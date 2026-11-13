@@ -1,0 +1,110 @@
+{
+ "descriptive": {
+  "dev_calib_day0_1": {
+   "n": 1,
+   "net": -0.42,
+   "pf": 0.0,
+   "void": 0,
+   "won": 0,
+   "z": null
+  },
+  "dev_calib_day2_on": {
+   "n": 6,
+   "net": 0.57,
+   "pf": 1.7037,
+   "void": 1,
+   "won": 3,
+   "z": 0.547
+  },
+  "dev_member": {
+   "n": 4,
+   "net": -0.31,
+   "pf": 0.6173,
+   "void": 1,
+   "won": 1,
+   "z": -0.3638
+  },
+  "dev_nonmember": {
+   "n": 3,
+   "net": 0.46,
+   "pf": 2.0952,
+   "void": 0,
+   "won": 2,
+   "z": 0.5332
+  },
+  "held_member": {
+   "n": 2,
+   "net": 0.16,
+   "pf": 1.5,
+   "void": 0,
+   "won": 1,
+   "z": 0.2
+  },
+  "held_nonmember": {
+   "n": 0,
+   "net": 0,
+   "pf": null,
+   "void": 0,
+   "won": 0,
+   "z": null
+  }
+ },
+ "dev": {
+  "n": 7,
+  "net": 0.15,
+  "pf": 1.122,
+  "void": 1,
+  "won": 3,
+  "z": 0.1305
+ },
+ "dev1": {
+  "n": 4,
+  "net": 0.22,
+  "pf": 1.2895,
+  "void": 0,
+  "won": 2,
+  "z": 0.2185
+ },
+ "dev2": {
+  "n": 3,
+  "net": -0.07,
+  "pf": 0.8511,
+  "void": 1,
+  "won": 1,
+  "z": -0.0951
+ },
+ "dev_verdict": "CLOSED",
+ "held": {
+  "n": 2,
+  "net": 0.16,
+  "pf": 1.5,
+  "void": 0,
+  "won": 1,
+  "z": 0.2
+ },
+ "held_calib_day0_1": {
+  "n": 1,
+  "net": -0.32,
+  "pf": 0.0,
+  "void": 0,
+  "won": 0,
+  "z": null
+ },
+ "held_calib_day2_on": {
+  "n": 1,
+  "net": 0.48,
+  "pf": "inf",
+  "void": 0,
+  "won": 1,
+  "z": null
+ },
+ "held_verdict": "NO_EVIDENCE at n = 1",
+ "skips": {
+  "gap_small": 1,
+  "member_not_ok": 1,
+  "no_index_point": 1,
+  "no_strike": 1,
+  "outside_windows": 1,
+  "stale_reading": 2
+ }
+}

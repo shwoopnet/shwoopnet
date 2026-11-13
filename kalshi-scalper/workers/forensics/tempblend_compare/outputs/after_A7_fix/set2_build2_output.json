@@ -1,0 +1,310 @@
+{
+ "ambiguities": [
+  "Amendment 1 of TEMPBLEND_CARD.md (658817e9) rules A1 to A18; this build follows it line by line (see the card)."
+ ],
+ "card": "TEMPBLEND_CARD.md 66483872 (f07129e1)",
+ "decisions": [
+  {
+   "S": 1790856000,
+   "bet": {
+    "K": 71,
+    "S": 1790856000,
+    "ask": 0.48,
+    "city": "C01",
+    "day2": true,
+    "gap": 0.8,
+    "member": true,
+    "pnl": 0.5,
+    "s": 70.2,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "C01",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790859600,
+   "bet": {
+    "K": 72,
+    "S": 1790859600,
+    "ask": 0.4,
+    "city": "C02",
+    "day2": false,
+    "gap": -0.8,
+    "member": false,
+    "pnl": -0.42,
+    "s": 72.4,
+    "side": "no",
+    "v": 71.6,
+    "void": false
+   },
+   "city": "C02",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790863200,
+   "bet": null,
+   "city": "C03",
+   "status": "gap under 0.5F",
+   "window": "dev"
+  },
+  {
+   "S": 1790866800,
+   "bet": {
+    "K": 70,
+    "S": 1790866800,
+    "ask": 0.32,
+    "city": "C04",
+    "day2": true,
+    "gap": 0.5,
+    "member": true,
+    "pnl": -0.34,
+    "s": 69.8,
+    "side": "yes",
+    "v": 70.3,
+    "void": false
+   },
+   "city": "C04",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790870400,
+   "bet": {
+    "K": 73,
+    "S": 1790870400,
+    "ask": 0.5,
+    "city": "C05",
+    "day2": true,
+    "gap": 2.0,
+    "member": false,
+    "pnl": 0.48,
+    "s": 71.0,
+    "side": "yes",
+    "v": 73.0,
+    "void": false
+   },
+   "city": "C05",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792497600,
+   "bet": {
+    "K": 72,
+    "S": 1792497600,
+    "ask": 0.58,
+    "city": "C06",
+    "day2": true,
+    "gap": 2.2,
+    "member": false,
+    "pnl": 0.4,
+    "s": 71.4,
+    "side": "yes",
+    "v": 73.6,
+    "void": false
+   },
+   "city": "C06",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792501200,
+   "bet": null,
+   "city": "C07",
+   "status": "no strike passes band and spread",
+   "window": "dev"
+  },
+  {
+   "S": 1792504800,
+   "bet": null,
+   "city": "C08",
+   "status": "member station not ok",
+   "window": "dev"
+  },
+  {
+   "S": 1792508400,
+   "bet": null,
+   "city": "C09",
+   "status": "no station reading",
+   "window": "dev"
+  },
+  {
+   "S": 1792512000,
+   "bet": {
+    "K": 72,
+    "S": 1792512000,
+    "ask": 0.4,
+    "city": "C10",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.02,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": true
+   },
+   "city": "C10",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1795176000,
+   "bet": {
+    "K": 72,
+    "S": 1795176000,
+    "ask": 0.5,
+    "city": "C12",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "C12",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795179600,
+   "bet": {
+    "K": 72,
+    "S": 1795179600,
+    "ask": 0.3,
+    "city": "C13",
+    "day2": false,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.32,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "C13",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1792515600,
+   "bet": null,
+   "city": "C14",
+   "status": "no index point",
+   "window": "dev"
+  },
+  {
+   "S": 1792519200,
+   "bet": {
+    "K": 73,
+    "S": 1792519200,
+    "ask": 0.43,
+    "city": "C15",
+    "day2": true,
+    "gap": 1.4,
+    "member": true,
+    "pnl": -0.45,
+    "s": 71.6,
+    "side": "yes",
+    "v": 73.0,
+    "void": false
+   },
+   "city": "C15",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790874000,
+   "bet": null,
+   "city": "C16",
+   "status": "no station reading",
+   "window": "dev"
+  }
+ ],
+ "development": {
+  "day_2_on_info": {
+   "n": 6,
+   "net": 0.57,
+   "pf": 1.703704,
+   "voids": 1
+  },
+  "days_0_1_info": {
+   "n": 1,
+   "net": -0.42,
+   "pf": 0.0,
+   "voids": 0
+  },
+  "first_half": {
+   "n": 4,
+   "net": 0.22,
+   "pf": 1.289474,
+   "voids": 0
+  },
+  "kills": {
+   "a_half_under_1_2": true,
+   "fewer_than_200": true,
+   "pooled_pf_under_1": false
+  },
+  "member": {
+   "n": 4,
+   "net": -0.31,
+   "pf": 0.617284,
+   "voids": 1
+  },
+  "non_member": {
+   "n": 3,
+   "net": 0.46,
+   "pf": 2.095238,
+   "voids": 0
+  },
+  "pooled": {
+   "n": 7,
+   "net": 0.15,
+   "pf": 1.121951,
+   "voids": 1
+  },
+  "second_half": {
+   "n": 3,
+   "net": -0.07,
+   "pf": 0.851064,
+   "voids": 1
+  },
+  "verdict": "CLOSED"
+ },
+ "held_out": {
+  "calibration_kill": "no evidence at n = 1",
+  "day_2_on": {
+   "n": 1,
+   "net": 0.48,
+   "pf": "inf",
+   "voids": 0
+  },
+  "days_0_1": {
+   "n": 1,
+   "net": -0.32,
+   "pf": 0.0,
+   "voids": 0
+  },
+  "pooled": {
+   "n": 2,
+   "net": 0.16,
+   "pf": 1.5,
+   "voids": 0
+  }
+ },
+ "outside_windows": 1,
+ "statuses": {
+  "bet": 9,
+  "gap under 0.5F": 1,
+  "member station not ok": 1,
+  "no index point": 1,
+  "no station reading": 2,
+  "no strike passes band and spread": 1
+ }
+}

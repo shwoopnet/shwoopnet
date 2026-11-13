@@ -22,3 +22,10 @@ were committed (`de0ce9be`) before they were run and the file says so. `edge_run
 Build 1: K 70.3, ask 0.55, pnl +0.43 (it sorts on the raw distance, then K). Every other row (36 of 37): both builds equal the hand file and each other. Aggregates on this set differ only through that row:
 pooled development n 22 in both, PF 5.4873 against 5.550633, net 7.09 against 7.19 (build 1 against build 2); the verdicts are the same (CLOSED; held-out "no evidence at n = 2").
 Controls: with the tolerance set to zero, or the gap line stripped of it, in a copy of build 1, the edge set now flags 5 and 4 rows against the hand file (it flagged none before E13, E14 and T03 were added).
+
+## After Desk C's A7 fix (Nov 13, 2026; the Head's order of 15:26Z): SAME on all three sets
+
+Build 1 is now `tempblend_score.py` sha256 `644770d9...` at `3619a351` on `claude/idea-desk-c` (the one changed line rounds the distance to 9 places before the tie-break; `test_rows.json` `2682931e`, `test_expected.json` `12f32a04` unchanged;
+build 2 unchanged, `3fab82b3`). Re-run on both earlier sets and the full 37-row edge set: **no differing decision and no differing figure on any of the three** (edge set: 37 rows, 0 differences against the hand file in either build, 0 between the builds;
+pooled development n 22, PF 5.5506 against 5.550633, net 7.19 in both; the T03 row now picks K 69.5, ask 0.45, pnl +0.53 in both; the only unrounded differences are each build's own rounding). The planted-fault control (tolerance set to zero in a copy
+of build 1) is still caught (2 rows flagged). Outputs: `outputs/after_A7_fix/`. The earlier outputs (with the T03 mismatch) stay in `outputs/` as the record.

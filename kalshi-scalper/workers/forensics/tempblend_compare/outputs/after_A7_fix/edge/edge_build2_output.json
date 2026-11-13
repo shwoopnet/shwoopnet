@@ -1,0 +1,631 @@
+{
+ "ambiguities": [
+  "Amendment 1 of TEMPBLEND_CARD.md (658817e9) rules A1 to A18; this build follows it line by line (see the card)."
+ ],
+ "card": "TEMPBLEND_CARD.md 66483872 (f07129e1)",
+ "decisions": [
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 70.5,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "E01_gap_exactly_0.5",
+    "day2": true,
+    "gap": 0.5,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 70.5,
+    "void": false
+   },
+   "city": "E01_gap_exactly_0.5",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "E02_gap_0.49",
+   "status": "gap under 0.5F",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.2,
+    "city": "E03_ask_exactly_0.20",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.22,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "E03_ask_exactly_0.20",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "E04_ask_0.19",
+   "status": "no strike passes band and spread",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.8,
+    "city": "E05_ask_exactly_0.80",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.18,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "E05_ask_exactly_0.80",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "E06_ask_0.81",
+   "status": "no strike passes band and spread",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "E07_spread_exactly_0.04",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.52,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "E07_spread_exactly_0.04",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "E08_spread_0.05",
+   "status": "no strike passes band and spread",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "E09_reading_exactly_600s_old",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "E09_reading_exactly_600s_old",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "E10_reading_601s_old",
+   "status": "no station reading",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "E11_calibration_exactly_172800s",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "E11_calibration_exactly_172800s",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "E12_calibration_172799s",
+    "day2": false,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "E12_calibration_172799s",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789257600,
+   "bet": {
+    "K": 71,
+    "S": 1789257600,
+    "ask": 0.5,
+    "city": "W02_S_2026-09-13T00:00:00Z_dev_first_half",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "W02_S_2026-09-13T00:00:00Z_dev_first_half",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1791503999,
+   "bet": {
+    "K": 71,
+    "S": 1791503999,
+    "ask": 0.5,
+    "city": "W03_S_2026-10-08T23:59:59Z_dev_first_half",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "W03_S_2026-10-08T23:59:59Z_dev_first_half",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1791504000,
+   "bet": {
+    "K": 71,
+    "S": 1791504000,
+    "ask": 0.5,
+    "city": "W04_S_2026-10-09T00:00:00Z_dev_second_half",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "W04_S_2026-10-09T00:00:00Z_dev_second_half",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1793836799,
+   "bet": {
+    "K": 71,
+    "S": 1793836799,
+    "ask": 0.5,
+    "city": "W05_S_2026-11-04T23:59:59Z_dev_second_half",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "W05_S_2026-11-04T23:59:59Z_dev_second_half",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1794441600,
+   "bet": {
+    "K": 71,
+    "S": 1794441600,
+    "ask": 0.5,
+    "city": "W08_S_2026-11-12T00:00:00Z_held",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "W08_S_2026-11-12T00:00:00Z_held",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1796860799,
+   "bet": {
+    "K": 71,
+    "S": 1796860799,
+    "ask": 0.5,
+    "city": "W09_S_2026-12-09T23:59:59Z_held",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "W09_S_2026-12-09T23:59:59Z_held",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 70.5,
+    "S": 1789905600,
+    "ask": 0.45,
+    "city": "T01_midpoint_tie_exact",
+    "day2": true,
+    "gap": 2.0,
+    "member": true,
+    "pnl": 0.53,
+    "s": 70.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "T01_midpoint_tie_exact",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 70.7,
+    "S": 1789905600,
+    "ask": 0.45,
+    "city": "T02_midpoint_tie_in_floating_point_only",
+    "day2": true,
+    "gap": 2.2,
+    "member": true,
+    "pnl": 0.53,
+    "s": 70.1,
+    "side": "yes",
+    "v": 72.3,
+    "void": false
+   },
+   "city": "T02_midpoint_tie_in_floating_point_only",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "V01_void",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.02,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": true
+   },
+   "city": "V01_void",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "M01_member_code_missing",
+   "status": "member station not ok",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "M02_member_code_degraded",
+   "status": "member station not ok",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "B01_source_B_non_member",
+    "day2": true,
+    "gap": 1.0,
+    "member": false,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "B01_source_B_non_member",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 70.0,
+    "S": 1789905600,
+    "ask": 0.48,
+    "city": "N01_gap_exactly_minus_0.5_NO",
+    "day2": true,
+    "gap": -0.5,
+    "member": true,
+    "pnl": 0.5,
+    "s": 70.0,
+    "side": "no",
+    "v": 69.5,
+    "void": false
+   },
+   "city": "N01_gap_exactly_minus_0.5_NO",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 70.0,
+    "S": 1789905600,
+    "ask": 0.2,
+    "city": "N02_NO_ask_exactly_0.20",
+    "day2": true,
+    "gap": -1.0,
+    "member": true,
+    "pnl": 0.78,
+    "s": 70.0,
+    "side": "no",
+    "v": 69.0,
+    "void": false
+   },
+   "city": "N02_NO_ask_exactly_0.20",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 70.0,
+    "S": 1789905600,
+    "ask": 0.8,
+    "city": "N03_NO_ask_exactly_0.80",
+    "day2": true,
+    "gap": -1.0,
+    "member": true,
+    "pnl": -0.82,
+    "s": 70.0,
+    "side": "no",
+    "v": 69.0,
+    "void": false
+   },
+   "city": "N03_NO_ask_exactly_0.80",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 64.1,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "E13_gap_exactly_0.5_on_paper_under_0.5_in_floating_point",
+    "day2": true,
+    "gap": 0.5,
+    "member": true,
+    "pnl": 0.48,
+    "s": 63.6,
+    "side": "yes",
+    "v": 64.1,
+    "void": false
+   },
+   "city": "E13_gap_exactly_0.5_on_paper_under_0.5_in_floating_point",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.54,
+    "city": "E14_spread_exactly_0.04_on_paper_over_0.04_in_floating_point",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.44,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "E14_spread_exactly_0.04_on_paper_over_0.04_in_floating_point",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 69.5,
+    "S": 1789905600,
+    "ask": 0.45,
+    "city": "T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point",
+    "day2": true,
+    "gap": 1.6,
+    "member": true,
+    "pnl": 0.53,
+    "s": 69.1,
+    "side": "yes",
+    "v": 70.7,
+    "void": false
+   },
+   "city": "T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 71,
+    "S": 1789905600,
+    "ask": 0.5,
+    "city": "I01_index_point_exactly_600s_before_decision",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.48,
+    "s": 70.0,
+    "side": "yes",
+    "v": 71.0,
+    "void": false
+   },
+   "city": "I01_index_point_exactly_600s_before_decision",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "I02_index_point_601s_before_decision",
+   "status": "no index point",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": null,
+   "city": "I03_index_point_299s_before_decision_too_new",
+   "status": "no index point",
+   "window": "dev"
+  }
+ ],
+ "development": {
+  "day_2_on_info": {
+   "n": 21,
+   "net": 6.71,
+   "pf": 5.246835,
+   "voids": 1
+  },
+  "days_0_1_info": {
+   "n": 1,
+   "net": 0.48,
+   "pf": "inf",
+   "voids": 0
+  },
+  "first_half": {
+   "n": 20,
+   "net": 6.23,
+   "pf": 4.943038,
+   "voids": 1
+  },
+  "kills": {
+   "a_half_under_1_2": false,
+   "fewer_than_200": true,
+   "pooled_pf_under_1": false
+  },
+  "member": {
+   "n": 21,
+   "net": 6.71,
+   "pf": 5.246835,
+   "voids": 1
+  },
+  "non_member": {
+   "n": 1,
+   "net": 0.48,
+   "pf": "inf",
+   "voids": 0
+  },
+  "pooled": {
+   "n": 22,
+   "net": 7.19,
+   "pf": 5.550633,
+   "voids": 1
+  },
+  "second_half": {
+   "n": 2,
+   "net": 0.96,
+   "pf": "inf",
+   "voids": 0
+  },
+  "verdict": "CLOSED"
+ },
+ "held_out": {
+  "calibration_kill": "no evidence at n = 2",
+  "day_2_on": {
+   "n": 2,
+   "net": 0.96,
+   "pf": "inf",
+   "voids": 0
+  },
+  "days_0_1": {
+   "n": 0,
+   "net": 0,
+   "pf": null,
+   "voids": 0
+  },
+  "pooled": {
+   "n": 2,
+   "net": 0.96,
+   "pf": "inf",
+   "voids": 0
+  }
+ },
+ "outside_windows": 4,
+ "statuses": {
+  "bet": 24,
+  "gap under 0.5F": 1,
+  "member station not ok": 2,
+  "no index point": 2,
+  "no station reading": 1,
+  "no strike passes band and spread": 3
+ }
+}
