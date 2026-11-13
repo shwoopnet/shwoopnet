@@ -1,0 +1,408 @@
+[
+ {
+  "S": "2026-10-01T12:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C01",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1790854800000,
+    "station_id": "W",
+    "temp_f": 70.2
+   }
+  ],
+  "strikes": [
+   {
+    "K": 70,
+    "result": "yes",
+    "yes_ask": 0.83,
+    "yes_bid": 0.8
+   },
+   {
+    "K": 71,
+    "result": "yes",
+    "yes_ask": 0.48,
+    "yes_bid": 0.45
+   },
+   {
+    "K": 72,
+    "result": "no",
+    "yes_ask": 0.13,
+    "yes_bid": 0.1
+   }
+  ],
+  "t_ms": 1790854800000,
+  "v": 71.0
+ },
+ {
+  "S": "2026-10-01T13:00:00Z",
+  "calib_effective_ms": 1790772300000,
+  "city": "C02",
+  "external": {
+   "W": {
+    "obs_time_ms": 1790858100000,
+    "temp_f": 72.4
+   }
+  },
+  "stations": [],
+  "strikes": [
+   {
+    "K": 71,
+    "result": "yes",
+    "yes_ask": 0.82,
+    "yes_bid": 0.8
+   },
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.63,
+    "yes_bid": 0.6
+   },
+   {
+    "K": 73,
+    "result": "no",
+    "yes_ask": 0.22,
+    "yes_bid": 0.2
+   }
+  ],
+  "t_ms": 1790858400000,
+  "v": 71.6
+ },
+ {
+  "S": "2026-10-01T14:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C03",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1790862000000,
+    "station_id": "W",
+    "temp_f": 70.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 70,
+    "result": "yes",
+    "yes_ask": 0.52,
+    "yes_bid": 0.5
+   }
+  ],
+  "t_ms": 1790862000000,
+  "v": 70.4
+ },
+ {
+  "S": "2026-10-01T15:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C04",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1790865600000,
+    "station_id": "W",
+    "temp_f": 69.8
+   }
+  ],
+  "strikes": [
+   {
+    "K": 70,
+    "result": "no",
+    "yes_ask": 0.32,
+    "yes_bid": 0.3
+   }
+  ],
+  "t_ms": 1790865600000,
+  "v": 70.3
+ },
+ {
+  "S": "2026-10-01T16:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C05",
+  "external": {
+   "W": {
+    "obs_time_ms": 1790869200000,
+    "temp_f": 71.0
+   }
+  },
+  "stations": [],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.85,
+    "yes_bid": 0.82
+   },
+   {
+    "K": 73,
+    "result": "yes",
+    "yes_ask": 0.5,
+    "yes_bid": 0.48
+   }
+  ],
+  "t_ms": 1790869200000,
+  "v": 73.0
+ },
+ {
+  "S": "2026-10-20T12:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C06",
+  "external": {
+   "W": {
+    "obs_time_ms": 1792496400000,
+    "temp_f": 71.4
+   }
+  },
+  "stations": [],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.58,
+    "yes_bid": 0.55
+   },
+   {
+    "K": 73,
+    "result": "no",
+    "yes_ask": 0.3,
+    "yes_bid": 0.28
+   }
+  ],
+  "t_ms": 1792496400000,
+  "v": 73.6
+ },
+ {
+  "S": "2026-10-20T13:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C07",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1792500000000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.45,
+    "yes_bid": 0.4
+   }
+  ],
+  "t_ms": 1792500000000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-10-20T14:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C08",
+  "stations": [
+   {
+    "code": "missing",
+    "obs_time_ms": 1792503600000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.42,
+    "yes_bid": 0.4
+   }
+  ],
+  "t_ms": 1792503600000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-10-20T15:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C09",
+  "external": {
+   "W": {
+    "obs_time_ms": 1792506500000,
+    "temp_f": 71.0
+   }
+  },
+  "stations": [],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.42,
+    "yes_bid": 0.4
+   }
+  ],
+  "t_ms": 1792507200000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-10-20T16:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C10",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1792510800000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": null,
+    "yes_ask": 0.4,
+    "yes_bid": 0.38
+   }
+  ],
+  "t_ms": 1792510800000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-11-07T12:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C11",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1794051600000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.4,
+    "yes_bid": 0.38
+   }
+  ],
+  "t_ms": 1794051600000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-11-20T12:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C12",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1795174800000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.5,
+    "yes_bid": 0.48
+   }
+  ],
+  "t_ms": 1795174800000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-11-20T13:00:00Z",
+  "calib_effective_ms": 1795175100000,
+  "city": "C13",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1795178400000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "no",
+    "yes_ask": 0.3,
+    "yes_bid": 0.28
+   }
+  ],
+  "t_ms": 1795178400000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-10-20T17:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C14",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1792514000000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.42,
+    "yes_bid": 0.4
+   }
+  ],
+  "t_ms": 1792514000000,
+  "v": 72.0
+ },
+ {
+  "S": "2026-10-20T18:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C15",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1792518000000,
+    "station_id": "W",
+    "temp_f": 71.6
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": null,
+    "yes_bid": 0.5
+   },
+   {
+    "K": 73,
+    "result": "no",
+    "yes_ask": 0.43,
+    "yes_bid": 0.4
+   }
+  ],
+  "t_ms": 1792518000000,
+  "v": 73.0
+ },
+ {
+  "S": "2026-10-01T17:00:00Z",
+  "calib_effective_ms": 1785542400000,
+  "city": "C16",
+  "stations": [
+   {
+    "code": "ok",
+    "obs_time_ms": 1790872100000,
+    "station_id": "W",
+    "temp_f": 71.0
+   }
+  ],
+  "strikes": [
+   {
+    "K": 72,
+    "result": "yes",
+    "yes_ask": 0.42,
+    "yes_bid": 0.4
+   }
+  ],
+  "t_ms": 1790872800000,
+  "v": 72.0
+ }
+]

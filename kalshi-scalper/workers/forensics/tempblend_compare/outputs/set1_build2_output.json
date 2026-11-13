@@ -1,0 +1,242 @@
+{
+ "ambiguities": [
+  "Amendment 1 of TEMPBLEND_CARD.md (658817e9) rules A1 to A18; this build follows it line by line (see the card)."
+ ],
+ "card": "TEMPBLEND_CARD.md 66483872 (f07129e1)",
+ "decisions": [
+  {
+   "S": 1789916400,
+   "bet": {
+    "K": 61,
+    "S": 1789916400,
+    "ask": 0.43,
+    "city": "AAA",
+    "day2": true,
+    "gap": 0.7,
+    "member": true,
+    "pnl": 0.55,
+    "s": 60.7,
+    "side": "yes",
+    "v": 61.4,
+    "void": false
+   },
+   "city": "AAA",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790002800,
+   "bet": {
+    "K": 59.5,
+    "S": 1790002800,
+    "ask": 0.52,
+    "city": "AAA",
+    "day2": true,
+    "gap": -0.8,
+    "member": true,
+    "pnl": -0.54,
+    "s": 59.8,
+    "side": "no",
+    "v": 59.0,
+    "void": false
+   },
+   "city": "AAA",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790089200,
+   "bet": null,
+   "city": "AAA",
+   "status": "gap under 0.5F",
+   "window": "dev"
+  },
+  {
+   "S": 1790175600,
+   "bet": null,
+   "city": "AAA",
+   "status": "member station not ok",
+   "window": "dev"
+  },
+  {
+   "S": 1790262000,
+   "bet": null,
+   "city": "BBB",
+   "status": "no station reading",
+   "window": "dev"
+  },
+  {
+   "S": 1792508400,
+   "bet": {
+    "K": 70.2,
+    "S": 1792508400,
+    "ask": 0.3,
+    "city": "BBB",
+    "day2": true,
+    "gap": 0.9,
+    "member": false,
+    "pnl": -0.32,
+    "s": 70.0,
+    "side": "yes",
+    "v": 70.9,
+    "void": false
+   },
+   "city": "BBB",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792594800,
+   "bet": null,
+   "city": "BBB",
+   "status": "no strike passes band and spread",
+   "window": "dev"
+  },
+  {
+   "S": 1795186800,
+   "bet": {
+    "K": 61,
+    "S": 1795186800,
+    "ask": 0.5,
+    "city": "AAA",
+    "day2": false,
+    "gap": 0.7,
+    "member": true,
+    "pnl": 0.48,
+    "s": 60.7,
+    "side": "yes",
+    "v": 61.4,
+    "void": false
+   },
+   "city": "AAA",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795273200,
+   "bet": {
+    "K": 59.5,
+    "S": 1795273200,
+    "ask": 0.42,
+    "city": "AAA",
+    "day2": true,
+    "gap": -0.8,
+    "member": true,
+    "pnl": 0.56,
+    "s": 59.8,
+    "side": "no",
+    "v": 59.0,
+    "void": false
+   },
+   "city": "AAA",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1792681200,
+   "bet": {
+    "K": 61.25,
+    "S": 1792681200,
+    "ask": 0.6,
+    "city": "AAA",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.38,
+    "s": 61.0,
+    "side": "yes",
+    "v": 62.0,
+    "void": false
+   },
+   "city": "AAA",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790348400,
+   "bet": null,
+   "city": "CCC",
+   "status": "no station reading",
+   "window": "dev"
+  }
+ ],
+ "development": {
+  "day_2_on_info": {
+   "n": 4,
+   "net": 0.07,
+   "pf": 1.081395,
+   "voids": 0
+  },
+  "days_0_1_info": {
+   "n": 0,
+   "net": 0,
+   "pf": null,
+   "voids": 0
+  },
+  "first_half": {
+   "n": 2,
+   "net": 0.01,
+   "pf": 1.018519,
+   "voids": 0
+  },
+  "kills": {
+   "a_half_under_1_2": true,
+   "fewer_than_200": true,
+   "pooled_pf_under_1": false
+  },
+  "member": {
+   "n": 3,
+   "net": 0.39,
+   "pf": 1.722222,
+   "voids": 0
+  },
+  "non_member": {
+   "n": 1,
+   "net": -0.32,
+   "pf": 0.0,
+   "voids": 0
+  },
+  "pooled": {
+   "n": 4,
+   "net": 0.07,
+   "pf": 1.081395,
+   "voids": 0
+  },
+  "second_half": {
+   "n": 2,
+   "net": 0.06,
+   "pf": 1.1875,
+   "voids": 0
+  },
+  "verdict": "CLOSED"
+ },
+ "held_out": {
+  "calibration_kill": "no evidence at n = 1",
+  "day_2_on": {
+   "n": 1,
+   "net": 0.56,
+   "pf": "inf",
+   "voids": 0
+  },
+  "days_0_1": {
+   "n": 1,
+   "net": 0.48,
+   "pf": "inf",
+   "voids": 0
+  },
+  "pooled": {
+   "n": 2,
+   "net": 1.04,
+   "pf": "inf",
+   "voids": 0
+  }
+ },
+ "outside_windows": 1,
+ "statuses": {
+  "bet": 6,
+  "gap under 0.5F": 1,
+  "member station not ok": 1,
+  "no station reading": 2,
+  "no strike passes band and spread": 1
+ }
+}

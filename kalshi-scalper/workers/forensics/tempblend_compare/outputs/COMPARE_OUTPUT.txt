@@ -1,0 +1,4 @@
+SET 1 (Desk C's rows): 12 rows. mapping notes: CCC 2026-09-25T15:00:00Z: no watched station in the map; build 2 cannot say it, the row is mapped with no reading
+  differences: NONE
+SET 2 (History Miner's rows): 16 rows. mapping notes: none
+  differences: NONE
