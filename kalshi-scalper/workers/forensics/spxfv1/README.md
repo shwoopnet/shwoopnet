@@ -1,5 +1,7 @@
 # SPXFV1 build 2: rows builder and Databento pull (Forensics desk, Nov 13, 2026)
 
+**CANCELLED Nov 13, 2026 by the Head of R&D (message of 16:58Z by its clock; seen at 17:01Z): SPXFV1 is closed unread, its family declined under the 3-falsified rule. No Databento pull was ever made (only the free `cost` metadata call, which quoted 0.008543 USD in total, was run); no real window or bar was built or opened; nothing was spent. The files stay on this branch as written and tested on invented rows only; they are not to be run on real data.**
+
 Ordered by the Head of R&D at 16:57Z (the owner's top priority, KXINX15M). Research only. Invented rows only so far; nothing real has been built or read.
 
 | File | What it does |
