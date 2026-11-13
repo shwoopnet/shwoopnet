@@ -165,6 +165,12 @@ class T(unittest.TestCase):
     def test_tolerance_on_bar_one(self):
         # a PF gap of exactly 0.10 minus 1e-10 counts as met (standing 1e-9 tolerance)
         self.assertGreaterEqual(0.10 - 1e-10, S.BAR_PF - S.TOL)
+    def test_crossed_or_locked_quote_is_no_quote(self):
+        t0 = (CT - 178) * 1000 + 500
+        self.assertEqual(self.window([brow("T1", t0, 0.60, 0.45)], [])["status"], "crossed_quote")   # YES bid .60 above YES ask .55
+        self.assertEqual(self.window([brow("T1", t0, 0.50, 0.50)], [])["status"], "crossed_quote")   # locked
+        self.assertEqual(self.window([brow("T1", t0, 0.30, 0.70)], [])["status"], "crossed_quote")   # locked, float 1 - .7 = .30000000000000004 (standing 1e-9)
+        self.assertEqual(self.window([brow("T1", t0, 0.10, 0.85)], [])["status"], "signal")           # legal two-sided quote
     def test_labels_printed(self):
         self.assertIn("DEPTH1, CFRTI-B and CFRTI1-BTC", S.LABELS["V1"])
         self.assertEqual(S.LABELS["V2"], "not blind on EVENT830's forward windows")

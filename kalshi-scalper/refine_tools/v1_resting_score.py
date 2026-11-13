@@ -164,6 +164,10 @@ def one_window(version, tk, ct, book, trades, cover):
     yb, nb = sides(t0)
     ya = None if nb is None else 1 - nb
     na = None if yb is None else 1 - yb
+    # standing rule 18: two-sided means 0 < bid < ask < 1; a crossed or locked quote (bid >= ask) is no quote (Head's ruling Nov 13). Each side's bid against its own ask:
+    # YES bid yb against YES ask 1 - nb, NO bid nb against NO ask 1 - yb; both reduce to yb + nb >= 1 (to the standing 1e-9)
+    if yb is not None and nb is not None and yb >= (1 - nb) - TOL:
+        return {"status": "crossed_quote"}
     if ya is None and na is None:
         return {"status": "no_quote"}
     if version == "V2" and (ya is None or yb is None or ya - yb > SPREAD_MAX + 1e-9):

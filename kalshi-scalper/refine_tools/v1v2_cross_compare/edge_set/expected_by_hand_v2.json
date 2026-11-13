@@ -1,0 +1,75 @@
+{
+ "counts": {
+  "signals": 8,
+  "filled": 6,
+  "not_filled": 2,
+  "crossed_quote": 2
+ },
+ "weeks": 3,
+ "version_pf_25": 1.3430306967679064,
+ "parent_pf_p1": 1.2430306967679066,
+ "parent_pf_p0": 1.3064655411999893,
+ "parent_pf_unfilled_p1": 1.4430306967679059,
+ "bar1_diff": 0.09999999999999987,
+ "missed_diff": 0.09999999999999942,
+ "version_net_week": 0.11000208333333333,
+ "parent_net_week_p1": 0.1250441995710109,
+ "parent_net_week_p0": 0.15242491005129163,
+ "extra_windows": {
+  "CRX": "yes bid 0.60, no bid 0.45 (sum 1.05): crossed, no quote",
+  "LCK": "yes bid 0.30, no bid 0.70 (sum 1.00): locked, no quote"
+ },
+ "sorted_order": [
+  "U0W",
+  "U0L",
+  "A1",
+  "B1",
+  "B2",
+  "C4",
+  "D5",
+  "E6"
+ ],
+ "close_only_order": [
+  "U0W",
+  "U0L",
+  "A1",
+  "B2",
+  "B1",
+  "C4",
+  "D5",
+  "E6"
+ ],
+ "bar3_sorted": {
+  "halves": [
+   [
+    0.0,
+    0.7387257981270648
+   ],
+   [
+    2.3205477914351462,
+    1.9747362370322672
+   ]
+  ],
+  "met": true,
+  "why": "finite: d2 0.345812 against d1 -0.738726"
+ },
+ "bar3_close_only": {
+  "halves": [
+   [
+    6.360017228648781,
+    2.210257511084055
+   ],
+   [
+    0.750786283439745,
+    0.6498993651789627
+   ]
+  ],
+  "met": false,
+  "why": "finite: d2 0.100887 against d1 4.149760"
+ },
+ "bar1_expected_under_1e-9_tolerance": true,
+ "missed_expected_under_1e-9_tolerance": true,
+ "bar1_strict_compare": false,
+ "missed_strict_compare": false,
+ "bar2_met": false
+}
