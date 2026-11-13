@@ -1,0 +1,294 @@
+{
+ "build": "Forensics second build of the TIE3 measurement",
+ "tries": 0,
+ "rule_scored": false,
+ "price_block_results_read": 0,
+ "label": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+ "reader_counts": {},
+ "cells": {
+  "NHL_P1": {
+   "counts": {
+    "price-block games": 114,
+    "price-block games with a derivable start": 114,
+    "base events": 185,
+    "not two-sided at the instant or the 30 minutes before": 10
+   },
+   "base_events": 185,
+   "base_rate_pooled": 0.3027027027027027,
+   "base_rate_pooled_se": 0.033777793479146945,
+   "base_rates_by_series": {
+    "KXNHL1P": {
+     "n": 185,
+     "rate": 0.3027,
+     "se": 0.0338
+    }
+   },
+   "price_block_games": 114,
+   "with_a_derivable_start": 114,
+   "two_sided": 104,
+   "two_sided_from_the_exact_minute": 21,
+   "share_two_sided_of_derivable": 0.9122807017543859,
+   "share_two_sided_of_all_price_block_games": 0.9122807017543859,
+   "two_sided_games_with_no_base_rate_for_their_series": 0,
+   "median_spread": 0.020000000000000018,
+   "gap_base_rate_minus_ask_q1_median_q3": [
+    -0.037297297297297305,
+    -0.037297297297297305,
+    -0.027297297297297296
+   ],
+   "share_of_two_sided_games_with_ask_10c_under_and_spread_4c_or_less": 0.0,
+   "fires": 0,
+   "status": "measured"
+  },
+  "NHL_P2": {
+   "counts": {
+    "price-block games": 114,
+    "price-block games with a derivable start": 114,
+    "base events": 184,
+    "not two-sided at the instant or the 30 minutes before": 20
+   },
+   "base_events": 184,
+   "base_rate_pooled": 0.2608695652173913,
+   "base_rate_pooled_se": 0.03237153835452497,
+   "base_rates_by_series": {
+    "KXNHL2P": {
+     "n": 184,
+     "rate": 0.2609,
+     "se": 0.0324
+    }
+   },
+   "price_block_games": 114,
+   "with_a_derivable_start": 114,
+   "two_sided": 94,
+   "two_sided_from_the_exact_minute": 16,
+   "share_two_sided_of_derivable": 0.8245614035087719,
+   "share_two_sided_of_all_price_block_games": 0.8245614035087719,
+   "two_sided_games_with_no_base_rate_for_their_series": 0,
+   "median_spread": 0.02999999999999997,
+   "gap_base_rate_minus_ask_q1_median_q3": [
+    -0.05913043478260871,
+    -0.0491304347826087,
+    -0.03913043478260869
+   ],
+   "share_of_two_sided_games_with_ask_10c_under_and_spread_4c_or_less": 0.0,
+   "fires": 0,
+   "status": "measured"
+  },
+  "NHL_P3": {
+   "counts": {
+    "price-block games": 114,
+    "price-block games with a derivable start": 114,
+    "base events": 184,
+    "not two-sided at the instant or the 30 minutes before": 23
+   },
+   "base_events": 184,
+   "base_rate_pooled": 0.22282608695652173,
+   "base_rate_pooled_se": 0.03067843580632238,
+   "base_rates_by_series": {
+    "KXNHL3P": {
+     "n": 184,
+     "rate": 0.2228,
+     "se": 0.0307
+    }
+   },
+   "price_block_games": 114,
+   "with_a_derivable_start": 114,
+   "two_sided": 91,
+   "two_sided_from_the_exact_minute": 17,
+   "share_two_sided_of_derivable": 0.7982456140350878,
+   "share_two_sided_of_all_price_block_games": 0.7982456140350878,
+   "two_sided_games_with_no_base_rate_for_their_series": 0,
+   "median_spread": 0.03,
+   "gap_base_rate_minus_ask_q1_median_q3": [
+    -0.05217391304347829,
+    -0.04717391304347829,
+    -0.03717391304347828
+   ],
+   "share_of_two_sided_games_with_ask_10c_under_and_spread_4c_or_less": 0.0,
+   "fires": 0,
+   "status": "measured"
+  },
+  "NHL_REG": {
+   "counts": {
+    "price-block games": 114,
+    "price-block games with a derivable start": 114,
+    "base events": 184,
+    "not two-sided at the instant or the 30 minutes before": 15
+   },
+   "base_events": 184,
+   "base_rate_pooled": 0.22826086956521738,
+   "base_rate_pooled_se": 0.030941551227111026,
+   "base_rates_by_series": {
+    "KXNHLOT": {
+     "n": 184,
+     "rate": 0.2283,
+     "se": 0.0309
+    }
+   },
+   "price_block_games": 114,
+   "with_a_derivable_start": 114,
+   "two_sided": 99,
+   "two_sided_from_the_exact_minute": 8,
+   "share_two_sided_of_derivable": 0.868421052631579,
+   "share_two_sided_of_all_price_block_games": 0.868421052631579,
+   "two_sided_games_with_no_base_rate_for_their_series": 0,
+   "median_spread": 0.010000000000000009,
+   "gap_base_rate_minus_ask_q1_median_q3": [
+    -0.001739130434782632,
+    -0.001739130434782632,
+    0.008260869565217377
+   ],
+   "share_of_two_sided_games_with_ask_10c_under_and_spread_4c_or_less": 0.0,
+   "fires": 0,
+   "status": "measured"
+  },
+  "NFL_Q": {
+   "counts": {
+    "base events": 620,
+    "price-block games": 120,
+    "price-block games with a derivable start": 120
+   },
+   "base_events": 620,
+   "base_rate_pooled": 0.18225806451612903,
+   "base_rate_pooled_se": 0.0155044250933644,
+   "base_rates_by_series": {
+    "KXNFL1Q": {
+     "n": 155,
+     "rate": 0.2581,
+     "se": 0.0351
+    },
+    "KXNFL2Q": {
+     "n": 155,
+     "rate": 0.1484,
+     "se": 0.0286
+    },
+    "KXNFL3Q": {
+     "n": 155,
+     "rate": 0.2,
+     "se": 0.0321
+    },
+    "KXNFL4Q": {
+     "n": 155,
+     "rate": 0.1226,
+     "se": 0.0263
+    }
+   },
+   "price_block_games": 120,
+   "with_a_derivable_start": 120,
+   "two_sided": 120,
+   "two_sided_from_the_exact_minute": 24,
+   "share_two_sided_of_derivable": 1.0,
+   "share_two_sided_of_all_price_block_games": 1.0,
+   "two_sided_games_with_no_base_rate_for_their_series": 0,
+   "median_spread": 0.010000000000000009,
+   "gap_base_rate_minus_ask_q1_median_q3": [
+    -0.009999999999999981,
+    0.008387096774193525,
+    0.028387096774193543
+   ],
+   "share_of_two_sided_games_with_ask_10c_under_and_spread_4c_or_less": 0.0,
+   "fires": 0,
+   "status": "measured"
+  },
+  "SOC_1H": {
+   "counts": {
+    "price-block games": 248,
+    "price-block games with a derivable start": 245,
+    "base events": 679,
+    "start not derivable: first-period market did not close 30 to 120 minutes after the start": 3,
+    "base events with no yes or no Tie result, dropped": 5,
+    "not two-sided at the instant or the 30 minutes before": 2
+   },
+   "base_events": 679,
+   "base_rate_pooled": 0.390279823269514,
+   "base_rate_pooled_se": 0.01872054319676857,
+   "base_rates_by_series": {
+    "KXBRASILEIRO1H": {
+     "n": 64,
+     "rate": 0.375,
+     "se": 0.0605
+    },
+    "KXBRASILEIROB1H": {
+     "n": 88,
+     "rate": 0.4545,
+     "se": 0.0531
+    },
+    "KXBUNDESLIGA1H": {
+     "n": 45,
+     "rate": 0.4222,
+     "se": 0.0736
+    },
+    "KXEPL1H": {
+     "n": 50,
+     "rate": 0.5,
+     "se": 0.0707
+    },
+    "KXEREDIVISIE1H": {
+     "n": 48,
+     "rate": 0.3542,
+     "se": 0.069
+    },
+    "KXLALIGA1H": {
+     "n": 60,
+     "rate": 0.4,
+     "se": 0.0632
+    },
+    "KXLIGAMX1H": {
+     "n": 65,
+     "rate": 0.4154,
+     "se": 0.0611
+    },
+    "KXLIGAPORTUGAL1H": {
+     "n": 40,
+     "rate": 0.45,
+     "se": 0.0787
+    },
+    "KXLIGUE11H": {
+     "n": 45,
+     "rate": 0.3778,
+     "se": 0.0723
+    },
+    "KXMLS1H": {
+     "n": 122,
+     "rate": 0.2951,
+     "se": 0.0413
+    },
+    "KXSERIEA1H": {
+     "n": 52,
+     "rate": 0.3462,
+     "se": 0.066
+    }
+   },
+   "price_block_games": 248,
+   "with_a_derivable_start": 245,
+   "two_sided": 243,
+   "two_sided_from_the_exact_minute": 96,
+   "share_two_sided_of_derivable": 0.9918367346938776,
+   "share_two_sided_of_all_price_block_games": 0.9798387096774194,
+   "two_sided_games_with_no_base_rate_for_their_series": 0,
+   "median_spread": 0.010000000000000009,
+   "gap_base_rate_minus_ask_q1_median_q3": [
+    -0.04522727272727273,
+    -0.0058333333333333015,
+    0.043383838383838386
+   ],
+   "share_of_two_sided_games_with_ask_10c_under_and_spread_4c_or_less": 0.11522633744855967,
+   "fires": 28,
+   "status": "measured"
+  }
+ },
+ "verdict": "CLOSED: efficient, move on (best measured cell NFL_Q, median gap +0.8c)",
+ "ambiguities": [
+  "1. An event's close, for the block it falls in: the close_time of its Tie market (for NHL_REG, of its single market).",
+  "2. \"Fewer than three settled markets\": fewer than three markets listed for the event (one for NHL_REG), or no Tie market among them. Base block: also a Tie result that is neither yes nor no.",
+  "3. The scheduled start: the Tie market's own occurrence_datetime minus 180 minutes. A missing or unreadable field is \"start not derivable\".",
+  "4. \"The game's first-period market\": the event of first_period_series with the same game key (the part of the ticker between the series and the suffix); its close is the latest close_time over its markets. For soccer it is the event itself.",
+  "5. T = start minus 30 minutes, rounded DOWN to a whole minute if the start is not on one.",
+  "6. The share of two-sided games: two-sided over price-block games with a derivable start. The share over all price-block games is printed beside it.",
+  "7. A price-block game whose own quarter or series has no base event has no base rate: it is counted and left out of the gap figures (it still counts as two-sided).",
+  "8. The base rate is used unrounded. Quartiles: linear interpolation between order statistics (position (n-1) x p).",
+  "9. History rows (the /historical endpoint) join the base block when they close before 2026-10-27; a ticker listed on both endpoints is counted once (the live row wins).",
+  "10. The cell minimum of 150 base events is on the cell's pooled base events; no minimum is set per quarter or per series.",
+  "11. Kill rule order: \"nothing to buy\" if under half of the price-block games (with a derivable start) are two-sided in EVERY cell with any such game; else \"survives\" if any measured cell has a median gap of 8c or more with a median spread of 4c or less; else \"efficient, move on\" with the best measured cell's median gap."
+ ]
+}
