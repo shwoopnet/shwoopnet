@@ -1,0 +1,4 @@
+t_send_ms,t_recv_ms,server_date_header,ticker,series,close_time,yes_bid_px_1,yes_bid_px_2,yes_bid_px_3,yes_bid_px_4,yes_bid_px_5,yes_bid_sz_1,yes_bid_sz_2,yes_bid_sz_3,yes_bid_sz_4,yes_bid_sz_5,no_bid_px_1,no_bid_px_2,no_bid_px_3,no_bid_px_4,no_bid_px_5,no_bid_sz_1,no_bid_sz_2,no_bid_sz_3,no_bid_sz_4,no_bid_sz_5
+1794398222950,1794398223000,x,KXBTC15M-W11,KXBTC15M,2026-11-11T12:00:00Z,0.2,,,,,10,,,,,0.75,,,,,10,,,,
+1794398249950,1794398250000,x,KXBTC15M-W11,KXBTC15M,2026-11-11T12:00:00Z,0.6,,,,,10,,,,,0.95,,,,,10,,,,
+1794398280950,1794398281000,x,KXBTC15M-W11,KXBTC15M,2026-11-11T12:00:00Z,0.2,,,,,10,,,,,0.75,,,,,10,,,,
