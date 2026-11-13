@@ -755,3 +755,4 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - The Head asked for a re-run at 19:36Z from Desk C's sweep, which missed the earlier run. That request was CANCELLED before anything was read.
   - Perps recorders confirmed thin by Main (GitHub drops scheduled starts); a self-chaining fix is approved at low priority.
   - Ruled: no research scorer fetches Coinbase or Hyperliquid at run time.
+- 19:40Z, WXDAYEND second build: the History Miner's wxdayend2.py f21845e7 (b45dd582) reads 0 of 22 on the city-days in landed runs, matching the Testing Desk on those 22. The other 18 come from Refinement's earlier reads, which are in no landed run, so they are not recounted, and their winners are unconfirmed. The FAIL stands; the independent check covers 22 of 40.
