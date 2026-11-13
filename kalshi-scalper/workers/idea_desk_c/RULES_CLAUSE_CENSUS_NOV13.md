@@ -125,3 +125,31 @@ A clause whose trigger is visible on Kalshi's own screen before settlement, and 
 - **Cancellation rates for tier 2 and 3 esports and Russian table tennis:** none published. Single cases only. Our own list counts (Desk B's and this page's) are the only rates we have.
 
 **For VOIDSNAP:** sportsbooks return stakes, Kalshi pays a discretionary price. A trader who carries the book convention ("void, money back") onto Kalshi has no reason to sell a team rumoured not to show. A trader who thinks a no-show is a loss does have reason to sell. Nothing published says which is more common, so the card's own measurement remains the only evidence.
+
+## RULESREAD_LISTS read (Nov 13, 2026, 06:50Z; pull/RULESREAD_LISTS/2026-11-13T0637Z_43379966481, status complete, no list left on a cursor)
+
+Rules text, and counts of settlements at a value other than 0 or 1, for the 26 series closing Aug 1 to Nov 12, 2026. Results were read only as counts of those settlements, as the job's purpose states; no price path and no rule was scored. [research]
+
+| Series | Markets | Events | Settled at a set price | Of those, traded | Last trade 10c or more from the settlement |
+|---|---|---|---|---|---|
+| Golf 3-ball (KXPGA3BALL) | 1,518 | 506 | 163 | 111 | 34 |
+| UFC method of victory | 1,036 | 148 | 21 | 13 | 1 |
+| UFC fight | 302 | 151 | 14 | 14 | 0 |
+| MotoGP race | 133 | 6 | 18 | 18 | 1 |
+| MMA fight | 52 | 26 | 6 | 6 | 5 |
+| PGA top 10 | 696 | 7 | 17 | 5 | 0 |
+| PGA make cut | 622 | 6 | 15 | 6 | 0 |
+| DP World Tour top 10, top 20, make cut | 1,067 / 1,067 / 1,003 | 8 / 8 / 7 | 3 / 3 / 9 | 0 | 0 |
+| F1, NASCAR, IndyCar, PGA winner, head-to-head | 1,326 in all | | 0 | | |
+
+**What the clauses say.**
+- **Golf 3-ball:** a tie for the lead pays "$1/N, rounded down to the nearest cent". A three-way tie pays $0.33 each, so the three sum to $0.99. A withdrawal before tee-off settles at "fair market value". Of 506 three-ball events, 65 ended in a two-way tie (0.5, 0.5, 0) and 2 in a three-way tie; about 7 settled at fair values (withdrawals).
+- **MMA:** a tie or no contest resolves "50/50 for both fighters"; a cancellation beyond two weeks settles at a fair price.
+- **Golf top-N and make-cut:** boundary ties pay in full (GOLFFINISH, as read earlier). The few set-price settlements are withdrawals before tee-off.
+- **Motorsport and the PGA winner:** no set-price settlements in the window.
+
+**Candidates: 0.**
+- **Golf 3-ball** is the only fast family here: about 1,700 events a year at this pace, not a slow family. The tie split is the standard dead-heat convention the books use too, so a price that ignores it would show as the three prices not summing to about $1. That is a parity scan, a closed row.
+- **The 34 traded markets with a last trade 10c or more from 50c** are mostly trades made mid-round, before the tie was known. A last trade is not a book that could be bought at the time.
+- **MMA:** 5 of 6 set-price settlements traded 10c or more away. That is 6 events in three and a half months, too few to measure.
+- **Golf top-N:** the full payout on boundary ties stays dropped on its own arithmetic (PF 1.07 to 1.35 even if wholly unpriced).
