@@ -103,4 +103,7 @@ assert H * 11 in J.screen_skip_hours(gap, ["A"])                                
 # validation counts
 mi = {"T": {H * 10 + 60: {"bid": 0.49, "ask": 0.51}, H * 12 + 60: {"bid": 0.49, "ask": 0.51}}}; hi = {"T": {H * 11: hq(0.49, 0.49, 0.49, 0.49, 0.51, 0.51, 0.51, 0.51)}}
 v = J.validation_counts(mi, hi, {"A": "T"}); assert v["minute_candles_in_an_hour_with_no_hourly_candle"] == 1 and v["minute_closes_outside_their_hour_low_to_high"] == 0
+# Desk A clarification: first half = first n // 2 bets sorted by (close, event); day = UTC date of the market CLOSE; the cost kill reads every qualifying decision
+rr = [{"event": "e%d" % i, "close": 100 + i} for i in range(5)]; rr.sort(key=lambda r: (r["close"], r["event"])); assert len(rr) // 2 == 2
+assert J.family_run([X, Y, Z], idx)[0]["cost_kill_reads"].startswith("the median over EVERY qualifying decision")
 print("inplayjump_second synthetic tests passed")

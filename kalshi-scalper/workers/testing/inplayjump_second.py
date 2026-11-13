@@ -20,11 +20,11 @@ AMBIGUITIES = [
     "3. Placebo search: the NEXT matches after X in (start or open, ticker) order, no wrap-around, up to 20; a match is 'used' only when a placebo BET is made; ANY failed condition, including the entry price band or spread at e + 1, sends the search on to the next match.",
     "4. Two contracts qualifying in the same minute = no bet, counted (the first minute at which anything qualifies is the decision minute, no second chance).",
     "5. The mid before the jump is minute t - 1's two-sided mid; the entry reads minute t + 1's close (the minute ending 120 s after t - 60... i.e. end ts t + 60). Both minutes must be present and two-sided; volume above zero is tested on minute t only.",
-    "6. Cost line: printed over (a) every qualifying decision with a two-sided entry minute and (b) those passing the ask band and spread (the entries). The kill reads (b), 'the qualifying entries'; both medians are shown.",
+    "6. Cost line (Desk A clarification Nov 13): the KILL reads the median over EVERY qualifying decision with a two-sided entry minute (before the band and spread filters); the median over the entries passing them is printed as information.",
     "7. A result that is not 'yes' or 'no' (void, missing) = price refunded, fee kept, a fee-only loss, counted in n, PF and z, count printed (rule and placebo alike).",
-    "8. Halves of development by date: the registration gives no split date; I split development at the calendar midpoint of the family's window (to the minute).",
+    "8. Halves (Desk A clarification Nov 13): bets sorted by (market close time, event ticker); first half = the first n // 2 bets, the rest = the second. Day for the day-z and the largest-day share = the UTC date of the market's CLOSE (a label, not a decision input).",
     "9. The placebo is re-weighted to the rule's price mix by price buckets min((round(p*100) - 20) // 10, 6); a bucket the rule uses but the placebo has no bet in is dropped and the remaining weights renormalised, and the dropped share is printed. The difference's standard error combines the rule's per-bet variance and the weighted bucket variances of the placebo.",
-    "10. z by days: clusters = the UTC date of the jump minute; z by match: one bet a match, so each bet is a cluster; the smaller of the two is used.",
+    "10. z by days: clusters = the UTC date of the market close; z by match: one bet a match, so each bet is a cluster; the smaller of the two is used.",
     "11. Tennis screen and validation lines are implemented as functions (screen_skip_hours, validation_counts) and are exercised on synthetic data; they run on landed hourly and minute files only after the full pilot data lands.",
 ]
 
@@ -195,25 +195,25 @@ def family_run(fam_matches, idx, read_results=False):
     medc = lambda xs: None if not xs else round(st.median(xs), 4)
     rep = {"matches": len(ms), "status_counts": why, "qualifying_decisions_with_a_two_sided_entry_minute": len(qual), "passing_ask_band_and_spread": len(bets),
            "share_passing": None if not qual else round(len(bets) / len(qual), 4), "median_one_way_cost_all_qualifying": medc(costs_all), "median_one_way_cost_entries": medc(costs_bet),
-           "cost_over_4c": None if not costs_bet else st.median(costs_bet) > 0.04 + TOL}
+           "cost_over_4c": None if not costs_all else st.median(costs_all) > 0.04 + TOL, "cost_kill_reads": "the median over EVERY qualifying decision with a two-sided entry minute (Desk A clarification Nov 13); the entries-only median is information"}
     return rep, dec, ms
 
 
 def score_family(fam_matches, idx, dev_from, dev_to):
     """The full read for one family (results joined HERE and only for bets and placebo bets). Returns the printed lines."""
     rep, dec, ms = family_run(fam_matches, idx); by_ev = {m["event"]: m for m in ms}; used = set(); rule, plc, noplc = [], [], 0
-    half = (dev_from + dev_to) // 2
     for pos, m in enumerate(ms):
         d = dec[m["event"]]
         if d["status"] != "bet": continue
         net, void = net_of(d["price"], d["code"], m["results"])
-        rule.append({"event": m["event"], "price": d["price"], "net": net, "void": void, "win": net > 0, "t": d["t"], "elapsed": d["elapsed"], "ts": d["t"], "day": d["t"] // 86400})
+        rule.append({"event": m["event"], "price": d["price"], "net": net, "void": void, "win": net > 0, "t": d["t"], "elapsed": d["elapsed"], "ts": d["t"], "close": m["close"], "day": m["close"] // 86400})
         p, why = placebo_for(m, d, ms, pos, idx, used)
         if p is None: noplc += 1; continue
         used.add(p["event"]); pm = by_ev[p["event"]]; pn, pv = net_of(p["price"], p["code"], pm["results"]); plc.append({"price": p["price"], "net": pn, "void": pv, "elapsed": d["elapsed"], "t": p["t"]})
     out = dict(rep, bets=len(rule), voids=sum(r["void"] for r in rule), placebo_bets=len(plc), bets_with_no_placebo=noplc)
     if not rule: out["verdict"] = "NOT_ENOUGH_DATA at n = 0"; return out
-    nets = [r["net"] for r in rule]; pf = k.pf(nets); h1 = [r["net"] for r in rule if r["ts"] < half]; h2 = [r["net"] for r in rule if r["ts"] >= half]
+    rule.sort(key=lambda r: (r["close"], r["event"]))                                              # Desk A clarification Nov 13: bets sorted by (market close time, event ticker); first half = the first n // 2 bets
+    nets = [r["net"] for r in rule]; pf = k.pf(nets); h1 = nets[:len(nets) // 2]; h2 = nets[len(nets) // 2:]
     out.update(wins=sum(r["win"] for r in rule), mean_price=round(sum(r["price"] for r in rule) / len(rule), 4), cash_pf=pf, net_cents_per_contract=round(100 * sum(nets) / len(nets), 3),
                halves_pf=[k.pf(h1) if h1 else None, k.pf(h2) if h2 else None], share_paid_70_to_85=round(sum(1 for r in rule if r["price"] >= 0.70 - TOL) / len(rule), 4))
     byday = {}
