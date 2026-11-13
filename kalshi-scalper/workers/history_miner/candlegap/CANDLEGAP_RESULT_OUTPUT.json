@@ -1,0 +1,56 @@
+{
+ "tickers": 36,
+ "tickers_with_candles": 36,
+ "markets_closed_in_lists": 34,
+ "market_minutes": 7436,
+ "counts": {
+  "before_close": {
+   "rows": {
+    "1_present_changed": 1286,
+    "2_present_unchanged": 3,
+    "3_missing_unchanged_twosided": 446,
+    "4_missing_unchanged_empty_or_onesided": 239,
+    "5_missing_changed": 338
+   },
+   "top": {
+    "1_present_changed": 872,
+    "2_present_unchanged": 417,
+    "3_missing_unchanged_twosided": 767,
+    "4_missing_unchanged_empty_or_onesided": 256,
+    "5_missing_changed": 0
+   }
+  },
+  "after_close": {
+   "rows": {
+    "1_present_changed": 37,
+    "2_present_unchanged": 0,
+    "3_missing_unchanged_twosided": 0,
+    "4_missing_unchanged_empty_or_onesided": 5085,
+    "5_missing_changed": 2
+   },
+   "top": {
+    "1_present_changed": 32,
+    "2_present_unchanged": 5,
+    "3_missing_unchanged_twosided": 0,
+    "4_missing_unchanged_empty_or_onesided": 5085,
+    "5_missing_changed": 2
+   }
+  }
+ },
+ "candle_vs_book": {
+  "before_close": {
+   "present": 1289,
+   "with_bid_ask": 1151,
+   "bid_within_1c": 1130,
+   "ask_within_1c": 1114,
+   "both_within_1c": 1102
+  },
+  "after_close": {
+   "present": 37,
+   "with_bid_ask": 2,
+   "bid_within_1c": 0,
+   "ask_within_1c": 0,
+   "both_within_1c": 0
+  }
+ }
+}
