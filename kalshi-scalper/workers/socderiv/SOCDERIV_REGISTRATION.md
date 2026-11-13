@@ -93,3 +93,7 @@ Two builds of this measurement's reader now print the same on 12 invented cases 
 4. Then "efficient, move on", unless the share at a gap of 8c or more (spread 4c or less) is at least 10% and at least twice the placebo's.
 
 **This fixes an order the text listed but did not call a precedence.** The first reading that applies is the reading printed; the later lines' figures are still printed beside it as information.
+
+### Clarifying line to the second amendment, Nov 13, 2026, 06:23Z, text only, before any list or candle of these series has landed (Auditor B's question; the Head of R&D, seq 13, 06:25Z)
+
+**Two-sided, everywhere in this registration, means 0 < bid < ask < 1 at the candle's close: a bid of 0.00 is no bid and an ask of 1.00 is no ask.** Comparisons carry the 1e-9 tolerance or whole cents. It follows that at the instant (the first minute at which the target is two-sided) both sides of the target have an ask, the NO ask being 1 minus the YES bid, so the cheaper side of (a) is always defined; and a game with no such minute is not filled: counted, not priced. This is the standing reading across this desk's cards (the Head made it standing for every registration from tonight: a text that says "two-sided", "quoted" or "a side" without defining it is read this way). No number, line or kill value changes.
