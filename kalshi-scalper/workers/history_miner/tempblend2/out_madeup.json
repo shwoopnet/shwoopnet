@@ -1,23 +1,6 @@
 {
  "ambiguities": [
-  "A1 index point v: card says 'the latest canonical index point (v at minute t, about S minus 20 minutes given the 300 second lag)'. Provisional: the latest point with t <= decision time minus 300 s, decision time = S minus 15 min (so normally t = S minus 20 min). Not provisional alternatives: exactly S minus 20, or the last point published by the decision time using its own publish stamp.",
-  "A2 decision candle: 'the 1 minute candle ending 15 minutes before S'. Provisional: the strike quotes are that candle's close (end_period_ts = S minus 900 s).",
-  "A3 station reading s: Source A 'at the same minute t'; Source B 'the latest report at or before t'. Provisional: Source A needs a reading at exactly minute t; Source B takes the latest at or before t. Skip if the reading used is more than 10 minutes from t; 'within 10 minutes' read as <= 600 s (inclusive).",
-  "A4 gap threshold: '|g| under 0.5F no bet', '+0.5F or more'. Provisional: bet when |g| >= 0.5 - 1e-9.",
-  "A5 strike set: 's < K <= v' (YES) and 'v < K <= s' (NO), compared as written on raw decimals (no rounding of v or s to whole degrees). The card does not say whether v and s are rounded first; the settlement rounding of the index is not stated.",
-  "A6 ORDER OF FILTERS (the main one): 'Only the strike nearest the midpoint (v + s) / 2, with its ask at 20c to 80c and a spread of 4c or less'. Provisional: take the strike nearest the midpoint among the eligible strikes FIRST, then require its ask and spread; if it fails, NO BET (no fallback to the next strike). The other reading: filter by band and spread first, then take the nearest.",
-  "A7 tie for nearest: two strikes equally near the midpoint (within 1e-9). Provisional: the LOWER strike.",
-  "A8 side's ask: YES ask = yes_ask; NO ask = 1 - yes_bid; spread = yes_ask - yes_bid for both. A quote is usable only if 0 < yes_bid < yes_ask < 1.",
-  "A9 band: '20c to 80c' on the side's ask BEFORE the 1c slip, inclusive at both ends (1e-9). Spread '4c or less' inclusive.",
-  "A10 fee: the card says 'cash PF after fees' but names no fee. Provisional: one contract, fee = 0.07 x p x (1 - p) rounded UP to the next cent at p = ask + 1c (the house formula used by the other cards). Cost = p + fee; win pays 1.",
-  "A11 PF: gross gain / gross loss over bets; 'inf' if no loss; n printed. Cash = per-contract dollars after fee.",
-  "A12 void: a bet whose strike result is neither yes nor no. The card is silent. Provisional: the Head's one void rule for hold-to-settlement cards (price refunded, fee kept, a fee-only loss, counted in n and PF), and the count is printed.",
-  "A13 windows: by S, development [2026-09-13, 2026-11-05), halves split at S < 2026-10-09 / S >= 2026-10-09; held-out [2026-11-12, 2026-12-10); S in neither is ignored and counted.",
-  "A14 kill lines applied to the development read as written: closed if bets < 200, or pooled cash PF < 1.0, or either half's PF < 1.2. Whether 'PF under 1.2 in either half' applies when a half has no loss (inf) or no bet: provisional, a half with no bet fails the line, a half with no loss passes.",
-  "A15 day split: 'time since the latest calibration change (effective_at_ms)'. Provisional: measured at the decision time; 'days 0 to 1' = under 2 x 86400 s, 'day 2 onward' = 2 x 86400 s or more. The card does not say whether a calibration change after the decision but before S counts.",
-  "A16 member skip: 'its own code at minute t is anything but ok' applies to member cities (Source A). Provisional: a missing code also skips. Non-member (Source B) rows carry no code and are not skipped for it.",
-  "A17 one bet per city-hour; the card does not say what happens if the index has no point in the 10 minutes before the decision. Provisional: skip, counted ('no index point').",
-  "A18 member and non-member rows (report rule): descriptive PF and n of each; the verdict is pooled. Membership is taken from the row as given (it can change with a calibration; the card fixes it per city, not per hour)."
+  "Amendment 1 of TEMPBLEND_CARD.md (658817e9) rules A1 to A18; this build follows it line by line (see the card)."
  ],
  "card": "TEMPBLEND_CARD.md 66483872 (f07129e1)",
  "decisions": [
@@ -31,7 +14,7 @@
     "day2": true,
     "gap": 0.8,
     "member": true,
-    "pnl": 0.49,
+    "pnl": 0.5,
     "s": 70.2,
     "side": "yes",
     "v": 71.0,
@@ -51,7 +34,7 @@
     "day2": false,
     "gap": -0.8,
     "member": false,
-    "pnl": -0.43,
+    "pnl": -0.42,
     "s": 72.4,
     "side": "no",
     "v": 71.6,
@@ -78,7 +61,7 @@
     "day2": true,
     "gap": 0.5,
     "member": true,
-    "pnl": -0.35,
+    "pnl": -0.34,
     "s": 69.8,
     "side": "yes",
     "v": 70.3,
@@ -90,9 +73,22 @@
   },
   {
    "S": 1790870400,
-   "bet": null,
+   "bet": {
+    "K": 73,
+    "S": 1790870400,
+    "ask": 0.5,
+    "city": "C05",
+    "day2": true,
+    "gap": 2.0,
+    "member": false,
+    "pnl": 0.48,
+    "s": 71.0,
+    "side": "yes",
+    "v": 73.0,
+    "void": false
+   },
    "city": "C05",
-   "status": "nearest strike ask outside 20c to 80c",
+   "status": "bet",
    "window": "dev"
   },
   {
@@ -105,7 +101,7 @@
     "day2": true,
     "gap": 2.2,
     "member": false,
-    "pnl": 0.39,
+    "pnl": 0.4,
     "s": 71.4,
     "side": "yes",
     "v": 73.6,
@@ -119,7 +115,7 @@
    "S": 1792501200,
    "bet": null,
    "city": "C07",
-   "status": "nearest strike spread over 4c",
+   "status": "no strike passes band and spread",
    "window": "dev"
   },
   {
@@ -166,7 +162,7 @@
     "day2": true,
     "gap": 1.0,
     "member": true,
-    "pnl": 0.47,
+    "pnl": 0.48,
     "s": 71.0,
     "side": "yes",
     "v": 72.0,
@@ -186,7 +182,7 @@
     "day2": false,
     "gap": 1.0,
     "member": true,
-    "pnl": -0.33,
+    "pnl": -0.32,
     "s": 71.0,
     "side": "yes",
     "v": 72.0,
@@ -195,25 +191,59 @@
    "city": "C13",
    "status": "bet",
    "window": "held"
+  },
+  {
+   "S": 1792515600,
+   "bet": null,
+   "city": "C14",
+   "status": "no index point",
+   "window": "dev"
+  },
+  {
+   "S": 1792519200,
+   "bet": {
+    "K": 73,
+    "S": 1792519200,
+    "ask": 0.43,
+    "city": "C15",
+    "day2": true,
+    "gap": 1.4,
+    "member": true,
+    "pnl": -0.45,
+    "s": 71.6,
+    "side": "yes",
+    "v": 73.0,
+    "void": false
+   },
+   "city": "C15",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790874000,
+   "bet": null,
+   "city": "C16",
+   "status": "no station reading",
+   "window": "dev"
   }
  ],
  "development": {
   "day_2_on_info": {
-   "n": 4,
-   "net": 0.51,
-   "pf": 2.378378,
+   "n": 6,
+   "net": 0.57,
+   "pf": 1.703704,
    "voids": 1
   },
   "days_0_1_info": {
    "n": 1,
-   "net": -0.43,
+   "net": -0.42,
    "pf": 0.0,
    "voids": 0
   },
   "first_half": {
-   "n": 3,
-   "net": -0.29,
-   "pf": 0.628205,
+   "n": 4,
+   "net": 0.22,
+   "pf": 1.289474,
    "voids": 0
   },
   "kills": {
@@ -222,27 +252,27 @@
    "pooled_pf_under_1": false
   },
   "member": {
-   "n": 3,
-   "net": 0.12,
-   "pf": 1.324324,
+   "n": 4,
+   "net": -0.31,
+   "pf": 0.617284,
    "voids": 1
   },
   "non_member": {
-   "n": 2,
-   "net": -0.04,
-   "pf": 0.906977,
+   "n": 3,
+   "net": 0.46,
+   "pf": 2.095238,
    "voids": 0
   },
   "pooled": {
-   "n": 5,
-   "net": 0.08,
-   "pf": 1.1,
+   "n": 7,
+   "net": 0.15,
+   "pf": 1.121951,
    "voids": 1
   },
   "second_half": {
-   "n": 2,
-   "net": 0.37,
-   "pf": 19.5,
+   "n": 3,
+   "net": -0.07,
+   "pf": 0.851064,
    "voids": 1
   },
   "verdict": "CLOSED"
@@ -251,30 +281,30 @@
   "calibration_kill": "no evidence at n = 1",
   "day_2_on": {
    "n": 1,
-   "net": 0.47,
+   "net": 0.48,
    "pf": "inf",
    "voids": 0
   },
   "days_0_1": {
    "n": 1,
-   "net": -0.33,
+   "net": -0.32,
    "pf": 0.0,
    "voids": 0
   },
   "pooled": {
    "n": 2,
-   "net": 0.14,
-   "pf": 1.424242,
+   "net": 0.16,
+   "pf": 1.5,
    "voids": 0
   }
  },
  "outside_windows": 1,
  "statuses": {
-  "bet": 7,
+  "bet": 9,
   "gap under 0.5F": 1,
   "member station not ok": 1,
-  "nearest strike ask outside 20c to 80c": 1,
-  "nearest strike spread over 4c": 1,
-  "no station reading": 1
+  "no index point": 1,
+  "no station reading": 2,
+  "no strike passes band and spread": 1
  }
 }

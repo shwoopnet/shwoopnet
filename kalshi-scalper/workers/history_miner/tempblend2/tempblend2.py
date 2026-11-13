@@ -1,13 +1,12 @@
 """TEMPBLEND second build (History Miner, Nov 13, 2026), written from the card text alone: kalshi-scalper/workers/idea_desk_c/TEMPBLEND_CARD.md on
-claude/idea-desk-c at 66483872 (sha256 f07129e1...). Desk C's scorer was not read. Invented rows only: no Kalshi request, no data.
-
-Where the card is silent this build takes a PROVISIONAL reading, named in AMBIG (A1 to A18) and printed in every output; the Head of R&D rules each one
-and Desk C amends the card before any data. A provisional reading is not a choice of the card's meaning.
+claude/idea-desk-c at 658817e9 (sha256 32112a10..., with Amendment 1, A1 to A18). Desk C's scorer was not read. Invented rows only: no Kalshi request,
+no data. First built at 66483872 (9c112b9f) with provisional readings; aligned to Amendment 1 by changing only those lines.
 
 Input (this build's own invented layout, one JSON object per city-hour, one per line):
   city, S (settlement minute, epoch s), member (true if the watched station is one of the five), source ("A" or "B"),
   index: [[t, v], ...] canonical index points (t = the point's minute, epoch s; v in F),
-  station: [[t, s, code], ...] the watched station's readings (code "ok" or another word; Source B rows carry code null),
+  station: [[t, s, code, obs_time], ...] the watched station's readings: Source A rows are keyed by the index point minute t they belong to
+           (the stations[] of point t) and carry the station's obs_time (omitted = t); Source B rows are keyed by their own obs_time and carry code null,
   cal_effective_ms: effective_at_ms of the city's config_version in force at the decision,
   strikes: [{"K": strike F, "yes_bid": dollars, "yes_ask": dollars, "result": "yes" | "no" | null}, ...] the decision candle's close, "K or above"
 Usage: python3 -I tempblend2.py <rows.jsonl> <out.json>"""
@@ -16,36 +15,16 @@ import json, math, sys
 EPS = 1e-9
 LOOK_S = 15 * 60
 LAG_S = 300
-STALE_S = 10 * 60
+STALE_S = 10 * 60            # A3 and A17 (Amendment 1)
 GAP_F = 0.5
 BAND = (0.20, 0.80)
 SPREAD_MAX = 0.04
-SLIP = 0.01
 DEV = ("2026-09-13T00:00:00Z", "2026-11-05T00:00:00Z")
 HALF = "2026-10-09T00:00:00Z"
 HELD = ("2026-11-12T00:00:00Z", "2026-12-10T00:00:00Z")
 MIN_BETS = 200
 MIN_DAY2 = 30
-AMBIG = [
-    "A1 index point v: card says 'the latest canonical index point (v at minute t, about S minus 20 minutes given the 300 second lag)'. Provisional: the latest point with t <= decision time minus 300 s, decision time = S minus 15 min (so normally t = S minus 20 min). Not provisional alternatives: exactly S minus 20, or the last point published by the decision time using its own publish stamp.",
-    "A2 decision candle: 'the 1 minute candle ending 15 minutes before S'. Provisional: the strike quotes are that candle's close (end_period_ts = S minus 900 s).",
-    "A3 station reading s: Source A 'at the same minute t'; Source B 'the latest report at or before t'. Provisional: Source A needs a reading at exactly minute t; Source B takes the latest at or before t. Skip if the reading used is more than 10 minutes from t; 'within 10 minutes' read as <= 600 s (inclusive).",
-    "A4 gap threshold: '|g| under 0.5F no bet', '+0.5F or more'. Provisional: bet when |g| >= 0.5 - 1e-9.",
-    "A5 strike set: 's < K <= v' (YES) and 'v < K <= s' (NO), compared as written on raw decimals (no rounding of v or s to whole degrees). The card does not say whether v and s are rounded first; the settlement rounding of the index is not stated.",
-    "A6 ORDER OF FILTERS (the main one): 'Only the strike nearest the midpoint (v + s) / 2, with its ask at 20c to 80c and a spread of 4c or less'. Provisional: take the strike nearest the midpoint among the eligible strikes FIRST, then require its ask and spread; if it fails, NO BET (no fallback to the next strike). The other reading: filter by band and spread first, then take the nearest.",
-    "A7 tie for nearest: two strikes equally near the midpoint (within 1e-9). Provisional: the LOWER strike.",
-    "A8 side's ask: YES ask = yes_ask; NO ask = 1 - yes_bid; spread = yes_ask - yes_bid for both. A quote is usable only if 0 < yes_bid < yes_ask < 1.",
-    "A9 band: '20c to 80c' on the side's ask BEFORE the 1c slip, inclusive at both ends (1e-9). Spread '4c or less' inclusive.",
-    "A10 fee: the card says 'cash PF after fees' but names no fee. Provisional: one contract, fee = 0.07 x p x (1 - p) rounded UP to the next cent at p = ask + 1c (the house formula used by the other cards). Cost = p + fee; win pays 1.",
-    "A11 PF: gross gain / gross loss over bets; 'inf' if no loss; n printed. Cash = per-contract dollars after fee.",
-    "A12 void: a bet whose strike result is neither yes nor no. The card is silent. Provisional: the Head's one void rule for hold-to-settlement cards (price refunded, fee kept, a fee-only loss, counted in n and PF), and the count is printed.",
-    "A13 windows: by S, development [2026-09-13, 2026-11-05), halves split at S < 2026-10-09 / S >= 2026-10-09; held-out [2026-11-12, 2026-12-10); S in neither is ignored and counted.",
-    "A14 kill lines applied to the development read as written: closed if bets < 200, or pooled cash PF < 1.0, or either half's PF < 1.2. Whether 'PF under 1.2 in either half' applies when a half has no loss (inf) or no bet: provisional, a half with no bet fails the line, a half with no loss passes.",
-    "A15 day split: 'time since the latest calibration change (effective_at_ms)'. Provisional: measured at the decision time; 'days 0 to 1' = under 2 x 86400 s, 'day 2 onward' = 2 x 86400 s or more. The card does not say whether a calibration change after the decision but before S counts.",
-    "A16 member skip: 'its own code at minute t is anything but ok' applies to member cities (Source A). Provisional: a missing code also skips. Non-member (Source B) rows carry no code and are not skipped for it.",
-    "A17 one bet per city-hour; the card does not say what happens if the index has no point in the 10 minutes before the decision. Provisional: skip, counted ('no index point').",
-    "A18 member and non-member rows (report rule): descriptive PF and n of each; the verdict is pooled. Membership is taken from the row as given (it can change with a calibration; the card fixes it per city, not per hour).",
-]
+AMBIG = ["Amendment 1 of TEMPBLEND_CARD.md (658817e9) rules A1 to A18; this build follows it line by line (see the card)."]
 
 
 def iso(s):
@@ -67,18 +46,21 @@ def decide(row):
     """One city-hour: returns (status, bet or None). status names why there is no bet."""
     S = row["S"]
     dec = S - LOOK_S
-    pts = [p for p in row["index"] if p[0] <= dec - LAG_S]
+    pts = [p for p in row["index"] if p[0] <= dec - LAG_S]            # A1
     if not pts:
         return "no index point", None
     t, v = max(pts, key=lambda p: p[0])
-    if dec - LAG_S - t > STALE_S:
+    if dec - t > STALE_S + EPS:                                        # A17: no point within 10 minutes before the decision
         return "no index point", None
     if row["source"] == "A":
-        rd = [r for r in row["station"] if r[0] == t]
+        rd = [r for r in row["station"] if r[0] == t]                   # A3: the stations[] of point t itself
         if not rd:
             return "no station reading", None
         r = rd[0]
-        if row.get("member") and r[2] != "ok":
+        obs = r[3] if len(r) > 3 and r[3] is not None else r[0]
+        if t - obs > STALE_S + EPS:
+            return "no station reading", None
+        if row.get("member") and r[2] != "ok":                          # A16: a missing code skips too
             return "member station not ok", None
     else:
         rd = [r for r in row["station"] if r[0] <= t]
@@ -93,23 +75,23 @@ def decide(row):
         return "gap under 0.5F", None
     side = "yes" if g > 0 else "no"
     lo, hi = (s, v) if side == "yes" else (v, s)
-    elig = [k for k in row["strikes"] if lo < k["K"] <= hi]
+    elig = [k for k in row["strikes"] if lo < k["K"] <= hi]           # A5: raw decimals
     if not elig:
         return "no strike between", None
+    def side_ask(k):
+        return k["yes_ask"] if side == "yes" else 1 - k["yes_bid"]
+    ok = [k for k in elig if k["yes_bid"] is not None and k["yes_ask"] is not None and 0 < k["yes_bid"] < k["yes_ask"] < 1   # A2, A8
+          and BAND[0] - EPS <= side_ask(k) <= BAND[1] + EPS and k["yes_ask"] - k["yes_bid"] <= SPREAD_MAX + EPS]          # A6, A9: filters FIRST
+    if not ok:
+        return "no strike passes band and spread", None
     mid = (v + s) / 2
-    k = min(elig, key=lambda k: (round(abs(k["K"] - mid), 9), k["K"]))
+    k = min(ok, key=lambda k: (round(abs(k["K"] - mid), 9), k["K"]))   # A6 then A7: nearest, ties to the lower K
     b, a = k["yes_bid"], k["yes_ask"]
-    if b is None or a is None or not (0 < b < a < 1):
-        return "nearest strike not two-sided", None
-    ask = a if side == "yes" else 1 - b
-    if not (BAND[0] - EPS <= ask <= BAND[1] + EPS):
-        return "nearest strike ask outside 20c to 80c", None
-    if a - b > SPREAD_MAX + EPS:
-        return "nearest strike spread over 4c", None
-    p = ask + SLIP
+    ask = side_ask(k)
+    p = ask                                                           # A10: fill at the ask seen, no +1c
     cost = p + fee(p)
     res = k["result"]
-    if res not in ("yes", "no"):
+    if res not in ("yes", "no"):                                      # A12
         pnl, void = -fee(p), True
     else:
         pnl, void = (1 - cost) if res == side else -cost, False

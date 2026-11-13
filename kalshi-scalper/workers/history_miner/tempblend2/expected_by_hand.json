@@ -1,15 +1,16 @@
 {
- "note": "Worked out by hand from the card and the provisional readings A1 to A18, before running tempblend2.py; fee = ceil-to-cent 0.07 p (1-p) at p = ask + 1c",
+ "note": "Worked out by hand from TEMPBLEND_CARD.md with Amendment 1 (658817e9) before running the aligned tempblend2.py: fill at the ask seen, fee = ceil-to-cent 0.07 p (1-p) at that ask, band and spread first, then nearest. Correction before commit: C02 first worked with NO ask = 1 - yes_ask (0.37); the card (A8) says 1 - yes_bid (0.40), so C02 is -0.42 and the totals follow; the scorer had it right",
  "per_row": {
-  "C01": ["bet", "yes", 71, 0.49], "C02": ["bet", "no", 72, -0.43], "C03": ["gap under 0.5F"], "C04": ["bet", "yes", 70, -0.35],
-  "C05": ["nearest strike ask outside 20c to 80c"], "C06": ["bet", "yes", 72, 0.39], "C07": ["nearest strike spread over 4c"],
+  "C01": ["bet", "yes", 71, 0.50], "C02": ["bet", "no", 72, -0.42], "C03": ["gap under 0.5F"], "C04": ["bet", "yes", 70, -0.34],
+  "C05": ["bet", "yes", 73, 0.48], "C06": ["bet", "yes", 72, 0.40], "C07": ["no strike passes band and spread"],
   "C08": ["member station not ok"], "C09": ["no station reading"], "C10": ["bet", "yes", 72, -0.02, "void"],
-  "C11": ["outside windows"], "C12": ["bet", "yes", 72, 0.47], "C13": ["bet", "yes", 72, -0.33]
+  "C11": ["outside windows"], "C12": ["bet", "yes", 72, 0.48], "C13": ["bet", "yes", 72, -0.32],
+  "C14": ["no index point"], "C15": ["bet", "yes", 73, -0.45], "C16": ["no station reading"]
  },
- "development": {"pooled": {"n": 5, "pf": 1.1, "net": 0.08, "voids": 1},
-                 "first_half": {"n": 3, "pf": 0.628205, "net": -0.29}, "second_half": {"n": 2, "pf": 19.5, "net": 0.37},
-                 "member": {"n": 3, "pf": 1.324324, "net": 0.12}, "non_member": {"n": 2, "pf": 0.906977, "net": -0.04},
-                 "days_0_1_info": {"n": 1, "net": -0.43},
+ "development": {"pooled": {"n": 7, "pf": 1.121951, "net": 0.15, "voids": 1},
+                 "first_half": {"n": 4, "pf": 1.289474, "net": 0.22}, "second_half": {"n": 3, "pf": 0.851064, "net": -0.07},
+                 "member": {"n": 4, "pf": 0.617284, "net": -0.31}, "non_member": {"n": 3, "pf": 2.095238, "net": 0.46},
+                 "days_0_1_info": {"n": 1, "net": -0.42},
                  "kills": {"fewer_than_200": true, "pooled_pf_under_1": false, "a_half_under_1_2": true}, "verdict": "CLOSED"},
- "held_out": {"pooled": {"n": 2, "net": 0.14}, "day_2_on": {"n": 1, "net": 0.47}, "days_0_1": {"n": 1, "net": -0.33}, "calibration_kill": "no evidence at n = 1"}
+ "held_out": {"pooled": {"n": 2, "net": 0.16}, "day_2_on": {"n": 1, "net": 0.48}, "days_0_1": {"n": 1, "net": -0.32}, "calibration_kill": "no evidence at n = 1"}
 }
