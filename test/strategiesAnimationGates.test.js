@@ -15,7 +15,7 @@ function fnSource(name) {
 }
 const fenced = (/\/\* STRAT-ANIM-BEGIN[\s\S]*?STRAT-ANIM-END \*\//.exec(html) || [''])[0];
 const escapeHtml = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-const lib = new Function('escapeHtml', fnSource('kalshiStratEase') + fnSource('kalshiStratPfAttr') + fnSource('kalshiStratCountText') + 'return {kalshiStratEase,kalshiStratPfAttr,kalshiStratCountText};')(escapeHtml);
+const lib = new Function('escapeHtml', fnSource('kalshiStratEase') + fnSource('kalshiStratPfAttr') + fnSource('kalshiStratCountText') + fnSource('kalshiStratCountInt') + 'return {kalshiStratEase,kalshiStratPfAttr,kalshiStratCountText,kalshiStratCountInt};')(escapeHtml);
 
 // SA1: the count never shows a number past the true one and ends exactly on it. IF THIS FAILS: a profit factor on screen could be wrong while it counts.
 gates.SA1 = () => {
@@ -51,7 +51,7 @@ gates.SA5 = () => {
   assert.ok(rules.length >= 6);
   rules.forEach((m) => { if (!/^\s*@keyframes/.test(m[1])) assert.ok(/#page-strategies\.sp-play/.test(m[1]), 'animation selector scoped to the Strategies page: ' + m[1].trim()); });
   const pagesJs = fenced.match(/querySelectorAll\('([^']+)'\)/g);
-  pagesJs.forEach((q) => assert.ok(/#stratBody \[data-pf\]/.test(q), 'the count only reads #stratBody [data-pf]: ' + q));
+  pagesJs.forEach((q) => assert.ok(/#stratBody \[data-pf\]/.test(q) && /^'#stratBody \[data-pf\](?:, #stratBody \[data-count\])?'$/.test(q.replace(/^querySelectorAll\(|\)$/g, '')), 'the count only reads #stratBody [data-pf]: ' + q));
 };
 // SA6: reduced motion off switch, both ways, and nothing starts in JS either.
 gates.SA6 = () => {
@@ -66,7 +66,7 @@ gates.SA6 = () => {
 // SA7: behaviour under reduced motion and normally, with fakes.
 function harness(reduced) {
   const log = { raf: 0, cancels: 0, timers: [], cleared: 0 };
-  const figs = [{ t: '1.23', textContent: '1.23', getAttribute() { return '1.23'; } }];
+  const figs = [{ t: '1.23', textContent: '1.23', getAttribute(n) { return n === 'data-pf' ? '1.23' : null; } }];
   const cls = new Set();
   const page = { offsetWidth: 1, classList: { add: (c) => cls.add(c), remove: (c) => cls.delete(c) }, querySelectorAll: () => figs };
   let rafCb = null;
@@ -129,6 +129,13 @@ gates.SA12 = () => {
   assert.ok(/<path class="sp-spk" pathLength="1"/.test(html), 'the trend line has pathLength 1');
   assert.ok(/@keyframes lineDraw\{ from\{ stroke-dashoffset:1; \} to\{ stroke-dashoffset:0; \} \}/.test(css), 'draw goes from fully hidden to fully drawn');
   assert.ok(/\.sp-bar i\{[^}]*scaleX|@keyframes spBar\{ from\{ transform:scaleX\(0\); \} to\{ transform:none; \} \}/.test(css), 'bars grow from empty to their width');
+};
+// SA13: the box counts (data-count) count up from 0 to the true whole number and never show a value past it; at rest the markup and the end of the count are the true count.
+gates.SA13 = () => {
+  assert.strictEqual(lib.kalshiStratCountInt('6', 0), '0'); assert.strictEqual(lib.kalshiStratCountInt('6', 1), '6'); assert.strictEqual(lib.kalshiStratCountInt('6', 2), '6');
+  for (let i = 0; i < 100; i++) assert.ok(Number(lib.kalshiStratCountInt('6', i / 100)) <= 6 && Number.isInteger(Number(lib.kalshiStratCountInt('6', i / 100))));
+  assert.ok(/<b data-count="' \+ counts\[s\.key\] \+ '">' \+ counts\[s\.key\] \+ '<\/b>/.test(html), 'the true count is the markup text');
+  assert.ok(/b\[i\]\.textContent = kalshiStratFigAttr\(b\[i\]\)/.test(fenced), 'stop restores the true text of both kinds of figure');
 };
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
