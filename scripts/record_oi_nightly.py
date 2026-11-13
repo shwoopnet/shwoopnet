@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Recorder OINIGHTLY (Nov 13, 2026, Idea Desk B; asked by the Head of R&D and Main, form 2). Research data only: nothing here trades, signs or sends an order.
 
-What it records. For the 13 OICORE shadow places (Desk A's twelve at commit 29dd035e plus Ethereum): Kalshi's PUBLIC one minute candles with open interest, from 7 to 2 minutes before each 15 minute
+What it records. For the 13 OICORE shadow places (Desk A's twelve at commit 29dd035e plus Ethereum, and Bitcoin for the three OIVER places): Kalshi's PUBLIC one minute candles with open interest, from 7 to 2 minutes before each 15 minute
 close of ONE UTC day (the previous day by default), one batched candlesticks request per close, so each place's open interest threshold and signal can be computed. A series is asked at a close only if
 the committed hours table (kalshi-scalper/workers/oicand/OI_HOURS_TABLE.json, made from the OICAND lists run by workers/oicand/oi_hours_table.py) lists that weekday and time, so no ticker that does not exist is
 asked. EVENT830's 8 series skip the 13:30Z close on EVENT830's calendar dates. Forward days only: before 2026-11-14 it refuses. Eastern is taken as EST (UTC-5), valid to 2027-03-13.
+  - Bitcoin (KXBTC15M) rows and coverage go to a separate folder (--btc-dir), never into the folder the 13 places' readers open; the same request answers both.
   - candles.csv:  one row per candle (day, close_time, ticker, end_period_ts, open interest, volume, price, yes_bid and yes_ask open, high, low, close); a missing value is empty, never zero
   - coverage.csv: one row per request (close, tickers asked, tickers answered, candles, status, tries)
 Public data only: no key, no auth header, no order. One host (api.elections.kalshi.com), GET only, redirects refused, a generic User-Agent. One request stream, at least 1.0 s apart. A 429, a 5xx or a dropped
@@ -23,17 +24,18 @@ from datetime import datetime, timedelta, timezone
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
 END_UTC = "2026-12-31T23:59:00Z"
-SERIES = ["KXXRP15M", "KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M", "KXETH15M"]
+SERIES = ["KXXRP15M", "KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M", "KXETH15M", "KXBTC15M"]
 EV830 = {"KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"}
 REL = {"2026-11-05", "2026-11-06", "2026-11-10", "2026-11-12", "2026-11-13", "2026-11-17", "2026-11-19", "2026-11-25", "2026-12-03", "2026-12-04", "2026-12-10", "2026-12-15", "2026-12-16", "2026-12-17", "2026-12-23"}
 FIRST_DAY, LAST_EST_DAY = "2026-11-14", "2027-03-13"
 MAX_REQUESTS = 120
+BTC = "KXBTC15M-"                    # Bitcoin goes to its OWN folder (rule 17: its closes from 2026-11-14 are CFRTI-K held-out windows)
 GAP_S = 1.0
 BACKOFF_S, BACKOFF_MAX_S, MAX_TRIES = 2.0, 30.0, 4
 MAX_FAIL_RUN = 3
 MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
 UTC = timezone.utc
-ROW_COLS = ["day", "close_time", "market_ticker", "end_period_ts", "open_interest_fp", "volume_fp", "price_open", "price_high", "price_low", "price_close", "price_mean", "price_previous",
+ROW_COLS = ["day", "close_time", "market_ticker", "end_period_ts", "open_interest_fp", "open_interest", "volume_fp", "price_open", "price_high", "price_low", "price_close", "price_mean", "price_previous",
             "bid_open", "bid_high", "bid_low", "bid_close", "ask_open", "ask_high", "ask_low", "ask_close"]
 COVER_COLS = ["day", "close_time", "request_id", "tickers_asked", "tickers_answered", "candles", "status", "tries"]
 UA = {"User-Agent": "shwoopnet-research-recorder"}
@@ -87,7 +89,7 @@ def rows_from(day, close, resp):
     out = []
     for m in (resp.get("markets") or []) if isinstance(resp, dict) else []:
         for c in m.get("candlesticks") or []:
-            out.append([day, close, m.get("market_ticker", ""), _g(c, "end_period_ts"), _g(c, "open_interest_fp"), _g(c, "volume_fp"),
+            out.append([day, close, m.get("market_ticker", ""), _g(c, "end_period_ts"), _g(c, "open_interest_fp"), _g(c, "open_interest"), _g(c, "volume_fp"),
                         _g(c, "price", "open_dollars"), _g(c, "price", "high_dollars"), _g(c, "price", "low_dollars"), _g(c, "price", "close_dollars"), _g(c, "price", "mean_dollars"), _g(c, "price", "previous_dollars"),
                         _g(c, "yes_bid", "open_dollars"), _g(c, "yes_bid", "high_dollars"), _g(c, "yes_bid", "low_dollars"), _g(c, "yes_bid", "close_dollars"),
                         _g(c, "yes_ask", "open_dollars"), _g(c, "yes_ask", "high_dollars"), _g(c, "yes_ask", "low_dollars"), _g(c, "yes_ask", "close_dollars")])
@@ -144,6 +146,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("out_dir")
     ap.add_argument("--hours", required=True)
+    ap.add_argument("--btc-dir", required=True)
     ap.add_argument("--day", default=None)
     a = ap.parse_args(argv)
     if past_end(time.time()):
@@ -157,21 +160,35 @@ def main(argv=None):
     if reqs is None:
         print("day %s is outside the forward window %s to %s: nothing recorded" % (day, FIRST_DAY, LAST_EST_DAY)); return 0
     os.makedirs(a.out_dir, exist_ok=True)
+    os.makedirs(a.btc_dir, exist_ok=True)
     s, fails, n = Stream(), 0, 0
-    with open(os.path.join(a.out_dir, "candles.csv"), "w", newline="") as fc, open(os.path.join(a.out_dir, "coverage.csv"), "w", newline="") as fv:
-        wc, wv = csv.writer(fc), csv.writer(fv)
-        wc.writerow(ROW_COLS); wv.writerow(COVER_COLS)
+    with open(os.path.join(a.out_dir, "candles.csv"), "w", newline="") as fc, open(os.path.join(a.out_dir, "coverage.csv"), "w", newline="") as fv, \
+            open(os.path.join(a.btc_dir, "candles.csv"), "w", newline="") as bc, open(os.path.join(a.btc_dir, "coverage.csv"), "w", newline="") as bv:
+        wc, wv, wbc, wbv = csv.writer(fc), csv.writer(fv), csv.writer(bc), csv.writer(bv)
+        wc.writerow(ROW_COLS); wv.writerow(COVER_COLS); wbc.writerow(ROW_COLS); wbv.writerow(COVER_COLS)
         for r in reqs:
+            other = [t for t in r["tickers"] if not t.startswith(BTC)]
+            btc = [t for t in r["tickers"] if t.startswith(BTC)]
             if n >= MAX_REQUESTS or fails >= MAX_FAIL_RUN:
-                wv.writerow([day, r["close"], r["id"], len(r["tickers"]), "", "", "not asked", ""]); continue
+                if other:
+                    wv.writerow([day, r["close"], r["id"], len(other), "", "", "not asked", ""])
+                if btc:
+                    wbv.writerow([day, r["close"], r["id"], len(btc), "", "", "not asked", ""])
+                continue
             n += 1
             status, body, tries = s.get(url_for(r))
             rows = rows_from(day, r["close"], body) if body else []
             fails = 0 if status == 200 else fails + 1
-            for row in rows:
+            orows = [x for x in rows if not x[2].startswith(BTC)]
+            brows = [x for x in rows if x[2].startswith(BTC)]
+            for row in orows:
                 wc.writerow(row)
-            answered = len({x[2] for x in rows})
-            wv.writerow([day, r["close"], r["id"], len(r["tickers"]), answered, len(rows), status, tries])
+            for row in brows:
+                wbc.writerow(row)
+            if other:
+                wv.writerow([day, r["close"], r["id"], len(other), len({x[2] for x in orows}), len(orows), status, tries])
+            if btc:
+                wbv.writerow([day, r["close"], r["id"], len(btc), len({x[2] for x in brows}), len(brows), status, tries])
     print("day %s | requests built %d | asked %d" % (day, len(reqs), n))
     return 0
 

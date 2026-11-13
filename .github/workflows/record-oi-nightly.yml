@@ -1,6 +1,6 @@
 # Nov 13, 2026 (Idea Desk B, form 2 asked by the Head of R&D and Main). Records Kalshi's PUBLIC one minute candles with open interest (7 to 2 minutes before each 15 minute close) of the previous UTC day
 # for the 13 OICORE shadow places' markets, so each place's open interest threshold and signal can be computed. Research data only. Public data only: no key, no secret, no order, no auth header.
-# The built-in GITHUB_TOKEN pushes gzipped files to its OWN data branch `oi-data` (under oinightly/<day>/), never to main and never to quote-data.
+# The built-in GITHUB_TOKEN pushes gzipped files to its OWN data branch `oi-data` (under oinightly/<day>/ for the 13 places and oinightly-btc/<day>/ for Bitcoin alone, rule 17), never to main and never to quote-data.
 # One run a day at 00:40 UTC, plus a retry start at 06:40 UTC that exits at once if the day's folder is already on the data branch. About 96 requests a run, 1.0 s apart: about 3 to 4 billed minutes a day,
 # about 90 to 120 minutes a month. It needs the committed hours table (kalshi-scalper/workers/oicand/OI_HOURS_TABLE.json); without it the script records nothing and exits 0.
 # It stops by itself: from 2026-12-31 23:59 UTC every run exits at once (checked in the first step and in the script). Stop it sooner by deleting this file.
@@ -42,15 +42,15 @@ jobs:
         run: |
           DAY="$(date -u -d 'yesterday' +%Y-%m-%d)"
           if [ -d "data/oinightly/$DAY" ]; then echo "already recorded $DAY"; exit 0; fi
-          python3 code/scripts/record_oi_nightly.py "data/oinightly/$DAY" --hours code/kalshi-scalper/workers/oicand/OI_HOURS_TABLE.json --day "$DAY"
-          gzip -9 -f data/oinightly/$DAY/*.csv 2>/dev/null || true
+          python3 code/scripts/record_oi_nightly.py "data/oinightly/$DAY" --hours code/kalshi-scalper/workers/oicand/OI_HOURS_TABLE.json --btc-dir "data/oinightly-btc/$DAY" --day "$DAY"
+          gzip -9 -f data/oinightly/$DAY/*.csv data/oinightly-btc/$DAY/*.csv 2>/dev/null || true
       - name: Commit and push the data branch
         if: always() && steps.gate.outputs.go == 'true'
         run: |
           cd data
           git config user.name "oi-nightly-recorder"
           git config user.email "oi-nightly-recorder@users.noreply.github.com"
-          git add oinightly
+          git add oinightly oinightly-btc
           git commit -q -m "oinightly $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           for i in 1 2 3 4 5 6; do git push -q origin oi-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin oi-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s
           exit 1
