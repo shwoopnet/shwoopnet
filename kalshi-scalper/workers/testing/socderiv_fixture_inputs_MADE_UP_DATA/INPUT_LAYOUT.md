@@ -25,3 +25,5 @@ Real ticker shapes, names only: winner `KX<LG>GAME-<KEY>-<TEAM>` (two team codes
 
 ## Added Nov 13, 2026 for stages 2 and 3 (cases 17 to 21, real ticker layout, invented prices; no expected output)
 Each case holds `lists/` and `candles/` as before. They are built to the edges the audit of the measure step named: exact 4c spreads on the target quote; a target quote whose ask and bid add to exactly 1.00; total-goals strikes of 9.5, 10.5 and 11.5 on the ladder (suffixes 10, 11, 12); a candle run with one request missing (its manifest still says complete; the request is absent from its rows); a game whose two total strikes nearest 50c are equally near (mids 0.45 and 0.55). In case 20 the candle folder embeds the full job but one request has no answer.
+
+## Added (cases 22 and 23): case 22 has one league whose team-total series lists no market (the other two leagues have them), so the group's games with a derivable kickoff differ from its games with a team-total target; case 23 has total-goals quotes in sub-cent prices (bid 0.4950 / ask 0.5000 on one strike, 0.5000 / 0.5050 on the next: mids 0.4975 and 0.5025, an exact tie at 50c). No expected output is given.

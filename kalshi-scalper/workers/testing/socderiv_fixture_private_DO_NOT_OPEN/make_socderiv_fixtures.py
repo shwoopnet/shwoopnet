@@ -48,6 +48,10 @@ def game_specs(name):
     elif name == "case_19": S = {lg: mk(50, high=True) for lg in A8[:3]}                                                               # total strikes 9.5, 10.5, 11.5 on the ladder
     elif name == "case_20": S = {lg: mk(50) for lg in A8[:3]}                                                                          # an incomplete candle run (one request missing)
     elif name == "case_21": S = {lg: mk(50, tie50=True) for lg in A8[:3]}                                                              # total mids 0.45 and 0.55: a tie at 50c
+    elif name == "case_22":                                                                                                            # one league with no team-total series (denominator and "no such market" reading)
+        S = {lg: mk(50) for lg in A8[:3]}
+        for g_ in S[A8[1]]: g_["no_teamtotal"] = True
+    elif name == "case_23": S = {lg: mk(50, subcent=True) for lg in A8[:3]}                                                           # sub-cent total quotes: mids 0.4975 and 0.5025 (an exact tie at 50c)
     elif name == "case_13": S = {lg: mk(40, btts=(2, 3)) for lg in A8[:3]}                                                    # under 150 filled and over the cost line
     elif name == "case_14": S = {lg: [dict(fill=(i < 20)) for i in range(60)] for lg in A8[:3]}                           # under 150 filled and under half filled
     return S
@@ -63,7 +67,7 @@ def build_case(name, out):
         for i, g in enumerate(gl):
             ko = BASE + i * 3 * 3600 + A8.index(lg) * 600
             close = ko + g.get("close_min", 120) * 60; occ = ko + 180 * 60
-            real = name in ("case_15", "case_16", "case_17", "case_18", "case_19", "case_20", "case_21"); c1, c2 = g.get("codes", ("ARS", "LFC") if real else ("AAA", "BBB"))
+            real = name in ("case_15", "case_16", "case_17", "case_18", "case_19", "case_20", "case_21", "case_22", "case_23"); c1, c2 = g.get("codes", ("ARS", "LFC") if real else ("AAA", "BBB"))
             gk = ("26%s%02d%s%s" % (("SEP", "OCT", "NOV")[i // 28], i % 28 + 1, c1, c2)) if real else "26OCT%03dAAABBB" % i
             def M(series, sfx, **kw):
                 return dict({"ticker": "%s-%s-%s" % (series, gk, sfx), "event_ticker": "%s-%s" % (series, gk), "open_time": F(close - 86400), "close_time": F(close), "occurrence_datetime": F(occ),
@@ -72,7 +76,7 @@ def build_case(name, out):
             for n_, kk in enumerate((0.5, 1.5, 2.5, 3.5, 4.5) + ((9.5, 10.5, 11.5) if g.get("high") else ()), 1): lists["live_KX%sTOTAL" % lg]["markets"].append(M("KX%sTOTAL" % lg, str(n_) if real else "T%s" % kk, floor_strike=kk))
             if not g.get("no_btts"):
                 for sfx in (("BTTS", "BTTS2") if g.get("two_btts") else ("BTTS" if real else "YES",)): lists["live_KX%sBTTS" % lg]["markets"].append(M("KX%sBTTS" % lg, sfx, strike_type="custom"))
-            for nm in ((c1 + "2", c2 + "2") if real else ("AAA2", "BBB2")): lists["live_KX%sTEAMTOTAL" % lg]["markets"].append(M("KX%sTEAMTOTAL" % lg, nm, floor_strike=1.5))
+            for nm in (() if g.get("no_teamtotal") else ((c1 + "2", c2 + "2") if real else ("AAA2", "BBB2"))): lists["live_KX%sTEAMTOTAL" % lg]["markets"].append(M("KX%sTEAMTOTAL" % lg, nm, floor_strike=1.5))
             games.append(dict(lg=lg, gk=gk, ko=ko, g=g, lam=LAMS[(i + A8.index(lg)) % len(LAMS)]))
     held = s.HELD_OUT_FROM + 7200
     if name == "case_01":   # one held-out game (closes after the window) that must never be sampled
@@ -109,10 +113,13 @@ def build_case(name, out):
         for t, (tm, kk) in sg["teamtotals"].items(): price[t] = s.over(l1 if tm == sg["team1"] else l2, kk)
         for t, p in price.items():
             lo, hi = e.get("btts", (1, 1)) if t in sg["btts"] else (1, 1)
+            sub = None
+            if e.get("subcent") and t in sg["totals"]: sub = {2.5: (0.495, 0.500), 3.5: (0.500, 0.505)}.get(sg["totals"][t])
             shift = e.get("pert", 0) if t == near else 0
             cs = []
             for m in range(0, 13):
                 b, a = quote(p, lo, hi, shift); empty = False
+                if sub: b, a = sub
                 if e.get("empty") is not None and m < 10:
                     v = e["empty"]
                     if t in sg["btts"] and v == 0: b, a = 0.0, 1.0
@@ -130,5 +137,5 @@ def build_case(name, out):
 
 if __name__ == "__main__":
     out = sys.argv[1]
-    for n in ["case_%02d" % i for i in range(1, 22)]:
+    for n in ["case_%02d" % i for i in range(1, 24)]:
         print(n, build_case(n, out))
