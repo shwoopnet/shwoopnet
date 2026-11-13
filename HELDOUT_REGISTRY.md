@@ -1,6 +1,6 @@
 # HELDOUT_REGISTRY (Idea Desk A, Nov 13, 2026; for the Head of R&D, standing rule 17)
 
-**Copy kept on rnd-queue by the Head of R&D (07:02Z Nov 13, 2026) from claude/idea-desk-a commit 1a59dae0. Desk A maintains the source; releases and CLOSED UNREAD marks are made only by dated lines in RND_QUEUE.md, which governs where the two differ. Every card of the old research team is frozen at that branch's tip 79724f00 (Nov 12, 2026 14:49Z): a change to any of them after another card has read shared windows is "not blind" (standing rule 17, frozen-read clause). [research]**
+**Copy kept on rnd-queue by the Head of R&D (07:16Z Nov 13, 2026) from claude/idea-desk-a commit 5f38d189 (first copy: 1a59dae0). Desk A maintains the source; the dated correction block at the end overrides the rows above it. Releases and CLOSED UNREAD marks are made only by dated lines in RND_QUEUE.md, which governs where the two differ. Every card of the old research team is frozen at that branch's tip 79724f00 (Nov 12, 2026 14:49Z): a change to any of them after another card has read shared windows is "not blind" (standing rule 17, frozen-read clause). Nobody messages the old research session. [research]**
 A LOOKUP of every research card found that ever held out data, froze a cut, or scheduled a forward read on a Kalshi series, across the branches claude/epic-ptolemy-0amjd9 (the whole tree: workers/*REGISTRATION*, *FROZEN*, *HELDOUT*, *AMENDMENT*, FORWARD_CALENDAR.md, src/scalper/*_fwd.py), claude/refine-live, claude/idea-desk-a, -b, -c, claude/testing-desk, claude/forensics-desk, claude/history-miner, main and rnd-queue. **It is a registry, not a ruling: it releases nothing and changes no card.** Names, constants and dates only: no price, result or scorer output was opened to write it (result and data files were checked for EXISTENCE by name only).
 
 ## What it cannot tell you (read this first)
@@ -692,3 +692,12 @@ The date is the first ISO date text on or after 2026-11-01 in that row's STATE a
 | KXYEARLOW | WXOTHER1 | none found |
 | KXYOUTUBESUBS | ENTER1 | none found |
 | KXZEC15M | LAG15, OICOREX1, QSTALE1, TSLM1, XCRY1, XOI1 | 2026-11-22 |
+
+## Dated corrections (Nov 13, 2026, Desk A; the table above is unchanged, these lines override its rows)
+- PERPBIN1: OPEN, held-out from closes 2026-11-14T00:00:00Z (Nov 5 to 13 rows printed apart, never pooled).
+- CFRTI-K and CFRTI-K-TX: held-out from 2026-11-14T00:00:00Z (not frozen; Nov 9 to 13 rows labelled "not blind", never pooled).
+- RECORD1: READ (2026-11-03). RECORD1B is the unread one and is void by Forensics' audit.
+- USWEEP2, SOCCER1, SOCCERELO1, FAMSPORTS: RELEASED (rnd-queue 0f7bfccb).
+- MM1, MAKER5, L1Q1, GF1, GF2, MKTTIME1-F, MUT1, GEN1, GEN1S, GEN2: CLOSED UNREAD.
+- COUNT2: holds out tornado counts only; its three politics series are listed as not runnable.
+- GEN6 to GEN11: the 2026-10-30 date is a freeze/run date. NEWH9, NEWH12, NEWH13: it is a data cut (holdout closes to 2026-10-30 00:00 UTC, exclusive).
