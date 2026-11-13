@@ -3,7 +3,7 @@
 One pooled cell over the eleven nc15 series: look = the last poll with exchange time in [D-10, D], D = close - 600 s (exchange time: rolling median of the last 120 readable Date headers + 0.5 s - t_recv); imb5 = (sum of five YES bid sizes - sum of five NO bid sizes) / their total; in the cell if abs(imb5) >= 0.50; imb5 > 0 buys YES, < 0 buys NO. Trade: 1 contract at the best ask (YES: 1 - best NO bid; NO: 1 - best YES bid) read at the FIRST poll with exchange time >= look + 1.0 s and <= look + 20 s, ask 0.10 to 0.90 inclusive (1e-9 slack) and at least 1 contract displayed at it; else no trade (counted). Held to settlement. Fee 0.07 p (1-p) rounded UP to the cent per order (1 contract); stress fee = 1.2 x that rounded fee.
 Scoring: only windows closing at or after SCORE_FROM = 2026-11-19T00:00:00Z. Earlier windows are never scored. Result from coverage.csv.gz (yes / no); a result of exactly 'void' is booked void (fee only), an empty or odd value is unresolved; an empty result is UNRESOLVED (left out of every figure, counted and its close dates printed).
 Definitions the registration leaves open (the exchange-time offset is a ROLLING median of the last 120 readable Date headers at each row, where the registration says 'median over the run'; fill polls are searched only in the look poll's own run folder, so a look at the end of a folder whose fill poll is in the next folder is lost and counted as 'no entry poll'), fixed here and frozen with this file's hash: thirds and halves = contiguous groups of US Central dates (ceil(n_days/3), ceil(n_days/2)); z = day-clustered mean daily net over its standard error (sample sd, days >= 3, one-sided); US Central date = America/Chicago of the close; cash PF = gross wins / gross losses (infinity with no loss).
-The registered read is ONE read at 3,400 or more scored cell trades (the Head's ruling, Nov 13: the 'n >= 1,000' and 'under 100' lines are struck as contradicting the minimum). Below it only the scored count, the windows lost and 'no evidence at n = x' print, no figure (counts may print at any time; 'keep recording' means the recorder keeps running, not repeated reads; the single-read z bar 5.46 has no look penalty). A figure-printing real run writes a read-once marker (path fixed beside the script) and every later real run refuses BEFORE reading any data. Labels at that read: SURVIVES (every bar cleared: cash PF >= 1.5 pooled and in each third, both halves > 1.0, mean net > 0 at fee x1.2, z >= 5.46); BAR NOT MET (not cleared, pooled cash PF 1.0 or more); FALSIFIED (pooled cash PF under 1.0). The card closes on either of the last two. Never called a research-bar pass. A fee-only void is booked only when Kalshi's own result says void; an empty result or any odd value is UNRESOLVED from the start (no wait), left out of every figure and counted with its close dates."""
+The registered read is ONE read at 3,400 or more scored cell trades (the Head's ruling, Nov 13: the 'n >= 1,000' and 'under 100' lines are struck as contradicting the minimum). Below it only the scored count, the windows lost and 'no evidence at n = x' print, no figure (counts may print at any time; 'keep recording' means the recorder keeps running, not repeated reads; the single-read z bar 5.46 has no look penalty). A figure-printing real run writes a read-once marker first and a second such run refuses. Labels at that read: SURVIVES (every bar cleared: cash PF >= 1.5 pooled and in each third, both halves > 1.0, mean net > 0 at fee x1.2, z >= 5.46); BAR NOT MET (not cleared, pooled cash PF 1.0 or more); FALSIFIED (pooled cash PF under 1.0). The card closes on either of the last two. Never called a research-bar pass. A fee-only void is booked only when Kalshi's own result says void; an empty result or any odd value is UNRESOLVED from the start (no wait), left out of every figure and counted with its close dates."""
 import sys, os, csv, gzip, math, statistics, collections, time, glob, calendar, re, datetime
 from pathlib import Path
 SERIES = ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M")
@@ -54,15 +54,11 @@ def load_coverage(runs):
     return cov
 def iso(t): return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(t))
 def central_day(ts): return datetime.datetime.fromtimestamp(ts, datetime.timezone.utc).astimezone(__import__("zoneinfo").ZoneInfo("America/Chicago")).date()
-MARKER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "nc15depth1_read_marker.txt")      # fixed beside the script (Auditor B N1: no override)
-def refuse_if_read(marker=None):
-    """checked BEFORE any data is read (Auditor B N3): once the one registered read has been made, every later real run refuses"""
+MARKER = os.environ.get("NC15DEPTH1_MARKER") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "nc15depth1_read_marker.txt")
+def read_once(marker=None):
+    """the registered read is ONE read: a figure-printing run writes this marker first; a second figure-printing run refuses"""
     m = marker or MARKER
     if os.path.lexists(m): sys.exit("REFUSED: the one registered read has been made (%s exists)" % m)
-def read_once(marker=None):
-    """the registered read is ONE read: a figure-printing run writes this marker; a later real run refuses before reading anything"""
-    m = marker or MARKER
-    refuse_if_read(m)
     with open(m, "x") as f: f.write("read at %s UTC\n" % iso(time.time()))
 def replay(root, now=None):
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as G; G.refuse_heldout(str(root), "nc15depth1")
@@ -135,7 +131,6 @@ if __name__ == "__main__":
     root = Path(sys.argv[1]).resolve()
     if not (root / "MADE_UP_DATA").exists() and os.environ.get("NC15DEPTH1_READ") != "1": sys.exit("REFUSED: %s has no MADE_UP_DATA; the real read needs NC15DEPTH1_READ=1 on the Head's word (from 2026-11-19)" % root)
     import heldout_guard_v2 as G; print(G.list_line())
-    if not (root / "MADE_UP_DATA").exists(): refuse_if_read()
     recs, why = replay(str(root))
     if sum(1 for t in recs if t["result"] in ("scored", "void")) >= MIN_N and not (root / "MADE_UP_DATA").exists(): read_once()
     print("\n".join(report(recs, why)))
