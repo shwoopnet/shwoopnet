@@ -1,0 +1,58 @@
+{
+ "job_id": "NEWSERIES_LISTS",
+ "owner": "MAIN",
+ "status": "active",
+ "registration": "kalshi-scalper/workers/idea_desk_c/NEWSERIES_CENSUS_PLAN.md",
+ "purpose": "New-series census stage 1 (Idea Desk C, owner MAIN): lists of OPEN and UNOPENED non-combo markets created since 2026-10-14, for series tickers, titles and created, open and close times only. No price field is read and no settled market is requested.",
+ "heldout": "Only open and unopened markets are listed (created on or after 2026-10-14); no settled market and no result is in any answer. The reader keeps ticker, event_ticker, series prefix, title, created_time, open_time and close_time, and drops every price, size and volume field unread. No card's held-out reads open markets' outcomes, since none exist yet.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "status",
+    "limit",
+    "cursor",
+    "min_created_ts",
+    "mve_filter"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "max_requests": 110,
+ "notes": "Two lists, newest created first: status=open and status=unopened, min_created_ts 2026-10-14T00:00:00Z (1791936000), mve_filter=exclude, 1,000 a page, up to 50 pages each, the runner's page limit (about 100,000 markets at most; the count is unknown, so the run stops cleanly at the page cap and reports truncation). Cap 110 (10 spare for 429 retries).",
+ "requests": [
+  {
+   "id": "created_open",
+   "path": "/markets",
+   "params": {
+    "status": "open",
+    "limit": 1000,
+    "min_created_ts": 1791936000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 50
+  },
+  {
+   "id": "created_unopened",
+   "path": "/markets",
+   "params": {
+    "status": "unopened",
+    "limit": 1000,
+    "min_created_ts": 1791936000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 50
+  }
+ ]
+}
