@@ -51,4 +51,11 @@ assert T.score(v, W)["skips"] == {"no_strike": 1}
 # 9. A15: a calibration exactly 2 days before S is under 2 days at the decision (S minus 15 min): day 0 to 1.
 v = synth("2026-11-13T00:00:00Z", 1, 1, 2)
 assert T.score(v, W)["held_calib_day0_1"]["n"] == 1
-print("tempblend scorer checks: 9 scenarios and the fixture passed")
+# 10. A7, Forensics' edge row T03: mid 69.9, distances 0.4 and 0.4 on paper but not in floating point; the LOWER K wins.
+v = synth("2026-09-14T00:00:00Z", 1, 1, 5)
+v[0]["v"], v[0]["stations"][0]["temp_f"] = 70.7, 69.1
+v[0]["strikes"] = [{"K": 69.5, "yes_bid": 0.43, "yes_ask": 0.45, "result": "yes"},
+                   {"K": 70.3, "yes_bid": 0.53, "yes_ask": 0.55, "result": "no"}]
+b, why = T.decide(v[0], W)
+assert why is None and b["K"] == 69.5 and b["ask"] == 0.45, (b, why)
+print("tempblend scorer checks: 10 scenarios and the fixture passed")

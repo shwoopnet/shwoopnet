@@ -115,7 +115,7 @@ def decide(row, watched):
         ask = ya if side == "yes" else round(1 - yb, 6)
         if not (ASK_LO - EPS <= ask <= ASK_HI + EPS) or ya - yb > SPREAD_MAX + EPS:
             continue
-        cands.append((abs(K - mid), K, ask, k["result"]))
+        cands.append((round(abs(K - mid), 9), K, ask, k["result"]))   # A7: equal within 1e-9 goes to the lower K
     if not cands:
         return None, "no_strike"
     cands.sort()
