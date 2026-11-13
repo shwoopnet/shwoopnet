@@ -4,6 +4,10 @@ HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; line
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-13 09:57 AM CT (15:57Z): OICORE read extended to 100 fills; slip-on / touch-priced split
+
+Main (Nov 13): extension to 100 fills (about Nov 19) is the registered next step. Change: once PR 895 is live (owner's merge, then deploy-sizing), every fill is tagged slip-on (placed before the deploy time Main sends) or touch-priced (after), and the 100-fill verdict is read on the whole record AND on the touch-priced fills separately. The deploy time is not known yet; until it arrives all fills are slip-on. Registered before the data; no figures.
+
 ## 2026-11-13 09:57 AM CT (15:57Z): S-LIM1-LIVE CLOSED (reverted on the owner's word); touch-priced before/after read planned
 
 Owner (via Main, Nov 13): switch OICORE's limit slip off; PR 895 sets SLOT_LIMIT_SLIP empty so the limit is the touch, live after the owner's typed merge and the next deploy-sizing run. S-LIM1-LIVE tracker: CLOSED, reverted on the owner's word; its end stamp is the deploy time Main will send (not yet known, so no review of tagged orders is run on or after it). PLAN, registered before any data: a before/after read of fill rate and result on OICORE orders placed after the deploy (new fills only, touch priced), against the slip-priced orders before it, same window length; information first, no promote verb, no bar changed. Live kills unchanged: streak 24 and drawdown stop 50 dollars. The after block needs enough fills to read (will say NOT_ENOUGH_DATA below 40 fills, about the sample the Nov 3 review used). Figures to Main by message only.
