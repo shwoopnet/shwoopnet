@@ -1,4 +1,3 @@
-import os
 """Synthetic tests for scorekit.py (made-up data only; no Kalshi, no real file opened). Run: python3 -W ignore test_scorekit.py"""
 import gzip, json, os, random, tempfile
 import scorekit as k
@@ -129,6 +128,9 @@ with tempfile.TemporaryDirectory() as d4:
 # ---- HELDOUT_PULL_RUNS.md (Head, Nov 13): a landed run listed there is refused by folder name, as typed and after a link; an unreadable list refuses everything
 import tempfile as _tf
 _run = sorted(k.listed_heldout_runs())[0]
+for _bad in ('/tmp/heldout_x', '/tmp/HeldOut_y'):
+    try: k.guard(_bad); raise AssertionError('lower-case held-out folder not refused')
+    except SystemExit as _e: assert 'HELDOUT_' in str(_e), _e
 with _tf.TemporaryDirectory() as _d:
     _p = os.path.join(_d, _run); os.makedirs(_p)
     for _call in (lambda: k.guard(_p), lambda: k.refuse_heldout(_p, allow=True), lambda: list(k.iter_answers(_p))):
