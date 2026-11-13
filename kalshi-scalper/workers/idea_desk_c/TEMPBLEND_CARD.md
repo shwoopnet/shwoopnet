@@ -121,3 +121,8 @@ Auditor B read the scorer (`tempblend/tempblend_score.py` at 644770d9) line by l
 - **Q1, z is clustered by day:** the z on the bar is the day-clustered z, like the other cards. The unit is the US Central calendar date of S. z = (mean of the daily net) / (standard deviation of the daily net / square root of the number of days).
 - **Q2, look-ahead on Source A:** a Source A reading whose obs_time is after t is a look-ahead and is skipped, named "obs_after_point". Otherwise A3 stands.
 - **Q3, the row builder is separate:** the file that makes the scorer's rows (the latest eligible index point, the calibration effective time at the decision, finalized results, the city-to-station map) is written only after probe A4 shows the real layout. It gets its own audit and a second build before any read.
+
+**Clarification (Nov 13, 2026; not a rule change, allowed by the Head of R&D; it states what the frozen scorer `tempblend/tempblend_score.py` sha256 ff7fa879 does):**
+- **B1:** the three windows of "PF 1.5 in each of three windows" are development first half (S before 2026-10-09), development second half (S from 2026-10-09 to before 2026-11-05) and the held-out (line 200).
+- **B2:** the z of 5.46 is computed on the held-out bets only (lines 200 and 229).
+- **B3:** the day-clustered z uses the SAMPLE standard deviation (divisor D minus 1) of the daily net. Only days with at least one bet count; a day with no bet is not a zero day. With fewer than 2 days, or a standard deviation of zero, z is not computed and the bar fails (lines 168 to 174, and `h["z"] or 0` at line 200).
