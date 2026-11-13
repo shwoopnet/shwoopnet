@@ -21,6 +21,5 @@ information only, fills on a present candle: n 0
 information only, optimistic, same-candle fill (every decision booked at the limit, no block): n 600, wins 328, cash PF 1.11, net +16.00, mean +0.0267, event-clustered z +1.31
 information only, voids paid at their settlement value instead: n 600, wins 328, cash PF 1.11, net +16.00, mean +0.0267, event-clustered z +1.31
 information only, price-matched baseline (gap under 2c, same steps, same-candle basis): n 0
-family lines are information only when the pooled read fails
 VERDICT: pooled: FALSIFIED
 A survival is a candidate for a wheel shadow place only. The shared deflated bar (one-sided z 5.46) is not claimed.
