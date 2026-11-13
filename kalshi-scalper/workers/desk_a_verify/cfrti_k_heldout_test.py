@@ -22,8 +22,9 @@ tr, _why = H.trades_of(mk, K.load_binary(cands), K.load_perp(perp)); assert len(
 # 2. the label rule
 def T(c): return dict(pnl=c, win=1 if c > 0 else 0, day=0, close=0)
 assert H.label([T(0.5)] * 29) == "NOT_ENOUGH_DATA"                              # n under 30: never a call
-assert H.label([T(0.1)] * 10 + [T(-0.2)] * 20) == "FAIL"                      # n 30, PF under 1.0: FAIL (registration: falsified at about 30)
-assert H.label([T(0.1)] * 10 + [T(-0.1)] * 39) == "FAIL"                      # n 49, PF under 1.0
+assert H.label([T(0.1)] * 10 + [T(-0.2)] * 20) == "NOT_ENOUGH_DATA"           # n 30, PF under 1.0: still under 50, so no call (the card's latest dated line: every label needs n >= 50)
+assert H.label([T(0.1)] * 10 + [T(-0.1)] * 39) == "NOT_ENOUGH_DATA"           # n 49, PF under 1.0: no call
+assert H.label([T(0.1)] * 10 + [T(-0.1)] * 40) == "FAIL"                      # n 50, PF under 1.0: FAIL
 assert H.label([T(0.3)] * 15 + [T(-0.2)] * 15) == "NOT_ENOUGH_DATA"           # n 30 to 49 and PF 1.5: no call, no marker
 assert H.label([T(0.2)] * 20 + [T(-0.2)] * 20) == "NOT_ENOUGH_DATA"           # n 40 and PF exactly 1.0: not under 1.0, so no call
 assert H.label([T(0.5)] * 49) == "NOT_ENOUGH_DATA"                            # n 49, all wins: not a fail, no call
@@ -60,7 +61,7 @@ try:
     with contextlib.redirect_stdout(io.StringIO()): H.run(lists, cands, perp, now=H.READ_NOT_BEFORE + 9, marker=mk_)
     raise AssertionError("second read not refused")
 except SystemExit as e: assert "has been made" in str(e)
-# 5. n 30 to 49: FAIL writes the marker (final) and a log line is NOT written; otherwise NOT_ENOUGH_DATA, no marker, and the run is LOGGED with date and n
+# 5. n 30 to 49: always NOT_ENOUGH_DATA, no marker, and the run is LOGGED with date and n
 fake_fail = [dict(pnl=-0.2 if i % 3 else 0.1, win=0, day=i % 5, close=H_MON + i) for i in range(35)]
 fake_ok = [dict(pnl=0.3 if i % 2 else -0.2, win=1, day=i % 5, close=H_MON + i) for i in range(35)]
 orig = H.trades_of; lg = os.path.join(tempfile.mkdtemp(), "log.txt")
@@ -68,12 +69,12 @@ try:
     H.trades_of = lambda m, b, p: (fake_fail, __import__("collections").Counter())
     mk1 = os.path.join(tempfile.mkdtemp(), "m1.txt")
     with contextlib.redirect_stdout(io.StringIO()) as _b1: H.run(lists, cands, perp, now=H.READ_NOT_BEFORE + 3, marker=mk1, log=lg)
-    assert os.path.exists(mk1) and "LABEL: FAIL" in _b1.getvalue(), _b1.getvalue()
+    assert not os.path.exists(mk1) and "NOT_ENOUGH_DATA, n trades = 35" in _b1.getvalue(), _b1.getvalue()      # n 35, PF under 1.0: no call, no marker
     H.trades_of = lambda m, b, p: (fake_ok, __import__("collections").Counter())
     mk2 = os.path.join(tempfile.mkdtemp(), "m2.txt")
     with contextlib.redirect_stdout(io.StringIO()) as _b2: H.run(lists, cands, perp, now=H.READ_NOT_BEFORE + 4, marker=mk2, log=lg)
     assert not os.path.exists(mk2) and "NOT_ENOUGH_DATA, n trades = 35" in _b2.getvalue() and "cash PF" not in _b2.getvalue()
-    rows = open(lg).read().strip().split("\n"); assert len(rows) == 1 and "n=35" in rows[0] and "2026-11-20" in rows[0], rows      # only the run that wrote no marker is logged
+    rows = open(lg).read().strip().split("\n"); assert len(rows) == 2 and all("n=35" in r for r in rows) and "2026-11-20" in rows[0], rows      # only the run that wrote no marker is logged
 finally: H.trades_of = orig
 print("CFRTI-K HELD-OUT TEST OK (filter from Nov 14, label rule, under 50 prints only the count and spends nothing, refuses before Nov 20, marker, second run refused)")
 print(out.strip())
