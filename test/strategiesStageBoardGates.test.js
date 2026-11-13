@@ -111,10 +111,10 @@ gates.ST11 = () => {
   inf.forEach((m) => assert.ok(/--lp-sync/.test(m[2]), 'synced: ' + m[1].trim()));
   assert.ok(!/\.rw\.open[^{]*\{[^}]*animation:\s*rw/.test(css), 'an open row does not replay its fill on every redraw');
 };
-// ST12: an approved seat with no order yet is not trading real money: it waits in Shadow, never Live; the same seat with an order is Live as a Trial.
+// ST12: a deployed seat with no order yet is a Live Trial at 0 of 90 (Nov 13, 2026: CFRTIK went live; the WAITING row in Shadow was for a seat whose deploy was pending), and the same seat with orders is still a Trial.
 gates.ST12 = () => {
   const wait = B.kalshiBoardHtml(model([card('CFRTIK', 'probation', { orders: 0 })]), esc, money);
-  assert.ok(/data-row="CFRTIK"/.test(panel(wait, 'shadow')) && !/data-row="CFRTIK"/.test(panel(wait, 'live')) && />WAITING</.test(panel(wait, 'shadow')), 'waiting in Shadow');
+  assert.ok(/data-row="CFRTIK"/.test(panel(wait, 'live')) && !/data-row="CFRTIK"/.test(panel(wait, 'shadow')) && /Trial \d+ of 90/.test(panel(wait, 'live')) && !/WAITING/.test(wait), 'a deployed seat with no order is Live as a Trial, never WAITING in Shadow');
   const run = B.kalshiBoardHtml(model([card('CFRTIK', 'probation', { orders: 3 })]), esc, money);
   assert.ok(/data-row="CFRTIK"/.test(panel(run, 'live')) && /Trial \d+ of 90/.test(panel(run, 'live')), 'trading: Live as a Trial');
 };
