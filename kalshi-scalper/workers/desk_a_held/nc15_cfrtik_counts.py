@@ -1,6 +1,6 @@
 """CFRTI-K on the NC15 markets: COUNTS ONLY (Desk A, Nov 13 2026). Book columns only; no result, trade or outcome column is read; no perp data (so the model edge is NOT counted here).
   python3 -I nc15_cfrtik_counts.py <folder holding nc15/>
-Per series: windows seen, windows with a signal poll (the last poll at or before close minus 120 s, at most 10 s earlier), and the cheap side (YES ask 0.05 to 0.30, else NO ask 0.05 to 0.30) with spread 0.03 or less ('cheap-and-tight')."""
+Per series: windows seen, windows with a signal poll (the FIRST poll at or after close minus 110 s, at most 10 s later), and the cheap side (YES ask 0.05 to 0.30, else NO ask 0.05 to 0.30) with spread 0.03 or less ('cheap-and-tight')."""
 import sys, glob, gzip, csv, statistics, collections, datetime
 from email.utils import parsedate_to_datetime
 SC = ["KXSILVER15M","KXCOPPER15M","KXWTI15M","KXHYPE15M","KXBNB15M"]
@@ -25,8 +25,7 @@ def main(root):
                 o = [x for x in offs[max(0, i - 119): i + 1] if x is not None]
                 if not o: continue
                 t = int(rows[i]["t_recv_ms"]) / 1000 + statistics.median(o)
-                if D - 10 <= t <= D: sig = i
-                if t > D: break
+                if D + 10 <= t <= D + 20: sig = i; break                  # Head's ruling Nov 13: the decision poll is the FIRST poll at or after D + 10 s (a stated allowance for the perp candle to be published), at most 10 s later
             if sig is None: continue
             p = rows[sig]; st[ser]["signal poll"] += 1
             yb, nb = f(p["yes_bid_px_1"]), f(p["no_bid_px_1"])
