@@ -61,3 +61,21 @@
    - **Favourite-late:** excluded by the 20c to 80c band.
    - **Not** a lock, market making, spot lead (opposite direction) or a 15 minute model sweep.
    - The Verification Analyst decides whether "15 minute crypto plus a new outside feed" escapes the closed 15 minute crypto rows.
+
+## Amendment 1 (Nov 13, 2026, before any data): LIQREV is the OKX recorder's own question (OKXLIQ1)
+
+- **Naming.** The OKX recorder was built to ask "does a liquidation cascade move Bitcoin's 15 minute market", and nobody registered that question. The Head of R&D asked for it as a card named OKXLIQ1. This card is that registration. OKXLIQ1 and LIQREV are one card, one try; the name used in the registry is LIQREV (OKXLIQ1).
+- **Why it is not the closed spot-lead family:**
+  - Spot-lead (W-SPOTLEAD1 and its relatives) uses the index or exchange spot PRICE and bets that Kalshi follows it.
+  - This card uses a different field: forced-liquidation FILLS on a derivatives venue, which no closed test read. It bets that part of the spot move REVERSES, the opposite direction.
+  - A move with no liquidations never triggers it.
+- **Why it is not the closed 15 minute crypto families:**
+  - The closed rows are Kalshi's own tape flow (FLOW1, TAPEFLOW1, RESIL1), and cheap-side price, time and regime grammars on the same series "without a new data source" (GEN12, GEN13, LEADLAG1 and the rest).
+  - OKX liquidations are a new outside data source. The rule is one pre-stated trigger, not a sweep, and it buys the mid band, not the cheap side.
+  - What it shares with them is only the market: KXBTC15M at 12 to 3 minutes before the close.
+- **Read timing (the Head's ruling):**
+  - forward only;
+  - the development read is on or after 2026-11-30;
+  - **the held-out read is on or after 2027-01-01**, after the OKX recorder stops on 2026-12-31, on the Head's written go.
+  - The held-out window stays closes 2026-11-30 to before 2026-12-16, a date constant, because R6's Bitcoin book ends on 2026-12-15. Days from Dec 16 to Dec 31 have OKX rows but no R6 book, so they are not used.
+- **H is not computed** until the Verification Analyst has scored this card and Auditor B has checked the text (the Head, Nov 13, 18:56Z). Then H is computed from liquidation sizes only, as written above.
