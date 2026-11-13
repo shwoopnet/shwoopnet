@@ -51,3 +51,6 @@ The OICORE-ETH line above said R6 runs "to 2026-12-31". Wrong: the R6 extension 
 
 ## Dated correction 2 (Nov 13, 2026, Desk A, after the Head's 21:21Z check of `scripts/record_15m_book.py` on main)
 My correction above is WITHDRAWN: R6 records Bitcoin, Ethereum and gold to 2026-12-31 23:59Z (only XRP stops at 2026-11-13 23:59Z), so the ETH line was right as first written. **OICORE-XRP is marked "no log source"** (no book after 2026-11-13 23:59Z) and is withdrawn; the list is twelve places with XRP out. The open interest source for every place is the nightly candle pull (Main's choice (b)); the bot's P3 skip rows are not a source.
+
+## Dated line (Nov 13, 2026, Desk A, at the Head's 21:23Z order, commit time of this line)
+Label fix: the "Dated correction (Nov 13, 2026, Desk A, 21:35Z)" above is labelled 21:35Z but was committed at 21:22:28Z (commit e4ac0c59); it is WITHDRAWN (see correction 2). Ethereum's R6 book runs to 2026-12-31 23:59Z (`ETH_END_UTC`, changed Nov 12); Bitcoin and gold to the same date; only XRP stopped 2026-11-13 23:59Z. **OICORE-XRP is withdrawn by source** (R6 is not extended for a version place).
