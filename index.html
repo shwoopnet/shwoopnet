@@ -959,6 +959,12 @@
   .sp-b-ok, .sp-b-live{ border-color:var(--paper); } .sp-b-warn{ border-color:var(--paper); border-style:dashed; } .sp-b-idle, .sp-b-deck{ color:var(--muted); } .sp-b-hot{ background:var(--paper); color:var(--ink,#000); border-color:var(--paper); } .sp-b-prob{ border-color:var(--muted); } .sp-b-off{ border-style:dashed; color:var(--muted); }
   .sp-rgrp{ margin:10px 0 0; } .sp-rgrp > summary{ display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:44px; padding:0 14px; border:1px solid var(--border); border-radius:12px; cursor:pointer; font-weight:700; text-transform:capitalize; list-style:none; } .sp-rgrp > summary::-webkit-details-marker{ display:none; } .sp-rgn{ color:var(--muted); font-variant-numeric:tabular-nums; } .sp-rgrp[open] > summary{ border-bottom-left-radius:0; border-bottom-right-radius:0; } .sp-rgrp > .sp-rlist{ border-top:0; border-top-left-radius:0; border-top-right-radius:0; }
   .sp-detsm{ margin-top:0; align-self:center; padding:4px 12px; min-height:40px; }
+  /* The Wheel view (Nov 13, 2026): same tokens as the stage board, black and white, no sideways scroll. */
+  .wh{ margin:14px 0 0; border:1px solid var(--border); border-radius:16px; background:var(--panel); padding:14px; min-width:0; }
+  .wh-hd{ display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; margin:0 0 10px; } .wh-hd b{ font-size:15px; } .wh-lab{ font-size:10.5px; font-weight:700; letter-spacing:.06em; border:1px solid var(--paper); border-radius:999px; padding:2px 9px; text-transform:uppercase; }
+  .wh-counts{ display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:8px; margin:0 0 8px; } .wh-b{ border:1px solid var(--border); border-radius:12px; padding:8px 12px; min-width:0; } .wh-b b{ display:block; font-size:20px; font-variant-numeric:tabular-nums; } .wh-b span{ font-size:11px; color:var(--muted); }
+  .wh-list{ margin:8px 0 0; } .wh-p summary{ gap:8px; } .wh-p summary .wh-n{ flex:1; min-width:0; overflow-wrap:anywhere; } .wh-p summary .sp-badge{ white-space:normal; text-align:right; }
+  .wh-body{ padding:4px 14px 12px; display:grid; gap:6px; min-width:0; } .wh-m{ display:flex; flex-wrap:wrap; gap:4px 14px; font-size:12px; color:var(--muted); } .wh-m b{ color:var(--paper); } .wh-r{ font-size:12.5px; overflow-wrap:anywhere; } .wh-r b{ font-weight:700; }
   .sp-rlist{ list-style:none; margin:0; padding:0; border:1px solid var(--border); border-radius:12px; }
   .sp-rrow{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 12px; align-items:center; padding:11px 14px; border-top:1px solid var(--border); font-size:14px; line-height:1.3; min-width:0; } .sp-rrow:first-child{ border-top:0; }
   .sp-rwho{ display:flex; flex-direction:column; gap:2px; min-width:0; } .sp-rname{ font-weight:700; font-size:15px; } .sp-rnote{ color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
@@ -1826,6 +1832,7 @@
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
                   <li>Process (inert): the wheel's live wiring is built with no seat in it: a frozen empty seat list, the seat validator (3 contract probation, at most 5 seats, minus $18 net floor, no favourites at 88c or above), the caps, the shard check and the live-against-shadow check. Nothing imports it, so nothing about the bot changes and no seat can place an order.</li>
+                  <li>Strategies page: a Wheel block under the stage board lists every rotating (unproven) place with its status, its kill and return rules and how far it is from the entry bar; the seat boxes read 0 because no seat is live. Page only; nothing trades.</li>
                   <li>Research: two kalshi-pull job files for the Fed word-mention idea (FOMCTEXT) are on main and nothing has run: FOMCTEXT_HIST_A (11 development press conference events, Jan 2025 to Apr 2026, 22 pages at most) and FOMCTEXT_EVENTS (four mention series listed with no markets, 12 pages at most). Job files and tests only.</li>
                   <li>Research: two kalshi-pull job files join main and nothing has run: POLGAPH_LISTS_NOV4 (63 politics series, settled lists closing Sep 12 to Nov 4 only, replacing the run that held out material) and HOURLYTEMP_CANDLES (129 batched one minute candle requests for the four hourly temperature series, Nov 5 to 11). Seven landed jobs also got a corrected held-out line, text only; their landed runs are unchanged.</li>
                   <li>Research (docs only): one landed lists run that turned out to hold held-out markets is now listed in a small held-out runs file instead of being moved; its development window was cut back to Nov 4.</li>
@@ -4623,8 +4630,8 @@ kalshiStatusTick();
   function kalshiRegistrySplit(list, shadowIds, retiredNames){
     var low = function(t){ return String(t).toLowerCase(); }, have = retiredNames.map(low);
     return {
-      pipeline: (list || []).filter(function(x){ return ['Idea', 'Shadow', 'Paper', 'Probe'].indexOf(x.stage) >= 0 && shadowIds.indexOf(x.id) < 0; }),
-      retired: (list || []).filter(function(x){ return x.stage === 'Retired' && have.indexOf(low(x.name)) < 0 && have.indexOf(low(x.id)) < 0; })
+      pipeline: (list || []).filter(function(x){ return String(x.id).indexOf('WH-') !== 0 && ['Idea', 'Shadow', 'Paper', 'Probe'].indexOf(x.stage) >= 0 && shadowIds.indexOf(x.id) < 0; }),
+      retired: (list || []).filter(function(x){ return String(x.id).indexOf('WH-') !== 0 && x.stage === 'Retired' && have.indexOf(low(x.name)) < 0 && have.indexOf(low(x.id)) < 0; })
     };
   }
   // The popup body. data comes from the page's own private reads when it has any ({ n, spark }); the file holds no figure, so a row with no data says so instead of drawing one. Room left is a count toward a target written in the file (roomTarget, in words in roomWhat).
@@ -4724,6 +4731,50 @@ kalshiStatusTick();
       if(isFinite(t) && d >= 0 && d <= 30 && (!best || t > best.t)){ best = { id: x.id, name: x.name, t: t, days: d }; }
     });
     return best;
+  }
+  // ---- The Wheel view (Nov 13, 2026, rotation lane piece F). The registry's WH- rows (generated from the Head of R&D's admit list, docs/WHEEL_ADMIT_LIST.md) drawn as one compact block under the stage board. Registry and page reads only: no new request. A signal count is shown only when the registry row states one (x.n); otherwise it says the count is read from the private log. No profit factor is drawn for a wheel place: the page computes none for them. The seat boxes are fixed text: no seat is live and each seat needs the owner's own popup (docs/ROTATION_LANE.md sections 5 and 5a). ----
+  var KAL_WHEEL_SEATS = { probation: 0, probationMax: 5, full: 0 };
+  function kalshiWheelRows(list){ return (list || []).filter(function(x){ return x && typeof x.id === 'string' && x.id.indexOf('WH-') === 0; }); }
+  // One status word for a place, from its stage and the registry's own read text. Pure.
+  function kalshiWheelStatus(x){
+    if(x.stage === 'Retired'){ return { key: 'retired', text: 'Retired with cause' }; }
+    var t = String(x.nextReadText || '');
+    if(/^counting\b/i.test(t)){ return { key: 'counting', text: 'Counting' }; }
+    if(/mute|waiting|archive|no log source|recorder/i.test(t)){ return { key: 'waiting', text: 'Waiting on the recorder' }; }
+    return { key: 'soon', text: 'Collecting soon' };
+  }
+  // Whole days from a YYYY-MM-DD start to now, 0 to 7; null when there is no readable start. Pure.
+  function kalshiWheelDay(startDate, now){
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(startDate || '')); if(!m){ return null; }
+    var t = Date.UTC(+m[1], +m[2] - 1, +m[3]); if(!isFinite(t) || !isFinite(now)){ return null; }
+    return Math.max(0, Math.min(7, Math.floor((now - t) / 86400000)));
+  }
+  function kalshiWheelHtml(model, esc){
+    var rows = kalshiWheelRows(model.registryList), now = model.now || 0, openSet = model.open || {};
+    var head = '<div class="wh-hd"><b>The wheel</b><span class="wh-lab">Rotating (unproven)</span></div>';
+    if(!rows.length){ return '<section class="wh" id="wheel" aria-label="The wheel">' + head + '<div class="sp-sub sp-none">' + esc(model.registryState === 'loading' ? 'Reading the strategy list...' : model.registryState === 'unreadable' ? 'The strategy list could not be read.' : 'No wheel places are in the strategy list.') + '</div></section>'; }
+    var st = rows.map(function(x){ return { x: x, s: kalshiWheelStatus(x) }; });
+    var cnt = function(k){ return st.filter(function(r){ return r.s.key === k; }).length; };
+    var box = function(n, l){ return '<div class="wh-b"><b>' + esc(String(n)) + '</b><span>' + esc(l) + '</span></div>'; };
+    var counts = '<div class="wh-counts">' + box(cnt('counting'), 'Shadow places counting') + box(cnt('waiting') + cnt('soon'), 'Waiting for the logger') + box(KAL_WHEEL_SEATS.probation + ' of ' + KAL_WHEEL_SEATS.probationMax, 'Probation seats') + box(KAL_WHEEL_SEATS.full, 'Full seats (no cap set)') + box(cnt('retired'), 'Retired') + '</div>' +
+      '<div class="sp-sub">No seat is live; each seat needs the owner\'s popup. Shadow only: no order, no money.</div>';
+    var fam = function(x){ var m = /^WH-([A-Z0-9]+)/.exec(x.id); return m ? m[1] : 'other'; };
+    var list = st.map(function(r){
+      var x = r.x, k = 'wh:' + x.id, o = Boolean(openSet[k]), prog = '', d = kalshiWheelDay(x.startDate, now);
+      if(r.s.key === 'retired'){ prog = 'Retired' + (x.retiredOn ? ' on ' + x.retiredOn : '') + ': ' + (x.cause || 'cause not written'); }
+      else {
+        var n = typeof x.n === 'number' ? x.n : null;
+        prog = (n === null ? 'Count read from the private log' : Math.min(n, 60) + ' of 60 signals') + (r.s.key === 'counting' && d !== null ? ' · day ' + d + ' of 7' : '');
+      }
+      var when = r.s.key === 'counting' && x.startDate ? 'Counting since ' + x.startDate : r.s.text;
+      var bar = r.s.key === 'counting' && typeof x.n === 'number' ? '<div class="sp-bar" aria-hidden="true"><i style="width:' + Math.max(0, Math.min(100, x.n / 60 * 100)).toFixed(1) + '%"></i></div>' : '';
+      return '<details class="bd-fold wh-p" data-k="' + esc(k) + '"' + (o ? ' open' : '') + '><summary><span class="wh-n">' + esc(x.name) + '</span><span class="sp-badge sp-b-' + (r.s.key === 'counting' ? 'hot' : 'idle') + '">' + esc(when) + '</span></summary>' +
+        '<div class="wh-body"><div class="wh-m"><span>Market family <b>' + esc(fam(x)) + '</b></span><span>' + esc(prog) + '</span></div>' + bar +
+        '<div class="wh-r"><b>Rule</b> ' + esc(x.rule || 'Not written yet') + '</div><div class="wh-r"><b>Status</b> ' + esc(x.nextReadText || 'Not written yet') + '</div>' +
+        '<div class="wh-r"><b>Kill</b> ' + esc(x.kill || 'Not written yet') + '</div><div class="wh-r"><b>Return</b> ' + esc(x['return'] || 'Not written yet') + '</div>' +
+        (x.nBasis ? '<div class="sp-sub">' + esc(x.nBasis) + '</div>' : '') + '</div></details>';
+    }).join('');
+    return '<section class="wh" id="wheel" aria-label="The wheel">' + head + counts + '<div class="wh-list">' + list + '</div></section>';
   }
   function kalshiBoardHtml(model, esc, money){
     var openSet = model.open || {}, now = model.now || 0, tt = model.timeText || String;
@@ -4867,7 +4918,7 @@ kalshiStatusTick();
     }).join('');
     var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[KAL_STAGES.length - 1].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
-    return '<div class="sp-wrap">' + summary + pipe + '</div>';
+    return '<div class="sp-wrap">' + summary + pipe + (typeof kalshiWheelHtml === 'function' ? kalshiWheelHtml(model, esc) : '') + '</div>';
   }
   // One GET of the committed list per page load (it is a static file next to index.html, so it costs no Firestore read); a failure is kept as the answer, never retried in a loop.
   var kalshiRegistryLoading = false;
@@ -4992,7 +5043,7 @@ kalshiStatusTick();
     // The summary reads the Stop Loss meter's open cost (the same worst case figure). Recent activity was removed on Nov 13, 2026 (the owner: the notifications and trade log already carry it).
     var summary = kalshiStratSummary(all, now, kalshiRiskMeter(all, kalshiLiveCtl && kalshiLiveCtl.session, now).openCost, kalDayKey);
     kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser) }; } });
-    var regRetired = kalshiRegistry.list.filter(function(x){ return x.stage === 'Retired'; });
+    var regRetired = kalshiRegistry.list.filter(function(x){ return x.stage === 'Retired' && x.id.indexOf('WH-') !== 0; });   // the wheel's retired places are drawn in the Wheel view
     kalshiStratSheets = {}; kalshiRetiredEntries(KAL_BOARD_RETIRED.rows, regRetired).forEach(function(e){ kalshiStratSheets[e.id] = e.sheet; kalshiRegData[e.id] = { live: true }; });
     live.forEach(function(s){ kalshiRegData[s.id] = kalshiOrdersLoaded ? { live: true, kill: s.kill, spark: s.spark } : { live: true }; });
     var regSplit = kalshiRegistrySplit(kalshiRegistry.list, KAL_BOARD_SHADOW.map(function(r){ return r.id; }).concat(KAL_BOARD_LIVE.map(function(r){ return r.id; })), KAL_BOARD_RETIRED.rows.map(function(r){ return r.name; }));

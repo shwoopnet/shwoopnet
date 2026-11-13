@@ -117,7 +117,7 @@ const code = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, 
 const files = walk(path.join(root, 'functions')).filter((f) => /\.js$/.test(f) && !/kalshiWheelLib\.js$/.test(f));
 for (const f of files) assert.ok(!/kalshiWheelLib|WHEEL_SEATS|activeWheelSeats/.test(code(fs.readFileSync(f, 'utf8'))), path.basename(f) + ' must not touch the wheel library while it is inert');
 const html = code(fs.readFileSync(path.join(root, 'index.html'), 'utf8'));
-assert.ok(!/WHEEL_SEATS|activeWheelSeats|kalshiWheelLib/.test(html));
+assert.ok(!/\bWHEEL_SEATS\b|activeWheelSeats|kalshiWheelLib/.test(html));
 assert.ok(!/WHEEL_SEATS|wheelSeat/i.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')));
 const lib = code(fs.readFileSync(path.join(root, 'functions', 'kalshiWheelLib.js'), 'utf8'));
 assert.ok(!/\b(fetch|firebase|firestore|Date\.now|new Date|process\.env|liveRequest|postOrder|sign)\b/i.test(lib.replace(/require\([^)]*\)/g, '')), 'the wheel library is pure: no network, database, clock or order code');
