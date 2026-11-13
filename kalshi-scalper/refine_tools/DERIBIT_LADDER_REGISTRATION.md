@@ -20,7 +20,10 @@ Ledger check: not LAD1/NEWH14 (realised vol), not IV1 (DVOL single number), not 
 - Otherwise FAIL if n >= 80 and bar missed; DATA_LIMITED if n < 80 (a number under 80 is not a verdict).
 - Prediction (prior, stated now): PF 1.00 (0.85 to 1.15); survivor probability 5%.
 - Pace: at 24 hourly closes a day the count of usable hours is limited by the recorder's actual coverage, measured in step 2 and extrapolated to n = 80.
-- [live figure removed, ask Main]
+- Gold correlation: daily shadow cash P/L vs gold L1 daily cash P/L (L1 gold history as available), reported only if >= 10 overlap days; gold-replacement needs |corr| < 0.3.
 
 
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided. lines 10 and 14 (look and edge rule) restored verbatim; line 23 still carries a marker, to be done by hand.
+
+
+Dated clarification Nov 13, 2026, second pass (Head of R&D ruling): from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided; line 23 restored verbatim (gold correlation rule).

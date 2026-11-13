@@ -9,10 +9,10 @@ PRIMARY (A): wxens forward data (V2 recorder, since 2026-11-04). The probability
 - Unit: one city-day = (city, target_date) with a recorded quote slot that has ensemble members at the same slot_ts, city, target_date, and a settled result.
 - One look per city-day: the EARLIEST slot_ts that has quotes for the city and target date (so a day-before look is used when it exists). Later looks are ignored (no re-entry).
 - Universe: the 14 cities in WXENS1_WATCHLIST (daily-high series only; low-temperature series not used). Not narrowed to the 8 later.
-- [live figure removed, ask Main]
+- Model probability of a bracket: mean over all ensemble members (all models) of a normal centred on the member's tmax_f with sd 2.0F (fixed, not fitted; the ensembles are known to be under-dispersed), integrating the settled whole-degree integer value: between [f,c] -> Phi((c+.5-x)/sd)-Phi((f-.5-x)/sd); greater K -> 1-Phi((K+.5-x)/sd); less K -> Phi((K-.5-x)/sd).
 - Both sides allowed. YES: edge = p - yes_ask, price = yes_ask. NO: edge = (1-p) - (1-yes_bid), price = 1 - yes_bid. Take an order if edge >= 0.08 and price in (0.10, 0.95]. A missing, zero or one-sided quote (yes_bid 0 for a NO buy) is skipped.
 - At most 2 orders per city-day, largest edge first; at most one per bracket; hold to the market result.
-- [live figure removed, ask Main]
+- Cash basis at the ask, +0c and +1c slip on the price, unrounded fee 0.07*price*(1-price), 1 contract.
 - N tried: this is 1 rule, 1 sd, 1 threshold, 1 look rule (no grid). Added to the family count: 5 variants counted for the family this session (W-ROW49 5 cities, this one).
 
 ## Pass bar (shadow candidate)
@@ -23,3 +23,6 @@ Not established. Candidate: casual bettors on thin books pricing round numbers; 
 
 
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided. line 19 restored verbatim; lines 12 and 15 still carry a marker, to be done by hand.
+
+
+Dated clarification Nov 13, 2026, second pass (Head of R&D ruling): from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided; lines 12 and 15 restored verbatim (model probability and cash basis).
