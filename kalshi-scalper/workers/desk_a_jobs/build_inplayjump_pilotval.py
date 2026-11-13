@@ -6,7 +6,7 @@ import json, os, sys, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_inplayjump_pilot as P, build_inplayjump_validation as V, build_inplayjump_candles as B
 def main(series_path, folder, outdir):
-    import heldout_guard; heldout_guard.refuse_heldout(folder, "pilotval builder")
+    import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(folder, "pilotval builder")
     import tempfile, io, contextlib
     with tempfile.TemporaryDirectory() as t1, tempfile.TemporaryDirectory() as t2, contextlib.redirect_stdout(io.StringIO()) as o:
         P.main(series_path, folder, t1); V.main(series_path, folder, t2)
