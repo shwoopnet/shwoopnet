@@ -1,0 +1,1 @@
+SAMPLE OK: 10080 markets; candle job would need 168 requests (cap 110) -> no job, over cap

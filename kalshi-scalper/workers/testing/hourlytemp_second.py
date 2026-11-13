@@ -81,8 +81,23 @@ def sample(lists):
     return out, markets
 
 def job_requests(smp):
-    hours = sorted({s["close"] for s in smp})
-    return (len(hours) + 1) // 2
+    """Amendment 3 pin 3: one time range a request, <=100 tickers, <=9,800 candles (tickers x minutes of the range, both ends counted);
+    hours in time order; an hour joins the request only if it closes <=3,600 s after the request's last close and both limits hold.
+    Returns the number of requests, or raises Refuse if an hour breaks a limit by itself."""
+    by = {}
+    for s_ in smp: by.setdefault(s_["close"], []).append(s_["ticker"])
+    reqs = []; cur = None   # [first_close, last_close, ntickers]
+    def mins(a, b): return (b - a) // 60 + 60 + 1   # from a-60min to b, both ends counted
+    for c in sorted(by):
+        n = len(by[c])
+        if n > 100 or n * mins(c, c) > 9800: raise Refuse("an hour breaks a request limit by itself (%d tickers)" % n)
+        if cur and c - cur[1] <= 3600 and cur[2] + n <= 100 and (cur[2] + n) * mins(cur[0], c) <= 9800:
+            cur[1] = c; cur[2] += n
+        else:
+            if cur: reqs.append(cur)
+            cur = [c, c, n]
+    if cur: reqs.append(cur)
+    return len(reqs)
 
 # ---------- candles
 def load_candles(candles, smp):
@@ -114,6 +129,13 @@ def px(c, side):
     o = c.get(side)
     if not isinstance(o, dict) or o.get("close_dollars") in (None, ""): return None
     return D(o["close_dollars"])
+
+def found(cd, mk, L, carried):
+    c = cd.get(L)
+    if c is None and carried:
+        ks = [t for t in cd if mk["open"] < t < L]
+        c = cd[max(ks)] if ks else None
+    return c
 
 def quote(cd, mk, L, carried):
     c = cd.get(L)
@@ -151,9 +173,10 @@ def measure(smp, cdata, complete, whole, nreq, novol, markets, lists):
                 strikes = [s for s in smp if s["series"] == S]
                 nq = 0; two = []   # (event, strike, bid, ask)
                 for s in strikes:
-                    q = quote(cdata.get(s["ticker"], {}), s, s["close"] - look * 60, carried)
+                    L = s["close"] - look * 60
+                    if found(cdata.get(s["ticker"], {}), s, L, carried) is not None: nq += 1   # candle found, empty book included
+                    q = quote(cdata.get(s["ticker"], {}), s, L, carried)
                     if q is None: continue
-                    nq += 1
                     b, a = q
                     if 0 < b < a < 1: two.append((s["event"], s["strike"], b, a))
                 spreads = [(a - b) * 100 for _, _, b, a in two]
@@ -174,8 +197,8 @@ def measure(smp, cdata, complete, whole, nreq, novol, markets, lists):
                 mo = med(near_ow); meds[(S, look)] = mo
                 f = lambda x, n=2: "n/a" if x is None else str(rnd(x, n))
                 share = lambda a_, b_: "n/a" if b_ == 0 else str(rnd(D(a_) * 100 / b_, 1)) + "%"
-                print("[%s] %s %dmin: strikes=%d quoted=%d twosided=%d (%s of strikes) median_spread=%s median_rt=%s | near: n=%d median_rt=%s median_oneway=%s | extreme95/5=%s of twosided | nearer-certain ask median r1=%s r2=%s r3+=%s [cents] (n %d/%d/%d)  measurement, not a rule" % (
-                    reading, S, look, len(strikes), nq, len(two), share(len(two), len(strikes)), f(med(spreads)), f(med(rts)),
+                print("[%s] %s %dmin: strikes=%d candle_found=%d twosided=%d (%s of candle-found strikes) median_spread=%s median_rt=%s | near: n=%d median_rt=%s median_oneway=%s | extreme95/5=%s of twosided | nearer-certain ask median r1=%s r2=%s r3+=%s [cents] (n %d/%d/%d)  measurement, not a rule" % (
+                    reading, S, look, len(strikes), nq, len(two), share(len(two), nq), f(med(spreads)), f(med(rts)),
                     len(near_ow), f(med(near_rt)), f(mo), share(ext, len(two)), f(med(cert[1])), f(med(cert[2])), f(med(cert[3])),
                     len(cert[1]), len(cert[2]), len(cert[3])))
         vals = list(meds.values())
