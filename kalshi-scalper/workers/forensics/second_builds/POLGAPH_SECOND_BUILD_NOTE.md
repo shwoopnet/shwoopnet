@@ -44,7 +44,7 @@ These are invented rows; the figures mean nothing about the market.
 
 Not compared: Desk B prints "candles without a volume field"; this build reads a missing volume as 0 and does not count them (0 on both fixtures).
 
-## Nov 13, about 01:50Z: Amendment 4 (the pooling line read exactly) and a fixture that separates the two readings
+## Nov 13, about 01:44Z: Amendment 4 (the pooling line read exactly) and a fixture that separates the two readings
 
 Auditor B found that Desk B's scorer let one family rescue a FAILED pooled read. Amendment 4 (registration `a13693f3...`, scorer `9186c8b5...` at `94ff7fa7`) reads it
 exactly: the pooled verdict first; anything but a pooled pass is the verdict; on a pooled pass the family with the largest net (tie: alphabetical) is read alone if it
