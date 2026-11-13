@@ -99,7 +99,7 @@ I rewrote my block layer to the rulings and ran Desk A's three commands myself, 
   blocks that grew to 191 and 206 signals to reach 7 days, an EXPIRED block, FAILED on the profit factor, on a half and on the 30 percent day rule, and places waiting on
   an open result.
 
-## Nov 13, 02:24Z: the second round of rulings (items g to o), and SAME again on three fixtures
+## Nov 13, 02:21Z: the second round of rulings (items g to o), and SAME again on three fixtures
 
 **The block comparison in the section above is superseded.** It was made against the lane text at `7c4c71d2` and Desk A's first reader. While it ran, the Head ruled ten
 more places (items (g) to (o), `ROTATION_LANE.md` section 4 at `rnd-queue` `bd7007cb`) and Desk A rebuilt its reader. I rebuilt my block layer from that text and compared again.
