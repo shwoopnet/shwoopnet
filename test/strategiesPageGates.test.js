@@ -548,7 +548,7 @@ gates.SP15 = () => {
 };
 gates.SP16 = () => {
   // the strategy sheet's money chart follows the range and counts from zero at the range's start
-  const R = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', varLine('KAL_STRAT_RANGES') + fn('kalshiStratRangeOf') + fn('kalshiStratRangeHtml') + fn('kalshiStratR') + fn('kalshiHoverAttr') + fn('kalshiHoverWhen') + fn('kalshiStratCumLine') + varLine('kalshiStratDayText') + fn('kalshiStratChartsHtml') + '; return kalshiStratChartsHtml;')(Math, Number, Array, isFinite, Intl, Date);
+  const R = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', varLine('KAL_STRAT_RANGES') + fn('kalshiStratRangeOf') + fn('kalshiStratRangeHtml') + fn('kalshiStratR') + fn('kalshiHoverAttr') + fn('kalshiHoverWhen') + fn('kalshiStratCumLine') + varLine('kalshiStratDayText') + varLine('KAL_SETTINGS_KEEP') + fn('kalshiStratSettingsKeep') + fn('kalshiStratChartsHtml') + '; return kalshiStratChartsHtml;')(Math, Number, Array, isFinite, Intl, Date);
   const base = { now: NOW, cum: [0, 5, 3, 4], times: [null, NOW - 10 * 86400000, NOW - 3 * 86400000, NOW - 2 * HR], n: 3 };
   const pts = (h) => JSON.parse(/class="hv" data-hv="([^"]+)"/.exec(h)[1].replace(/&#34;|&quot;/g, '"'));
   const all = R(Object.assign({ range: 'YTD' }, base), esc, money), wk = R(Object.assign({ range: '7D' }, base), esc, money), whole = R(Object.assign({}, base), esc, money);
