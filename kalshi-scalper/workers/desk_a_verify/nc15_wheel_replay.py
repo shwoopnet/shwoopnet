@@ -62,7 +62,7 @@ def load_coverage(runs):
                     if old is None or (r.get("result") in ("yes", "no") and old.get("result") not in ("yes", "no")): cov[r["ticker"]] = r
     return cov
 def replay(root, series=ADMITTED, since=SHEET_COMMIT_TS, now=None):
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(str(root), "nc15 wheel replay")      # standing rule (h): on every entry point, not only the command line
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(str(root), "nc15 wheel replay")      # standing rule (h): on every entry point, not only the command line
     runs = sorted(os.path.dirname(f) for f in glob.glob(os.path.join(root, "*", "*", "book.csv.gz")))
     cov = load_coverage(runs); now = time.time() if now is None else now
     closes = {}; tick_runs = collections.defaultdict(set)
@@ -122,7 +122,7 @@ def report(recs, reasons):
 if __name__ == "__main__":
     a = [x for x in sys.argv[1:] if not x.startswith("--")]
     if not a: sys.exit(__doc__)
-    root = Path(a[0]).resolve(); sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(str(root), "nc15 wheel replay")
+    root = Path(a[0]).resolve(); sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(str(root), "nc15 wheel replay")
     if not (root / "MADE_UP_DATA").exists() and os.environ.get("WHEEL_BLOCK_READ") != "1": sys.exit("REFUSED: not a made-up folder and WHEEL_BLOCK_READ=1 is not set (a block read is on the Head's word)")
     ser = ADMITTED; since = SHEET_COMMIT_TS
     for x in sys.argv[1:]:
