@@ -48,3 +48,7 @@ For the history screen of card 1 (the scorer is `desk_a_verify/oiver_spread.py`)
 - **R6 held-out:** R6 rows from 2026-11-09T00:00:00Z on are held out; no R6 folder dated on or after it is opened.
 - **Development span:** R6 closes from 2026-10-29 to before 2026-11-09 (the replay set; R6 starts 2026-10-29). The candle-side development range of all three OIVER scorers is closes from 2026-09-12 to before 2026-11-09, so for DEPTH the two ranges intersect at 2026-10-29 to before 2026-11-09.
 - **OIVER-CAP30 confirmed:** a price of exactly **0.30 counts as in range (inclusive)**; the 8c floor stays.
+
+## Dated line (Nov 13, 2026, the Head of R&D, 21:14Z; Auditor B's F1, rule 18): the book check and the weeks
+- **Two-sided book (rule 18):** the parent requires 0 < yes bid, yes ask < 1 and bid < ask (1e-9 slack) at the decision candle; otherwise the window is counted as "not two-sided" and scores nothing (this covers a bid of 0, an ask of 1, both, a missing side, and a locked or crossed book). Applies to OIVER-SPREAD, OIVER-CAP30 and, through the same parent, OIVER-DEPTH.
+- **Weeks:** the net per contract-week uses weeks = (last close - first close) / 7 days over the PARENT's trades (at least one week), and the same divisor is used for the parent and the version. For OIVER-DEPTH the weeks are taken over the REPLAY SET's trades (its comparison is parent trades with an R6 decision poll against its own version), also with the same divisor for both.

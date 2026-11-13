@@ -24,9 +24,14 @@ win("W6", 6, 100000, (0.44, 0.47), (0.45, 0.48), "yes")      # YES 0.47, spread 
 win("W7", 7, 100000, (0.08, 0.10), (0.08, 0.10), "yes", skip_prev=True)    # the close-360 candle missing
 win("W8", 8, 100000, (0.30, 0.35), (0.30, 0.35), "no")       # YES 0.35, spread 0.05, loses: fee 32c / 20 = 0.016: cash -0.35 - 0.016 = -0.366; parent only
 win("W9", 9, 100000, (0.08, 0.10), (0.08, 0.10), "void")     # a void result: dropped before scoring
-win("W10", 10, 100000, (0.50, 0.50), (0.50, 0.50), "yes")    # locked book: skipped
+win("W10", 10, 100000, (0.50, 0.50), (0.50, 0.50), "yes")    # locked book: skipped ("not two-sided")
+win("W11", 11, 100000, (0.00, 0.10), (0.00, 0.10), "yes")    # rule 18: bid 0 (a one-sided book): not two-sided, scored nothing
+win("W12", 12, 100000, (0.90, 1.00), (0.90, 1.00), "yes")    # ask 1: not two-sided
+win("W13", 13, 100000, (0.00, 1.00), (0.00, 1.00), "yes")    # bid 0 and ask 1: not two-sided
+win("W14", 14, 100000, (0.01, 0.02), (0.01, 0.02), "yes")    # bid 0.01, ask 0.02 IS two-sided (bid > 0, ask < 1, bid < ask): it passes the rule and is then outside the 0.08 floor
+win("W15", 15, 100000, (0.98, 0.99), (0.98, 0.99), "yes")    # bid 0.98, ask 0.99: two-sided; the NO price 0.02 is under the floor: outside the band
 d = tempfile.mkdtemp(); lists = folder(d, "l", {"markets": mk}); cands = folder(d, "c", {"markets": cd})
-windows, bad = O.load_windows(lists); assert bad == 1 and len(windows) == 9, (bad, len(windows))
+windows, bad = O.load_windows(lists); assert bad == 1 and len(windows) == 14, (bad, len(windows))
 C_ = O.load_candles(cands); trades, why = {}, {}
 for tk, w in windows.items():
     t, r = O.decide(w, C_.get(tk, {})); why[tk.split("-")[1]] = r
@@ -35,7 +40,7 @@ assert sorted(trades) == ["W1", "W2", "W3", "W6", "W8"], (sorted(trades), why)
 assert abs(trades["W1"]["cash"] - 0.8935) < 1e-12 and abs(trades["W2"]["cash"] + 0.2735) < 1e-12 and abs(trades["W3"]["cash"] + 0.315) < 1e-12 and abs(trades["W6"]["cash"] - 0.5125) < 1e-12 and abs(trades["W8"]["cash"] + 0.366) < 1e-12
 assert [trades[k]["spread_ok"] for k in ("W1", "W2", "W3", "W6", "W8")] == [True, False, True, True, False]
 assert all(abs(trades[k]["p"] - v) < 1e-12 for k, v in (("W1", 0.10), ("W2", 0.26), ("W3", 0.30), ("W6", 0.47), ("W8", 0.35)))      # the price paid is the ask seen at the decision candle
-assert why["W4"] == "not fired" and why["W5"] == "outside 0.08 to 0.50" and why["W7"] == "missing candle" and why["W10"] == "crossed or locked book", why
+assert why["W4"] == "not fired" and why["W5"] == "outside 0.08 to 0.50" and why["W7"] == "missing candle" and why["W10"] == "not two-sided" and why["W11"] == "not two-sided" and why["W12"] == "not two-sided" and why["W13"] == "not two-sided" and why["W14"] == "outside 0.08 to 0.50" and why["W15"] == "outside 0.08 to 0.50", why
 assert O.CONTRACTS == 20 and O.fee_up(0.10) == 0.13 and O.fee_up(0.26) == 0.27 and O.fee_up(0.47) == 0.35 and O.fee_up(0.30) == 0.30 and O.fee_up(0.35) == 0.32
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf): O.main(lists, cands)
