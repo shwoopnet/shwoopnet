@@ -5,7 +5,7 @@ Rules (fixed here): the last 20 weekdays (Monday to Friday by the UTC date of th
 series that has a market with that close batched in market_tickers; period_interval 1; start_ts = close - 420 s, end_ts = close - 120 s (covers the candles ending
 close - 360 s and close - 180 s and the entry minutes, and leaves the last two minutes unread); a ticker of EVENT830's 8 series closing at 13:30Z on its past forward dates
 (2026-11-05, 11-06, 11-10, 11-12, 11-13) is dropped even if listed; nothing closing after 2026-11-13T02:35:00Z. Standard library only."""
-import gzip, json, os, sys
+import gzip, hashlib, json, os, sys
 from datetime import datetime, timezone
 
 END = "2026-11-13T02:35:00Z"
@@ -62,8 +62,9 @@ def main():
         job["ticker_allowlist"] = sorted({t for r in ch for t in r["params"]["market_tickers"].split(",")})
         job["max_requests"] = len(ch)
         job["notes"] += " Part %d of %d of the same candle pull, at most %d requests each (about 27 KB a request unpacked)." % (k, len(chunks), maxreq)
-        json.dump(job, open(os.path.join(sys.argv[2], "OICAND_CANDLES_%d.json" % k), "w"), indent=1)
-        print("file %d: %d requests, %d tickers" % (k, len(ch), len(job["ticker_allowlist"])))
+        path = os.path.join(sys.argv[2], "OICAND_CANDLES_%d.json" % k)
+        json.dump(job, open(path, "w"), indent=1)
+        print("part %d of %d: %s | %d requests | %d tickers | sha256 %s" % (k, len(chunks), os.path.basename(path), len(ch), len(job["ticker_allowlist"]), hashlib.sha256(open(path, "rb").read()).hexdigest()))
     print("days %d (%s to %s) | closes %d | tickers %d | requests %d | files %d" % (len(days), days[0], days[-1], len(reqs), len(tickers), len(reqs), len(chunks)))
 
 if __name__ == "__main__":
