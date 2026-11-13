@@ -37,10 +37,10 @@ def _all_ts(cs): return sorted({t for d in cs.values() for t in d})
 def qualifying(cs, tickers, kind, K, S, t):
     """contracts of the match with a qualifying jump at minute t (jump on the two-sided minute-end mid, volume > 0, mid at t-1 in the band, in play). Uses minutes t-1 and t and the past only."""
     q = []
+    if not any(in_play(kind, cs[x], t, S) for x in tickers): return q      # Nov 13 clarification: "in play" is a property of the MATCH minute (either contract's steps count; the clock families never use the alive rule)
     for tk in tickers:
         a, b = cs[tk].get(t - 60), cs[tk].get(t)
         if not (two_sided(a) and two_sided(b)) or (b.get("volume") or 0) <= 0: continue
-        if not in_play(kind, cs[tk], t, S): continue
         if mid(b) - mid(a) >= K["jump"] - 1e-9 and K["pre_jump_mid_band"][0] - 1e-9 <= mid(a) <= K["pre_jump_mid_band"][1] + 1e-9: q.append(tk)
     return q
 def elapsed_base(cs, tickers, kind, S):
