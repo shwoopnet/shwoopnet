@@ -1,0 +1,47 @@
+{
+ "job_id": "OICAND_CANDLES",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/DESK_A_OICORE_PLACES_NOV13.md",
+ "purpose": "One minute candles (period 1, open_interest kept) from 7 minutes to 2 minutes before each close, of the 12 fifteen minute series' markets of the last 20 weekdays of the OICAND_LISTS window, one request per close with the series' tickers batched, for the 90th percentile open interest threshold of Desk A's twelve OICORE wheel places.",
+ "heldout": "Development only, ending 2026-11-13T02:35Z (before the NC15 depth-cell places' forward count start 2026-11-13T02:40Z; nothing from it on). Cut out: EVENT830's forward windows, the 13:30Z closes on 2026-11-05, 11-06, 11-10, 11-12 for its 8 series (the 11-13 close is after this window's end) (register: EVENT830 forward read about 2026-12-04, FORWARD READ SCHEDULED); a +-5 minute cut around each close, so no EVENT830 window's result is asked. NC15DEPTH1 pooled scoring opens 2026-11-19T00:00Z, so windows before it are count only and not held out. Other cards listing these series (EVENT1, FXREF1, FXUSD, LAG15, NEWH2, OICOREX1, XOI1, PUB20 and others) are READ (spent) or OPEN on date constants earlier than 2026-10-16 or later than this window per the registry; Auditor B to confirm. Held-out for the places themselves: HELDOUT_FIRST 2026-12-01T00:00Z.",
+ "allowed_endpoints": [
+  {
+   "name": "batch_candles",
+   "method": "GET",
+   "path_pattern": "/markets/candlesticks",
+   "params_allowed": [
+    "market_tickers",
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXAUDUSD15M",
+  "KXBNB15M",
+  "KXCOPPER15M",
+  "KXEURUSD15M",
+  "KXGBPUSD15M",
+  "KXHYPE15M",
+  "KXNATGAS15M",
+  "KXSILVER15M",
+  "KXUSDCAD15M",
+  "KXUSDJPY15M",
+  "KXWTI15M",
+  "KXXRP15M"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 1,
+ "requests": [],
+ "notes": "Built by workers/oicand/oi_candles_job.py from the OICAND_LISTS answers; weekdays only (UTC date of the close), the last 20; EVENT830's past forward closes are dropped; end_ts is the close minus 120 s as in SPXOI1.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
