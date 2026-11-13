@@ -14,14 +14,21 @@ LIST_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file_
 ROW = re.compile(r"^\|\s*`([A-Za-z0-9_\-]+)/([A-Za-z0-9_\-]+)`\s*\|")
 
 
+_PRINTED = set()
+
+
 def listed_runs(list_file=None):
     f = list_file or LIST_FILE
     try:
-        lines = open(f, encoding="utf-8").read().splitlines()
-    except OSError:
+        raw = open(f, "rb").read()
+        lines = raw.decode("utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
         raise SystemExit("REFUSED: %s cannot be read, so no run can be shown to be clean (standing rule (h))" % f)
     if not any(ln.startswith("| Run folder") for ln in lines):
         raise SystemExit("REFUSED: %s has no table header; the list is not the file this guard expects" % f)
+    if f not in _PRINTED:      # Head's rule (a): every run's log carries the sha256 of the list copy it read; a run without this line is not counted
+        _PRINTED.add(f)
+        sys.stderr.write("hm_guard: HELDOUT_PULL_RUNS list read, sha256 %s (%s)\n" % (__import__("hashlib").sha256(raw).hexdigest(), f))
     return {m.group(2) for m in map(ROW.match, lines) if m}
 
 
