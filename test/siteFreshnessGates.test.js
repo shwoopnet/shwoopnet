@@ -130,6 +130,16 @@ gates.SF10 = () => {
   assert.ok(/at least 10 losses/.test(reg.return), 'the registry return rule carries the 10 losses guard');
 };
 
+gates.SF12 = () => {
+  // Nov 13, 2026: the hard account stop. The Rules text states the line from the code's constant, so a change to it fails here.
+  const { HARD_STOP_FRACTION } = require('../functions/kalshiHardStopLib.js');
+  const rules = text(menu);
+  const pct = Math.round(HARD_STOP_FRACTION * 100) + '%';
+  assert.ok(html.includes('<span id="kalRulesHardStop">' + pct + '</span>'), 'the Rules text names the hard stop line ' + pct);
+  assert.ok(/all new buys stop and stay stopped until the owner restarts them with a reviewed change/.test(rules), 'the Rules text says it is a latch');
+  assert.ok(/not the account balance, so a deposit or a withdrawal never counts/.test(rules), 'and that deposits and withdrawals do not count');
+};
+
 gates.SF11 = () => {
   // Consequence: while gold's latch is tripped the Rules line follows the shared state and says off, cooling down; the old label stays when the state is unknown.
   assert.ok(/stNow\.L1 === 'off' \? 'Gold is off, cooling down/.test(html), 'the Rules line is driven by the shared L1 state');
