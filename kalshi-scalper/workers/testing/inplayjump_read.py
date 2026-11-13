@@ -10,7 +10,7 @@ Known gap, accepted: scorekit's held-out guard is case-sensitive ('HELDOUT_'); i
 import sys, os, json, hashlib
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 H = lambda n: hashlib.sha256(open(os.path.join(HERE, n), "rb").read()).hexdigest()
-PIN = {"scorer": ("inplayjump_second.py", "fb9bca51de40b7c1"), "scorekit": ("scorekit.py", "02728f2afdfe62a9")}
+PIN = {"scorer": ("inplayjump_second.py", "fb9bca51de40b7c1"), "scorekit": ("scorekit.py", "f219b43c755b4b87")}
 for key, (fn, pre) in PIN.items():
     if not H(fn).startswith(pre): raise SystemExit("refused: %s is not the frozen build (%s)" % (fn, H(fn)[:16]))
 import scorekit as k
