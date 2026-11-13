@@ -1,0 +1,5 @@
+# HISTCUTOFF1 (Nov 13, 2026, Chief of Staff, Head of R&D approved)
+
+One public GET of `/historical/cutoff` on the elections host. It returns the timestamps that separate Kalshi's live market list (`/markets`) from its historical list (`/historical/markets`), a date every lists job needs to choose between the two endpoints. A zero-try measurement: it reads no market, price, candle or outcome, scores no rule and holds no held-out data (the answer is cutoff timestamps only). Same host, pace and stop rules as every pull job; GET only, no key, no redirect, the runner is unchanged. Lowest priority; runs with the next jobs change.
+
+Second request (Head of R&D, Nov 13, 2026): `GET /historical/markets?event_ticker=KXFEDMENTION-26MAR&limit=1`, a probe of whether the historical list honours an event filter, on a development Fed meeting. If honoured, Desk C writes the lists job as one request per development event; if not, the historical lists run as a HELDOUT_ pull later. A development row may land; no held-out meeting is requested.
