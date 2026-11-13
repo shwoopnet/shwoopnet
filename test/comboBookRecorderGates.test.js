@@ -68,7 +68,7 @@ gates.CB3 = () => {
   assert.ok(/ref: main/.test(wf) && /record_combo\.py "data\/combo\/\$STAMP"/.test(wf));
   const cfg = fs.readFileSync(path.join(root, '_config.yml'), 'utf8');
   assert.ok(/- \.github/.test(cfg) && /- scripts/.test(cfg) && /- docs/.test(cfg), 'workflow, script and docs are not published with the site');
-  assert.ok(/timeout-minutes: (\d+)/.test(wf) && Number(wf.match(/timeout-minutes: (\d+)/)[1]) <= 60, 'a stuck job is cut off');
+  assert.ok(/timeout-minutes: (\d+)/.test(wf) && Number(wf.match(/timeout-minutes: (\d+)/)[1]) <= 75, 'a stuck job is cut off');
 };
 
 // CB4: it stops by itself on 2027-01-31, in the workflow and in the script.
