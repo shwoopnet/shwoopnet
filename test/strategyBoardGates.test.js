@@ -28,8 +28,8 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiStratPfOf', 'kalshiStratPfAttr', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml', 'kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_RETIRED_CAUSES') + varLine('KAL_BOARD_DAY') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
+const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiStratPfOf', 'kalshiStratPfAttr', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStageBoxOf', 'kalshiClosestKill', 'kalshiGoldReturnStats', 'kalshiPromotedAgo', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData'];
+const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_RETIRED_CAUSES') + varLine('KAL_BOARD_DAY') + varLine('KAL_BOARD_LADDER') + varBlock('KAL_STAGES') + names.map(fn).join('\n');
 const P = new Function('Intl', 'Math', 'Date', 'Number', 'Array', 'Object', 'String', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_TRIPWIRE, KAL_BOARD_KILL, KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_RETIRED_CAUSES };')(Intl, Math, Date, Number, Array, Object, String, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
@@ -161,7 +161,7 @@ gates.SB11 = () => {
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
   assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
-  assert.ok(/Comes back when: a 14 day cool off/.test(masked) && /class="sp-bar"/.test(P.kalshiBoardHtml(model('ok'), esc, money)) && !/class="sp-bar"/.test(masked), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
+  assert.ok(/Comes back when: a 14 day cool off/.test(masked) && /class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(P.kalshiBoardHtml(model('ok'), esc, money))[0]) && !/class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(masked)[0]), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
   assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
   const evil = P.kalshiBoardHtml({ live: [{ id: 'X', name: '<img src=x onerror=1>', rule: '"><script>', w: P.kalshiBoardWindows([], now), kill: { lines: ['<b>'] } }], deck: { state: 'unreadable', rows: [] }, retired: { asOf: '<i>', back: '<u>', rows: [{ name: 'n', pf: 1, n: 1 }] } }, esc, money);
@@ -178,8 +178,8 @@ gates.SB13 = () => {
   const now = Date.UTC(2026, 10, 10, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, 0, 'Live cards moved Implement, Kill and Return into the Details popup (Nov 12, 2026)');
-  assert.strictEqual((h.match(/data-reg-details=/g) || []).length >= 3, true, 'and each live card has the button');
+  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, P.KAL_BOARD_LIVE.length, 'every live row keeps Implement, Kill and Return in its More layer (the stage board, Nov 12, 2026)');
+  assert.strictEqual((h.match(/data-row=/g) || []).length >= 3, true, 'and each live strategy is a row that opens in place');
   const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((ok.match(/class="kal-bd-rules"/g) || []).length, 4, 'every shadow rule has a Rules line');
   assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
@@ -192,7 +192,7 @@ gates.SB12 = () => {
   const mod = html.slice(html.indexOf('readKalshiShadowRows'), html.indexOf('readKalshiShadowRows') + 1500);
   assert.ok(/collection\(db, 'kalshiShadowRows'\)/.test(mod) && !/setDoc|updateDoc|addDoc/.test(mod), 'a plain read of the shadow log');
   assert.ok(/match \/kalshiShadowRows\/\{id\} \{\s*allow read: if isAdmin\(\);\s*allow write: if false;/.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')), 'admin read, no client write');
-  assert.ok(/\.sp-board\{[^}]*display:grid; grid-template-columns:minmax\(0,1fr\)/.test(html) && /\.sp-cards\{ display:grid; grid-template-columns:minmax\(0,1fr\)/.test(html) && /\.sp-top\{ display:flex; align-items:center/.test(html), 'the lanes are a shrinking grid: one column on a phone, so a phone never scrolls sideways');
+  assert.ok(/@media \(max-width:760px\)\{ \.rw-h\{ grid-template-columns:20px minmax\(0,1fr\) 46px 96px;/.test(html) && /\.rw-d, \.mo-body\{ grid-template-columns:1fr; \}/.test(html) && /\.lp-row\{ display:grid; grid-template-columns:1fr 1fr;/.test(html), 'rows stack and the loop is a 2 by 2 grid on a phone, so a phone never scrolls sideways');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
