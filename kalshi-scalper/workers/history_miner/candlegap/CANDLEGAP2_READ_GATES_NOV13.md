@@ -1,3 +1,5 @@
+**CLOSED, Nov 13, 2026: CANDLEGAP-2 was closed as NOT DECIDED (gate A passed, gate B failed). See `CANDLEGAP2_CLOSED_NOV13.md` (f675d325). The gates below are kept as written.**
+
 # CANDLEGAP-2 read-time gates (dated note, Nov 13, 2026, about 02:20Z; Auditor B's CLEAN of fd92418c, accepted by the History Miner)
 
 No frozen file changes; the hashes stand (candlegap.py a7178688, candlegap2_run.py fbbed7bf, CANDLEGAP2_DESIGN.md a91d4113, CANDLEGAP2_TTEBB.json 1a391881). Both gates are applied BEFORE any count is read:
