@@ -42,3 +42,5 @@ Date 2026-11-10. Registered first: scratch `w_goldkill/REGISTRATION.md` (grid fi
 
 ## The owner chooses
 A. [live figure removed, ask Main] Backstop that has never false-killed gold; honest that it is not an early detector. B. Alert only, no new hard kill (the 12 percent stop stays the only one). No false kills, no new code risk, and a real failure costs up to $117.51 before it stops. C. Tighter hard kill (K1 $40 or 2 in a row). [live figure removed, ask Main]
+
+Dated line Nov 13, 2026 (Main request, text only): refresh needed against the gold latch trip (rule 2, 2026-11-12T19:09Z, gold off), the GOLDOFF shadow that began 2026-11-12T18:31Z, the rotation lane (docs/ROTATION_LANE.md on main, v1.3 per Main) with its guard of at least 10 losses for an 88c or higher favourite, and the CFRTI-K probation seat. The older text above describes the state before these; the Monday rotation template (MONDAY_ROTATION_TEMPLATE.md, UPDATE Nov 13 block) carries the current structure.

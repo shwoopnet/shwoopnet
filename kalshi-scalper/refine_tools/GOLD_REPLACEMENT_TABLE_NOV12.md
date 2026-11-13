@@ -77,3 +77,5 @@ No. Nothing in the files can replace gold L1 by Monday Nov 16, and the reasons a
 ## What this table does not say
 
 It says nothing about whether any idea has an edge, only where each one stands in the files and how long a fair test takes if the assumptions in POWER_TABLE_NOV12.md hold. The 35c per-trade sd is a default; a real edge below 5c needs four times the 5c figure. Families are the labels as written in the files; a reviewer may merge W-SPOTLEAD1 into the OICORE family if its trades overlap OICORE's windows, which no file measures.
+
+Dated line Nov 13, 2026 (Main request, text only): refresh needed against the gold latch trip (rule 2, 2026-11-12T19:09Z, gold off), the GOLDOFF shadow that began 2026-11-12T18:31Z, the rotation lane (docs/ROTATION_LANE.md on main, v1.3 per Main) with its guard of at least 10 losses for an 88c or higher favourite, and the CFRTI-K probation seat. The older text above describes the state before these; the Monday rotation template (MONDAY_ROTATION_TEMPLATE.md, UPDATE Nov 13 block) carries the current structure.

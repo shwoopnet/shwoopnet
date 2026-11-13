@@ -36,3 +36,11 @@ days=sorted({r[0][:10] for r in rows})[-7:]
 w=[p for t,p in rows if t[:10]>=days[0]]
 print('whole record last 7 trading days (%s..%s): n=%d PF %.2f net $%.2f'%(days[0],days[-1],len(w),pf(w),sum(w)))
 print('TRIPWIRE: '+('TRIPPED '+'; '.join(trip) if trip else 'OK')+' (n since start %d/100, cum PF %s, latest r60 %s)'%(len(since),('%.2f'%pf(v)) if v else 'n/a','%.2f'%roll[-1][1] if roll else 'n/a'))
+# Nov 13, 2026: gold has been OFF since the latch tripped (rule 2, net under -20 dollars once 40 trades settled) at 2026-11-12T19:09Z.
+# This tool is a monitor only: it now says whether the latch condition is met and counts gold trades settled after the trip.
+LATCH_TRIPPED_AT = '2026-11-12T19:09:00'
+NET_LINE, N_LINE = -20.0, 40
+nets = sum(v); after = [r for r in rows if r[0] >= LATCH_TRIPPED_AT]
+print('LATCH (rule 2): %s | n since re-arm %d, net since re-arm $%.2f (line %.0f once %d settled) | gold trades settled after the trip: %d (should be 0 or only orders open at the trip)' % (
+    'CONDITION MET' if (len(since) >= N_LINE and nets < NET_LINE) else 'condition not met', len(since), nets, NET_LINE, N_LINE, len(after)))
+print('GOLD OFF since %s UTC: the tripwire above is informational only; the sizing base for nightly.py comes from Main by message at each run (SIZING_BASE env), never from a file.' % LATCH_TRIPPED_AT)
