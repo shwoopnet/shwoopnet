@@ -1,0 +1,37 @@
+# WHEEL0: audit plan for the read (prepared Nov 13, 2026, Forensics desk, on the Head of R&D's order of 15:26Z)
+
+Written without opening any WHEEL0 or CFRTI_K run. The read happens only after (1) DEPTH1's read is made and its `DEPTH1 READ MADE:` line is committed on the Head's word, and (2) the Head's separate go. Nothing below runs before that,
+except step 1 (hash checks) and step 5 (the selftest on made-up data), which open no run.
+
+## Files the go touches, and their frozen hashes (sha256, first 16; all on `claude/forensics-desk`)
+
+| File | Hash | Role |
+|---|---|---|
+| `wheel0/wheel0.py` | `10a7b3630be5807a` | the scorer (frozen, never run on real data) |
+| `wheel0/WHEEL0_NULL_SIM.json` | `bb9456dda0f3a704` | the luck table (printed in the result) |
+| `wheel0/WHEEL0_DROP_TABLE.json` | `f5f629704c29e8d0` | the random-drop table (hash printed by the scorer) |
+| `wheel0/WHEEL0_PRECONDITION.md` | `6984d524a9b0491b` (CHANGES when the marker line is committed; the scorer reads it) | the DEPTH1 marker |
+| `wheel0/WHEEL0_REGISTRATION.md` | `b3b10c1e3beb8ac3` (section 14's read-once line is replaced in the commit made just BEFORE the read) | the registration |
+| `wheel0/WHEEL0_LABEL_BLOCK.md` | `97522f60967b0900` (full `97522f60967b09000fe8e52b653698987e3367db66b94db394ea37ad492ce094`) | the words printed at the head of the result |
+| `wheel0/WHEEL0_LISTS.json`, `wheel0/wheel0_null_sim.py`, `wheel0/build_wheel0_candles.py`, `wheel0/wheel0_coverage.py`, `wheel0_count.py` | `20f8dd301f5295c5`, `e3e902fd54c2c081`, `716bedf9345d61fe`, `4a615921dc743ae0`, `366d18c7ccd77441` | job and helper files (not run at the read) |
+| `listed_runs_guard.py`, `HELDOUT_PULL_RUNS.md` (copy) | `f77b3051cb912254`, `6d85f5f558df9cbb` (full `6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d`) | the pre-run check and the list it reads (refresh the copy if Main says the list changed) |
+| second build `wheel0_second.py` (Testing Desk) | hash to be named by the Testing Desk | the independent build, run on the same files |
+
+The runs the scorer reads (folder names only; none opened for this plan): lists `pull/CFRTI_K_LISTS/2026-11-12T1645Z_43262026759` (Bitcoin results), `pull/WHEEL0_LISTS/2026-11-12T2022Z_43299588338` (the others); candles `pull/CFRTI_K_CANDLES/2026-11-12T1840Z_43279857619`
+(Bitcoin), `pull/WHEEL0_CANDLES_XRP/2026-11-13T0205Z_43349567884`, `..._DOGE/2026-11-13T0215Z_43350776238`, `..._GOLD/2026-11-13T0226Z_43352150367`, `..._ETH/2026-11-13T0237Z_43353458562`; the R6 books root only if the Head names it for the cross-check.
+
+## Order of checks at the go (each result written into the run log beside the scorer's output; a step without its line is not counted)
+
+1. **Hashes.** `sha256sum` every file in the table (the marker file excepted until step 3); each must equal the table. Any difference stops the read and goes to the Head.
+2. **Pre-run guard, the exact command** (Head's rule of 14:46Z: the command, its output and the list copy's sha256 go in the log): `python3 -I kalshi-scalper/workers/forensics/listed_runs_guard.py <each lists folder> <each candles folder>` (and the books root if used). Expected last line: `listed_runs_guard: N path(s) not in HELDOUT_PULL_RUNS.md (1 run(s) listed); list read: HELDOUT_PULL_RUNS.md sha256 6d85f5f5...`. Any REFUSED stops the read.
+3. **Precondition.** `WHEEL0_PRECONDITION.md` carries a line beginning `DEPTH1 READ MADE:` (the scorer enforces it itself and also refuses before 2026-11-14T00:00Z). The marker commit is the Head's word, made by this desk only after both DEPTH1 prints agree.
+4. **Read-once marker.** In the commit made immediately BEFORE the read, replace registration section 14's `WHEEL0 READ: not yet run.` with the date, the Head's go line and the scorer's sha256. The scorer refuses an `--out` file that exists.
+5. **Selftest on made-up data** (no run opened): `python3 -I kalshi-scalper/workers/forensics/wheel0/wheel0.py selftest` must print its 29 checks as passing. Run it right before the read, in the same shell.
+6. **The read, once:** `python3 -I kalshi-scalper/workers/forensics/wheel0/wheel0.py run --lists <lists folders> --candles <candle folders> [--books <R6 root>] --out <new file> --go "<the Head's go line>"`. The Bitcoin and Ethereum markets closing on or after 2026-10-29T00:00Z are dropped by the scorer itself at the reader; check the printed market counts show none.
+7. **Print the label block** (`WHEEL0_LABEL_BLOCK.md`, word for word) and the result's first lines, scorer sha256 and drop-table sha256 together; send the Head the lines and the file's sha256. No figure goes to anyone else before the second build prints the same.
+8. **Second build.** The Testing Desk's `wheel0_second.py` runs on the same files with the same guard check; compare every figure. Rule 16b: a verdict figure within 0.001 of its bar (profit factor after HOT against 1.15 and 1.0, D against zero, both p values against 0.05) is recomputed exactly by both builds and the exact figure decides; a bar tested on rounded figures is decided on the unrounded when the printed figures are within 0.002 of it. A difference is reported to the Head, not fixed.
+9. **After the read:** one commit with the result file, the log, the guard lines and the label block; the verdict is one of the three registered labels and nothing else.
+
+## What this plan does not do
+
+It does not open a run, run the scorer on real data, or decide anything the Head decides (the go, the marker, a mismatch). If DEPTH1's read has not been made by 2026-11-14T06:00Z, the question goes back to the Head.
