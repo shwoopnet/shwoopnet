@@ -80,3 +80,9 @@ A poll with a blank or unreadable touch size stays in the replay set and the ver
 - **New variant test:** the base windows plus two rows, W11 and W12, closing 1794009000 and 1794009900, both inside the range. The variant must give every base figure unchanged, plus counts void_dropped 2.
   - W11: a copy of W1 (r6_poll 1, ask size 40), result "void".
   - W12: a copy of W9 (r6_poll 1, NO buy, bid size 100), result blank.
+
+## Dated line, 2026-11-13 21:32Z: void drop at LOAD (Auditor B, 21:31Z: Desk A's load_windows drops a result that is not yes or no before any signal test)
+- A development row whose result is "void" or blank is dropped when the file is read, counted as void_dropped, and never reaches any other count (no_oi, oi_below, not_two_sided, band, and so on).
+- Held-out rows are still ignored first and counted as held_out_ignored; any other text still STOPS.
+- The variant adds W13, a copy of W4 (OI rise 86,299, so oi_below if it were read) with result "void".
+- Expected variant counts: the base counts with void_dropped 3. oi_below stays 1, the base W4 alone. Every figure is unchanged.
