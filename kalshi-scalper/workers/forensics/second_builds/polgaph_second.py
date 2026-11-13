@@ -237,7 +237,12 @@ def measure(spec, list_folders, hourly_folders, minute_folders):
 
 def lines(out):
     f = lambda x, d=2: "n/a" if x is None else ("inf" if x == float("inf") else ("%." + str(d) + "f") % x)
-    L = ["verdict: " + out["verdict"], FRESH, "COUNTS: " + "; ".join("%s %d" % (k, v) for k, v in out["counts"].items()),
+    order = ["series asked", "series with any settled market in the window", "markets", "markets with any hourly candle", "market-mornings", "no look (an hourly candle missing)",
+             "not two-sided at one of the three candles", "1. three two-sided candles", "2. gap of 5c or more", "left after 3. steady", "left after 4. band", "left after 5. spread", "left after 6. liquid",
+             "left after 7. one per event and morning (the event's pick)", "not the event's pick", "blocked: the event holds an earlier filled, unsettled bet", "fired", "filled on a present candle",
+             "filled on an unchanged minute (no 07:01 candle)", "not filled", "no fill data (the minute request was not answered)"]
+    cnt = out["counts"]; keys = order + sorted(k for k in cnt if k not in order)
+    L = ["verdict: " + out["verdict"], FRESH, "COUNTS: " + "; ".join("%s %d" % (k, cnt.get(k, 0)) for k in keys),
          "filled bets: %s | distinct among filled: %s | largest number open at once: %d" % (out["filled_bets"], out["distinct_among_filled"], out["largest_number_open_at_once"]),
          "ONE-WAY COST over %d market-mornings: median %sc (kill above 4c); as paid at the limit %sc (information only)" % (out["one_way_cost"]["market_mornings"], f(None if out["one_way_cost"]["median_ask_minus_mid_plus_fee_at_the_limit"] is None else 100 * out["one_way_cost"]["median_ask_minus_mid_plus_fee_at_the_limit"]), f(None if out["one_way_cost"]["cost_as_paid_at_the_limit_information_only"] is None else 100 * out["one_way_cost"]["cost_as_paid_at_the_limit_information_only"]))]
     def row(name, b):
