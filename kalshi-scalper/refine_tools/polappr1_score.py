@@ -41,7 +41,12 @@ class Refuse(Exception):
     pass
 
 
+APPR_OTHER_SERIES = {"KXVOTEHUBTRUMPUPDOWN", "KXTRUMPVH", "KXTRUMPAPPROVALBELOW", "KXNYTTRUMPAPPROVAL",
+                     "KXVOTEHUBVANCEAPPROVE", "KXVHAPRPOTUS", "KXTRUMPAPPROVALYEAR"}
+
+
 def grp(s):
+    """Amendment 5 (1): a family is exactly its registered list of series; any other series is in no family (None)."""
     if s in GCB:
         return "GCB"
     if s == "KXTRUMPAPPROVE":
@@ -50,11 +55,15 @@ def grp(s):
         return "APPR_RCP"
     if s == "KX538APPROVE":
         return "APPR_538"
-    return "APPR_OTHER"
+    if s in APPR_OTHER_SERIES:
+        return "APPR_OTHER"
+    return None
 
 
 def fams_of(series):
     g = grp(series)
+    if g is None:
+        return []
     return [g] if g == "GCB" else [g, "ALL_APPR"]
 
 
@@ -116,7 +125,7 @@ def load_obs(rows, cuts):
         if not j["c"]:
             continue
         ect = ec[j["e"]]
-        if is_heldout(cuts, j["s"], ect):
+        if grp(j["s"]) is None or is_heldout(cuts, j["s"], ect):
             continue
         ct = j["ct"]
         cs = sorted(j["c"])
@@ -190,12 +199,15 @@ def boot(xs, B=2000, seed=1, blocks=None):
 
 
 def live(os_):
-    """As if live: 3 contracts, +1c slip, fee rounded up to the cent per order, fills in close order."""
-    os_ = sorted(os_, key=lambda o: o["ct"])
+    """As if live: 3 contracts, +1c slip, fee rounded up to the cent per order, fills in close order.
+    Amendment 5 (2): the net rule (net under -15 dollars after 20 fills) is tested at EVERY fill from the 20th on,
+    in fill order; the 5 loss streak at any fill. Returns n, net at fill 20 (net so far if under 20 fills), longest
+    streak, fired, max open, net over all fills, first fill at which a kill fires (None if none)."""
+    os_ = sorted(os_, key=lambda o: (o["ct"], o["t"]))
     tot = 0
     streak = 0
     ml = 0
-    fired = False
+    first = None
     n = 0
     net20 = 0
     for o in os_:
@@ -206,12 +218,12 @@ def live(os_):
         tot += pnl
         streak = streak + 1 if pnl < 0 else 0
         ml = max(ml, streak)
-        if streak >= 5:
-            fired = True
+        if streak >= 5 and first is None:
+            first = n
         if n == 20:
             net20 = tot
-            if tot < -15:
-                fired = True
+        if n >= 20 and tot < -15 - 1e-9 and first is None:
+            first = n
     if n < 20:
         net20 = tot
     ev = [(o["qt"], 1) for o in os_] + [(o["ct"], -1) for o in os_]
@@ -220,7 +232,7 @@ def live(os_):
     for _, d in ev:
         cur += d
         mx = max(mx, cur)
-    return n, net20, ml, fired, mx, tot
+    return n, net20, ml, first is not None, mx, tot, first
 
 
 def week(o):
@@ -240,14 +252,16 @@ def cells(obs, cuts):
     return out
 
 
-def calibration(rows, cuts):
+def calibration_rows(rows, cuts):
+    """Amendment 5 (3): by look and the five registered price buckets of the YES ASK, per market, pooled over the approval
+    families (ALL_APPR, TRAIN and VALID events only); realized YES frequency against the mean YES ask and mean mid; n always shown."""
     ec = event_closes(rows)
     pts = []
     for j in rows:
-        if not j["c"]:
+        if not j["c"] or "ALL_APPR" not in fams_of(j["s"]):
             continue
-        ect = ec[j["e"]]
-        g = grp(j["s"])
+        if third(cuts, "ALL_APPR", ec[j["e"]]) not in ("TRAIN", "VALID"):
+            continue
         cs_ = sorted(j["c"])
         for ln, L, tol in LOOKS:
             q = look_quote(cs_, j["ct"], L, tol)
@@ -257,21 +271,18 @@ def calibration(rows, cuts):
             b = fl(q[2])
             if a is None or b is None or not 0 < a < 1:
                 continue
-            for f in fams_of(j["s"]):
-                if third(cuts, f, ect) in ("TRAIN", "VALID"):
-                    pts.append((f, ln, (a + b) / 2, 1.0 if j["res"] == "yes" else 0.0))
-    edg = [0, .10, .25, .40, .60, .75, .90, 1.0001]
-    lines = []
-    for f in FAMILIES:
-        for ln, _, _ in LOOKS:
-            seg = []
-            for i in range(len(edg) - 1):
-                x = [r for r in pts if r[0] == f and r[1] == ln and edg[i] <= r[2] < edg[i + 1]]
-                if len(x) >= 8:
-                    seg.append("%.2f-%.2f n%d mid%.3f real%.3f" % (edg[i], min(edg[i + 1], 1), len(x), sum(r[2] for r in x) / len(x), sum(r[3] for r in x) / len(x)))
-            if seg:
-                lines.append("%s %s | %s" % (f, ln, " ; ".join(seg)))
-    return lines
+            pts.append((ln, a, (a + b) / 2, 1.0 if j["res"] == "yes" else 0.0))
+    out = []
+    for ln, _, _ in LOOKS:
+        for lo, hi in PB:
+            x = [r for r in pts if r[0] == ln and lo <= r[1] < hi]
+            if x:
+                out.append((ln, "%.2f-%.2f" % (lo, min(hi, 0.9)), len(x), sum(r[1] for r in x) / len(x), sum(r[2] for r in x) / len(x), sum(r[3] for r in x) / len(x)))
+    return out
+
+
+def calibration(rows, cuts):
+    return ["%s | %s n%d meanAsk%.3f meanMid%.3f realizedYES%.3f" % r for r in calibration_rows(rows, cuts)]
 
 
 def family_label(n_big, best_pf, supporting, max_n):
@@ -304,9 +315,16 @@ def report(rows, cuts):
     out.append("EVENTS IN FILE BY THIRD (HELD counts are events only; no held-out candle is read or scored)")
     for f in FAMILIES:
         out.append("  %s %s" % (f, dict(scored[f])))
+    unl = collections.Counter()
+    for e in ec:
+        s = next(j["s"] for j in rows if j["e"] == e)
+        if grp(s) is None:
+            unl[s] += 1
+    for s, c in sorted(unl.items()):
+        out.append("  %s: unlisted, not scored (%d events)" % (s, c))
     out.append("OBS %d" % len(obs))
     out.append("")
-    out.append("CALIBRATION (YES quote at the look, all markets, TRAIN and VALID events only): look | bucket n meanMid realizedYES")
+    out.append("CALIBRATION (Amendment 5: YES ask buckets, per market, approval families pooled, TRAIN and VALID events only; descriptive only): look | bucket n meanAsk meanMid realizedYES")
     out.extend(calibration(rows, cuts))
     out.append("")
     allc = []
@@ -341,9 +359,9 @@ def report(rows, cuts):
             wl, wh = boot([net(o) for o in va], blocks=[week(o) for o in va])
             wide = wl if wl < lo_ else lo_
             killed = L[3] or s2[1] <= 0 or wide <= 0
-            out.append("PASS %s n%d/%d PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f va90[%+.1f,%+.1f] week-block[%+.1f,%+.1f] z%.2f %s | live3: n%d net20 $%.2f streak%d kill%s maxopen%d | %s" % (
+            out.append("PASS %s n%d/%d PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f va90[%+.1f,%+.1f] week-block[%+.1f,%+.1f] z%.2f %s | live3: n%d net@20 $%.2f net(all) $%.2f streak%d kill%s first-kill-fill %s maxopen%d | %s" % (
                 tag, len(tr), len(va), s1[2], s2[2], 100 * s1[1], 100 * s2[1], 100 * lo_, 100 * hi, 100 * wl, 100 * wh, sa[3],
-                ("PASSES the research bar z %.2f (4.55 info)" % RESEARCH_Z) if sa[3] >= RESEARCH_Z else "exploratory (below the research bar z %.2f; 4.55 of the retired ledger is information only)" % RESEARCH_Z, L[0], L[1], L[2], "Y" if L[3] else "N", L[4],
+                ("PASSES the research bar z %.2f (4.55 info)" % RESEARCH_Z) if sa[3] >= RESEARCH_Z else "exploratory (below the research bar z %.2f; 4.55 of the retired ledger is information only)" % RESEARCH_Z, L[0], L[1], L[5], L[2], "Y" if L[3] else "N", L[6] if L[6] else "none", L[4],
                 "KILLED" if killed else "survives the kill bar") + ("" if n >= NO_EVIDENCE_N else " | no evidence at n = %d" % n))
         elif n < NO_EVIDENCE_N:
             out.append("     %s no evidence at n = %d (TRAIN %d, VALID %d)" % (tag, n, len(tr), len(va)))
