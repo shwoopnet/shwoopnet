@@ -75,6 +75,11 @@ s = seq(30); s[5] = dict(s[5], result="pending", cents=None); b, st = rp(s, now=
 assert not b and st["waiting"] and "expiry not yet decided" in st["why"], (b, st)
 s = seq(30) + [sig(30, 30 * 24 * H, 1)]; s[5] = dict(s[5], result="pending", cents=None); b, st = rp(s, now=T0 + 40 * DAY); assert not b and "expiry not yet decided" in st["why"]
 s[5] = dict(s[5], result="scored", cents=300); b, st = rp(s, now=T0 + 40 * DAY); assert b[0]["status"] == "EXPIRED"
-a = dict(sig(1, 0, 1), side="no", ticker="P-0001"); c = dict(sig(2, 0, 1), side="yes", ticker="P-0001"); o = sorted([a, c], key=lambda x: (x["t"], x["ticker"], 0 if x.get("side") == "yes" else 1)); assert o[0]["side"] == "yes"
+a = dict(sig(1, 0, 1), side="no", ticker="P-0001"); c = dict(sig(2, 0, 1), side="yes", ticker="P-0001"); o = sorted([a, c], key=W.order_key); assert o[0]["side"] == "yes"
+d = dict(sig(0, 0, 1), side="yes", ticker="P-0000"); assert [x["ticker"] for x in sorted([a, d, c], key=W.order_key)] == ["P-0000", "P-0001", "P-0001"] and sorted([a, d, c], key=W.order_key)[2]["side"] == "no"
+# (q) a pending signal decided after first + 21 days: the block (all final) is EXPIRED and the pending signal STARTS the next block (which then waits)
+s = seq(30) + [dict(sig(30, 30 * 24 * H, 1, result="pending"), cents=None)]; b, st = rp(s, now=T0 + 40 * DAY); assert b[0]["status"] == "EXPIRED" and b[0]["n"] == 30 and st["waiting"] and st["block_n"] == 1, (b, st)
+# a pending signal inside the 21 days: waiting, not EXPIRED
+s = seq(30); s[29] = dict(s[29], result="pending", cents=None); b, st = rp(s, now=T0 + 30 * DAY); assert not b and st["waiting"], (b, st)
 print("T11 cents round down, expiry waits for results, yes before no OK")
 print("ALL OK")
