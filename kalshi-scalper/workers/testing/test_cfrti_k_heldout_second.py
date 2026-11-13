@@ -4,6 +4,7 @@ import calendar, gzip, json, math, os, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cfrti_k_heldout_second as r
 import scorekit as k
+assert r.FAIL_EARLY_N == 30 and r.MIN_ROWS == 50
 
 A = 0.0005; SD = A * math.sqrt(10 / 9) * math.sqrt(4 / 3)
 T = lambda d, h, m: calendar.timegm((2026, 11, d, h, m, 0))
@@ -141,7 +142,7 @@ with tempfile.TemporaryDirectory() as t:
     bad = os.path.join(t, "badlists"); mrows[0]["rules_primary"] = "The strike is something else entirely."; mkrun(bad, [("L1", {"markets": mrows})])
     try: r.check_rules_text([bad]); assert 0
     except SystemExit as e: assert "STOP" in str(e)
-r.MIN_ROWS = 50
+r.MIN_ROWS, r.FAIL_EARLY_N = 50, 30
 # label ladder on UNROUNDED figures (Head 17:09Z, registration section 4): n < 30 NOT_ENOUGH_DATA; n 30 to 49 FAIL if PF < 1.0 else NOT_ENOUGH_DATA; n >= 50 PASS / NO CALL / FAIL
 mk_f = lambda n, pf, mean: {"n": n, "pf": pf, "mean": mean}
 assert r.label(mk_f(50, 1.3, 0.01)).startswith("PASS") and r.label(mk_f(50, 1.2999999999, 0.01)).startswith("PASS") and r.label(mk_f(50, float("inf"), 0.2)).startswith("PASS")          # inside 1e-9

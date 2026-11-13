@@ -4,13 +4,13 @@ Built FROM THE CARD TEXT ALONE: CFRTI_K_REGISTRATION.md at 3be6d090 on claude/id
 NOT RUN ON DATA. Hand case: CFRTI_K_HELD_HAND_CASE.md (committed before this code). Test: test_cfrti_k_heldout_second.py (made-up data only).
 
 READ: refuses before READ_DATE (2026-11-20T00:00Z), before anything is loaded; needs the committed line starting 'READ-ONCE MARKER' in the registration file and refuses if it already says READ ON <date>;
-      refuses if the local marker file CFRTI_K_HELDOUT_READ.local exists; under 50 held-out rows prints only 'NOT_ENOUGH_DATA, n = x' and writes NO marker (the read is not spent); otherwise writes the local marker BEFORE printing.
+      refuses if the local marker file CFRTI_K_HELDOUT_READ.local exists; n under 30, or n 30 to 49 with cash PF at or above 1.0, prints only 'NOT_ENOUGH_DATA, n = x' and writes NO marker (the read is not spent); every run is appended to CFRTI_K_HELDOUT_RUNS.log with its date and n; otherwise writes the local marker BEFORE printing.
 Windows: settled KXBTC15M markets from the lists. The reader reads ONLY closes on or after 2026-11-14T00:00:00Z; earlier closes are not read (counted).
 Rule (sections 7 and 12): decision candle = the KXBTC15M candle ending close - 120 s (YES bid and ask CLOSE both present, spread <= 0.03); cheap side YES if its ask is in [0.05, 0.30] else NO if 1 - yes_bid is in [0.05, 0.30];
   perp mid = (bid close + ask close)/2 of PERPBTC1M; model index = strike x (mid at the candle ending close - 120 / mid at the candle ending close - 900), a missing opening mid drops the window;
   volatility: mids at close - 120 - 60j (j = 0..10), log changes between neighbouring marks where both exist, at least 6 changes, sample sd (n - 1) x sqrt(4/3); chance(YES) = Phi(ln(mid_now/mid_open)/sd);
   buy 1 contract of the cheap side when chance(side) - ask >= 0.05, held to settlement, fee 0.07 p (1 - p) UNROUNDED, void = fee-only loss. Every comparison carries 1e-9; the bar and the labels read UNROUNDED figures.
-Labels at n >= 50 (dated lines of Nov 13): PASS = cash PF >= 1.3 and mean > 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF < 1.0. Under 50: only 'NOT_ENOUGH_DATA, n = x'.
+Labels (section 4 as the Head ruled 17:09Z): n under 30 NOT_ENOUGH_DATA; n 30 to 49 FAIL if cash PF < 1.0 (marker, final) else NOT_ENOUGH_DATA; n >= 50 PASS = cash PF >= 1.3 and mean > 0, NO CALL = cash PF from 1.0 up to 1.3, FAIL = cash PF < 1.0.
 Beside it: haircut (a), line (b) ran rows dropped, BOOK-REPLAY +2 s and +6 s and the stale-ask count (the last two only when R6 polls are given).
 LINES FOLLOWED (quoted from CFRTI_K_REGISTRATION.md at 3be6d090, the registration text governs):
   FEE (sections 1 and 7): "One contract, held to settlement, fee 0.07 x p x (1 - p) unrounded, cash."  -> the fee is UNROUNDED in every decided figure; the rounded-up fee prints as information only.
@@ -25,6 +25,7 @@ import scorekit as k
 HELDOUT_FIRST = calendar.timegm((2026, 11, 14, 0, 0, 0))
 READ_DATE = calendar.timegm((2026, 11, 20, 0, 0, 0))
 MIN_ROWS = 50
+FAIL_EARLY_N = 30
 BAR_PF = 1.3
 SERIES = "KXBTC15M"
 PERP_TICKER = "KXBTCPERP"
@@ -34,6 +35,7 @@ MIN_CHANGES, N_MARKS = 6, 10
 HAIRCUT_FRACTION, HAIRCUT_DRAWS, HAIRCUT_SEED = 0.34, 1000, 20261114
 RULES_PHRASE = "simple average of the sixty seconds"
 LOCAL_MARKER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CFRTI_K_HELDOUT_READ.local")
+RUN_LOG = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CFRTI_K_HELDOUT_RUNS.log")
 AMBIGUITIES = [
     "Cheap side: the YES test comes FIRST (YES if its ask is 0.05 to 0.30, else NO), as written in sections 1 and 7, not 'the lower ask'.",
     "Perp mid = (bid close + ask close)/2 (section 9); a mark with either missing is a missing mark.",
@@ -177,15 +179,27 @@ def figures(rows, rounded=False):
 
 
 def label(f):
-    """PASS / NO CALL / FAIL on UNROUNDED figures (Head's dated lines of Nov 13); under MIN_ROWS only NOT_ENOUGH_DATA."""
+    """Registration section 4 as the Head ruled at 17:09Z, on UNROUNDED figures: n under 30 NOT_ENOUGH_DATA; n 30 to 49 FAIL if cash PF is under 1.0, else NOT_ENOUGH_DATA; n >= 50 PASS / NO CALL / FAIL."""
     n, p, mean = f["n"], f["pf"], f["mean"]
     if n < MIN_ROWS:
+        if n >= FAIL_EARLY_N and p is not None and p < 1.0 - TOL:
+            return "FAIL (cash PF %s under 1.0, n = %d, under the 50-row line: section 4's 'under 1.0 at n of about 30 or more'): CFRTI-K is CLOSED FOR GOOD (the owner)" % (p, n)
         return "NOT_ENOUGH_DATA, n = %d" % n
     if p is not None and p >= BAR_PF - TOL and mean is not None and mean > TOL:
         return "PASS (cash PF %s >= 1.3, mean above 0, n = %d; the registered bar, NOT the research bar)" % (p, n)
     if p is not None and p < 1.0 - TOL:
         return "FAIL (cash PF %s under 1.0, n = %d): CFRTI-K is CLOSED FOR GOOD (the owner)" % (p, n)
     return "NO CALL (cash PF %s from 1.0 up to 1.3, n = %d): not a fail" % (p, n)
+
+
+def read_outcome(f):
+    """'read' = the read is made now (marker written, final): n >= 50, or n 30 to 49 with cash PF under 1.0; 'not_enough' = only the count prints and NO marker is written."""
+    return "not_enough" if label(f).startswith("NOT_ENOUGH_DATA") else "read"
+
+
+def log_run(path, now, n, outcome):
+    with open(path, "a") as fh:
+        fh.write("%s UTC  n = %d  %s\n" % (time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(now)), n, outcome))
 
 
 def haircut_a(rows):
@@ -275,7 +289,7 @@ def load_r6(root):
     return {t: sorted(v, key=lambda p: p["t"]) for t, v in out.items()}
 
 
-def heldout_read(marker, lists, cands, perp, r6_root=None, now=None, local_marker=None):
+def heldout_read(marker, lists, cands, perp, r6_root=None, now=None, local_marker=None, run_log=None):
     now = time.time() if now is None else now
     if now < READ_DATE:
         raise SystemExit("refused: before READ_DATE 2026-11-20T00:00Z")
@@ -289,14 +303,17 @@ def heldout_read(marker, lists, cands, perp, r6_root=None, now=None, local_marke
     rules = check_rules_text(lists)
     mk, cs, pc = k.markets(lists), k.candles(cands), k.candles(perp)
     held, g = build(mk, cs, perp_mids(pc))
-    if len(held) < MIN_ROWS:
+    run_log = run_log or RUN_LOG
+    if read_outcome(figures(held)) == "not_enough":
+        log_run(run_log, now, len(held), "NOT_ENOUGH_DATA, no marker written (the read is not spent)")
         return {"NOT_ENOUGH_DATA": "n = %d" % len(held)}          # only the count; no marker, the read is not spent
     cut.check(held, now)
     with open(local_marker, "w") as fh:
         fh.write("HELD-OUT READ MADE at %s UTC; folders %s\n" % (time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(now)), [os.path.basename(x.rstrip("/")) for x in list(lists) + list(cands) + list(perp)]))
     r6 = load_r6(r6_root) if r6_root else None
+    log_run(run_log, now, len(held), "READ MADE, marker written: %s" % label(figures(held)).split(" (")[0].split(",")[0])
     return {"constants": {"card": "CFRTI_K_REGISTRATION.md at Desk A 3be6d090, sha256 35b8a1fc6a9f5268", "fee_line_followed": "fee 0.07 x p x (1 - p) unrounded, cash (sections 1 and 7)",
-                          "label_line_followed": "dated line 2026-11-13 17:04Z: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0; under 50 NOT_ENOUGH_DATA", "HELDOUT_FIRST": "2026-11-14T00:00:00Z", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "PASS": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)", "NO_CALL": "cash PF from 1.0 up to 1.3", "FAIL": "cash PF < 1.0 (then CLOSED FOR GOOD)", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
+                          "label_line_followed": "dated line 2026-11-13 17:04Z: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0; under 50 NOT_ENOUGH_DATA", "HELDOUT_FIRST": "2026-11-14T00:00:00Z", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "n_under_30": "NOT_ENOUGH_DATA, no marker", "n_30_to_49": "FAIL if cash PF < 1.0 (marker written, final), else NOT_ENOUGH_DATA with no marker", "PASS": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)", "NO_CALL": "cash PF from 1.0 up to 1.3", "FAIL": "cash PF < 1.0 (then CLOSED FOR GOOD)", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
                           "haircut_seed": HAIRCUT_SEED}, "rules_primary_text": rules, "counts": g,
             "HELDOUT": group_report(held, r6), "ambiguities": AMBIGUITIES}
 
