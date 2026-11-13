@@ -124,3 +124,11 @@ Each uses only candles ending at or before its minute. An event whose market has
 19. Every "or more", "or less", "within" and "under" is compared with a tolerance of 1e-9. Voids are counted, never filtered. The held-out folder guard runs on every path.
 20. **Requests:** one batched candle request covers tickers whose windows fit one time range within 100 tickers and 8,500 candles. Ceiling 300. If the sample needs more, no job is written and the count goes to the Head; the sample is not cut.
 21. **Order:** scorer frozen by commit and sha256, Auditor B CLEAN, a second build from this text by another desk, then the pull.
+
+## AMENDMENT 2, Nov 13, 2026, 01:18Z: the Head of R&D's ruling on the carry (01:15Z), written before any candle of these markets was requested or read
+
+1. **The registered carry stands** (rule 7: no age limit inside the event's window; a non-quote candle stops the search).
+2. **The reading (replaces rule 18).** Stage 1 says "worth a rule" ONLY IF all three of its lines pass on the registered carry AND none of them fails on the 60 minute carry or on no carry. If the carries disagree, stage 1's verdict is "depends on the carry: not decided", no rule is registered, and the next step is a zero-try check of what a missing candle means on these markets against the wheel book recorder's 3 second books (KXCS2GAME is one of its polled series), not a choice of carry.
+   Read exactly, for the builder: a detector is "worth a rule" if its three lines pass under all three carries; it "fails" if under every carry at least one of its lines fails; anything else is "mixed". The verdict is "worth a rule" if any detector is worth a rule; else "depends on the carry: not decided" if any detector is mixed; else CLOSED, no try spent.
+3. **A stated limit of every figure built on a carried quote.** A carried ask is a quote last SEEN, not a quote that can be paid. So stage 1 measures whether the price stood, not whether an order would have filled, and any later rule is scored only on fills that the recorder's books can confirm or on exact-minute quotes. That is the lesson of REMATCH and of MAPBREAK's quarter of orders that did not fill.
+4. Nobody chooses a carry after seeing the lines.

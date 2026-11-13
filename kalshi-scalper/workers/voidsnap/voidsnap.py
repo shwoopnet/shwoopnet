@@ -386,12 +386,19 @@ def cmd_measure(lists_run, candles_run, sample_path):
             print("   line 3: best allowed reference %s (the best of %d), within 3c in %.3f of all sampled voids (0.70 or more: %s)%s"
                   % (best, len(D_REFS[d]), l3, "met" if ok3 else "FAILED", TAG))
         verdicts[cname] = res
-    reg = verdicts[REG_NAME]
-    good = [d for d in ("D1", "D2", "D3") if reg[d]]
-    print("READING (registered carry): %s%s" % (("worth a rule, by " + ", ".join(good)) if good else "CLOSED, no try spent: no detector meets lines 1, 2 and 3 together", TAG))
-    other = [k for k, v in verdicts.items() if k != REG_NAME and [d for d in ("D1", "D2", "D3") if v[d]] != good]
-    print("the information-only versions %s%s" % ("give the same reading" if not other else "DISAGREE with the registered reading: " + "; ".join(other), TAG))
-
+    # the reading (Amendment 2): a detector must pass its three lines under ALL three carries
+    worth = [d for d in ("D1", "D2", "D3") if all(v[d] for v in verdicts.values())]
+    mixed = [d for d in ("D1", "D2", "D3") if d not in worth and any(v[d] for v in verdicts.values())]
+    for d in ("D1", "D2", "D3"):
+        print("%s passes its three lines under: %s%s" % (d, ", ".join(k for k, v in verdicts.items() if v[d]) or "no carry rule", TAG))
+    if worth:
+        reading = "worth a rule, by " + ", ".join(worth) + " (its three lines pass under all three carries)"
+    elif mixed:
+        reading = "depends on the carry: not decided (" + ", ".join(mixed) + " passes under some carries and not others); no rule is registered"
+    else:
+        reading = "CLOSED, no try spent: no detector meets lines 1, 2 and 3 together under any carry"
+    print("READING: %s%s" % (reading, TAG))
+    print("a carried ask is a quote last seen, not a quote that can be paid: these figures say whether the price stood, not whether an order would have filled%s" % TAG)
 
 def main():
     refuse_all()
