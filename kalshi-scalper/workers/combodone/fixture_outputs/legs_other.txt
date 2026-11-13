@@ -1,0 +1,12 @@
+COMBODONE stage 1 count | quotes are list copies (delayed) | only the first 100 quote rows of a run carry legs, so a combo with a wide spread is invisible and the count is conservative [a count, zero tries, nothing scored]
+2026-11-13: completed runs 3 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-14: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-15: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-16: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-17: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-18: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-19: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-20: completed runs 29 of 48 scheduled [a count, zero tries, nothing scored]
+2026-11-21: completed runs 1 of 48 scheduled [a count, zero tries, nothing scored]
+THE WEEK: 2026-11-14 to 2026-11-20 | completed runs 269 of 336 scheduled (80.1%) | run folders not completed 0 | completed runs whose combo list was whole 269 of 269 [a count, zero tries, nothing scored]
+REFUSED: the leg run did not ask for 1 of the 36 legs this week names; it is not this week's leg pull

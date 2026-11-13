@@ -1,0 +1,6 @@
+== week_30
+THE WEEK: 2026-11-14 to 2026-11-20 | completed runs 269 of 336 scheduled (80.1%) | run folders not completed 0 | completed runs whose combo list was whole 269 of 269 [a count, zero tries, nothing scored]
+quote rows in the week 46 (unreadable rows left out 0) | distinct legs named in whole leg strings 36 | requests 1 (cap 100) [a count, zero tries, nothing scored]
+written: COMBODONE_LEGS.json in cd_out/week_30
+== runs_268
+NO FULL WEEK YET: seven UTC days in a row, each over, with 269 or more completed runs in all and no day under 24. The count waits; nothing is read on a partial week. [a count, zero tries, nothing scored]
