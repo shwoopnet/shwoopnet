@@ -51,4 +51,4 @@ Check what a public hosting platform publishes before the first document is adde
 
 ## Assets
 
-Screenshots in `docs/mockups/` (fixture data): `kalshi-wide.png`, `kalshi-wide-menu.png`, `kalshi-phone.png`. Link to the repository history for the PR trail rather than copying code.
+The old fixture screenshots were deleted on 2026-11-13; link to the repository history for the PR trail rather than copying code.
