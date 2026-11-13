@@ -1,4 +1,5 @@
-COMBODONE stage 1 count | quotes are list copies (delayed) | only the first 100 quote rows of a run carry legs, so a combo with a wide spread is invisible and the count is conservative [a count, zero tries, nothing scored]
+FILES READ: sha256 292de99c94808d69c914361f5d9c6065469e2732df0fb7aa10498c756552cf9f over 816 files (path, size and sha256 of every file in a dated folder) [a count, zero tries, nothing scored]
+COMBODONE stage 1 count | quotes are list copies (delayed some seconds, so the 60 second line is good to some seconds, not to the second) | only the first 100 quote rows of a run carry legs, so a combo with a wide spread is invisible and the count is conservative [a count, zero tries, nothing scored]
 2026-11-13: completed runs 3 of 48 scheduled [a count, zero tries, nothing scored]
 2026-11-14: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]
 2026-11-15: completed runs 40 of 48 scheduled [a count, zero tries, nothing scored]

@@ -20,6 +20,11 @@ t0 is the receive time of run 6 on D2. The legs, as the invented leg pull report
   legs_refused   as week_30, the leg pull has a second request that was refused: not decided.
   legs_cursor    as week_30, the leg answer still carries a cursor: not decided.
   legs_other     as week_30, the leg pull's job did not ask for LI: the counter must refuse.
+  legs_nofile    as week_30, the leg pull has a second request answered 200 with no stored file: not decided.
+  edges          as base, plus: a row whose legs value is 2.5 (leg unknown); a row with a receive time in the week and no
+                 ticker (unreadable, counted); a row with no receive time in a week folder (unreadable, counted); the
+                 same in the D0 folder and in the D8 folder (not counted); and one D3 run whose coverage file has two
+                 rows, stopped_early 1 then 0 (completed, so the week still has 269).
 """
 import csv
 import gzip
@@ -84,7 +89,7 @@ def gz_csv(path, cols, rows):
         f.write(buf.getvalue())
 
 
-def build(out, name, per_day, extra=0, stopped=(), legs="whole"):
+def build(out, name, per_day, extra=0, stopped=(), legs="whole", raw=(), two_cov=()):
     """per_day: {day index: number of run folders}. stopped: (day, run) folders with stopped_early = 1."""
     rows = list(ROWS) + [(4, 3, "X%02d" % i, "LA:yes|M%02d:yes" % i, 2, "0.5000", "1.00", FAR, None, None) for i in range(1, extra + 1)]
     facts = dict(LEGS)
@@ -96,9 +101,16 @@ def build(out, name, per_day, extra=0, stopped=(), legs="whole"):
             os.makedirs(folder)
             mine = [r for r in rows if (r[0], r[1]) == (day, k)]
             ms = int(t * 1000)
-            gz_csv(os.path.join(folder, "quotes.csv.gz"), QUOTE_COLS, [[ms, ms, "MADE-UP", r[2], "EV-" + r[2], 2, "", r[7], "", r[5], "", "", "", r[6], "", "0.00", "0.00", r[4], r[3]] for r in mine])
+            qrows = [[ms, ms, "MADE-UP", r[2], "EV-" + r[2], 2, "", r[7], "", r[5], "", "", "", r[6], "", "0.00", "0.00", r[4], r[3]] for r in mine]
+            for rd, rk, has_time, ticker, legs_n in raw:
+                if (rd, rk) == (day, k):
+                    qrows.append([ms, ms if has_time else "", "MADE-UP", ticker, "EV-RAW", 2, "", FAR, "", "0.5000", "", "", "", "5.00", "", "0.00", "0.00", legs_n, "LA:yes|LB:yes"])
+            gz_csv(os.path.join(folder, "quotes.csv.gz"), QUOTE_COLS, qrows)
             gz_csv(os.path.join(folder, "books.csv.gz"), BOOK_COLS, [[ms, "MADE-UP", r[2], r[7]] + [""] * 10 + [r[8]] + [""] * 4 + [r[9]] + [""] * 4 for r in mine if r[8] is not None])
-            gz_csv(os.path.join(folder, "coverage.csv.gz"), COVER_COLS, [[ms, 900, 1, 1, 400, len(mine), 40, 15, 57, 0, 1 if (day, k) in stopped else 0]])
+            cov = [[ms, 900, 1, 1, 400, len(mine), 40, 15, 57, 0, 1 if (day, k) in stopped else 0]]
+            if (day, k) in two_cov:
+                cov = [[ms, 900, 1, 0, 400, 0, 0, 0, 3, 3, 1]] + cov
+            gz_csv(os.path.join(folder, "coverage.csv.gz"), COVER_COLS, cov)
     named = sorted({p.split(":")[0] for r in rows if r[3] and not r[3].endswith("|...") for p in r[3].split("|")})
     asked = [t for t in named if not (legs == "other" and t == "LI")]
     run = os.path.join(out, name, "legs")
@@ -109,6 +121,9 @@ def build(out, name, per_day, extra=0, stopped=(), legs="whole"):
         json.dump(body, f)
     reqs = [{"id": "legs001", "path": "/markets", "params": {"tickers": ",".join(asked), "limit": 1000}}]
     rws = [{"index": 1, "id": "legs001", "page": 1, "status": 200, "file": "0001.json.gz"}]
+    if legs == "nofile":
+        reqs.append({"id": "legs002", "path": "/markets", "params": {"tickers": "LA", "limit": 1000}})
+        rws.append({"index": 2, "id": "legs002", "page": 1, "status": 200, "file": None})
     if legs == "refused":
         reqs.append({"id": "legs002", "path": "/markets", "params": {"tickers": "LA", "limit": 1000}})
         rws.append({"index": 2, "id": "legs002", "page": 1, "status": 429, "file": None})
@@ -129,6 +144,9 @@ def main():
     build(out, "legs_refused", week, extra=26, legs="refused")
     build(out, "legs_cursor", week, extra=26, legs="cursor")
     build(out, "legs_other", week, extra=26, legs="other")
+    build(out, "legs_nofile", week, extra=26, legs="nofile")
+    build(out, "edges", week, two_cov=((3, 20),),
+          raw=((2, 5, True, "R01", "2.5"), (2, 5, True, "", 2), (2, 7, False, "R03", 2), (0, 1, False, "R04", 2), (8, 0, False, "R05", 2)))
 
 
 if __name__ == "__main__":

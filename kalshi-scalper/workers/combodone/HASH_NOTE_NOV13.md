@@ -1,12 +1,16 @@
-# COMBODONE stage 1 counter: as frozen, Nov 13, 2026, 02:20Z
+# COMBODONE stage 1 counter: as frozen (final), Nov 13, 2026, 02:38Z
 
 A zero-try COUNT (go or no-go) for Idea Desk C's card. Built from the card's text only, tested on made-up data only. No combo-data file has been opened for it and no figure exists.
 
 | File | sha256 |
 |---|---|
-| `combodone/combodone.py` (commands `week`, `legs-job`, `count`) | `8cdf4bb96518b26225a3d095a8bc00abd0f5e72331cfa04966eeef4dfda3db2e` |
-| `combodone/fixture_outputs/make_fixtures_MADE_UP_DATA.py` | `1e782b4432807909fa53f1ebaef9c8c8be7c021474084f96363bea8b7add6da1` |
-| The card: `idea_desk_c/COMBODONE_CARD.md` at commit 593597e6 on `claude/idea-desk-c` (Amendments 1 and 2, readings 1 to 18) | `985ff446fc1b2959342d20734a2feb18d190aef6a266852ec3c6303e2f7802d5` |
+| `combodone/combodone.py` (commands `week`, `legs-job`, `count`) | `5695b46f4163fc322dbe3d24e28b0d8e1430e1c793239b29c4714a0d5f5f4ea1` |
+| `combodone/fixture_outputs/make_fixtures_MADE_UP_DATA.py` | `196e92a489269d58a6bcdb89c225ebf467496bb3053e0cc0944f4d52554187d3` |
+| The card: `idea_desk_c/COMBODONE_CARD.md` at commit 4ae639d9 on `claude/idea-desk-c` (Amendments 1 to 5, readings 1 to 23) | `81974ae89253f33b6f754c9f25b320046938c3412d7e0c68b0dd1dbf5a422536` |
+
+The first freeze (8cdf4bb9, against the card at 593597e6) is DEAD. Auditor B passed it CLEAN with two gates; the History Miner's second build (from the card only) printed the same on every figure of the 11 made-up cases (64 blocks, 0 different). The change since then is exactly: the Miner's four readings where our builds could differ on inputs the cases did not exercise (readings 19 to 22: any coverage row; a legs value that is not a whole number; a 200 row with no file; an unreadable row placed by its receive time or its folder's day), the auditor's fingerprint line as the card's Amendment 5 defines it (path, size and sha256 of the bytes of every file in a dated folder; a symbolic link refuses the run; root files excluded), and the "some seconds" wording on the 60 second line. On the 11 cases the History Miner's final build (4f2e954f) and this one name the SAME fingerprint in every case, and every other printed line is unchanged from the first freeze.
+
+**Gates before any real figure is read (Auditor B):** (1) the leg run folder goes to Auditor B first, for a structure check against its manifest; (2) both builds run on ONE frozen copy of the combo folder and must print the same fingerprint.
 
 The held-out folder guard (`deskb_guard.py`) runs on every path, and every file opened must resolve inside the folder it was named under.
 
@@ -30,7 +34,9 @@ It cannot show whether a resting ask was below fair value (it holds no leg price
 | `second_week` | a second full week follows | the first week; figures equal `week_30` |
 | `legs_refused`, `legs_cursor` | a refused leg request; an answer left on a cursor | not decided |
 | `legs_other` | the leg job did not ask for one named leg | refused |
+| `legs_nofile` | a leg request answered 200 with no stored file | not decided |
+| `edges` | base plus: a legs value of 2.5; a row with a time and no ticker; a row with no time in a week folder, in the D0 folder and in the D8 folder; a run whose coverage file has two rows (stopped early, then not) | as `base` except 21 quote rows, 2 unreadable, 5 leg unknown; the week still has 269 runs |
 
 Boundaries inside `base`: an ask of 0.8700 with size 1 counts, 0.8701 does not, size 0.5 does not; a leg settled exactly 60 seconds before the snapshot satisfies (b), 59 seconds does not; a combo whose close time equals the snapshot time is closed; a book ask of exactly 87c counts, 88c does not. Tested by hand and not committed: a combo folder inside a HELDOUT_ folder and a run folder that is a link into one (both refused). The leg job the builder writes passed the check of main's pull runner (`scripts/kalshi_pull.py`).
 
-The fixture inputs are not committed (about 9,000 small files); `make_fixtures_MADE_UP_DATA.py <dir>` writes them.
+The inputs are committed under neutral names, one archive a case: `fixture_inputs_MADE_UP_DATA/case_01.tar.gz` to `case_13.tar.gz` (the printed outputs here were made from those archives, so their fingerprints can be reproduced; the generator writes the same content, but gzip stamps the time, so a fresh run of it has other fingerprints). Tested by hand, not committed: a symbolic link inside a dated folder (refused) and a file at the root of the combo folder (fingerprint unchanged).

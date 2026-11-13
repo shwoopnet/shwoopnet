@@ -4,7 +4,7 @@ For a second build made from Idea Desk C's card only (`idea_desk_c/COMBODONE_CAR
 
 ## The cases
 
-`case_01.tar.gz` to `case_11.tar.gz`, one archive a case (a case is about 1,000 small files). Unpack each into its own empty folder; an archive holds only paths under `case_NN/`. Inside: `case_NN/combo/` (shaped like the `combo` folder of the `combo-data` branch) and `case_NN/legs/` (shaped like a kalshi-pull run of the leg pull).
+`case_01.tar.gz` to `case_13.tar.gz`, one archive a case (a case is about 1,000 small files). Unpack each into its own empty folder; an archive holds only paths under `case_NN/`. Inside: `case_NN/combo/` (shaped like the `combo` folder of the `combo-data` branch) and `case_NN/legs/` (shaped like a kalshi-pull run of the leg pull).
 
 ## `combo/`: what the recorder writes (scripts/record_combo.py on main)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """COMBODONE stage 1: a zero-try COUNT (go or no-go). Built from Idea Desk C's card
-kalshi-scalper/workers/idea_desk_c/COMBODONE_CARD.md with its Amendments 1 and 2 (commit 593597e6 on claude/idea-desk-c),
+kalshi-scalper/workers/idea_desk_c/COMBODONE_CARD.md with its Amendments 1 to 5 (commit 4ae639d9 on claude/idea-desk-c),
 before any combo-data file was opened for it. Nothing is scored against an outcome. It reads leg RESULTS only to
 classify a snapshot (a leg decided for the combo, against it, or neither), so it is not blind to leg outcomes.
 
@@ -13,6 +13,7 @@ Standard library only. Every command refuses a path in a HELDOUT_ folder.
 """
 import csv
 import gzip
+import hashlib
 import io
 import json
 import math
@@ -99,9 +100,39 @@ def runs(combo):
                 continue
             cov = read_csv(combo, d, r, "coverage.csv")
             has_quotes = any(os.path.isfile(inside(combo, d, r, n)) for n in ("quotes.csv.gz", "quotes.csv"))
-            ok = bool(cov) and str(cov[0].get("stopped_early", "")).strip() == "0" and has_quotes
-            out.append((d, r, ok, (str(cov[0].get("list_complete", "")).strip() == "1") if cov else None))
+            ok = any(str(c.get("stopped_early", "")).strip() == "0" for c in cov or []) and has_quotes
+            out.append((d, r, ok, any(str(c.get("list_complete", "")).strip() == "1" for c in cov) if cov else None))
     return out
+
+
+def fingerprint(combo):
+    """Amendment 5: what was read, so two builds can show they read the same files. The sha256 of one line per regular
+    file at any depth under a top-level YYYY-MM-DD folder, 'relative/path<TAB>size<TAB>sha256 of its bytes<NEWLINE>',
+    forward slashes, sorted by path as plain strings. Every dated folder present counts, not only the week's. A file at
+    the root of the combo folder is not in it. A symbolic link anywhere in a dated folder REFUSES the run."""
+    refuse_heldout(combo)
+    lines = []
+    for d in os.listdir(combo):
+        if not DAY_RE.fullmatch(d):
+            continue
+        top = inside(combo, d)
+        if os.path.islink(top):
+            sys.exit("REFUSED: %s is a symbolic link" % top)
+        if not os.path.isdir(top):
+            continue
+        for root, dirs, files in os.walk(top):
+            for name in dirs + files:
+                path = os.path.join(root, name)
+                if os.path.islink(path):
+                    sys.exit("REFUSED: %s is a symbolic link" % path)
+            for name in files:
+                path = inside(combo, os.path.relpath(os.path.join(root, name), combo))
+                if os.path.isfile(path):
+                    with open(path, "rb") as f:
+                        digest = hashlib.sha256(f.read()).hexdigest()
+                    lines.append((os.path.relpath(path, combo).replace(os.sep, "/"), os.path.getsize(path), digest))
+    text = "".join("%s\t%d\t%s\n" % x for x in sorted(lines))
+    return hashlib.sha256(text.encode("utf-8")).hexdigest(), len(lines)
 
 
 def find_week(all_runs):
@@ -149,7 +180,7 @@ def parse_legs(s, n_legs):
         t, _, side = part.partition(":")
         legs.append((t, side if side in ("yes", "no") else ""))
     n = num(n_legs)
-    if n is not None and int(n) != len(legs):
+    if n is None or n != int(n) or int(n) != len(legs):       # readings 12 and 20
         legs.append((None, ""))
     return "ok", legs
 
@@ -164,8 +195,8 @@ def week_rows(combo, all_runs, days):
             continue
         for row in read_csv(combo, d, r, "quotes.csv") or []:
             t = epoch(row.get("t_recv_ms"))
-            if t is None or not row.get("ticker"):
-                unreadable += 1
+            if t is None or not row.get("ticker"):            # reading 22: by its receive time, else by its folder's day
+                unreadable += (day_of(t) if t is not None else d) in wanted
                 continue
             if day_of(t) in wanted:
                 out.append((t, d, r, row))
@@ -182,13 +213,19 @@ def needed_legs(rows):
     return need
 
 
+def print_fingerprint(combo):
+    print("FILES READ: sha256 %s over %d files (path, size and sha256 of every file in a dated folder)%s" % (fingerprint(combo) + (TAG,)))
+
+
 def cmd_week(combo):
+    print_fingerprint(combo)
     all_runs = runs(combo)
     per, days = find_week(all_runs)
     print_week(all_runs, per, days)
 
 
 def cmd_legs_job(combo, out):
+    print_fingerprint(combo)
     all_runs = runs(combo)
     per, days = find_week(all_runs)
     print_week(all_runs, per, days)
@@ -234,7 +271,10 @@ def read_legs_run(run):
     good = {r.get("id") for r in rows if r.get("status") == 200 and not r.get("truncated")}
     facts, cursor_left = {}, False
     for r in rows:
-        if r.get("status") != 200 or not r.get("file"):
+        if r.get("status") != 200:
+            continue
+        if not r.get("file"):                                 # reading 21
+            bad.add(r.get("id"))
             continue
         body = json.load(gzip.open(inside(run, r["file"]), "rt"))
         if not isinstance(body, dict):
@@ -293,9 +333,10 @@ def med(v):
 
 
 def cmd_count(combo, legs_run):
+    print_fingerprint(combo)
     all_runs = runs(combo)
     per, days = find_week(all_runs)
-    print("COMBODONE stage 1 count | quotes are list copies (delayed) | only the first 100 quote rows of a run carry legs, so a combo with a wide spread is invisible and the count is conservative%s" % TAG)
+    print("COMBODONE stage 1 count | quotes are list copies (delayed some seconds, so the 60 second line is good to some seconds, not to the second) | only the first 100 quote rows of a run carry legs, so a combo with a wide spread is invisible and the count is conservative%s" % TAG)
     print_week(all_runs, per, days)
     if days is None:
         return
