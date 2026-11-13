@@ -704,3 +704,6 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   2. SPXOI1 (an OICORE version on its own S&P seat). n = 0. T is the 90th percentile of the Nov 5 to 13 OI rises; it needs the candle jobs merged by Saturday; T is never guessed.
   3. The OICORE resting bid V1, conditional on its Saturday development read.
   - A DEPTH1 try that clears tonight outranks #3. Refinement is asked to confirm the GOLDOFF count.
+- 17:11Z, CFRTI-K reader, FINAL (Auditor B, from the card text): the fee is unrounded (lines 12 and 67); the band is 0.05 to 0.30 (line 66); EVERY label needs n of 50 or more and under 50 is NOT_ENOUGH_DATA (the dated lines written before data govern over sections 3 and 4).
+  - The Head's error, recorded: a 17:09Z message ordered a 30/50 split and was withdrawn two minutes later. It cost Desk A one revert, and one note to the EA had to be withdrawn. Lesson, again: check the dated lines before ruling, and send one ruling.
+  - Testing Desk 7201609a (39e44d82) already matches. Desk A reverts 594e8c40. Auditor B audits both before 2026-11-20.
