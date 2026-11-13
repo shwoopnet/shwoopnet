@@ -1,0 +1,9 @@
+events 171 dev events 171 (held-out third unread) tickers 1197 trade tickers 1197
+RULE Q
+maker coef 0.0000: dev events 168 days 10 | strikes quoted 1113 | fills yes 400 no 391 | pairs 174 singles 443 | PF 1.41 | mean per strike +0.76c | mean per event +5.07c | net +8.51$ per contract-set
+RULE Q
+maker coef 0.0175: dev events 168 days 10 | strikes quoted 1113 | fills yes 400 no 391 | pairs 174 singles 443 | PF 1.28 | mean per strike +0.56c | mean per event +3.71c | net +6.24$ per contract-set
+RULE P
+maker coef 0.0000: dev events 168 days 10 | strikes quoted 1113 | fills yes 988 no 1032 | pairs 907 singles 206 | PF 0.18 | mean per strike -2.65c | mean per event -17.54c | net -29.46$ per contract-set
+RULE P
+maker coef 0.0175: dev events 168 days 10 | strikes quoted 1113 | fills yes 988 no 1032 | pairs 907 singles 206 | PF 0.07 | mean per strike -3.14c | mean per event -20.79c | net -34.93$ per contract-set
