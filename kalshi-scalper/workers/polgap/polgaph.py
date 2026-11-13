@@ -480,17 +480,21 @@ def cmd_score(lists_run, hourly_run, minute_run, dec_path):
             limit = r["ask"] + SLIP
             base.append(dict(r, cash=settle(m, r["side"], limit, fee(limit))[0]))
     print("information only, price-matched baseline (gap under 2c, same steps, same-candle basis): %s" % fmt(stats(base)))
-    # the registered lines (Amendment 4): the pooled verdict first; the family-alone read can only replace a pooled PASS
+    # the registered lines (Amendment 4 as ruled by the Head of R&D): the pooled verdict first; a family-alone read can only replace a pooled PASS
     pooled = verdict(dev, h1, h2, "pooled")
     if not pooled.endswith("survives development"):
+        print("family lines are information only when the pooled read fails")
         print("VERDICT: " + pooled)
     else:
-        top = max(fams, key=lambda f: (by[f][0]["net"], [-ord(c) for c in f]))      # largest net; on a tie the name first in alphabetical order
         over = [f for f in fams if by[f][0]["net"] > 0.5 * dev["net"] + EPS]
-        if top in over:
-            print("POOLING CONDITION: the pooled read passes, but %s supplies more than half of the pooled net (%.2f of %.2f)%s, so the pooled pass does not count; the card is read as that family's alone."
-                  % (top, by[top][0]["net"], dev["net"], "" if len(over) == 1 else " (and so does another family; the one with the largest net is read)"))
+        if len(over) == 1:
+            top = over[0]
+            print("POOLING CONDITION: the pooled read passes, but %s supplies more than half of the pooled net (%.2f of %.2f), so the pooled pass does not count; the card is read as that family's alone."
+                  % (top, by[top][0]["net"], dev["net"]))
             print("VERDICT: " + verdict(by[top][0], by[top][1], by[top][2], top))
+        elif len(over) >= 2:
+            print("POOLING CONDITION: two families each exceed half; pooled pass stands")
+            print("VERDICT: " + pooled)
         else:
             print("POOLING CONDITION: no family supplies more than half of the pooled net; the pooled read stands.")
             print("VERDICT: " + pooled)
