@@ -98,3 +98,15 @@
 - 8 pages at most, cap 10.
 
 The development pull now ends before the held-out cut by the job's own bounds, not by a reader dropping rows. If these lists do not hold all eleven development meetings, the older ones come only from a separate HELDOUT_ pull on the Head's go with an audited splitter; that job is not written.
+
+## Clarification 3 (Nov 13, 2026, 02:45Z): how the statement words are matched without a script
+
+The web reader this desk may use will not reproduce a statement's full text or a complete word list. Its quoting rules cap a quote at 125 characters, even though the Board's site is public domain. The Head of R&D has ruled out a script fetching the site. So no word inventory is committed in advance. Instead:
+
+1. The release line of all eleven development statements was read and is recorded here, each "For release at 2:00 p.m." EST or EDT:
+   - 2025: Jan 29, Mar 19, May 7, Jun 18, Jul 30, Sep 17, Oct 29, Dec 10;
+   - 2026: Jan 28, Mar 18, Apr 29;
+   - URL pattern `/newsevents/pressreleases/monetaryYYYYMMDDa.htm`.
+2. When FOMCTEXT_LISTS has landed, this desk reads ONLY the ticker, event ticker and strike word (title or subtitle) fields of the development markets. No price and no result field is read.
+3. For each (decision date, strike word) pair, a reader opens that one statement and answers yes or no: does the word, its plural or its possessive appear in the statement body (voters list included, implementation note excluded)? A yes or no is not a quote.
+4. The answers fill the statement-word table of Clarification 1, point 2. That table is committed, with the Board cited as the source, BEFORE the candle job is built. Held-out statements (2026-06-17 on) are never opened.
