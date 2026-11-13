@@ -1466,3 +1466,18 @@ The whole file was also checked for other doubles: exact repeated lines, near-du
 
 Gates SP18 (one chart, one caption row, three tiles as the card's last child, Privacy on the right, no changelog line twice; it fails on the merged main of this morning), and SP4, SP6, SP14, FB2b, FB4 and SB11 edited on purpose.
 
+**Page load check, same pull request** (the owner: "check for page loading bugs as well"). Each page was loaded at desktop and phone width, cold and refreshed. The real site was used for the signed-out page; a local build of this branch was used for the signed-in pages, with data arriving in stages the way Firestore answers. Fixes:
+- **Loss stop meter:** if the orders answer before the bot's settings, the meter used its $10 fallback line and could read "100% used" in red for a moment. `kalshiLiveCtl.loaded` now starts false and is set by the listener, and until then the meter says "Reading the bot's settings...". An object built without the key counts as loaded, so the older gates are unchanged.
+- **Bot page:** "Reading the account..." was shown twice; the totals block now shows its Today row with "loading...".
+- **Brief:** the page jumped when the prices arrived. Each chart card now holds its loaded height (`min-height:185px`) and the "Updated" line keeps its space. On a phone, the price strip shows its row at sign-in with "Loading prices...", where it used to appear from nothing and push the page down by a row.
+
+Checked and found fine:
+- no page error; nothing reads "undefined" or NaN;
+- charts are not drawn twice on a redraw;
+- the loop animation keeps its phase;
+- no stale data after a refresh: the strategy list is fetched with `no-cache`, `sw.js` caches nothing, and only preferences are kept in the browser;
+- nothing works only on the second load;
+- first paint 0.3 to 0.7 s on the real site cold, 0.2 to 0.4 s on refresh.
+
+The only failed request on the real site is the update check's HEAD request, which Chromium reports as aborted although it answers 200. Gates in `test/pageLoadGates.test.js`.
+

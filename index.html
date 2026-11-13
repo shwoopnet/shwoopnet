@@ -336,7 +336,7 @@
   .brief-chart-ft{ display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
   .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:12px; }
   .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss-text); }
-  .brief-chart{ position:relative; }
+  .brief-chart{ position:relative; min-height:185px; }   /* holds the loaded chart's height while the prices arrive, so the page below does not jump (load check, Nov 13, 2026: the footer moved down by a whole chart when the tape answered) */
   /* Tap and drag on a phone (mobile pass, Nov 13, 2026): a sideways drag on a chart moves its readout, an up or down drag still scrolls the page. */
   .brief-chart, .kal-plot{ touch-action:pan-y; }
   .brief-plot{ position:relative; margin:6px 46px 0 0; } .brief-yaxis{ position:absolute; left:100%; top:0; bottom:0; width:46px; } .brief-yaxis span{ position:absolute; left:6px; transform:translateY(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -366,7 +366,7 @@
   .tape-asof, .brief-asof{ color:var(--muted); font-size:12px; }
   .tape-asof{ flex:none; padding:0 12px; position:relative; z-index:1; background:var(--panel); }
   .tape-asof.stale, .brief-asof.stale{ color:var(--loss-text); }
-  .brief-asof{ margin:-6px 0 14px 2px; }
+  .brief-asof{ margin:-6px 0 14px 2px; min-height:1.4em; }   /* the "Updated" line keeps its space before the prices arrive, so the page does not jump (load check, Nov 13, 2026) */
 
   .brief-section-title{
     font-family:'Public Sans', sans-serif; font-size:17px; color:var(--paper); font-weight:700;
@@ -1706,7 +1706,7 @@
         </div>
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
-        <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
+        <div id="kalBotTotals"><div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div></div>
         <div class="kal-acct-risk"><div class="kal-k">Loss stop</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
         <div class="kal-strats" id="kalStrategies"><div class="kal-empty">Reading the strategies...</div></div>
       </div>
@@ -1872,7 +1872,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
-                  <li>Strategies page cleanup (the owner: "what the hell are we doing"): a merge had kept both sides of a conflict and drew a second, smaller chart and a stray caption in the top card. The top card now has one chart, no middle caption, and Today, Last 7 days and All time as one row of three tiles inside the card. The Privacy button sits on the right, the top card and the stage bar have the same width, and a doubled changelog line is gone. Every strategy pop-up uses one layout, and CFRTI-K reads Trial in Live. The Off box is now "Off, coming back": it lists only strategies that traded live and are building a record to return; the retired history stays in the strategy list and the docs. Page only.</li>
+                  <li>Strategies page cleanup (the owner: "what the hell are we doing"): a merge had kept both sides of a conflict and drew a second, smaller chart and a stray caption in the top card. The top card now has one chart, no middle caption, and Today, Last 7 days and All time as one row of three tiles inside the card. The Privacy button sits on the right, the top card and the stage bar have the same width, and a doubled changelog line is gone. Every strategy pop-up uses one layout, and CFRTI-K reads Trial in Live. Page loading checked on every page, desktop and phone, cold load and refresh: the Bot page's loss stop meter now waits for the bot's settings instead of reading 100% used for a moment, "Reading the account..." is said once, and the Brief no longer jumps down when the prices arrive. The Off box is now "Off, coming back": it lists only strategies that traded live and are building a record to return; the retired history stays in the strategy list and the docs. Page only.</li>
                   <li>Trading: the second slot's window and open-money limits were loosened for trial seats (window 4% of the account, open total 5%, and the slot may use three quarters of the shared window limit instead of half); the account stops and the 5.5% window limit are unchanged.</li>
                   <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
                   <li>Strategies page: one pop-up for every strategy at every stage (the owner: "all of these look so different"). Paper, wheel, approved and retired strategies now open the same sheet as a live one: the same header (ring, name, stage badge, status word), the same four tiles (labelled paper, n/a only when there is no data), the same charts with 7D, 30D and YTD, a "Progress to qualify" bar where a live strategy has its stop bar, the three rule lines and a Settings panel. The Perp-model longshot is deployed, so with no trade yet it reads Trial 0 of 90 in Live instead of waiting in Shadow. Page only.</li>
@@ -3314,7 +3314,7 @@
     var tot = kalshiLiveTotals(a, kalshiAllOrders());
     var totEl = document.getElementById('kalBotTotals');
     if(!a){
-      totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
+      totEl.innerHTML = '<div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div>';   // one "Reading the account" line is enough (the status block above says it); this keeps Today's row in place (load check, Nov 13, 2026)
     } else if(!kalshiOrdersLoaded){
       totEl.innerHTML = '<div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div>';
     } else {
@@ -3463,7 +3463,7 @@
     if(t === 'newer'){ kalshiLiveShow.page = Math.max(0, kalshiLiveShow.page - 1); renderKalshiBot(); }
   });
 
-  var kalshiLiveCtl = { arm: null, last: null, session: null };
+  var kalshiLiveCtl = { arm: null, last: null, session: null, loaded: false };   // loaded: the bot's control documents have answered once (load check, Nov 13, 2026)
   var kalshiLiveCtlUnsub = null;
   // Chart axes (the owner, Oct 24, 2026: "include like an x/y axis for % (y) and date (x) on the charts"). Pure helpers shared by the Account result line and the Brief charts: round tick values, a Central-time tick for every hour or day step, and
   // the label for each. Labels are plain HTML laid over the chart, not text inside the scaled SVG, so they stay a readable 12px on a phone.
@@ -4145,7 +4145,8 @@
     }
     var allOrders = kalshiResolveOrders(kalshiAllOrders(), a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
     var m = kalshiRiskMeter(allOrders, s, now);
-    rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
+    // Until the session settings answer, the stop line is unknown (the meter would fall back to $10 and could read 100% used in red for a moment on load), so it says it is reading (load check, Nov 13, 2026).
+    rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' : kalshiLiveCtl && kalshiLiveCtl.loaded === false ? '<div class="kal-empty">Reading the bot\'s settings...</div>' :
       (function(){
         // Percentages only (the owner, Oct 23, 2026), so this card can stay readable under Privacy view: no dollar figure is drawn here.
         var pct = function(x){ return Math.round(x * 100) + '%'; };
@@ -5423,7 +5424,7 @@ kalshiStatusTick();
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; kalshiSyncError = ''; kalshiFeedRender(); }, function(err){ kalshiFeedFailed(err); }); }
     if(api.watchKalshiSlot){ kalshiSlotUnsub = api.watchKalshiSlot(function(o){ kalshiSlotOrders = o; kalshiSlotError = ''; kalshiFeedRender(); }, function(err){ kalshiSlotOrders = []; kalshiSlotError = String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60); kalshiFeedRender(); }); }
-    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiL1(); } kalshiFeedRender(); }); }
+    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session, loaded: true }; if(s.account){ kalshiAcctFromServer(s.account); } if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiL1(); } kalshiFeedRender(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; kalshiFeedRender(); }); }
   }
   function stopKalshiFeed(){
@@ -6410,6 +6411,8 @@ kalshiStatusTick();
         // its own 3-minute cycle. This page makes no market-data call of its
         // own.
         sharedSnapshotUnsubscribe = api.watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate);
+        // Show the strip's row at once with a plain loading line, so the page does not jump down when the prices arrive (load check, Nov 13, 2026: on a phone the strip is its own row under the header).
+        (function(){ var te = document.getElementById('marketTape'); if(te && te.hidden && !marketTapeData){ te.innerHTML = '<span class="tape-asof">Loading prices...</span>'; te.hidden = false; } })();
         tapeUnsubscribe = api.watchMarketTape(handleMarketTapeUpdate);
         INDEX_PROXIES.forEach(function(ix){
           ensureInWatchlist(ix.sym, null, null);
