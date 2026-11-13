@@ -137,15 +137,15 @@ def p_winner(l1, l2, N=12):
 
 
 def fit(win_mid, total_mid):
-    """Least squares by a coarse-to-fine grid over the two rates (step 0.2, then 0.04, then 0.01). win_mid = (team1, draw, team2); total_mid = {strike: mid of 'over strike'}. Returns (l1, l2, rmse over the fitted legs)."""
-    s = sum(win_mid); wm = [x / s for x in win_mid] if s > 0 else list(win_mid)
+    """Least squares by a coarse-to-fine grid over the two rates (step 0.2, then 0.04, 0.01, 0.0025, 0.0006, 0.00015, 0.00004). win_mid = (team1, draw, team2); total_mid = {strike: mid of 'over strike'}. Returns (l1, l2, rmse over the fitted legs)."""
+    wm = list(win_mid)          # not renormalised: the fit absorbs the winner overround (registration, stated weakness)
     tm = list(total_mid.items())
     def err(a, b):
         h, d, c = p_winner(a, b); lam = a + b; e = math.exp(-lam); cdf, run, ov = {}, 0.0, {}
         for n in range(0, 9): run += e * lam ** n / math.factorial(n); cdf[n] = run
         return (h - wm[0]) ** 2 + (d - wm[1]) ** 2 + (c - wm[2]) ** 2 + sum((1 - cdf[int(kk)] - v) ** 2 for kk, v in tm)
     best = (1e9, 1.0, 1.0)
-    for step, span, lo in ((0.2, 20, 0.1), (0.04, 5, None), (0.01, 4, None)):
+    for step, span, lo in ((0.2, 20, 0.1), (0.04, 5, None), (0.01, 4, None), (0.0025, 4, None), (0.0006, 4, None), (0.00015, 4, None), (0.00004, 4, None)):
         if lo is not None: cand = [(lo + i * step, lo + j * step) for i in range(span) for j in range(span)]
         else: cand = [(best[1] + i * step, best[2] + j * step) for i in range(-span, span + 1) for j in range(-span, span + 1)]
         best = min((err(a, b), a, b) for a, b in cand if a > 0.02 and b > 0.02)
@@ -163,11 +163,13 @@ def fee_up(p): return math.ceil(round(0.07 * p * (1 - p) * 100, 6)) / 100
 
 def one_way(value, b, a):
     """Desk B dated amendment (Nov 12): the cost line is ONE-WAY: (ask minus mid) of the side taken plus the entry fee at its price plus 1c, rounded up. The side taken is the cheaper one, as for the gap."""
-    price = a if value - a >= b - value else 1 - b
+    price = a if a <= 1 - b else 1 - b
     return (a - b) / 2 + fee_up(round(price + 0.01, 4))
 
 
-def gap(value, b, a): return max(value - a, b - value)          # YES at the ask, or NO at 1 - bid: the cheaper side
+def gap(value, b, a):
+    """The cheaper side = the side with the LOWER ask (YES ask a, or NO ask 1 - bid; a tie takes YES); gap = the model value of that side minus its ask."""
+    return (value - a) if a <= 1 - b else ((1 - value) - (1 - b))
 
 
 def stats(rows):
@@ -183,7 +185,7 @@ def measure(spec, list_folders, candle_folders):
     gs, counts = games(spec, list_folders)
     idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
     rows = {}              # (group, type) -> list of target rows ; placebo rows kept alongside
-    cache = {}
+    cache = {}; seen_pl = set()          # one placebo per (game, instant) of a filled target of that type (Miner R10)
     games_by_group = {}
     resid = []
     for g in gs:
@@ -219,7 +221,8 @@ def measure(spec, list_folders, candle_folders):
             rows.setdefault((g["group"], typ), {"targets": [], "placebo": []})["targets"].append(row)
             # placebo: refit with the total strike nearest 50c left out, compare its model value with its own quote
             near = min(totm, key=lambda kk: abs(totm[kk] - 0.5)); rest = {kk: v for kk, v in totm.items() if kk != near}
-            if len(rest) >= 2:
+            if len(rest) >= 2 and (g["league"], g["game"], ts, typ) not in seen_pl:
+                seen_pl.add((g["league"], g["game"], ts, typ))
                 pk = ck + (near,)
                 if pk not in cache: cache[pk] = fit((wm[t1[0]], wm[tie[0]], wm[t2[0]]), rest)
                 p1, p2, _ = cache[pk]
