@@ -26,3 +26,5 @@ Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from 
 
 
 Dated clarification Nov 13, 2026, second pass (Head of R&D ruling): from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided; lines 12 and 15 restored verbatim (model probability and cash basis).
+
+Dated clarification 2 Nov 13, 2026 (Auditor B finding): one rule sentence was missing from the restore and is put back verbatim from commit 44dda69f^: Replacement of gold needs daily P/L correlation under 0.3 with gold L1 on overlapping days.

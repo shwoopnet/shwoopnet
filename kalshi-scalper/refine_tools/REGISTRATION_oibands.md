@@ -23,7 +23,7 @@ Fills, wins, win rate with an exact (Clopper-Pearson) 90 percent interval, net d
 - Nothing is adopted from history: about 420 splits were looked at, so any band found there is a multiplicity-inflated pick.
 
 ## Read points
-- A: 40 fills.
+- A: 40 fills. Its fills are NOT pooled with the earlier S-HALFSIZE1 under-0.10 group (a different key and window).
 - B: 20 fills.
 
 ## Decision language (fixed now)

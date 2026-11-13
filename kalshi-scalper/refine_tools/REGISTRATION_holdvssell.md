@@ -10,3 +10,5 @@ Rule at 30 new sells:
 
 
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^; nothing re-decided. 6 markers: 2 verbatim (rules 2 and 3 text, multiplicity), 4 rewritten, 4 sentences: the question and sample (dropped how many sells were read before), the statistic and read point (dropped the pace and the history prior with its dollar figures), rule 1 (dropped the worst day dollar comparison).
+
+Dated clarification 2 Nov 13, 2026 (Auditor B finding): the history prior was removed as figures; its label is put back as words: the history prior is NOT evidence for the forward read.
