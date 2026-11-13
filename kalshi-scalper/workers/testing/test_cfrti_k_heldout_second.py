@@ -63,10 +63,10 @@ with tempfile.TemporaryDirectory() as t:
     lists, cands, prun = os.path.join(t, "lists"), os.path.join(t, "cands"), os.path.join(t, "perp")
     mkrun(lists, [("L1", {"markets": mrows})]); mkrun(cands, [("C1", {"markets": crows})]); mkrun(prun, [("P1", {"market_ticker": "KXBTCPERP", "candlesticks": pcs})])
     mk, cc, pc = k.markets([lists]), k.candles([cands]), k.candles([prun])
-    held, nb, g = r.build(mk, cc, r.perp_mids(pc))
-    assert g["windows_listed"] == 14 and g["closes_before_2026-11-09_not_read"] == 2 and g["heldout_windows"] == 9 and g["not_blind_windows"] == 3, g          # B0 08 Nov 23:45 not read, B1 09 Nov 00:00 and B2 13 Nov 23:45 not blind, H1 14 Nov 00:00 held-out
-    assert g["traded_heldout"] == 3 and g["void_traded"] == 1 and g["traded_not_blind"] == 1, g
-    assert g["edge under 5c"] == 1 and g["spread above 3c"] == 3 and g["no opening minute"] == 1 and g["fewer than 6 changes"] == 1 and g["no decision candle"] == 1 and g["sd zero"] == 1, g
+    held, g = r.build(mk, cc, r.perp_mids(pc))
+    assert g["windows_listed"] == 14 and g["closes_before_2026-11-14_not_read"] == 5 and g["heldout_windows"] == 9, g          # B0 08 Nov 23:45 not read, B1 09 Nov 00:00 and B2 13 Nov 23:45 not blind, H1 14 Nov 00:00 held-out
+    assert g["traded_heldout"] == 3 and g["void_traded"] == 1 and "traded_not_blind" not in g, g
+    assert g["edge under 5c"] == 1 and g["spread above 3c"] == 1 and g["no opening minute"] == 1 and g["fewer than 6 changes"] == 1 and g["no decision candle"] == 1 and g["sd zero"] == 1, g
     assert [x["ticker"][-2:] for x in held] == ["H1", "H2", "H3"] and [x["side"] for x in held] == ["no", "yes", "no"] and [x["ran"] for x in held] == [False, False, True]
     f = lambda p: 0.07 * p * (1 - p)
     nets = [0.9 - f(0.1), -0.1 - f(0.1), -f(0.1)]
@@ -74,8 +74,8 @@ with tempfile.TemporaryDirectory() as t:
     reg = gr["registered_line_unrounded_fee"]
     assert reg["n"] == 3 and abs(reg["net"] - 0.7811) < 1e-9 and abs(reg["pf"] - nets[0] / (-nets[1] - nets[2])) < 1e-12 and abs(reg["pf"] - 7.9369) < 5e-5 and abs(reg["mean"] - 0.7811 / 3) < 1e-9 and abs(reg["win_rate"] - 1 / 3) < 1e-12
     r.MIN_ROWS = 3
-    assert gr["LABEL"] == "no call at n = 3", gr["LABEL"]          # computed before MIN_ROWS was lowered: n 3 < 50
-    assert r.group_report(held)["LABEL"].startswith("cleared its registered bar (NOT the research bar)")
+    assert gr["LABEL"] == "NOT_ENOUGH_DATA, n = 3", gr["LABEL"]          # computed before MIN_ROWS was lowered: n 3 < 50
+    assert r.group_report(held)["LABEL"].startswith("PASS")
     lb = gr["line_b_ran_rows_dropped"]
     assert lb["rows_with_a_next_candle"] == 3 and lb["ran_rows"] == 1 and abs(lb["ran_share"] - 1 / 3) < 1e-12 and lb["n_non_ran"] == 2 and abs(lb["pf_non_ran"] - 0.8937 / 0.1063) < 1e-3 and abs(lb["pf_non_ran"] - 8.4073) < 5e-4, lb
     ha = gr["haircut_a_random_34pct_drop"]
@@ -100,8 +100,7 @@ with tempfile.TemporaryDirectory() as t:
     assert rp["+2 s"]["filled"] == 0 and rp["+6 s"]["filled"] == 1 and rp["+6 s"]["of_signals"] == 3 and abs(rp["+6 s"]["net"] - (0.9 - f(0.1))) < 1e-9, rp
     assert rp["rows_with_a_book_at_decision"] == 1 and rp["ask_not_on_the_book"] == 1 and "NO exchange-time offset" in rp["clock"], rp
     assert r.replay_lines(held, None).startswith("NOT COMPUTED")
-    # the not-blind group is its own report, never pooled
-    nbg = r.group_report(nb); assert nbg["registered_line_unrounded_fee"]["n"] == 1 and nb[0]["day"] == "2026-11-10"
+    assert not any(x["ticker"].endswith(("N1", "B1", "B2", "B0", "D1")) for x in held)          # nothing before 2026-11-14T00:00Z is read
     # rules text check
     assert "simple average of the sixty seconds" in r.check_rules_text([lists])
     # the full read: refused before READ_DATE; committed marker; local marker; NOT_ENOUGH_DATA does not spend the read
@@ -111,10 +110,10 @@ with tempfile.TemporaryDirectory() as t:
     assert not os.path.exists(lm)
     r.MIN_ROWS = 50
     ne = r.heldout_read(mkf, [lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=lm)
-    assert ne["NOT_ENOUGH_DATA"].startswith("3 held-out rows") and "NOT spent" in ne["NOT_ENOUGH_DATA"] and not os.path.exists(lm)
+    assert ne == {"NOT_ENOUGH_DATA": "n = 3"} and not os.path.exists(lm)          # only the count; the read is not spent
     r.MIN_ROWS = 3
     full = r.heldout_read(mkf, [lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=lm)
-    assert os.path.exists(lm) and "HELD-OUT READ MADE" in open(lm).read() and full["HELDOUT"]["LABEL"].startswith("cleared") and full["NOT_BLIND_shares_Bitcoin_windows_with_DEPTH1_never_pooled"]["registered_line_unrounded_fee"]["n"] == 1
+    assert os.path.exists(lm) and "HELD-OUT READ MADE" in open(lm).read() and full["HELDOUT"]["LABEL"].startswith("PASS") and "NOT_BLIND" not in " ".join(full)
     try: r.heldout_read(mkf, [lists], [cands], [prun], now=r.READ_DATE + 2, local_marker=lm); assert 0
     except SystemExit as e: assert "already made" in str(e)
     open(mkf, "w").write("READ-ONCE MARKER: READ ON 2026-11-20, commit abc\n")
@@ -132,9 +131,11 @@ with tempfile.TemporaryDirectory() as t:
     try: r.check_rules_text([bad]); assert 0
     except SystemExit as e: assert "STOP" in str(e)
 r.MIN_ROWS = 50
-# label ladder on UNROUNDED figures
+# label ladder on UNROUNDED figures: PASS / NO CALL / FAIL; under 50 only NOT_ENOUGH_DATA
 mk_f = lambda n, pf, mean: {"n": n, "pf": pf, "mean": mean}
-assert r.label(mk_f(50, 1.3, 0.01)).startswith("cleared") and r.label(mk_f(50, 1.2999999999, 0.01)).startswith("cleared")           # inside 1e-9
-assert r.label(mk_f(50, 1.2999, 0.01)).startswith("no call") and r.label(mk_f(50, 1.5, 0.0)).startswith("no call") and r.label(mk_f(49, 2.0, 0.1)).startswith("no call")
-assert r.label(mk_f(30, 0.9999, -0.01)).startswith("FALSIFIED") and r.label(mk_f(29, 0.5, -0.1)).startswith("no call") and r.label(mk_f(30, 1.0, 0.0)).startswith("no call")
+assert r.label(mk_f(50, 1.3, 0.01)).startswith("PASS") and r.label(mk_f(50, 1.2999999999, 0.01)).startswith("PASS") and r.label(mk_f(50, float("inf"), 0.2)).startswith("PASS")          # inside 1e-9
+assert r.label(mk_f(50, 1.2999, 0.01)).startswith("NO CALL") and r.label(mk_f(50, 1.0, 0.0)).startswith("NO CALL") and r.label(mk_f(50, 1.0 - 1e-10, 0.0)).startswith("NO CALL") and r.label(mk_f(50, None, None)).startswith("NO CALL")
+assert r.label(mk_f(50, 1.5, 0.0)).startswith("NO CALL")          # the card says a mean above 0: PF 1.5 with mean 0 cannot happen, but the label does not call PASS without it
+assert r.label(mk_f(50, 0.9999, -0.01)).startswith("FAIL") and "CLOSED FOR GOOD" in r.label(mk_f(50, 0.5, -0.1))
+assert r.label(mk_f(49, 2.0, 0.1)) == "NOT_ENOUGH_DATA, n = 49" and r.label(mk_f(30, 0.5, -0.1)) == "NOT_ENOUGH_DATA, n = 30"
 print("test_cfrti_k_heldout_second: all checks passed")

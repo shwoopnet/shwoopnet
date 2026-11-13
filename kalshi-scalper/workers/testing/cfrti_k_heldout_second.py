@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """CFRTI-K HELD-OUT reader, SECOND BUILD (Testing Desk, Nov 13, 2026). Research only: reads files, sends nothing, places nothing.
-Built FROM THE CARD TEXT ALONE: CFRTI_K_REGISTRATION.md at 57e2b153 on claude/idea-desk-a (sha256 f42574fb), sections 1 to 13, the Nov 12 and Nov 13 amendments and the dated lines. Desk A's reader and cfrti_k.py were NOT read.
+Built FROM THE CARD TEXT ALONE: CFRTI_K_REGISTRATION.md at 3be6d090 on claude/idea-desk-a (sha256 35b8a1fc6a9f5268), sections 1 to 13, the amendments and the dated lines (Nov 13, 17:04Z three labels; the EA's NO CALL line). Desk A's reader and cfrti_k.py were NOT read.
 NOT RUN ON DATA. Hand case: CFRTI_K_HELD_HAND_CASE.md (committed before this code). Test: test_cfrti_k_heldout_second.py (made-up data only).
 
 READ: refuses before READ_DATE (2026-11-20T00:00Z), before anything is loaded; needs the committed line starting 'READ-ONCE MARKER' in the registration file and refuses if it already says READ ON <date>;
-      refuses if the local marker file CFRTI_K_HELDOUT_READ.local exists; under 50 held-out rows prints NOT_ENOUGH_DATA with the count only and writes NO marker (the read is not spent); otherwise writes the local marker BEFORE printing.
-Windows: settled KXBTC15M markets from the lists. HELDOUT = closes on or after 2026-11-14T00:00:00Z. NOT BLIND = closes 2026-11-09T00:00Z up to 2026-11-14T00:00Z, printed separately, never pooled. Earlier closes are not read (counted).
+      refuses if the local marker file CFRTI_K_HELDOUT_READ.local exists; under 50 held-out rows prints only 'NOT_ENOUGH_DATA, n = x' and writes NO marker (the read is not spent); otherwise writes the local marker BEFORE printing.
+Windows: settled KXBTC15M markets from the lists. The reader reads ONLY closes on or after 2026-11-14T00:00:00Z; earlier closes are not read (counted).
 Rule (sections 7 and 12): decision candle = the KXBTC15M candle ending close - 120 s (YES bid and ask CLOSE both present, spread <= 0.03); cheap side YES if its ask is in [0.05, 0.30] else NO if 1 - yes_bid is in [0.05, 0.30];
   perp mid = (bid close + ask close)/2 of PERPBTC1M; model index = strike x (mid at the candle ending close - 120 / mid at the candle ending close - 900), a missing opening mid drops the window;
   volatility: mids at close - 120 - 60j (j = 0..10), log changes between neighbouring marks where both exist, at least 6 changes, sample sd (n - 1) x sqrt(4/3); chance(YES) = Phi(ln(mid_now/mid_open)/sd);
   buy 1 contract of the cheap side when chance(side) - ask >= 0.05, held to settlement, fee 0.07 p (1 - p) UNROUNDED, void = fee-only loss. Every comparison carries 1e-9; the bar and the labels read UNROUNDED figures.
-Bar (section 4): n >= 50, cash PF >= 1.3, mean > 0: 'cleared its registered bar (NOT the research bar)'; cash PF < 1.0 at n >= 30: FALSIFIED; else 'no call at n = x'.
+Labels at n >= 50 (dated lines of Nov 13): PASS = cash PF >= 1.3 and mean > 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF < 1.0. Under 50: only 'NOT_ENOUGH_DATA, n = x'.
 Beside it: haircut (a), line (b) ran rows dropped, BOOK-REPLAY +2 s and +6 s and the stale-ask count (the last two only when R6 polls are given).
 Usage: cfrti_k_heldout_second.py <registration file> --lists <runs>... --candles <KXBTC15M candle runs>... --perp <PERPBTC1M runs>... [--r6 <root holding book15r6/>]
 """
@@ -19,10 +19,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import scorekit as k
 
 HELDOUT_FIRST = calendar.timegm((2026, 11, 14, 0, 0, 0))
-NOTBLIND_FROM = calendar.timegm((2026, 11, 9, 0, 0, 0))
 READ_DATE = calendar.timegm((2026, 11, 20, 0, 0, 0))
 MIN_ROWS = 50
-FALSIFY_N = 30
 BAR_PF = 1.3
 SERIES = "KXBTC15M"
 PERP_TICKER = "KXBTCPERP"
@@ -38,10 +36,10 @@ AMBIGUITIES = [
     "sd = 0 cannot give a probability: the window is dropped and counted ('sd zero'), never traded. The card is silent.",
     "Fee is UNROUNDED (section 1: 'fee 0.07 x p x (1 - p) unrounded, cash'); the rounded-up fee is printed as information only.",
     "A void result is a fee-only loss (the standing void rule); an empty or other result text STOPS the run naming the window (the Head's ruling for SPXFV1, applied here).",
-    "'About 30' for the falsified line is 30. Under 50 rows the read is NOT_ENOUGH_DATA (the Head), so FALSIFIED is reachable only at 50 rows or more.",
+    "PF exactly 1.0 is NO CALL ('from 1.0 up to 1.3'); an undefined PF (no wins and no losses) is NO CALL. PF >= 1.3 implies a positive net, so the mean test never binds on its own.",
     "Haircut (a): per draw a FIXED count round(0.34 n) of rows is dropped with rng.sample(range(n), k) from random.Random(20261114), 1,000 draws; the 5th and 95th percentiles are nearest rank. The card does not give these details.",
-    "Windows with closes 2026-11-05 to 2026-11-09 are not named by any amendment: they are NOT READ and counted.",
-    "READ_DATE is the Head's 2026-11-20. The owner's dated line (Nov 13) says the frozen read runs on Nov 14 once: if the Head wants it earlier the constant changes and the build is re-audited; nothing here overrides it.",
+    "The 17:04Z dated line says the reader reads ONLY closes from 2026-11-14T00:00:00Z: the NOT BLIND print of closes 2026-11-09 to 2026-11-13 (an earlier amendment) is therefore not produced; those closes are not read. The Head to confirm.",
+    "READ_DATE 2026-11-20 (the dated line: Nov 14 is only the START of the held-out window). If there are under 50 rows on Nov 20 the reader prints NOT_ENOUGH_DATA and is run again on the first day with 50, once.",
     "The perp ticker in the candle runs is taken as KXBTCPERP, or the only ticker present; anything else stops the run (the landed layout of the perp answer is the scorekit shape, unverified for this reader).",
     "R6 clock offsets (exchange time via the Date header) are NOT applied: poll time = t_recv_ms / 1000. The replay and stale-ask lines say so.",
     "The Cutoff guard compares each held-out row's WINDOW CLOSE (trade 'ts' = close) with HELDOUT_FIRST, since the card defines the held-out by close.",
@@ -119,9 +117,9 @@ def ran_flag(side, ask, nxt):
 
 
 def build(mk, cs, mids):
-    """-> (held-out trades, not-blind trades, counts). Trade ts = the window close (the Cutoff guard reads it)."""
-    g = {"windows_listed": 0, "closes_before_2026-11-09_not_read": 0, "heldout_windows": 0, "not_blind_windows": 0, "no decision candle": 0, "traded_heldout": 0, "traded_not_blind": 0, "void_traded": 0}
-    held, nb = [], []
+    """-> (held-out trades, counts). Trade ts = the window close (the Cutoff guard reads it)."""
+    g = {"windows_listed": 0, "closes_before_2026-11-14_not_read": 0, "heldout_windows": 0, "no decision candle": 0, "traded_heldout": 0, "void_traded": 0}
+    held = []
     for tkr in sorted(mk):
         m = mk[tkr]
         if m["series"] != SERIES:
@@ -130,10 +128,9 @@ def build(mk, cs, mids):
         c = m["close"]
         if c is None:
             g["no close time"] = g.get("no close time", 0) + 1; continue
-        if c < NOTBLIND_FROM:
-            g["closes_before_2026-11-09_not_read"] += 1; continue
-        group = held if c >= HELDOUT_FIRST else nb
-        g["heldout_windows" if c >= HELDOUT_FIRST else "not_blind_windows"] += 1
+        if c < HELDOUT_FIRST:
+            g["closes_before_2026-11-14_not_read"] += 1; continue
+        g["heldout_windows"] += 1
         res = m["result"]
         if res is None or str(res).strip() == "":
             raise SystemExit("STOP: empty result on window %s; a settled list must carry every result" % tkr)
@@ -153,10 +150,10 @@ def build(mk, cs, mids):
             g[reason] = g.get(reason, 0) + 1; continue
         side, ask, chance = pick
         void = res == "void"
-        g["traded_heldout" if c >= HELDOUT_FIRST else "traded_not_blind"] += 1; g["void_traded"] += void
-        group.append({"event": m["event"] or tkr, "ticker": tkr, "ts": c, "t0": c - 120, "close": c, "side": side, "price": ask, "win": (res == side), "void": void,
+        g["traded_heldout"] += 1; g["void_traded"] += void
+        held.append({"event": m["event"] or tkr, "ticker": tkr, "ts": c, "t0": c - 120, "close": c, "side": side, "price": ask, "win": (res == side), "void": void,
                       "ran": ran_flag(side, ask, by.get(c - 60)), "day": time.strftime("%Y-%m-%d", time.gmtime(c))})
-    return held, nb, g
+    return held, g
 
 
 def net(t, rounded=False):
@@ -176,12 +173,15 @@ def figures(rows, rounded=False):
 
 
 def label(f):
+    """PASS / NO CALL / FAIL on UNROUNDED figures (Head's dated lines of Nov 13); under MIN_ROWS only NOT_ENOUGH_DATA."""
     n, p, mean = f["n"], f["pf"], f["mean"]
-    if n >= MIN_ROWS and p is not None and p >= BAR_PF - TOL and mean is not None and mean > TOL:
-        return "cleared its registered bar (NOT the research bar): cash PF >= 1.3, positive mean, n >= %d" % MIN_ROWS
-    if n >= FALSIFY_N and p is not None and p < 1.0 - TOL:
-        return "FALSIFIED (cash PF under 1.0 at n = %d)" % n
-    return "no call at n = %d" % n
+    if n < MIN_ROWS:
+        return "NOT_ENOUGH_DATA, n = %d" % n
+    if p is not None and p >= BAR_PF - TOL and mean is not None and mean > TOL:
+        return "PASS (cash PF %s >= 1.3, mean above 0, n = %d; the registered bar, NOT the research bar)" % (p, n)
+    if p is not None and p < 1.0 - TOL:
+        return "FAIL (cash PF %s under 1.0, n = %d): CFRTI-K is CLOSED FOR GOOD (the owner)" % (p, n)
+    return "NO CALL (cash PF %s from 1.0 up to 1.3, n = %d): not a fail" % (p, n)
 
 
 def haircut_a(rows):
@@ -284,17 +284,16 @@ def heldout_read(marker, lists, cands, perp, r6_root=None, now=None, local_marke
         k.guard(f)
     rules = check_rules_text(lists)
     mk, cs, pc = k.markets(lists), k.candles(cands), k.candles(perp)
-    held, nb, g = build(mk, cs, perp_mids(pc))
+    held, g = build(mk, cs, perp_mids(pc))
     if len(held) < MIN_ROWS:
-        return {"NOT_ENOUGH_DATA": "%d held-out rows, need %d; count only, no figure, the read is NOT spent (no marker written)" % (len(held), MIN_ROWS), "counts": g}
+        return {"NOT_ENOUGH_DATA": "n = %d" % len(held)}          # only the count; no marker, the read is not spent
     cut.check(held, now)
     with open(local_marker, "w") as fh:
         fh.write("HELD-OUT READ MADE at %s UTC; folders %s\n" % (time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(now)), [os.path.basename(x.rstrip("/")) for x in list(lists) + list(cands) + list(perp)]))
     r6 = load_r6(r6_root) if r6_root else None
-    return {"constants": {"HELDOUT_FIRST": "2026-11-14T00:00:00Z", "NOT_BLIND_FROM": "2026-11-09T00:00:00Z", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "bar": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)",
-                          "falsified": "cash PF < 1.0 at n >= 30", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
+    return {"constants": {"HELDOUT_FIRST": "2026-11-14T00:00:00Z", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "PASS": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)", "NO_CALL": "cash PF from 1.0 up to 1.3", "FAIL": "cash PF < 1.0 (then CLOSED FOR GOOD)", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
                           "haircut_seed": HAIRCUT_SEED}, "rules_primary_text": rules, "counts": g,
-            "HELDOUT": group_report(held, r6), "NOT_BLIND_shares_Bitcoin_windows_with_DEPTH1_never_pooled": group_report(nb, r6), "ambiguities": AMBIGUITIES}
+            "HELDOUT": group_report(held, r6), "ambiguities": AMBIGUITIES}
 
 
 if __name__ == "__main__":
