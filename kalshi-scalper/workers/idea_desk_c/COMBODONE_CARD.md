@@ -175,3 +175,9 @@ The first line of the count prints this fingerprint, and both builds must name t
 **Clarification to Amendment 5 (Nov 13, 2026, 02:55Z, Auditor B via the History Miner):**
 - (1) The fingerprint covers EVERY top-level YYYY-MM-DD folder present in the frozen copy of the combo folder when the count runs, not only the seven days the count reads. Both builds run on one frozen copy.
 - (2) Files not under a dated folder (a README or any other root file) are not in the fingerprint.
+
+## Reporting rule (Nov 13, 2026, before any data; the Head of R&D's ruling, from the Verification Analyst's C9 and C10)
+
+COMBODONE reads the combo recorder's quotes, with no fill check:
+- **C9:** every result line says "upper bound, not fill-checked".
+- **C10:** the fee mode is per-order rounded. A void refunds the price, keeps the fee, and is counted as a bet.
