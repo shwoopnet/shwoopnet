@@ -82,3 +82,11 @@ Results:
 - a result "maybe"
 - two non-blank results that conflict
 - a HELDOUT_ path
+
+## Corrections found by the first test run (no expected figure changed)
+1. **The hand data put the "next" poll at c - 180.5, which is itself inside the decision interval [c - 190, c - 180].** So it was the decision poll and nothing came after it, and every signal missed its second look.
+   - Polls are now at c - 182.5, c - 180.5 (the decision poll, the last in the interval) and c - 178.5 (the next, 2 s later), all with the same book.
+   - K3's next poll is at c - 176.0 (4.5 s after the decision poll, a miss).
+   - K7 is unchanged (c - 195.5 and c - 170.5: no poll in the interval).
+   - The books, so every expected figure, are unchanged.
+2. **READ_FROM had been hand-typed as 2026-11-20's epoch.** It is now computed from the date (2026-11-21T00:00Z), and so is COUNT_FROM (2026-11-13T21:19:58Z = 1794604798, checked).
