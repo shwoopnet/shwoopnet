@@ -39,6 +39,8 @@ def game_specs(name):
     elif name == "case_10": S = {lg: [dict(edge=15) if i < 10 else {} for i in range(70)] for lg in A8[:3]}             # oldest 10 per league beyond the 60 cap carry a big edge
     elif name == "case_11": S = {lg: [dict(close_min=(99, 100, 135, 136)[i % 4]) for i in range(60)] for lg in A8[:3]}
     elif name == "case_12": S = {lg: [dict(empty=i % 4) for i in range(60)] for lg in A8[:3]}; [g.update(tie_empty=True) for lg in A8[:3] for g in S[lg][:7]]
+    elif name == "case_13": S = {lg: mk(40, btts=(2, 3)) for lg in A8[:3]}                                                    # under 150 filled and over the cost line
+    elif name == "case_14": S = {lg: [dict(fill=(i < 20)) for i in range(60)] for lg in A8[:3]}                           # under 150 filled and under half filled
     return S
 
 
@@ -112,5 +114,5 @@ def build_case(name, out):
 
 if __name__ == "__main__":
     out = sys.argv[1]
-    for n in ["case_%02d" % i for i in range(1, 13)]:
+    for n in ["case_%02d" % i for i in range(1, 15)]:
         print(n, build_case(n, out))
