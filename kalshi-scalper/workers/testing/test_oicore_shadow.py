@@ -42,6 +42,8 @@ assert o.oicore_shadow(A, cs, "KXAAA15M", 0.08, 0.50, 500, 0.0, "NC15") == s1.sp
 assert o.signal([poll(C - 180, no=[(0.80, 20)])], C, 1600, 1000, 0.08, 0.50, 600, 0.0)[0] == "signal" and o.signal([poll(C - 120, no=[(0.80, 20)])], C, 1600, 1000, 0.08, 0.50, 600 + 1e-10, 0.0)[0] == "signal"
 assert o.signal([poll(C - 180.1, no=[(0.80, 20)])], C, 1600, 1000, 0.08, 0.50, 600, 0.0)[0] == "no_data" and o.signal([poll(C - 119.9, no=[(0.80, 20)])], C, 1600, 1000, 0.08, 0.50, 600, 0.0)[0] == "no_data"
 assert o.signal([poll(C - 150, no=[(0.92, 20)])], C, 1600, 1000, 0.08, 0.50, 600, 0.0)[0] == "signal" and o.signal([poll(C - 150, no=[(0.92, 20)])], C, 1600, 1000, 0.09, 0.50, 600, 0.0)[0] == "no_trade"          # ask .08 inside .08, outside .09
+for ask, hi, ok in ((0.50, 0.50, True), (0.51, 0.50, False), (0.40, 0.40, True), (0.41, 0.40, False)):          # the band's upper edge is inclusive (1e-9)
+    assert (o.signal([poll(C - 150, no=[(round(1 - ask, 6), 20)])], C, 1600, 1000, 0.08, hi, 600, 0.0)[0] == "signal") is ok, (ask, hi)
 # the first poll in the window that passes the band is the signal
 assert o.signal([poll(C - 178, no=[(0.40, 20)], yes=[(0.45, 20)]), poll(C - 170, no=[(0.80, 20)]), poll(C - 160, no=[(0.85, 20)])], C, 2, 0, 0.08, 0.50, 1, 0.0)[1] == 1
 # --- fill checks: NC15 within 6 s, R6 within 4 s ---
