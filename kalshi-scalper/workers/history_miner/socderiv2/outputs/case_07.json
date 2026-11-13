@@ -24,6 +24,7 @@
     "share_gap8_spread4": 0.1
    },
    "group": "A_big",
+   "market_note": null,
    "median_spread": 0.02,
    "one_way_cost_median": 0.03,
    "placebo": {
@@ -65,6 +66,7 @@
     "share_gap8_spread4": 0.0
    },
    "group": "A_big",
+   "market_note": null,
    "median_spread": 0.02,
    "one_way_cost_median": 0.03,
    "placebo": {
@@ -199,6 +201,7 @@
    "winner_legs_incomplete": 0
   }
  },
+ "no_btts_leg_by_group": {},
  "no_such_series": [
   "KXAPFDDHBTTS",
   "KXAPFDDHGAME",
@@ -250,6 +253,11 @@
   "KXUCLWTOTAL"
  ],
  "readings": [
+  "R20 (F4): with --job files given, each run's embedded job must equal its committed job file, and every request of the job must be answered whole at 200 (load_run), or the reader stops",
+  "R19 (Auditor B's F2 via the Testing Desk): the 10% and twice-the-placebo test on exact counts (hits*10 >= n and hits*n_placebo >= 2*hits_placebo*n) and 'not tradable' as 2*filled < derivable; shares are printed only",
+  "R17 (26ae3495 a): 'not tradable' = filled games under half of ALL the group's games with a derivable kickoff (both counts printed beside the share); where that target type has no market in the group, 'no such market in this group' is printed in market_note; the verdict still follows the registered order (minimum first)",
+  "R18 (26ae3495 b): the placebo strike is the two-sided total strike whose mid is nearest 0.50, distances compared after rounding to 1e-9; a tie takes the LOWER strike",
+  "R16 (Nov 13, after the lists landed and before any candle): the BTTS leg is the ONE market whose event_ticker is KX<LG>BTTS-<GAMEKEY> (series file: one market an event), whatever its last segment (the real tickers end in -BTTS, the made-up layout used -YES); more than one such market = no BTTS leg, counted (third amendment 707fad73, item 1)",
   "R1 lists proof: every live_<SERIES> request answered 200 on pages 1..k with no cursor left; the three fee-field reads are not used (the fee is the registered formula) and may be unanswered",
   "R2 a game = one GAME event with all three winner markets (two team codes and -TIE); a game missing one is counted 'winner legs incomplete' and is not derivable",
   "R3 sample: GAME events whose latest winner close is inside [2026-09-12, 2026-11-13) UTC, the 60 with the latest such close per league, ties by event ticker; never extended",
@@ -263,7 +271,7 @@
   "R11 residual: per fit, sqrt(SSE / number of fitted legs); the median over fits is reported",
   "R12 one-way cost per target: (ask - mid) + entry fee, fee = ceil to the cent of 0.07 x p x (1 - p) with p = cheaper-side ask + 0.01; the cell's cost is the median; CLOSED on cost above 0.04",
   "R13 n for the minimum = filled games (games with at least one filled target of that type); targets filled are also printed",
-  "R14 verdict order: not tradable, then closed on cost, then no evidence at n = x, then efficient or survives; every flag is printed beside the verdict",
+  "R14 verdict order (Desk B second dated amendment, e12b26cd, sha256 228e7860...): no evidence at n = x (under 150 filled games), then closed on cost, then not tradable, then efficient or survives; every flag is printed beside the verdict",
   "R15 quantiles: median by statistics.median; quartiles and 90th percentile by linear interpolation between order statistics at (n - 1) x q"
  ]
 }

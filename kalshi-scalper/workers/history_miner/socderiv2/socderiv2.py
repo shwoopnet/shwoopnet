@@ -3,7 +3,7 @@
 SOCDERIV_SERIES.json (sha256 01b7febc...). The Testing Desk's socderiv.py and its tests were NOT read. Zero tries: no result is read,
 the market `result` field is never touched. Every output carries the registered freshness line.
 
-Usage: python3 -I socderiv2.py <series.json> <lists run folder> <candles run folder> <out.json>
+Usage: python3 -I socderiv2.py <series.json> <lists run folder> <candles run folder> <out.json> [--job=<lists job> --job=<candles job>]
 
 Readings this build chose where the text is silent are listed in READINGS and printed in every output."""
 import gzip, hashlib, json, math, os, statistics, sys
@@ -20,6 +20,10 @@ MIN_FILLED = 150
 GAP_LINE, SPREAD_LINE = 0.08, 0.04
 COST_KILL = 0.04
 READINGS = [
+    "R20 (F4): with --job files given, each run's embedded job must equal its committed job file, and every request of the job must be answered whole at 200 (load_run), or the reader stops",
+    "R19 (Auditor B's F2 via the Testing Desk): the 10% and twice-the-placebo test on exact counts (hits*10 >= n and hits*n_placebo >= 2*hits_placebo*n) and 'not tradable' as 2*filled < derivable; shares are printed only",
+    "R17 (26ae3495 a): 'not tradable' = filled games under half of ALL the group's games with a derivable kickoff (both counts printed beside the share); where that target type has no market in the group, 'no such market in this group' is printed in market_note; the verdict still follows the registered order (minimum first)",
+    "R18 (26ae3495 b): the placebo strike is the two-sided total strike whose mid is nearest 0.50, distances compared after rounding to 1e-9; a tie takes the LOWER strike",
     "R16 (Nov 13, after the lists landed and before any candle): the BTTS leg is the ONE market whose event_ticker is KX<LG>BTTS-<GAMEKEY> (series file: one market an event), whatever its last segment (the real tickers end in -BTTS, the made-up layout used -YES); more than one such market = no BTTS leg, counted (third amendment 707fad73, item 1)",
     "R1 lists proof: every live_<SERIES> request answered 200 on pages 1..k with no cursor left; the three fee-field reads are not used (the fee is the registered formula) and may be unanswered",
     "R2 a game = one GAME event with all three winner markets (two team codes and -TIE); a game missing one is counted 'winner legs incomplete' and is not derivable",
@@ -264,7 +268,7 @@ def run(series_path, lists_dir, candles_dir):
                         c["roundtrip"].append((a - b) + 2 * 0.07 * mid * (1 - mid))
                         pk = (ev, ts)
                         if pk not in c["plac"]:
-                            ln0, _, q0 = min(tq, key=lambda x: (abs((x[2][0] + x[2][1]) / 2 - 0.5), x[0]))
+                            ln0, _, q0 = min(tq, key=lambda x: (round(abs((x[2][0] + x[2][1]) / 2 - 0.5), 9), x[0]))   # 26ae3495 (b): a tie within 1e-9 takes the LOWER strike
                             rest = [(ln, mm) for ln, mm in tm if ln != ln0]
                             p1, p2, _ = M.fit(wm, rest)
                             _, _, pg = cheaper(q0[0], q0[1], M.p_total_over(p1, p2, ln0))
@@ -279,13 +283,15 @@ def run(series_path, lists_dir, candles_dir):
         ps = stats([x[0] for x in pl], [x[1] for x in pl])
         cost = statistics.median(c["cost"]) if c["cost"] else None
         flags = {
-            "not_tradable": c["derivable"] > 0 and nf < c["derivable"] / 2 - EPS,
+            "not_tradable": c["derivable"] > 0 and 2 * nf < c["derivable"],          # integers (F2)
             "closed_on_cost": cost is not None and cost > COST_KILL + EPS,
             "under_minimum": nf < MIN_FILLED,
         }
         share, pshare = st.get("share_gap8_spread4"), ps.get("share_gap8_spread4")
-        flags["survives_share_test"] = (share is not None and pshare is not None and share >= 0.10 - EPS
-                                        and share >= 2 * pshare - EPS)
+        # F2: exact counts, never rounded shares: hits*10 >= n and hits*n_placebo >= 2*hits_placebo*n
+        h, n_ = st.get("count_gap8_spread4", 0), st.get("n", 0)
+        hp, np_ = ps.get("count_gap8_spread4", 0), ps.get("n", 0)
+        flags["survives_share_test"] = (n_ > 0 and np_ > 0 and h * 10 >= n_ and h * np_ >= 2 * hp * n_)
         if flags["under_minimum"]:
             v = "no evidence at n = %d" % nf
         elif flags["closed_on_cost"]:
@@ -299,6 +305,7 @@ def run(series_path, lists_dir, candles_dir):
         out_cells.append({
             "group": grp, "target": tt, "games_kickoff_derivable": c["derivable"], "games_with_target": c["games_with_target"],
             "targets": c["targets"], "targets_unreadable": c["unreadable"], "targets_filled": c["targets_filled"],
+            "market_note": "no such market in this group" if c["targets"] == 0 else None,   # 26ae3495 (a)
             "games_filled": nf, "filled_share": round(nf / c["derivable"], 6) if c["derivable"] else None,
             "median_spread": round(statistics.median(c["spreads"]), 6) if c["spreads"] else None,
             "one_way_cost_median": round(cost, 6) if cost is not None else None,
@@ -310,8 +317,19 @@ def run(series_path, lists_dir, candles_dir):
             "no_such_series": sorted(no_such), "no_btts_leg_by_group": no_btts, "leagues": league_rows, "cells": out_cells, "readings": READINGS}
 
 
+def check_jobs(pairs):
+    """F4: each run's embedded job must equal the committed job file given for it (JSON equality), before anything is read."""
+    for folder, jobfile in pairs:
+        m = json.load(open(os.path.join(folder, "manifest.json")))
+        if m.get("job") != json.load(open(jobfile)):
+            raise Stop("the run's job is not the committed job: %s" % folder)
+
+
 def main(argv):
     try:
+        jobs = [a.split("=", 1)[1] for a in argv[5:] if a.startswith("--job=")]
+        if jobs:                 # --job=<lists job file> [--job=<candles job file> ...]; folders after the lists are the candle runs
+            check_jobs(list(zip([argv[2], argv[3]], jobs)))
         res = run(argv[1], argv[2], argv[3])
     except Stop as e:
         res = {"stopped": str(e), "freshness": FRESH}
