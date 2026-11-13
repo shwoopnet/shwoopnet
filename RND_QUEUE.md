@@ -816,3 +816,11 @@ The reading: RND_CHARTER section 4 counts a cash PF under 1.0 on the development
 - Gate: before any desk spends time on an idea, the Verification Analyst runs the uniqueness check (7d, declined list 7e, retired cards, and versions per 7g) and answers NEW, VERSION or CLOSED. Only NEW gets desk time as research.
 - Versions of live winners (OICORE places, OIVER, EVENT830 lines) stay allowed on the shadow or paper list, but are not counted as new research.
 - Builders (History Miner, Testing Desk, Forensics, Auditor B) keep finishing builds of OPEN cards; they do not reopen closed ones.
+
+## 2026-11-13 21:31Z, new-mechanism verdicts (VA gate), and the PAPER list
+NEW, registered, PAPER list only, each labelled UNPROVEN:
+- OPENGAP1 (Desk B, card 4cec7eea): fade the overnight S&P gap in the first KXINX15M window. HELDOUT_OPENGAP1 2026-12-01T00:00Z. Screen: 30 independent events, both halves positive, pinned cutoff. Cards read in this family: 8.
+- CONGCAL Stage A + FEDREGPI YES arm (Desk C, one family; 8a27c56f, 3990bbfe): no automated read of senate.gov, clerk.house.gov or federalregister.gov (Main's terms read: none cleared). Registration only.
+- CROWDLEG (Desk C, 788eefb6, combo-only): needs a combo recorder change; one counts-only trial pull approved by Main.
+NOT NEW: SETTLEMENT-WINDOW (version of CFRTI-K), SPOTVOL1 (SPOTFLOW1 source, displacement-fade family), combo vs legs (MVE1), settled or near-certain legs (COMBODONE), tie asymmetry (TIECOND1), serial dependence (S06 to S11, SWEEP1 F5), EA leads a, b, c (lock and parity, favourite-and-hold, Polymarket parked).
+Shadow versions (not research): 3 OIVER places on Bitcoin and 12 OICORE places (XRP withdrawn, no book after Nov 13); source the nightly OI recorder (Desk B c4d38d6e, needs the owner's merge).
