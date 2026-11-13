@@ -22,11 +22,12 @@ def load_markets_ho(folder):
                 if c >= HELD_FROM: out[m["ticker"]] = dict(tk=m["ticker"], close=c, strike=float(m["floor_strike"]), yes=m["result"] == "yes")
     return out
 def trades_of(markets, binary, perp):
-    tr = []
+    """(trades, reasons): every held-out window is either a trade or counted under the reason decide() gave (zero volatility drops the window and counts it as 'no volatility', as the Verification Analyst's second build does)"""
+    tr, why = [], collections.Counter()
     for tk, mk in markets.items():
-        t, _ = K.decide(mk, binary.get(tk, {}), perp)
+        t, w = K.decide(mk, binary.get(tk, {}), perp); why[w] += 1
         if t: tr.append(t)
-    tr.sort(key=lambda t: t["close"]); return tr
+    tr.sort(key=lambda t: t["close"]); return tr, why
 def label(trades):
     """the registered held-out call (CFRTI_K_REGISTRATION section 4). n under 50: NOT_ENOUGH_DATA; at n of 50 or more: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0"""
     n = len(trades)
@@ -46,12 +47,12 @@ def run(lists, cands, perp_path, now=None, marker=None, fixture=False):
     now = time.time() if now is None else now
     if not fixture and now < READ_NOT_BEFORE: sys.exit("REFUSED: before 2026-11-20T00:00:00Z the held-out read does not run (registered read date)")
     if not fixture: refuse_if_read(marker)
-    mk = load_markets_ho(lists); tr = trades_of(mk, K.load_binary(cands), K.load_perp(perp_path))
+    mk = load_markets_ho(lists); tr, why = trades_of(mk, K.load_binary(cands), K.load_perp(perp_path))
     if len(tr) < MIN_TRADES:
         print("NOT_ENOUGH_DATA, n trades = %d (needs %d); nothing else is printed and the read is not spent" % (len(tr), MIN_TRADES)); return tr
     if not fixture:
         with open(marker or MARKER, "x") as f: f.write("read at %s UTC\n" % time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)))
-    print("\n".join(lines(tr))); return tr
+    print("\n".join(lines(tr))); print("held-out windows %d | decisions: %s" % (len(mk), dict(why))); return tr
 if __name__ == "__main__":
     if len(sys.argv) != 4: sys.exit(__doc__)
     lists = os.path.abspath(sys.argv[1])

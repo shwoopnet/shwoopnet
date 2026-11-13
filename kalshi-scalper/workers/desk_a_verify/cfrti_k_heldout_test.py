@@ -18,7 +18,7 @@ H_MON = calendar.timegm(time.strptime("2026-11-14", "%Y-%m-%d"))
 lists, cands, perp = build(60, "2026-10-25", True, 7)
 mk = H.load_markets_ho(lists); assert mk and min(m["close"] for m in mk.values()) >= H_MON, "a close before HELD_FROM was loaded"
 assert max(m["close"] for m in mk.values()) > H_MON + 30 * 86400
-tr = H.trades_of(mk, K.load_binary(cands), K.load_perp(perp)); assert len(tr) >= 50 and min(t["close"] for t in tr) >= H_MON, len(tr)
+tr, _why = H.trades_of(mk, K.load_binary(cands), K.load_perp(perp)); assert len(tr) >= 50 and min(t["close"] for t in tr) >= H_MON, len(tr)
 # 2. the label rule
 def T(c): return dict(pnl=c, win=1 if c > 0 else 0, day=0, close=0)
 assert H.label([T(0.5)] * 49) == "NOT_ENOUGH_DATA"
@@ -32,6 +32,11 @@ assert H.label([T(0.20)] * 25 + [T(-0.20)] * 25) == "NO CALL"                # P
 assert H.label([T(0.26)] * 25 + [T(-0.20)] * 25) == "PASS"                   # PF exactly 1.3 and mean above 0 is PASS
 assert H.label([T(0.30)] * 10 + [T(-0.01)] * 40) == "PASS"                   # large PF
 assert H.label([T(0.199)] * 25 + [T(-0.20)] * 25) == "FAIL"                  # PF just under 1.0
+# 2b. zero volatility: the window is DROPPED and COUNTED (reasons), never a trade
+cl = H_MON + 900 * 10; mk0 = dict(tk="KXBTC15M-Z", close=cl, strike=100.0, yes=True)
+flat = {cl - 120 - 60 * k: 100.0 for k in range(11)}; flat[cl - 900] = 100.0
+tr0, why0 = H.trades_of({"KXBTC15M-Z": mk0}, {"KXBTC15M-Z": {cl - 120: (0.10, 0.12)}}, flat)
+assert tr0 == [] and why0["no volatility"] == 1, (tr0, dict(why0))
 # 3. under 50 prints only the count and spends nothing
 lists2, cands2, perp2 = build(2, "2026-11-14", False, 3)
 mk_ = os.path.join(tempfile.mkdtemp(), "m.txt")
