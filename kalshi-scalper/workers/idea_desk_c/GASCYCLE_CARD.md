@@ -86,3 +86,8 @@ The rule reads only the **state average path itself, from Kalshi's own settled m
   - GAS1-F's windows are being checked.
   - Under rule (h), GASCYCLE's development and held-out dates may need to move to avoid those windows. Its constants (development D before 2026-10-15; held-out D 2026-10-15 to before 2026-12-15) stand only if the Head confirms no overlap. Otherwise the Head re-rules them before any read.
 - **Stage 0** until those are settled and the zero-try count runs. No probe job yet.
+- **Nov 13, 2026, the Head of R&D: the dates STAND.** USWEEP1 and GAS1-F are both frozen at 79724f00. GAS1-F holds every KXAAAGASD* series, but it was dropped under the favourite-and-hold ban, so its window is never read. W-CAT-ECON1 was released by Refinement on Nov 13. Development D before 2026-10-15; held-out D 2026-10-15 to before 2026-12-15.
+- **Zero-try count jobs (drafted Nov 13, for Auditor B and the Head before Main):**
+  - `jobs/GASCYCLE_COUNT_LIVE.json`: two settled live lists, max_close_ts = 2026-10-15T00:00:00Z, at most 24 pages.
+  - `jobs/GASCYCLE_COUNT_HIST.json`: two historical lists. That endpoint takes no date bound but holds only markets closed before about 2026-09-13; it runs only if that is ruled an acceptable bound, and only if the series began before then.
+  - No candles in either. The count reads only ticker, event, close time, strike fields, expiration_value and result.

@@ -1,0 +1,64 @@
+{
+ "job_id": "GASCYCLE_COUNT_LIVE",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/GASCYCLE_CARD.md",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "series_allowlist": [
+  "KXAAAGASDOH",
+  "KXAAAGASCDIN"
+ ],
+ "ticker_allowlist": [],
+ "purpose": "GASCYCLE zero-try count (Idea Desk C, owner MAIN): settled market lists of the Ohio and Indiana daily gas series, closes before 2026-10-15 only, for each day's settled state average (expiration_value). No candle is requested and no price field is read.",
+ "heldout": "GASCYCLE held-out is D 2026-10-15 to before 2026-12-15: every request carries max_close_ts = 1792022400 (2026-10-15T00:00:00Z), so no held-out market is requested. USWEEP1 and GAS1-F (frozen 79724f00) hold KXAAAGASD* windows that are never read; W-CAT-ECON1 was released Nov 13. The reader keeps only ticker, event_ticker, close_time, strike fields, expiration_value and result.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  }
+ ],
+ "max_requests": 26,
+ "notes": "Two series, each its settled live list with close from 2024-01-01 to before 2026-10-15, up to 12 pages of 1,000 (a daily ladder of about 10 to 30 strikes from the series start, unknown, to Oct 15 is at most about 10,000 markets a series). The live list holds markets closed after about 2026-09-13 only; older markets are in GASCYCLE_COUNT_HIST, a separate file because that endpoint takes no date bound. At most 24 pages, cap 26. Fields kept: ticker, event_ticker, close_time, floor_strike, cap_strike, strike_type, expiration_value, result.",
+ "requests": [
+  {
+   "id": "live_KXAAAGASDOH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAAAGASDOH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1704067200,
+    "max_close_ts": 1792022400
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "live_KXAAAGASCDIN",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAAAGASCDIN",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1704067200,
+    "max_close_ts": 1792022400
+   },
+   "max_pages": 12
+  }
+ ]
+}

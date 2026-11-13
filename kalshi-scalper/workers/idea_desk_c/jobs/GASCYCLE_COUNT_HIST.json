@@ -1,0 +1,55 @@
+{
+ "job_id": "GASCYCLE_COUNT_HIST",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/GASCYCLE_CARD.md",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "series_allowlist": [
+  "KXAAAGASDOH",
+  "KXAAAGASCDIN"
+ ],
+ "ticker_allowlist": [],
+ "purpose": "GASCYCLE zero-try count (Idea Desk C, owner MAIN): historical settled market lists of the Ohio and Indiana daily gas series (markets closed before Kalshi's history boundary, about 2026-09-13). No candle, no price field read.",
+ "heldout": "This endpoint takes no date bound; it holds only markets closed before the history boundary (about 2026-09-13), which is before GASCYCLE's held-out start (2026-10-15). FOR AUDITOR B AND THE HEAD TO RULE: run it only if that boundary is accepted as the bound. The reader drops any row with close_time at or after 2026-10-15T00:00:00Z unopened (there should be none) and keeps only ticker, event_ticker, close_time, strike fields, expiration_value and result.",
+ "allowed_endpoints": [
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "max_requests": 26,
+ "notes": "Two series, the historical list each, up to 12 pages of 1,000. At most 24 pages, cap 26. Needed only if the series began before about 2026-09-13; if GASCYCLE_COUNT_LIVE shows the first event after that, this job is not run.",
+ "requests": [
+  {
+   "id": "hist_KXAAAGASDOH",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXAAAGASDOH",
+    "limit": 1000
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "hist_KXAAAGASCDIN",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXAAAGASCDIN",
+    "limit": 1000
+   },
+   "max_pages": 12
+  }
+ ]
+}
