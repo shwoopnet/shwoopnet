@@ -36,5 +36,9 @@ if o2["aggregate"] != {"n": 1, "verdict": "NOT_ENOUGH_DATA (count only)"}: bad.a
 refused(lambda: S.run("held", W, F, now=S.iso("2027-02-26T00:00:00Z"), marker=m), "second held read")
 held = os.path.join(tempfile.mkdtemp(), "pull", "POLGAPH_LISTS", "2026-11-13T0627Z_43378777252"); os.makedirs(held)
 refused(lambda: S.run("dev", os.path.join(held, "w.csv"), F), "listed run via hm_guard")
+o3 = S.run("dev", os.path.join(inv, "windows_heldempty.csv"), F)
+for k, v in E["dev_heldempty"]["counts"].items():
+    if o3["counts"].get(k, 0) != v: bad.append(("F1 count", k, o3["counts"].get(k), v))
+refused(lambda: S.run("dev", W, os.path.join(inv, "futures_mes.csv")), "a non-ES futures row (F2)")
 print("MISMATCHES", bad)
 sys.exit(1 if bad else 0)

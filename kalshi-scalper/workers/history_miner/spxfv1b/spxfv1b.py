@@ -5,7 +5,7 @@ output holds AGGREGATES only (counts, PF, mean, labels), never a per-window prob
 
 Inputs (this build's layout; the real rows are built by another script and audited):
   windows CSV: ticker, close_ts (epoch s), yes_bid, yes_ask (the Kalshi decision candle, end time close - 120 s), result (yes | no | void | empty)
-  futures CSV: ts_event_s (bar START, epoch s, D7), instrument_id, close  - ES.c.0 1 minute bars only (D7)
+  futures CSV: ts_event_s (bar START, epoch s, D7), symbol, instrument_id, close  - ES.c.0 1 minute bars only (D7); any other symbol stops the run (F2)
 Usage: python3 -I spxfv1b.py dev|held <windows.csv> <futures.csv> <out.json>"""
 import csv, json, math, os, statistics, sys
 from datetime import datetime, timezone
@@ -55,6 +55,8 @@ def load_futures(path):
     bars = {}
     with open(path, newline="") as f:
         for r in csv.DictReader(f):
+            if r.get("symbol") != "ES.c.0":                                     # F2
+                raise Stop("futures row with symbol %r refused: ES.c.0 only (D7)" % r.get("symbol"))
             ts = int(r["ts_event_s"])
             if ts in bars:
                 raise Stop("two futures bars with ts_event %d (ES.c.0 only, D7)" % ts)
@@ -132,23 +134,25 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
         if os.path.exists(marker):
             raise Stop("held read refused: read-once marker %s exists" % marker)
     cut = iso(HELDOUT_FIRST)
-    with open(windows_path, newline="") as f:
-        W = []
-        for r in csv.DictReader(f):
-            if r["result"] not in ("yes", "no", "void"):
-                raise Stop("result %r refused (%s)" % (r["result"], r["ticker"]))
-            W.append({"ticker": r["ticker"], "close_ts": int(r["close_ts"]), "yes_bid": float(r["yes_bid"]), "yes_ask": float(r["yes_ask"]), "result": r["result"]})
     bars = load_futures(futures_path)
     counts, trades = {}, []
     rd = iso(READ_DATE)
+    W = []
+    with open(windows_path, newline="") as f:
+        for r in csv.DictReader(f):
+            close = int(r["close_ts"])                                          # F1: drop by block FIRST; no other field of a dropped row is read
+            held = close >= cut
+            if mode == "held" and close > rd:                                   # S5
+                counts["after_read_date_ignored"] = counts.get("after_read_date_ignored", 0) + 1
+                continue
+            if (mode == "dev" and held) or (mode == "held" and not held):
+                k = "held_out_ignored" if mode == "dev" else "development_ignored"
+                counts[k] = counts.get(k, 0) + 1
+                continue
+            if r["result"] not in ("yes", "no", "void"):                        # S6, only rows of the block being read
+                raise Stop("result %r refused (%s)" % (r["result"], r["ticker"]))
+            W.append({"ticker": r["ticker"], "close_ts": close, "yes_bid": float(r["yes_bid"]), "yes_ask": float(r["yes_ask"]), "result": r["result"]})
     for w in sorted(W, key=lambda w: (w["close_ts"], w["ticker"])):
-        held = w["close_ts"] >= cut
-        if mode == "held" and w["close_ts"] > rd:                               # S5
-            counts["after_read_date_ignored"] = counts.get("after_read_date_ignored", 0) + 1
-            continue
-        if (mode == "dev" and held) or (mode == "held" and not held):
-            counts["held_out_ignored" if mode == "dev" else "development_ignored"] = counts.get("held_out_ignored" if mode == "dev" else "development_ignored", 0) + 1
-            continue
         st, t = decide(w, bars)
         counts[st] = counts.get(st, 0) + 1
         if t:
@@ -169,7 +173,7 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
             kills = {"pf_under_1_at_100": pf([t["net"] for t in trades]) < 1.0,
                      "win_rate_within_3_points": abs(A["win_rate"] - A["mean_price"]) < 0.03 + EPS}
             passes = all(r is not None and r >= 1.5 - EPS for r in raw) and not any(kills.values())
-            A.update({"thirds": th, "kills": kills, "verdict": "PASS" if passes else "NOT PASS"})
+            A.update({"thirds": th, "kills": kills, "verdict": "BAR MET (not a research-bar pass)" if passes else "BAR NOT MET"})   # F3
             out["aggregate"] = A
         with open(marker, "w") as f:
             f.write("SPXFV1 held read done\n")
