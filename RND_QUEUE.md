@@ -802,3 +802,9 @@ The reading: RND_CHARTER section 4 counts a cash PF under 1.0 on the development
   - Forensics: per-place coverage and read budget, a pre-check of the SPXOI1 runs, and the inventory.
   - Desk B: EVENT830-mechanism places on uncovered windows, and size-only NOT_ENOUGH_DATA cards.
   - Desk C: the LIQREV scorer build 1, new-series stage 2, and bot-loggable cards.
+
+## 2026-11-13 21:15Z, OIVER and OICAND rulings (Head)
+- OIVER range: candles 2026-09-12 to before 2026-11-09, STOP outside; CFRTI_K_CANDLES only, R6SLICE as cross-check; Aug 20 probe out. Rows builder re-frozen a7aa5fc8 (F1 to F4), with Auditor B. If no windows fall in range, OIVER waits for an allocated pull, never widened.
+- OIVER-DEPTH and CAP30 amendment: Desk A 98eddee8, file sha256 172a55ca (last R6 poll in [close-190, close-180], 40 or more inclusive, R6 held out from Nov 9, CAP 0.30 inclusive). DEPTH span Oct 29 to before Nov 9. R6 rows builder next (Miner), hand case first.
+- OICORE 12 places registration: Desk A 29dd035e, sha256 2d6301c6. OICAND_LISTS 581174d3; candle job split into files of at most 1,000 requests; order after SPXOI1 and the 11-ticker OI check; Auditor B CLEAN first; Main approved in principle.
+- P06 fix lines (Desk B): a VERSION of EVENT830 under 7g, one family, VA scores before any shadow entry; silver is shadow only (reserved). Not evidence at n = 41.
