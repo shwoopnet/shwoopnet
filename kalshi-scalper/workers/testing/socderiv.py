@@ -90,7 +90,7 @@ def games(spec, list_folders):
             if len(teams) != 2: counts["kickoff_not_derivable"] += 1; continue
             tot = {m["ticker"]: m["floor"] for m in by.get((ser["total"], gk), []) if m["floor"] is not None}
             btts = [m["ticker"] for m in by.get((ser["btts"], gk), [])]
-            if not btts: counts["no_btts_leg"] += 1
+            if len(btts) != 1: counts["no_btts_leg"] += 1; btts = []          # the BTTS leg is the ONE market of the event KX<LG>BTTS-<game key> (Head ruling Nov 13 08:21Z); none or more than one: no BTTS leg, counted
             tts = {}
             for m in by.get((ser["teamtotal"], gk), []):
                 hits = [c for c in teams if code(m["ticker"]).startswith(c)]          # exactly one team code must prefix the last segment; two (one code the start of the other, e.g. CR and CRU) is not guessed: unreadable (registration: "if their shape cannot be read, unreadable, not guessed")
