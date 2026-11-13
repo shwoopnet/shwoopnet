@@ -28,3 +28,7 @@ Of the 195 voids, 16 had no window and 179 had a candle. Where a void was buyabl
 - It is hindsight on one window of one family (esports "fair price" voids). The fixed-price families (e-soccer, Liga Pro, e-basketball, ITF) were not measured here; Idea Desk C's census already found their voids barely trade away from the fixed price.
 - A carried ask is a quote last seen, not a quote that could be paid.
 - The stage 2 text (`VOIDSNAP_STAGE2_RULE.md`) was written before this read and is NOT registered. On this reading it is not registered at all.
+
+## Second build: the same output (05:35Z)
+
+Forensics printed and committed its own build's output first (`claude/forensics-desk` b10f83da, `second_builds/VOIDSNAP_SECOND_OUTPUT_landed_VOIDSNAP_CANDLES_2026-11-13T0244Z.txt`, from `voidsnap_second.py` 32243990 on the same candle run, lists run and sample), and only then opened `desk_b_printed_lines.txt`. Its comparison parsed all 53 lines: 157 figures compared, 0 differ. Both builds read CLOSED, no try spent, with every detector failing all three lines under all three carries. Rule 16b is met; the verdict is the Head of R&D's to record. Until the Head records it, the card's own text is not touched.
