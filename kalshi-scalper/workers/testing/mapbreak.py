@@ -99,7 +99,7 @@ def matches(spec, list_folders):
             floors = [m["floor"] for _, m in tot if m["floor"] is not None]
             maps = by.get((ti["map_series"], key), [])
             ns = {p[2] for p, _ in maps if len(p) >= 4}
-            if len(mm) != 2 or not floors or max(floors) != 2.5 or "1" not in ns:
+            if len(mm) != 2 or not floors or max(floors) != 2.5 or "1" not in ns or "2" not in ns:
                 counts["not_best_of_three"] += 1; continue
             cand.append((close, ti["cell"], key, mm, maps))
     out = []

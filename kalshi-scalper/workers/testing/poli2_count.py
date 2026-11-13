@@ -227,7 +227,7 @@ def tally(gaps):
     s_ = res["strict"]; l_ = res["loose"]
     clears = lambda r: r["first_half"] >= FLOOR and r["second_half"] >= FLOOR
     rt = s_["median_round_trip_at_entry"]
-    if rt is not None and rt > COST_MAX:
+    if rt is not None and rt > COST_MAX + 1e-9:
         verdict = "CLOSED on cost: the median round trip at the entry hour is %.1fc, above 5c (no further read)" % (100 * rt)
     elif clears(s_):
         verdict = "COUNT CLEARS 40 series-mornings per half on the strict (proxy) basis; this is a count, not a result"
@@ -260,7 +260,7 @@ def cost_screen(quote_files, series_set=None):
     if not rts: return {"quotes": 0, "verdict": "no two-sided quote priced 20c to 80c: cannot screen"}
     med = st.median(rts)
     return {"quotes": len(rts), "distinct_markets": len(ms), "series": len(ser), "median_round_trip": round(med, 4), "median_spread": round(st.median(sps), 4),
-            "verdict": ("CLOSED on cost: median round trip %.1fc is above 5c; stage 2 is never sent" % (100 * med)) if med > COST_MAX else ("under the 5c line (%.1fc): send the stage 2 request count to the Head for a go" % (100 * med))}
+            "verdict": ("CLOSED on cost: median round trip %.1fc is above 5c; stage 2 is never sent" % (100 * med)) if med > COST_MAX + 1e-9 else ("under the 5c line (%.1fc): send the stage 2 request count to the Head for a go" % (100 * med))}
 
 
 def count(folders, lists=None):

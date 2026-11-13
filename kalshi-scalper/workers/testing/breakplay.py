@@ -113,18 +113,30 @@ OBS_BID, OBS_ASK = 0.90, 0.10
 def last_candle(idx, t, ts):
     d = idx.get(t)
     if not d: return None
-    m = max((x for x in d if x <= ts), default=None)
+    real = lambda c: (c.get("bid") is not None and c["bid"] > 0) or (c.get("ask") is not None and c["ask"] < 1)          # Amendment 10 line 5: a candle carrying a bid or an ask. A bid of 0.00 or an ask of 1.00 is an EMPTY BOOK (what a closed market shows), not a quote (my reading, to be confirmed)
+    m = max((x for x in d if x <= ts and real(d[x])), default=None)
     return None if m is None else d[m]
 
 
-def observe_winner(idx, contracts, ts):
-    """AMENDMENT 9 (Desk B, d8756d7c). contracts {team: map ticker} (exactly two). Each contract's LAST candle ending at or before ts, two-sided or one-sided. The winner is the team whose OWN map contract shows a YES best bid of 0.90 or more while the other team's does not. Neither, both, or a contract with no candle -> None ('state not observable at the look')."""
+OBS_AGE_S = 600
+
+
+def observe_winner(idx, contracts, ts, close=None):
+    """AMENDMENTS 9 and 10. contracts {team: map ticker} (exactly two). Each contract's LAST candle (carrying a bid or an ask) ending at or before ts. The winner is the team whose OWN map contract shows a YES best bid of 0.90 or more while the other team's does not. Neither, both, or a contract with no candle -> None. Line 7: the candle that names the winner must END no earlier than 10 minutes before that map market's close (`close`), else the state is not observable."""
     teams = list(contracts)
     if len(teams) != 2: return None
     cs = {t: last_candle(idx, contracts[t], ts) for t in teams}
     if any(c is None for c in cs.values()): return None
     hi = [t for t in teams if cs[t]["bid"] is not None and cs[t]["bid"] >= OBS_BID - 1e-9]
-    return hi[0] if len(hi) == 1 else None
+    if len(hi) != 1: return None
+    if close is not None and cs[hi[0]]["ts"] < close - OBS_AGE_S - 1e-9: return None
+    return hi[0]
+
+
+def pre_possible(idx, rec, cfg):
+    """A pre-match minute exists for SOME orientation of the two teams (Amendment 10 line 3: observability is counted per look REACHED, i.e. one with a pre-match minute and a look minute)."""
+    ts = list(rec["match"])
+    return any(pre_match_minute(idx, dict(rec, up=a, down=bb), cfg) is not None for a, bb in ((ts[0], ts[1]), (ts[1], ts[0])))
 
 
 def resolve(idx, rec, cfg, look_no, obs1=None):
@@ -134,12 +146,12 @@ def resolve(idx, rec, cfg, look_no, obs1=None):
     look = look_minute(idx, rec, cfg, sc)
     if look is None: return "no_look", None
     if look_no == 1:
-        w = observe_winner(idx, rec["placebo"], look)
-        if w is None: return "state_not_observable", None
+        w = observe_winner(idx, rec["placebo"], look, rec["state_close"])
+        if w is None: return ("state_not_observable" if pre_possible(idx, rec, cfg) else "unobservable_look_not_reached_no_pre_match"), None
     else:
-        w2 = observe_winner(idx, rec["map2"], look)
-        w = obs1 or observe_winner(idx, rec["placebo"], look)                 # map 1 again at the second look if it was not observable at the first
-        if w is None or w2 is None: return "state_not_observable", None
+        w2 = observe_winner(idx, rec["map2"], look, rec["state_close2"])
+        w = obs1 or observe_winner(idx, rec["placebo"], look, rec["state_close"])                 # map 1 again at the second look if it was not observable at the first
+        if w is None or w2 is None: return ("state_not_observable" if pre_possible(idx, rec, cfg) else "unobservable_look_not_reached_no_pre_match"), None
         if w2 == w: return "map2_won_by_map1_winner", None
     teams = list(rec["match"]); other = teams[1] if w == teams[0] else teams[0]
     return "ok", dict(rec, up=w, down=other)
@@ -165,13 +177,15 @@ def prepare(idx, rec, cfg, look_no=1):
     for side, team, val in (("up", rec["up"], v1), ("down", rec["down"], v2)):
         b, a = two(idx, rec["match"][team], look)
         cand[side] = {"gap": val - a, "spread": a - b, "side": side, "ask": a, "team": team, "rt": rt(b, a), "half_spread": (a - b) / 2}
+    if abs(cand["up"]["gap"] - cand["down"]["gap"]) < 1e-9:                       # Amendment 10 line 4: exactly equal gaps -> no bet, counted
+        for s_ in cand: cand[s_]["tie"] = True
     return dict(out, look=look, cand=cand, best=max(cand, key=lambda s: cand[s]["gap"]))
 
 
 def stat(rows):
     if not rows: return None
     g = [r["gap"] for r in rows]; q = st.quantiles(g, n=4, method="inclusive") if len(g) > 2 else None; d = st.quantiles(g, n=10, method="inclusive") if len(g) > 2 else None
-    fire = [r for r in rows if r["gap"] >= EDGE and r["spread"] <= SPREAD_MAX]
+    fire = [r for r in rows if r["gap"] >= EDGE - 1e-9 and r["spread"] <= SPREAD_MAX + 1e-9]
     return {"n": len(rows), "gap_median": round(st.median(g), 4), "gap_quartiles": None if not q else [round(q[0], 4), round(q[2], 4)], "gap_p90": None if not d else round(d[8], 4),
             "share_gap_ge_8c_spread_le_4c": round(len(fire) / len(rows), 3), "share_when_team_up": round(sum(1 for r in fire if r.get("side") == "up") / len(rows), 3), "share_when_team_down": round(sum(1 for r in fire if r.get("side") == "down") / len(rows), 3)}
 
@@ -179,7 +193,9 @@ def stat(rows):
 SECOND = "|second_look"
 
 
-def fired(c, cfg): return c["gap"] >= cfg.edge and c["spread"] <= cfg.spread_max
+def fired(c, cfg):
+    """Gap 8c or more and spread 4c or less, each with a tolerance of 1e-9 (Amendment 10 line 6: a spread of exactly 4c counts as 4c); exactly equal gaps on the two sides: no bet (line 4)."""
+    return c["gap"] >= cfg.edge - 1e-9 and c["spread"] <= cfg.spread_max + 1e-9 and not c.get("tie")
 
 
 def filled_next_minute(idx, rec, r):
@@ -195,9 +211,11 @@ def _add_look(P, idx, rec, r, cfg, sc):
     for s in ("up", "down"): P["spreads"].append(r["cand"][s]["spread"])
     c = r["cand"][r["best"]]
     if cfg.fill_next_minute:
+        P["rts"].append(cost_of(c, cfg))                                           # Amendment 10 line 2: the one-way cost is over EVERY look with an observable state and both match contracts two-sided, on the cheaper side's contract
+        if c.get("tie"): P["equal_gaps_no_bet"] = P.get("equal_gaps_no_bet", 0) + 1
         if fired(c, cfg):
             P["fired"] = P.get("fired", 0) + 1
-            if filled_next_minute(idx, rec, r): P["fired_filled"] = P.get("fired_filled", 0) + 1; P["rts"].append(cost_of(c, cfg))
+            if filled_next_minute(idx, rec, r): P["fired_filled"] = P.get("fired_filled", 0) + 1
             else: P["fired_not_filled"] = P.get("fired_not_filled", 0) + 1
     elif cfg.cost_mode == "one_way": P["rts"].append(cost_of(c, cfg))
     else: [P["rts"].append(cost_of(r["cand"][s], cfg)) for s in ("up", "down")]
@@ -243,11 +261,11 @@ def measure(records, candle_folders, cfg):
     for cell, P in sorted(per.items()):
         s_l, s_p = stat(P["look"]), stat(P["placebo"]); n = P.get("fired_filled", 0) if cfg.fill_next_minute else P["look_filled"]; medrt = None if not P["rts"] else round(st.median(P["rts"]), 4)
         if n < cfg.min_filled: v = ("no evidence at n = %d filled bets (fired and filled at the next minute)" if cfg.fill_next_minute else "no evidence at n = %d filled at the look") % n
-        elif medrt > cfg.cost_max: v = "CLOSED on cost: median %s %.1fc at the look is above %.0fc" % ("round trip" if cfg.cost_mode == "round_trip" else "one-way entry cost", 100 * medrt, 100 * cfg.cost_max)
-        elif s_l["share_gap_ge_8c_spread_le_4c"] >= cfg.edge_share and s_l["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): v = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration and the Head's go"
+        elif medrt > cfg.cost_max + 1e-9: v = "CLOSED on cost: median %s %.1fc at the look is above %.0fc" % ("round trip" if cfg.cost_mode == "round_trip" else "one-way entry cost", 100 * medrt, 100 * cfg.cost_max)
+        elif s_l["share_gap_ge_8c_spread_le_4c"] >= cfg.edge_share - 1e-9 and s_l["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0) - 1e-9: v = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration and the Head's go"
         else: v = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % s_l["gap_p90"]
         verdicts.append(v)
-        titles[cell] = {"sampled": P["sampled"], "filled_pre_match": P["pre"], "fired_signals_at_the_look": P.get("fired", 0), "fired_and_filled_next_minute": P.get("fired_filled", 0), "fired_not_filled": P.get("fired_not_filled", 0), "state_not_observable_at_the_look": P.get("state_not_observable", 0), "no_look_before_state": P.get("no_look", 0), "map2_won_by_map1_winner_no_second_look": P.get("map2_won_by_map1_winner", 0), "observed_winner_differs_from_posted_result": P.get("observed_differs_from_posted", 0), "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": P["pre_dropped_match_ok"], "filled_at_the_look": n,
+        titles[cell] = {"sampled": P["sampled"], "filled_pre_match": P["pre"], "fired_signals_at_the_look": P.get("fired", 0), "fired_and_filled_next_minute": P.get("fired_filled", 0), "fired_not_filled": P.get("fired_not_filled", 0), "equal_gaps_no_bet": P.get("equal_gaps_no_bet", 0), "unobservable_look_not_reached_no_pre_match": P.get("unobservable_look_not_reached_no_pre_match", 0), "state_not_observable_at_the_look": P.get("state_not_observable", 0), "no_look_before_state": P.get("no_look", 0), "map2_won_by_map1_winner_no_second_look": P.get("map2_won_by_map1_winner", 0), "observed_winner_differs_from_posted_result": P.get("observed_differs_from_posted", 0), "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": P["pre_dropped_match_ok"], "filled_at_the_look": n,
                         "median_minutes_state_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2), "median_spread_at_look": None if not P["spreads"] else round(st.median(P["spreads"]), 4),
                         "median_round_trip_at_look": medrt, "cost_line_used": ("round trip (spread plus two fees), kill above %.0fc" if cfg.cost_mode == "round_trip" else "one-way entry cost (ask minus mid plus the entry fee as charged), kill above %.0fc") % (100 * cfg.cost_max), "look": s_l, "placebo": s_p, "state_known_at_close": None if not P.get("state_known_n") else {"records_with_a_two_sided_candle_before_close": P["state_known_n"], "share_up_contract_bid_ge_0.90": round(P["state_known_hi"] / P["state_known_n"], 3), "note": "low share = close_time is a scheduled time, the state was read before it was public"},
                         "denominators": "look share over %d matches, placebo share over %d matches%s" % (0 if not s_l else s_l["n"], 0 if not s_p else s_p["n"], " (DIFFERENT SETS: the second look covers third-map matches only, the placebo all the title's matches)" if cell.endswith(SECOND) else ""), "verdict": v}
@@ -268,7 +286,7 @@ def rule_trades(records, candle_folders, cfg, heldout_go=False):
         if r == "no_pre": counts["no_pre"] += 1; continue
         if r["look"] is None: counts["no_look"] += 1; continue
         c = r["cand"][r["best"]]
-        if not (c["gap"] >= cfg.edge and c["spread"] <= cfg.spread_max): counts["no_signal"] += 1; continue
+        if not fired(c, cfg): counts["no_signal"] += 1; continue
         if "result_up" not in rec: counts["no_result"] += 1; continue
         win = rec["result_up"] if r["best"] == "up" else (not rec["result_up"])
         trades.append({"event": rec["key"], "cluster": rec["key"], "day": rec["S"] // 86400, "ts": r["look"], "price": c["ask"], "win": bool(win), "side": r["best"], "gap": c["gap"], "cell": rec["cell"]}); counts["traded"] += 1
@@ -357,7 +375,7 @@ def score_rule2(records, candle_folders, cfg, result_fn, heldout_go=False, name=
             if key not in inn: continue
             if rr["look"] is None: cnt["no_look"] += 1; continue
             c = rr["cand"][rr["best"]]
-            if not (c["gap"] >= cfg.edge and c["spread"] <= cfg.spread_max): cnt["no_signal"] += 1; continue
+            if not fired(c, cfg): cnt["no_signal"] += 1; continue
             res = result_fn(recx); out["result_fn_calls"] += 1; cnt["fired"] += 1
             if res is None:                    # Head's standing rule (Nov 12): a void is booked as price refunded, fee kept, a fee-only loss, counted in n, PF and z, with the count printed
                 t = amend_trade(recx, rr, no, False); t["net"] = -t["fee"]; t["void"] = True; cnt["void_booked_as_fee_loss"] = cnt.get("void_booked_as_fee_loss", 0) + 1

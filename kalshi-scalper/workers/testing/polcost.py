@@ -50,7 +50,7 @@ def table(folder):
         b, a = num(m.get("yes_bid_dollars")), num(m.get("yes_ask_dollars"))
         if b is None or a is None or not (0 < b < a < 1): continue
         mid = (a + b) / 2
-        if not (0.20 <= mid <= 0.80): continue
+        if not (0.20 - 1e-9 <= mid <= 0.80 + 1e-9): continue
         sz = [x for x in (num(m.get("yes_bid_size_fp")), num(m.get("yes_ask_size_fp"))) if x is not None]
         per.setdefault(m["ticker"].split("-")[0], []).append({"spread": a - b, "rt": (a - b) + 2 * 0.07 * mid * (1 - mid), "size": min(sz) if sz else None})
     out = {"open_markets_listed": open_n, "series_with_a_quoted_market": len(per), "per_series": {}}
@@ -62,7 +62,7 @@ def table(folder):
         med = st.median(r["rt"] for r in allr)
         out["overall"] = {"markets_quoted_20c_to_80c": len(allr), "series": len(per), "median_spread": round(st.median(r["spread"] for r in allr), 4), "median_round_trip": round(med, 4)}
         near = abs(med - COST_MAX) <= 0.01
-        out["verdict"] = ("POL-i2 CLOSED on cost: the overall median round trip is %.1fc, above 5c; its settled lists are never pulled" % (100 * med)) if med > COST_MAX else \
+        out["verdict"] = ("POL-i2 CLOSED on cost: the overall median round trip is %.1fc, above 5c; its settled lists are never pulled" % (100 * med)) if med > COST_MAX + 1e-9 else \
                          ("at or under the 5c line (%.1fc): POL-i2's settled lists go in a later run, placed by the Head" % (100 * med))
         if near: out["verdict"] += "; WITHIN 1c OF THE LINE: a morning snapshot (the 07:00 ET entry hour) may be asked for"
     else:

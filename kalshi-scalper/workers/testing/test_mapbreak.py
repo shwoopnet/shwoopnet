@@ -29,27 +29,27 @@ def mk(t, close, result="yes", **kw): return dict({"ticker": t, "event_ticker": 
 random.seed(5)
 lists = {"live_" + s: {"markets": []} for s in m.series_all(spec)}
 sampled = []
-def add_match(title, i, day, hh, garbage_seed, bo3=True, map2_delay=40, start_ok=True, end_gap=50, two_nil=False):
+def add_match(title, i, day, hh, garbage_seed, bo3=True, map2_delay=40, start_ok=True, end_gap=50, two_nil=False, map2=True):
     ser = [t for t in spec["titles"] if t["cell"] == title][0]; key = "26OCT%02d%02d00AAABBB%d" % (day, hh, i); S = tz_start(day, hh, 0)
     c1 = S + (3600 if start_ok else 15000); c2 = c1 + map2_delay * 60; cm = c2 + end_gap * 60
     rnd = random.Random(garbage_seed); up = "AAA" if i % 2 == 0 else "BBB"; dn = "BBB" if up == "AAA" else "AAA"
     for team in ("AAA", "BBB"):
         lists["live_" + ser["match_series"]]["markets"].append(mk("%s-%s-%s" % (ser["match_series"], key, team), cm, rnd.choice(["yes", "no"])))        # GARBAGE results: must never be read
         lists["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-1-%s" % (ser["map_series"], key, team), c1, "yes" if team == up else "no"))     # the state
-        lists["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-2-%s" % (ser["map_series"], key, team), c2, "yes" if (team == (up if two_nil else dn)) else "no"))     # the map-2 result IS the state of the second look
+        if map2: lists["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-2-%s" % (ser["map_series"], key, team), c2, "yes" if (team == (up if two_nil else dn)) else "no"))     # the map-2 result IS the state of the second look
     lists["live_" + ser["total_maps_series"]]["markets"].append(mk("%s-%s-2" % (ser["total_maps_series"], key), cm, floor_strike=2.5))
     if not bo3: lists["live_" + ser["total_maps_series"]]["markets"].append(mk("%s-%s-3" % (ser["total_maps_series"], key), cm, floor_strike=3.5))
     return dict(title=title, key=key, S=S, c1=c1, up=up, dn=dn, ser=ser)
 NM = 170
 for i in range(NM): sampled.append(add_match("DOTA2", i, 1 + i % 20, 10 + i % 8, i))
-add_match("DOTA2", 900, 5, 10, 1, bo3=False); add_match("DOTA2", 901, 5, 11, 1, start_ok=False); add_match("DOTA2", 902, 5, 12, 1, map2_delay=5); add_match("DOTA2", 903, 5, 13, 1, two_nil=True); add_match("DOTA2", 910, 6, 12, 2, end_gap=12); add_match("DOTA2", 911, 6, 13, 3, end_gap=5)
+add_match("DOTA2", 900, 5, 10, 1, bo3=False); add_match("DOTA2", 901, 5, 11, 1, start_ok=False); add_match("DOTA2", 902, 5, 12, 1, map2_delay=5); add_match("DOTA2", 903, 5, 13, 1, two_nil=True); add_match("DOTA2", 904, 5, 14, 1, map2=False); add_match("DOTA2", 910, 6, 12, 2, end_gap=12); add_match("DOTA2", 911, 6, 13, 3, end_gap=5)
 for i in range(20): add_match("CS2", i, 3, 9 + i % 5, 100 + i)                                        # only 20 CS2 matches: under 150 filled
 ms, counts = m.matches(spec, [])  if False else (None, None)
 with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     mkrun(dl, jl, lists)
     mt, counts = m.matches(spec, [dl])
     assert counts["lists_truncated_at_the_page_cap"] == []
-    assert counts["not_best_of_three"] == 1 and counts["start_not_derivable"] == 1 and counts["map2_closed_under_15_min_after_map1_count_only"] == 1 and counts["sampled"] == NM + 20 + 5, counts
+    assert counts["not_best_of_three"] == 2 and counts["start_not_derivable"] == 1 and counts["map2_closed_under_15_min_after_map1_count_only"] == 1 and counts["sampled"] == NM + 20 + 5, counts
     assert len(mt) == NM + 24, counts
     assert counts["second_look_matches"] == NM + 23 and counts["map2_won_by_map1_winner_no_second_look"] == 1, counts
     assert all(set(x) - {"state_close2", "map2"} == {"cell", "key", "S", "state_close", "posted_up", "match", "placebo"} for x in mt)           # no result field of any market in a match record
@@ -203,4 +203,16 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     finally: m.CFG.min_filled = 150
     assert 0 < o_nf["bets"] < o_nf["optimistic_same_candle_fill"]["bets"] and o_nf["counts"]["not_filled"] == o_nf["optimistic_same_candle_fill"]["bets"] - o_nf["bets"] and "optimistic" in o_nf["optimistic_same_candle_fill"]["label"], (o_nf.get("counts"), o_nf.get("verdict"))
     assert o_ok["bets"] == o_ok["optimistic_same_candle_fill"]["bets"] and o_ok["counts"]["not_filled"] == 0
+    # AMENDMENT 10: tolerance, age limit, a candle carrying a bid or an ask
+    cfgx = m.CFG
+    assert bp.fired({"gap": 0.08, "spread": 0.54 - 0.50}, cfgx) and bp.fired({"gap": 0.58 - 0.50, "spread": 0.04}, cfgx) and not bp.fired({"gap": 0.0799, "spread": 0.04}, cfgx) and not bp.fired({"gap": 0.08, "spread": 0.0401}, cfgx)
+    assert not bp.fired({"gap": 0.09, "spread": 0.02, "tie": True}, cfgx)                  # exactly equal gaps: no bet
+    cdt = lambda ts, b, a: {"ts": ts, "bid": b, "ask": a}
+    ixa = {"MA": {100: cdt(100, 0.93, None)}, "MB": {100: cdt(100, 0.05, 0.08)}}
+    assert bp.observe_winner(ixa, {"A": "MA", "B": "MB"}, 200, close=700) == "A"          # ends exactly 10 minutes before the close: allowed
+    assert bp.observe_winner(ixa, {"A": "MA", "B": "MB"}, 200, close=701) is None         # older than 10 minutes: not observable
+    ixb = {"MA": {100: cdt(100, 0.93, None), 150: cdt(150, None, None)}, "MB": {100: cdt(100, 0.05, 0.08)}}
+    assert bp.observe_winner(ixb, {"A": "MA", "B": "MB"}, 200, close=300) == "A"          # an empty candle (no bid, no ask) is not 'the last candle'
+    ixe = {"MA": {100: cdt(100, 0.93, None), 150: cdt(150, 0.0, 1.0)}, "MB": {100: cdt(100, 0.05, 0.08), 150: cdt(150, 0.0, 1.0)}}
+    assert bp.observe_winner(ixe, {"A": "MA", "B": "MB"}, 200, close=300) == "A"          # a closed market's empty book (bid 0.00, ask 1.00) is not a quote
 print("mapbreak synthetic tests passed")

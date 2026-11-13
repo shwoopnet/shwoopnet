@@ -60,7 +60,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     mkrun(dl, jl, lists)
     ev, counts = t.events(spec, [dl])
     assert len(ev["NHL_P1"]["base"]) == NB and len(ev["NFL_Q"]["base"]) == NB and len(ev["NHL_REG"]["base"]) == NB, [len(v["base"]) for v in ev.values()]
-    assert counts["held_out_dropped"] >= 1 and counts["dropped_wrong_market_count"] >= 1 and counts["start_not_derivable"] >= 1, counts
+    assert counts["held_out_dropped"] >= 1 and counts["dropped_not_all_settled"] + counts["dropped_no_tie_market"] >= 1 and counts["start_not_derivable"] >= 1, counts
     assert len(ev["NHL_P1"]["price"]) == NP, len(ev["NHL_P1"]["price"])
     assert all(set(e) == {"event", "key", "tie_ticker", "T"} for v in ev.values() for e in v["price"])           # the price block carries no result and no level
     e0 = ev["NHL_P1"]["price"][0]; assert e0["T"] == starts[0] - 1800

@@ -74,7 +74,7 @@ def events(spec, list_folders):
     by = {}
     for t, m in ms.items():
         by.setdefault((m["series"], game_key(m["event"])), []).append(m)
-    counts = {"events_listed": 0, "held_out_dropped": 0, "dropped_not_all_settled": 0, "dropped_wrong_market_count": 0, "price_block_games_not_all_settled_COUNTED_NOT_FILTERED": 0, "dropped_no_tie_market": 0, "start_not_derivable": 0, "no_such_series": 0, "limit_base_block_boundary": "a base game settling within about 2.5 hours after a pricing instant near 2026-10-27T00:00Z can be in the base block for its closing, a stated limit (Auditor B, Nov 13); price-block games are kept whatever their result field says"}
+    counts = {"events_listed": 0, "held_out_dropped": 0, "dropped_not_all_settled": 0, "price_block_games_not_all_settled_COUNTED_NOT_FILTERED": 0, "dropped_no_tie_market": 0, "start_not_derivable": 0, "no_such_series": 0, "limit_base_block_boundary": "a base game settling within about 2.5 hours after a pricing instant near 2026-10-27T00:00Z can be in the base block for its closing, a stated limit (Auditor B, Nov 13); price-block games are kept whatever their result field says"}
     listed = {m["series"] for m in ms.values()}
     counts["no_such_series"] = sum(1 for s in all_series(spec) if s not in listed)
     out = {}
@@ -88,11 +88,10 @@ def events(spec, list_folders):
                 counts["events_listed"] += 1
                 close = max(m["close"] for m in mk if m["close"])
                 if close >= HELD_OUT_FROM: counts["held_out_dropped"] += 1; continue
-                if len(mk) != need: counts["dropped_wrong_market_count"] += 1; continue
-                unsettled = any(m["result"] not in ("yes", "no") for m in mk)
+                unsettled = len(mk) != need or any(m["result"] not in ("yes", "no") for m in mk)
                 if close < BASE_END:
-                    if unsettled: counts["dropped_not_all_settled"] += 1; continue                       # the BASE block needs the result
-                elif unsettled: counts["price_block_games_not_all_settled_COUNTED_NOT_FILTERED"] += 1       # price block: nothing is filtered on a result field (Head's ruling Nov 13): a family-level count only
+                    if unsettled: counts["dropped_not_all_settled"] += 1; continue                       # the BASE block needs every result
+                elif unsettled: counts["price_block_games_not_all_settled_COUNTED_NOT_FILTERED"] += 1       # price block: NOTHING is filtered on a result field or on the number of markets (Head's ruling Nov 13): a family-level count only; a game is dropped only if it has no Tie market or no derivable start
                 tie = [m for m in mk if (m["ticker"].endswith("-1") if reg else m["ticker"].endswith("-TIE"))]
                 if len(tie) != 1: counts["dropped_no_tie_market"] += 1; continue
                 tie = tie[0]
@@ -158,13 +157,13 @@ def measure(spec, list_folders, candle_folders):
             two += 1; games_two.add(e["event"]); sp = got["ask"] - got["bid"]; spreads.append(sp)
             if r is not None:
                 gaps.append(r - got["ask"])
-                if r - got["ask"] >= RULE_EDGE and sp <= SPREAD_MAX: fires += 1
+                if r - got["ask"] >= RULE_EDGE - 1e-9 and sp <= SPREAD_MAX + 1e-9: fires += 1          # tolerance 1e-9 (Auditor B, Head Nov 13): a spread of exactly 4c counts as 4c
         nb, npd = len(b), len(p)
         res[c["cell"]] = {"base_events": nb, "base_rates_by_key": rates, "price_block_games_with_derivable_start": npd, "two_sided": two, "distinct_games_two_sided": len(games_two), "distinct_games_price_block": len({e["event"] for e in p}), "share_two_sided": None if not npd else round(two / npd, 3),
                           "median_spread": None if not spreads else round(st.median(spreads), 4), "gap_q1_median_q3": q(gaps), "share_two_sided_games_with_ask_10c_under_and_spread_le_4c": None if not two else round(fires / two, 3),
                           "status": "no evidence at n = %d base events / %d two-sided games" % (nb, two) if (nb < MIN_BASE or two < MIN_PRICED) else "measured"}
     meas = {n: r for n, r in res.items() if r["status"] == "measured"}
-    survive = [n for n, r in meas.items() if r["gap_q1_median_q3"] and r["gap_q1_median_q3"][1] >= EDGE and r["median_spread"] is not None and r["median_spread"] <= SPREAD_MAX]
+    survive = [n for n, r in meas.items() if r["gap_q1_median_q3"] and r["gap_q1_median_q3"][1] >= EDGE - 1e-9 and r["median_spread"] is not None and r["median_spread"] <= SPREAD_MAX + 1e-9]
     if survive: verdict = "SURVIVES the measurement in %d cell(s) %s: a separate registration, tries = surviving cells" % (len(survive), survive)
     elif meas and all((r["share_two_sided"] or 0) < 0.5 for r in meas.values()): verdict = "CLOSED: nothing to buy (under half of the price-block games are two-sided in every measured cell)"
     elif meas:
