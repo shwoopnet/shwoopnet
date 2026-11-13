@@ -43,3 +43,5 @@ Neither reaches a registered figure, a median or the verdict. The Head of R&D ru
 ## CLOSED on two builds (Nov 13, 2026, 08:17Z)
 
 The Head of R&D ruled: both information-only lines are pinned by one dated line as my reader prints them, with the second build's values beside them; no code moves. The closing note with the dated line, both builds' hashes and the run is at the end of card 17's section in `IDEA_DESK_B_WAVE3.md`, whose sha256 is now 0f762be1af986598379e7e8ff4c859cf093e8834fef0c5766c1e1eab9b9e836c. Verdict recorded: NHLOT CLOSED at the price measurement, no bet, no outcome, no try spent. The Head asks for the Verification Analyst through the Chief of Staff.
+
+**08:23Z:** the Verification Analyst confirmed every count from its own code; one sentence added to the closing note with its one stated ambiguity. The card file's sha256 is now c4d531939b736a8cd85007e076f4f6447571c97009cd2ce2408981b922a01b3b. NHLOT is finished.
