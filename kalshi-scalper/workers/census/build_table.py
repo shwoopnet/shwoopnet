@@ -6,6 +6,10 @@ columns from the Nov 10 listing and from the Forensics desk's cost table. Usage:
 python3 build_table.py   (run in this folder; writes ../FAMILY_TABLE.md)
 """
 import collections, csv, os
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 

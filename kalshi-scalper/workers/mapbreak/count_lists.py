@@ -1,5 +1,9 @@
 """MAPBREAK lists: counts from tickers, strikes and close times only. No price and no result is read."""
 import json, gzip, os, sys, collections, datetime
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 S = sys.argv[1]
 m = json.load(open(S + '/manifest.json'))
 live = collections.defaultdict(lambda: collections.defaultdict(dict)); hist = collections.defaultdict(dict); pages = collections.Counter()

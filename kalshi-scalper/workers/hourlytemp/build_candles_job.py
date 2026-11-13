@@ -13,6 +13,10 @@ Writes markets.json and HOURLYTEMP_CANDLES.json.
 """
 import gzip, json, os, sys
 from datetime import datetime
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 MAX_TICKERS, MAX_CANDLES, MAX_REQUESTS = 100, 9800, 110
 

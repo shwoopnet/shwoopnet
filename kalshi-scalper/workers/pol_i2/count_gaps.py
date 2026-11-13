@@ -12,6 +12,10 @@ Usage: python3 count_gaps.py <markets.json> <folder of the candle run> [<more ru
 import glob, gzip, json, os, sys
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 ET = ZoneInfo("America/New_York")
 FIRST, LAST, SPLIT = date(2026, 9, 13), date(2026, 11, 12), date(2026, 10, 13)

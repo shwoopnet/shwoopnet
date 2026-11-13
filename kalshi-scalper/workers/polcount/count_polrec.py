@@ -1,6 +1,10 @@
 """Politics recorder count: markets, events, closes and spread level per series. No result and no price level is printed
 (two-sidedness and spread only). Usage: python3 -I count_polrec.py <folder holding polrec/...>"""
 import gzip, csv, glob, sys, collections, datetime, statistics
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 S = sys.argv[1]
 def ts(x):
     try: return datetime.datetime.fromisoformat(x.replace('Z', '+00:00')).timestamp()

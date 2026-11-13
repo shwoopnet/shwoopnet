@@ -19,6 +19,10 @@ import os
 import sys
 from collections import Counter
 from datetime import datetime
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 MAX_GAMES, MAX_REQUESTS, GROUP_GAMES, GROUP_TICKERS, GROUP_SPAN_S = 150, 150, 5, 100, 1800
 BEFORE_S, AFTER_S = 50 * 60, 120

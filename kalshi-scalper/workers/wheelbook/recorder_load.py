@@ -1,6 +1,10 @@
 """Concurrency estimate for a book recorder, from the Nov 10 census listing. Times and tickers only."""
 import gzip, json, glob, re, collections, datetime, sys
 from zoneinfo import ZoneInfo
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 ET = ZoneInfo('America/New_York'); MON = {m: i + 1 for i, m in enumerate('JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'.split())}
 def ts(x): return datetime.datetime.fromisoformat(x.replace('Z', '+00:00')).timestamp() if x else None
 def start(ev):

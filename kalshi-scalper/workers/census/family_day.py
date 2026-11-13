@@ -9,6 +9,10 @@ Usage: python3 family_day.py <series_day.csv> <out dir>
 """
 import csv, os, re, sys
 from first_cut import RULES as OLD
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 NEW = [
     ("m15_all", r"15M$"),

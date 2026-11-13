@@ -9,6 +9,10 @@ Usage: python3 settle_speed.py <folder of the CENSUS_LISTING run> <out dir>
 import csv, glob, gzip, json, os, sys
 from datetime import datetime
 from family_day import family
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 def ts(x):
     try:

@@ -2,6 +2,10 @@
 Usage: python3 -I count_listing.py <folder with NNNN.json.gz list answers>"""
 import sys, gzip, json, glob, re, collections, datetime
 from zoneinfo import ZoneInfo
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 ET = ZoneInfo('America/New_York')
 MON = {m: i + 1 for i, m in enumerate('JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC'.split())}
 SERIES = ('KXESOCCERGAME', 'KXEBASKETBALLGAME')

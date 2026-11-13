@@ -10,6 +10,10 @@ and first_cut_families.csv (one row per family). Counts only; no price, no resul
 Usage: python3 first_cut.py <dir with the three json files> <out dir>
 """
 import csv, json, os, re, sys
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 # (family key, regex on the series ticker). First match wins.
 RULES = [

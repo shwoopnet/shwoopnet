@@ -12,6 +12,10 @@ import subprocess
 import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ECON = os.path.join(HERE, "econlag.py")

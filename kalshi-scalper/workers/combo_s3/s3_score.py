@@ -15,6 +15,10 @@ import os
 import random
 import sys
 from datetime import datetime, timezone
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 # ---- pinned constants (the registration carries the same values) ----
 START_UTC = "2026-11-13T00:00:00Z"        # development entries start here

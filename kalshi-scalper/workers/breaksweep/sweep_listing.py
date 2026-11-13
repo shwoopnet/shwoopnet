@@ -13,6 +13,10 @@ Usage: python3 sweep_listing.py <folder of the CENSUS_LISTING run> <out dir>
 import csv, glob, gzip, json, os, sys
 from collections import Counter, defaultdict
 from datetime import datetime
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 LEAD_MIN = 10
 

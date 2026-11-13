@@ -11,6 +11,10 @@ Writes markets.json and POLI2_CANDLES.json.
 """
 import gzip, json, os, sys
 from datetime import datetime
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 START_TS = 1788652800      # 2026-09-06 00:00 UTC: seven days of volume before the first gap day
 END_TS = 1794484800        # 2026-11-12 12:00 UTC = 07:00 ET on the last gap day; nothing later is pulled

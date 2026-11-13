@@ -22,6 +22,10 @@ import os
 import re
 import sys
 from datetime import datetime, timezone
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 START_UTC = "2026-10-20T00:00:00Z"
 END_UTC = "2026-11-11T23:59:59Z"

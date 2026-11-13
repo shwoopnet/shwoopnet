@@ -15,6 +15,10 @@ the two-sided strikes within two ranks of the money is above 5c at every look in
 Usage: python3 measure.py <markets.json> <folder of the HOURLYTEMP_LISTS run> <folder of the candle run> [...]
 """
 import glob, gzip, json, math, os, sys
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 LOOKS = (55, 30, 10)        # minutes before the hour (the market opens 60 minutes before it)
 NEAR = 2                    # ranks either side of the money that count as near the money

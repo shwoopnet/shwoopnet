@@ -26,6 +26,10 @@ import gzip
 import json
 import os
 import sys
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '..'))
+from deskb_guard import refuse_all as _refuse_all
+_refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first open or glob
 
 # ---- pinned constants (the card carries the same values) ----
 JUMP = 0.08          # moneyline mid move against three minutes earlier
