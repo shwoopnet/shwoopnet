@@ -163,11 +163,13 @@ def run(stage, games):
         L.append("STAGE 2 (development only): n = %d settled (unsettled %d); wins %d, losses %d (a void is a fee-only loss counted); net %+.1f c, %+.2f c a contract; cash PF %s; halves by 2026-12-01T00:00Z: first n %d PF %s, second n %d PF %s" % (
             n, len(uns), sum(1 for x in nets if x > 0), sum(1 for x in nets if x <= 0), fl(sum(nets)), fl(sum(nets) / n) if n else 0, None if P is None else round(P, 4), len(h1), None if P1 is None else round(P1, 4), len(h2), None if P2 is None else round(P2, 4)))
         z, kk = z_day_clustered([(central_day(t), n_) for t, n_ in rows])
-        L.append("Z (one-sided, day-clustered by US Central game day, %d clusters): %s against the bar %s" % (kk, None if z is None else round(z, 2), Z_BAR))
-        if n < MIN_FILLED: L.append("STAGE 2 VERDICT: NOT_ENOUGH_DATA at n = %d" % n)
+        L.append("Z (information only; the final held-out pass reads it; one-sided, day-clustered by US Central game day, %d clusters): %s against the bar %s" % (kk, None if z is None else round(z, 2), Z_BAR))
+        if n < MIN_FILLED: L.append("STAGE 2 VERDICT: NOT_ENOUGH_DATA (%d settled entries, need %d)" % (n, MIN_FILLED))
         else:
             half_ok = all(x is None or x >= 1 - TOL for x in (P1, P2))          # a half fails only below 1.0 (an empty half cannot fail)
-            L.append("STAGE 2 VERDICT: %s" % ("pass: cash PF %.2f >= 1.5, halves not below 1.0, z %.2f >= %.2f" % (P, z, Z_BAR) if (P is not None and P >= PF_BAR - TOL and half_ok and z is not None and z >= Z_BAR - TOL) else "bar not met (cash PF %s, halves ok %s, z %s)" % (P, half_ok, z)))
+            # Head ruling Nov 13, 15:42Z: the DEVELOPMENT verdict is a screen on cash PF, the halves and net only; z is printed above for information and belongs to the final held-out pass
+            ok = P is not None and P >= PF_BAR - TOL and half_ok and sum(nets) > 0
+            L.append("STAGE 2 VERDICT: %s" % ("SURVIVES DEVELOPMENT (the held-out is a later, reviewed read; nothing here is approved)" if ok else "FALSIFIED (cash PF line 1.5, both halves at 1.0, net above 0)"))
     L.append("label: provisional, one build; invented rows")
     return L
 

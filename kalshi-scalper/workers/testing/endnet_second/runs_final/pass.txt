@@ -6,6 +6,6 @@ ENTRIES BY US CENTRAL WEEK (Monday): {'2026-11-16': 21, '2026-11-23': 47, '2026-
 WEEK TESTS: mean over the 4 weeks of the development window 40.0 (DECIDES: under 6 is False); information: every week with an entry under 6 is False; mean over the weeks with entries 40.0
 STAGE 1 VERDICT: NOT CLOSED at stage 1
 STAGE 2 (development only): n = 160 settled (unsettled 0); wins 106, losses 54 (a void is a fee-only loss counted); net +5400.0 c, +33.75 c a contract; cash PF 4.0769; halves by 2026-12-01T00:00Z: first n 73 PF 3.9877, second n 87 PF 4.1538
-Z (one-sided, day-clustered by US Central game day, 25 clusters): 10.57 against the bar 5.46
-STAGE 2 VERDICT: pass: cash PF 4.08 >= 1.5, halves not below 1.0, z 10.57 >= 5.46
+Z (information only; the final held-out pass reads it; one-sided, day-clustered by US Central game day, 25 clusters): 10.57 against the bar 5.46
+STAGE 2 VERDICT: SURVIVES DEVELOPMENT (the held-out is a later, reviewed read; nothing here is approved)
 label: provisional, one build; invented rows

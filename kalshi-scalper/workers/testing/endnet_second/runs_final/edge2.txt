@@ -7,6 +7,6 @@ WEEK TESTS: mean over the 4 weeks of the development window 2.25 (DECIDES: under
 STAGE 1 VERDICT: CLOSED: fewer than 6 qualifying entries a week (the mean over the 4-week window)
 FLAG: 1 entries with a missing or null result are UNSETTLED, excluded from n and PF, counted: ['e12_result_null']
 STAGE 2 (development only): n = 8 settled (unsettled 1); wins 4, losses 4 (a void is a fee-only loss counted); net +176.3 c, +22.04 c a contract; cash PF 2.8815; halves by 2026-12-01T00:00Z: first n 4 PF 11.9118, second n 4 PF 0.8801
-Z (one-sided, day-clustered by US Central game day, 8 clusters): 1.25 against the bar 5.46
-STAGE 2 VERDICT: NOT_ENOUGH_DATA at n = 8
+Z (information only; the final held-out pass reads it; one-sided, day-clustered by US Central game day, 8 clusters): 1.25 against the bar 5.46
+STAGE 2 VERDICT: NOT_ENOUGH_DATA (8 settled entries, need 150)
 label: provisional, one build; invented rows
