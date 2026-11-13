@@ -135,7 +135,7 @@ gates.SP4 = () => {
   assert.ok(/>COOLING</.test(panel(h, 'off')) && !/>HEALTHY</.test(panel(h, 'off')), 'and reads cooling down');
   const open = P.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: P.KAL_BOARD_RETIRED, open: { stage: 'live' } }, esc, money);
   assert.ok(!/id="lp-p-live"[^>]* hidden/.test(open) && /id="lp-p-off"[^>]* hidden/.test(open) && /aria-expanded="true" aria-controls="lp-p-live"/.test(open) && /<b>Live open\.<\/b>/.test(open), 'the open box is shown, the others are hidden, the header line says which is open');
-  assert.ok(/Closest to a kill: /.test(h) && /<b>0<\/b> shadow/.test(h), 'the header line carries the counts and the closest kill');
+  assert.ok(!/Closest to a kill: /.test(h) && !/<b>0<\/b> shadow/.test(h) && /closest kill: /.test(open), 'each figure once (Nov 13, 2026, "limit redundancies"): the boxes carry the counts and the open box\'s progress line the closest kill, so the header line repeats neither');
 };
 const now = Date.UTC(2026, 10, 10, 18, 0);
 // The shadow registry is EMPTY since Nov 11, 2026 (the owner retired all four rules), but the board still draws shadow cards for the next rule a reviewed edit adds, so the renderer is exercised on a fixture of four rules,
@@ -225,7 +225,7 @@ gates.SP9 = () => {
   assert.strictEqual(Q.kalshiStratOpenCount([ord(NOW, 'yes', 0.9, true, { settled: false }), ord(NOW, 'yes', 0.9, true, { settled: false, exitCount: 10 }), { fillCount: 0 }]), 1, 'a sold out or unfilled order is not a position');
   const html = Q.kalshiStratSummaryHtml(s, esc, money);
   assert.ok(html.indexOf('sp-sum-pf') < html.indexOf('sp-sum-grid') && /<b data-pf="\d\.\d\d"[^>]*>\d\.\d\d<\/b>/.test(html), 'the blended PF is big and first, inside its ring');
-  assert.ok(/net cash since the start/.test(html) && /Today/.test(html) && /Last 7 days/.test(html) && /at risk/.test(html) && /Open now/.test(html));
+  assert.ok(/All time/.test(html) && /Today/.test(html) && /Last 7 days/.test(html) && /at risk/.test(html) && !/Open now/.test(html) && !/sp-sum-net/.test(html));
   // the dial and curve (Nov 13, 2026, the owner chose A): the 30 day cash curve starts at zero and ends at the 30 day net; no trades draws no curve and says so
   assert.deepStrictEqual(s.curve, [0, 0.945 * 0 - 9.055, -9.055 + 0.945, -9.055 + 0.945 * 2].map((x) => Math.round(x * 10000) / 10000));
   assert.ok(/class="sp-sum-curve"/.test(html) && /class="sp-sum-ring"/.test(html), 'a ring and a curve');
@@ -458,7 +458,7 @@ gates.GK6 = () => {
   const out = Q.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [], retired: [] }, registryList: [], registryState: 'ok' }, esc, money);
   const cell = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*><b data-count="(\\d+)"').exec(out)[1]);
   assert.deepStrictEqual([cell('shadow'), cell('live'), cell('off')], [0, 3, 1]);
-  assert.ok(/<b>0<\/b> shadow &middot; <b>3<\/b> live \(3 on trial\) &middot; <b>1<\/b> off or retired/.test(out), 'the header line says the same');
+  assert.ok(/<b>3<\/b> of the live strategies are on trial/.test(out) && !/off or retired/.test(out), 'the header line adds only the trial count, which no box shows');
   assert.ok(/>KILLED</.test(out) === false && />COOLING</.test(out) && !/>HEALTHY</.test(/<section class="lp-p" id="lp-p-off"[\s\S]*?<\/section>/.exec(out)[0]), 'the killed gold row reads cooling down, never healthy');
   assert.ok(/Gold is off: the kill rule tripped/.test(out), 'the plain line is in the open detail');
 };

@@ -23,13 +23,13 @@ gates.ST1 = () => {
   assert.ok(!/kal-chip-slot/.test(html) && /\.kal-chip\{[^}]*color:var\(--muted\)/.test(html), 'the chip is a quiet muted label: the bright treatment is for figures and urgent items');
   assert.deepStrictEqual(f.kalshiSlotIds([{ ts: 1, slotId: 'A' }, { ts: 2, slotId: 'A' }, { ts: 3 }, { slotId: 'B' }]), ['A'], 'only orders with an id and a time name a strategy');
 };
-// ST17 (Nov 4, 2026, the owner: "Hide it"): a removed strategy with nothing open is not a row, but its result still counts in All strategies, so the account figure does not move.
+// ST17 (Nov 4, 2026, the owner: "Hide it"): a removed strategy with nothing open is not a row. Since Nov 13, 2026 there is no total row either.
 gates.ST17 = () => {
   const done = f.kalshiOrdersSummary([{ ts: 2, slotId: 'FLOW1', fillCount: 1, settledPnl: -0.64 }], 5), l1 = f.kalshiOrdersSummary([{ ts: 3, fillCount: 1, settledPnl: 1 }], 5);
   const rows = [{ id: 'L1', info: { name: 'Closing buy', markets: 'Gold', note: '' }, sum: l1, status: 'Running', ageText: '' }, { id: 'FLOW1', info: { name: 'Seller flow (removed)', markets: 'Bitcoin', note: '' }, sum: done, status: '', ageText: '', hidden: true }];
   const h = f.kalshiStrategiesTableHtml(rows, esc, money);
   assert.ok(!/Seller flow/.test(h), 'the removed strategy has no row');
-  assert.ok(/\+\$0\.36/.test(h), 'All strategies still includes its -$0.64 (1.00 - 0.64)');
+  assert.ok(!/\+\$0\.36/.test(h) && !/All strategies/.test(h), 'no total row (Nov 13, 2026, "limit redundancies"): the account figure lives in the Account card and the Account result chart');
   const src = html.slice(html.indexOf('kalshiSlotIds(kalshiSlotOrders).forEach'), html.indexOf('tbl.innerHTML = kalshiStrategiesTableHtml'));
   assert.ok(/KAL_SLOT_REGISTERED\.indexOf\(id\) < 0/.test(src) && /hidden: gone && !sum\.open\.length/.test(src), 'only a strategy out of the registry with nothing open is hidden');
 };
@@ -110,8 +110,7 @@ gates.ST11 = () => {
   assert.strictEqual(ranged.lastTs, NOW - 1000, 'the last order is the latest of all, not only of the range');
   const row = (id, sum) => ({ id, info: { name: id, markets: 'M', note: '' }, sum, status: 'Running', ageText: 'x' });
   const h = f.kalshiStrategiesTableHtml([row('L1', ranged), row('OICORE', f.kalshiOrdersSummary([mk(NOW - 2000, -0.95)], NOW, since))], esc, money, { rangeLabel: '1M', age: () => 'x', partial: false });
-  assert.ok(/All strategies/.test(h) && /kal-strat-total/.test(h), 'a total row');
-  assert.ok(h.includes('-$1.45') || h.includes('-$1.45'.replace('$', '$')), 'the total row is the sum of the rows: -0.50 and -0.95 make -1.45');
+  assert.ok(!/All strategies/.test(h) && !/kal-strat-total/.test(h) && !h.includes('-$1.45'), 'no total row (Nov 13, 2026, the owner: remove it, each figure once)');
   assert.ok(/Result \(1M\)/.test(h), 'the Result column names its range');
   assert.ok(/renderKalshiPnl\(\); renderKalshiStrategies\(\);/.test(html), 'changing the range redraws the Strategies card');
 };
@@ -151,7 +150,7 @@ gates.ST14 = () => {
   const s1 = f.kalshiOrdersSummary([{ ts: 2, slotId: 'A', fillCount: 1, settledPnl: 1 }], 5), s2 = f.kalshiOrdersSummary([{ ts: 3, slotId: 'B', fillCount: 1, settledPnl: -0.3 }], 5);
   const row = (id, sum) => ({ id, info: { name: id + ' name', markets: 'Gold', note: '' }, sum, status: 'Running', ageText: 'x' });
   const h = f.kalshiStrategiesTableHtml([row('L1', s1), row('OICORE', s2)], esc, money, { rangeLabel: '1M', age: () => 'x' });
-  assert.ok(h.indexOf('All strategies') > -1 && h.indexOf('All strategies') < h.indexOf('L1 name') && h.indexOf('All strategies') < h.indexOf('OICORE name'), 'All strategies is the first row');
+  assert.ok(h.indexOf('All strategies') < 0 && h.indexOf('L1 name') < h.indexOf('OICORE name'), 'the table lists the strategies only (the All strategies row was removed Nov 13, 2026, the owner: "limit redundancies")');
   assert.ok(!/kal-card-title/.test(h), 'no card title of its own inside the Account card');
   assert.ok(/<span class="kal-strat-mk">Gold<\/span>/.test(h), 'the markets sit under the strategy name');
   assert.ok(/\[data-card="account"\] \.kal-strat-tbl th:nth-child\(2\)/.test(html), 'the separate Markets column is hidden beside the balance (and kept on a phone, where each strategy is a stacked card)');

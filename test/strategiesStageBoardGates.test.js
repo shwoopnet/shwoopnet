@@ -27,14 +27,14 @@ gates.ST1 = () => {
   assert.ok(!/data-row="L1"/.test(panel(h, 'live')) && /data-row="L1"/.test(panel(h, 'off')) && /data-row="OICORE"/.test(panel(h, 'live')));
   assert.ok(/COOLING/.test(panel(h, 'off')) && /20 of 60 trades/.test(panel(h, 'off')));
 };
-// ST2: the count on every box equals the strategies in its panel, and the header line repeats the same counts.
+// ST2: the count on every box equals the strategies in its panel; the header line does not repeat them (each figure once).
 gates.ST2 = () => {
   const live = [card('L1', 'live'), card('A', 'live'), card('B', 'probation')];
   const h = B.kalshiBoardHtml(model(live), esc, money);
   const cnt = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*><b data-count="(\\d+)"').exec(h)[1]);
   const rows = (k) => (panel(h, k).match(/class="rw(?: open)?(?: near)?"/g) || []).length;
   for (const k of ['shadow', 'live']) assert.strictEqual(cnt(k), rows(k), k);
-  assert.ok(new RegExp('<b>' + cnt('shadow') + '</b> shadow &middot; <b>' + cnt('live') + '</b> live \\(1 on trial\\)').test(h), 'one Live box (Nov 13, 2026): the header counts the trial seats inside it');
+  assert.ok(/<b>1<\/b> of the live strategies is on trial/.test(h) && !/<b>\d+<\/b> shadow/.test(h), 'one Live box: the header adds the trial count and never repeats the box counts (Nov 13, 2026, "limit redundancies")');
 };
 // ST3: a strategy whose kill state is unknown or still loading never reads HEALTHY and says the state is not readable; a known healthy one still can.
 gates.ST3 = () => {
