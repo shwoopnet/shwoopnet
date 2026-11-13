@@ -838,3 +838,12 @@ Owner (via EA): "please do not merge or create anything new until weve found our
 - No new PR or job file goes to Main. Reads only on data already recorded or merged. Held: nightly OI recorder, OICAND jobs, CROWDLEG trial, OIFIELD (unless already merged).
 - Held-out rules unchanged: development reads only; held-out windows stay unread.
 - Running tally (unique + above cutoff), sent to the EA each evening. 2026-11-13: 0. Nobody can guarantee the count; it is reported as it is.
+
+## 2026-11-13 21:47Z, owner: "Yes, count candle tests". CANDLE HAIRCUT RULE (fixed before any read)
+A candle-based development read counts toward the 20 to 30 only if the VA rules the card NEW and, AFTER this haircut, it clears cash PF 1.3 with both halves at 1.0 or better. Label: "upper bound, not fill-checked". It is fill-checked on books before any real money.
+- C1 Two-sided only: the decision candle must have 0 < yes_bid < yes_ask < 1 (rule 18). Otherwise no trade, counted as "not two-sided".
+- C2 Entry price: YES buy = the decision candle's yes_ask close + 0.01; NO buy = (1 - yes_bid close) + 0.01. Never past 0.99. One cent because CANDLEVSBOOK1 found the candle quote within 1c of the book in 95.9% of minutes.
+- C3 Exit before settlement (any exit variant): YES sell = yes_bid close - 0.01; NO sell = (1 - yes_ask close) - 0.01; never below 0.01. Hold to settlement pays 1 or 0.
+- C4 Fees: Kalshi's taker fee on every leg at the haircut price, rounded up to the cent per order at the card's stated contract count (scorekit.fee_rounded), divided back per contract.
+- C5 Fill assumed (no size data): every signal counts as filled. That is why the label is "upper bound".
+- C6 Unchanged: the card's halves rule (floor(n/2) by count), the deflation count, the fixed held-out date (unread), rule 16b (two builds agree), and Auditor B's CLEAN before any read.
