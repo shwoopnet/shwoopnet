@@ -15,3 +15,5 @@ RESULT (Nov 12): 66 series, 3,559 events; 26 cells with n 60+ in both train and 
 ## AMENDMENT (2026-11-12T01:11Z, Desk A held-out audit; no rule changed)
 Thirds were "cut dates from the fetched events, saved in frozen.json". Cut dates are now constants in `CUTS_W-CAT-ECON1.json` and in the script: cut1 = 1790395140 (2026-09-26T03:59Z), cut2 = 1792641540 (2026-10-22T03:59Z), tertiles of event close over the 3,175 events with candle observations. TRAIN = close before cut1, VALIDATE = cut1 up to cut2, HELD-OUT = cut2 or later. Later pulls may not move them.
 HELD-OUT NOT READ as of 2026-11-12T01:11Z.
+
+Reservation released by the Head of R&D, 2026-11-13 (on the card owner's word): the held-out will never be scored under this card; a return needs a new registration on later events. (W-CAT-ECON1, 66 Economics series, held-out close at or after 2026-10-22T03:59Z; shortlist was 0 and the held-out was never read. The overlap with Idea Desk C's GASCYCLE card, Ohio and Indiana state gas dailies, is the reason.)
