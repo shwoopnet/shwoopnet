@@ -1,0 +1,14 @@
+development events 171 | held-out events dropped at load (counted, never simulated) 10 | strikes in the books 1197 [development only, no held-out mode]
+== Rule Q: quotable events 171 | strikes with an order 1123 | orders 2246 | fills 791 (yes 400, no 391; trade fills 791, fractional filling trades 380, book fills 0) | pairs 174 | singles 443
+   item 7: sales with a blank or zero bid (sold at 0) 33 | item 8 (Rule P book condition, cells examined until each order's first qualifying row): blank 0, zero 0
+  1 contract, fee unrounded (verdict figures), maker 0: net +8.513293 | mean per event +0.049785 | PF 1.41 | days 10, positive days 8
+  1 contract, fee unrounded (verdict figures), maker 0.0175 x p x (1 - p): net +6.238708 | mean per event +0.036484 | PF 1.28 | days 10, positive days 8
+  1 contract, fee rounded per order, maker 0: net +5.840000 | mean per event +0.034152 | PF 1.26 | days 10, positive days 8
+  1 contract, fee rounded per order, maker 0.0175 x p x (1 - p): net -2.070000 | mean per event -0.012105 | PF 0.92 | days 10, positive days 4
+== Rule P: quotable events 171 | strikes with an order 1123 | orders 2246 | fills 2020 (yes 988, no 1032; trade fills 679, fractional filling trades 348, book fills 1341) | pairs 907 | singles 206
+   item 7: sales with a blank or zero bid (sold at 0) 124 | item 8 (Rule P book condition, cells examined until each order's first qualifying row): blank 35, zero 0
+  1 contract, fee unrounded (verdict figures), maker 0: net -29.464062 | mean per event -0.172304 | PF 0.18 | days 10, positive days 1
+  1 contract, fee unrounded (verdict figures), maker 0.0175 x p x (1 - p): net -34.925191 | mean per event -0.204241 | PF 0.07 | days 10, positive days 1
+  1 contract, fee rounded per order, maker 0: net -30.020000 | mean per event -0.175556 | PF 0.18 | days 10, positive days 1
+  1 contract, fee rounded per order, maker 0.0175 x p x (1 - p): net -50.220000 | mean per event -0.293684 | PF 0.00 | days 10, positive days 0
+10 contract report: not produced (G10, information only)

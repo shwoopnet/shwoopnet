@@ -1,0 +1,14 @@
+development events 1 | held-out events dropped at load (counted, never simulated) 1 | strikes in the books 3 [development only, no held-out mode]
+== Rule Q: quotable events 1 | strikes with an order 2 | orders 4 | fills 2 (yes 1, no 1; trade fills 2, fractional filling trades 0, book fills 0) | pairs 1 | singles 0
+   item 7: sales with a blank or zero bid (sold at 0) 0 | item 8 (Rule P book condition, cells examined until each order's first qualifying row): blank 0, zero 0
+  1 contract, fee unrounded (verdict figures), maker 0: net +0.050000 | mean per event +0.050000 | PF 99.0 | days 1, positive days 1
+  1 contract, fee unrounded (verdict figures), maker 0.0175 x p x (1 - p): net +0.041469 | mean per event +0.041469 | PF 99.0 | days 1, positive days 1
+  1 contract, fee rounded per order, maker 0: net +0.050000 | mean per event +0.050000 | PF 99.0 | days 1, positive days 1
+  1 contract, fee rounded per order, maker 0.0175 x p x (1 - p): net +0.030000 | mean per event +0.030000 | PF 99.0 | days 1, positive days 1
+== Rule P: quotable events 1 | strikes with an order 2 | orders 4 | fills 3 (yes 2, no 1; trade fills 2, fractional filling trades 0, book fills 1) | pairs 1 | singles 1
+   item 7: sales with a blank or zero bid (sold at 0) 1 | item 8 (Rule P book condition, cells examined until each order's first qualifying row): blank 1, zero 0
+  1 contract, fee unrounded (verdict figures), maker 0: net -0.250000 | mean per event -0.250000 | PF 0.00 | days 1, positive days 0
+  1 contract, fee unrounded (verdict figures), maker 0.0175 x p x (1 - p): net -0.262206 | mean per event -0.262206 | PF 0.00 | days 1, positive days 0
+  1 contract, fee rounded per order, maker 0: net -0.250000 | mean per event -0.250000 | PF 0.00 | days 1, positive days 0
+  1 contract, fee rounded per order, maker 0.0175 x p x (1 - p): net -0.280000 | mean per event -0.280000 | PF 0.00 | days 1, positive days 0
+10 contract report: not produced (G10, information only)
