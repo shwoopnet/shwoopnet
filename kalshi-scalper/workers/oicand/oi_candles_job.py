@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Builds the OICAND_CANDLES kalshi-pull job (open interest candles for Desk A's twelve OICORE wheel places) from the answers of the OICAND_LISTS run.
-Reads ONLY ticker and close_time from the settled lists (no result, price or volume). Usage: oi_candles_job.py <lists run folder> <out job json>
+Reads ONLY ticker and close_time from the settled lists (no result, price or volume). Usage: [OICAND_MAXREQ=1000] oi_candles_job.py <lists run folder> <out directory>  (writes OICAND_CANDLES_1.json, _2.json, ...)
 Rules (fixed here): the last 20 weekdays (Monday to Friday by the UTC date of the close) present in the lists; one request per distinct close time, the tickers of every
 series that has a market with that close batched in market_tickers; period_interval 1; start_ts = close - 420 s, end_ts = close - 120 s (covers the candles ending
 close - 360 s and close - 180 s and the entry minutes, and leaves the last two minutes unread); a ticker of EVENT830's 8 series closing at 13:30Z on its past forward dates
@@ -51,10 +51,20 @@ def build(markets):
 
 def main():
     days, reqs, tickers = build(read(sys.argv[1]))
-    job = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "OICAND_CANDLES_template.json")))
-    job["requests"] = reqs; job["ticker_allowlist"] = tickers; job["max_requests"] = len(reqs)
-    json.dump(job, open(sys.argv[2], "w"), indent=1)
-    print("days %d (%s to %s) | closes %d | tickers %d | requests %d" % (len(days), days[0], days[-1], len(reqs), len(tickers), len(reqs)))
+    maxreq = int(os.environ.get("OICAND_MAXREQ", "1000"))
+    tpl = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "OICAND_CANDLES_template.json")))
+    os.makedirs(sys.argv[2], exist_ok=True)
+    chunks = [reqs[i:i + maxreq] for i in range(0, len(reqs), maxreq)] or [[]]
+    for k, ch in enumerate(chunks, 1):
+        job = json.loads(json.dumps(tpl))
+        job["job_id"] = "OICAND_CANDLES_%d" % k
+        job["requests"] = ch
+        job["ticker_allowlist"] = sorted({t for r in ch for t in r["params"]["market_tickers"].split(",")})
+        job["max_requests"] = len(ch)
+        job["notes"] += " Part %d of %d of the same candle pull, at most %d requests each (about 27 KB a request unpacked)." % (k, len(chunks), maxreq)
+        json.dump(job, open(os.path.join(sys.argv[2], "OICAND_CANDLES_%d.json" % k), "w"), indent=1)
+        print("file %d: %d requests, %d tickers" % (k, len(ch), len(job["ticker_allowlist"])))
+    print("days %d (%s to %s) | closes %d | tickers %d | requests %d | files %d" % (len(days), days[0], days[-1], len(reqs), len(tickers), len(reqs), len(chunks)))
 
 if __name__ == "__main__":
     main()

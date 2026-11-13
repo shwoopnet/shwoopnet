@@ -1,15 +1,18 @@
-# PUB20 P06 FIXES as separate wheel places (lane 0.6). Desk B, Nov 13, 2026, written 21:12Z by this desk's clock. No data read.
+# PUB20 P06 FIXES as separate wheel places (lane 0.6): every line is a VERSION OF EVENT830. Desk B, Nov 13, 2026, written 21:12Z by this desk's clock. No data read.
 Existing registered card, so no new try (the Head, 21:09Z): PUB20_REGISTRATION.md sha256 37632d91 (blob 7576f9fe) on origin/claude/epic-ptolemy-0amjd9. **Label: "development n 41, positive in both halves (PF 1.18 and 1.81); not evidence at n = 41."** Family (7f): a calendar entry like EVENT830, with a different counterparty: benchmark fix flow (order placers and dealers filling fix orders; the card's mechanism: "benchmark order flow is price insensitive and gets reversed afterwards"). No live seat without the owner's popup.
 ## The card's own rule, band and look (not changed)
 Windows closing at the fix time on a weekday; cheap side (the cheaper side, YES first on a tie) whose ask is 0.05 to 0.50 at the candle ending 180 s before the close, quote spread at most 0.10; fill at that side's ask with a hard limit of 0.50; held to settlement; 1 contract in shadow; fee 7% x C x p x (1 - p) rounded up per order (C = 10 in the card's tests; the shadow fee follows the lane). The NC15 fill check (the Head): the next poll within 6 s at which the limit still meets the size, priced at the worse of the signal poll and that poll. Fix times converted with the zone rules: the 4 pm London fix is 16:00 London (16:00Z in GMT, 15:00Z during British summer time), 10:00 ET is 15:00Z (EST) or 14:00Z (EDT), and the LBMA silver price at 12:00 London is 12:00Z in GMT. In the window to Dec 31 every one of these falls in GMT and EST.
 ## The places (one place per market and fix time; one rule, the same band on all)
 | Place | Market (NC15 books to Dec 31) | Window closing at | UTC in Nov and Dec |
 |---|---|---|---|
-| P06-EURUSD-LON16 | KXEURUSD15M | 4 pm London fix | 16:00Z |
-| P06-EURUSD-NY10 | KXEURUSD15M | 10:00 ET (New York option cut) | 15:00Z |
-| P06-GBPUSD-LON16 | KXGBPUSD15M | 4 pm London fix | 16:00Z |
-| P06-GBPUSD-NY10 | KXGBPUSD15M | 10:00 ET | 15:00Z |
-| P06-USDJPY-LON16 | KXUSDJPY15M | 4 pm London fix | 16:00Z |
-| P06-USDJPY-NY10 | KXUSDJPY15M | 10:00 ET | 15:00Z |
-| P06-SILVER-LON12 | KXSILVER15M | 12:00 London (LBMA silver price) | 12:00Z |
+| P06-EURUSD-LON16 (version of EVENT830) | KXEURUSD15M | 4 pm London fix | 16:00Z |
+| P06-EURUSD-NY10 (version of EVENT830) | KXEURUSD15M | 10:00 ET (New York option cut) | 15:00Z |
+| P06-GBPUSD-LON16 (version of EVENT830) | KXGBPUSD15M | 4 pm London fix | 16:00Z |
+| P06-GBPUSD-NY10 (version of EVENT830) | KXGBPUSD15M | 10:00 ET | 15:00Z |
+| P06-USDJPY-LON16 (version of EVENT830) | KXUSDJPY15M | 4 pm London fix | 16:00Z |
+| P06-USDJPY-NY10 (version of EVENT830) | KXUSDJPY15M | 10:00 ET | 15:00Z |
+| P06-SILVER-LON12 (version of EVENT830) | KXSILVER15M | 12:00 London (LBMA silver price) | 12:00Z |
 Seven places. Each is one window a weekday, so at most about 30 windows each by Dec 31 and fewer after the band: **none can reach the 150 fill-checked entries by itself**; the card's own pooled count was 41 on 89 days. The windows of EUR/USD, GBP/USD, USD/JPY and silver at 15:00Z and 12:00Z are not EVENT830's windows (which close at 13:30Z) but 10:00 ET is the same time as the 10:00 ET releases of queue item 1 (JOLTS Dec 1 and Census rows) on those days: those days' P06-NY10 windows are also release windows, so read them separately. **Silver and EVENT830:** silver is one of EVENT830's 8 reserved markets in the bot, so a seat there needs the Chief of Staff to resolve that first. Counterparty (named): fix order flow. Kill and return follow the lane's per-place rules.
+
+## RELABEL, 21:14Z (the Head of R&D, lifecycle 7g)
+These are cheap-side calendar entries held to settlement at a fixed time, which is EVENT830's mechanism moved to other times. Under lifecycle 7g every line above is labelled **"version of EVENT830"**: **they count as ONE family, not seven**; they replace the parent only by the 7g rule (cash PF +0.10 over EVENT830 at 60 signals, second half not worse); the Verification Analyst scores them before any shadow entry. Silver is reserved to EVENT830 in code, so a silver line can only be shadow. The label stays: "development n 41, positive in both halves; not evidence at n = 41". The earlier wording "calendar entry with a different counterparty" stands as the registered card's claim, not as a reason to call it a separate strategy.

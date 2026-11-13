@@ -1,0 +1,6 @@
+# build output on the made-up fixture, OICAND_MAXREQ=2 and default
+file 1: 2 requests, 3 tickers
+file 2: 1 requests, 1 tickers
+days 3 (2026-10-19 to 2026-11-12) | closes 3 | tickers 4 | requests 3 | files 2
+file 1: 3 requests, 4 tickers
+days 3 (2026-10-19 to 2026-11-12) | closes 3 | tickers 4 | requests 3 | files 1
