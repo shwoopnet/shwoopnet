@@ -131,7 +131,7 @@ gates.SZ6 = async () => {
   assert.ok(!/args|session|request|store|process\.env/.test(body), 'the function reads code constants only');
   const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
   assert.ok(!/maxContractsFor/.test(idx) && !/maxContractsFor/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), 'neither a callable nor the page touches it');
-  assert.ok(/count > maxContractsFor\(c\.series\)/.test(src) && src.indexOf('store.createTest(cid, record)', src.indexOf('count > maxContractsFor(c.series)')) > 0 && src.indexOf('count > maxContractsFor(c.series)') > src.indexOf('async function runL1Tick'), 'checked before the order is recorded or sent');
+  assert.ok(/count > maxContractsAt\(c\.series, now\)/.test(src) && src.indexOf('store.createTest(cid, record)', src.indexOf('count > maxContractsAt(c.series, now)')) > 0 && src.indexOf('count > maxContractsAt(c.series, now)') > src.indexOf('async function runL1Tick'), 'checked before the order is recorded or sent');
 };
 
 (async () => {
