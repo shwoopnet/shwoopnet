@@ -31,3 +31,8 @@ One first window a weekday and the rule fires on perhaps a third of days (my gue
 
 ## Prerequisites before any read (times only)
 (a) From a lists run (the SPXOI1 lists run holds KXINX15M markets): the first window's open_time and close_time each day, to confirm "first window" and its length; no prices or results. (b) Count of trading days with a previous day's last strike. No Kalshi request is made by this desk.
+
+## Dated line, Nov 13, 2026, 21:25Z (the Verification Analyst: NEW, paper list only)
+The VA scored OPENGAP1 NEW (V2's OVN1 to OVN4 are gap fades on Kalshi perp reference prices: OVN1, OVN2, OVN3 NOT_ENOUGH_DATA, OVN4 FALSIFIED as a spread measurement; S14 (gold reopen gap fade) NOT_ENOUGH_DATA, n 11; no 7e row names a gap fade; the source differs, so the two-NOT_ENOUGH_DATA closing rule does not close it). Paper list only, slow family.
+- **The gap is an index move carried in the listing's strikes, with no fair-value comparison:** it is the first window's floor_strike over the previous trading day's last window's floor_strike, both fields of the Kalshi market objects, and the rule never compares a Kalshi quote with a model price, a futures price or any outside reference, so it is not the closed "quote lags an outside reference" family (the Head to confirm).
+- **Paper screen (the VA's lower screen for a slow family):** 30 independent events (qualifying days), positive in both halves, with a pinned cutoff. **Pinned cutoff constant for this card: HELDOUT_FIRST = 2026-12-01T00:00:00Z** (a date constant, never an event count): every qualifying day closing before it is development; the held-out is every day from it, read once, and not before 30 independent qualifying events exist for the paper screen (150 entries for the fuller bar).
