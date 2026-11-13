@@ -118,21 +118,23 @@ gates.RT1 = () => {
   assert.ok(!/data-fk="row:(?:XRPYES10|KESTREL|GOLDALL|XRPFAV6|LANTERN)"/.test(html), 'none of the five has a live or shadow row');
 };
 gates.SP4 = () => {
-  // Consequence (the stage board, Nov 12, 2026): four boxes in the loop order; the count on a box equals the strategies in its panel; a killed strategy is in Off / Retired and never in Live.
+  // Consequence (the stage board, Nov 12, 2026; one Live box since Nov 13, 2026, the owner: "Merge into one Live box"): three boxes in the loop order, a trial seat in Live with its Trial tag; the count on a box equals the strategies in its panel; a killed strategy is in Off / Retired and never in Live.
   const live = liveModel(money).map((s) => Object.assign(s, { lane: { L1: 'off', OICORE: 'probation', EVENT830: 'live', CFRTIK: 'probation' }[s.id], killState: s.id === 'L1' ? 'killed' : undefined }));
   const h = P.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.deepStrictEqual([...h.matchAll(/data-stage="(\w+)"/g)].map((m) => m[1]), ['shadow', 'prob', 'live', 'off'], 'Shadow, Probation, Live, Off / Retired, in the loop order');
-  assert.deepStrictEqual(P.KAL_STAGES.map((s) => s.key), ['shadow', 'prob', 'live', 'off']);
+  assert.deepStrictEqual([...h.matchAll(/data-stage="(\w+)"/g)].map((m) => m[1]), ['shadow', 'live', 'off'], 'Shadow, Live, Off / Retired, in the loop order');
+  assert.deepStrictEqual(P.KAL_STAGES.map((s) => s.key), ['shadow', 'live', 'off']);
   const cnt = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*>(?:<u[^>]*>[^<]*</u>)?<b data-count="(\\d+)"').exec(h)[1]);
   const rows = (k) => (panel(h, k).match(/class="rw(?: open)?(?: near)?"/g) || []).length;
-  assert.deepStrictEqual([cnt('shadow'), cnt('prob'), cnt('live')], [0, 2, 1], 'the counts');
-  for (const k of ['shadow', 'prob', 'live']) assert.strictEqual(rows(k), cnt(k), 'the ' + k + ' count equals the rows in its panel');
+  assert.deepStrictEqual([cnt('shadow'), cnt('live')], [0, 3], 'the counts: two trial seats and one proven strategy are all Live');
+  assert.strictEqual((panel(h, 'live').match(/>Trial \d+ of 90</g) || []).length, 2, 'each trial seat carries its Trial tag with its fills of 90');
+  assert.strictEqual((panel(h, 'live').match(/>Proven</g) || []).length, 1, 'a strategy that is not a seat is Proven');
+  for (const k of ['shadow', 'live']) assert.strictEqual(rows(k), cnt(k), 'the ' + k + ' count equals the rows in its panel');
   assert.strictEqual(cnt('off'), rows('off') + (panel(h, 'off').match(/class="sp-rrow"/g) || []).length, 'Off / Retired counts its cooling strategies plus the retired list');
   assert.strictEqual(rows('off'), 1);
   assert.ok(/data-row="L1"/.test(panel(h, 'off')) && !/data-row="L1"/.test(panel(h, 'live')), 'a killed strategy is in Off / Retired, never in Live');
   assert.ok(/>COOLING</.test(panel(h, 'off')) && !/>HEALTHY</.test(panel(h, 'off')), 'and reads cooling down');
   const open = P.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: P.KAL_BOARD_RETIRED, open: { stage: 'live' } }, esc, money);
-  assert.ok(!/id="lp-p-live"[^>]* hidden/.test(open) && /id="lp-p-prob"[^>]* hidden/.test(open) && /aria-expanded="true" aria-controls="lp-p-live"/.test(open) && /<b>Live open\.<\/b>/.test(open), 'the open box is shown, the others are hidden, the header line says which is open');
+  assert.ok(!/id="lp-p-live"[^>]* hidden/.test(open) && /id="lp-p-off"[^>]* hidden/.test(open) && /aria-expanded="true" aria-controls="lp-p-live"/.test(open) && /<b>Live open\.<\/b>/.test(open), 'the open box is shown, the others are hidden, the header line says which is open');
   assert.ok(/Closest to a kill: /.test(h) && /<b>0<\/b> shadow/.test(h), 'the header line carries the counts and the closest kill');
 };
 const now = Date.UTC(2026, 10, 10, 18, 0);
@@ -156,7 +158,7 @@ gates.SP5 = () => {
   assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
   assert.strictEqual((plain.match(/<dd>Next: 3 contracts as a probe<\/dd>/g) || []).length, 4, 'all four fixture shadow rules say next 3 contracts');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
-  assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 4 && (plain.match(/class="lp-p"/g) || []).length === 4 && /id="lp"/.test(plain), 'four boxes and four panels in one loop');
+  assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 3 && (plain.match(/class="lp-p"/g) || []).length === 3 && /id="lp"/.test(plain), 'three boxes and three panels in one loop');
   assert.ok((plain.match(/class="bd-b near"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a kill line with the closest limit hatched on each live row');
   assert.ok((plain.match(/<circle class="sp-ring-bg"/g) || []).length === 2 * n && (plain.match(/class="rw-ring"/g) || []).length === n, 'a small ring on every row head and a ring dial in every row\'s detail (Nov 13, 2026)');
   assert.ok((plain.match(/class="kal-bd-rules"/g) || []).length === n, 'every row keeps Implement, Kill and Return in More');
@@ -282,7 +284,7 @@ gates.SP12b = () => {
   assert.deepStrictEqual(Q.kalshiClosestKill([{ id: 'A', frac: 0.2 }, { id: 'B', frac: 0.6 }, { id: 'C', frac: 0 }]).id, 'B');
   assert.strictEqual(Q.kalshiClosestKill([{ id: 'A', frac: 0 }, { id: 'B', frac: NaN }]), null, 'nothing used, nothing nearest');
   assert.strictEqual(Q.kalshiClosestKill([]), null);
-  assert.deepStrictEqual(['live', 'probation', 'off', 'deck'].map(Q.kalshiStageBoxOf), ['live', 'prob', 'off', 'live']);
+  assert.deepStrictEqual(['live', 'probation', 'off', 'deck'].map(Q.kalshiStageBoxOf), ['live', 'live', 'off', 'live']);
   const NOWD = Date.UTC(2026, 10, 12, 12);
   assert.strictEqual(Q.kalshiPromotedAgo([{ id: 'A', name: 'A' }, { id: 'B', name: 'B', promotedOn: 'soon' }], NOWD), null, 'no registry date, no label');
   assert.deepStrictEqual(Q.kalshiPromotedAgo([{ id: 'A', name: 'A', promotedOn: '2026-11-10' }, { id: 'B', name: 'B', promotedOn: '2026-11-11' }, { id: 'C', name: 'C', promotedOn: '2026-09-01' }], NOWD), { id: 'B', name: 'B', t: Date.UTC(2026, 10, 11), days: 1 });
@@ -455,8 +457,8 @@ gates.GK6 = () => {
   const live = ['L1', 'OICORE', 'EVENT830', 'CFRTIK'].map((id) => ({ id, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: id === 'L1', count: 5 }, lane: id === 'L1' ? 'off' : 'probation', spark: [], detail: null, killState: id === 'L1' ? 'killed' : undefined, note: id === 'L1' ? 'Gold is off: the kill rule tripped; it returns only by the written return rule' : '' }));
   const out = Q.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [], retired: [] }, registryList: [], registryState: 'ok' }, esc, money);
   const cell = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*><b data-count="(\\d+)"').exec(out)[1]);
-  assert.deepStrictEqual([cell('shadow'), cell('prob'), cell('live'), cell('off')], [0, 3, 0, 1]);
-  assert.ok(/<b>0<\/b> shadow &middot; <b>3<\/b> probation &middot; <b>0<\/b> live &middot; <b>1<\/b> off or retired/.test(out), 'the header line says the same');
+  assert.deepStrictEqual([cell('shadow'), cell('live'), cell('off')], [0, 3, 1]);
+  assert.ok(/<b>0<\/b> shadow &middot; <b>3<\/b> live \(3 on trial\) &middot; <b>1<\/b> off or retired/.test(out), 'the header line says the same');
   assert.ok(/>KILLED</.test(out) === false && />COOLING</.test(out) && !/>HEALTHY</.test(/<section class="lp-p" id="lp-p-off"[\s\S]*?<\/section>/.exec(out)[0]), 'the killed gold row reads cooling down, never healthy');
   assert.ok(/Gold is off: the kill rule tripped/.test(out), 'the plain line is in the open detail');
 };
@@ -522,10 +524,11 @@ gates.AL3 = () => {
   // Consequence: a killed gold sits in the Off / Retired box with its return progress; the Live box and its count hold only what trades.
   const mk = (id, lane, note) => ({ id, lane, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: lane === 'off', count: 5 }, spark: [], detail: null, killState: lane === 'off' ? 'killed' : undefined, note: note || '', ret: lane === 'off' ? { trades: 2, losses: 1, days: 2, pf: 1, frac: 2 / 60 } : null });
   const out = Q.kalshiBoardHtml({ live: [mk('L1', 'off', 'Gold is off. Return record (GOLDOFF shadow): 2 of 60 trades.'), mk('OICORE', 'probation')], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [], retired: [] }, registryList: [], registryState: 'ok', open: { stage: 'off', 'row:L1': true } }, esc, money);
-  const off = /<section class="lp-p" id="lp-p-off"[\s\S]*?<\/section>/.exec(out)[0], live = /<section class="lp-p" id="lp-p-live"[\s\S]*?<\/section>/.exec(out)[0], prob = /<section class="lp-p" id="lp-p-prob"[\s\S]*?<\/section>/.exec(out)[0];
-  assert.ok(/data-row="L1"/.test(off) && /data-row="OICORE"/.test(prob) && !/data-row=/.test(live), 'gold in Off, OICORE on probation, nothing in Live');
+  const off = /<section class="lp-p" id="lp-p-off"[\s\S]*?<\/section>/.exec(out)[0], live = /<section class="lp-p" id="lp-p-live"[\s\S]*?<\/section>/.exec(out)[0];
+  assert.ok(/data-row="L1"/.test(off) && /data-row="OICORE"/.test(live) && !/data-row="L1"/.test(live), 'gold in Off, OICORE in Live as a trial seat');
+  assert.ok(/>Trial 5 of 90</.test(live), 'with its Trial tag');
   assert.ok(/GOLDOFF shadow/.test(off) && /2 of 60 trades/.test(off) && /class="bd-b ret"/.test(off), 'the return progress is on the off row');
-  assert.ok(/<b data-count="0">0<\/b><span class="lp-tt">Live/.test(out), 'the Live count is what trades');
+  assert.ok(/<b data-count="1">1<\/b><span class="lp-tt">Live/.test(out), 'the Live count is what trades');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
