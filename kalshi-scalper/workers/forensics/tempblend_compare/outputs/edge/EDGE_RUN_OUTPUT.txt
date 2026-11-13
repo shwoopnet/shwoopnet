@@ -1,0 +1,7 @@
+rows 37; checked against the hand file: build 1 3 difference(s), build 2 0 difference(s); build 1 against build 2: 1 difference(s)
+  [1] T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point: field K hand 69.5, build 1 70.3
+  [1] T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point: field ask hand 0.45, build 1 0.55
+  [1] T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point: field pnl hand 0.53, build 1 0.43
+  [1 vs 2] T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point: build 1 {'expect': 'bet', 'side': 'yes', 'K': 70.3, 'ask': 0.55, 'fee': 0.02, 'pnl': 0.43, 'void': False, 'member': True, 'day2': True} | build 2 {'expect': 'bet', 'side': 'yes', 'K': 69.5, 'ask': 0.45, 'fee': None, 'pnl': 0.53, 'void': False, 'member': True, 'day2': True}
+build 1 skips: {'gap_small': 1, 'member_not_ok': 2, 'no_index_point': 2, 'no_strike': 3, 'outside_windows': 4, 'stale_reading': 1}
+build 2 statuses: {'bet': 24, 'gap under 0.5F': 1, 'no strike passes band and spread': 3, 'no station reading': 1, 'member station not ok': 2, 'no index point': 2} outside windows: 4

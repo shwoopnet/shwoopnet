@@ -10,3 +10,15 @@ mapped row files, both builds' full outputs on both sets, and `COMPARE_OUTPUT.tx
 
 Result: see `COMPARE_OUTPUT.txt`. Control: each build reproduces its own committed expected output exactly on its own set (build 1 on set 1 equals `test_expected.json`; build 2 on set 2 equals `out_madeup.json`
 apart from its card line); and a deliberately changed copy of build 1 (spread 0.025, gap 0.55) is caught by the comparer on both sets.
+
+## Third set: one row on each edge of the card (Nov 13, 2026; the Head's order of 15:21Z)
+
+`edge_rows.py` builds 37 invented rows from the card text alone; `edge_hand_expected.json` holds the expected decision of each row, written BY HAND from the card and committed (`f731844c`) BEFORE either build was run on this set.
+Three rows (E13, E14, T03) were added after the first run, because that run showed the original edges were not float-sensitive (a planted change of the tolerance to zero changed nothing); their hand expectations
+were committed (`de0ce9be`) before they were run and the file says so. `edge_run.py` runs both builds and compares each row with the hand file and with the other build. Outputs: `outputs/edge/`.
+
+**Result: ONE MISMATCH, reported, not fixed.** Row `T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point` (v 70.7, s 69.1; strikes 69.5 and 70.3, both exactly 0.4 from the midpoint 69.9 on paper; in floating point
+69.9 - 69.5 is 0.4000000000000057 and 70.3 - 69.9 is 0.3999999999999915). Card A7: two strikes equally near the midpoint within 1e-9 take the LOWER K. Hand expectation and build 2: K 69.5, ask 0.45, pnl +0.53.
+Build 1: K 70.3, ask 0.55, pnl +0.43 (it sorts on the raw distance, then K). Every other row (36 of 37): both builds equal the hand file and each other. Aggregates on this set differ only through that row:
+pooled development n 22 in both, PF 5.4873 against 5.550633, net 7.09 against 7.19 (build 1 against build 2); the verdicts are the same (CLOSED; held-out "no evidence at n = 2").
+Controls: with the tolerance set to zero, or the gap line stripped of it, in a copy of build 1, the edge set now flags 5 and 4 rows against the hand file (it flagged none before E13, E14 and T03 were added).
