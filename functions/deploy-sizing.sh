@@ -11,7 +11,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV_FILE=functions/.env
 PROJECT=shwoopnet
-ONLY=functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount,functions:kalshiGoldKillCheck,functions:kalshiHardStopCheck,functions:kalshiBalanceSnapshot   # kalshiLiveAccount reports the order switch to the Bot page: left out, it kept an old value (Nov 2, 2026)
+CHECKER=functions:kalshiHardStopCheck   # the hard account stop's checker goes out FIRST, in its own command (Nov 13, 2026): the minute function blocks buys when the checker has never written its record
+ONLY=functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount,functions:kalshiGoldKillCheck,functions:kalshiBalanceSnapshot   # kalshiLiveAccount reports the order switch to the Bot page: left out, it kept an old value (Nov 2, 2026)
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 
@@ -57,6 +58,9 @@ if [ "${DRY_RUN:-}" != "1" ]; then
   done
 fi
 
+echo "Deploying the hard account stop's checker first: $CHECKER to $PROJECT. If this fails nothing else is deployed."
+if [ "${DRY_RUN:-}" != "1" ]; then printf '{"commit":"%s","at":"%s"}\n' "$(git rev-parse HEAD 2>/dev/null || echo unknown)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > functions/deploy-stamp.json; else echo "[dry run] write functions/deploy-stamp.json"; fi
+run "${FB[@]}" deploy --only "$CHECKER" --project "$PROJECT" || { echo "STOP: the hard stop checker did not deploy, so the bot was NOT deployed."; exit 1; }
 echo "Deploying $ONLY to $PROJECT."
 # Deploy stamp (the owner, Oct 31, 2026): record which commit this deploy comes from; the functions copy it to Firestore when they start and the nightly report shows it. Written right before the deploy, never read by any order code.
 if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] write functions/deploy-stamp.json"; else printf '{"commit":"%s","at":"%s"}\n' "$(git rev-parse HEAD 2>/dev/null || echo unknown)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > functions/deploy-stamp.json; fi

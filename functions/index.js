@@ -474,6 +474,11 @@ exports.kalshiL1Session = onCall(async (request) => {
   if (KALSHI_LIVE_ENABLED.value() !== "on") {
     throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to start.");
   }
+  // The hard account stop (docs/HARD_ACCOUNT_STOP.md): while its latch holds the bot cannot be started again. Read from the checker's own authoritative record; an unreadable record throws, which refuses the start.
+  const hardState = await db.collection("kalshiLiveControl").doc("hardStopState").get();
+  if (hardState.exists && hardState.data().tripped === true && Number(hardState.data().rearmAt) >= hardStopLib.HARD_STOP.rearmAt) {
+    throw new HttpsError("failed-precondition", "The hard account stop has stopped all new buys (the account fell 40% from its best on trading results). It stays off until a reviewed code change re-arms it.");
+  }
   const arm = await db.collection("kalshiLiveControl").doc("arm").get();
   if (arm.exists && arm.data().armed === true && arm.data().until > Date.now()) {
     throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the bot.");
@@ -854,7 +859,7 @@ exports.kalshiGoldKillCheck = onSchedule(
 const hardL1Reader = live.makeRecentOrderReader(async (ts) => (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", ts).get()).docs.map((d) => ({ id: d.id, ...d.data() })));
 const hardSlotReader = live.makeRecentOrderReader(async (ts) => (SLOT_ON ? slotStoreLib.ordersSince(getFirestore(), ts) : []));   // with no second strategy ever used there are no such orders
 exports.kalshiHardStopCheck = onSchedule(
-  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  { schedule: "every 5 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
   async () => {
     try {
       ensureDefaultAdminApp();
@@ -879,6 +884,13 @@ exports.kalshiHardStopCheck = onSchedule(
           return true;
         }),
         releaseAlert: (rearmAt) => claimRef.set({ rearmAt: null }, { merge: true }),
+        // Ends a RUNNING session the way the loss stop does (same fields); false when none was running (an owner stop is left as it is).
+        endSession: (why) => db.runTransaction(async (tx) => {
+          const cur = await tx.get(sessRef);
+          if (!cur.exists || cur.data().active !== true) return false;
+          tx.set(sessRef, { active: false, endedAt: now, endedBecause: why }, { merge: true });
+          return true;
+        }),
         raiseAlert: (a) => sessRef.set({ hardStopAlert: a }, { merge: true }),
         logEvent: (e) => db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e }),
       });

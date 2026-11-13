@@ -20,7 +20,7 @@ const HARD_STOP = Object.freeze({
   // reviewed edit, with the owner's approval); the stored latch of an older generation is then ignored and the equity peak starts again from zero.
   rearmAt: Date.parse("2026-11-13T00:00:00Z"),
   staleMs: 15 * 60 * 1000,       // a record whose heartbeat is older than this is treated as "the checker is silent": fail closed
-  heartbeatMs: 5 * 60 * 1000,    // the checker refreshes its heartbeat at least this often (it writes nothing else on a quiet minute)
+  heartbeatMs: 4 * 60 * 1000,    // the checker runs every 5 minutes, so every run is past this and refreshes the heartbeat; the 15 minute stale rule above allows two missed runs
 });
 
 // A line outside [0.20, 0.40] is never used as written: above 0.40 it is clamped to 0.40, and below 0.20 or not a number it falls to 0.20 (the tightest), so a bad edit can only make the stop
@@ -39,16 +39,18 @@ function hardStopTripped(sizingState, cfg = HARD_STOP) {
   return Number(h.rearmAt) >= cfg.rearmAt;
 }
 
-// The ONE question the ticks ask. blocked === true means: place no new order. Fails closed on everything except an absent field (never evaluated: see the doc's deploy order):
+// The ONE question the ticks ask. blocked === true means: place no new order. Fails closed on everything, with one deliberate exception for time before the code's own start date:
 //   - a stored latch of this generation blocks, whatever else it says (a latch never needs a fresh heartbeat);
 //   - a record that is not an object, or says it could not read what it needs (status "unreadable"), blocks;
-//   - a record of this generation whose heartbeat is missing or older than staleMs blocks (the checker went silent after it had run).
-// A record of an OLDER generation is ignored (a re-arm), as is a missing field (not yet evaluated).
+//   - a record of this generation whose heartbeat is missing or older than staleMs blocks (the checker went silent after it had run);
+//   - an ABSENT field (never evaluated, the sizing document deleted, or the checker never deployed) blocks once now is at or after cfg.rearmAt, and an unreadable clock counts as after. Before rearmAt it does not,
+//     which is what keeps the recorded replays (dated October 2026) byte identical. The deploy order in docs/HARD_ACCOUNT_STOP.md puts the checker first so this never blocks a healthy deploy.
+// A record of an OLDER generation is ignored (a re-arm): the checker is about to write this generation's record, and an old latch is history.
 function hardStopBlocks(sizingState, now, cfg = HARD_STOP) {
   const h = sizingState ? sizingState.hardStop : undefined;
-  if (h === undefined || h === null) return { blocked: false, why: "not yet evaluated" };
+  if (h === undefined || h === null) return !(now < cfg.rearmAt) ? { blocked: true, why: "not evaluated" } : { blocked: false, why: "before the start date" };
   if (typeof h !== "object") return { blocked: true, why: "the hard stop record is not readable" };
-  if (!(Number(h.rearmAt) >= cfg.rearmAt)) return { blocked: false, why: "older generation" };
+  if (!(Number(h.rearmAt) >= cfg.rearmAt)) return !(now < cfg.rearmAt) ? { blocked: true, why: "not evaluated for this generation" } : { blocked: false, why: "older generation" };
   if (h.tripped === true) return { blocked: true, why: "tripped" };
   if (h.status === "unreadable") return { blocked: true, why: "unreadable" };
   const at = Number(h.checkedAt);
@@ -125,7 +127,7 @@ function tripDetail(j, cfg = HARD_STOP) {
 // heartbeat is due, so a cache the tick erased is back within a minute.
 // Order of effects: the authoritative record first, then the cache, then the alert (retried on later minutes while the record says it has not gone out).
 // io: { now, readL1Orders(since), readSlotOrders(since), readSizing() -> doc|null, readState() -> doc|null, writeState(obj) (merge), writeHardStop(obj) (merge into the sizing doc's hardStop),
-//       claimAlert(rearmAt) -> true when this call took the once-per-generation claim, raiseAlert({at, rearmAt, ...}), releaseAlert(rearmAt) (puts the claim back when the alert write failed), logEvent(e) }
+//       claimAlert(rearmAt) -> true when this call took the once-per-generation claim, raiseAlert({at, rearmAt, ...}), releaseAlert(rearmAt) (puts the claim back when the alert write failed), endSession(why) -> true when it ended a running session, logEvent(e) }
 async function runHardStopCheck(io, cfg = HARD_STOP) {
   const { now } = io;
   let l1, slot, sizing, state;
@@ -163,6 +165,15 @@ async function runHardStopCheck(io, cfg = HARD_STOP) {
   const stateDue = differs(st) || beatDue(st), cacheDue = differs(cache) || beatDue(cache);
   if (stateDue) { try { await io.writeState(rec); } catch (e) { return { skipped: "unwritten" }; } }
   if (cacheDue) { try { await io.writeHardStop(rec); } catch (e) { return { skipped: "unwritten" }; } }
+  // A trip ENDS THE SESSION, the way the 12% loss stop does (active false, endedAt, endedBecause, a "session ended" event), so no tick runs after it whatever the sizing cache says (the tick's full write of the sizing
+  // document can overwrite the cache). Done on every run while the latch holds, so a session started by hand again is ended again within one run (the Start callable also refuses while the latch holds). The exit
+  // watch does not depend on the session being active, so exits keep running. Every error is swallowed; the ticks still block on the latch.
+  if (rec.tripped && typeof io.endSession === "function") {
+    try {
+      const ended = await io.endSession("hard account stop: the account is down " + Math.round(effectiveFraction(cfg) * 100) + "% from its best on trading results");
+      if (ended === true) { try { await io.logEvent({ ts: now, kind: "session ended", detail: "the hard account stop (" + Math.round(effectiveFraction(cfg) * 100) + "% below the account's best on trading results) ended the session. It stays off until a reviewed edit re-arms it" }); } catch (e) { /* informational */ } }
+    } catch (e) { /* the ticks still block on the latch */ }
+  }
   // The alert (a critical bell item and a phone alert): once per generation, claimed in a transaction by the caller, and retried on later minutes until the authoritative record says it went out.
   if (rec.tripped && rec.alerted !== true) {
     let first = true;

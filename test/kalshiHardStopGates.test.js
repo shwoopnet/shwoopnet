@@ -130,8 +130,11 @@ gates.HS4 = async () => {
   assert.ok(hs.hardStopBlocks({ hardStop: { ...okRec, checkedAt: NOW - hs.HARD_STOP.staleMs - 1 } }, NOW).blocked, 'a silent checker blocks');
   assert.ok(hs.hardStopBlocks({ hardStop: { rearmAt: R, status: 'ok', tripped: false } }, NOW).blocked, 'a record with no heartbeat blocks');
   assert.ok(!hs.hardStopBlocks({ hardStop: okRec }, NOW).blocked, 'a fresh healthy record does not');
-  assert.ok(!hs.hardStopBlocks({ base: 1 }, NOW).blocked && !hs.hardStopBlocks(null, NOW).blocked, 'never evaluated: not blocked (the deploy order in the doc covers this)');
-  assert.ok(!hs.hardStopBlocks({ hardStop: { ...okRec, rearmAt: R - 1, tripped: true } }, NOW).blocked, 'an older generation is a re-arm');
+  assert.ok(hs.hardStopBlocks({ base: 1 }, NOW).blocked && hs.hardStopBlocks(null, NOW).blocked && hs.hardStopBlocks({ hardStop: null }, NOW).blocked, 'never evaluated, or the sizing document gone, after the start date: no new buys');
+  assert.ok(hs.hardStopBlocks({ base: 1 }, NaN).blocked, 'an unreadable clock counts as after');
+  assert.ok(!hs.hardStopBlocks({ base: 1 }, R - 1).blocked && !hs.hardStopBlocks(null, R - 1).blocked, 'before the start date an absent field does not block (the recorded October replays stay identical)');
+  assert.ok(hs.hardStopBlocks({ hardStop: { ...okRec, rearmAt: R - 1, tripped: true } }, NOW).blocked, 'an older generation after the start date is not a free pass: the checker has not written this generation yet');
+  assert.ok(!hs.hardStopBlocks({ hardStop: { ...okRec, rearmAt: R - 1, tripped: true } }, R - 1).blocked, 'and before the start date it is ignored');
   // The checker: unreadable orders, an unreadable sizing document, no base, an order that cannot be priced: all write "unreadable" and trip nothing.
   const cases = [
     ['orders', (w) => { w.io.readL1Orders = async () => { throw new Error('down'); }; }],
@@ -171,7 +174,6 @@ gates.HS5 = async () => {
   const r2 = await hs.runHardStopCheck({ ...w2.io }, later);
   assert.ok(!r2.killed && w2.st.sizing.hardStop.tripped === false && w2.st.sizing.hardStop.peakEquity === 0, 'the new generation starts from zero: old trades are history');
   // a stored date older than the code's never blocks by itself
-  assert.ok(!hs.hardStopBlocks({ hardStop: { tripped: true, rearmAt: R - 1 } }, NOW).blocked);
   // a latch the tick's full sizing write erased is re-derived, while the result is still below the line
   const w3 = world([l1(100, at(0)), l1(-500, at(1))], [], { base: BASE });
   await run(w3);
@@ -224,7 +226,8 @@ gates.HS8 = () => {
   const idx = read('functions', 'index.js');
   const fn = idx.slice(idx.indexOf('exports.kalshiHardStopCheck'), idx.indexOf('exports.kalshiPaperTick'));
   assert.ok(!/KALSHI_LIVE_KEY_ID|KALSHI_LIVE_PRIVATE_KEY|secrets/.test(fn), 'no secret on the checker');
-  assert.ok(/schedule: "every 1 minutes"/.test(fn));
+  assert.ok(/schedule: "every 5 minutes"/.test(fn), 'every 5 minutes: a 5 minute trip delay is fine for a 40% line, and the 15 minute stale rule allows two missed runs');
+  assert.ok(hs.HARD_STOP.staleMs >= 3 * 5 * 60 * 1000 && hs.HARD_STOP.heartbeatMs < 5 * 60 * 1000, 'every run refreshes the heartbeat and three runs fit in the stale window');
   assert.ok(/functions:kalshiHardStopCheck/.test(read('functions', 'deploy-sizing.sh')));
   assert.ok(/kalshiHardStopLib/.test(read('functions', 'deploy-latest.sh')));
 };
@@ -260,10 +263,13 @@ gates.HS9 = async () => {
   assert.ok(/k === 'hard stop'\)\{\s*out\.push\(\{ id: id, ts: e\.ts, level: 'critical'/.test(read('index.html')));
 };
 
-// HS10: an absent field changes nothing for the tick (the recorded replays stay byte identical).
+// HS10: an absent field after the start date means no buys (deleted sizing document, checker never written); nothing about the tick changes before it.
 gates.HS10 = async () => {
-  const w = l1world(); await tick(w, state);
-  assert.strictEqual(w.posts.length, 1, 'no hardStop field: gold buys exactly as before');
+  const w = l1world(); const r = await tick(w, state);
+  assert.strictEqual(w.posts.length, 0, 'no hardStop field after the start date: nothing is sent');
+  assert.strictEqual(r.skipped, 'hard stop');
+  const w2 = l1world(); await tick(w2, null);
+  assert.strictEqual(w2.posts.length, 0, 'a missing sizing document: nothing is sent');
   const lv = read('functions', 'kalshiLiveLib.js');
   const body = lv.slice(lv.indexOf('Hard account stop (docs'), lv.indexOf('Probe drop rule (see'));
   assert.ok(!/await (store|args)\./.test(body.replace(/await note/g, '')) && !/liveRequest|setSizingState/.test(body), 'the check makes no read and no write of its own');
@@ -285,6 +291,48 @@ gates.HS11 = async () => {
   // open orders are not results, hand-closed ones are not the bot's result, other strategies' junk is ignored
   const ev = hs.replay([{ ...l1(-999, at(0)), settled: false }, { ...l1(-999, at(1)), result: 'hand' }, { strategy: 'X' }, null, l1(-999, R - 1000)]);
   assert.strictEqual(ev.trades, 0, 'open, hand-closed and pre-rearmAt orders count for nothing');
+};
+
+// HS14: a trip ENDS THE SESSION the way the loss stop does; the Start button is refused while the latch holds; a stale-cache tick cannot reopen buys; the exit watch does not depend on the session.
+gates.HS14 = async () => {
+  const sess = { active: true };
+  const w = world([l1(100, at(0)), l1(-500, at(1))], [], { base: BASE });
+  w.io.endSession = async (why) => { if (sess.active !== true) return false; Object.assign(sess, { active: false, endedAt: NOW, endedBecause: why }); return true; };
+  await run(w);
+  assert.strictEqual(sess.active, false, 'the trip ended the session');
+  assert.ok(/hard account stop/.test(sess.endedBecause) && /40%/.test(sess.endedBecause) && !/by the owner/i.test(sess.endedBecause), 'with a reason that says the 40% account stop and is not read as an owner stop');
+  assert.deepStrictEqual(w.events.map((e) => e.kind).sort(), ['hard stop', 'session ended']);
+  assert.deepStrictEqual(push.sessionKinds({ active: true }, { active: false, endedBecause: sess.endedBecause }), ['issue'], 'the existing stopped-by-itself phone alert fires too');
+  // The race: the tick's stale full write puts back an untripped cache while a session is started again by hand. The next run ends it again, and the latch (in its own document) is intact.
+  w.st.sizing = { base: BASE, hardStop: { ...okRec, rearmAt: R } }; sess.active = true; w.io.now += 300000;
+  await run(w);
+  assert.strictEqual(sess.active, false, 'a session restarted while the latch holds is ended again on the next run');
+  assert.ok(hs.hardStopTripped(w.st.sizing), 'and the cache is restored from the latch');
+  assert.strictEqual(w.events.filter((e) => e.kind === 'session ended').length, 2);
+  // an owner stop is left alone: no running session, nothing written, no event
+  const q = world([l1(100, at(0)), l1(-500, at(1))], [], { base: BASE });
+  q.io.endSession = async () => false;
+  await run(q);
+  assert.ok(!q.events.some((e) => e.kind === 'session ended'));
+  // the Start callable refuses while the latch holds, and reads the checker's own record
+  const idx = read('functions', 'index.js');
+  const cb = idx.slice(idx.indexOf('exports.kalshiL1Session'), idx.indexOf('const arm = await', idx.indexOf('exports.kalshiL1Session')));
+  assert.ok(/doc\("hardStopState"\)\.get\(\)/.test(cb) && /hardState\.data\(\)\.tripped === true/.test(cb) && /HttpsError\("failed-precondition"/.test(cb), 'Start refuses while the latch holds');
+  assert.ok(cb.indexOf('hardStopState') < cb.indexOf('.set({ active: true') || !/\.set\(\{ active: true/.test(cb), 'before it writes anything');
+  // the exit watch never reads session.active (it only needs the session document to exist)
+  const lv = read('functions', 'kalshiLiveLib.js');
+  const watch = stripC(lv.slice(lv.indexOf('async function runExitWatch'), lv.indexOf('async function flattenAll')));
+  assert.ok(!/session\.active|\.active === true/.test(watch), 'the L1 exit watch does not depend on session.active');
+  assert.ok(/ends the session|endSession/.test(read('functions', 'kalshiHardStopLib.js')));
+};
+
+// HS15: the slot's entry gate: the production caller always passes the verdict, a boolean computed from the sizing document every minute. (An omitted argument stays open: failing closed there broke
+// about twenty slot engine tests that call the engine directly, so it was left, as the coordinator allowed.)
+gates.HS15 = async () => {
+  const idx = stripC(read('functions', 'index.js'));
+  assert.ok(/hardStopBlocked: hardStopLib\.hardStopBlocks\(sizingSnap\.exists \? sizingSnap\.data\(\) : null, now\)\.blocked/.test(idx), 'the production caller passes the verdict (a boolean) every time');
+  assert.strictEqual(idx.split('slotRun.runSlotTick(').length - 1, 1, 'and there is one production call site');
+  assert.strictEqual(hs.hardStopBlocks(null, NOW).blocked, true, 'so with the sizing document missing the value passed is true');
 };
 
 // HS13: if the base at the peak is not on record, the smallest base seen since the start is used (a tighter line); with no base at all, no buys. The worked example: an $800 account peaks at +$100 -> $900, line $360.
