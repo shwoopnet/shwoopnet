@@ -28,7 +28,7 @@ const SLOT_MAX_SCALE_STEPS = 3;
 // Dollar caps SCALE WITH THE SIZING BASE, like L1's own window cap and loss stop (the owner, Oct 29, 2026: the gold ladder makes L1 positions bigger as the account grows, so fixed dollars would be too small
 // for a bigger account and too big for a smaller one). Each cap is a share of the sizing base, never above a hard dollar ceiling, so a wrong base can never lift a cap past the ceiling. Per order is below the daily cap.
 // Nov 12, 2026 (the owner: "Raise limits to the max", "Yes, per-seat caps"): per order, daily and lifetime fractions raised to 2.5%, 2.5% and 7.5% so the dollar ceilings are reachable at a base of a few hundred dollars and up; the daily and lifetime loss caps are now counted PER STRATEGY (see slotOrderCheckWith), so a seat's own kill binds before another seat's losses can use up its room.
-const SLOT_CAP_FRACTIONS = Object.freeze({ perOrder: 0.025, perWindow: 0.02, openTotal: 0.03, daily: 0.025, lifetime: 0.075 });
+const SLOT_CAP_FRACTIONS = Object.freeze({ perOrder: 0.025, perWindow: 0.04, openTotal: 0.05, daily: 0.025, lifetime: 0.075 });
 const SLOT_CAP_CEILINGS = Object.freeze({ perOrder: 20, perWindow: 40, openTotal: 60, daily: 20, lifetime: 60 });
 function slotCaps(sizingBase) {
   const base = isNum(sizingBase) && sizingBase > 0 ? sizingBase : 0;   // an unusable base means every cap is zero: nothing can be sent
@@ -99,7 +99,7 @@ const SLOT_ENTRY_LEFT_MIN_SEC = 120, SLOT_ENTRY_LEFT_MAX_SEC = 840;
 const SLOT_ENTRY_LEFT_MIN_SEC_REF = 60;
 const SLOT_EXIT_LEFT_FLOOR_SEC = 45;                   // every exit is before settlement: a strategy must be fully out by this long before the close
 const SLOT_OPEN_STATUSES = Object.freeze(["filled", "sending", "unknown"]);   // the statuses runL1Tick counts as money in a window; ANY order with fills counts too, whatever its status
-const SLOT_WINDOW_SHARE = 0.5;                         // the slot may take at most this share of the shared window cap, so L1 (gold first) is never starved of its room
+const SLOT_WINDOW_SHARE = 0.75;                        // the slot may take at most this share of the shared window cap, so L1 (gold first) is never starved of its room
 const SLOT_L1_RESERVE = 1.05;                          // dollars always left in the window for one more L1 contract (a 97c contract plus its fee)
 const SLOT_LAST_REVIEWED_ON = "2026-11-12";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
 const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M|KXSILVER15M|KXCOPPER15M|KXWTI15M|KXEURUSD15M|KXGBPUSD15M|KXUSDJPY15M|KXHYPE15M|KXBNB15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
