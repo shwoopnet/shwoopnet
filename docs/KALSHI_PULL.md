@@ -16,7 +16,7 @@ A workflow a person starts by hand from the Actions tab. It reads one job file f
 | Other failures | three in a row (5xx, a redirect, no answer) end the run; a 404 is an answer |
 | Answer size | 5 MB an answer, 200 MB a run |
 | Run time | 40 minutes in the script, 50 in the workflow |
-| Runs a day | 20 real runs per UTC day (it was 6 until Nov 12, 2026, then 12 the same day; counted from the folders already on the data branch); a dry run does not count |
+| Runs a day | 40 real runs per UTC day (it was 6 until Nov 12, 2026, then 12, then 20 the same day; counted from the folders already on the data branch); a dry run does not count |
 | Runner minutes | about 2 for 60 requests, about 6 for 300, about 25 to 30 for the full 1,200 (checkout and push add under a minute); free on a public repository |
 | Stop date | 2027-02-28 23:59 UTC, checked in the workflow and in the script |
 
