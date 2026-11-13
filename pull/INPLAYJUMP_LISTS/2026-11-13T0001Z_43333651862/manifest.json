@@ -1,0 +1,952 @@
+{
+ "job": {
+  "job_id": "INPLAYJUMP_LISTS",
+  "owner": "DESK_A",
+  "registration": "kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md",
+  "purpose": "INPLAYJUMP stage 1: settled match-winner markets of seven in-play series inside each family's DEVELOPMENT window only (close-time floor and ceiling on every call), plus the series fee fields. No price is read.",
+  "heldout": "none requested: every list call carries max_close_ts at the end of the family's development window, so no held-out market is listed",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor",
+     "min_close_ts",
+     "max_close_ts"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXESOCCERGAME",
+   "KXITFMATCH",
+   "KXITFWMATCH",
+   "KXLIGAPROMATCH",
+   "KXATPCHALLENGERMATCH",
+   "KXWTACHALLENGERMATCH",
+   "KXEBASKETBALLGAME"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 73,
+  "notes": "14 requests, at most 71 pages in all (pages count toward the cap). Page limits are margins over Desk B's estimates (e-soccer 11 pages, ITF 8, table tennis 7, challenger 8, e-basketball 7). Fields the reader keeps: ticker, event_ticker, open_time, close_time, result, volume.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "live_KXESOCCERGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXESOCCERGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1792022400,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 14
+   },
+   {
+    "id": "live_KXITFMATCH",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXITFMATCH",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1791590400,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 10
+   },
+   {
+    "id": "live_KXITFWMATCH",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXITFWMATCH",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1791590400,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXLIGAPROMATCH",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAPROMATCH",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1790812800,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 9
+   },
+   {
+    "id": "live_KXATPCHALLENGERMATCH",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXATPCHALLENGERMATCH",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 8
+   },
+   {
+    "id": "live_KXWTACHALLENGERMATCH",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTACHALLENGERMATCH",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 8
+   },
+   {
+    "id": "live_KXEBASKETBALLGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEBASKETBALLGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789430400,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 9
+   },
+   {
+    "id": "series_KXESOCCERGAME",
+    "path": "/series/KXESOCCERGAME",
+    "params": {}
+   },
+   {
+    "id": "series_KXITFMATCH",
+    "path": "/series/KXITFMATCH",
+    "params": {}
+   },
+   {
+    "id": "series_KXITFWMATCH",
+    "path": "/series/KXITFWMATCH",
+    "params": {}
+   },
+   {
+    "id": "series_KXLIGAPROMATCH",
+    "path": "/series/KXLIGAPROMATCH",
+    "params": {}
+   },
+   {
+    "id": "series_KXATPCHALLENGERMATCH",
+    "path": "/series/KXATPCHALLENGERMATCH",
+    "params": {}
+   },
+   {
+    "id": "series_KXWTACHALLENGERMATCH",
+    "path": "/series/KXWTACHALLENGERMATCH",
+    "params": {}
+   },
+   {
+    "id": "series_KXEBASKETBALLGAME",
+    "path": "/series/KXEBASKETBALLGAME",
+    "params": {}
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-13T0001Z",
+ "finished": "2026-11-13T0002Z",
+ "status": "complete",
+ "requests_sent": 37,
+ "bytes_stored": 62784258,
+ "rows": [
+  {
+   "index": 1,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2418797,
+   "t_send_ms": 1794528090756,
+   "t_recv_ms": 1794528090993,
+   "server_date": "Fri, 13 Nov 2026 00:01:30 GMT",
+   "file": "0001.json.gz",
+   "sha256": "fbd711105b35f0653b36515bdc8be4926fe4c573178f3281afc4bdca0c1eb32e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2419912,
+   "t_send_ms": 1794528091756,
+   "t_recv_ms": 1794528091976,
+   "server_date": "Fri, 13 Nov 2026 00:01:31 GMT",
+   "file": "0002.json.gz",
+   "sha256": "19a5b80944b8b4e59576e0c22838980586755e985e52af4d64a6b6eab55fc6a2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2418718,
+   "t_send_ms": 1794528092756,
+   "t_recv_ms": 1794528093085,
+   "server_date": "Fri, 13 Nov 2026 00:01:32 GMT",
+   "file": "0003.json.gz",
+   "sha256": "5aee3efffcd6942f9c5d4051db4d8d3c7060655532bdb472bf2e99c171a9d671",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2417419,
+   "t_send_ms": 1794528093756,
+   "t_recv_ms": 1794528094066,
+   "server_date": "Fri, 13 Nov 2026 00:01:33 GMT",
+   "file": "0004.json.gz",
+   "sha256": "14c08873bde5b42adb5c9efc1ddfed78c3a95e4d213b0eb57a23e39cc74b3475",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2421358,
+   "t_send_ms": 1794528094757,
+   "t_recv_ms": 1794528094966,
+   "server_date": "Fri, 13 Nov 2026 00:01:34 GMT",
+   "file": "0005.json.gz",
+   "sha256": "987624627153ddb92044d1e9b41e5f62097f1f44b5409a72b645a0f57a98ff63",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 2418952,
+   "t_send_ms": 1794528095757,
+   "t_recv_ms": 1794528096186,
+   "server_date": "Fri, 13 Nov 2026 00:01:35 GMT",
+   "file": "0006.json.gz",
+   "sha256": "0f90ddd2f01ac5cd6bf0e758db8de0c006f7a27f0d306f333b45253f24970b67",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 7,
+   "status": 200,
+   "bytes": 2418692,
+   "t_send_ms": 1794528096757,
+   "t_recv_ms": 1794528097063,
+   "server_date": "Fri, 13 Nov 2026 00:01:36 GMT",
+   "file": "0007.json.gz",
+   "sha256": "93569b8077ade2fcb8fdf9a93f2a82ba2c764f251ccefd7a4621ff65ee2f940c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 8,
+   "status": 200,
+   "bytes": 2418191,
+   "t_send_ms": 1794528097757,
+   "t_recv_ms": 1794528098017,
+   "server_date": "Fri, 13 Nov 2026 00:01:37 GMT",
+   "file": "0008.json.gz",
+   "sha256": "39c055f532b44cd40deef28c335fa39870e066f9e930d67fda1fe17d80cdd141",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 9,
+   "status": 200,
+   "bytes": 2419045,
+   "t_send_ms": 1794528098757,
+   "t_recv_ms": 1794528099188,
+   "server_date": "Fri, 13 Nov 2026 00:01:38 GMT",
+   "file": "0009.json.gz",
+   "sha256": "c9e4fa3ad82e812cf4534fd6578e3bccf5b8fafa2d6db1b35526352cc0231bb4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 10,
+   "status": 200,
+   "bytes": 2421034,
+   "t_send_ms": 1794528099757,
+   "t_recv_ms": 1794528100049,
+   "server_date": "Fri, 13 Nov 2026 00:01:39 GMT",
+   "file": "0010.json.gz",
+   "sha256": "604e6dddd1f7538543bcf480c527e7db49137edf7059b1ba4dce3035a80b4666",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 11,
+   "status": 200,
+   "bytes": 2419276,
+   "t_send_ms": 1794528100757,
+   "t_recv_ms": 1794528100978,
+   "server_date": "Fri, 13 Nov 2026 00:01:40 GMT",
+   "file": "0011.json.gz",
+   "sha256": "b1a054f21e1e0606a168630f7cdeaad65861b3d7c5d7147ec349edf7216fc288",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "page": 12,
+   "status": 200,
+   "bytes": 1134545,
+   "t_send_ms": 1794528101757,
+   "t_recv_ms": 1794528101995,
+   "server_date": "Fri, 13 Nov 2026 00:01:41 GMT",
+   "file": "0012.json.gz",
+   "sha256": "4c2fc20dd9b0b28abc1a316ff10052f0eff2009190169eda73ace1e385c3d2d7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "live_KXITFMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2513522,
+   "t_send_ms": 1794528102757,
+   "t_recv_ms": 1794528103137,
+   "server_date": "Fri, 13 Nov 2026 00:01:42 GMT",
+   "file": "0013.json.gz",
+   "sha256": "451728271f9c2afbb4a98e89c078bdc5f47650abdb82fb6fca1ebebab2250941",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "live_KXITFMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2517940,
+   "t_send_ms": 1794528103758,
+   "t_recv_ms": 1794528104021,
+   "server_date": "Fri, 13 Nov 2026 00:01:43 GMT",
+   "file": "0014.json.gz",
+   "sha256": "58431844ba00a67840e3ab526fc665df21d5e1d6293ab476a47c5d6a0fa95715",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "live_KXITFMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 719592,
+   "t_send_ms": 1794528104758,
+   "t_recv_ms": 1794528104993,
+   "server_date": "Fri, 13 Nov 2026 00:01:44 GMT",
+   "file": "0015.json.gz",
+   "sha256": "3ba520018d7900e143d438273f5ad64670c83ed96b0292c240184c1f7c676eb9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "live_KXITFWMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFWMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2522417,
+   "t_send_ms": 1794528105758,
+   "t_recv_ms": 1794528106309,
+   "server_date": "Fri, 13 Nov 2026 00:01:45 GMT",
+   "file": "0016.json.gz",
+   "sha256": "7ec9fd06453ba4ccd2b21cefe78244737bf85c8cf16dc85f54c0afb43b1367a4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "live_KXITFWMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFWMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2519025,
+   "t_send_ms": 1794528106758,
+   "t_recv_ms": 1794528107318,
+   "server_date": "Fri, 13 Nov 2026 00:01:46 GMT",
+   "file": "0017.json.gz",
+   "sha256": "bedaea5c202f96b1c9955ca6c724fe7bee5fff088ed021f05212b5d3aba6a777",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "live_KXITFWMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFWMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1270814,
+   "t_send_ms": 1794528107758,
+   "t_recv_ms": 1794528108110,
+   "server_date": "Fri, 13 Nov 2026 00:01:47 GMT",
+   "file": "0018.json.gz",
+   "sha256": "d6cbdbb704d7a3b3cf7bf8793a654ff24afd8104263839b75b578301dbe3a333",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "live_KXLIGAPROMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPROMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1790812800,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2288021,
+   "t_send_ms": 1794528108758,
+   "t_recv_ms": 1794528109009,
+   "server_date": "Fri, 13 Nov 2026 00:01:48 GMT",
+   "file": "0019.json.gz",
+   "sha256": "18257e62752ed707c3fd0acdbb499f8b3c05c2eb0e7e7bf56b3521ebffeac4ab",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "live_KXLIGAPROMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPROMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1790812800,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2314722,
+   "t_send_ms": 1794528109758,
+   "t_recv_ms": 1794528110021,
+   "server_date": "Fri, 13 Nov 2026 00:01:49 GMT",
+   "file": "0020.json.gz",
+   "sha256": "414c61e234076a989bec27687b14d7ca1caa77f65d41d4f8b097acd6eb884122",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "live_KXLIGAPROMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPROMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1790812800,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 869073,
+   "t_send_ms": 1794528110758,
+   "t_recv_ms": 1794528110876,
+   "server_date": "Fri, 13 Nov 2026 00:01:50 GMT",
+   "file": "0021.json.gz",
+   "sha256": "13cf15bebed6b43dd82f5a14a0174fc21e534d1566beb06df0dca55daec39bad",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "live_KXATPCHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2504461,
+   "t_send_ms": 1794528111758,
+   "t_recv_ms": 1794528112049,
+   "server_date": "Fri, 13 Nov 2026 00:01:51 GMT",
+   "file": "0022.json.gz",
+   "sha256": "5fe7c0f978f17d0613aeb4002b03e7adc051911b012f7f7933353abf8c8a6dd4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "live_KXATPCHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2506252,
+   "t_send_ms": 1794528112758,
+   "t_recv_ms": 1794528113315,
+   "server_date": "Fri, 13 Nov 2026 00:01:52 GMT",
+   "file": "0023.json.gz",
+   "sha256": "8ede88eb059e7e336ebd4a56852186fc489c773e16d3e3b0605746622e037c38",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "live_KXATPCHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2509687,
+   "t_send_ms": 1794528113759,
+   "t_recv_ms": 1794528114192,
+   "server_date": "Fri, 13 Nov 2026 00:01:53 GMT",
+   "file": "0024.json.gz",
+   "sha256": "b6468b7b6f35208eb55a375afa2adaaaf8b0439722593adde34a329905ef52a4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "live_KXATPCHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 583134,
+   "t_send_ms": 1794528114759,
+   "t_recv_ms": 1794528114892,
+   "server_date": "Fri, 13 Nov 2026 00:01:54 GMT",
+   "file": "0025.json.gz",
+   "sha256": "3f139f348d7fea5103a1fc0db9817a5e1350ca6cc033ffc1ee24a93d77fa9dd2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 26,
+   "id": "live_KXWTACHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTACHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2491059,
+   "t_send_ms": 1794528115759,
+   "t_recv_ms": 1794528116263,
+   "server_date": "Fri, 13 Nov 2026 00:01:55 GMT",
+   "file": "0026.json.gz",
+   "sha256": "aa748aacccf2431543bb5bac1e989a6506190ed94688010e3644f557a2ce4be3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 27,
+   "id": "live_KXWTACHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTACHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 336561,
+   "t_send_ms": 1794528116759,
+   "t_recv_ms": 1794528116898,
+   "server_date": "Fri, 13 Nov 2026 00:01:56 GMT",
+   "file": "0027.json.gz",
+   "sha256": "4e42b27e80f123377f9e7b90ad49f843c0bd5ce4017085f399d44263f85c91c7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 28,
+   "id": "live_KXEBASKETBALLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEBASKETBALLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789430400,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2389463,
+   "t_send_ms": 1794528117759,
+   "t_recv_ms": 1794528118094,
+   "server_date": "Fri, 13 Nov 2026 00:01:57 GMT",
+   "file": "0028.json.gz",
+   "sha256": "389ad05191103961a0ec860f922265b196f7c3df50e956d444860688954c623a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 29,
+   "id": "live_KXEBASKETBALLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEBASKETBALLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789430400,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2388259,
+   "t_send_ms": 1794528118759,
+   "t_recv_ms": 1794528118954,
+   "server_date": "Fri, 13 Nov 2026 00:01:58 GMT",
+   "file": "0029.json.gz",
+   "sha256": "51e4bcec7a63f23b30d62de85364dacdfb8a5e7bf2ee70f8ba7b3c671b3e04dd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 30,
+   "id": "live_KXEBASKETBALLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEBASKETBALLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789430400,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1781175,
+   "t_send_ms": 1794528119759,
+   "t_recv_ms": 1794528119944,
+   "server_date": "Fri, 13 Nov 2026 00:01:59 GMT",
+   "file": "0030.json.gz",
+   "sha256": "33cfcaeeb890501ba614cd8be999c7f8e1186ef6c063192b0f4e2c479967a4bb",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 31,
+   "id": "series_KXESOCCERGAME",
+   "path": "/series/KXESOCCERGAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1878,
+   "t_send_ms": 1794528120759,
+   "t_recv_ms": 1794528120855,
+   "server_date": "Fri, 13 Nov 2026 00:02:00 GMT",
+   "file": "0031.json.gz",
+   "sha256": "b6f3d1a9c1082df0db2266e5bec3092bf08b7050f66bea4196434205a2642b5b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 32,
+   "id": "series_KXITFMATCH",
+   "path": "/series/KXITFMATCH",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 2008,
+   "t_send_ms": 1794528121759,
+   "t_recv_ms": 1794528121856,
+   "server_date": "Fri, 13 Nov 2026 00:02:01 GMT",
+   "file": "0032.json.gz",
+   "sha256": "eb286af845799c423048a667380fc3ab083d7d6071986dc6e93e634fdbb2df67",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 33,
+   "id": "series_KXITFWMATCH",
+   "path": "/series/KXITFWMATCH",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 2012,
+   "t_send_ms": 1794528122759,
+   "t_recv_ms": 1794528122858,
+   "server_date": "Fri, 13 Nov 2026 00:02:02 GMT",
+   "file": "0033.json.gz",
+   "sha256": "ea6a4460c58886b091c85c3d291f7f73b3036af0880747366abf6cf5b4ed8243",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 34,
+   "id": "series_KXLIGAPROMATCH",
+   "path": "/series/KXLIGAPROMATCH",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 2041,
+   "t_send_ms": 1794528123760,
+   "t_recv_ms": 1794528123862,
+   "server_date": "Fri, 13 Nov 2026 00:02:03 GMT",
+   "file": "0034.json.gz",
+   "sha256": "ddf68316eb1cdb535ab185bbbe562b2aca8c7249a6d9b1d8140fd0f6ce7aebd5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 35,
+   "id": "series_KXATPCHALLENGERMATCH",
+   "path": "/series/KXATPCHALLENGERMATCH",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1881,
+   "t_send_ms": 1794528124760,
+   "t_recv_ms": 1794528124881,
+   "server_date": "Fri, 13 Nov 2026 00:02:04 GMT",
+   "file": "0035.json.gz",
+   "sha256": "e7349b67d4cd5b8e8f8ae57e011a2566fae179a56ecb43bd0f3661f00b577c93",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 36,
+   "id": "series_KXWTACHALLENGERMATCH",
+   "path": "/series/KXWTACHALLENGERMATCH",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1518,
+   "t_send_ms": 1794528125760,
+   "t_recv_ms": 1794528125856,
+   "server_date": "Fri, 13 Nov 2026 00:02:05 GMT",
+   "file": "0036.json.gz",
+   "sha256": "097192abb5f60732a097fe5c3b5c71244c977e5c9ffbc141028024c27d73caaa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 37,
+   "id": "series_KXEBASKETBALLGAME",
+   "path": "/series/KXEBASKETBALLGAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1804,
+   "t_send_ms": 1794528126760,
+   "t_recv_ms": 1794528126856,
+   "server_date": "Fri, 13 Nov 2026 00:02:06 GMT",
+   "file": "0037.json.gz",
+   "sha256": "524c899290772265f91ed0370640a34bff4b565e6a26811990a4a126af26130a",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
