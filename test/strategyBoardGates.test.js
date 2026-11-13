@@ -161,11 +161,11 @@ gates.SB11 = () => {
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
   assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
-  assert.ok(/Comes back when: a 14 day cool off/.test(masked) && /class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(P.kalshiBoardHtml(model('ok'), esc, money))[0]) && !/class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(masked)[0]), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
+  assert.ok(/can come back only after a 14 day break/.test(masked) && !/As of Nov/.test(masked) && /class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(P.kalshiBoardHtml(model('ok'), esc, money))[0]) && !/class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(masked)[0]), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
   assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
   const evil = P.kalshiBoardHtml({ live: [{ id: 'X', name: '<img src=x onerror=1>', rule: '"><script>', w: P.kalshiBoardWindows([], now), kill: { lines: ['<b>'] } }], deck: { state: 'unreadable', rows: [] }, retired: { asOf: '<i>', back: '<u>', rows: [{ name: 'n', pf: 1, n: 1 }] } }, esc, money);
-  assert.ok(!/<img|<script/.test(evil) && evil.includes('&#60;i&#62;') && evil.includes('&#60;u&#62;'), 'every value is escaped');
+  assert.ok(!/<img|<script/.test(evil), 'every value is escaped (the retired as-of and back fields are no longer drawn: the footer is fixed plain text, Nov 13, 2026)');
   const body = fn('renderStrategiesPage');
   assert.ok(/kalshiMoney/.test(body) && !/toFixed\(2\)[^;]*\$|'\$'/.test(fn('kalshiBoardHtml') + fn('kalshiBoardKill')), 'no dollar sign typed into the board text');
   assert.ok(/kalshiShadowCache\.error \? 'unreadable'/.test(body), 'a failed read is a state, not an exception');

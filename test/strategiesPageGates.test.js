@@ -310,9 +310,9 @@ gates.SP12c = () => {
   assert.ok(Q.KAL_BOARD_RETIRED.rows.every((r) => Q.KAL_RETIRED_CAUSES.includes(r.cause)), 'every old row has a cause');
   const h = Q.kalshiRetiredGroupsHtml(en, {}, esc);
   assert.ok(!/<details[^>]* open/.test(h), 'closed by default');
-  assert.deepStrictEqual([...h.matchAll(/<summary><span>([^<]+)<\/span>/g)].map((m) => m[1]), Q.KAL_RETIRED_CAUSES, 'groups by cause, in a fixed order');
-  assert.ok(/failed the bar \u00b7 n 172 and 173, PF about 0.55 to 0.60 \u00b7 Nov 12/.test(h), 'one line: cause, key numbers, date');
-  assert.ok(/<span class="sp-rnote">family closed \u00b7 Nov 12<\/span>/.test(h), 'no figures: only cause and date');
+  assert.deepStrictEqual([...h.matchAll(/<summary><i class="chev"><\/i><span class="sp-rgt">([^<]+)<\/span>/g)].map((m) => m[1]), Q.KAL_RETIRED_CAUSES, 'groups by cause, in a fixed order');
+  assert.ok(/sp-rnote">n 172 and 173, PF about 0.55 to 0.60 \u00b7 Nov 12</.test(h), 'one line: key numbers and date (the group header names the cause, Nov 13, 2026)');
+  assert.ok(/<span class="sp-rnote">Nov 12<\/span>/.test(h), 'no figures: only the date');
   assert.strictEqual((h.match(/data-reg-details=/g) || []).length, en.length, 'every line has Details');
   assert.ok(!/<img|bogus/.test(h) && /&#60;img/.test(h), 'escaped');
   assert.ok(/<details class="sp-rgrp" data-k="ret:superseded" open>/.test(Q.kalshiRetiredGroupsHtml(en, { 'ret:superseded': true }, esc)), 'an opened group stays open across a redraw');

@@ -992,6 +992,8 @@
   .sp-pop-h{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:6px; } .sp-pop-f{ display:grid; grid-template-columns:60px minmax(0,1fr); gap:8px; font-size:12px; margin:8px 0; } .sp-pop-f b, .sp-pop-room b{ color:var(--muted); font-weight:600; } .sp-pop-room{ margin-top:12px; font-size:12px; display:grid; gap:6px; }
   .sp-badge{ flex:none; font-size:10.5px; font-weight:700; letter-spacing:.06em; border:1px solid var(--border); border-radius:999px; padding:2px 9px; white-space:nowrap; }
   .sp-b-ok, .sp-b-live{ border-color:var(--paper); } .sp-b-warn{ border-color:var(--paper); border-style:dashed; } .sp-b-idle, .sp-b-deck{ color:var(--muted); } .sp-b-hot{ background:var(--paper); color:var(--ink,#000); border-color:var(--paper); } .sp-b-prob{ border-color:var(--muted); } .sp-b-off{ border-style:dashed; color:var(--muted); }
+  /* Off / Retired groups look and fold like the Live rows (Nov 13, 2026, the owner): a row with a chevron, the group name and its count; opening it lists the strategies in it. */
+  .lp-rows .sp-rgrp{ margin:8px 0 0; } .lp-rows .sp-rgrp > summary{ justify-content:flex-start; gap:10px; min-height:52px; padding:6px 14px 6px 8px; border-radius:10px; background:var(--ink,#0b0b0b); text-transform:none; font-size:13px; } .lp-rows .sp-rgrp > summary:hover{ border-color:#8a8a8a; } .lp-rows .sp-rgrp[open] > summary{ border-color:#666; } .sp-rgt::first-letter{ text-transform:uppercase; } .lp-rows .sp-rgrp .sp-rgn{ margin-left:auto; } .sp-rgrp[open] > summary > .chev{ transform:rotate(45deg); border-color:var(--paper); }
   .sp-rgrp{ margin:10px 0 0; } .sp-rgrp > summary{ display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:44px; padding:0 14px; border:1px solid var(--border); border-radius:12px; cursor:pointer; font-weight:700; text-transform:capitalize; list-style:none; } .sp-rgrp > summary::-webkit-details-marker{ display:none; } .sp-rgn{ color:var(--muted); font-variant-numeric:tabular-nums; } .sp-rgrp[open] > summary{ border-bottom-left-radius:0; border-bottom-right-radius:0; } .sp-rgrp > .sp-rlist{ border-top:0; border-top-left-radius:0; border-top-right-radius:0; }
   .sp-detsm{ margin-top:0; align-self:center; padding:4px 12px; min-height:40px; }
   .sp-gloss{ margin:14px 0 0; border:1px solid var(--border); border-radius:16px; background:var(--panel); padding:12px 16px; }
@@ -1866,6 +1868,8 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Strategies page, Off / Retired box (the owner: "this looks a little weird"): each group (Failed the bar, Killed while live, Family closed, Superseded) is now a row like the Live rows, with a chevron and a count, closed until tapped; the strategy lines inside no longer repeat the group name; the duplicate return line in the top right is gone; the footer reads in plain words with no "as of" date. Page only.</li>
+                  <li>Phone layout matches the desktop site (the owner: "lets start building mobile out too"): the Bot page Account card shows the balance, Today, the loss stop and then the order switch, in the desktop order; on the Strategies page the stage boxes line up, the top box says "N trades" and the page opens with a plain line on what it shows; a tap on any chart shows its readout and a sideways drag moves it (the Account result line and the Brief charts now answer a tap too), while an up or down drag still scrolls. Page only.</li>
                   <li>Phone layout matches the desktop site (the owner: "lets start building mobile out too"): the Bot page Account card shows the balance, Today, the loss stop and then the order switch, in the desktop order; on the Strategies page the stage boxes line up, the top box says "N trades" and the page opens with a plain line on what it shows; a tap on any chart shows its readout and a sideways drag moves it (the Account result line and the Brief charts now answer a tap too), while an up or down drag still scrolls. Page only.</li>
                   <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
                   <li>Trading: OICORE's limit is back at the price it sees (the 1c above it is switched off), because the orders that filled above the price first seen netted negative; it fills a little less often and never pays more than the price it sees</li>
@@ -4756,8 +4760,8 @@ kalshiStatusTick();
     return KAL_RETIRED_CAUSES.map(function(c){
       var rows = (entries || []).filter(function(e){ return e.cause === c; });
       if(!rows.length){ return ''; }
-      return '<details class="sp-rgrp" data-k="ret:' + esc(c) + '"' + (open && open['ret:' + c] ? ' open' : '') + '><summary><span>' + esc(c) + '</span><span class="sp-rgn">' + rows.length + '</span></summary><ul class="sp-rlist">' + rows.map(function(e){
-        var bits = [e.cause, e.figures, kalshiRetiredDate(e.date)].filter(Boolean).join(' · ');
+      return '<details class="sp-rgrp" data-k="ret:' + esc(c) + '"' + (open && open['ret:' + c] ? ' open' : '') + '><summary><i class="chev"></i><span class="sp-rgt">' + esc(c) + '</span><span class="sp-rgn">' + rows.length + '</span></summary><ul class="sp-rlist">' + rows.map(function(e){
+        var bits = [e.figures, kalshiRetiredDate(e.date)].filter(Boolean).join(' · ') || 'Retired';   // the group already names the cause, so the line does not repeat it
         return '<li class="sp-rrow"><span class="sp-rwho"><span class="sp-rname">' + esc(e.name) + '</span><span class="sp-rnote">' + esc(bits) + '</span></span><button type="button" class="sp-detbtn sp-detsm" data-reg-details="' + esc(e.id) + '">Details</button></li>';
       }).join('') + '</ul></details>';
     }).join('');
@@ -4990,11 +4994,11 @@ kalshiStatusTick();
     var bodies = {
       shadow: rowsOf('shadow') + shadowEmpty + quietHtml,
       live: box.live.length ? rowsOf('live') : empty('No strategy is trading real money.'),
-      off: rowsOf('off') + kalshiRetiredGroupsHtml(retEntries, model.open, esc) + '<div class="sp-sub sp-back">Comes back when: ' + esc(model.retired.back) + '. As of ' + esc(model.retired.asOf) + '.</div>'
+      off: rowsOf('off') + kalshiRetiredGroupsHtml(retEntries, model.open, esc) + '<div class="sp-sub sp-back">A retired strategy can come back only after a 14 day break, then a fresh paper record of 150 trades that wins at least 1.3 times what it loses (and 1.2 times in its later half), then the owner&rsquo;s approval.</div>'
     };
     var panels = KAL_STAGES.map(function(s){
       var isOpen = openKey === s.key;
-      return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '><div class="lp-prog" aria-hidden="true"><i style="--w:' + pct(prog[s.key][0]).toFixed(1) + '%"></i><span>' + esc(prog[s.key][1]) + ' &rarr; ' + esc(s.then) + '</span></div><div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
+      return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '>' + (s.key === 'off' ? '' : '<div class="lp-prog" aria-hidden="true"><i style="--w:' + pct(prog[s.key][0]).toFixed(1) + '%"></i><span>' + esc(prog[s.key][1]) + ' &rarr; ' + esc(s.then) + '</span></div>') + '<div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
     }).join('');
     var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[KAL_STAGES.length - 1].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
