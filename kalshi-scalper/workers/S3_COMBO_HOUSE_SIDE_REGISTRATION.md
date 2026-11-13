@@ -98,3 +98,12 @@ COMBOPRICE1 is V2's design for pricing a combo against its own legs (`workers/CO
 With item 1 alone, one thing becomes possible at zero reads: grouping S3's paper fills by shared legs in place of close dates (an amendment, made before the read it governs). COMBOPRICE1 itself needs items 1 and 2.
 
 Also for Nov 26, description only and not a try: the recorder's printed trades where the taker bought YES show what the house side actually earned where the volume is. It is read only on or after Nov 26, with the recorder's own stop rule.
+
+## Dated clarifying line, Nov 13, 2026, 00:20Z, before any outcome is joined (Head of R&D's ruling of 00:19Z): weather legs
+
+The registered sample does not change. **Every S3 figure is printed twice: over all combos, and over combos with no weather leg.**
+- A weather leg is a leg whose series ticker starts with one of: `KXHIGH`, `KXLOW`, `KXTEMP`, `KXRAIN`, `KXSNOW`, `KXHURR`, `KXTORN`, `KXWIND`. The list is fixed here, before any outcome; the scorer also prints every leg series it saw with its count, so a weather series the list misses can be seen and named, never silently kept.
+- The recorder has stored each combo's leg tickers only since its second snapshot (Nov 12, 21:36Z). A combo with no stored legs is "leg unknown": it sits in the all-combos line only.
+- The registered verdict, the kill lines and the read dates are on the all-combos line, as registered. The no-weather-leg line is information for one purpose: **any probe spec that ever goes to the owner from S3 leaves out combos with a weather leg unless the owner says otherwise** (the owner's ban on 65c to 87c weather NO legs).
+- S3 stays on the paper track with its own read dates (Nov 26, Dec 12). It is NOT on the wheel list (the Head's ruling: listing it twice would pad the wheel). The optional cut at 7 or more legs is not registered.
+- The scorer change (the second line and the leg-series count) is made and re-hashed before the Nov 26 read; the leg-ticker column is checked on Nov 19.
