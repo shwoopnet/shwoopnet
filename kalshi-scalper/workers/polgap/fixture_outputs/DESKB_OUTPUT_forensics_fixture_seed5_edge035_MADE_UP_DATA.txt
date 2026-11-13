@@ -29,6 +29,6 @@ information only, fills on a present candle: n 140, wins 89, cash PF 2.02, net +
 information only, optimistic, same-candle fill (every decision booked at the limit, no block): n 434, wins 286, cash PF 2.32, net +75.27, mean +0.1734, event-clustered z +7.39
 information only, voids paid at their settlement value instead: n 281, wins 188, cash PF 2.38, net +50.71, mean +0.1805, event-clustered z +6.58
 information only, price-matched baseline (gap under 2c, same steps, same-candle basis): n 1082, wins 301, cash PF 0.64, net -93.69, mean -0.0866, event-clustered z -5.58
-POOLING CONDITION: activity counts supplies more than half of the pooled net (37.21 of 50.63), so a pooled pass does not count; the card is read as that family's alone.
+POOLING CONDITION: the pooled read passes, but activity counts supplies more than half of the pooled net (37.21 of 50.63), so the pooled pass does not count; the card is read as that family's alone.
 VERDICT: activity counts: survives development
 A survival is a candidate for a wheel shadow place only. The shared deflated bar (one-sided z 5.46) is not claimed.
