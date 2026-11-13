@@ -86,7 +86,7 @@ Held-out line for both, from `HELDOUT_REGISTRY.md` (rnd-queue, ad42ec54): cards 
 - **Nothing here is padded:** I did not write a temperature card, an in-play-total card or a settlement-lag card, for the reasons given above.
 - Probe B (`desk_b_jobs/LIVEDATA_PROBE_B.json`, 80b2fa4f) answers stage 0 only in part: it lists current milestones and the doubles events. **A step B2 is needed for these two cards** (the live data of one NHL and one NBA milestone, the game_stats of the same two, and one finished game of each): about 8 requests, written once B's answers show milestone ids.
 
-## ENDNET: three readings pinned, Nov 13, 2026, 15:14Z by this desk's clock (the Head of R&D's ruling stamped 15:12Z by the Head's clock). Written before any state, price or result of this card was read; the scorer was built on invented rows only.
+## ENDNET: three readings pinned, Nov 13, 2026, 15:12Z by this desk's clock (the Head of R&D's ruling stamped 15:12Z by the Head's clock). Written before any state, price or result of this card was read; the scorer was built on invented rows only.
 
 Dated lines, to be carried into the registration when ENDNET is registered (it counts as a registered rule only once its state source is shown to exist):
 1. **The strike.** The strike bought is the one whose `floor_strike` f satisfies 0 <= f - total < 1, where total = home goals + away goals at the entry minute, so exactly one more goal makes YES (YES = final total above f). This replaces the card's wording "a strike whose floor_strike is the current total": a half line such as 5.5 against a total of 5 is the usual case, and an integer line equal to the total also qualifies.
