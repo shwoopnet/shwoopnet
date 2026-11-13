@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/voidsnap/VOIDSNAP_CARD.md",
  "purpose": "VOIDSNAP stage 1 (zero tries, hindsight measurement): one minute candles of both contracts of each voided CS2 match in the development window and of its matched played match.",
- "heldout": "none: every event closes 2026-09-12 to 2026-10-22; the voids before 2026-09-12 are the held-out set of a later rule and no ticker of theirs is requested",
+ "heldout": "none: every event closes 2026-09-12 to 2026-10-22; the voids before 2026-09-12 are the held-out set of a later rule and no ticker of theirs is requested. Cards that name or share these series: CANDLEGAP_CS2, ESPORTM1, MAPBREAK, PREMOVE, VOIDSNAP. MAPBREAK and PREMOVE are closed unread.",
  "allowed_endpoints": [
   {
    "name": "batch_candles",

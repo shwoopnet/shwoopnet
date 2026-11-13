@@ -3,7 +3,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md",
  "purpose": "break-in-play measurement stage 2: one minute candles of the match and placebo contracts of the sampled matches.",
- "heldout": "none read; the sample closes before 2026-10-23T00:00Z",
+ "heldout": "none read; the sample closes before 2026-10-23T00:00Z. Cards that name or share these series: MAPBREAK, PREMOVE, ESPORT1, ESPORTM1, CANDLEGAP_CS2, VOIDSNAP, SCOUT1. MAPBREAK and PREMOVE are closed unread.",
  "allowed_endpoints": [
   {
    "name": "batch_candles",

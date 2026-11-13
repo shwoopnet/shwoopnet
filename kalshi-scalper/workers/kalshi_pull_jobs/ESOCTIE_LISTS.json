@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/history_miner/esoctie/ESOCTIE_REGISTRATION.md",
  "purpose": "ESOCTIE stage 1 (History Miner): settled lists of KXESOCCERGAME, development closes 2026-09-12 to before 2026-10-23 only, in three date slices to keep each answer small; plus the series fee fields.",
- "heldout": "none read: nothing closing on or after 2026-10-23T00:00Z is listed (every slice carries max_close_ts at most 1792713599); held-out is ESOCTIE's own block 2026-10-23 to 2026-11-13, pulled only on the Head of R&D's go",
+ "heldout": "none read: nothing closing on or after 2026-10-23T00:00Z is listed (every slice carries max_close_ts at most 1792713599); held-out is ESOCTIE's own block 2026-10-23 to 2026-11-13, pulled only on the Head of R&D's go. Cards that name or share these series: the ESOCTIE forward wheel sheet, INPLAYJUMP, PREMOVE, REMATCH, VIRT1. ESOCTIE, INPLAYJUMP, PREMOVE and REMATCH are closed unread; VIRT1 is unreleased, with its forward read on or after 2026-11-21, frozen at 79724f00.",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "allowed_endpoints": [

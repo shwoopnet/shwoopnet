@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/history_miner/esoctie/ESOCTIE_REGISTRATION.md",
  "purpose": "ESOCTIE candles part 3 of 4: 1 minute candles of the three contracts of every development event, packed by S (minutes x tickers at most 9,000); development only.",
- "heldout": "none: development events only (closes before 2026-10-23T00:00Z); held-out events are refused by the builder",
+ "heldout": "none: development events only (closes before 2026-10-23T00:00Z); held-out events are refused by the builder. Cards that name or share these series: ESOCTIE, the ESOCTIE forward wheel sheet, INPLAYJUMP, PREMOVE, REMATCH, VIRT1. ESOCTIE, INPLAYJUMP, PREMOVE and REMATCH are closed unread; VIRT1 is unreleased, with its forward read on or after 2026-11-21, frozen at 79724f00.",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "allowed_endpoints": [
