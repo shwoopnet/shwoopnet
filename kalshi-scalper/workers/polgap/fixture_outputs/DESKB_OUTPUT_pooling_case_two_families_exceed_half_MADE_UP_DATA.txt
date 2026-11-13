@@ -1,0 +1,26 @@
+POLGAPH score | candle freshness measured on Bitcoin 15 minute only, not on these markets
+counts from the decide step: {"made_up": 1}
+one-way cost, median over 460 market-mornings with a gap and three two-sided candles: 0.0300 (the kill line reads this); cost as paid at the limit, information only: 0.0400
+   activity counts: 200 market-mornings, 0.0300
+   shipping counts: 200 market-mornings, 0.0300
+   single questions: 60 market-mornings, 0.0300
+decisions, one per event and morning 460 | blocked by an open bet on the event 0 | fired 460 | no fill data 0 | not filled 0 | filled on a present candle 0 | filled on an unchanged minute 460 | voids among filled 0
+first half: filled 231 | distinct events 231 | series 3 | mornings 1
+second half: filled 229 | distinct events 229 | series 3 | mornings 1
+largest number of bets open at once: 460 (the rulebook allows 10)
+POOLED development: n 460, wins 345, cash PF 2.77, net +105.80, mean +0.2300, event-clustered z +10.06
+   first half: n 231, wins 173, cash PF 2.75, net +52.88, mean +0.2289, event-clustered z +7.10
+   second half: n 229, wins 172, cash PF 2.79, net +52.92, mean +0.2311, event-clustered z +7.13
+FAMILY activity counts: decisions 200 | n 200, wins 160, cash PF 3.69, net +56.00, mean +0.2800, event-clustered z +8.11
+   first half: n 100, wins 80, cash PF 3.69, net +28.00, mean +0.2800, event-clustered z +5.73 | second half: n 100, wins 80, cash PF 3.69, net +28.00, mean +0.2800, event-clustered z +5.73
+FAMILY shipping counts: decisions 200 | n 200, wins 160, cash PF 3.69, net +56.00, mean +0.2800, event-clustered z +8.11
+   first half: n 100, wins 80, cash PF 3.69, net +28.00, mean +0.2800, event-clustered z +5.73 | second half: n 100, wins 80, cash PF 3.69, net +28.00, mean +0.2800, event-clustered z +5.73
+FAMILY single questions: decisions 60 | n 60, wins 25, cash PF 0.66, net -6.20, mean -0.1033, event-clustered z -1.59
+   first half: n 31, wins 13, cash PF 0.67, net -3.12, mean -0.1006, event-clustered z -1.11 | second half: n 29, wins 12, cash PF 0.65, net -3.08, mean -0.1062, event-clustered z -1.14
+information only, fills on a present candle: n 0
+information only, optimistic, same-candle fill (every decision booked at the limit, no block): n 460, wins 345, cash PF 2.77, net +105.80, mean +0.2300, event-clustered z +10.06
+information only, voids paid at their settlement value instead: n 460, wins 345, cash PF 2.77, net +105.80, mean +0.2300, event-clustered z +10.06
+information only, price-matched baseline (gap under 2c, same steps, same-candle basis): n 0
+POOLING CONDITION: two families each exceed half; pooled pass stands
+VERDICT: pooled: survives development
+A survival is a candidate for a wheel shadow place only. The shared deflated bar (one-sided z 5.46) is not claimed.
