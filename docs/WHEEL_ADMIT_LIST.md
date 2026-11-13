@@ -1,5 +1,7 @@
 # The wheel: shadow admit list (kept by the Head of R&D)
 
+> Stage word (Nov 13, 2026): a live second-slot seat is a **Trial** until it is **Proven**. "Probation" in this file means a Trial seat; the text below keeps its original word.
+
 Rules: `ROTATION_LANE.md` on this branch (v1.0, approved by the owner Nov 12, 2026; `docs/ROTATION_LANE.md` on main). No live account figure is in this file. [design]
 
 **What a line here means.** A place on the shadow list: one rule on one market, with one set of parameters shared by every market of that rule. Only signals logged AFTER the batch date count toward its entry block. A place cannot take a live seat until (a) the premise test WHEEL0 has been read, (b) the controller and logging have passed the Chief of Staff's security review, (c) its exact spec has been put to the owner in a popup (batched popups are fine) and merged by the Chief of Staff, and (d) its own forward record clears the entry bar. A rule whose registered research read is falsified loses all its places at once.

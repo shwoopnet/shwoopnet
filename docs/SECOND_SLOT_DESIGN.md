@@ -1,6 +1,6 @@
 # The second slot: design and Phase A guard rails
 
-Written Oct 29, 2026 for the owner (Cameron). Status: **Phase A only.** The guard rails are code and tests (`functions/kalshiSlotLib.js`, `test/kalshiSlotGates.test.js`). They are inert: `SLOT_ENABLED` is `false`, `SLOT_STRATEGIES` is an empty array, nothing imports the module, nothing is deployed and nothing can place an order. No file that trades (`kalshiLiveLib.js`, `index.js`) was edited.
+Written Oct 29, 2026 for the owner (Cameron). Status (updated Nov 13, 2026): **the slot is ON with three strategies (OICORE, EVENT830, CFRTIK; `SLOT_ENABLED` true), and the text below is the Phase A design as written Oct 29.** Original status: **Phase A only.** The guard rails are code and tests (`functions/kalshiSlotLib.js`, `test/kalshiSlotGates.test.js`). They are inert: `SLOT_ENABLED` is `false`, `SLOT_STRATEGIES` is an empty array, nothing imports the module, nothing is deployed and nothing can place an order. No file that trades (`kalshiLiveLib.js`, `index.js`) was edited.
 
 Nothing has passed the research bar yet. This design exists so that when a survivor does, admitting it is a small reviewed edit of one array, inside rules that were written and tested first.
 
