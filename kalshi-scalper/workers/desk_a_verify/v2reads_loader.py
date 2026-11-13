@@ -16,7 +16,7 @@ def f(x):
     except Exception: return None
 def d(obj, k): return f((obj or {}).get(k))
 def bodies(folder):
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(folder, "v2reads_loader.bodies")      # standing rule (h)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(folder, "v2reads_loader.bodies")      # standing rule (h)
     man = json.load(open(os.path.join(folder, "manifest.json")))
     for row in man["rows"]:
         if row.get("status") == 200 and "file" in row: yield json.load(gzip.open(os.path.join(folder, row["file"])))
