@@ -1340,3 +1340,7 @@ The first run of `MAPBREAK_CANDLES` (2026-11-12T1954Z) answered 166 of its 282 r
 
 The first `MAPBREAK_CANDLES` run stored 165 answers (c0000 to c0164, files 0001 to 0165); the 166th request, c0165, tripped the 200 MB cap and was not stored. The note above that says c0165 was answered is wrong. `MAPBREAK_CANDLES_REST` now carries c0165 to c0281 (117 requests, cap 117, ticker allowlist cut to what it uses), byte for byte from the original job. It must not be run before this correction is merged. Job file only.
 
+## MAPBREAK_CANDLES_M2 (Nov 12, 2026, the Testing Desk, for Desk B's Amendment 7)
+
+`MAPBREAK_CANDLES_M2` (owner MAIN): 65 batched one minute candle requests, cap 65, 685 tickers (the other map-2 contract of each one-map-each match), windows from the map-1 close minus 5 minutes to the map-2 close plus 5 minutes, development only (every request ends before 2026-10-23), about 1 MB a request. Job file only; it rides in the same pull request as the `MAPBREAK_CANDLES_REST` correction. Run it after the REST job. Nothing has run.
+
