@@ -91,7 +91,7 @@
   "KXUSUNSCVETO"
  ],
  "ticker_allowlist": [],
- "max_requests": 110,
+ "max_requests": 207,
  "requests": [
   {
    "id": "set_ASYLUMCASES",
