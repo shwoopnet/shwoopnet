@@ -15,7 +15,7 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
 - It is **capped** when it read 10 pages with a cursor left. The oldest trades of its window are then lost, and the window counts only as a lower bound.
 - A cycle cut by a failed read or three refusals in a row is neither. It moves nothing, so the next cycle reads that window again.
 - Windows overlap on purpose, within a job and between jobs. A reader de-duplicates by `trade_id` across all files.
-- Each job writes `mark.txt` (the start of its last good cycle) after every cycle. The next job starts its tape there (digits only, at most 2 hours back, 5 minutes when unknown), so a gap between jobs is read unless it is longer than 2 hours.
+- Each job writes `mark.txt` (the start of its last good cycle) after every cycle. The next job starts its tape at the newest folder's mark that exists (a job that died before its first cycle is skipped) (digits only, at most 2 hours back, 5 minutes when unknown), so a gap between jobs is read unless it is longer than 2 hours.
 - `end.txt` gives the combos whose legs were still unknown when the job ended.
 - Every CROWDLEG or NOTAKER result states:
   - the share of polls or cycles that were capped or cut;
@@ -37,6 +37,7 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
 | Requests per day | at most 14,400; about 4,300 to 7,200 expected |
 | MB per day (gzipped) | an ESTIMATE: at least about 450,000 combo trades a day at the trial's lower bound, about 110 bytes a row raw, so about 50 MB raw and about 10 MB gzipped, plus a few MB of legs; about 800 MB over the whole run on its own branch (re-measure from the first files) |
 | Runner minutes | continuous: about 1,440 a day, about 43,000 a month, free on a public repo, far over the Charter's 250 a month guideline; the owner approved it ("Yes, nonstop recorder", Nov 13, 2026) |
+| Repo weight | its branch is fetched by every full clone of this repo, so about 800 MB by the end makes every full clone heavier (a single-branch clone of main is unaffected); the Head of R&D or the owner accepts that, or sets a size stop |
 | Ends | 2027-01-31 23:59 UTC by itself (workflow and script); sooner by deleting `.github/workflows/record-combo-tape.yml` |
 
 **Held-out line.** The CROWDLEG and NOTAKER forward windows are:
@@ -45,4 +46,4 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
 
 The exact dates are written as a dated amendment to both cards the day the first rows land, before any row is read. No one reads a held-out row for price, side, size or result before then; coverage counts may be checked.
 
-**Gates.** `test/comboTapeRecorderGates.test.js` CT1 to CT9. CT1 checks the code against a hand case written and committed before the code (`test/fixtures/comboTapeHandCase.json`).
+**Gates.** `test/comboTapeRecorderGates.test.js` CT1 to CT10. CT1 checks the code against a hand case written and committed before the code (`test/fixtures/comboTapeHandCase.json`).

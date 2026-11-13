@@ -46,9 +46,10 @@ jobs:
         id: mark
         if: steps.gate.outputs.go == 'true'
         run: |
-          LAST="$(ls -d data/tape/*/* 2>/dev/null | sort | tail -1)"
           M=""
-          if [ -n "$LAST" ] && [ -f "$LAST/mark.txt" ]; then M="$(head -c 20 "$LAST/mark.txt" | tr -cd '0-9')"; fi
+          for d in $(ls -d data/tape/*/* 2>/dev/null | sort -r); do   # the newest job folder that HAS a mark: a job that died before its first cycle must not hide the last good mark (Auditor B, Nov 13)
+            if [ -f "$d/mark.txt" ]; then M="$(head -c 20 "$d/mark.txt" | tr -cd '0-9')"; [ -n "$M" ] && break; fi
+          done
           echo "since=${M:-0}" >> "$GITHUB_OUTPUT"
       - name: Record the combo tape up to the next 4 hour boundary
         if: steps.gate.outputs.go == 'true'

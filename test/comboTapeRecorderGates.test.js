@@ -193,6 +193,29 @@ gates.CT8 = () => {
   assert.ok(/- \.github/.test(cfg) && /- scripts/.test(cfg) && /- docs/.test(cfg), 'not published with the site');
 };
 
+// CT10 (Auditor B F1, Nov 13): the mark comes from the newest job folder that HAS a mark.txt with digits, so a job that died before its first cycle (folder, no mark) or wrote junk does not
+// send the next job back to the 5 minute default and lose the gap silently. Hand case: three folders, the newest without a mark, the middle with junk, the oldest with 1800000240.
+gates.CT10 = () => {
+  const os = require('os');
+  const step = wf.split('- name: Find where the previous job\'s tape ended')[1].split('run: |')[1].split('\n      - name:')[0];
+  const body = step.split('\n').map((l) => l.replace(/^          /, '')).join('\n');
+  const run = (layout) => {
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ct10-'));
+    for (const [folder, mark] of layout) {
+      fs.mkdirSync(path.join(d, 'data', 'tape', folder), { recursive: true });
+      if (mark !== null) fs.writeFileSync(path.join(d, 'data', 'tape', folder, 'mark.txt'), mark);
+    }
+    const outFile = path.join(d, 'out');
+    execFileSync('bash', ['-c', body], { cwd: d, env: { PATH: process.env.PATH, GITHUB_OUTPUT: outFile } });
+    return fs.readFileSync(outFile, 'utf8').trim();
+  };
+  assert.strictEqual(run([['2027-01-15/0800', '1800000240\n'], ['2027-01-15/1200', 'junk\n'], ['2027-01-15/1600', null]]), 'since=1800000240', 'skips a folder with no mark and one with no digits');
+  assert.strictEqual(run([['2027-01-15/0800', '1800000240\n'], ['2027-01-15/1200', '1800014400\n']]), 'since=1800014400', 'the newest good mark wins');
+  assert.strictEqual(run([['2027-01-15/0800', null]]), 'since=0', 'no mark anywhere: the 5 minute default');
+  assert.strictEqual(run([]), 'since=0', 'a new branch: the 5 minute default');
+  assert.strictEqual(run([['2027-01-15/0800', '1800000240; rm -rf /\n']]), 'since=1800000240', 'anything but digits is stripped');
+};
+
 // CT9: the docs state the figures; no em dash in the new files.
 gates.CT9 = () => {
   const doc = fs.readFileSync(path.join(root, 'docs', 'COMBO_TAPE_RECORDER.md'), 'utf8');
