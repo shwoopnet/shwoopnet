@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Hourly city temperature: a COST AND TIMING MEASUREMENT, zero tries. Built from
-workers/HOURLYTEMP_MEASUREMENT_NOTE.md and its amendment of Nov 13, 2026 (pins 1 to 12), before any list or
-candle of these series was pulled. Kalshi's own data only. No result field is read; no rule is scored.
+workers/HOURLYTEMP_MEASUREMENT_NOTE.md and its amendments of Nov 13, 2026 (pins 1 to 12; Amendment 4: a strike
+added after its hour opened is kept and read from its own open). Amendment 4 was written after the lists landed
+(tickers, strikes and times only) and before any candle was pulled. Kalshi's own data only. No result field is
+read; no rule is scored.
 
   job     <lists run> <out dir>                    builds the candle job and markets.json. Tickers, strikes and times only.
   measure <markets.json> <lists run> <candle run>  the settlement source, then the figures and the one line.
@@ -14,7 +16,7 @@ import json
 import math
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from deskb_guard import refuse_all, refuse_heldout  # noqa: E402
@@ -29,10 +31,15 @@ COST_LINE = 0.04
 FEE = 0.07
 SLIP = 0.01
 DECIDED = (0.95, 0.05)
-MAX_TICKERS, MAX_CANDLES, MAX_REQUESTS = 100, 9800, 110
+MAX_TICKERS, MAX_CANDLES, MAX_REQUESTS = 100, 9800, 140
 TAG = " [measurement, not a rule]"
 LABEL = "candle freshness measured on Bitcoin 15 minute only, not on this family; one-minute resolution, no seconds-level claim"
 REG = "kalshi-scalper/workers/HOURLYTEMP_MEASUREMENT_NOTE.md"
+HELDOUT_LINE = ("none read: a cost measurement, no result is read and no rule is scored. Cards that ever held out these four series, with their "
+                "state on Nov 13, 2026: W-CAT-CAL1 weather (Refinement), closes at or after 2026-10-20T06:00Z, never read, RELEASED by the Head "
+                "of R&D 2026-11-13 06:51Z, development here; WXNEW1 (old research team), frozen holdout 2026-10-19 to 2026-10-31, not read, ends "
+                "before this sample of 2026-11-05 to 2026-11-11, no overlap; WXOTHER1 (old research team), closed unread, scores nothing on the "
+                "hourly family. No open card holds these series inside the sample dates.")
 
 
 def ts(iso):
@@ -92,7 +99,7 @@ def cut_lists(run):
 def sample(run):
     """Pin 1: the settled markets of the four series inside the fixed seven days. No result or price field is read.
     Returns the markets and the reasons, if any, why this sample must not be used (pins 1, 4 and 5)."""
-    mk, skipped, types, odd_life = {}, 0, {}, 0
+    mk, skipped, types, longer, nonpos, off_hour = {}, 0, {}, 0, 0, 0
     for m in read_lists(run, "settled_"):
         types[str(m.get("strike_type"))] = types.get(str(m.get("strike_type")), 0) + 1
         try:
@@ -103,7 +110,10 @@ def sample(run):
             continue
         if not ts(FROM) <= row["close_ts"] <= ts(TO):
             sys.exit("REFUSED: %s closes outside the fixed seven days" % row["ticker"])
-        odd_life += row["close_ts"] - row["open_ts"] != LIFE_S
+        life = row["close_ts"] - row["open_ts"]
+        longer += life > LIFE_S            # Amendment 4: a life SHORTER than 60 minutes is kept and counted, not a stop
+        nonpos += life <= 0
+        off_hour += row["close_ts"] % 3600 != 0
         mk[row["ticker"]] = row
     why = []
     cut = cut_lists(run)
@@ -111,18 +121,63 @@ def sample(run):
         why.append("A LIST IS MISSING OR NOT WHOLE (%s)" % ", ".join(cut))
     if skipped:
         why.append("%d LISTED MARKETS LACK A STRIKE, AN EVENT OR A TIME" % skipped)
-    if odd_life:
-        why.append("%d MARKETS DID NOT LIVE EXACTLY 60 MINUTES" % odd_life)
+    if longer:
+        why.append("%d MARKETS LIVED LONGER THAN 60 MINUTES" % longer)
+    if nonpos:
+        why.append("%d MARKETS CLOSED AT OR BEFORE THEIR OPEN" % nonpos)
+    if off_hour:
+        why.append("%d MARKETS CLOSE OFF THE CLOCK HOUR" % off_hour)
     if len(types) != 1 or next(iter(types)) not in THRESHOLD_TYPES:
         why.append("THE STRIKES ARE NOT ONE LADDER OF 'ABOVE' THRESHOLDS (strike types listed: %s)" % ", ".join("%s x %d" % kv for kv in sorted(types.items())))
     return mk, why
 
 
+def late(m):
+    """Amendment 4: a strike added after its hour's ladder opened (a life under 60 minutes)."""
+    return 0 < m["close_ts"] - m["open_ts"] < LIFE_S
+
+
+def gained(markets):
+    """The series-hours (events) that gained at least one strike after opening."""
+    return {(m["series"], m["event"]) for m in markets if late(m)}
+
+
+def hour_text(t):
+    return datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%dT%H")
+
+
+def describe(markets, tag=""):
+    """Amendment 4 (b) and (d): the late strikes with the table of their lives, the series-hours that gained strikes
+    (listed), and the clock hours present per series with the missing ones named. Counts and times only."""
+    odd = [m for m in markets if late(m)]
+    print("strikes added after their hour opened (kept, each read from its own open): %d of %d markets%s" % (len(odd), len(markets), tag))
+    for life in sorted({m["close_ts"] - m["open_ts"] for m in odd}):
+        these = [m for m in odd if m["close_ts"] - m["open_ts"] == life]
+        print("   life %5d s: %3d (%s)%s" % (life, len(these), ", ".join("%s %d" % (s, sum(1 for m in these if m["series"] == s)) for s in SERIES if any(m["series"] == s for m in these)), tag))
+    g = gained(markets)
+    print("series-hours %d | that gained strikes after opening %d%s" % (len({(m["series"], m["event"]) for m in markets}), len(g), tag))
+    for s in SERIES:
+        rows = {}
+        for m in odd:
+            if m["series"] == s:
+                rows[(m["close_ts"], m["event"])] = rows.get((m["close_ts"], m["event"]), 0) + 1
+        if rows:
+            print("   %s gained strikes in %d series-hours (close hour UTC, strikes added): %s%s" % (s, len(rows), ", ".join("%s +%d" % (hour_text(c), n) for (c, _), n in sorted(rows.items())), tag))
+    expected = list(range(ts(FROM), ts(TO) + 1, 3600))
+    for s in SERIES:
+        have = {m["close_ts"] for m in markets if m["series"] == s}
+        missing = [hour_text(t) for t in expected if t not in have]
+        print("   %s: clock hours present %d of %d, as they are, not filled%s%s" % (s, len(have), len(expected), ("; missing: " + ", ".join(missing[:40]) + (" ... and %d more" % (len(missing) - 40) if len(missing) > 40 else "")) if missing else "", tag))
+
+
 def cmd_job(run, out):
     mk, why = sample(run)
-    hours = {}
+    hours, late_groups = {}, {}
     for m in mk.values():
-        hours.setdefault(m["close_ts"], []).append(m["ticker"])
+        if late(m):                                             # Amendment 4 (a): its range starts at its own open
+            late_groups.setdefault((m["open_ts"], m["close_ts"]), []).append(m["ticker"])
+        else:
+            hours.setdefault(m["close_ts"], []).append(m["ticker"])
     groups, keys, i = [], sorted(hours), 0
     while i < len(keys):
         a = keys[i]
@@ -134,7 +189,12 @@ def cmd_job(run, out):
         else:
             groups.append((a - LIFE_S, a, sorted(hours[a])))
             i += 1
-    print("settled markets in the sample %d | clock hours %d | requests %d (cap %d)" % (len(mk), len(keys), len(groups), MAX_REQUESTS))
+    lgroups = []
+    for (o, c), tks in sorted(late_groups.items()):
+        tks = sorted(tks)
+        lgroups += [(o, c, tks[i:i + MAX_TICKERS]) for i in range(0, len(tks), MAX_TICKERS)]
+    print("settled markets in the sample %d | clock hours %d | requests %d: full-hour %d, late strikes %d (cap %d)"
+          % (len(mk), len({m["close_ts"] for m in mk.values()}), len(groups) + len(lgroups), len(groups), len(lgroups), MAX_REQUESTS))
     if why:
         for w in why:
             print("%s: no job written. The sample is never cut and no pin is bent; this goes to the Head of R&D." % w)
@@ -142,15 +202,18 @@ def cmd_job(run, out):
     if not mk:
         print("NO MARKET IN THE SAMPLE: no job written.")
         return
-    if len(groups) > MAX_REQUESTS or any(len(g[2]) > MAX_TICKERS or len(g[2]) * ((g[1] - g[0]) // 60 + 1) > MAX_CANDLES for g in groups):
+    describe(list(mk.values()))
+    if len(groups) + len(lgroups) > MAX_REQUESTS or any(len(g[2]) > MAX_TICKERS or len(g[2]) * ((g[1] - g[0]) // 60 + 1) > MAX_CANDLES for g in groups + lgroups):
         print("OVER THE CAP: no job written. The sample is never cut; the count goes to the Head of R&D.")
         return
     kept = sorted(mk)
     reqs = [{"id": "h%03d" % (k + 1), "path": "/markets/candlesticks",
              "params": {"market_tickers": ",".join(g[2]), "start_ts": g[0], "end_ts": g[1], "period_interval": 1}} for k, g in enumerate(groups)]
+    reqs += [{"id": "l%03d" % (k + 1), "path": "/markets/candlesticks",
+              "params": {"market_tickers": ",".join(g[2]), "start_ts": g[0], "end_ts": g[1], "period_interval": 1}} for k, g in enumerate(lgroups)]
     job = {"job_id": "HOURLYTEMP_CANDLES", "owner": "DESK_B", "registration": REG,
-           "purpose": "Hourly city temperature, cost and timing measurement (zero tries), stage 2: one minute candles of every strike of the four hourly temperature series for the 60 minutes each market lived, seven fixed days.",
-           "heldout": "none (a cost measurement; no result is read and no rule is scored)",
+           "purpose": "Hourly city temperature, cost and timing measurement (zero tries), stage 2: one minute candles of every strike of the four hourly temperature series for the minutes each market lived (a strike added after its hour opened is asked from its own open), seven fixed days.",
+           "heldout": HELDOUT_LINE,
            "allowed_endpoints": [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}],
            "series_allowlist": list(SERIES), "ticker_allowlist": kept, "max_requests": MAX_REQUESTS, "requests": reqs,
            "notes": "Built by workers/hourlytemp/hourlytemp.py job from the HOURLYTEMP_LISTS answers; the seven days are never extended and the sample is never cut.",
@@ -264,52 +327,75 @@ def share(a, b):
     return "n/a" if not b else "%.1f%%" % (100.0 * a / b + 1e-7)
 
 
-def reading(events, cand, carried, name):
-    """All figures under one reading of the quote; returns 'closed', 'not closed' or 'cannot say' (pin 10)."""
-    print("--- %s%s" % (name, TAG))
-    medians = []
-    for series in SERIES:
-        for look in LOOKS:
-            found = two = decided = 0
-            spreads, trips, near_trips, near_one = [], [], [], []
-            side = {1: [], 2: [], 3: []}
-            for (s, _), ms in sorted(events.items()):
-                if s != series:
-                    continue
-                rows = []
-                for m in sorted(ms, key=lambda m: (m["strike"], m["ticker"])):
-                    c, any_candle = quote(cand.get(m["ticker"], {}), m["close_ts"] - look * 60, m["open_ts"], carried)
-                    found += any_candle
-                    if c is None:
-                        continue
-                    two += 1
-                    b, a = c[0], c[1]
-                    mid = (a + b) / 2
-                    spreads.append(a - b)
-                    trips.append((a - b) + 2 * FEE * mid * (1 - mid))
-                    decided += mid >= DECIDED[0] - EPS or mid <= DECIDED[1] + EPS
-                    rows.append((b, a, mid))
-                if not rows:
-                    continue
-                k0 = 0
-                for i in range(1, len(rows)):                      # nearest 50c; on a tie the lower strike stays
-                    if abs(rows[i][2] - 0.5) < abs(rows[k0][2] - 0.5) - EPS:
-                        k0 = i
-                for i, (b, a, mid) in enumerate(rows):
-                    r = abs(i - k0)
-                    if r <= NEAR:
-                        near_trips.append((a - b) + 2 * FEE * mid * (1 - mid))
-                        near_one.append((a - b) / 2 + fee_up(min(0.99, a + SLIP)))
-                    if r >= 1:
-                        side[min(r, 3)].append(a if i < k0 else 1 - b)
-            one = med(near_one)
-            medians.append(one)
-            print("%s %2d min before the hour: strikes with a quote candle %d | two-sided %d (%s) | median spread %s | median round trip %s | near the money n %d: round trip %s, ONE-WAY entry cost %s | priced 95c or 5c and beyond %s | ask of the nearer-certain side at rank 1, 2, 3+: %s, %s, %s%s"
-                  % (series, look, found, two, share(two, found), cents(med(spreads)), cents(med(trips)), len(near_one), cents(med(near_trips)), cents(one),
-                     share(decided, two), cents(med(side[1])), cents(med(side[2])), cents(med(side[3])), TAG))
+def look_figures(evs, cand, carried, look):
+    """One city at one look over the given series-hours. Returns (the printed figures, the median one-way cost).
+    Amendment 4 (a): a strike whose own open is at or after the look is 'not yet open': it is not an empty book,
+    not a strike with a quote candle, and never a candidate for the money."""
+    found = two = decided = not_open = 0
+    spreads, trips, near_trips, near_one = [], [], [], []
+    side = {1: [], 2: [], 3: []}
+    for ms in evs:
+        rows = []
+        for m in sorted(ms, key=lambda m: (m["strike"], m["ticker"])):
+            t = m["close_ts"] - look * 60
+            if t <= m["open_ts"]:
+                not_open += 1
+                continue
+            c, any_candle = quote(cand.get(m["ticker"], {}), t, m["open_ts"], carried)
+            found += any_candle
+            if c is None:
+                continue
+            two += 1
+            b, a = c[0], c[1]
+            mid = (a + b) / 2
+            spreads.append(a - b)
+            trips.append((a - b) + 2 * FEE * mid * (1 - mid))
+            decided += mid >= DECIDED[0] - EPS or mid <= DECIDED[1] + EPS
+            rows.append((b, a, mid))
+        if not rows:
+            continue
+        k0 = 0
+        for i in range(1, len(rows)):                      # nearest 50c; on a tie the lower strike stays
+            if abs(rows[i][2] - 0.5) < abs(rows[k0][2] - 0.5) - EPS:
+                k0 = i
+        for i, (b, a, mid) in enumerate(rows):
+            r = abs(i - k0)
+            if r <= NEAR:
+                near_trips.append((a - b) + 2 * FEE * mid * (1 - mid))
+                near_one.append((a - b) / 2 + fee_up(min(0.99, a + SLIP)))
+            if r >= 1:
+                side[min(r, 3)].append(a if i < k0 else 1 - b)
+    one = med(near_one)
+    text = ("not yet open %d | strikes with a quote candle %d | two-sided %d (%s) | median spread %s | median round trip %s | near the money n %d: round trip %s, ONE-WAY entry cost %s | priced 95c or 5c and beyond %s | ask of the nearer-certain side at rank 1, 2, 3+: %s, %s, %s"
+            % (not_open, found, two, share(two, found), cents(med(spreads)), cents(med(trips)), len(near_one), cents(med(near_trips)), cents(one),
+               share(decided, two), cents(med(side[1])), cents(med(side[2])), cents(med(side[3]))))
+    return text, one
+
+
+def line_of(medians):
+    """Pin 10 on a list of median one-way costs, one per city and look."""
     if any(x is not None and x <= COST_LINE + EPS for x in medians):
         return "not closed"
     return "closed" if all(x is not None for x in medians) else "cannot say"
+
+
+def reading(events, grew, cand, carried, name):
+    """All figures under one reading of the quote, each printed twice (Amendment 4 (c)): on ALL series-hours, which is
+    the headline and the only one the line reads, and without the series-hours that gained strikes, for information.
+    Returns ('closed', 'not closed' or 'cannot say') for all hours and for the hours that gained none."""
+    print("--- %s%s" % (name, TAG))
+    medians, medians_q = [], []
+    for series in SERIES:
+        all_ev = [ms for (s, _), ms in sorted(events.items()) if s == series]
+        quiet_ev = [ms for (s, e), ms in sorted(events.items()) if s == series and (s, e) not in grew]
+        for look in LOOKS:
+            text, one = look_figures(all_ev, cand, carried, look)
+            text_q, one_q = look_figures(quiet_ev, cand, carried, look)
+            medians.append(one)
+            medians_q.append(one_q)
+            print("%s %2d min before the hour, ALL %d series-hours: %s%s" % (series, look, len(all_ev), text, TAG))
+            print("%s %2d min before the hour, without the %d that gained strikes (%d series-hours): %s%s" % (series, look, len(all_ev) - len(quiet_ev), len(quiet_ev), text_q, TAG))
+    return line_of(medians), line_of(medians_q)
 
 
 def cmd_measure(markets_path, lists_run, candle_run):
@@ -338,14 +424,20 @@ def cmd_measure(markets_path, lists_run, candle_run):
     events = {}
     for m in markets:
         events.setdefault((m["series"], m["event"]), []).append(m)
+    grew = gained(markets)
+    quiet = [m for m in markets if (m["series"], m["event"]) not in grew]
     print("markets in the fixed sample %d | events (a city and an hour) %d | markets with any candle %d%s" % (len(markets), len(events), sum(1 for m in markets if cand.get(m["ticker"])), TAG))
-    r1 = reading(events, cand, True, "CARRIED quote (the last candle inside the market's 60 minute life)")
-    r2 = reading(events, cand, False, "EXACT quote (only a candle ending at the look)")
+    print("without the %d series-hours that gained strikes: markets %d | events %d | markets with any candle %d%s"
+          % (len(grew), len(quiet), len(events) - len(grew), sum(1 for m in quiet if cand.get(m["ticker"])), TAG))
+    describe(markets, TAG)
+    r1, q1 = reading(events, grew, cand, True, "CARRIED quote (the last candle inside the market's own life)")
+    r2, q2 = reading(events, grew, cand, False, "EXACT quote (only a candle ending at the look)")
     print("candles with no volume field at all: %d (each counts as a minute with no trade)%s" % (no_volume, TAG))
     for series in SERIES:
-        ms = [m for m in markets if m["series"] == series]
-        traded = sum(1 for m in ms for t, c in cand.get(m["ticker"], {}).items() if m["open_ts"] < t <= m["close_ts"] and c[2] > EPS)
-        print("%s: market-minutes with a trade %s (%d of %d)%s" % (series, share(traded, 60 * len(ms)), traded, 60 * len(ms), TAG))
+        for label, ms in (("ALL series-hours", [m for m in markets if m["series"] == series]), ("without those that gained strikes", [m for m in quiet if m["series"] == series])):
+            traded = sum(1 for m in ms for t, c in cand.get(m["ticker"], {}).items() if m["open_ts"] < t <= m["close_ts"] and c[2] > EPS)
+            minutes = sum((m["close_ts"] - m["open_ts"]) // 60 for m in ms)      # Amendment 4: each market's own minutes of life
+            print("%s, %s: market-minutes with a trade %s (%d of %d)%s" % (series, label, share(traded, minutes), traded, minutes, TAG))
     sizes = {}
     for m in read_lists(lists_run, "open_"):
         for k in ("yes_ask_size_fp", "yes_bid_size_fp"):
@@ -358,7 +450,8 @@ def cmd_measure(markets_path, lists_run, candle_run):
     for s in SERIES:
         v = sizes.get(s, [])
         print("%s: size at the touch on open markets (a list copy, one level only): median %s contracts over %d quoted sides%s" % (s, "n/a" if not v else "%.0f" % (med(v) + 1e-7), len(v), TAG))
-    print("the line under the carried quote: %s | under the exact quote: %s | candle requests answered whole %d of %d%s" % (r1, r2, answered, asked, TAG))
+    print("the line on ALL series-hours, under the carried quote: %s | under the exact quote: %s | candle requests answered whole %d of %d%s" % (r1, r2, answered, asked, TAG))
+    print("information only, the same line without the series-hours that gained strikes: carried %s | exact %s (the verdict below reads ALL hours)%s" % (q1, q2, TAG))
     if not whole:
         verdict = "the candle pull is not whole: not decided"
     elif r1 == r2 == "closed":

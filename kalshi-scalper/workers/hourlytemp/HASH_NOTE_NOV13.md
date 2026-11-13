@@ -75,3 +75,18 @@ What it shows, counts only:
 - Clock hours: all four series lack 2026-11-05T09 and T10; New York lacks six more (Nov 8 01; Nov 9 02, 07, 10, 11, 17). So 166 of 168 for three series and 160 for New York.
 
 My reading, an inference and not a count: these are strikes ADDED to an hour's ladder after it opened. No strike value was read, so whether the added strikes are the ones nearest the money is not known. Nothing is decided; no candle job exists; the reader and the note are unchanged.
+
+## AMENDMENT 4 written; the reader changed (Nov 13, 2026, 08:15Z). Before any candle is pulled.
+
+On the Head of R&D's ruling of 08:09Z (course 1: keep all 6,720 markets, each from its own open time).
+
+| File | sha256 now | was |
+|---|---|---|
+| `HOURLYTEMP_MEASUREMENT_NOTE.md` (Amendment 4 appended) | 079e137162236185e3ff3feaf5c8b9a1e24cfde2c1923c8c047da13bb3739bad | f83c67858db66ddcf2c61ebf69256dcf04339e61f05ea981f6bd480f0752a154 |
+| `hourlytemp/hourlytemp.py` | bc76e8fc001fa409296050c9f60c90397a33bca015cdca5d2470c7d499afd572 | f443ae6016209dffd2113c552d67fa3dd3750d9ec0e5a7abb39ca224a24c9970 |
+
+**What changed in the reader, and nothing else:** (1) `sample`: a life under 3,600 seconds is no longer a stop; it still stops on a life longer than 3,600 seconds, a close off the clock hour, or an open at or after the close. (2) new `late`, `gained`, `describe`: the count and table of late strikes, the series-hours that gained strikes (listed), the clock hours present per series with the missing ones named. (3) `job`: late markets go into their own requests (`l001` onward), one per distinct open and close time, range from their own open; full-hour requests are built from full-life markets as before; the cap is 140; the job's held-out line is the new `HELDOUT_LINE`. (4) `reading` is split into `look_figures`, `line_of` and `reading`: a strike whose own open is at or after the look is "not yet open" and skipped before any quote is looked for; every figure line is printed for ALL series-hours and again without those that gained strikes; the line and the verdict read ALL hours. (5) `measure`: the counts line, the trade-minutes line and the line under each reading are printed twice in the same way; trade-minutes are over each market's own minutes of life. The quote search, the two-sided test, the money, the ranks, the fee, the cost line, the verdict words and the whole-run and same-sample refusals are untouched.
+
+**Made-up fixtures (`fixture_outputs/make_fixtures_MADE_UP_DATA.py`, now 34b2ac12):** the 15 old cases are regenerated with byte-identical content; on the 9 old cases that reach `measure`, every ALL-hours figure line of the new reader equals the old reader's line once the new prefix ("ALL n series-hours: not yet open 0") is taken off, and every verdict or refusal is the same. Four new cases: 16 (three late shapes: a strike opening 21 minutes before the close that becomes the money at the 10 minute look, strikes opening 9 minutes before the close that are open at no look, and an hour with two opening times), 17 (the hour that gained strikes decides the line: 3.00c on all hours, 6.00c without it; the verdict reads all hours), 18 (a close at half past the hour: stop), 19 (an open equal to the close: stop). A job built from case 16 passes the pull runner's own check (main's copy): two full-hour requests and four late ones of 21, 9, 39 and 29 minutes. The stored outputs in `fixture_outputs/` are those of the new reader.
+
+**Not done on purpose:** the new builder has NOT been run on the real lists. Order from here: Auditor B's diff against Amendment 4, the Testing Desk's re-run on cases 16 to 19, then the candle job to the Head with its request count and held-out line.

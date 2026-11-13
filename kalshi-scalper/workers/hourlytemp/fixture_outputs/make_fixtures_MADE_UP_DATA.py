@@ -17,12 +17,23 @@ Every price is a whole number of cents. Usage: make_fixtures_MADE_UP_DATA.py <ou
   other_job      as closed, but the candle run's job asked for one ticker fewer than the sample: the reader must refuse.
   no_job         as closed, but the candle run's manifest carries no job: the reader must refuse.
   missing_field  one listed New York market has no strike: no job written.
-  odd_life       one listed Miami market opened 90 minutes before its close: no job written.
+  odd_life       one listed Miami market opened 90 minutes before its close (a life LONGER than 60 minutes): no job written.
   mixed_types    one listed Chicago market is a "between" range, the rest thresholds: no job written.
   list_cut       as closed, but the New York settled list ends on a page that still carries a cursor: no job written.
   outside        one market closing on Nov 12: the builder must refuse.
   over_cap       15 strikes a city-hour for 168 hours: two hours do not fit one request, so 168 requests, over the cap
-                 of 110, no job written. Lists only.
+                 of 140, no job written. Lists only.
+
+  Amendment 4 (strikes added after their hour opened), added Nov 13, 2026:
+  late_strikes   as closed, plus: Miami's first hour has all its strikes far from 50c and gains three strikes 21 minutes
+                 before the close, one of them at 50c (open at the 10 minute look only, and the money there); Chicago's
+                 first hour gains three strikes 9 minutes before the close (open at no look); Los Angeles's second hour
+                 gains three strikes 39 minutes before the close and three more 29 minutes before (two opening times).
+  late_decides   Miami as in late_strikes, with a spread of 2c in that hour from 12 minutes before the close, and a
+                 second hour whose money is its lowest strike: on ALL hours the Miami 10 minute median is 3c (not
+                 closed); without the hour that gained strikes it is 6c. The verdict must read all hours.
+  off_hour       one listed Chicago market closes at half past the hour (life 60 minutes): no job written.
+  no_life        one listed New York market's open equals its close: no job written.
 """
 import gzip
 import json
@@ -39,10 +50,10 @@ def iso(t):
     return t.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def market(series, close, k, strike):
+def market(series, close, k, strike, life=3600):
     ev = "%s-%s" % (series, close.strftime("%y%b%d%H").upper())
     return {"ticker": "%s-T%s" % (ev, strike), "event_ticker": ev, "floor_strike": strike, "strike_type": "greater",
-            "open_time": iso(datetime.fromtimestamp(close.timestamp() - 3600, timezone.utc)), "close_time": iso(close),
+            "open_time": iso(datetime.fromtimestamp(close.timestamp() - life, timezone.utc)), "close_time": iso(close),
             "rules_primary": "MADE-UP rules text for %s: the invented station reading at the top of the hour." % series,
             "rules_secondary": "", "result": "MADE-UP, never read", "yes_bid_size_fp": "0.00", "yes_ask_size_fp": "0.00"}
 
@@ -66,20 +77,30 @@ def candle(t, bid, ask, vol=0):
     return {"end_period_ts": t, "yes_bid": {"close_dollars": "%.4f" % (bid / 100.0)}, "yes_ask": {"close_dollars": "%.4f" % (ask / 100.0)}, "volume_fp": "%.2f" % vol}
 
 
-def build(out, name, spread, cities=SERIES, mids=None, gap=None, empty=None, hours=HOURS, per_hour=None, candles=True, cursor_on=None, refused=(), spoil=None, job="whole"):
+def build(out, name, spread, cities=SERIES, mids=None, gap=None, empty=None, hours=HOURS, per_hour=None, candles=True, cursor_on=None, refused=(), spoil=None, job="whole",
+          ev_mids=None, extra=None, spread_ev=None):
     """spread(series, minutes_left) -> cents. gap(series) -> minutes before the hour from which no candle exists.
-    empty(series, k, minutes_left) -> True for an empty book. mids(series) -> cents by strike."""
+    empty(series, k, minutes_left) -> True for an empty book. mids(series) -> cents by strike.
+    ev_mids(series, close) -> cents by strike for that one hour, or None. extra(series, close) -> a list of
+    (strike, mid cents, life in seconds): strikes added after the hour opened; a late strike has candles only for
+    minutes that end after its own open. spread_ev(series, minutes_left, close) -> cents, or None for spread()."""
     settled, per = [], {}
     for s in cities:
         ms = []
         for close in hours:
             row = (mids(s) if mids else MIDS) if per_hour is None else tuple(range(per_hour))
+            if ev_mids and ev_mids(s, close) is not None:
+                row = ev_mids(s, close)
             for k, mid in enumerate(row):
                 m = market(s, close, k, 40 + k)
                 if spoil:
                     spoil(m, s, close, k)
                 ms.append(m)
-                per[m["ticker"]] = (s, k, mid, int(close.timestamp()))
+                per[m["ticker"]] = (s, k, mid, int(close.timestamp()), 3600, close)
+            for strike, mid, life in (extra(s, close) if extra else ()):
+                m = market(s, close, None, strike, life)
+                ms.append(m)
+                per[m["ticker"]] = (s, None, mid, int(close.timestamp()), life, close)
         settled.append(("settled_" + s, {"markets": ms, "cursor": "MADE-UP-MORE" if s == cursor_on else ""}))
     opens = []
     for s in cities:
@@ -92,16 +113,18 @@ def build(out, name, spread, cities=SERIES, mids=None, gap=None, empty=None, hou
     if not candles:
         return
     body = []
-    for tk, (s, k, mid, close) in sorted(per.items()):
+    for tk, (s, k, mid, close, life, close_dt) in sorted(per.items()):
         cs = []
         for left in range(59, -1, -1):                       # candle ending `left` minutes before the hour
+            if 60 * left >= life:                            # the market was not open yet: no candle can end at or before its open
+                continue
             if gap and gap(s) is not None and left < gap(s):
                 continue
             t = close - 60 * left
             if empty and empty(s, k, left):
                 cs.append(candle(t, 0, 100))
                 continue
-            w = spread(s, left)
+            w = spread_ev(s, left, close_dt) if spread_ev and spread_ev(s, left, close_dt) is not None else spread(s, left)
             lo = mid - w // 2
             hi = lo + w
             lo, hi = max(1, lo), min(99, max(hi, 2))
@@ -133,6 +156,24 @@ def main():
     build(out, "outside", wide, hours=(datetime(2026, 11, 12, 3, tzinfo=timezone.utc),), candles=False)
     week = tuple(datetime.fromtimestamp(datetime(2026, 11, 5, 0, tzinfo=timezone.utc).timestamp() + 3600 * h, timezone.utc) for h in range(168))
     build(out, "over_cap", wide, hours=week, per_hour=15, candles=False)
+    second = HOURS[1]
+    far_mids = lambda s, c: (99, 98, 96, 93, 88, 80) if (s, c) == ("KXTEMPMIAH", first) else None
+
+    def added(s, c):
+        if (s, c) == ("KXTEMPMIAH", first):
+            return [(46, 62, 1260), (47, 50, 1260), (48, 35, 1260)]
+        if (s, c) == ("KXTEMPCHIHS", first):
+            return [(46, 2, 540), (47, 2, 540), (48, 1, 540)]
+        if (s, c) == ("KXTEMPLAXHS", second):
+            return [(46, 2, 2340), (47, 2, 2340), (48, 1, 2340), (37, 99, 1740), (38, 98, 1740), (39, 97, 1740)]
+        return []
+    build(out, "late_strikes", wide, ev_mids=far_mids, extra=added)
+    build(out, "late_decides", wide, extra=lambda s, c: added(s, c) if s == "KXTEMPMIAH" else [],
+          ev_mids=lambda s, c: (99, 98, 96, 93, 88, 80) if (s, c) == ("KXTEMPMIAH", first) else ((50, 25, 10, 3, 2, 1) if (s, c) == ("KXTEMPMIAH", second) else None),
+          spread_ev=lambda s, left, c: 2 if (s, c) == ("KXTEMPMIAH", first) and left <= 12 else None)
+    half = datetime.fromtimestamp(first.timestamp() + 1800, timezone.utc)
+    build(out, "off_hour", wide, candles=False, spoil=lambda m, s, c, k: m.update(open_time=iso(datetime.fromtimestamp(half.timestamp() - 3600, timezone.utc)), close_time=iso(half)) if (s, c, k) == ("KXTEMPCHIHS", first, 3) else None)
+    build(out, "no_life", wide, candles=False, spoil=lambda m, s, c, k: m.update(open_time=m["close_time"]) if (s, c, k) == ("KXTEMPNYCHS", first, 4) else None)
 
 
 if __name__ == "__main__":

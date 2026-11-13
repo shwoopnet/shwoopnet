@@ -4,7 +4,7 @@ For a second build made from `HOURLYTEMP_MEASUREMENT_NOTE.md` only. Everything u
 
 ## A case
 
-`case_NN/lists/` is shaped like the answers of the lists job (`desk_b_jobs/HOURLYTEMP_LISTS.json`); `case_NN/candles/`, where present, is shaped like the answers of the candle job. Cases 10 to 15 have lists only (they are for the step that builds the candle job).
+`case_NN/lists/` is shaped like the answers of the lists job (`desk_b_jobs/HOURLYTEMP_LISTS.json`); `case_NN/candles/`, where present, is shaped like the answers of the candle job. Cases 10 to 15, 18 and 19 have lists only (they are for the step that builds the candle job).
 
 ## A run folder (both kinds)
 
@@ -21,3 +21,7 @@ A market object carries, among others: `ticker`, `event_ticker`, `strike_type`, 
 ## A candle answer (`/markets/candlesticks`, batched)
 
 `{"markets": [ {"market_ticker": "...", "candlesticks": [ ... ]}, ... ]}`. A candle: `end_period_ts` (epoch seconds, the END of the minute), `yes_bid` and `yes_ask` objects each with `close_dollars` (a string such as `"0.4800"`), `volume_fp` (a string). A minute in which nothing changed has no candle. A request's `params.market_tickers` is the comma-joined list of tickers it asked for, with `start_ts`, `end_ts` and `period_interval` 1.
+
+## Added Nov 13, 2026 with Amendment 4 (strikes added after their hour opened)
+
+Cases 16 and 17 have lists and candles; cases 18 and 19 have lists only. In cases 16 and 17 some markets of an hour have an `open_time` later than the hour's other markets (a life under 60 minutes); such a market has candles only for minutes that end after its own open. One hour of case 16 has two different late opening times. In the real candle job a late market is asked for in its own request, whose time range starts at its own open; in these folders every candle is in one answer, as before. Nothing else about the layout changed.
