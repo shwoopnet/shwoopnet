@@ -1,0 +1,51 @@
+{
+ "job_id": "HISTCUTOFF1",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/main/HISTCUTOFF1.md",
+ "purpose": "Read Kalshi's historical cutoff and probe whether /historical/markets honours event_ticker on one development event; no rule scored.",
+ "heldout": "none for the cutoff (three timestamps). The probe asks for one market row of a development Fed meeting (March 2026, before the card's 2026-06-17 held-out cut); a development row is allowed to land, no held-out meeting is requested.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "allowed_endpoints": [
+  {
+   "name": "historical_cutoff",
+   "method": "GET",
+   "path_pattern": "/historical/cutoff",
+   "params_allowed": []
+  },
+  {
+   "name": "historical_markets_probe",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "event_ticker",
+    "limit"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "pacing_seconds": 1.0,
+ "max_requests": 2,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request asked again; three 429s in a row end the run; no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "cutoff",
+   "path": "/historical/cutoff",
+   "params": {}
+  },
+  {
+   "id": "probe_event_filter",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26MAR",
+    "limit": 1
+   }
+  }
+ ]
+}
