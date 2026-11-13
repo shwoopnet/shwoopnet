@@ -63,6 +63,8 @@ def load(path, drop_result):
             sys.exit("REFUSED: game %s closes on or after the held-out date %s" % (g.get("game"), HELD_FROM))
     early = [g for g in games if g["close_ts"] < ts(DEV_FROM)]
     games = [g for g in games if g["close_ts"] >= ts(DEV_FROM)]
+    if not games:
+        sys.exit("REFUSED: no in-window data (%d games, %d closed before the development window)" % (len(early) + len(games), len(early)))
     if drop_result:
         for g in games:
             for s in g["strikes"]:
@@ -173,20 +175,18 @@ def fmt(name, rs):
 
 
 def day_z(rs):
-    """Day-clustered z of the mean net per entry, one-sided; the cluster is the US Central calendar date of the close. Information beside the bar."""
-    pnl = [float(one_pnl(r)) for r in rs]
-    n = len(pnl)
+    """z of the mean of the DAILY means (US Central game day of the close) over the sample sd (n - 1) of the daily means / sqrt(days), one-sided.
+    Information beside the bar (Nov 13 ruling: the sample sd, as TEMPBLEND and NC15DEPTH1 do)."""
+    days = {}
+    for r in rs:
+        days.setdefault(datetime.fromtimestamp(r["close_ts"], CT).date(), []).append(float(one_pnl(r)))
+    dm = [sum(v) / len(v) for v in days.values()]
+    n = len(dm)
     if n < 2:
         return None
-    mean = sum(pnl) / n
-    clusters = {}
-    for r, p in zip(rs, pnl):
-        d = datetime.fromtimestamp(r["close_ts"], CT).date()
-        c = clusters.setdefault(d, [0, 0.0])
-        c[0] += 1
-        c[1] += p - mean
-    se = math.sqrt(sum(v * v for _, v in clusters.values())) / n
-    return None if se == 0 else mean / se
+    mean = sum(dm) / n
+    sd = math.sqrt(sum((x - mean) ** 2 for x in dm) / (n - 1))
+    return None if sd == 0 else mean / (sd / math.sqrt(n))
 
 
 def cmd_score(path):
@@ -212,7 +212,7 @@ def cmd_score(path):
     else:
         v = "SURVIVES DEVELOPMENT (the held-out is a later, reviewed read; nothing here is approved)"
     z = day_z(settled)
-    print("day-clustered z (US Central game day, one-sided, mean net per entry): %s against the ledger bar %.2f%s" % ("n/a" if z is None else "%.2f" % (z + 1e-9 if z >= 0 else z - 1e-9), Z_BAR, TAG))
+    print("day-clustered z (US Central game day, one-sided, mean of the daily means over their sample sd): %s against the ledger bar %.2f%s" % ("n/a" if z is None else "%.2f" % (z + 1e-9 if z >= 0 else z - 1e-9), Z_BAR, TAG))
     print("VERDICT: %s%s" % (v, TAG))
 
 
