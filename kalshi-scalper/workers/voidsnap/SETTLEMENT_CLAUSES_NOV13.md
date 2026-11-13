@@ -59,3 +59,12 @@ Not held, so not counted: ITF and challenger doubles, tour-level tennis, NBA and
 3. **Where a fixed-price void WOULD pay: a match that is known not to be going ahead while its market still stands away from the fixed price.** Then the payoff needs no guess about Kalshi's fair price, which is the weakest line of VOIDSNAP. If VOIDSNAP's stage 1 finds a detector that works on CS2, the same detector on e-soccer (33c) and Liga Pro (50c) is the natural next measurement. Two cautions already on record: REMATCH found e-soccer markets mostly unquoted before play, and on the census day the voided table tennis events had no contracts traded at all.
 4. **A gap for whoever reads contract terms:** the total-maps series void at the same rate as their match markets with no clause in the market text.
 5. Nothing here is a registered rule and nothing was scored.
+
+## Added Nov 13, 01:57Z: what Idea Desk C found from the evidence side (its page `RULES_CLAUSE_CENSUS_NOV13.md`, commit 3589f83c on `claude/idea-desk-c`; not checked by this desk)
+
+- **Its census of all 606 series in the landed lists agrees with the counts above.**
+- **Fixed-price voids leave almost nothing to buy.** From listed last trades: 1 of 35 traded ITF void markets had a last trade 10c or more from 50c; Liga Pro had 4 traded of 69 voids; e-soccer 13 traded of 182. So point 3 above ("the natural next measurement") is withdrawn for ITF, Liga Pro and e-soccer unless a book recorder shows otherwise. A last trade is one print, not a book, but with so few voids traded at all the ground is thin.
+- **Kalshi publishes no method for "fair price".** Its esports map terms leave it to "the sole discretion of the Exchange", and its college basketball terms let it reject the last trade as unfair. This is the weakest line of VOIDSNAP, stated by the exchange itself, and it is why stage 1's line 3 asks whether the settlement value can be known at the time.
+- **Bookmakers void.** Pinnacle voids forfeits and walkovers "regardless of how the governing body ... scores it" and voids esports not started in 30 hours; DraftKings voids table tennis on a walkover, retirement or cancellation unless decided. Betfair and Bet365 could not be verified.
+- **Nothing published** measures prices moving on forfeit or walkover news, or gives a cancellation rate for lower-tier esports or Russian table tennis. The list counts above are the only rates there are.
+- **A confusion by series, not measured:** a third-party guide tells traders an ATP walkover "resolves 50-50", while the challenger rules say a fair price.
