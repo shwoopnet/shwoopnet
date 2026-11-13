@@ -1,0 +1,26 @@
+settled markets 6720 | without a ticker or a time 0 | life not exactly 3600 s: 140 [times only, no price, no result]
+1. Life lengths of the odd markets (seconds: count per series) [times only, no price, no result]
+     540 s:   3  (KXTEMPCHIHS 3)
+     780 s:   6  (KXTEMPCHIHS 6)
+    1140 s:   9  (KXTEMPLAXHS 9)
+    1740 s:  24  (KXTEMPCHIHS 15, KXTEMPLAXHS 6, KXTEMPMIAH 3)
+    2280 s:   6  (KXTEMPLAXHS 3, KXTEMPNYCHS 3)
+    2340 s:  80  (KXTEMPCHIHS 18, KXTEMPLAXHS 50, KXTEMPMIAH 12)
+    2400 s:   6  (KXTEMPCHIHS 3, KXTEMPNYCHS 3)
+    2940 s:   6  (KXTEMPCHIHS 3, KXTEMPNYCHS 3)
+   per series: KXTEMPCHIHS 48 of 1708, KXTEMPLAXHS 68 of 1728, KXTEMPMIAH 15 of 1675, KXTEMPNYCHS 9 of 1609
+   markets whose close is not on the clock hour: 0
+2. Clock hours (close hours, UTC) per series against the 168 of the seven days [times only, no price, no result]
+   KXTEMPCHIHS: 166 present, 2 missing: 2026-11-05T09, 2026-11-05T10
+   KXTEMPLAXHS: 166 present, 2 missing: 2026-11-05T09, 2026-11-05T10
+   KXTEMPMIAH: 166 present, 2 missing: 2026-11-05T09, 2026-11-05T10
+   KXTEMPNYCHS: 160 present, 8 missing: 2026-11-05T09, 2026-11-05T10, 2026-11-08T01, 2026-11-09T02, 2026-11-09T07, 2026-11-09T10, 2026-11-09T11, 2026-11-09T17
+   close hours with a market of any series: 166
+3. Are the odd markets whole hours or part of an hour's ladder? [times only, no price, no result]
+   series-hours with an odd market: 43 | every market of the hour odd: 0 | only part of the hour odd: 43
+    3 odd of 13 markets in the hour, 1 distinct odd life length(s): 39 series-hours
+    5 odd of 15 markets in the hour, 2 distinct odd life length(s): 1 series-hours
+    6 odd of 16 markets in the hour, 2 distinct odd life length(s): 3 series-hours
+   markets per series-hour (markets: series-hours): 10: 615, 13: 39, 15: 1, 16: 3
+   odd series-hours by close hour of day, UTC (hour: count): 00: 1, 08: 1, 13: 5, 14: 6, 15: 4, 16: 10, 17: 8, 18: 7, 23: 1
+nothing is decided here: the Head of R&D rules; no candle job exists [times only, no price, no result]

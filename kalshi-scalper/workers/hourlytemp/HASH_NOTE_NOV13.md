@@ -63,3 +63,15 @@ Run `pull/HOURLYTEMP_LISTS/2026-11-13T0756Z_43389350994/` (13 answers; the job o
 - 140 MARKETS DID NOT LIVE EXACTLY 60 MINUTES: no job written.
 
 This is Amendment 2, item 3 working as written: a sampled market whose close minus open is not exactly 3,600 seconds stops the builder, because the carried quote and the job's time ranges assume the 60 minute life. No candle job exists, nothing was cut, no pin was bent. No price and no result has been read. The stop is with the Head of R&D. I have run nothing else on the run: which markets, which series and what lives they had is not known to me, because the reader prints only the count.
+
+## The times-only breakdown of the 140 (Nov 13, 2026, 08:07Z)
+
+Approved by the Head of R&D; script `hourlytemp/lives_breakdown.py` committed first (75ddb85f, sha256 6b1d7ae16d1fdcac4e0df0c2347d8807ce101ca881d372284bfe1225797ed2fb); Auditor B read the whole file and confirmed it takes only ticker, open_time and close_time before it ran. Printed lines: `hourlytemp/real_read/lives_lines_2026-11-13T0756Z.txt`, sha256 281a2eb47f8a4627cf3323ae228b5b4d11a8e31479dd0236152f4a02671d7834. Its first section equals Auditor B's independent count figure for figure.
+
+What it shows, counts only:
+- 6,720 settled markets in 658 series-hours. 615 series-hours have 10 markets; 43 have more (39 have 13, one has 15, three have 16).
+- All 140 odd markets sit in those 43 series-hours, and in every one of them only PART of the hour is odd: the 10 other markets of the hour lived the full 60 minutes. The odd ones opened late (lives of 540 to 2,940 seconds; 80 of them 2,340 seconds) in groups of 3, or 5 or 6 with two different opening times.
+- By series: Chicago 48, coastal Los Angeles 68, Miami 15, New York 9. By close hour of day (UTC) the 43 series-hours fall at 13 to 18 (40 of them), plus one each at 00, 08 and 23.
+- Clock hours: all four series lack 2026-11-05T09 and T10; New York lacks six more (Nov 8 01; Nov 9 02, 07, 10, 11, 17). So 166 of 168 for three series and 160 for New York.
+
+My reading, an inference and not a count: these are strikes ADDED to an hour's ladder after it opened. No strike value was read, so whether the added strikes are the ones nearest the money is not known. Nothing is decided; no candle job exists; the reader and the note are unchanged.
