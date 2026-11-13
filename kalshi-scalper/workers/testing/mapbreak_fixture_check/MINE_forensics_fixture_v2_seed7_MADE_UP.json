@@ -1,0 +1,404 @@
+{
+ "titles": {
+  "CS2": {
+   "sampled": 2415,
+   "filled_pre_match": 1082,
+   "fired_signals_at_the_look": 204,
+   "fired_and_filled_next_minute": 147,
+   "fired_not_filled": 57,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 3,
+   "unobservable_look_not_reached_no_pre_match": 103,
+   "state_not_observable_at_the_look": 944,
+   "no_look_before_state": 177,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 58,
+   "filled_at_the_look": 147,
+   "median_minutes_state_close_to_look": 2.55,
+   "median_spread_at_look": 0.03,
+   "median_round_trip_at_look": 0.04,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 1082,
+    "gap_median": 0.0046,
+    "gap_quartiles": [
+     -0.0099,
+     0.0595
+    ],
+    "gap_p90": 0.1174,
+    "share_gap_ge_8c_spread_le_4c": 0.189,
+    "share_when_team_up": 0.103,
+    "share_when_team_down": 0.086
+   },
+   "placebo": {
+    "n": 1082,
+    "gap_median": 0.0067,
+    "gap_quartiles": [
+     -0.0141,
+     0.0296
+    ],
+    "gap_p90": 0.0604,
+    "share_gap_ge_8c_spread_le_4c": 0.071,
+    "share_when_team_up": 0.042,
+    "share_when_team_down": 0.03
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 1082 matches, placebo share over 1082 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 147 filled bets (fired and filled at the next minute)"
+  },
+  "CS2|second_look": {
+   "sampled": 1077,
+   "filled_pre_match": 247,
+   "fired_signals_at_the_look": 40,
+   "fired_and_filled_next_minute": 32,
+   "fired_not_filled": 8,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 0,
+   "unobservable_look_not_reached_no_pre_match": 74,
+   "state_not_observable_at_the_look": 652,
+   "no_look_before_state": 83,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 0,
+   "filled_at_the_look": 32,
+   "median_minutes_state_close_to_look": 2.53,
+   "median_spread_at_look": 0.02,
+   "median_round_trip_at_look": 0.04,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 247,
+    "gap_median": 0.0002,
+    "gap_quartiles": [
+     -0.0099,
+     0.0556
+    ],
+    "gap_p90": 0.0982,
+    "share_gap_ge_8c_spread_le_4c": 0.162,
+    "share_when_team_up": 0.073,
+    "share_when_team_down": 0.089
+   },
+   "placebo": {
+    "n": 247,
+    "gap_median": 0.0049,
+    "gap_quartiles": [
+     -0.0133,
+     0.0262
+    ],
+    "gap_p90": 0.0436,
+    "share_gap_ge_8c_spread_le_4c": 0.061,
+    "share_when_team_up": 0.032,
+    "share_when_team_down": 0.028
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 247 matches, placebo share over 247 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 32 filled bets (fired and filled at the next minute)"
+  },
+  "DOTA2": {
+   "sampled": 1201,
+   "filled_pre_match": 546,
+   "fired_signals_at_the_look": 98,
+   "fired_and_filled_next_minute": 74,
+   "fired_not_filled": 24,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 0,
+   "unobservable_look_not_reached_no_pre_match": 56,
+   "state_not_observable_at_the_look": 461,
+   "no_look_before_state": 90,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 23,
+   "filled_at_the_look": 74,
+   "median_minutes_state_close_to_look": 2.52,
+   "median_spread_at_look": 0.03,
+   "median_round_trip_at_look": 0.04,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 546,
+    "gap_median": 0.0006,
+    "gap_quartiles": [
+     -0.0099,
+     0.0579
+    ],
+    "gap_p90": 0.103,
+    "share_gap_ge_8c_spread_le_4c": 0.179,
+    "share_when_team_up": 0.114,
+    "share_when_team_down": 0.066
+   },
+   "placebo": {
+    "n": 546,
+    "gap_median": 0.0075,
+    "gap_quartiles": [
+     -0.0157,
+     0.0281
+    ],
+    "gap_p90": 0.0745,
+    "share_gap_ge_8c_spread_le_4c": 0.084,
+    "share_when_team_up": 0.049,
+    "share_when_team_down": 0.035
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 546 matches, placebo share over 546 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 74 filled bets (fired and filled at the next minute)"
+  },
+  "DOTA2|second_look": {
+   "sampled": 528,
+   "filled_pre_match": 112,
+   "fired_signals_at_the_look": 23,
+   "fired_and_filled_next_minute": 20,
+   "fired_not_filled": 3,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 0,
+   "unobservable_look_not_reached_no_pre_match": 44,
+   "state_not_observable_at_the_look": 324,
+   "no_look_before_state": 33,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 0,
+   "filled_at_the_look": 20,
+   "median_minutes_state_close_to_look": 2.61,
+   "median_spread_at_look": 0.02,
+   "median_round_trip_at_look": 0.04,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 112,
+    "gap_median": -0.0015,
+    "gap_quartiles": [
+     -0.0099,
+     0.0593
+    ],
+    "gap_p90": 0.1008,
+    "share_gap_ge_8c_spread_le_4c": 0.205,
+    "share_when_team_up": 0.089,
+    "share_when_team_down": 0.116
+   },
+   "placebo": {
+    "n": 112,
+    "gap_median": 0.0126,
+    "gap_quartiles": [
+     -0.0162,
+     0.0299
+    ],
+    "gap_p90": 0.0424,
+    "share_gap_ge_8c_spread_le_4c": 0.08,
+    "share_when_team_up": 0.036,
+    "share_when_team_down": 0.045
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 112 matches, placebo share over 112 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 20 filled bets (fired and filled at the next minute)"
+  },
+  "LOL": {
+   "sampled": 173,
+   "filled_pre_match": 68,
+   "fired_signals_at_the_look": 9,
+   "fired_and_filled_next_minute": 8,
+   "fired_not_filled": 1,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 0,
+   "unobservable_look_not_reached_no_pre_match": 12,
+   "state_not_observable_at_the_look": 67,
+   "no_look_before_state": 14,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 8,
+   "filled_at_the_look": 8,
+   "median_minutes_state_close_to_look": 2.57,
+   "median_spread_at_look": 0.03,
+   "median_round_trip_at_look": 0.04,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 68,
+    "gap_median": -0.0016,
+    "gap_quartiles": [
+     -0.0111,
+     0.0372
+    ],
+    "gap_p90": 0.0835,
+    "share_gap_ge_8c_spread_le_4c": 0.132,
+    "share_when_team_up": 0.059,
+    "share_when_team_down": 0.074
+   },
+   "placebo": {
+    "n": 68,
+    "gap_median": 0.0031,
+    "gap_quartiles": [
+     -0.0142,
+     0.0233
+    ],
+    "gap_p90": 0.0467,
+    "share_gap_ge_8c_spread_le_4c": 0.059,
+    "share_when_team_up": 0.044,
+    "share_when_team_down": 0.015
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 68 matches, placebo share over 68 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 8 filled bets (fired and filled at the next minute)"
+  },
+  "LOL|second_look": {
+   "sampled": 73,
+   "filled_pre_match": 17,
+   "fired_signals_at_the_look": 1,
+   "fired_and_filled_next_minute": 0,
+   "fired_not_filled": 1,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 0,
+   "unobservable_look_not_reached_no_pre_match": 8,
+   "state_not_observable_at_the_look": 41,
+   "no_look_before_state": 5,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 0,
+   "filled_at_the_look": 0,
+   "median_minutes_state_close_to_look": 2.62,
+   "median_spread_at_look": 0.02,
+   "median_round_trip_at_look": 0.04,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 17,
+    "gap_median": 0.0169,
+    "gap_quartiles": [
+     -0.0184,
+     0.0516
+    ],
+    "gap_p90": 0.0576,
+    "share_gap_ge_8c_spread_le_4c": 0.059,
+    "share_when_team_up": 0.059,
+    "share_when_team_down": 0.0
+   },
+   "placebo": {
+    "n": 17,
+    "gap_median": 0.0013,
+    "gap_quartiles": [
+     -0.0192,
+     0.0173
+    ],
+    "gap_p90": 0.029,
+    "share_gap_ge_8c_spread_le_4c": 0.0,
+    "share_when_team_up": 0.0,
+    "share_when_team_down": 0.0
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 17 matches, placebo share over 17 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 0 filled bets (fired and filled at the next minute)"
+  },
+  "VALORANT": {
+   "sampled": 69,
+   "filled_pre_match": 31,
+   "fired_signals_at_the_look": 6,
+   "fired_and_filled_next_minute": 4,
+   "fired_not_filled": 2,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 0,
+   "unobservable_look_not_reached_no_pre_match": 2,
+   "state_not_observable_at_the_look": 28,
+   "no_look_before_state": 3,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 0,
+   "filled_at_the_look": 4,
+   "median_minutes_state_close_to_look": 2.55,
+   "median_spread_at_look": 0.03,
+   "median_round_trip_at_look": 0.035,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 31,
+    "gap_median": 0.0194,
+    "gap_quartiles": [
+     -0.014,
+     0.066
+    ],
+    "gap_p90": 0.0911,
+    "share_gap_ge_8c_spread_le_4c": 0.194,
+    "share_when_team_up": 0.129,
+    "share_when_team_down": 0.065
+   },
+   "placebo": {
+    "n": 31,
+    "gap_median": 0.0131,
+    "gap_quartiles": [
+     -0.0046,
+     0.0343
+    ],
+    "gap_p90": 0.1034,
+    "share_gap_ge_8c_spread_le_4c": 0.129,
+    "share_when_team_up": 0.065,
+    "share_when_team_down": 0.065
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 31 matches, placebo share over 31 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 4 filled bets (fired and filled at the next minute)"
+  },
+  "VALORANT|second_look": {
+   "sampled": 34,
+   "filled_pre_match": 7,
+   "fired_signals_at_the_look": 0,
+   "fired_and_filled_next_minute": 0,
+   "fired_not_filled": 0,
+   "fired_not_filled_of_which_no_next_minute_candle_at_all": 0,
+   "equal_gaps_no_bet": 0,
+   "unobservable_look_not_reached_no_pre_match": 1,
+   "state_not_observable_at_the_look": 21,
+   "no_look_before_state": 3,
+   "map2_won_by_map1_winner_no_second_look": 0,
+   "observed_winner_differs_from_posted_result": 0,
+   "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": 0,
+   "filled_at_the_look": 0,
+   "median_minutes_state_close_to_look": 2.17,
+   "median_spread_at_look": 0.025,
+   "median_round_trip_at_look": 0.04,
+   "cost_line_used": "one-way entry cost (ask minus mid plus the entry fee as charged), kill above 4c",
+   "look": {
+    "n": 7,
+    "gap_median": 0.0187,
+    "gap_quartiles": [
+     -0.0056,
+     0.0247
+    ],
+    "gap_p90": 0.0386,
+    "share_gap_ge_8c_spread_le_4c": 0.0,
+    "share_when_team_up": 0.0,
+    "share_when_team_down": 0.0
+   },
+   "placebo": {
+    "n": 7,
+    "gap_median": 0.0075,
+    "gap_quartiles": [
+     -0.0087,
+     0.0282
+    ],
+    "gap_p90": 0.0357,
+    "share_gap_ge_8c_spread_le_4c": 0.0,
+    "share_when_team_up": 0.0,
+    "share_when_team_down": 0.0
+   },
+   "state_known_at_close": null,
+   "denominators": "look share over 7 matches, placebo share over 7 matches (the same matches: this look's own pre-match placebo)",
+   "verdict": "no evidence at n = 0 filled bets (fired and filled at the next minute)"
+  }
+ },
+ "tries_added": 0,
+ "rule_scored": false,
+ "result_read": false,
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on esports",
+ "disclosed_limit": "second looks exist only for matches whose POSTED map-2 result says one map each (how the candle windows were planned); per title the count of looks where the observed state differs from the posted one is printed (observed_winner_differs_from_posted_result, map2_won_by_map1_winner_no_second_look)",
+ "card": "CLOSED: every cell is closed or has no evidence",
+ "counts_first": {
+  "lists_truncated_at_the_page_cap": [],
+  "matches_listed": 4820,
+  "not_best_of_three": 269,
+  "held_out_dropped": 570,
+  "before_development_history_rows_not_used": 0,
+  "start_not_derivable": 123,
+  "no_map1_result": 0,
+  "no_posted_map1_result_kept_anyway": 52,
+  "map1_contracts_not_the_two_teams": 0,
+  "sampled": 3981,
+  "second_look_matches": 1712,
+  "map2_closed_under_15_min_after_map1_count_only": 446,
+  "map2_won_by_map1_winner_no_second_look": 2094,
+  "no_map2_result_no_second_look": 52
+ },
+ "match_result_read": false,
+ "family_note": "same family as NHLOT: ONE candidate for the owner's count; the Head's probability that it reaches the research bar is 2 percent"
+}
