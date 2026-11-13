@@ -642,3 +642,9 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
 - Refinement's scorer: fc2889324f93c87f. Registrations: V1 e9223260, V2 76dff5e6.
 - Forwarded to the History Miner for an independent build from the text. Both builds re-run when it reports. Auditor B diffs them after the 23:30Z DEPTH1 byte check.
 - 16:24Z: the edge set v2 read SAME on both builds (Refinement fc2889324f93c87f, Miner ad97de4a at e19f5fde), matching the hand expectation at ca51fa54. The Miner's old build ae3cafe4 fills U0L, so the scope row tells the builds apart. These are edge set fixture figures only; nothing here is a development or held-out read. Auditor B's final diff is queued behind the 23:30Z DEPTH1 byte check.
+
+## 2026-11-13 16:45Z: new family KXINX15M (S&P 500 15 minute), top priority (the owner, via the EA)
+- Public facts: one market per window (YES if the close is at or above the window-start 1-minute close); weekdays, 25 windows a day closing 15:00Z to 21:00Z; quadratic fee, multiplier 1; exchange index 0 (shard 0); listed since Nov 5. No data was read beyond the series and market lists.
+- Recorder: Main is asked for the smallest PR (add KXINX15M to NC15's SERIES) for the owner's typed merge.
+- Cards (Desk A, registered before any read): SPXFV1, the unique candidate (futures-implied fair value; ES or MES from the licensed Databento feed only, nothing derived in the repo; held-out proposed as closes on or after 2026-12-01T00:00Z). SPXOI1 is a VERSION of OICORE (7g). A cheap-side longshot is allowed only with a new field (declined row 190). Late-favourite is a duplicate (7d rule 2) and needs the owner's exception; it is not assigned.
+- Dates given to the EA: shadow from Mon Nov 16 at the earliest; qualification about mid-December at best, late December to January more likely.
