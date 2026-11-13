@@ -60,6 +60,23 @@ supplies more than half of the pooled net.
   `POLGAPH_FIRST_BUILD_OUTPUT_fixture_seed5_edge032_others_minus05_MADE_UP_DATA_run_by_forensics.txt`.
 - The two earlier fixtures still agree against Desk B's refreshed lines at `94ff7fa7`: 155 of 155 and 156 of 156.
 
+## Nov 13, about 01:50Z: the two-families fixture, and one information-only difference
+
+The Head's last word (01:44Z): align to Desk B's `94ff7fa7` (scorer `9186c8b5...`, registration `a13693f3...`, restored byte for byte at `5a7de18e`); the later hashes
+`331711cd` and `2e48e8c8` are dead. This build was already on that text. Fixtures asked for: pooled fail with a dominant family (above), and two families over half:
+
+- `make_polgaph_fixture.py <dir> <series json> 5 0.35 -0.4 balanced`: 7 activity-count series, 7 shipping, 14 single questions; the two count families get the edge and
+  single questions lose. Pooled: n 152, PF 1.74, a pass. Activity counts and shipping counts EACH supply more than half of the pooled net (the third family is negative).
+  Both builds read the family with the largest net alone, and both print "no evidence at n = 66" for it (halves 35 and 31). I ran Desk B's scorer at `94ff7fa7` on it
+  myself with its two commands, without reading it; its lines are saved as `POLGAPH_FIRST_BUILD_OUTPUT_fixture_seed5_balanced_edge035_single_minus04_MADE_UP_DATA_run_by_forensics.txt`.
+- **155 of 156 figures the same. THE ONE DIFFERENCE, information only:** on the line "voids paid at their settlement value instead" Desk B's build prints wins 95 and
+  mine 94; n, profit factor, net, mean and z are the same. The cause is one voided bet whose cash result at its settlement value is exactly zero (value 0.53, limit 0.51,
+  fee 0.02). In floating point 0.53 - 0.51 - 0.02 is +1.7e-17, so a build that counts a win as "result above zero" with no tolerance counts it; mine uses the 1e-9
+  tolerance and does not. The registration does not define a win on that line. No verdict line reads it. Sent to the Head and Desk B for a one-line pin.
+- Desk B's three small pooling cases (`make_pool_fixture_MADE_UP_DATA.py`) start from a decisions file and exercise its score step only; this build has no such
+  entry point (it always decides from the candles), so those three were not run here. The two whole-pipeline fixtures above cover the same two cases.
+- The three earlier fixtures are unchanged in content under the changed generator (checked by hashing the decompressed answers).
+
 ## Places where the registration leaves a choice
 
 The build prints its readings with the output (`ambiguities`). The ones most likely to move a figure:

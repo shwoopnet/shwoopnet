@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """A MADE-UP fixture for POLGAPH in the pull-run folder shape (manifest.json + NNNN.json.gz): <out>/lists, <out>/hourly and <out>/minute, plus the marker file MADE_UP_DATA.
 Nothing here is real: only the series NAMES come from Desk B's POLGAPH_SERIES.json (so the family map applies); events, markets, quotes, volumes and results are invented.
-usage: python3 -I make_polgaph_fixture.py <out dir> <POLGAPH_SERIES.json> [seed] [edge] [other_edge]
+usage: python3 -I make_polgaph_fixture.py <out dir> <POLGAPH_SERIES.json> [seed] [edge] [other_edge] [balanced]
+  balanced (the word, optional sixth argument): only the first 7 activity-count series are used beside the 7 shipping and 14 single-question series, the count families'
+  events last 2 to 3 days with 10 markets each (more events, more picks), `edge` is used for BOTH count families and `other_edge` for single questions only. With edge 0.45 and other_edge -0.3 the pooled
+  read passes and BOTH count families supply more than half of the pooled net (possible because the third family is negative): the two-families case of Amendment 4.
   other_edge (optional): the edge used for the shipping and single-question families, while `edge` is used for activity counts only. With edge 0.25 and other_edge -0.45 the
   pooled read fails while activity counts alone would pass: the case that separates "pooled verdict first" (Amendment 4) from "a failed pooled read rescued by one family".
   edge (default 0.0): how far beyond a coin flip an overnight gap points toward the market's result. 0.0 = the gap says nothing; 0.35 = a strong planted effect.
@@ -19,24 +22,24 @@ F = lambda x: datetime.fromtimestamp(x, timezone.utc).strftime("%Y-%m-%dT%H:%M:%
 W0 = int(datetime(2026, 9, 12, tzinfo=timezone.utc).timestamp()); W1 = int(datetime(2026, 11, 12, 23, 59, 59, tzinfo=timezone.utc).timestamp())
 
 
-def main(out, series_json, seed, edge, other_edge=None):
+def main(out, series_json, seed, edge, other_edge=None, balanced=False):
     rng = random.Random(seed); os.makedirs(out); open(os.path.join(out, "MADE_UP_DATA"), "w").write("invented rows for a build comparison; nothing here is real\n")
     fam = json.load(open(series_json))["families"]
-    use = fam["activity counts"] + fam["shipping counts"] + fam["single questions"]                    # all 69 series, so the counts clear the 150 and 40 minimums
+    use = (fam["activity counts"][:7] if balanced else fam["activity counts"]) + fam["shipping counts"] + fam["single questions"]                    # all 69 series, so the counts clear the 150 and 40 minimums
     cent = lambda x: round(min(0.93, max(0.07, x)), 2)
     lists = {}; hourly = {}; looks = {}; q07 = {}; n_ev = 0
     for s in use:
-        single = s in fam["single questions"]; lists[s] = []; e_s = edge if (other_edge is None or s in fam["activity counts"]) else other_edge
+        single = s in fam["single questions"]; lists[s] = []; e_s = edge if (other_edge is None or s in fam["activity counts"] or (balanced and s in fam["shipping counts"])) else other_edge
         day = datetime(2026, 9, rng.randint(5, 11), tzinfo=ET)
         while True:
             oh, om = rng.choice([(7, 0), (9, 30), (14, 0), (20, 15)]); ch, cm, cs = rng.choice([(7, 0, 0), (10, 0, 0), (16, 0, 0), (23, 59, 59)])
-            dur = rng.randint(8, 25) if single else rng.randint(2, 6)
+            dur = rng.randint(8, 25) if single else (rng.randint(2, 3) if balanced else rng.randint(2, 6))
             op = int(day.replace(hour=oh, minute=om).timestamp()); cl_dt = (day + timedelta(days=dur)).replace(hour=ch, minute=cm, second=cs); cl = int(cl_dt.timestamp())
             day = (day + timedelta(days=dur + rng.choice([0, 0, 1]))).replace(hour=0, minute=0, second=0)
             if cl > W1: break
             if cl < W0: continue
             n_ev += 1; ev = "%s-%s" % (s, cl_dt.strftime("%y%b%d").upper())
-            for k in range(rng.choice([1, 2]) if single else 4):
+            for k in range(rng.choice([1, 2]) if single else (10 if balanced else 4)):
                 tk = "%s-%s%d" % (ev, "Q" if single else "T", k + 1); m = cent(rng.uniform(0.15, 0.85)); truth = rng.random() < m
                 vscale = rng.choice([0, 1, 1, 25, 25, 25, 25, 25, 25, 25]); cd = hourly.setdefault(tk, {}); g = 0.0; h = (op // 3600 + 1) * 3600
                 while h <= cl:
@@ -109,8 +112,8 @@ def main(out, series_json, seed, edge, other_edge=None):
         mreq.append(("m_" + d, "/markets/candlesticks", params, {"markets": mk}))
     write_run(os.path.join(out, "minute"), mreq)
     print("made-up POLGAPH fixture written to %s: %d series, %d events, %d markets, %d hourly requests, %d minute requests over %d mornings, seed %d, edge %s" % (
-        out, len(use), n_ev, sum(len(v) for v in lists.values()), len(hreq), len(mreq), len(looks), seed, edge) + ("" if other_edge is None else ", other families %s" % other_edge))
+        out, len(use), n_ev, sum(len(v) for v in lists.values()), len(hreq), len(mreq), len(looks), seed, edge) + ("" if other_edge is None else ", other families %s" % other_edge) + (", balanced" if balanced else ""))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 5, float(sys.argv[4]) if len(sys.argv) > 4 else 0.0, float(sys.argv[5]) if len(sys.argv) > 5 else None)
+    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 5, float(sys.argv[4]) if len(sys.argv) > 4 else 0.0, float(sys.argv[5]) if len(sys.argv) > 5 else None, len(sys.argv) > 6 and sys.argv[6] == "balanced")
