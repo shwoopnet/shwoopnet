@@ -12,7 +12,7 @@ Expected lucky clears with no edge anywhere (a fairly priced market, one fee los
 | 2026-11-13 (MAPBREAK's CS2 place withdrawn: out on its registered screen; R6 extended, so every logged place runs to Dec 31) | 20 | 12 (all to Dec 31) | 0 | 0 | 0 | 0 |
 | 2026-11-13 00:11Z (the 12 logged places re-dated: no signal counts until one frozen definition sheet is committed and the auditor answers "closed") | 20 | 12 logging, 0 counting yet | 0 | 0 | 0 | 0 |
 | 2026-11-13 00:13Z (MAPBREAK's CS2 place restored as pending recount: the screen count came from one build with a floating point fault) | 21 | 12 logging, 0 counting yet | 0 | 0 | 0 | 0 |
-| 2026-11-13 00:17Z (four forex places withdrawn: cannot reach 60 signals in 21 days; five CFRTI-K places listed pending the perps archive; frozen definition sheet 3b8bf486 committed 00:14Z, awaiting the auditor) | 22 | 8 logging, 0 counting yet | 0 | 0 | 0 | 0 |
+| 2026-11-13 00:16Z (four forex places withdrawn: cannot reach 60 signals in 21 days; five CFRTI-K places listed pending the perps archive; frozen definition sheet 3b8bf486 committed 00:14Z, awaiting the auditor) | 22 | 8 logging, 0 counting yet | 0 | 0 | 0 | 0 |
 
 ## Probation seats (rules section 5a; live results by message only, never here)
 
