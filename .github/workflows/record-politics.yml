@@ -30,6 +30,7 @@ jobs:
       - name: Stop for good after the end date (2027-02-28 23:59 UTC)
         id: gate
         run: |
+          echo "start=$(date -u +%s)" >> "$GITHUB_OUTPUT"   # the run's own start time (github.run_started_at is not a context value, which made every chain die at link one)
           if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the recorder script from main
         if: steps.gate.outputs.go == 'true'
@@ -78,12 +79,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
-          RUN_START: ${{ github.run_started_at }}
+          RUN_START: ${{ steps.gate.outputs.start }}
         run: |
           END="$(date -u -d '2027-02-28T23:59:00Z' +%s)"
-          START="$(date -u -d "$RUN_START" +%s)"
           NOW="$(date -u +%s)"
-          EARLIEST=$(( START + 1200 ))
+          START="${RUN_START:-$NOW}"
+          EARLIEST=$(( START + 1560 ))   # 26 minutes after the start, so the successor is never under the 25 minute freshness line
           [ "$EARLIEST" -lt "$NOW" ] && EARLIEST="$NOW"
           TARGET=$(( (EARLIEST + 1799) / 1800 * 1800 ))
           if [ "$TARGET" -ge "$END" ]; then echo "next run would pass the end date: not chaining"; exit 0; fi

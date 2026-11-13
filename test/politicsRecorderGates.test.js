@@ -101,7 +101,7 @@ gates.PR6 = () => {
   assert.ok(cfg.series.length >= 17 && cfg.series.length <= 60 && cfg.max_series <= 60 && cfg.max_requests_per_run > 0 && cfg.cap_days === 30);
   assert.ok(cfg.series.every((s) => /^[A-Z0-9]{2,40}$/.test(s)) && new Set(cfg.series).size === cfg.series.length);
   for (const must of ['KXTRUMPAPPROVE', 'KXVHGCB', 'KXTRUMPACT', 'KXHORMUZWEEKLY', 'KXTRUTHSOCIAL', 'KXACTBLUETOP', 'KXBABELMANDEBWEEKLY', 'KXHORMUZPEAK', 'KXTRUMPENDORSEMENTS', 'KXAPRPOTUS', 'KXAPRPOTUSD', 'KXGENERICBALLOTVOTEHUB', 'KXVOTEHUBTRUMPUPDOWN']) assert.ok(cfg.series.includes(must), must);
-  assert.strictEqual(cfg.series.length, 45, 'Nov 12, 2026: 42 series plus the three Refinement additions');
+  assert.strictEqual(cfg.series.length, 51, 'Nov 13, 2026: 45 series plus the six mention series Desk B asked for (the only politics family with enough events for a 60 signal block)');
   assert.ok(!cfg.series.includes('KXGENERICBALLOT'), 'one event in all history: left out on purpose');
   assert.ok(!cfg.series.some((s) => cfg.later_only.includes(s)), 'a later-only series is not recorded');
   assert.ok(!/KX[A-Z0-9]{3,}/.test(code), 'no series name is hard coded in the script');
@@ -208,7 +208,8 @@ gates.PR11 = () => {
   assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true' && steps\.fresh\.outputs\.poll == 'true'"/.test(chain), 'chains after a failed poll (but a manual cancel stops the chain), never from a skipped or past-end run');
   assert.ok(/2027-02-28T23:59:00Z/.test(chain) && (chain.match(/not chaining/g) || []).length >= 2, 'the end date is checked before and after the sleep');
   assert.ok(chain.indexOf('sleep $((') > -1 && chain.indexOf('sleep $((') < chain.indexOf('gh workflow run'), 'it sleeps before it dispatches');
-  assert.ok(/START \+ 1200/.test(chain) && /1800/.test(chain), 'at least 20 minutes after the start, on a half hour');
+  assert.ok(/START \+ 1560/.test(chain) && /1800/.test(chain), 'at least 26 minutes after the start (past the 25 minute freshness line), on a half hour');
+  assert.ok(/RUN_START: \$\{\{ steps\.gate\.outputs\.start \}\}/.test(chain) && !/github\.run_started_at/.test(chain), 'the start time is recorded by the first step, never read from a context value that does not exist');
   const disp = [...wf.matchAll(/gh workflow run ([^\n]+)/g)].map((x) => x[1].trim());
   assert.deepStrictEqual(disp, ['record-politics.yml --ref main'], 'only this workflow, only on main');
   assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf));
