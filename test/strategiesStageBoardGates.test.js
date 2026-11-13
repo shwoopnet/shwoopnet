@@ -71,7 +71,7 @@ gates.ST6 = () => {
 gates.ST7 = () => {
   const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(css)[1];
   const attr = css.split('\n').filter((l) => l.includes('[data-reduce-motion="true"]')).join('\n');
-  for (const s of ['#page-strategies .lp::before', '#page-strategies .lp-ln u', '#page-strategies .lp-ret u', '#page-strategies .lp-p.play .rw', '#page-strategies .rw.near .rw-w::before', '#page-strategies .rw.open .sp-bar i', '#page-strategies .sx', '#page-strategies .lp-t', '#page-strategies.sp-play .lp-t']) {
+  for (const s of ['#page-strategies .lp::before', '#page-strategies .lp-ln u', '#page-strategies .lp-ret u', '#page-strategies .lp-p.play .rw', '#page-strategies .rw.near .rw-w::before', '#page-strategies .rw.rw-opening .sp-bar i', '#page-strategies .sx', '#page-strategies .lp-t', '#page-strategies.sp-play .lp-t']) {
     assert.ok(media.includes(s), 'prefers-reduced-motion stops ' + s);
     assert.ok(attr.includes(s), 'the Settings switch stops ' + s);
   }
@@ -101,6 +101,27 @@ gates.ST10 = () => {
   assert.ok(!/localStorage|sessionStorage|fetch\(|XMLHttpRequest|setDoc|updateDoc|addDoc|setInterval|https?:\/\//.test(code));
   assert.strictEqual((code.match(/setTimeout\(/g) || []).length, 1, 'one timeout, the entrance play');
   assert.ok(!code.includes(String.fromCharCode(8212)), 'no em dash');
+};
+// ST11: a redraw never restarts the loop (the owner, Nov 13, 2026: "a very obvious restart animation ... almost as if the page refreshes"). Every infinite animation on the board takes its phase from --lp-sync, which the render sets from the page clock BEFORE replacing the markup; nothing replays because a row is open.
+gates.ST11 = () => {
+  const render = html.slice(html.indexOf('  function renderStrategiesPage('), html.indexOf('  // The Details popup lives outside'));
+  assert.ok(render.indexOf("setProperty('--lp-sync'") > 0 && render.indexOf("setProperty('--lp-sync'") < render.indexOf('el.innerHTML = kalshiBoardHtml('), 'the phase is set before the markup is replaced');
+  const inf = [...css.matchAll(/([^{}]+)\{([^{}]*infinite[^{}]*)\}/g)].filter((m) => /\.lp|\.rw|\.sp-sum/.test(m[1]));
+  assert.ok(inf.length >= 5, 'the board has its infinite animations');
+  inf.forEach((m) => assert.ok(/--lp-sync/.test(m[2]), 'synced: ' + m[1].trim()));
+  assert.ok(!/\.rw\.open[^{]*\{[^}]*animation:\s*rw/.test(css), 'an open row does not replay its fill on every redraw');
+};
+// ST12: an approved seat with no order yet is not trading real money: it waits in Shadow, never Live; the same seat with an order is Live as a Trial.
+gates.ST12 = () => {
+  const wait = B.kalshiBoardHtml(model([card('CFRTIK', 'probation', { orders: 0 })]), esc, money);
+  assert.ok(/data-row="CFRTIK"/.test(panel(wait, 'shadow')) && !/data-row="CFRTIK"/.test(panel(wait, 'live')) && />WAITING</.test(panel(wait, 'shadow')), 'waiting in Shadow');
+  const run = B.kalshiBoardHtml(model([card('CFRTIK', 'probation', { orders: 3 })]), esc, money);
+  assert.ok(/data-row="CFRTIK"/.test(panel(run, 'live')) && /Trial \d+ of 90/.test(panel(run, 'live')), 'trading: Live as a Trial');
+};
+// ST13: a trial seat past 90 fills never reads like a pass: it says the review is due.
+gates.ST13 = () => {
+  const h = B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94 } } })]), esc, money);
+  assert.ok(/>Trial, review due</.test(panel(h, 'live')) && !/90 of 90/.test(h));
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
