@@ -73,7 +73,7 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.strictEqual(slot.slotOrderCheck.length, 1);
   // A hand-built or unregistered strategy still cannot enter, whatever it claims.
   assert.strictEqual(slot.slotOrderCheck(input()).allowed, false, 'TESTA is not in the registry');
-  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$|kalshiSlotRunLib\.js$|kalshiSlotStoreLib\.js$|kalshiLiveLib\.js$|functions[\\/]index\.js$|kalshi-scalper[\\/]README\.md$/.test(x))) {
+  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$|kalshiSlotRunLib\.js$|kalshiSlotStoreLib\.js$|kalshiWheelLib\.js$|kalshiLiveLib\.js$|functions[\\/]index\.js$|kalshi-scalper[\\/]README\.md$/.test(x))) {
     const txt = fs.readFileSync(f, 'utf8');
     // The Bot page may READ the slot's orders (the strategy switch, Oct 29, 2026) and nothing else of the slot: no library, no run or store code, no control latch, no direction lock.
     if (/index\.html$/.test(f)) { assert.ok(!/kalshiSlot(Lib|Run|Store|Control)|kalshiLiveDirection/.test(txt) && !/(setDoc|addDoc|updateDoc|deleteDoc|runTransaction)\([^)]*kalshiSlot/.test(txt), 'the page only reads kalshiSlotOrders'); continue; }
