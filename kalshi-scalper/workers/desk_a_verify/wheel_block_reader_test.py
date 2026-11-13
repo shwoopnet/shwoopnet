@@ -19,7 +19,7 @@ s = [sig(i, i * 6 * H, 0 if i % 5 else 1) for i in range(100)]; b, st = rp(s, ba
 # T4: EXPIRED: later signal past 21 days (unread; the next block starts after the expiry time), and by the clock with --now
 s = [sig(i, i * 10 * H, 1 if i % 3 else 0) for i in range(90)]; b, st = rp(s); assert b[0]["status"] == "EXPIRED" and b[0]["n"] < 60, b[0]
 s = seq(30); b, st = rp(s, now=T0 + 22 * DAY); assert b[0]["status"] == "EXPIRED" and st.get("expired_by_clock"), (b, st)
-s = seq(30); b, st = rp(s, now=T0 + 6 * DAY); assert not b and st["block_in_progress"] == 30; print("T4 EXPIRED by a later signal and by the clock OK")
+s = seq(30); b, st = rp(s, now=T0 + 8 * DAY); assert not b and st["block_in_progress"] == 30; print("T4 EXPIRED by a later signal and by the clock OK")
 # T5 (g), (h): integer cents. 10W >= 13L passes exactly at 1.3 and fails one cent under; a half W >= L; a day over 30% of the net fails, exactly 30% passes
 def block_with(cw, cl, n=60):
     s = [sig(i, i * 6 * H, 1 if i % 3 else 0) for i in range(n)]
@@ -58,4 +58,16 @@ except SystemExit: pass
 W.STRICT_CENTS = False
 assert W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "3.00"]]))[0]["cents"] == 300
 print("T9 void is neither win nor loss; non-cent cash and a blank win are refused OK")
+# T10 (Auditor B round 2): a blank limit, a --now before the data, a blank cash and a duplicate row are refused
+def refused(fn):
+    try: fn(); return False
+    except SystemExit: return True
+assert refused(lambda: W.read_place([dict(x, limit=None) for x in seq(70)], now=NOW))
+assert refused(lambda: W.read_place(seq(70), now=T0 - DAY))
+assert refused(lambda: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", ""]])))
+assert refused(lambda: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "3.0"], ["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "3.0"]])))
+assert W.read_place([dict(x, limit=None) for x in seq(70)], fav=True, now=NOW)                  # a favourites place may run without a limit column
+import heldout_guard as G
+assert refused(lambda: G.refuse_heldout("/tmp/heldout_x/y", "t")) and refused(lambda: G.refuse_heldout("/tmp/HeldOut_x", "t"))
+print("T10 blank limit, early --now, blank cash, duplicate, lower-case heldout refused OK")
 print("ALL OK")

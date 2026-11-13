@@ -3,7 +3,7 @@
 import os, sys, tempfile
 def refuse_heldout(path, who="this reader"):
     for p in (os.path.abspath(path), os.path.realpath(path)):
-        if any(part.startswith("HELDOUT_") for part in p.split(os.sep)):
+        if any(part.upper().startswith("HELDOUT_") for part in p.split(os.sep)):
             raise SystemExit("REFUSED (%s): %s is, or is inside, or points into, a held-out folder (standing rule h); each card reads it once on the Head's own go" % (who, path))
 def selftest():
     d = tempfile.mkdtemp(); h = os.path.join(d, "HELDOUT_X"); os.makedirs(os.path.join(h, "part1")); ok = os.path.join(d, "dev_ok"); os.makedirs(ok); link = os.path.join(d, "innocent"); os.symlink(h, link)

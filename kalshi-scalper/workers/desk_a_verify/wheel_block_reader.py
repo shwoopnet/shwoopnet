@@ -14,14 +14,18 @@ def ge_pf(W, L, num, den):
     return den * W >= num * L
 def limit_c(x): return int(round(x * 100))
 def load(path):
-    out = []
+    out = []; seen = set()
     for r in csv.DictReader(open(path, newline="")):
         st = r.get("status", "")
         if not st.startswith("fillable"): continue
         res = r.get("result") or ""
         if "," in st: res = {"fillable, scored": "scored", "fillable, void": "void", "fillable, open": "pending"}.get(st, res)
         t = r.get("signal_t") or r.get("signal_exchange")
-        if res == "scored" and r.get("win") in ("", None): raise SystemExit("REFUSED: a scored record (%s) has no win field" % r["ticker"])                      # Auditor B item 7: a blank win never reads as a loss
+        if res == "scored" and r.get("win") in ("", None): raise SystemExit("REFUSED: a scored record (%s) has no win field" % r["ticker"])
+        if res in ("scored", "void") and r.get("cash") in ("", None): raise SystemExit("REFUSED: a %s record (%s) has no cash field" % (res, r["ticker"]))
+        key = (r["ticker"], r.get("signal_t") or r.get("signal_exchange"))
+        if key in seen: raise SystemExit("REFUSED: duplicate record (ticker %s, signal_t %s): one signal would count twice" % key)
+        seen.add(key)                      # Auditor B item 7: a blank win never reads as a loss
         c = None
         if r.get("cash") not in ("", None):
             x = float(r["cash"]) * 100
@@ -34,6 +38,8 @@ def need_outcomes(band, fav):
     lo, hi = band
     return ("wins", "losses") if lo <= 50 < hi else (("wins",) if hi <= 50 else ("losses",))
 def read_place(sigs, band=(11, 91), fav=False, start_t=None, now=None):
+    if not fav and any(x["limit"] is None for x in sigs): raise SystemExit("REFUSED: a counted record has no limit: without it the 88c skip, (i), cannot be applied (a favourites-class place needs --fav)")
+    if now is not None and sigs and now < max(x["t"] for x in sigs) - EPS: raise SystemExit("REFUSED: --now is earlier than the latest signal in the file")
     need_n = 150 if fav else 60; needs = need_outcomes(band, fav); blocks = []; cur = []; conf = None
     counted = []
     for s in sorted(sigs, key=lambda s: (s["t"], s["ticker"])):
