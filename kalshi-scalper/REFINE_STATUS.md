@@ -2410,3 +2410,5 @@ Early signs, not findings (small counts):
 **Not done yet:** OICORE (second slot) is not in the nightly report (it only reads the L1 collection `kalshiLiveOrders`). The forward read is Nov 13, and I have no read path for `kalshiSlotOrders` from this container. Needs a decision from the owner or main session: either a report extension (a reviewed code change, not mine to make) or the Bot page export of the slot orders pasted in.
 
 **Next:** nightly read of the report each pass; check Dogecoin counts above 5 and the first Dogecoin loss at the new size; first OICORE fills when the owner shares an export. No brief drafted: no refinement idea has a hypothesis that is not already a V2 test (L1 filter, exit and sizing tests are closed by the Oct 28 instruction; [live figure removed, ask Main]
+
+Dated line Nov 13, 2026 (Head of R&D ruling on the owner poll, text only): S-JUMP1 and S-SDIR1 (read at 40 fills, entries of Nov 9): they are fed by OICORE second-slot orders, still being placed as of the Nov 12 nightly review; the read waits for its own count and is not brought forward.

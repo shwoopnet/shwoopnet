@@ -20,3 +20,5 @@ Under 40 settled signals: counts only, NO READ.
 
 
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^; nothing re-decided. 10 markers: 7 verbatim (title, side rule, tries, the 40 and 80 signal thresholds and the weak-test and no-read lines); 3 rewritten, 3 sentences: the cash booking line (dropped a remark on how live fills priced against the touch), the information-only line (names the live size without a number) and the prior (the live and forward win counts were removed).
+
+Dated line Nov 13, 2026 (Head of R&D ruling on the owner poll, text only): what feeds this tracker today: the skip records OICORE writes when its signal is priced under 8c (needs the deploy time, see the dated DEPLOY_TS line if one has been added). The read waits for its own count (40 settled signals, then 80) and is not brought forward.

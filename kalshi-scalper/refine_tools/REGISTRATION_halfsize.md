@@ -25,3 +25,5 @@ History context: about 410 splits tried, so nothing survives deflation. This is 
 
 
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^; nothing re-decided. 6 markers: 5 verbatim (question and strategy, window, fill basis, report, read point and kill rule), 1 rewritten, 1 sentence: the history context kept only the number of splits tried and dropped the history PF and the bucket result.
+
+Dated line Nov 13, 2026 (Head of R&D ruling on the owner poll, text only): orders that feed this tracker today: OICORE second-slot orders (still being placed as of the Nov 12 nightly review). The read waits for its own count (40 fills in the under-0.10 group) and is not brought forward.

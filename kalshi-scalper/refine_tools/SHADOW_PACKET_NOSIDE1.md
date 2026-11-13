@@ -1,3 +1,5 @@
+CLOSED, NOT BUILT (Nov 13, 2026): the approval NO side was closed as a candidate by the Head of R&D on Nov 12 and its reservation released on Nov 13; this packet drafted a shadow for it and is kept as history only.
+
 # SHADOW PACKET: W-NO-ARM1 (approval and generic ballot NO side). One page. Draft Nov 12, 2026; final by Nov 13 16:00Z. No live account figure.
 
 VERDICT (Nov 12 development read, one line): arm A FAIL (APPR: TRAIN n 63 PF 0.64, VALID n 64 PF 1.91, pooled n 127 PF 1.03 at +1c; ALL pooled n 145 PF 0.91; halves disagree in sign); arm B and GCB no evidence (n under 30). Held-out not read.

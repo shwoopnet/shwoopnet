@@ -27,3 +27,5 @@ Any dollar figure is fill-booked: count * (exitAvg for an early sell, 1 or 0 for
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^; nothing re-decided. 8 markers: 1 verbatim (source), 3 rewritten (cutoffs kept, the row counts and the earlier read removed: lines for the two leads and the forward window), 4 verbatim (statistic, read point shortened to the rule, pass bar, dollar formula). Rewritten sentences: 3 (leads 1 and 2 cutoffs, forward window dropped its trading-status remarks).
 
 Live figures removed on Nov 13, 10 numbers, no rule word changed (lead 1, the earlier read rates).
+
+Dated line Nov 13, 2026 (Head of R&D ruling on the owner poll, text only): orders that feed this tracker today: gold L1 (off since the latch tripped on Nov 12) and Dogecoin L1 (status not confirmed here). With no new orders the read point (20 early sells or 300 fills) may never be reached; the read waits for the count and is not brought forward.

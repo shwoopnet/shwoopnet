@@ -37,3 +37,5 @@ Two registered tests (A at 40, B at 20), one-sided in spirit, no adjustment; M i
 
 
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^; nothing re-decided. 11 markers: 7 verbatim (title, price paid definition, window, cash basis, per group report, decision rule A, decision rule B); 4 rewritten, 4 sentences: the two priors (the live record and simulation figures were removed, only the statement that none is adopted remains) and the two read points (the pace estimate and a reference to another test were dropped; the fill counts 40 and 20 are unchanged).
+
+Dated line Nov 13, 2026 (Head of R&D ruling on the owner poll, text only): orders that feed this tracker today: OICORE second-slot orders (still being placed as of the Nov 12 nightly review). The read waits for its own counts (A at 40 fills, B at 20) and is not brought forward.
