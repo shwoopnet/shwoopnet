@@ -11,25 +11,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 CANDIDATES = [os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md"), os.path.join(HERE, "HELDOUT_PULL_RUNS.md")]
 
 
-def listed_source():
-    """-> (path, sha256 of the exact bytes read) of the list copy the guard uses."""
+def _load():
+    """-> (path, sha256 of the bytes, runs) of the FIRST copy that holds a run row; one function so the printed hash is always that of the list used."""
     for c in CANDIDATES:
         try: raw = open(c, "rb").read()
         except OSError: continue
-        return os.path.normpath(c), hashlib.sha256(raw).hexdigest()
-    raise SystemExit("REFUSED: kalshi-scalper/workers/HELDOUT_PULL_RUNS.md cannot be read, so every run is refused (standing rule (h))")
-
-
-def listed_runs():
-    for c in CANDIDATES:
-        try: text = open(c, encoding="utf-8").read()
-        except OSError: continue
         runs = []
-        for line in text.split("\n"):
+        for line in raw.decode("utf-8", "replace").split("\n"):
             cells = [x.strip().strip("`") for x in line.split("|")]
             if len(cells) > 2 and re.match(r"^[A-Za-z0-9_]+/\d{4}-\d\d-\d\dT\d{4}Z_\d+$", cells[1]): runs.append(cells[1])
-        if runs: return sorted(set(runs))
+        if runs: return os.path.normpath(c), hashlib.sha256(raw).hexdigest(), sorted(set(runs))
     raise SystemExit("REFUSED: kalshi-scalper/workers/HELDOUT_PULL_RUNS.md cannot be read or lists no run, so every run is refused (standing rule (h))")
+
+
+def listed_source():
+    """-> (path, sha256) of the list copy used."""
+    return _load()[:2]
+
+
+def listed_runs(): return _load()[2]
 
 
 def refuse_listed(path):
