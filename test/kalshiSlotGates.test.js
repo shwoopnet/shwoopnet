@@ -55,7 +55,7 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
     entry: { sideRule: 'cheap', priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 },
     exit: { holdToSettle: true }, contractsPerOrder: 10,
     scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true },
-    killRules: { maxConsecutiveLosses: 24, minNet: { afterFills: 40, net: -6 } },
+    killRules: { maxConsecutiveLosses: 24, minNet: { afterFills: 40, net: -50 } },
     forwardReadDate: '2026-11-13', reviewedAt: '2026-10-30',
   });
   const v = slot.validateSlotStrategy(o);

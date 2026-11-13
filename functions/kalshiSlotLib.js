@@ -166,7 +166,7 @@ const SLOT_STRATEGIES = Object.freeze([
     entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 }),
     exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 10,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
-    killRules: Object.freeze({ maxConsecutiveLosses: 24, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 24, minNet: Object.freeze({ afterFills: 40, net: -50 }) }),
     forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",
   }),
   // EVENT830 (Nov 3, 2026, a held, capped live probe; pre-registration kalshi-scalper/README.md#SLOT-EVENT830, research record workers/EVENT830_REGISTRATION.md). On a listed US 8:30 AM ET release day only

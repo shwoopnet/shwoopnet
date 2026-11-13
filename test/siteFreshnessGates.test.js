@@ -129,7 +129,7 @@ gates.SF10 = () => {
   // the registry row says the same line and carries the 10 losses guard in the return rule
   const reg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies.find((x) => x.id === 'L1');
   assert.ok(reg.kill.includes(money(GOLD_KILL.drawdownDollars)) && reg.kill.includes('-' + money(Math.abs(GOLD_KILL.netFloor))), 'the registry kill text carries the constants');
-  assert.ok(/at least 10 losses/.test(reg.return), 'the registry return rule carries the 10 losses guard');
+  assert.ok(/at least 10 losses/.test(reg.goesLive + ' ' + reg.return), 'the registry return rule carries the 10 losses guard');
 };
 
 gates.SF12 = () => {
@@ -155,6 +155,20 @@ gates.SF12 = () => {
   const exitLine = html.slice(html.indexOf('<b>Exit at 25c (fixed, always on).</b>'), html.indexOf('</div>', html.indexOf('<b>Exit at 25c (fixed, always on).</b>')));
   held.forEach((id) => assert.ok(exitLine.includes(id), 'the 25c exit line says ' + id + ' holds to settlement'));
   assert.ok(/closed from Friday 5 PM to Sunday 6 PM Central/.test(text(menu)), 'the Rules text states gold\'s weekend close');
+};
+
+// SF13 (Nov 13, 2026): the page's OICORE net floor must be the library's minNet, so a kill edit cannot leave the page stale.
+gates.SF13 = () => {
+  const slot = require('../functions/kalshiSlotLib.js');
+  const oi = slot.SLOT_STRATEGIES.find((x) => x.id === 'OICORE').killRules.minNet;
+  assert.strictEqual(slot.validateSlotStrategy(slot.SLOT_STRATEGIES.find((x) => x.id === 'OICORE')).ok, true, 'the validator accepts the net floor');
+  const m = /var KAL_BOARD_KILL = \{ OICORE: \{ streak: \d+, afterFills: (\d+), net: (-?\d+(?:\.\d+)?)/.exec(html);
+  assert.ok(m, 'KAL_BOARD_KILL is on the page');
+  assert.strictEqual(Number(m[1]), oi.afterFills); assert.strictEqual(Number(m[2]), oi.net, 'the board kill net equals the library minNet');
+  const floor = '$' + Math.abs(oi.net);
+  assert.ok(html.includes('down more than ' + floor + ' after ' + oi.afterFills + ' trades'), 'the Strategies rule line says ' + floor);
+  const reg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies.find((x) => x.id === 'OICORE');
+  assert.ok(reg.kill.includes('down more than ' + floor + ' after ' + oi.afterFills + ' trades'), 'the registry kill text says ' + floor);
 };
 
 let failed = 0;
