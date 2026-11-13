@@ -93,7 +93,8 @@ def games(spec, list_folders):
             if not btts: counts["no_btts_leg"] += 1
             tts = {}
             for m in by.get((ser["teamtotal"], gk), []):
-                tm = next((c for c in teams if code(m["ticker"]).startswith(c)), None)
+                hits = [c for c in teams if code(m["ticker"]).startswith(c)]          # exactly one team code must prefix the last segment; two (one code the start of the other, e.g. CR and CRU) is not guessed: unreadable (registration: "if their shape cannot be read, unreadable, not guessed")
+                tm = hits[0] if len(hits) == 1 else None
                 if tm is None or m["floor"] is None: counts["teamtotal_unreadable_markets"] += 1; continue
                 tts[m["ticker"]] = (tm, m["floor"])
             winner = sorted(m["ticker"] for m in mk)
