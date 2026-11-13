@@ -13,6 +13,7 @@
 // Nothing stored (Firestore, the page, a request) can add a strategy, change a cap or turn SLOT_ENABLED on. Every number is here.
 
 const bot = require("./kalshiSignalLib");
+const spxoiConfig = require("./kalshiSpxoiConfig");   // SPXOI1_T, the one number not known yet (null = the seat is not registered)
 
 // ---- The master switch and the hard caps. Changing any of these is a reviewed code edit, never a stored value. ----------------------------
 const SLOT_ENABLED = true;                            // phase A: off. Turning it on is its own reviewed pull request, after the wiring phases.
@@ -20,8 +21,10 @@ const SLOT_ENABLED = true;                            // phase A: off. Turning i
 // None of them is an L1 market, so a position there can never sit against an L1 position.
 const EVENT830_SERIES = Object.freeze(["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"]);
 // KXXRP15M (XRPYES10) and KXAUDUSD15M (KESTREL) were added Nov 10, 2026 and removed Nov 11, 2026 with those strategies (the owner retired the favourite-late duplicates). Putting either back is a reviewed edit of this list, the reserved map and SLOT_TICKER_RE.
-const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M"].concat(EVENT830_SERIES));
-const SLOT_SERIES_RESERVED = Object.freeze(EVENT830_SERIES.reduce((o, x) => { o[x] = "EVENT830"; return o; }, {}));
+// KXINX15M (the S&P 500 15 minute market, SPXOI1, Nov 13, 2026) is allowed but RESERVED to SPXOI1 even while that seat is inactive, so no other strategy can ever trade it. It is not an L1 market.
+const SPXOI1_SERIES = "KXINX15M";
+const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M"].concat(EVENT830_SERIES, [SPXOI1_SERIES]));
+const SLOT_SERIES_RESERVED = Object.freeze(Object.assign(EVENT830_SERIES.reduce((o, x) => { o[x] = "EVENT830"; return o; }, {}), { [SPXOI1_SERIES]: "SPXOI1" }));
 const SLOT_MAX_CONTRACTS_PER_ORDER = 10;
 const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold contracts in one ticker, all strategies together
 const SLOT_MAX_SCALE_STEPS = 3;
@@ -101,8 +104,8 @@ const SLOT_EXIT_LEFT_FLOOR_SEC = 45;                   // every exit is before s
 const SLOT_OPEN_STATUSES = Object.freeze(["filled", "sending", "unknown"]);   // the statuses runL1Tick counts as money in a window; ANY order with fills counts too, whatever its status
 const SLOT_WINDOW_SHARE = 0.5;                         // the slot may take at most this share of the shared window cap, so L1 (gold first) is never starved of its room
 const SLOT_L1_RESERVE = 1.05;                          // dollars always left in the window for one more L1 contract (a 97c contract plus its fee)
-const SLOT_LAST_REVIEWED_ON = "2026-11-12";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
-const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M|KXSILVER15M|KXCOPPER15M|KXWTI15M|KXEURUSD15M|KXGBPUSD15M|KXUSDJPY15M|KXHYPE15M|KXBNB15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
+const SLOT_LAST_REVIEWED_ON = "2026-11-13";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
+const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M|KXSILVER15M|KXCOPPER15M|KXWTI15M|KXEURUSD15M|KXGBPUSD15M|KXUSDJPY15M|KXHYPE15M|KXBNB15M|KXINX15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
 const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to kalshiLiveLib.L1_WINDOW_CAP_FRACTION; the caller passes the live one
 
 // ---- Release calendars (Nov 3, 2026, EVENT830). A strategy whose entry names a calendar may enter ONLY the window that closes at one of these instants. Frozen in code, append only by a reviewed edit
@@ -160,7 +163,7 @@ function slotCalendarSeriesDue(strategies, now) {
 // Buys the CHEAPER side (5c to 50c) in the 180 to 120 s before the close when open interest rose by 86,300 contracts or more over the 3 minutes to the candle ending 180 s before the close, and holds to settlement
 // (the one reviewed hold exception, SLOT_HOLD_ALLOWED). 5 contracts an order for the first 15 filled trades, then a reviewed edit to 10. Win rate is about 28%, so a losing streak is NORMAL: the streak kill is 18 (a streak of 5
 // would end it by chance within days); the real brakes are the net floor below and the slot's dollar caps (lifetime 6% of the sizing base, at most $60), which end it with no loss rule needed.
-const SLOT_STRATEGIES = Object.freeze([
+const SLOT_STRATEGIES_BASE = Object.freeze([
   Object.freeze({
     id: "OICORE", readme: "kalshi-scalper/README.md#SLOT-OICORE", series: Object.freeze(["KXBTC15M"]),
     entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 }),
@@ -202,6 +205,46 @@ const SLOT_STRATEGIES = Object.freeze([
   // FLOW1 (seller-flow probe, live Nov 4, 2026) was REMOVED the same day after the research session's FLOW1 history test (2,568 windows, low-flow PF 1.13 to 1.23, low minus high -3.6c,
   // p 0.49) and the refinement chat's second out-of-sample block both found no reliable edge. The flowMax entry field and flowFromTrades stay in code; a re-admission is a reviewed edit.
 ]);
+// SPXOI1 (Nov 13, 2026, an owner-approved TRIAL seat, below the research bar, no evidence of an edge; pre-registration kalshi-scalper/README.md#SLOT-SPXOI1). The S&P 500 15 minute market (KXINX15M, weekdays about
+// 15:00Z to 21:00Z, exchange shard 0) only. OICORE's shape on a different underlying: decide 120 to 180 s before the close; the open interest rise (the candle ending 180 s before the close minus the one ending 360 s before it,
+// a missing candle means no order) must be at or above SPXOI1_T; buy the side with the LOWER ask (a tie goes YES, slotCheapSide) if that ask is 8c to 50c; the limit is the ask (no slip); 3 contracts; hold to settlement.
+// Per order at most $3 and its own daily loss cap $9 (SLOT_SEAT_CAPS). Kill: net below -$18 after 5 settled fills, or 30 losses in a row (the validator's most). Scale-in is off (one step).
+// SPXOI1_T is NOT KNOWN YET (the 90th percentile over Nov 5 to Nov 13, from the candles the manual data pull jobs fetch, checked by Auditor B). While it is null the entry below is not built and the seat is not in the registry,
+// so nothing can be sent for it and no other seat is affected. A value that makes the entry fail validation also leaves it out (gate SX2 fails then), rather than invalidating the whole registry.
+const spxoiThreshold = () => spxoiConfig.SPXOI1_T;
+function spxoiEntry(T = spxoiThreshold()) {   // the argument exists for tests only (an invented value); production calls it with none, so only the config file's number is ever used
+  if (!(typeof T === "number" && Number.isFinite(T) && T > 0)) return null;
+  return Object.freeze({
+    id: "SPXOI1", readme: "kalshi-scalper/README.md#SLOT-SPXOI1", series: Object.freeze([SPXOI1_SERIES]),
+    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.08, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: T }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 3,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 30, minNet: Object.freeze({ afterFills: 5, net: -18 }) }),
+    forwardReadDate: "2026-12-01", reviewedAt: "2026-11-13",
+  });
+}
+const SPXOI1_ENTRY = spxoiEntry();
+// Own caps per seat (Nov 13, 2026): a seat listed here may send at most perOrder dollars in one order and lose at most daily dollars in 24 hours, whatever the base-scaled caps allow. They can only LOWER a cap, never raise one.
+const SLOT_SEAT_CAPS = Object.freeze({ SPXOI1: Object.freeze({ perOrder: 3, daily: 9 }) });
+// A tie between the two sides' prices goes to YES for these seats (SPXOI1's registered rule); every other "cheap" seat keeps the older reading, where a tie goes to NO.
+const SLOT_TIE_YES = Object.freeze(["SPXOI1"]);
+const slotCheapSide = (strategyId, yesPrice, noPrice) => (SLOT_TIE_YES.includes(strategyId) ? (yesPrice <= noPrice ? "yes" : "no") : (yesPrice < noPrice ? "yes" : "no"));
+// Weekday market hours for a seat whose market is not open around the clock (UTC minutes since midnight, Monday to Friday). It only decides when the minute function reads that market's quotes; the entry window,
+// the quote and the gate decide everything else. 15:00Z to 21:00Z is a registration fact for KXINX15M; a window outside it simply is not read.
+const SLOT_SESSION_HOURS = Object.freeze({ SPXOI1: Object.freeze({ startUtcMin: 15 * 60, endUtcMin: 21 * 60 }) });
+function slotSessionSeriesDue(strategies, now) {
+  const out = [];
+  if (!isNum(now)) return out;
+  const dow = (Math.floor(now / 86400000) + 4) % 7, minOfDay = Math.floor((((now % 86400000) + 86400000) % 86400000) / 60000);   // UTC weekday (0 = Sunday; 1970-01-01 was a Thursday) and minutes since UTC midnight, with no Date object (this module has no clock)
+  const left = 900 - (Math.floor(now / 1000) % 900);     // seconds to the next quarter hour close
+  for (const s of strategies || []) {
+    const h = s && Object.prototype.hasOwnProperty.call(SLOT_SESSION_HOURS, s.id) ? SLOT_SESSION_HOURS[s.id] : null;
+    if (!h || !s.entry) continue;
+    if (dow < 1 || dow > 5 || minOfDay < h.startUtcMin || minOfDay > h.endUtcMin) continue;
+    if (left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec + SLOT_CALENDAR_LEAD_MS / 1000) for (const x of s.series) if (!out.includes(x)) out.push(x);
+  }
+  return out;
+}
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
 // Optional (Oct 30, 2026, the open interest core): the open interest on the market must have risen by at least this many contracts over the 3 minutes to the signal candle, or no order. Absent means no such condition.
@@ -217,7 +260,7 @@ const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
 // the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
-const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "CFRTIK"]);   // XRPYES10 and KESTREL left this list Nov 11, 2026 with their retirement   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "CFRTIK", "SPXOI1"]);   // XRPYES10 and KESTREL left this list Nov 11, 2026 with their retirement   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];
@@ -280,6 +323,10 @@ function validateSlotStrategy(s) {
   else if (s.reviewedAt > SLOT_LAST_REVIEWED_ON) e.push("reviewedAt must not be after " + SLOT_LAST_REVIEWED_ON + " (a future date would blind the kill rules)");
   return { ok: e.length === 0, errors: e };
 }
+
+// The registry the rest of the module reads. It is built here, after the validator exists: the trial seat joins only when its threshold is set AND its entry passes validation (a failing entry is left out on its own, never
+// allowed to invalidate the other seats; gate SX2 fails if a set threshold ever produces a seat that is not registered).
+const SLOT_STRATEGIES = Object.freeze(SLOT_STRATEGIES_BASE.concat(SPXOI1_ENTRY && validateSlotStrategy(SPXOI1_ENTRY).ok ? [SPXOI1_ENTRY] : []));
 
 // The strategies that may act. Fails closed three ways: the switch is off, any entry is invalid (the whole registry is refused, so a typo
 // cannot quietly drop one guard and keep the rest), or an id repeats.
@@ -595,6 +642,9 @@ function slotOrderCheckWith(flags, input) {
   const regIds = new Set(activeSlotStrategiesWith(flags).map((x) => x.id));
   const own = slotRiskContract(i.slotOrders.filter((t) => isSlotOrder(t) && (t.slotId === strategy.id || !regIds.has(t.slotId))), i.now);
   const caps = slotCaps(i.sizingBase);
+  // A seat's own caps (SLOT_SEAT_CAPS) can only lower the base-scaled ones.
+  const seatCaps = Object.prototype.hasOwnProperty.call(SLOT_SEAT_CAPS, strategy.id) ? SLOT_SEAT_CAPS[strategy.id] : null;
+  if (seatCaps) for (const k of Object.keys(seatCaps)) if (isNum(seatCaps[k]) && seatCaps[k] >= 0) caps[k] = Math.min(caps[k], seatCaps[k]);
   // A laddered strategy (SLOT_LADDERS) has caps that grow with its contract count: a daily loss cap and a drawdown stop from its own peak, in place of the base-scaled daily and lifetime caps.
   const lad = slotLadderState(strategy, i.slotOrders, i.sizingBase);
   if (lad.laddered) caps.daily = lad.dailyCap;
@@ -701,6 +751,7 @@ module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord, accountOrder,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
   SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor, SLOT_SKIP_BELOW, SLOT_SKIP_BELOW_MAX, slotSkipsPrice,
+  SPXOI1_SERIES, SPXOI1_ENTRY, spxoiEntry, SLOT_SEAT_CAPS, SLOT_TIE_YES, slotCheapSide, SLOT_SESSION_HOURS, slotSessionSeriesDue,
   EVENT830_SERIES, SLOT_SERIES_RESERVED, SLOT_CALENDARS, slotCalendarRow, slotCalendarSeriesDue, SLOT_CALENDAR_LEAD_MS,
   SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,

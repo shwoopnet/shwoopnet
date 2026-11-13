@@ -233,7 +233,7 @@ function makeRunners(flags) {
         const dn = (x) => (typeof x === "number" && Number.isFinite(x) ? Number(x.toFixed(4)) : undefined);
         if (!refDec.trade) { skip(job, "cfrti_" + refDec.reason.replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), { edge: dn(refDec.edge), price: dn(refDec.sidePrice), nChanges: dn(refDec.nChanges) }, refDec.side); results.push(ticker + ": CFRTI-K no order (" + refDec.reason + ")"); continue; }
       }
-      const side = refDec ? refDec.side : s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? (yesPrice < noPrice ? "yes" : "no") : s.entry.sideRule;
+      const side = refDec ? refDec.side : s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? slotLib.slotCheapSide(s.id, yesPrice, noPrice) : s.entry.sideRule;
       const sidePrice = side === "yes" ? yesPrice : noPrice;
       if (!refDec && sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { skip(job, "price_out_of_band", { price: sidePrice, min: s.entry.priceMin, max: s.entry.priceMax }, side); results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
       // The limit may sit a reviewed amount above the side's touch (SLOT_LIMIT_SLIP, OICORE 1c), never past the band; the band test above is on the quoted price.

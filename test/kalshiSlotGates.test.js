@@ -45,7 +45,7 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.strictEqual(slot.SLOT_EVER_USED, true, 'once admitted, watching is never set back');
   assert.strictEqual(slot.slotActive(), true);
   assert.strictEqual(slot.slotWatch(), true);
-  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-12');
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-13');   // moved with the SPXOI1 seat
   assert.ok(Object.isFrozen(slot.SLOT_STRATEGIES));
   assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'exactly three strategies are admitted (CFRTIK added Nov 12, 2026; FLOW1 removed Nov 4, 2026; XRPYES10 and KESTREL removed Nov 11, 2026)');
   const o = slot.SLOT_STRATEGIES[0];
@@ -64,7 +64,7 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.ok(o.contractsPerOrder <= slot.SLOT_MAX_CONTRACTS_PER_ORDER, 'never above the per-order ceiling');
   assert.strictEqual(o.exit.holdToSettle, true);
   assert.ok(slot.SLOT_HOLD_ALLOWED.includes(o.id), 'holding to settlement is only for reviewed ids');
-  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830', 'CFRTIK']);
+  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1']);
   assert.ok(o.scaleIn.maxSteps * o.contractsPerOrder <= slot.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, 'all steps together fit the open contracts ceiling');
   assert.ok(o.reviewedAt <= slot.SLOT_LAST_REVIEWED_ON, 'reviewedAt is not after the last reviewed date');
   assert.ok(o.series.every((x) => slot.SLOT_SERIES_ALLOWED.includes(x)));
@@ -84,7 +84,9 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.ok(prereg.includes('SLOT-OICORE') && /SLOT_STRATEGIES/.test(prereg), 'the registered readme anchor exists in the pre-registration file');
   const c = code(libSrc);
   assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(|process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b|https?:|child_process|\bfs\b/.test(c), 'the library must have no network, store, clock, environment, randomness, timer or signing code');
-  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"']);
+  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSpxoiConfig"']);   // the second is SPXOI1's threshold file (Nov 13, 2026): frozen pure data, checked next
+  const cfgSrc = code(fs.readFileSync(path.join(root, 'functions', 'kalshiSpxoiConfig.js'), 'utf8'));
+  assert.ok(!/require\(|import|fetch|Date|process\.|fs\b|http/.test(cfgSrc), 'the threshold file is pure data: no import, network, clock or environment');
 };
 gates['a switch on alone does nothing: the switch needs a valid registered strategy, and a stored value cannot add one'] = () => {
   // Admitted state: the production switch is on, so the "switch alone" property is proved through the injected-flags path, which is how the gate always proved it.
@@ -263,8 +265,8 @@ gates['the mirrored constants and the settlement rule stay equal to the live one
   const reserved = Object.keys(slot.SLOT_SERIES_RESERVED);
   assert.ok(slot.SLOT_SERIES_ALLOWED.filter((s) => !reserved.includes(s)).every((s) => live.L1_SERIES.includes(s)));
   assert.ok(reserved.every((s) => !live.L1_SERIES.includes(s)), 'no reserved market is an L1 market');
-  assert.deepStrictEqual(slot.SLOT_SERIES_ALLOWED, ['KXBTC15M', 'KXETH15M', 'KXGOLD15M', 'KXSILVER15M', 'KXCOPPER15M', 'KXWTI15M', 'KXEURUSD15M', 'KXGBPUSD15M', 'KXUSDJPY15M', 'KXHYPE15M', 'KXBNB15M']);
-  assert.deepStrictEqual(reserved.map((s) => slot.SLOT_SERIES_RESERVED[s]), reserved.map(() => 'EVENT830'), 'reserved for EVENT830 (its eight) only; XRP and AUD/USD left the lists with XRPYES10 and KESTREL on Nov 11, 2026');
+  assert.deepStrictEqual(slot.SLOT_SERIES_ALLOWED, ['KXBTC15M', 'KXETH15M', 'KXGOLD15M', 'KXSILVER15M', 'KXCOPPER15M', 'KXWTI15M', 'KXEURUSD15M', 'KXGBPUSD15M', 'KXUSDJPY15M', 'KXHYPE15M', 'KXBNB15M', 'KXINX15M']);
+  assert.deepStrictEqual(reserved.map((s) => slot.SLOT_SERIES_RESERVED[s]), reserved.map((s) => (s === 'KXINX15M' ? 'SPXOI1' : 'EVENT830')), 'reserved for EVENT830 (its eight) and SPXOI1 (the S&P 500 market, Nov 13, 2026) only; XRP and AUD/USD left the lists with XRPYES10 and KESTREL on Nov 11, 2026');
 };
 gates['the L1 exit watch and settle sweep still read only L1 orders, and the live library has not been edited to know about the slot'] = () => {
   const live_src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');

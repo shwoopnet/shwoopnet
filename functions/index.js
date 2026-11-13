@@ -685,10 +685,11 @@ exports.kalshiLiveArmed = onSchedule(
         // Slot only: right after L1, in the same minute function, on the figures L1 just worked out. It cannot fail the tick (the error is logged) and does nothing if L1 ended the session.
         if (SLOT_ON) {
           // A calendar strategy's markets (EVENT830's eight, none of them L1's) are read ONLY in the minute or two before a listed release window can enter (slotCalendarSeriesDue), and only for the slot:
+          // SPXOI1 (Nov 13, 2026) trades the S&P 500 15 minute market, which L1 does not read: its series joins the same list only in the minute or two before its entry span on a weekday session (slotSessionSeriesDue), and only while the seat is registered.
           // they go into a copy of the list, never into what runL1Tick read. On every other minute this adds no read. One series failing is skipped, never allowed to stop the rest.
           let slotQuotes = market.quotes;
           try {
-            const due = slotLib.slotCalendarSeriesDue(slotLib.activeSlotStrategies(), now).filter((x, i, a) => a.indexOf(x) === i).filter((x) => !market.quotes.some((q) => q && q.series === x));
+            const due = slotLib.slotCalendarSeriesDue(slotLib.activeSlotStrategies(), now).concat(slotLib.slotSessionSeriesDue(slotLib.activeSlotStrategies(), now)).filter((x, i, a) => a.indexOf(x) === i).filter((x) => !market.quotes.some((q) => q && q.series === x));
             if (due.length) {
               slotQuotes = market.quotes.slice();
               for (const series of due) {

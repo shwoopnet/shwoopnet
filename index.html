@@ -1870,6 +1870,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Trading, built but switched off until a number is known: a trial seat in the second strategy slot for the S&amp;P 500 15 minute market (SPXOI1, the owner approved it as a trial below the research bar, with no evidence of an edge). It would buy the cheaper side at 8c to 50c when open interest rose enough in the minutes before the close, 3 contracts, held to the close, with its own limits of $3 an order and $9 lost a day. The open interest line is not known yet (it comes from the Nov 5 to Nov 13 candles), so the seat is not registered and nothing can be sent for it. Nothing else in the bot changed.</li>
                   <li>Research: two kalshi-pull jobs for the S&amp;P 500 15 minute market (KXINX15M) were added, one list request and 143 candle requests over Nov 5 to Nov 13. Nothing has been run and nothing in the bot changed.</li>
                   <li>Trading logs: the shadow logger (no orders) shares its reads (one candle read and one second look per market however many rules need it, one settle read per market), takes its allowed markets from a reviewed list, and logs exactly what it logged before with the one rule it has.</li>
                   <li>Trading, behind the scenes (not live, nothing wired): the risk core rules written as a pure library with tests, so a growing set of strategies has one set of account and seat limits to be checked against before anything uses them.</li>
@@ -4216,6 +4217,7 @@ kalshiStatusTick();
     OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' },
     EVENT830: { name: 'Release day longshot', markets: 'Silver, Copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE, BNB', note: '' },
     CFRTIK: { name: 'Perp-model longshot', markets: 'Bitcoin', note: '' },   // CFRTI-K, a Trial strategy (Nov 12, 2026)
+    SPXOI1: { name: 'S&P 500 open interest jump (trial)', markets: 'S&P 500', note: '' },   // SPXOI1, a Trial strategy (Nov 13, 2026); NOT in KAL_SLOT_REGISTERED until its threshold is set and the seat is registered in the bot (gate SX9)
     XRPYES10: { name: 'XRP yes at 10 minutes (retired)', markets: 'XRP', note: '' },   // XRPYES10 and KESTREL were retired Nov 11, 2026 (duplicates of gold L1); a past or still open order keeps its label, like FLOW1
     KESTREL: { name: 'AUD/USD favourite at 6 minutes (retired)', markets: 'AUD/USD', note: '' },
     FLOW1: { name: 'Seller flow (removed)', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
