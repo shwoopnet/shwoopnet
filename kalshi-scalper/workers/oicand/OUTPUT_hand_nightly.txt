@@ -1,3 +1,5 @@
 day 2026-11-17 | requests 2 | tickers 3 | job_id OICAND_NIGHTLY_20261117
 day 2026-11-16 | requests 2 | tickers 4 | job_id OICAND_NIGHTLY_20261116
-REFUSED: day 2026-11-13 is outside 2026-11-14 to 2027-03-06 (forward days only; Eastern is taken as EST)
+REFUSED: day 2026-11-13 is outside 2026-11-14 to 2027-03-13 (forward days only; Eastern is taken as EST)
+day 2027-03-13 | requests 0 | tickers 0 | job_id OICAND_NIGHTLY_20270313
+REFUSED: day 2027-03-14 is outside 2026-11-14 to 2027-03-13 (forward days only; Eastern is taken as EST)

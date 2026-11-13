@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Nightly OI candle job for the 13 OICORE shadow places (Desk A's twelve at 29dd035e plus Ethereum), written by Desk B. Usage: oi_nightly_job.py <UTC day YYYY-MM-DD> <hours table json> <out job json>.
 One batched candlesticks request per close of that UTC day (00:00Z to 23:45Z), period 1, start_ts = close - 420 s, end_ts = close - 120 s, open interest kept. Tickers are built from the close
-time in Eastern (EST, UTC-5, valid 2026-11-02 to 2027-03-06) and a series is asked at a close only if the hours table (weekday of the close's UTC date, HH:MM) lists it, so no ticker that does not
+time in Eastern (EST, UTC-5, valid 2026-11-02 to 2027-03-13; DST starts 2027-03-14) and a series is asked at a close only if the hours table (weekday of the close's UTC date, HH:MM) lists it, so no ticker that does not
 exist is asked. EVENT830's 8 series skip the 13:30Z close on EVENT830's calendar dates. Forward days only: before 2026-11-14 it refuses. Reads no Kalshi data. Standard library only."""
 import json, os, sys
 from datetime import datetime, timedelta, timezone
@@ -9,7 +9,7 @@ from datetime import datetime, timedelta, timezone
 SERIES = ["KXXRP15M", "KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M", "KXETH15M"]
 EV830 = {"KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"}
 REL = {"2026-11-05", "2026-11-06", "2026-11-10", "2026-11-12", "2026-11-13", "2026-11-17", "2026-11-19", "2026-11-25", "2026-12-03", "2026-12-04", "2026-12-10", "2026-12-15", "2026-12-16", "2026-12-17", "2026-12-23"}
-FIRST_DAY, LAST_EST_DAY = "2026-11-14", "2027-03-06"
+FIRST_DAY, LAST_EST_DAY = "2026-11-14", "2027-03-13"
 MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
 U = timezone.utc
 
