@@ -39,18 +39,18 @@ CATALOG = [
           "Bitcoin 15 minute: the Kalshi-only cheap side with a model edge from the Bitcoin perpetual; replay of the R6 books plus public candles", r'CFRTI-K on Bitcoin',
           counting='cfrti', basis="Replay of the R6 books; the count is read from the private log, not stored here"),
     *[wheel('WH-CFRTIK-' + k, 'Perp-model longshot, wheel place (%s)' % n,
-            "%s 15 minute: the CFRTI-K model edge, listed and admitted when the perps archive carries its ticker" % n, r'five further CFRTI-K places', counting='waiting',
-            wait="Listed; admitted when the nightly perps archive carries its ticker", basis="Replay of recorded books; the count is read from the private log, not stored here")
+            "%s 15 minute: the CFRTI-K model edge, listed; admission waits on the perps archive files" % n, r'five further CFRTI-K places', counting='waiting',
+            wait="Listed; the nightly perps archive takes this perpetual from Nov 12, 2026 (PR 861); admission is the Head of R&D's call once its first files land", basis="Replay of recorded books; the count is read from the private log, not stored here")
       for k, n in (('SILVER', 'Silver'), ('COPPER', 'Copper'), ('WTI', 'WTI oil'), ('HYPE', 'HYPE'), ('BNB', 'BNB'))],
     *[wheel('WH-NC15-' + k, 'Depth cell, wheel place (%s)' % n, NC15_RULE, r'silver, copper, WTI, HYPE, BNB, USD/CAD', counting='batch2', basis=NC15_BASIS,
             extra=("Marginal: re-counted once on 2026-11-19, withdrawn if under 60 fill-checked signals per 21 days" if k in ('SILVER', 'USDCAD') else None))
       for k, n in (('SILVER', 'silver'), ('COPPER', 'copper'), ('WTI', 'WTI oil'), ('HYPE', 'HYPE'), ('BNB', 'BNB'), ('USDCAD', 'USD/CAD'), ('NATGAS', 'natural gas'))],
-    *[wheel('WH-IPJ-' + k, 'In-play jump, wheel place (%s)' % n, "Follow an in-play price jump (the jump rule registered by Desk B), %s" % n, r'INPLAYJUMP', counting='waiting',
-            wait="Listed; waiting for the wheel book recorder's fault fix and frozen forward definitions", basis="Public wheel book recorder; the count is read from the private log, not stored here")
+    *[wheel('WH-IPJ-' + k, 'In-play jump, wheel place (%s)' % n, "Follow an in-play price jump (the jump rule registered by Desk B), %s" % n, r'Every sports and esports place is withdrawn', retire=True,
+            date='2026-11-13', cause='failed the bar', reason="Withdrawn Nov 13: every sports and esports place is withdrawn (INPLAYJUMP's families closed or falsified; the Head of R&D's admit list)", ret=NEVER)
       for k, n in (('ESOCCER', 'e-soccer'), ('TT', 'table tennis'), ('EBASKET', 'e-basketball'), ('ITF', 'ITF tennis'), ('CHALL', 'challenger tennis'))],
     wheel('WH-ESOCTIE', 'E-soccer tie against base rate, wheel place', "E-soccer: the listed Tie bought pre-match when a walk-forward base rate beats its ask by 10c or more at a spread of 4c or less",
-          r'ESOCTIE', counting='waiting', wait="Listed; no log source yet (waiting for the wheel book recorder and frozen forward definitions)",
-          basis="Public wheel book recorder; the count is read from the private log, not stored here"),
+          r'Every sports and esports place is withdrawn', retire=True, date='2026-11-13', cause='failed the bar',
+          reason="Withdrawn Nov 13: every sports and esports place is withdrawn (ESOCTIE closed or falsified; the Head of R&D's admit list)", ret=NEVER),
     *[wheel('WH-NC15-' + k, 'Depth cell, wheel place (%s)' % n, NC15_RULE, r'EUR/USD 13, GBP/USD 0', retire=True, date='2026-11-13', cause='failed the bar',
             reason="Withdrawn Nov 13: Desk A's count of fill-checked signals per 21 days is far under the 60 a block needs", ret=NEVER)
       for k, n in (('EURUSD', 'EUR/USD'), ('GBPUSD', 'GBP/USD'), ('USDJPY', 'USD/JPY'), ('AUDUSD', 'AUD/USD'))],
@@ -94,7 +94,7 @@ def ct_text(stamp):
     return d.strftime('%B ') + str(d.day) + ' at ' + str(int(d.strftime('%I'))) + d.strftime(':%M %p') + ' CT'
 
 
-def build(spec, text, batch):
+def build(spec, text, batch, start=None):
     if spec['marker'] and not re.search(spec['marker'], text[spec['src']]):
         sys.exit('sync_registry: %s no longer found in %s; not writing (fail closed)' % (spec['marker'], SRC[spec['src']]))
     row = {k: None for k in KEYS}
@@ -107,12 +107,13 @@ def build(spec, text, batch):
     row['notes'] = [spec['extra']] if spec.get('extra') else []
     c = spec['counting']
     if c in ('batch2', 'cfrti') and batch:
-        stamp = batch
+        # The NC15 places count from the START TIME line of the admit list when there is one (it was moved twice after the batch 2 admission, Nov 13, 2026), else from the admission.
+        stamp = (start or batch) if c == 'batch2' else batch
         row['startDate'] = stamp[:10]
         if c == 'batch2':
-            row['nextReadText'] = "Counting since %s (the auditor's 'closed' on the frozen definition sheet); n is read from the private log, not stored here" % ct_text(stamp)
+            row['nextReadText'] = "Counting since %s (the start time in the Head of R&D's admit list); n is read from the private log, not stored here" % ct_text(stamp)
         else:
-            row['nextReadText'] = "Admitted %s but mute: it logs 'no signal: no mark' until the nightly archive carries its perpetual, so no signal counts yet" % ct_text(stamp)
+            row['nextReadText'] = "Admitted %s but mute: it logs 'no signal: no mark' until the first nightly archive files with the Bitcoin perpetual land (the archive takes it from Nov 12, 2026), so no signal counts yet" % ct_text(stamp)
     elif c in ('batch2', 'cfrti'):
         row['nextReadText'] = "Admitted; start time to confirm with the Head of R&D"
         row['notes'].append("to confirm with the Head of R&D: the admit time was not found in the list")
@@ -130,10 +131,12 @@ def main():
     text = {k: git_show(a.ref, v) for k, v in SRC.items()}
     m = re.search(r'ADMITTED, BATCH 2, dated (\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)', text['admit'])
     batch = m.group(1) if m else None
+    ms = re.search(r'START TIME OF THE FORWARD COUNT for the 7 NC15 depth-cell places[^:]*:\s*(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)', text['admit'])
+    start = ms.group(1) if ms else None
     old = open(a.registry, encoding='utf-8').read()
     reg = json.loads(old)
     hand = [x for x in reg['strategies'] if not x['id'].startswith(MANAGED)]
-    reg['strategies'] = hand + [build(s, text, batch) for s in CATALOG]
+    reg['strategies'] = hand + [build(s, text, batch, start) for s in CATALOG]
     ids = [x['id'] for x in reg['strategies']]
     if len(ids) != len(set(ids)):
         sys.exit('sync_registry: duplicate id')

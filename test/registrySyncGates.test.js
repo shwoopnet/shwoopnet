@@ -17,7 +17,7 @@ function scratch(admitExtra) {
   const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'regsync-'));
   const sh = (...a) => execFileSync('git', a, { cwd: dir, stdio: 'pipe' });
   sh('init', '-q'); sh('config', 'user.email', 'a@b.c'); sh('config', 'user.name', 'x');
-  const admit = 'CFRTI-K on Bitcoin. silver, copper, WTI, HYPE, BNB, USD/CAD. five further CFRTI-K places. INPLAYJUMP ESOCTIE. EUR/USD 13, GBP/USD 0. WITHDRAWN Nov 13 00:48Z REMATCH closed at stage 1\n**ADMITTED, BATCH 2, dated 2026-11-13T00:23:49Z (recorded 00:24Z).**\n' + (admitExtra || '');
+  const admit = 'CFRTI-K on Bitcoin. silver, copper, WTI, HYPE, BNB, USD/CAD. five further CFRTI-K places. INPLAYJUMP ESOCTIE. Every sports and esports place is withdrawn. EUR/USD 13, GBP/USD 0. WITHDRAWN Nov 13 00:48Z REMATCH closed at stage 1\n**ADMITTED, BATCH 2, dated 2026-11-13T00:23:49Z (recorded 00:24Z).**\n' + (admitExtra || '');
   fs.writeFileSync(path.join(dir, 'WHEEL_ADMIT_LIST.md'), admit);
   fs.writeFileSync(path.join(dir, 'RND_QUEUE.md'), 'PERPBIN1: FALSIFIED on development\nS2 long leg (stocks)\nPOL-i2: CLOSED on cost\nPROPUNDER\nPREMOVE WITHDRAWN UNREAD\nPREDRIFT\n');
   sh('add', '.'); sh('commit', '-q', '-m', 'q'); sh('branch', '-M', 'rnd-queue');
@@ -30,8 +30,8 @@ gates.RS1 = () => {
   const out = execFileSync('node', [path.join(__dirname, 'strategyRegistryGates.test.js')], { encoding: 'utf8' });
   assert.ok(!/FAIL/.test(out));
   const wh = reg.strategies.filter((x) => x.id.startsWith('WH-'));
-  assert.strictEqual(wh.filter((x) => x.stage === 'Shadow').length, 19 - 0, 'the 19 admitted wheel places are Shadow rows');
-  assert.ok(wh.filter((x) => x.stage === 'Retired').length === 4, 'the four withdrawn forex places are Retired');
+  assert.strictEqual(wh.filter((x) => x.stage === 'Shadow').length, 13, 'the 13 standing wheel places are Shadow rows (7 NC15, CFRTI-K on Bitcoin, 5 more CFRTI-K; every sports and esports place was withdrawn Nov 13)');
+  assert.ok(wh.filter((x) => x.stage === 'Retired').length === 10, 'the four withdrawn forex places and the six withdrawn sports and esports places are Retired');
   for (const id of ['CL-MAPBREAK', 'CL-REMATCH', 'CL-TIE3', 'CL-WXDAYEND']) { const x = reg.strategies.find((y) => y.id === id); assert.ok(x && x.stage === 'Retired' && x.cause === 'failed the bar', id + ' is Retired (failed the bar)'); }
   assert.ok(!/PENDING RECOUNT/i.test(JSON.stringify(reg)), 'MAPBREAK is closed, never pending');
 };
@@ -48,7 +48,16 @@ gates.RS2 = () => {
   assert.deepStrictEqual(out.strategies.find((x) => x.id === 'L1').notes, ['HAND NOTE'], 'a hand note survives');
   assert.deepStrictEqual(out.strategies.filter((x) => HAND.includes(x.id)).map((x) => x.id), HAND.filter((i) => out.strategies.some((x) => x.id === i)), 'hand rows keep their order and content');
   assert.ok(out.strategies.every((x) => HAND.includes(x.id) || /^(WH|CL)-/.test(x.id)), 'only WH- and CL- rows are generated');
-  assert.ok(/6:23 PM CT/.test(out.strategies.find((x) => x.id === 'WH-NC15-WTI').nextReadText), 'the counting start comes from the list, in Central time');
+  assert.ok(/6:23 PM CT/.test(out.strategies.find((x) => x.id === 'WH-NC15-WTI').nextReadText), 'with no START TIME line the counting start is the batch 2 admission, in Central time');
+  // With the START TIME line (it moved twice after the admission) the NC15 places count from it.
+  const s2 = scratch();
+  fs.appendFileSync(path.join(s2.dir, 'WHEEL_ADMIT_LIST.md'), '\n**START TIME OF THE FORWARD COUNT for the 7 NC15 depth-cell places (silver): 2026-11-13T02:40:00Z** (written 02:39Z)\n');
+  execFileSync('git', ['commit', '-qam', 'q3'], { cwd: s2.dir });
+  fs.writeFileSync(s2.regPath, JSON.stringify({ asOf: 'x', note: 'n', stages: reg.stages, strategies: [] }) + '\n');
+  s2.run();
+  const o2 = JSON.parse(fs.readFileSync(s2.regPath, 'utf8'));
+  assert.ok(/8:40 PM CT/.test(o2.strategies.find((x) => x.id === 'WH-NC15-WTI').nextReadText), 'the NC15 start comes from the START TIME line');
+  assert.ok(/6:23 PM CT/.test(o2.strategies.find((x) => x.id === 'WH-CFRTIK-BTC').nextReadText), 'CFRTI-K on Bitcoin keeps its admission time');
 };
 
 gates.RS3 = () => {

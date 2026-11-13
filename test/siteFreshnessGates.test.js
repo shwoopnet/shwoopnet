@@ -116,6 +116,17 @@ gates.SF8 = () => {
   const heads = [...html.matchAll(/<div class="changelog-day">(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})<\/div>/g)].map((m) => MON[m[1]] * 100 + Number(m[2]));
   for (let i = 1; i < heads.length; i++) assert.ok(heads[i] <= heads[i - 1], 'changelog days run newest first');
 };
+// SF10 (stale-items audit, Nov 13, 2026): the Rules text named the gold kill line as "6% of the balance base" after the code made it a fixed dollar line, and said every position is sold at 25c while the second-slot strategies hold to settlement.
+gates.SF10 = () => {
+  const gk = require('../functions/kalshiGoldKillLib.js').GOLD_KILL, slot = require('../functions/kalshiSlotLib.js');
+  const t = text(menu);
+  assert.ok(t.includes('$' + gk.drawdownDollars + ' below its own cash peak'), 'the Rules text names the gold kill line in dollars, as in GOLD_KILL.drawdownDollars');
+  assert.ok(t.includes('down $' + Math.abs(gk.netFloor) + ' after ' + gk.netAfterTrades + ' trades'), 'the net floor and its trade count match GOLD_KILL');
+  assert.ok(!/% of the balance base below its own peak/.test(t), 'no percentage wording for the gold kill line');
+  const held = slot.SLOT_STRATEGIES.filter((x) => x.exit && x.exit.holdToSettle === true).map((x) => x.id);
+  const exitLine = html.slice(html.indexOf('<b>Exit at 25c (fixed, always on).</b>'), html.indexOf('</div>', html.indexOf('<b>Exit at 25c (fixed, always on).</b>')));
+  held.forEach((id) => assert.ok(exitLine.includes(id), 'the 25c exit line says ' + id + ' holds to settlement'));
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
