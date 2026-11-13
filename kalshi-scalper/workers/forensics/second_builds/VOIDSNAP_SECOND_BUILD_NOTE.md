@@ -1,6 +1,6 @@
 # VOIDSNAP stage 1: independent second build (Forensics desk)
 
-**Written Nov 13, 2026, about 01:55Z, on the Head of R&D's order (VOIDSNAP first, then POLGAPH).** Built from Desk B's card with Amendments 1 and 2 alone
+**Written Nov 13, 2026, about 01:27Z, on the Head of R&D's order (VOIDSNAP first, then POLGAPH).** Built from Desk B's card with Amendments 1 and 2 alone
 (`claude/idea-desk-b` at `a0cdeebe`, `kalshi-scalper/workers/voidsnap/VOIDSNAP_CARD.md`, sha256 `da37859d...`). Desk B's `voidsnap.py` was not read.
 No candle of any of these markets has been requested or read by anyone. No Kalshi request was made for this build. It is a hindsight measurement, not a rule.
 

@@ -1,6 +1,6 @@
 # POLGAPH: independent second build (Forensics desk)
 
-**Written Nov 13, 2026, about 01:45Z, on the Head of R&D's order (second, after VOIDSNAP).** Built from Desk B's registration with Amendments 1 and 2 alone
+**Written Nov 13, 2026, about 01:32Z, on the Head of R&D's order (second, after VOIDSNAP).** Built from Desk B's registration with Amendments 1 and 2 alone
 (`claude/idea-desk-b`, `kalshi-scalper/workers/polgap/POLGAPH_REGISTRATION.md`, sha256 `69eec8d6...`, unchanged at `a0cdeebe`) and `POLGAPH_SERIES.json` (`9f3886e7...`).
 Desk B's `polgaph.py` was not read. Nothing of this card has been requested or read by anyone; no Kalshi request was made for this build.
 
@@ -30,7 +30,7 @@ These are invented rows; the figures mean nothing about the market. The comparis
 
 ## Places where the registration leaves a choice
 
-The build prints its twelve readings with the output (`ambiguities`). The ones most likely to move a figure:
+The build prints its readings with the output (`ambiguities`). The ones most likely to move a figure:
 
 1. **The count "left after step 7".** I count the event's pick (one per event and morning) as step 7, then "blocked", then "fired". The text can also be read with the block inside step 7.
 2. **"No fill data".** A market and morning has fill data if some answered minute request names the ticker and its time range contains the minute ending 07:01.

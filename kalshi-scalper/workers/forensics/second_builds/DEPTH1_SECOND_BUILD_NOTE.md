@@ -124,7 +124,7 @@ With these applied the three-fixture match is unchanged: 360 of 360 per-try figu
 `DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_A4_MADE_UP_DATA.{json,txt}` and `DEPTH1_SECOND_OUTPUT_tie_fixture_seed5_MADE_UP_DATA.{json,txt}` (this build under Amendments 1 to 4); `DEPTH1_WRAPPER_OUTPUT_tie_fixture_seed5_MADE_UP_DATA_run_by_forensics.txt` (Desk A's harness run on the tie fixture); `make_depth1_tie_fixture.py`. `depth1_second.py` sha256 `0092b363...`.
 
 
-## Nov 13, about 02:05Z: the gold overlap mark aligned to the first build (Desk A's note of 01:16Z)
+## Nov 13, about 01:29Z: the gold overlap mark aligned to the first build (Desk A's note of 01:16Z)
 
 - **What changed, one line of `depth1_second.py`:** at the poll at T minus 360 s, a missing side has no ask and is "not in band"; if the other side's ask is 0.88 to 0.97 the
   window is HELD. Before, my build called any poll with a missing side "not held". No poll within 10 s of T minus 360 s is still "unknown" in both builds.
