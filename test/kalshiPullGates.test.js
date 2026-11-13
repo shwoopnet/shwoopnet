@@ -610,10 +610,10 @@ gates.KP18 = () => {
 d = tempfile.mkdtemp(); now = 1790000000.0
 import time
 day = time.strftime("%Y-%m-%d", time.gmtime(now))
-for i in range(19): os.makedirs(os.path.join(d, "pull", "JOB_A", day + "T%02d00Z_1" % i))
+for i in range(39): os.makedirs(os.path.join(d, "pull", "JOB_A", day + "T%02d00Z_1" % i))
 os.makedirs(os.path.join(d, "pull", "JOB_B", day + "T0900Z_1")); os.makedirs(os.path.join(d, "pull", "JOB_B", "2020-01-01T0900Z_1"))
 print(json.dumps([m.runs_today(d, "JOB_A", now), m.MAX_RUNS_PER_DAY]))`);
-  assert.deepStrictEqual(day, [20, 20], 'runs of every job count toward the day cap (20 a UTC day since Nov 12, 2026)');
+  assert.deepStrictEqual(day, [40, 40], 'runs of every job count toward the day cap (40 a UTC day since Nov 12, 2026)');
 };
 
 // KP18b: raising the day cap from 6 to 12 changed ONLY that number. Every per-run limit is still what it was.
@@ -621,8 +621,8 @@ gates.KP18b = () => {
   const out = py('print(json.dumps([m.GAP_S, m.BACKOFF_S, m.BACKOFF_MAX_S, m.MAX_429_IN_ROW, m.MAX_FAILS_IN_ROW, m.HARD_MAX_REQUESTS, m.MAX_BODY_BYTES, m.MAX_RUN_BYTES, m.MAX_RUN_SECONDS, m.MAX_JOB_BYTES, m.MAX_PAGES, m.END_UTC, sorted(m.ROUTES.keys()), [m.ROUTES[k][0] for k in sorted(m.ROUTES)]]))');
   assert.deepStrictEqual(out, [1.0, 5.0, 60.0, 3, 3, 1200, 5000000, 200000000, 2400, 2000000, 50, '2027-02-28T23:59:00Z', ['elections', 'perps'], ['api.elections.kalshi.com', 'external-api.kalshi.com']]);
   const src = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'kalshi_pull.py'), 'utf8');
-  assert.ok(/^MAX_RUNS_PER_DAY = 20 /m.test(src), 'the day cap is 20');
-  assert.ok(/5 MB an answer, 200 MB a run, 20 real runs a UTC day/.test(wf), 'the workflow header says 20');
+  assert.ok(/^MAX_RUNS_PER_DAY = 40 /m.test(src), 'the day cap is 40');
+  assert.ok(/5 MB an answer, 200 MB a run, 40 real runs a UTC day/.test(wf), 'the workflow header says 40');
 };
 
 // KP19: file names on the data branch are counters; a hostile request id or answer cannot create a path outside the run folder.

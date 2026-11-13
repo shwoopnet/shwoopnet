@@ -1347,4 +1347,7 @@ The first `MAPBREAK_CANDLES` run stored 165 answers (c0000 to c0164, files 0001 
 ## INPLAYJUMP_PILOTVAL (Nov 12, 2026, Desk A)
 
 `INPLAYJUMP_PILOTVAL` (owner DESK_A): 22 batched candle requests (5 pilot, 17 tennis validation; three hourly candles for the tennis screen), cap 22, 159 tickers, built from the `INPLAYJUMP_LISTS` answer (run 43333651862); every request ends before 2026-10-23 (development only), under the 10,000 minutes x tickers limit. Job file only; rides in the same pull request as the MAPBREAK corrections. Nothing has run.
+## kalshi-pull: 40 real runs a UTC day (Nov 12, 2026, the owner: "yes 40")
+
+The day cap on real runs of `scripts/kalshi_pull.py` goes from 20 to 40 (`MAX_RUNS_PER_DAY`), and the workflow header comment says 40; nothing else changes. Why: the 20 run cap bound on Nov 12 ("REFUSED: 20 real runs already today") with the research queue oversubscribed for the next day. Every per-run limit is exactly as it was (1 request a second, 1,200 requests, three 429s end a run, 5 MB an answer, 200 MB a run, the host table, GET only, no key, no redirects, the end date 2027-02-28). If the first 429 ever appears, drop back to 20 at once (a one line edit). Gates KP18 and KP18b pin 40 and every other limit.
 
