@@ -152,6 +152,19 @@ class T(unittest.TestCase):
         self.assertEqual(S.bar3((1.0, 1.0, 1, 0, 0), (2.0, inf, 1, 0.4, 0.4))[0], False)      # only parent infinite: fails
         self.assertEqual(S.bar3((nan, 1.0, 0, 0, 0), (2.0, 1.0, 1, 0.1, 0.1))[0], False)      # empty first half fails
         self.assertEqual(S.bar3((1.0, 1.0, 1, 0, 0), (nan, 1.0, 0, 0, 0))[0], False)          # empty second half fails
+    def test_zero_bid_is_no_bid_and_no_ask(self):
+        t0 = (CT - 178) * 1000 + 500
+        w = self.window([brow("T1", t0, 0.10, 0.0)], [])      # NO bid 0.00: YES has no ask; NO ask .90 is out of band
+        self.assertEqual(w["status"], "out_of_band")
+        w = self.window([brow("T1", t0, 0.0, 0.85)], [])      # YES bid 0.00: no YES bid, YES ask .15 stands, no order
+        self.assertTrue(w.get("no_order"))
+    def test_half_split_sorted_by_close_then_ticker(self):
+        a = [{"p_ask": 0.5, "p_bid": 0.4, "win": True, "filled": True, "ct": 10, "tk": "B"}, {"p_ask": 0.5, "p_bid": 0.4, "win": False, "filled": True, "ct": 10, "tk": "A"}, {"p_ask": 0.5, "p_bid": 0.4, "win": True, "filled": True, "ct": 5, "tk": "Z"}, {"p_ask": 0.5, "p_bid": 0.4, "win": True, "filled": True, "ct": 20, "tk": "C"}]
+        l1 = S.evaluate(list(a), 7.0, "dev"); l2 = S.evaluate(list(reversed(a)), 7.0, "dev")
+        self.assertEqual(l1, l2)
+    def test_tolerance_on_bar_one(self):
+        # a PF gap of exactly 0.10 minus 1e-10 counts as met (standing 1e-9 tolerance)
+        self.assertGreaterEqual(0.10 - 1e-10, S.BAR_PF - S.TOL)
     def test_labels_printed(self):
         self.assertIn("DEPTH1, CFRTI-B and CFRTI1-BTC", S.LABELS["V1"])
         self.assertEqual(S.LABELS["V2"], "not blind on EVENT830's forward windows")

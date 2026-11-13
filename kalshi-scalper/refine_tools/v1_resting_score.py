@@ -34,6 +34,7 @@ T0_AFTER_S = 178   # V1: first row at or after close minus 178 s; V2: 180
 CANCEL_S = 120
 BAR_PF = 0.10
 BAR_N = 60
+TOL = 1e-9   # the standing tolerance on bars (1), (2), (3) and the missed test; also the zero-bid test
 DEPTH1_MARKER_PREFIX = "DEPTH1 READ MADE:"
 NC15DEPTH1_HASH_PREFIX = "NC15DEPTH1 SCORER HASH:"
 NC15DEPTH1_FINAL_SHA256 = "0a6c1f519ca66820ed4a10951dcd20a54febf7dadb2457d5c4f95aed25af57a3"   # the FINAL NC15DEPTH1 scorer hash (Head, 2026-11-13)
@@ -144,6 +145,9 @@ def load_run_folders(root):
 def sides(row):
     """(yes_bid, no_bid) best bids as dollars or None; yes_ask = 1 - no_bid, no_ask = 1 - yes_bid."""
     yb, nb = fl(row.get("yes_bid_px_1")), fl(row.get("no_bid_px_1"))
+    # a bid of 0.00 is no bid, and an ask computed from a 0.00 opposite bid is no ask
+    yb = yb if yb is not None and yb > TOL else None
+    nb = nb if nb is not None and nb > TOL else None
     return yb, nb
 
 
@@ -175,7 +179,7 @@ def one_window(version, tk, ct, book, trades, cover):
     if res not in ("yes", "no"):
         return {"status": "no_result"}
     p_bid = yb if side == "yes" else nb
-    out = {"status": "signal", "side": side, "p_ask": p_ask, "p_bid": p_bid, "win": res == side, "filled": False, "ct": ct}
+    out = {"status": "signal", "side": side, "p_ask": p_ask, "p_bid": p_bid, "win": res == side, "filled": False, "ct": ct, "tk": tk}
     if p_bid is None or p_bid <= 0:
         out["no_order"] = True
         return out
@@ -234,12 +238,12 @@ def half_verdict(h):
         return False, "empty half fails"
     vinf, pinf = vpf == float("inf"), ppf == float("inf")
     if vinf and pinf:
-        return vnet >= pnet0 - 1e-12, "both PFs infinite: decided on net (version not lower than parent at +0c)"
+        return vnet >= pnet0 - TOL, "both PFs infinite: decided on net (version not lower than parent at +0c)"
     if vinf:
         return True, "only the version PF is infinite: passes"
     if pinf:
         return False, "only the parent PF is infinite: fails"
-    return vpf - ppf >= 0, "finite"
+    return vpf - ppf >= -TOL, "finite"
 
 
 def bar3(h1, h2):
@@ -249,14 +253,14 @@ def bar3(h1, h2):
             return False, "empty half fails"
     d1, d2 = h1[0] - h1[1], h2[0] - h2[1]
     if all(x == x and abs(x) != float("inf") for x in (d1, d2)):
-        return d2 >= d1 - 1e-12, "finite differences: second half not below first"
+        return d2 >= d1 - TOL, "finite differences: second half not below first"
     ok, why = half_verdict(h2)
     return ok, "an infinite PF in a half: second half decided alone (%s)" % why
 
 
 def evaluate(sig, days, block="dev"):
     """sig: signal dicts (status signal) in close order. Returns the report lines and the bar."""
-    sig = sorted(sig, key=lambda s: s["ct"])
+    sig = sorted(sig, key=lambda s: (s["ct"], s.get("tk", "")))   # half split: sorted by (close_ts, ticker) before n // 2
     n = len(sig)
     filled = [s for s in sig if s["filled"]]
     unfilled = [s for s in sig if not s["filled"]]
@@ -289,14 +293,14 @@ def evaluate(sig, days, block="dev"):
         return pf(v), pf(p), len(f), sum(v), sum(p0)
     h1, h2 = part(sig[:half]), part(sig[half:])
     out.append("first half: version PF %.2f parent PF %.2f (filled %d) | second half: version PF %.2f parent PF %.2f (filled %d)" % (h1[0], h1[1], h1[2], h2[0], h2[1], h2[2]))
-    c1 = pf(ver) - pf(par_all) >= BAR_PF
+    c1 = pf(ver) - pf(par_all) >= BAR_PF - TOL
     par0 = res[(0.0, MAKER_FEE_FRAC)][1]
-    c2_1 = sum(ver) / weeks >= sum(par_all) / weeks - 1e-12
-    c2_0 = sum(ver) / weeks >= sum(par0) / weeks - 1e-12   # the stricter parent (+0c) governs: live fills are at or below the ask seen
+    c2_1 = sum(ver) / weeks >= sum(par_all) / weeks - TOL
+    c2_0 = sum(ver) / weeks >= sum(par0) / weeks - TOL   # the stricter parent (+0c) governs: live fills are at or below the ask seen
     c2 = c2_0 and c2_1
     c3, c3_why = bar3(h1, h2)
     c4 = len(filled) >= BAR_N
-    miss = pf(par_unf) - pf(ver) >= BAR_PF if unfilled and filled else False
+    miss = pf(par_unf) - pf(ver) >= BAR_PF - TOL if unfilled and filled else False
     out.append("bar (3) basis: " + c3_why)
     out.append("7g BAR: (1) PF beats parent by 0.10: %s | (2) net per contract-week not lower (vs parent +0c: %s, vs +1c: %s; +0c governs): %s | (3) second half not worse (version minus parent, second half vs first): %s | (4) at least %d filled: %s" % (
         "met" if c1 else "not met", "met" if c2_0 else "not met", "met" if c2_1 else "not met", "met" if c2 else "not met", "met" if c3 else "not met", BAR_N, "met" if c4 else "not met (NOT_ENOUGH_DATA)"))
