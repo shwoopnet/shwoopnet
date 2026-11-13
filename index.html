@@ -952,7 +952,8 @@
   .kal-console [data-card="pnl"] .kal-plot{ flex:1 1 auto; } .kal-console [data-card="pnl"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
   /* Strategies page (Nov 10, 2026, the owner: an entirely new page for strategies, same theme, new visuals). Black and white only, plain text with signs (no green or red, calm view). Prefix sp- for the shared pieces (badge, ring, bar, spark, summary, popup) and lp- / rw- for the stage board (Nov 12, 2026, the owner: "build it into the live page"): .lp the loop of four boxes, .lp-t one box, .lp-p the open box's panel, .rw one strategy row, .rw-d its detail, .rw-more the deepest layer. */
   #page-strategies .sp-lede{ font-size:12px; color:var(--muted); margin:0 0 16px; overflow-wrap:anywhere; }
-  .sp-wrap{ container-type:inline-size; container-name:sp; max-width:1280px; margin:0 auto; }
+  .sp-wrap{ container-type:inline-size; container-name:sp; }   /* full page width, the same as the header, the lede and the Bot page, so the top card and the stage bar line up (cleanup, Nov 13, 2026) */
+  #page-strategies .kal-header-bare{ justify-content:flex-end; padding:8px 0 10px 0; }   /* the Privacy button sits on the right, as on the Bot page */
   .sp-detbtn{ align-self:flex-start; margin-top:10px; background:none; border:1px solid var(--border); color:var(--paper); border-radius:999px; padding:8px 16px; min-height:40px; font:inherit; font-size:12.5px; cursor:pointer; } .sp-detbtn:hover{ border-color:var(--paper); }
   .sp-pop{ position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; padding:16px; } .sp-pop[hidden]{ display:none; }
   .sp-pop-sheet{ width:min(420px,100%); max-height:90vh; overflow:auto; background:var(--panel-raised, #141414); border:1px solid var(--border); border-radius:16px; padding:20px 22px; box-shadow:0 30px 80px rgba(0,0,0,.6); }
@@ -1023,7 +1024,7 @@
   .sp-sub{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; min-width:0; }
   .sp-ladder{ display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); border-top:1px solid var(--border); padding-top:10px; flex-wrap:wrap; }
   .sp-ladder b{ font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px; }
-  .sp-sum.kal-card{ padding:20px 22px; display:grid; grid-template-columns:auto minmax(0,1fr) 220px; gap:24px; align-items:center; margin-bottom:10px; position:relative; overflow:hidden; }
+  .sp-sum.kal-card{ padding:20px 22px; display:grid; grid-template-columns:auto minmax(0,1fr); gap:16px 24px; align-items:center; margin-bottom:10px; position:relative; overflow:hidden; }
   .sp-sum.kal-card::after{ content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(600px 180px at 10% 0%, rgba(255,255,255,.06), transparent 70%); }
   .sp-sum-pf{ min-width:0; } .sp-sum-ring{ position:relative; width:132px; height:132px; } .sp-sum-ring svg{ width:100%; height:100%; display:block; }
   .sp-sum-ring .sp-ring-bg, .sp-sum-ring .sp-ring-fg{ stroke-width:8; } .sp-sum-in{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
@@ -1035,11 +1036,12 @@
   .sp-sum-none{ height:100%; display:flex; align-items:center; font-size:12px; color:var(--muted); border-top:1px dashed var(--border); }
   .sp-sum-cap{ display:flex; justify-content:space-between; gap:8px; font-size:11px; color:var(--muted); margin-top:4px; }
   .sp-sum-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
+  .sp-sum > .sp-sum-grid{ grid-column:1 / -1; grid-template-columns:repeat(3,minmax(0,1fr)); }   /* Today, Last 7 days and All time: one compact row of tiles inside the card, the pop-up tile style (cleanup, Nov 13, 2026) */ .sp-sum > .sp-sum-grid .sp-sum-c{ padding:9px 12px; gap:2px; }
   .sp-sum-c{ display:flex; flex-direction:column; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:10px 12px; } .sp-sum-c span{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); } .sp-sum-c b{ font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin-top:2px; } .sp-sum-c small{ font-size:12px; font-weight:600; color:var(--muted); }
   .sp-sum-sub{ font-style:normal; font-size:10.5px; color:var(--muted); margin-top:2px; font-variant-numeric:tabular-nums; }
   .sp-det-body .sp-sum-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } .sp-det-body .sp-sum-c{ background:none; border:0; border-top:1px solid var(--border); border-radius:0; padding:8px 0 0; } .sp-det-body .sp-sum-c b{ font-size:16px; }
-  @media (max-width:900px){ .sp-sum.kal-card{ grid-template-columns:auto minmax(0,1fr); gap:16px 18px; } .sp-sum .sp-sum-grid{ grid-column:1 / -1; grid-template-columns:repeat(3,minmax(0,1fr)); } .sp-sum-ring{ width:104px; height:104px; } .sp-sum-in b{ font-size:28px; } }
-  @media (max-width:560px){ .sp-sum.kal-card{ padding:16px; gap:14px; } .sp-sum .sp-sum-c b{ font-size:15px; } .sp-sum-cap span:nth-child(2){ display:none; } }
+  @media (max-width:900px){ .sp-sum.kal-card{ gap:16px 18px; } .sp-sum-ring{ width:104px; height:104px; } .sp-sum-in b{ font-size:28px; } }
+  @media (max-width:560px){ .sp-sum.kal-card{ padding:16px; gap:12px; grid-template-columns:minmax(0,1fr); } .sp-sum-pf{ display:flex; justify-content:center; } .sp-sum-ring{ width:96px; height:96px; } .sp-sum-in b{ font-size:26px; } .sp-sum > .sp-sum-grid{ gap:6px; } .sp-sum > .sp-sum-grid .sp-sum-c{ padding:8px 9px; } .sp-sum .sp-sum-c b{ font-size:14px; } .sp-sum .sp-sum-sub{ font-size:10px; } }   /* phone: the ring sits above a full-width chart, then the three tiles in one row (cleanup, Nov 13, 2026) */
   .sp-det-body{ display:flex; flex-direction:column; gap:12px; margin-top:12px; min-width:0; }
   .sp-plot{ min-width:0; } .sp-plot svg{ width:100%; height:64px; display:block; overflow:visible; }
   .sp-rt-h{ margin-bottom:-6px; } .sp-rt{ list-style:none; margin:0; padding:0; }
@@ -1870,6 +1872,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Strategies page cleanup (the owner: "what the hell are we doing"): a merge had kept both sides of a conflict and drew a second, smaller chart and a stray caption in the top card. The top card now has one chart, no middle caption, and Today, Last 7 days and All time as one row of three tiles inside the card. The Privacy button sits on the right, the top card and the stage bar have the same width, and a doubled changelog line is gone. Every strategy pop-up uses one layout, and CFRTI-K reads Trial in Live. The Off box is now "Off, coming back": it lists only strategies that traded live and are building a record to return; the retired history stays in the strategy list and the docs. Page only.</li>
                   <li>Trading: the second slot's window and open-money limits were loosened for trial seats (window 4% of the account, open total 5%, and the slot may use three quarters of the shared window limit instead of half); the account stops and the 5.5% window limit are unchanged.</li>
                   <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
                   <li>Strategies page: one pop-up for every strategy at every stage (the owner: "all of these look so different"). Paper, wheel, approved and retired strategies now open the same sheet as a live one: the same header (ring, name, stage badge, status word), the same four tiles (labelled paper, n/a only when there is no data), the same charts with 7D, 30D and YTD, a "Progress to qualify" bar where a live strategy has its stop bar, the three rule lines and a Settings panel. The Perp-model longshot is deployed, so with no trade yet it reads Trial 0 of 90 in Live instead of waiting in Shadow. Page only.</li>
@@ -1877,7 +1880,6 @@
                   <li>Research: two kalshi-pull jobs for the S&amp;P 500 15 minute market (KXINX15M) were added, one list request and 143 candle requests over Nov 5 to Nov 13. Nothing has been run and nothing in the bot changed.</li>
                   <li>Trading logs: the shadow logger (no orders) shares its reads (one candle read and one second look per market however many rules need it, one settle read per market), takes its allowed markets from a reviewed list, and logs exactly what it logged before with the one rule it has.</li>
                   <li>Trading, behind the scenes (not live, nothing wired): the risk core rules written as a pure library with tests, so a growing set of strategies has one set of account and seat limits to be checked against before anything uses them.</li>
-                  <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
                   <li>Strategies page: the All strategies chart is the one chart on its card and is bigger, and its range buttons are now 7D, 30D and YTD (the owner: "it should go 7D, 30D, YTD"); each strategy pop-up's "Money made over time" chart uses the same three and the same choice. OICORE's lines read "Starts at 15 contracts" and "returns at its starting size"; EVENT830's and Perp-model longshot's loss caps say they are their own; a retired strategy or paper place can come back by itself at most twice. Page only.</li>
                   <li>Strategies page: the Off / Retired box now matches the Live box (the owner: "this card doesnt match"): each group is drawn as a Live row (same height, name font and status word, with its count where a Live row shows its status), the Off badge is the same solid badge, and the strategies inside a group line up under the row names. The "What the words on this page mean" panel is removed (the owner: "this can get removed"); the plain words stay in the cards. The account safety stop reads as the owner set it: the first 12% stop in a day restarts by itself 24 hours later (at most once in 7 days), a second within 7 days waits for the owner. OICORE reads 15 contracts to start. Page only.</li>
                   <li>Every strategy states its own rules (the owner: "all strategies should have their own return criteria, nothing should be dependent on me with rotating strategies"): each card, pop-up and the Bot page Rules now say "Goes live when", "Stops when" and "Comes back when" in plain words, with no "then the owner approves" or "reviewed edit"; each live strategy's pop-up has a Settings panel (stage, market, entry, price band, contracts and ladder, loss caps, drawdown, streak and net floor stops, exit), copied from the bot's code and checked against it by a test. These are the written rules the bot is being built to follow, and the page says so; the one owner step left is the account safety stop (a 12% loss in a day stops everything until the owner starts it). Page and strategy list only.</li>
@@ -4651,8 +4653,7 @@ kalshiStatusTick();
       '<div class="sp-sum-none">' + esc('No settled trades ' + (rg.key === 'YTD' ? 'this year' : 'in the ' + rg.word) + '.') + '</div>';
     return '<div class="kal-card sp-sum">' + ring +
       '<div class="sp-sum-mid"><div class="sp-sum-top"><div class="sp-sum-k">All strategies &middot; ' + esc(rg.word) + ' &middot; ' + s.w30.n + ' trades</div>' + kalshiStratRangeHtml(rg.key, esc) + '</div>' +
-      '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? rg.from : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || rg.from) + '</span><span>cash result, dashed line is zero</span><span>Today</span></div>' + (s.note ? '<div class="sp-sub sp-sum-note">' + esc(s.note) + '</div>' : '') + '</div>' +
-      '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? rg.from : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || rg.from) + '</span><span>cash result, dashed line is zero</span><span>Now</span></div></div>' +
+      '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? rg.from : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || rg.from) + '</span><span>Today</span></div>' + (s.note ? '<div class="sp-sub sp-sum-note">' + esc(s.note) + '</div>' : '') + '</div>' +
       '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>All time</span><b>' + esc(sg(s.net)) + '</b><em class="sp-sum-sub">' + esc(s.open + ' open · ' + money(s.atRisk) + ' at risk') + '</em></div>' + '</div></div>';
   }
   var kalshiStratDayText = function(k){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(k)); return m ? new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))) : ''; };
@@ -4804,7 +4805,7 @@ kalshiStatusTick();
   var KAL_STAGES = [
     { key: 'shadow', label: 'Shadow', sub: 'on paper', head: 'tracked on paper: what a strategy would have bought, no money at risk', then: 'its paper record wins at least 1.3 times what it loses over 60 checked trades, then holds up for 30 more' },
     { key: 'live', label: 'Live', sub: 'real money', head: 'These trade real money. A strategy on Trial trades small until it has 90 trades on record, then it shows as Live. Under review means it trades at its normal size while its record is checked. None has proven itself yet (winning at least 1.3 times what it loses).', then: 'one of its stop rules trips' },
-    { key: 'off', label: 'Off / Retired', sub: 'cooling down', head: 'switched off for now, or retired for good', then: 'a pause, then a fresh paper record' }
+    { key: 'off', label: 'Off, coming back', sub: 'cooling down', head: 'traded real money, switched off by a stop rule, and building its record to come back', then: 'a pause, then a fresh paper record' }
   ];
   // The box a live card belongs in, from its lane (kalshiStratLaneOf): a killed strategy is in Off / Retired, never in Live.
   function kalshiStageBoxOf(lane){ return lane === 'off' ? 'off' : 'live'; }   // a trial seat is Live with a Trial tag (Nov 13, 2026, the owner: "Merge into one Live box")
@@ -5010,8 +5011,7 @@ kalshiStatusTick();
     var allKills = kills.live, nearest = kalshiClosestKill(allKills);
     ['live'].forEach(function(k){ box[k].forEach(function(o){ if(nearest && o.key === nearest.id){ o.near = true; } }); });
     // ---- Off / Retired: the killed cards first, then the retired list grouped by cause (closed by default) ----
-    var retEntries = kalshiRetiredEntries(model.retired.rows, model.regRetired || []);
-    var counts = { shadow: box.shadow.length, live: box.live.length, off: box.off.length + retEntries.length };
+    var counts = { shadow: box.shadow.length, live: box.live.length, off: box.off.length };   // Off shows only strategies that traded live and can come back (cleanup, Nov 13, 2026, the owner: "this list should only display stuff that has ran live & is returning at some point"); the full retired history stays in the registry and the docs
     var goldRet = null; (model.live || []).forEach(function(s){ if(s.ret){ goldRet = s.ret; } });
     var unreadableGold = (model.live || []).some(function(s){ return s.killState === 'unknown'; });
     // ---- The header line and each box's progress line ----
@@ -5038,7 +5038,7 @@ kalshiStatusTick();
     var bodies = {
       shadow: rowsOf('shadow') + shadowEmpty + quietHtml,
       live: box.live.length ? rowsOf('live') : empty('No strategy is trading real money.'),
-      off: rowsOf('off') + kalshiRetiredGroupsHtml(retEntries, model.open, esc) + '<div class="sp-sub sp-back">Comes back when: ' + esc(model.retired.back) + '. ' + esc(typeof KAL_RULES_BUILDING === 'string' ? KAL_RULES_BUILDING : '') + '</div>'
+      off: box.off.length ? rowsOf('off') + '<div class="sp-sub sp-back">' + esc(typeof KAL_RULES_BUILDING === 'string' ? KAL_RULES_BUILDING : '') + '</div>' : empty('Nothing is off right now. A strategy that trades real money and trips a stop rule shows here while it builds its record to come back.')
     };
     var panels = KAL_STAGES.map(function(s){
       var isOpen = openKey === s.key;
