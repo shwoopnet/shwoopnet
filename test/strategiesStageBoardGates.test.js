@@ -137,15 +137,15 @@ gates.ST14 = () => {
   const withRows = card('OICORE', 'probation', { orders: 40, rows, daily, spark: [1, 1.1, 1.2], detail: { n: 40, winRate: 0.25, avgWin: 3, avgLoss: -1, cum: [3, 2, 1], recent: [] }, w: { d7: { n: 1, net: 1 }, d30: { n: 40, pf: 1.0, net: 0 }, all: { n: 40 } } });
   const h = B.kalshiBoardHtml(model([withRows]), esc, money);
   const r = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(h);
-  assert.ok(r && /class="sc"/.test(r[1]) && /Money made over time/.test(r[1]) && /Last 14 days/.test(r[1]) && /Win\/loss ratio, last 30 trades/.test(r[1]) && !/data-seg=/.test(r[1]), 'B style (Nov 13, 2026): every chart stacked in labelled panels, no tabs');
-  assert.ok(/>Nearest stop rule</.test(r[1]) && />Trial</.test(r[1]) && /class="sc-kb"/.test(r[1]) && !/sc-g\b/.test(r[1]), 'thin bars for the closest kill and the trial, no gauges');
+  assert.ok(r && /class="sc"/.test(r[1]) && /Money made over time/.test(r[1]) && !/Last 14 days/.test(r[1]) && !/Win\/loss ratio, last 30 trades/.test(r[1]) && !/data-seg=/.test(r[1]) && !/being built/.test(r[1]), 'one chart (Nov 13, 2026, the owner: "remove some info from the pop-up strategy card"): the money chart only, no daily or win/loss chart, no tabs, no being-built note');
+  assert.ok(/>Nearest stop rule</.test(r[1]) && !/>Trial</.test(r[1]) && /class="sc-kb"/.test(r[1]) && !/sc-g\b/.test(r[1]), 'a thin bar for the closest stop, no gauges; a trial still counting has no bar (its header tag says Trial N of 90; Nov 13, 2026, the owner\'s keep list)');
   assert.ok(/<dt>Stops when<\/dt><dd>kill rule<\/dd><dt>Comes back when<\/dt><dd>return rule<\/dd>/.test(r[1]) && /class="sc-rule">rule of OICORE</.test(r[1]), 'the rule, the kill and the return are in the sheet');
   const masked = B.kalshiBoardHtml(model([withRows]), esc, (x) => (x < 0 ? '-' : '') + '****');
   const mr = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(masked)[1];
   assert.ok(/\+\*\*\*\*/.test(mr) && !/\$\d/.test(mr), 'Privacy view masks the sheet\'s dollars');
   assert.ok(!/class="sc"/.test(B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 3 })]), esc, money)), 'no rows passed, no chart block');
   const empty = B.kalshiStratChartsHtml({ cum: [0], roll: [], daily: [], n: 0 }, esc, money);
-  assert.ok(/Not enough settled trades yet/.test(empty) && /Needs 30 settled trades/.test(empty) && !/<path class="sc-ln"/.test(empty), 'an empty record draws no line');
+  assert.ok(/Not enough settled trades yet/.test(empty) && !/<path class="sc-ln"/.test(empty), 'an empty record draws no line');
   assert.ok(/#spChartBody \.sc ~ \.rw-d, #spChartBody \.sc ~ \.rw-more/.test(css), 'with charts, the sheet does not repeat the old dropdown detail');
   assert.ok(/#stratBody \.rw > \.sx\{ display:none; \}/.test(css), 'no dropdown: the row never expands in place');
   const click = html.slice(html.indexOf("var r = t.closest('[data-row]')"), html.indexOf("if(m){", html.indexOf("var r = t.closest('[data-row]')")));

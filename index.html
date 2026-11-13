@@ -336,7 +336,7 @@
   .brief-chart-ft{ display:flex; justify-content:space-between; gap:8px; margin-top:6px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
   .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:12px; }
   .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss-text); }
-  .brief-chart{ position:relative; }
+  .brief-chart{ position:relative; min-height:185px; }   /* holds the loaded chart's height while the prices arrive, so the page below does not jump (load check, Nov 13, 2026: the footer moved down by a whole chart when the tape answered) */
   /* Tap and drag on a phone (mobile pass, Nov 13, 2026): a sideways drag on a chart moves its readout, an up or down drag still scrolls the page. */
   .brief-chart, .kal-plot{ touch-action:pan-y; }
   .brief-plot{ position:relative; margin:6px 46px 0 0; } .brief-yaxis{ position:absolute; left:100%; top:0; bottom:0; width:46px; } .brief-yaxis span{ position:absolute; left:6px; transform:translateY(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -366,7 +366,7 @@
   .tape-asof, .brief-asof{ color:var(--muted); font-size:12px; }
   .tape-asof{ flex:none; padding:0 12px; position:relative; z-index:1; background:var(--panel); }
   .tape-asof.stale, .brief-asof.stale{ color:var(--loss-text); }
-  .brief-asof{ margin:-6px 0 14px 2px; }
+  .brief-asof{ margin:-6px 0 14px 2px; min-height:1.4em; }   /* the "Updated" line keeps its space before the prices arrive, so the page does not jump (load check, Nov 13, 2026) */
 
   .brief-section-title{
     font-family:'Public Sans', sans-serif; font-size:17px; color:var(--paper); font-weight:700;
@@ -970,6 +970,7 @@
   .hv-t{ position:absolute; top:-30px; z-index:2; padding:3px 8px; border:1px solid var(--border); border-radius:6px; background:var(--panel-raised, #141414); font-size:11.5px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; pointer-events:none; }
   /* The chart sheet (Nov 13, 2026, option A): a strategy row opens this pop-up instead of a dropdown; the row's own detail block stays in the markup (hidden) and is copied in. Centered on a desktop, a bottom sheet on a phone. */
   #stratBody .rw > .sx{ display:none; }
+  html:has(.sp-cpop:not([hidden])){ overflow:hidden; } .sp-cpop{ overscroll-behavior:contain; } .sp-csheet{ overscroll-behavior:contain; }   /* the page behind stays still while a pop-up is open (interaction check, Nov 13, 2026: a wheel over the sheet scrolled the page) */
   .sp-cpop{ z-index:310; } .sp-csheet{ width:min(880px,100%); max-height:88vh; padding:18px 22px 20px; }
   .sp-ch-top{ display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; } .sp-ch-h{ flex:1; min-width:0; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; font-size:12.5px; } .sp-ch-h .rw-ring{ width:56px; height:56px; } .sp-ch-h .rw-n{ font-size:17px; } .sp-ch-h .rw-k{ flex:1 1 180px; }
   .sp-cx{ all:unset; box-sizing:border-box; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border:1px solid var(--border); border-radius:10px; cursor:pointer; font-size:20px; color:var(--muted); flex:none; } .sp-cx:hover, .sp-cx:focus-visible{ color:var(--paper); border-color:var(--paper); }
@@ -1695,7 +1696,7 @@
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
                 <div class="kal-note">Each market is a yes or no question that is answered every 15 minutes; a contract pays $1 if it is right and nothing if it is wrong. L1 (Closing buy) buys the side priced 88c to 97c, the one the market already expects to win, about 6 minutes before a market closes, then holds it until the market closes and pays out. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy (Open interest jump), trades Bitcoin only: it buys the cheaper side (8c to 50c; an entry priced under 8c is skipped, a small test), with its limit at the price it sees, 3 to 2 minutes before the close when open interest (the number of open contracts) jumped by 86,300 or more, 20 contracts to start, held until the market closes. Its size can step up to 25 and then 30 contracts only as its own settled record earns each step (15 trades over at least 5 days) and the balance can carry it, and steps back down at once after a bad stretch. At 20 contracts it stops for the day after losing $50, and stops after falling $100 below its best result (each held to a share of the balance: 6% and 12%).</span> <span id="kalRulesSlotEvent">EVENT830, a Trial strategy called Release day longshot (small size while it builds a record), trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central), when the spread (the gap between the buy and sell price) is 10c or less, it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held until the market closes.</span> <span id="kalRulesSlotCfrti">CFRTIK, a Trial strategy called Perp-model longshot, trades Bitcoin only: once, 2 minutes before the close, it buys the cheaper side when that side costs 5c to 30c, the spread is 3c or less and a model built from the price of Bitcoin's perpetual contract says the side is worth at least 5c more than its price, 3 contracts at the price it sees, held until the market closes. It sends nothing if the perpetual's price is missing, and it can share Bitcoin with OICORE only on the same side.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock on weekdays (the 8 PM to midnight pause was lifted Oct 30, 2026); its market is closed from Friday 5 PM to Sunday 6 PM Central. Gold is on a trial seat (Trial: below the research bar, the owner's written exception to the return rule, Nov 13): from Nov 14 it places at most 3 contracts with no profit add-on and the 25c early sell kept, and it also switches itself off if its cash net is under -$18 after 5 trades (counted from the trial start). At the Nov 19 checkpoint of its paper record (GOLDOFF): 1.3 or better takes the normal return path at half size; 1.0 to 1.3 keeps it at 3 contracts until 60 rows; under 1.0 the trial seat is cut. Gold also has its own kill latch: it stops placing new orders, and stays off until its paper record clears its return bar, if its cash result falls <span id="kalRulesGoldKill">$58.75</span> (a fixed dollar line, not a share of the balance) below its own peak, or its cash net is under -$20 after 40 trades; an open position is still sold at the 25c line. While it is off the page shows gold as off, cooling down. It comes back only after its shadow record (GOLDOFF) shows a cash profit factor of 1.3 or better over at least 60 trades and 7 days with at least 10 losses, the second half at 1.3 or better, and then at half size for its first 30 trades (full size if those 30 don't lose money); it can come back by itself twice, and a third stop retires it. These are the written rules the bot is being built to follow. Until that code is live, a strategy that stops stays off. Account safety stops, for every strategy at once: the first time the whole bot loses 12% of the account in a day, it stops and restarts by itself 24 hours later (at most once in 7 days); a second 12% stop within 7 days stays off until the owner restarts it. Behind every strategy sits one hard stop on the whole bot: if its cash trading result (every settled and sold trade of every strategy, not the account balance, so a deposit or a withdrawal never counts) falls <span id="kalRulesHardStop">40%</span> of the account below its own best point, all new buys stop and stay stopped until the owner restarts them with a reviewed change; open positions are still managed and sold.</div>
-                <div class="kal-note"><b>Size.</b> Gold is on a trial seat from Nov 14: at most 3 contracts and no profit add-on. Gold grows with the account once the trial ends (one contract per $43 of balance, held at 15 contracts since Nov 3, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
+                <div class="kal-note"><b>Size.</b> Gold is on a trial seat from Nov 14 (Trial: below the research bar, the owner's written exception to the return rule): at most 3 contracts and no profit add-on; its paper record is checked on Nov 19 to decide the next step. Gold grows with the account once the trial ends (one contract per $43 of balance, held at 15 contracts since Nov 3, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Each strategy is judged on its own orders, with the combined account stop at the same 12% behind both. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a gold (L1) position's price falls to 25c, the bot sells it. OICORE, EVENT830 and CFRTIK hold until the market closes and are not sold at 25c.</div>
                 <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool, and the extra contracts it buys are capped at a quarter of the base size.</div>
@@ -1706,7 +1707,7 @@
         </div>
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
-        <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
+        <div id="kalBotTotals"><div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div></div>
         <div class="kal-acct-risk"><div class="kal-k">Loss stop</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
         <div class="kal-strats" id="kalStrategies"><div class="kal-empty">Reading the strategies...</div></div>
       </div>
@@ -1872,11 +1873,13 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Strategies page and site checks (the owner: "lets remove some info from the pop-up strategy card", "interaction bugs", "page loading bugs"): every strategy pop-up now shows only the essentials, one money chart with 7D, 30D and YTD, the four tiles, the nearest stop in plain words with the room left, one short sentence each for when it goes live, stops and comes back, and only the settings not already shown. Gold reads Trial 0 of 90 as a trial seat, "no losses" fits inside the small ring, and the Shadow box lost its repeated top line. Fixed from a click and tap test of every page: Back now closes a pop-up instead of leaving the site, the page behind no longer scrolls under a pop-up, a pop-up closes when you leave the page, the Tools and Layout menus close on a tap outside or Escape, and a tapped chart readout stays until the next tap. From a load test: the loss stop meter waits for the bot's settings instead of showing 100% used for a moment, "Reading the account" shows once, and the Brief no longer jumps when prices arrive. Page only.</li>
                   <li>Trading, built but switched off until a number is known: a trial seat in the second strategy slot for the S&amp;P 500 15 minute market (SPXOI1, the owner approved it as a trial below the research bar, with no evidence of an edge). It would buy the cheaper side at 8c to 50c when open interest rose enough in the minutes before the close, 3 contracts, held to the close, with its own limits of $3 an order and $9 lost a day. The open interest line is not known yet (it comes from the Nov 5 to Nov 13 candles), so the seat is not registered and nothing can be sent for it. Nothing else in the bot changed.</li>
                   <li>Strategies page cleanup (the owner: "what the hell are we doing"): a merge had kept both sides of a conflict and drew a second, smaller chart and a stray caption in the top card. The top card now has one chart, no middle caption, and Today, Last 7 days and All time as one row of three tiles inside the card. The Privacy button sits on the right, the top card and the stage bar have the same width, and a doubled changelog line is gone. Every strategy pop-up uses one layout, and CFRTI-K reads Trial in Live. The Off box is now "Off, coming back": it lists only strategies that traded live and are building a record to return; the retired history stays in the strategy list and the docs. Page only.</li>
                   <li>Trading: the second slot's window and open-money limits were loosened for trial seats (window 4% of the account, open total 5%, and the slot may use three quarters of the shared window limit instead of half); the account stops and the 5.5% window limit are unchanged.</li>
                   <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
                   <li>Strategies page: one pop-up for every strategy at every stage (the owner: "all of these look so different"). Paper, wheel, approved and retired strategies now open the same sheet as a live one: the same header (ring, name, stage badge, status word), the same four tiles (labelled paper, n/a only when there is no data), the same charts with 7D, 30D and YTD, a "Progress to qualify" bar where a live strategy has its stop bar, the three rule lines and a Settings panel. The Perp-model longshot is deployed, so with no trade yet it reads Trial 0 of 90 in Live instead of waiting in Shadow. Page only.</li>
+                  <li>Strategies page: the All time, Today and Last 7 days tiles no longer change when 7D, 30D or YTD is chosen (the owner: "all time bubble also changes with chart range selection"). The page now always holds the whole record since Oct 7; only the chart, its header and its ring follow the range. Page only.</li>
                   <li>Strategies page: YTD now reaches back to the first trade on Oct 7 (the owner: "the ytd strategies thing should go back to oct 7th right?"). The page only held the newest 1,000 gold orders, so a long range could start later without saying so; it now reads the older ones once, like the Account result line does, and says so on the chart while reading or if they cannot be read. The chart's right edge reads Today. Page only.</li>
                   <li>Research: two kalshi-pull jobs for the S&amp;P 500 15 minute market (KXINX15M) were added, one list request and 143 candle requests over Nov 5 to Nov 13. Nothing has been run and nothing in the bot changed.</li>
                   <li>Trading logs: the shadow logger (no orders) shares its reads (one candle read and one second look per market however many rules need it, one settle read per market), takes its allowed markets from a reviewed list, and logs exactly what it logged before with the one rule it has.</li>
@@ -3316,7 +3319,7 @@
     var tot = kalshiLiveTotals(a, kalshiAllOrders());
     var totEl = document.getElementById('kalBotTotals');
     if(!a){
-      totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
+      totEl.innerHTML = '<div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div>';   // one "Reading the account" line is enough (the status block above says it); this keeps Today's row in place (load check, Nov 13, 2026)
     } else if(!kalshiOrdersLoaded){
       totEl.innerHTML = '<div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div>';
     } else {
@@ -3465,7 +3468,7 @@
     if(t === 'newer'){ kalshiLiveShow.page = Math.max(0, kalshiLiveShow.page - 1); renderKalshiBot(); }
   });
 
-  var kalshiLiveCtl = { arm: null, last: null, session: null };
+  var kalshiLiveCtl = { arm: null, last: null, session: null, loaded: false };   // loaded: the bot's control documents have answered once (load check, Nov 13, 2026)
   var kalshiLiveCtlUnsub = null;
   // Chart axes (the owner, Oct 24, 2026: "include like an x/y axis for % (y) and date (x) on the charts"). Pure helpers shared by the Account result line and the Brief charts: round tick values, a Central-time tick for every hour or day step, and
   // the label for each. Labels are plain HTML laid over the chart, not text inside the scaled SVG, so they stay a readable 12px on a phone.
@@ -3681,9 +3684,8 @@
     }
     host.addEventListener('pointermove', move);
     host.addEventListener('pointerdown', move);   // a tap shows the readout at once on a phone, and a sideways drag moves it (mobile pass, Nov 13, 2026)
-    host.addEventListener('pointerleave', clear);
-    host.addEventListener('pointercancel', clear);
-    host.addEventListener('pointerup', function(e){ if(e.pointerType !== 'mouse'){ clear(); } });
+    host.addEventListener('pointerleave', function(e){ if(e.pointerType === 'mouse'){ clear(); } });   // a lifted finger stays: the readout holds until the next touch, like the Strategies charts (interaction check, Nov 13, 2026: a tap showed it for an instant only)
+    host.addEventListener('pointercancel', clear);   // a vertical scroll that starts on the chart clears it
   })();
   (function(){
     var bar = document.getElementById('kalPnlRanges');
@@ -4147,7 +4149,8 @@
     }
     var allOrders = kalshiResolveOrders(kalshiAllOrders(), a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
     var m = kalshiRiskMeter(allOrders, s, now);
-    rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
+    // Until the session settings answer, the stop line is unknown (the meter would fall back to $10 and could read 100% used in red for a moment on load), so it says it is reading (load check, Nov 13, 2026).
+    rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' : kalshiLiveCtl && kalshiLiveCtl.loaded === false ? '<div class="kal-empty">Reading the bot\'s settings...</div>' :
       (function(){
         // Percentages only (the owner, Oct 23, 2026), so this card can stay readable under Privacy view: no dollar figure is drawn here.
         var pct = function(x){ return Math.round(x * 100) + '%'; };
@@ -4322,24 +4325,26 @@ kalshiStatusTick();
   // The cash rule is a port of fillCost in the bot's kalshiLiveLib (a test pins the port to it on fixtures); the kill constants and the shadow rule ids are copies (tests fail if they drift from the bot's code).
   // The window is the kill latch's own: gold's trades since GOLD_KILL.rearmAt (2026-11-14 00:00 UTC, the trial seat's start, functions/kalshiGoldKillLib.js; a test pins the two together). It used to start at Nov 9 16:22 UTC, so the counter read trades the latch never counted (Nov 12, 2026).
   var KAL_BOARD_TRIPWIRE = { from: Date.UTC(2026, 10, 14), trades: 100, pfFloor: 1.0, rollingN: 60, rollingFloor: 0.7, fromText: 'Nov 13 6:00 PM Central' };   // 2026-11-14 00:00 UTC (the gold trial seat's start) is Nov 13 6:00 PM Central (UTC-6 after Nov 1)
-  var KAL_BOARD_KILL = { OICORE: { streak: 24, afterFills: 40, net: -50, from: Date.UTC(2026, 9, 30) }, EVENT830: { streak: 20 }, CFRTIK: { streak: 30, afterFills: 5, net: -18, from: Date.UTC(2026, 10, 12) } };   // CFRTIK: the bot's streak kill (its net floor of -$18 after 5 fills is the nearer brake); OICORE: the bot's killRules, reviewedAt (2026-10-30); EVENT830: the bot's streak kill
+  // Gold is a trial seat (Nov 13, 2026, the owner's exception; the bot's GOLD_TRIAL in functions/kalshiGoldKillLib.js, a test pins these to it): the page tags it Trial N of 90, counting its trades from the start.
+  var KAL_GOLD_TRIAL = { startedAt: Date.UTC(2026, 10, 14), contracts: 3 };
+  var KAL_BOARD_KILL = { OICORE: { streak: 24, afterFills: 40, net: -50, from: Date.UTC(2026, 9, 30) }, EVENT830: { streak: 20 }, CFRTIK: { streak: 30, afterFills: 5, net: -18, from: Date.UTC(2026, 10, 12) }, L1: { trialNet: -18, trialAfter: 5, drawdown: 58.75 } };   // CFRTIK: the bot's streak kill (its net floor of -$18 after 5 fills is the nearer brake); OICORE: the bot's killRules, reviewedAt (2026-10-30); EVENT830: the bot's streak kill
   var KAL_BOARD_LIVE = [
     { id: 'L1', name: 'Closing buy', rule: 'Gold: about 6 minutes before each 15 minute market closes, buys whichever side costs 88c to 97c (the side the market already expects to win)',
-      rules: ['Trial: below the research bar (the owner\'s written exception to the return rule, Nov 13). At most 3 contracts and no profit add-on while the trial runs. Nov 19 checkpoint of its paper record: 1.3 or better takes the normal return path (at least 60 trades and 7 days, at least 10 losses, the second half as strong, then half size for 30 trades); 1.0 to 1.3 stays at 3 contracts until 60 rows; under 1.0 the trial seat is cut', 'Gold switches itself off if it is down more than $18 after 5 trades, if it falls $58.75 below its best point, or if its result is under -$20 after 40 trades. Any gold position that drops to 25c is sold at once', 'The same paper record clears again after the stop. It can come back by itself twice; a third stop retires it'],
+      rules: ['On trial now at 3 contracts; after a strong paper record it returns to normal size, starting at half size for 30 trades', 'It stops if it is down $18 after 5 trades, falls $58.75 below its best point, or is under -$20 after 40 trades', 'After a stop, when a fresh paper record wins at least 1.3 times what it loses, with at least 10 losses'],
       params: [['Market', 'Gold, 15 minute markets'], ['Entry', 'About 6 minutes before the close (5.5 to 6.7 minutes left)'], ['Price band', '88c to 97c, the side the market expects to win'], ['Contracts', 'Trial seat: at most 3, no profit add-on (afterwards one for every $43 of the account, up to 15, plus up to a quarter more from profit)'], ['Window cap', 'At most 5.5% of the account in one 15 minute window'], ['Early sell', 'At 25c'], ['Drawdown stop', '$58.75 below its best point'], ['Trial floor', '-$18 after 5 trades'], ['Net floor', '-$20 after 40 trades'], ['Streak stop', 'None']] },
     { id: 'OICORE', name: 'Open interest jump', rule: 'Bitcoin: buys the cheaper side at 8c to 50c when lots of new contracts were just opened, and holds it until the market closes',
-      rules: ['Starts at 20 contracts. It steps up to 25 and 30 only when its own record and the account size allow', 'It stops itself after 24 losses in a row, if it is down more than $50 after 40 trades, or if it falls more than $5 a contract below its best point ($100 at 20 contracts)', '30 days after a stop, its paper record of new trades wins at least 1.3 times what it loses over 60 trades and holds up for 30 more. It returns at its starting size. A third stop retires it'],
+      rules: ['Starts at 20 contracts and steps up to 25 and 30 as its record and the account allow', 'It stops after 24 losses in a row, if it is down more than $50 after 40 trades, or after a $100 fall from its best point', '30 days after a stop, when a fresh paper record wins at least 1.3 times what it loses'],
       params: [['Market', 'Bitcoin, 15 minute markets'], ['Entry', '3 to 2 minutes before the close, when open interest rose by 86,300 contracts or more'], ['Price band', '8c to 50c, the cheaper side (under 8c is skipped)'], ['Contracts', '20 to start; ladder 20, 25, 30'], ['Daily loss cap', '$2.50 a contract ($50 at 20), at most 6% of the account'], ['Drawdown stop', '$5 a contract below its best point ($100 at 20), at most 12% of the account'], ['Streak stop', '24 losses in a row'], ['Net floor', '-$50 after 40 trades'], ['Exit', 'Held until the market closes']] },
     { id: 'EVENT830', name: 'Release day longshot', rule: 'On mornings when US economic data comes out at 8:30 AM Eastern: buys the cheaper side at 5c to 50c just before that window closes, and holds it until the market closes',
-      rules: ['Live now at 1 contract, on the listed release mornings only', 'It stops itself after 20 losses in a row, or if it is down overall after 40 trades', 'After 30 new release mornings on paper winning at least 1.3 times what it loses, with both halves positive. It returns at 1 contract. A third stop retires it'],
+      rules: ['Trades 1 contract on the listed 8:30 AM release mornings', 'It stops after 20 losses in a row, or if it is down overall after 40 trades', 'After 30 new release mornings on paper that win at least 1.3 times what they lose'],
       params: [['Market', 'Silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB, 15 minute markets'], ['Entry', '3 to 2 minutes before the close of the window that ends at the 8:30 AM Eastern release, spread 10c or less'], ['Price band', '5c to 50c, the cheaper side'], ['Contracts', '1, no ladder'], ['Daily loss cap', 'Its own: 2.5% of the account, at most $20'], ['Lifetime loss cap', 'Its own: 7.5% of the account, at most $60'], ['Streak stop', '20 losses in a row'], ['Net floor', '$0 after 40 trades'], ['Exit', 'Held until the market closes']] },
     { id: 'CFRTIK', name: 'Perp-model longshot', rule: 'Bitcoin: once, 2 minutes before the close, buys the cheaper side at 5c to 30c when a price model (built from Bitcoin\'s always-open futures price) says it is worth at least 5c more, and holds it until the market closes',
-      rules: ['On trial at 3 contracts. It moves to 10 contracts after 60 real trades winning at least 1.3 times what it loses (both halves holding up), then 30 more that don\'t lose', 'It stops itself if it is down more than $18 after 5 trades, or after 30 losses in a row', '14 days after a slow-down stop or 30 days after a hard stop, a fresh paper record of 60 trades winning at least 1.3 times what it loses, plus 30 more at break even or better. It returns at 3 contracts. A third stop retires it'],
+      rules: ['On trial at 3 contracts; it moves to 10 after 90 trades that win at least 1.3 times what they lose', 'It stops if it is down $18 after 5 trades, or after 30 losses in a row', '14 days after a stop, when a fresh paper record wins at least 1.3 times what it loses'],
       params: [['Market', 'Bitcoin, 15 minute markets'], ['Entry', 'One look 2 minutes before the close, spread 3c or less, model edge at least 5c'], ['Price band', '5c to 30c, the cheaper side'], ['Contracts', '3 on trial, no ladder yet'], ['Daily loss cap', 'Its own: 2.5% of the account, at most $20'], ['Lifetime loss cap', 'Its own: 7.5% of the account, at most $60'], ['Streak stop', '30 losses in a row'], ['Net floor', '-$18 after 5 trades'], ['Exit', 'Held until the market closes']] }
   ];
   var KAL_RULES_BUILDING = 'These are the written rules the bot is being built to follow. Until that code is live, a strategy that stops stays off.';
   var KAL_ACCOUNT_STOP = 'Account safety stops, for every strategy at once: the first time the whole bot loses 12% of the account in a day, it stops and restarts by itself 24 hours later (at most once in 7 days); a second 12% stop within 7 days stays off until the owner restarts it. Hard stop: if the trading result falls 40% of the account below its best point, all new buys stop until the owner restarts them.';
-  var KAL_BOARD_SHADOW_RULES = ['Its paper record wins at least 1.3 times what it loses over 60 checked trades on at least 7 days (150 trades and 10 losses for favourites at 88c or more), holds up for 30 more, and its worst-case loss still fits the account\'s risk budget. It starts at 3 contracts', 'It is dropped if it loses more than 1c a contract after 50 paper trades, or makes fewer than 40 paper trades in 30 days', '14 days after a slow-down stop, or 30 days after a hard stop, a fresh paper record clears the same bar. It returns at 3 contracts. It can come back by itself at most twice; a third stop retires it for good'];
+  var KAL_BOARD_SHADOW_RULES = ['Its paper record wins at least 1.3 times what it loses over 60 trades, then it trades 3 contracts', 'It is dropped if it loses more than 1c a contract after 50 paper trades, or makes fewer than 40 paper trades in 30 days', '14 days after a stop, when a fresh paper record clears the same bar; a third stop retires it'];
   var KAL_BOARD_SHADOW = [];   // EMPTY since Nov 11, 2026: the owner retired all four shadow rules (duplicates of gold L1); it copies the bot's SHADOW_RULES except GOLDOFF (gold's return evidence, Nov 12: scored by the report's returnRule, not drawn here; a test compares them). A new rule must be a different mechanism.
   var KAL_BOARD_RETIRED = { asOf: 'Nov 11', back: '14 days after a slow-down stop, or 30 days after a hard stop, a fresh paper record clears the same bar as a new strategy (60 checked trades winning at least 1.3 times what it loses, then 30 more). It returns at 3 contracts. It can come back by itself at most twice; a third stop retires it for good', rows: [
     { cause: 'killed while live', name: 'XRP' }, { cause: 'killed while live', name: 'Bitcoin' }, { cause: 'killed while live', name: 'Ethereum' }, { cause: 'killed while live', name: 'Dogecoin', note: 'removed' },
@@ -4397,7 +4402,13 @@ kalshiStatusTick();
     var rows = kalshiBoardRows(orders);
     if(id === 'L1'){
       var T = KAL_BOARD_TRIPWIRE, since = rows.filter(function(r){ return r.ts >= T.from; }), roll = rows.slice(-T.rollingN), sp = kalshiBoardPf(since), rp = kalshiBoardPf(roll);
-      return { count: since.length, pf: sp.pf, rolling: roll.length >= T.rollingN ? rp.pf : null, lines: [
+      // The stops that bind first on the trial seat (Nov 13, 2026, the owner: the bar read "0 of 100 · trades since the tripwire started", which meant nothing): the trial floor (-$18 from 5 trades) and the
+      // drawdown line ($58.75 below its best point), both counted on the cash rows since the trial start (KAL_BOARD_TRIPWIRE.from, the code's GOLD_KILL.rearmAt; a test pins all three to the code).
+      var GK = KAL_BOARD_KILL.L1, gnet = 0, gpeak = 0;
+      since.forEach(function(r){ gnet += r.p; if(gnet > gpeak){ gpeak = gnet; } });
+      gnet = Math.round(gnet * 100) / 100;
+      var gFloorRoom = Math.max(0, Math.round((gnet - GK.trialNet) * 100) / 100), gDdRoom = Math.max(0, Math.round((GK.drawdown - (gpeak - gnet)) * 100) / 100);
+      return { count: since.length, pf: sp.pf, rolling: roll.length >= T.rollingN ? rp.pf : null, net: gnet, floorRoom: gFloorRoom, ddRoom: gDdRoom, floorOn: since.length >= GK.trialAfter, lines: [
         'Tripwire ' + since.length + ' of ' + T.trades + ' trades, PF ' + kalshiBoardPfText(sp) + ' (cut under ' + T.pfFloor.toFixed(1) + ') · rolling ' + T.rollingN + ' PF ' + (roll.length >= T.rollingN ? kalshiBoardPfText(rp) : 'n/a') + ' (alert under ' + T.rollingFloor.toFixed(1) + ')'
       ] };
     }
@@ -4505,6 +4516,10 @@ kalshiStatusTick();
     var frac = function(x, of){ return of > 0 && isFinite(x) ? Math.max(0, Math.min(1, x / of)) : 0; };
     if(id === 'L1' && kill.off){ return { frac: 1, big: 'OFF', cap: 'the kill rule tripped' }; }
     if(id === 'L1' && kill.unknown){ return null; }
+    if(id === 'L1' && isFinite(kill.floorRoom) && isFinite(kill.ddRoom)){
+      var GK = KAL_BOARD_KILL.L1, gf = frac(-GK.trialNet - kill.floorRoom, -GK.trialNet), gd = frac(GK.drawdown - kill.ddRoom, GK.drawdown);
+      return gd > gf ? { frac: gd, big: money(GK.drawdown) + ' drawdown line', cap: money(kill.ddRoom) + ' of room' } : { frac: gf, big: money(-GK.trialNet) + ' trial floor', cap: money(kill.floorRoom) + ' of room' + (kill.floorOn ? '' : ' (applies from ' + GK.trialAfter + ' trades)') };
+    }
     if(id === 'L1' && isFinite(kill.count)){ return { frac: frac(kill.count, KAL_BOARD_TRIPWIRE.trades), big: kill.count + ' of ' + KAL_BOARD_TRIPWIRE.trades, cap: 'trades since the tripwire started' }; }
     if(id === 'OICORE' && isFinite(kill.streak) && isFinite(kill.floorRoom)){
       var K = KAL_BOARD_KILL.OICORE, sf = frac(kill.streak, K.streak), ff = kill.floorOn ? frac(-kill.net, -K.net) : 0;
@@ -4849,12 +4864,15 @@ kalshiStatusTick();
   }
   // c: { rule, net, n, winRate, avgWin, avgLoss, cum (running cash from 0), roll (rolling 30 trade cash PF), daily ([{k, p}]), gauge ({frac, big, cap} or null), trial (fills or null), kill, ret }.
   // The look of preview B with the content of A (Nov 13, 2026, the owner: "i like a's card information but B's style more", "lets simplify the cards too"): one column of labelled panels, no tabs, thin bars instead of gauges. Lines carry no text in the stretched SVG; every dollar goes through money(), so Privacy view masks it.
+  // The Settings panel lists only what the pop-up does not already say (Nov 13, 2026, the owner: "remove some info from the pop-up strategy card"): the market, entry and band are in the one-line description,
+  // and every stop line is in Stops when and the Nearest stop rule bar. What stays: the size (contracts and ladder), the loss caps and, for a paper place, its dates and size if it goes live.
+  var KAL_SETTINGS_KEEP = /^(Contracts|Daily loss cap|Lifetime loss cap|Window cap|Started|Next read|Size if it goes live)$/;
+  function kalshiStratSettingsKeep(params){ return (Array.isArray(params) ? params : []).filter(function(kv){ return kv && kv[1] && KAL_SETTINGS_KEEP.test(kv[0]); }); }
   function kalshiStratChartsHtml(c, esc, money){
     var W = 600, sg = function(x){ return (x > 0 ? '+' : '') + money(x); };
     var svg = function(h, inner, label){ return '<svg class="sc-svg" viewBox="0 0 ' + W + ' ' + h + '" preserveAspectRatio="none" style="height:' + h + 'px" role="img" aria-label="' + esc(label) + '">' + inner + '</svg>'; };
     var none = function(t){ return '<div class="sc-none">' + esc(t) + '</div>'; };
     var hl = function(y, cls){ return '<line class="' + cls + '" x1="0" x2="' + W + '" y1="' + y + '" y2="' + y + '"/>'; };
-    var panel = function(label, note, body, cls){ return '<div class="sc-p' + (cls ? ' ' + cls : '') + '"><h5>' + esc(label) + (note ? '<em>' + esc(note) + '</em>' : '') + '</h5>' + body + '</div>'; };
     // The money chart follows the page's timeframe: the trades in the range, counted from zero at the range's start (Nov 13, 2026). Anything without times (an old call) draws the whole record.
     var rg = c.range ? kalshiStratRangeOf(c.range) : null, cum = c.cum || [], times = c.times || [];
     if(rg && isFinite(c.now) && times.length === cum.length){
@@ -4865,14 +4883,6 @@ kalshiStatusTick();
     var cl = kalshiStratCumLine(cum, W, 150);
     var hvBox = function(h, pts, inner){ return '<div class="hv"' + kalshiHoverAttr(pts, esc) + '>' + inner + '</div>'; };
     var cash = cl ? hvBox(150, cl.pts.map(function(p, i){ var t = times[i]; return { x: p.x, y: p.y, t: (i === 0 ? (rg ? rg.from : 'Start') : 'Trade ' + i + (t ? ', ' + kalshiHoverWhen(t) : '')) + ' · ' + sg(p.v) }; }), svg(150, hl(cl.zeroY, 'sc-ref') + '<path class="sc-area" d="' + cl.d + ' L' + cl.lastX + ' 150 L0 150Z"/><path class="sc-ln" d="' + cl.d + '"/><line class="sc-end" x1="' + cl.lastX + '" x2="' + cl.lastX + '" y1="' + cl.lastY + '" y2="' + cl.lastY + '"/>', 'Cash result over ' + (cl.n - 1) + ' settled trades')) : none(rg && (c.cum || []).length > 1 ? 'No settled trades ' + (rg.key === 'YTD' ? 'this year' : 'in the ' + rg.word) + '.' : 'Not enough settled trades yet.');
-    var rv = (c.roll || []).filter(function(x){ return typeof x === 'number' && isFinite(x); }), pf;
-    if(rv.length >= 2){
-      var Y = function(x){ return Math.round((6 + (1 - Math.min(3, Math.max(0, x)) / 3) * 98) * 100) / 100; };
-      var d = rv.map(function(x, i){ return (i ? 'L' : 'M') + Math.round(i / (rv.length - 1) * W * 100) / 100 + ' ' + Y(x); }).join(' ');
-      pf = hvBox(110, rv.map(function(x, i){ return { x: i / (rv.length - 1), y: Y(x) / 110, t: 'PF ' + x.toFixed(2) + ' over the 30 trades to this point' }; }), svg(110, hl(Y(1), 'sc-ref') + hl(Y(1.3), 'sc-bar13') + '<path class="sc-ln" d="' + d + '"/>', 'Rolling 30 trade cash profit factor, last ' + rv[rv.length - 1].toFixed(2)));
-    } else { pf = none('Needs 30 settled trades.'); }
-    var dv = c.daily || [], m = Math.max.apply(null, dv.map(function(x){ return Math.abs(x.p); }).concat([0])), bw = dv.length ? W / dv.length : W;
-    var days = m > 0 ? hvBox(110, dv.map(function(x, i){ var h = Math.max(1.5, Math.abs(x.p) / m * 50); return { x: (i + 0.5) / dv.length, y: (x.p >= 0 ? 55 - h : 55 + h) / 110, t: kalshiStratDayText(x.k) + ' · ' + sg(x.p) }; }), svg(110, hl(55, 'sc-ref') + dv.map(function(x, i){ var h = Math.max(1.5, Math.abs(x.p) / m * 50); return '<rect class="sc-b' + (x.p < 0 ? ' neg' : '') + '" style="--i:' + i + '" x="' + (i * bw + 4).toFixed(1) + '" width="' + Math.max(1, bw - 8).toFixed(1) + '" y="' + (x.p >= 0 ? 55 - h : 55).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2"/>'; }).join(''), 'Cash result by day, last ' + dv.length + ' days')) : none('No settled trades in the last ' + (dv.length || 14) + ' days.');
     var bar = function(label, u, val){ u = Math.max(0, Math.min(1, isFinite(u) ? u : 0)); return '<div class="sc-p sc-k"><h5>' + esc(label) + '<em>' + esc(val) + '</em></h5><div class="sc-kb"><i style="width:' + (u * 100).toFixed(1) + '%"></i></div></div>'; };
     var pc = function(x){ return x === null || x === undefined ? 'n/a' : Math.round(x * 100) + '%'; }, mo = function(x){ return x === null || x === undefined ? 'n/a' : sg(x); };
     var chip = function(k, v){ return '<div><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
@@ -4880,12 +4890,12 @@ kalshiStatusTick();
     return '<div class="sc">' + (c.rule ? '<div class="sc-rule">' + esc(c.rule) + '</div>' : '') + (c.warn ? '<div class="sc-warn">' + esc(c.warn) + '</div>' : '') +
       '<div class="sc-stats">' + chip(c.paper ? 'Paper net' : 'Total made', mo(c.net)) + chip(c.paper ? 'Paper win rate' : 'Win rate', pc(c.winRate)) + chip(c.paper ? 'Paper average win' : 'Average win', mo(c.avgWin)) + chip(c.paper ? 'Paper average loss' : 'Average loss', mo(c.avgLoss)) + '</div>' +
       '<div class="sc-p"><div class="sc-ph"><h5>' + (c.paper ? 'Paper money over time' : 'Money made over time') + '<em>' + esc((cum.length - 1) + ' trades · ' + (rg ? rg.word : 'all time') + ' · dashed: zero') + '</em></h5>' + (rg ? kalshiStratRangeHtml(rg.key, esc) : '') + '</div>' + cash + '</div>' +
-      '<div class="sc-two">' + panel('Last 14 days', '', days) + panel('Win/loss ratio, last 30 trades', 'dashed: break even (1.0) · dotted: target (1.3)', pf) + '</div>' +
       (c.gauge ? bar('Nearest stop rule', c.gauge.frac, c.gauge.big + ' · ' + c.gauge.cap) : '') + (c.qualify ? bar('Progress to qualify', c.qualify.frac, c.qualify.text) : '') +
-      (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? (c.trialNote || 'Record done') : c.trial + ' of 90 fills toward the 60 + 30 record')) +
-      (c.goes || c.kill || c.ret ? '<dl class="sc-rules">' + line('Goes live when', c.goes) + line('Stops when', c.kill) + line('Comes back when', c.ret) + '</dl>' + (typeof KAL_RULES_BUILDING === 'string' ? '<div class="sc-note">' + esc(KAL_RULES_BUILDING) + '</div>' : '') : '') +
+      (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial >= 90 ? bar('Trial', 1, c.trialNote || 'Record done') : '') +   // only a finished trial: whether it is proven; before that the header's Trial N of 90 tag says it (Nov 13, 2026)
+     
+      (c.goes || c.kill || c.ret ? '<dl class="sc-rules">' + line('Goes live when', c.goes) + line('Stops when', c.kill) + line('Comes back when', c.ret) + '</dl>' : '') +
       // The strategy's settings, copied from the bot's code (a gate compares them), so every pop-up shows what the strategy actually does (Nov 13, 2026, the owner: "displays the rules and parameters")
-      (Array.isArray(c.params) && c.params.length ? '<div class="sc-p"><h5>Settings</h5><dl class="sc-rules sc-params">' + line('Stage', c.stage) + c.params.map(function(kv){ return line(kv[0], kv[1]); }).join('') + '</dl></div>' : '') + '</div>';
+      (function(){ var keep = kalshiStratSettingsKeep(c.params); return keep.length ? '<div class="sc-p"><h5>Settings</h5><dl class="sc-rules sc-params">' + keep.map(function(kv){ return line(kv[0], kv[1]); }).join('') + '</dl></div>' : ''; })() + '</div>';
   }
   // One pop-up for every stage (Nov 13, 2026, the owner: "all of these look so different"): a registry row (a paper or wheel place, an approved seat, a retired idea) is drawn by the SAME template as a live strategy, with
   // paper figures labelled "paper" where the page has them (d.rows: settled fillable shadow rows as { ts, p }), n/a only where there is truly no data, a "Progress to qualify" bar in place of the stop bar, and its three rule lines and settings.
@@ -4931,7 +4941,7 @@ kalshiStatusTick();
     // A small ring in each row (Nov 13, 2026, the owner chose E, "box flips"): the cash PF inside, the arc on the same 0 to 2 scale as the big ring.
     var miniRing = function(pf){
       var r = kalshiStratRing(pf);
-      return '<span class="rw-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="40"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '</svg><span class="rw-pf">' + esc(pf) + '</span></span>';
+      return '<span class="rw-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="40"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '</svg><span class="rw-pf"' + (kalshiStratRingText(pf).num ? '' : ' title="' + esc(pf) + '"') + '>' + esc(kalshiStratRingText(pf).glyph) + '</span></span>';   // "no losses" and "n/a" are a glyph in the small ring, the words in its tooltip (Nov 13, 2026: the words overflowed the circle)
     };
     var rowHtml = function(o, boxKey, i){
       var open = Boolean(openSet['row:' + o.key]), did = 'rwd-' + boxKey + '-' + i;
@@ -4952,7 +4962,7 @@ kalshiStatusTick();
       var lane = s.lane || 'live', bk = kalshiStageBoxOf(lane), g = kalshiStratGauge(s.id, s.kill, money);
       // An approved seat that has placed no order yet (CFRTIK before its deploy) is not trading real money, so it waits in Shadow, never in Live (Nov 13, 2026). orders is the count of every order the page holds for it, filled or not; undefined (an older caller) changes nothing.
       var waiting = false;   // an approved seat with no order yet used to wait in Shadow; the seats are deployed now (Nov 13, 2026: CFRTIK live), so a seat with no order reads Trial 0 of 90 in Live from live state
-      var bd = kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1', killState: s.killState });
+      var bd = kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: true, killState: s.killState });
       var pf = kalshiBoardPfText(s.w.d30), unreadable = s.killState === 'unknown', loading = s.killState === 'loading';
       var word = lane === 'off' && bd.text === 'STOPPED' ? 'COOLING' : bd.text;
       var reg = regOf(s.id), ret = s.ret || null;
@@ -4969,7 +4979,7 @@ kalshiStatusTick();
       var rd = reg && reg.nextReadText ? reg.nextReadText : 'Not written yet', shadowTwin = shadowRep[s.id];
       var mo = more(s.id, '<div class="mo-sp"><span class="bd-lab">Recent results</span>' + sparkHtml(s.spark || [], 'Rolling 30 trade cash PF') + '</div>' +
         ladderDl('Sizing', KAL_BOARD_LADDER[s.id] || KAL_BOARD_LADDER.shadow, '<dt>Record</dt><dd>' + esc('Live record: ' + s.w.d30.n + ' settled trades in 30 days, ' + s.w.all.n + ' in all. Shadow record: ' + (shadowTwin ? 'cash PF ' + (shadowTwin.fillable === 0 ? 'n/a' : shadowTwin.pfFillable === null ? 'n/a' : shadowTwin.pfFillable.toFixed(2)) + ' over ' + shadowTwin.fillable + ' signals' : 'n/a')) + '</dd><dt>Read date</dt><dd>' + esc(rd) + '</dd>') + rulesHtml(s.rules) + (s.detail ? kalshiStratDetailHtml(s.detail, esc, money, tt) : ''));
-      var tg = trialTag(lane, s.w.all.n, s.w.all.pf); if(bk === 'live' && tg.trial){ trials++; }
+      var tg = trialTag(lane, s.id === 'L1' && s.kill && isFinite(s.kill.count) ? s.kill.count : s.w.all.n, s.w.all.pf); if(bk === 'live' && tg.trial){ trials++; }   // gold's trial counts its trades since the trial start, not its whole record
       // The chart sheet's block (option A): only when the caller passed the strategy's settled rows (renderStrategiesPage does; an older caller draws the rows as before).
       var dd = s.detail || {}, charts = Array.isArray(s.rows) ? kalshiStratChartsHtml({ range: model.range || '30D', now: now, rule: s.rule, net: s.w.all.net, cum: [0].concat(dd.cum || []), times: [null].concat(s.rows.map(function(r){ return r.ts; })), roll: s.spark, daily: s.daily || [], n: dd.n, winRate: dd.winRate, avgWin: dd.avgWin, avgLoss: dd.avgLoss, goes: goesWords, kill: killWords, ret: retWords, params: s.params || null, stage: bk === 'off' ? 'Off, cooling down' : tg.text,
         gauge: bk !== 'off' && g && !unreadable && !loading ? g : null, trial: (tg.trial || tg.done) && !waiting ? Math.max(0, Math.floor(Number(s.w.all.n) || 0)) : null, trialNote: tg.note || '',
@@ -4980,7 +4990,6 @@ kalshiStatusTick();
     });
     function n30(s){ return s.w.d30.n > 0; }
     // ---- Shadow rows: the rules the bot logs without money ----
-    var shadowBest = null;
     if(model.deck.rows.length){
       model.deck.rows.forEach(function(r){
         if(model.deck.state !== 'ok'){
@@ -4989,7 +4998,6 @@ kalshiStatusTick();
           return;
         }
         var p = r.rep, pfText = (p.fillable === 0 ? 'n/a' : (p.pfFillable === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : p.pfFillable.toFixed(2))), fr = p.fillable / 150;
-        if(!shadowBest || p.fillable > shadowBest.n){ shadowBest = { id: r.id, n: p.fillable }; }
         var bd = kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract });
         var det = '<div class="rw-c1"><div class="rw-hd">' + ringHtml(pfText, esc) + '<div class="rw-hm"><b>' + esc(r.id) + '</b><span>cash PF, n ' + p.fillable + '</span></div></div>' + oneRule('Rule', r.rule + '. Shadow only, no money') +
           '<div class="bd-res"><span>Day <b>' + Math.min(14, Math.floor(p.days)) + ' of 14</b></span><span>Signals <b>' + p.signals + '</b></span><span class="bd-last">' + esc(p.status.split(':')[0]) + '</span></div></div>' +
@@ -5015,14 +5023,8 @@ kalshiStatusTick();
     ['live'].forEach(function(k){ box[k].forEach(function(o){ if(nearest && o.key === nearest.id){ o.near = true; } }); });
     // ---- Off / Retired: the killed cards first, then the retired list grouped by cause (closed by default) ----
     var counts = { shadow: box.shadow.length, live: box.live.length, off: box.off.length };   // Off shows only strategies that traded live and can come back (cleanup, Nov 13, 2026, the owner: "this list should only display stuff that has ran live & is returning at some point"); the full retired history stays in the registry and the docs
-    var goldRet = null; (model.live || []).forEach(function(s){ if(s.ret){ goldRet = s.ret; } });
     var unreadableGold = (model.live || []).some(function(s){ return s.killState === 'unknown'; });
-    // ---- The header line and each box's progress line ----
-    var prog = {
-      shadow: shadowBest ? [shadowBest.n / 150, 'closest: ' + shadowBest.n + ' of 150 signals'] : [0, 'no shadow rule counting yet'],
-      live: [0, ''],   // no progress line on the Live box (Nov 13, 2026, the owner): each row already shows its own nearest stop rule
-      off: goldRet ? [goldRet.frac, 'return: ' + goldRet.trades + ' of 60 trades'] : [0, 'nothing to return yet']
-    };
+    // No progress line on any box (Nov 13, 2026, the owner): each row already shows its own stop rule or record, and the Shadow line repeated it.
     var openKey = model.open && KAL_STAGES.some(function(s){ return s.key === model.open.stage; }) ? model.open.stage : null;
     // Each figure once (Nov 13, 2026, the owner: "limit redundancies"): the boxes carry the counts, the open box's progress line carries the closest kill or promotion, and each row its own kill room, so this line only says what is not shown elsewhere.
     var defSum = (trials ? '<b>' + trials + '</b> of the live strategies ' + (trials === 1 ? 'is' : 'are') + ' on trial. ' : '') + (unreadableGold ? 'Gold\'s kill state is not readable. ' : '') + 'Tap a box to open it.';
@@ -5045,7 +5047,7 @@ kalshiStatusTick();
     };
     var panels = KAL_STAGES.map(function(s){
       var isOpen = openKey === s.key;
-      return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '>' + (s.key === 'off' || s.key === 'live' ? '' : '<div class="lp-prog" aria-hidden="true"><i style="--w:' + pct(prog[s.key][0]).toFixed(1) + '%"></i><span>' + esc(prog[s.key][1]) + ' &rarr; ' + esc(s.then) + '</span></div>') + '<div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
+      return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '>' + '' + '<div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
     }).join('');
     var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[KAL_STAGES.length - 1].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
@@ -5144,13 +5146,20 @@ kalshiStatusTick();
     kalshiStratAnim.raf = requestAnimationFrame(step);
   }
   /* STRAT-ANIM-END */
-  var kalshiStratPop = { refresh: function(){} }, kalshiStratSheets = {}, kalshiStratChart = { refresh: function(){} };
+  var kalshiStratPop = { refresh: function(){}, close: function(){} }, kalshiStratSheets = {}, kalshiStratChart = { refresh: function(){}, close: function(){} };
+  // Back closes a strategy pop-up instead of leaving the site (interaction check, Nov 13, 2026: the page only ever replaces its address, so Back left the site with a sheet open).
+  // Opening pushes one history entry with the same address; Back (popstate) closes the open pop-up; closing by X, Escape or a tap outside steps back over that entry so it does not pile up.
+  function kalshiPopPush(){ try{ if(!(history.state && history.state.spPop)){ history.pushState({ spPop: true }, '', location.href); } }catch(e){} }
+  function kalshiPopPop(){ try{ if(history.state && history.state.spPop){ history.back(); } }catch(e){} }
+  window.addEventListener('popstate', function(){ kalshiStratChart.close(true); kalshiStratPop.close(true); });
   // The full history behind the chosen range (Nov 13, 2026, the owner: "the ytd strategies thing should go back to oct 7th right?"). The live listener holds only the newest 1,000 gold orders and 500 second-slot orders,
   // so a range that starts before the oldest of them reads the older gold orders once, the same way the Account result line does (kalshiOrdersSince, kept six hours; a failed read is retried after a minute and the chart says so).
   // Returns { orders } when it has a full set (or nothing older is needed), { loading } while the read is out, { failed, from } when it failed, and slotShort when the second-slot list may be cut short.
   var kalshiStratOlder = {}, kalshiStratOlderOut = {};
+  // The page always holds the whole record since the bot's first trade (Oct 7, 2026), whatever range is chosen (the owner, Nov 13, 2026: the All time tile must not change with 7D, 30D or YTD). Only the chart, its header and its ring follow the range; Today, Last 7 days and All time read the full record.
+  var KAL_STRAT_START = Date.UTC(2026, 9, 7);
   function kalshiStratHistory(now){
-    var cut = kalshiStratRangeOf(kalshiStratRange).cut(now), key = kalshiStratRange;
+    var cut = KAL_STRAT_START, key = 'all';
     var live = (kalshiLiveOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); }), slot = (kalshiSlotOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); });
     var oldest = live.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity), slotOldest = slot.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
     var out = { slotShort: slot.length >= 500 && cut < slotOldest ? slotOldest : null };
@@ -5184,7 +5193,7 @@ kalshiStatusTick();
       var kill = kalshiBoardKill(s.id, mine, now, kalshiMoney), goldCard = s.id === 'L1';
       if(goldCard){ kill.off = gold.state === 'killed'; kill.unknown = gold.state !== 'killed' && gold.state !== 'armed'; if(kill.off){ kill.lines = ['Gold is off: the kill rule tripped.'].concat(kill.lines); } }
       var reg = kalshiRegistry.list.filter(function(x){ return x.id === s.id; })[0] || null;
-      var lane = kalshiStratLaneOf({ stage: reg ? reg.stage : undefined, drawn: true, off: liveState[s.id] === 'off', slot: KAL_SLOT_REGISTERED.indexOf(s.id) >= 0 || Boolean(reg && reg.code && reg.code.slot) });
+      var lane = kalshiStratLaneOf({ stage: reg ? reg.stage : undefined, drawn: true, off: liveState[s.id] === 'off', slot: KAL_SLOT_REGISTERED.indexOf(s.id) >= 0 || Boolean(reg && reg.code && reg.code.slot) || (s.id === 'L1' && typeof KAL_GOLD_TRIAL === 'object') });
       return { id: s.id, lane: lane, name: s.name, rule: s.rule, rules: s.rules, params: s.params, orders: mine.length, w: kalshiBoardWindows(mine, now), kill: kill,
         killState: goldCard ? gold.state : undefined, note: goldCard ? kalshiGoldKillNote(gold, gold.state === 'killed' ? kalshiGoldReturnProgress(kalshiShadowCache.rows, now) : '', kalDateTime) : '',
         today: kalshiBoardPf(kalshiBoardRows(mine).filter(function(r){ return kalDayKey(r.ts) === kalDayKey(now); })).net,
@@ -5238,13 +5247,14 @@ kalshiStatusTick();
       return true;
     };
     kalshiStratPop.refresh = function(){ if(!pop.hidden && openId){ draw(); } };   // a redraw or the Privacy switch re-masks an open sheet
-    var close = function(){ pop.hidden = true; openId = null; if(last && last.focus){ last.focus(); } };
+    var close = function(fromBack){ if(pop.hidden){ return; } pop.hidden = true; openId = null; if(!fromBack){ kalshiPopPop(); } if(last && last.focus){ last.focus(); } };
+    kalshiStratPop.close = close;
     pop.addEventListener('click', function(e){ if(e.target === pop || e.target.id === 'spPopClose' || (e.target.closest && e.target.closest('#spPopX'))){ close(); return; } var g = e.target && e.target.closest ? e.target.closest('[data-strng]') : null; if(g){ kalshiStratRange = g.getAttribute('data-strng'); renderStrategiesPage(); } });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !pop.hidden){ close(); } });
     body.addEventListener('click', function(e){
       var b = e.target && e.target.closest ? e.target.closest('[data-reg-details]') : null; if(!b){ return; }
       var id = b.getAttribute('data-reg-details'); openId = id; if(!draw()){ openId = null; return; }
-      last = b; pop.hidden = false; document.getElementById('spPopClose').focus();
+      last = b; if(pop.hidden){ kalshiPopPush(); } pop.hidden = false; document.getElementById('spPopClose').focus();
     });
   })();
   // The chart sheet (Nov 13, 2026, the owner chose A, "Sheet": "go back to the original idea of it being a pop-up ... but with charts involved"). A tap on a strategy row opens one pop-up holding the row's head, its charts (Cash, Rolling PF, Daily, the closest kill and trial gauges, the last trades) and everything its old dropdown held. It lives outside #stratBody so the minute's redraw never closes it; refresh() copies the redrawn row back in, so the figures stay live and Privacy view re-masks them. Close, a tap outside or Escape closes it and focus goes back to the row. On a phone it is a bottom sheet.
@@ -5264,14 +5274,15 @@ kalshiStatusTick();
       return true;
     };
     var mark = function(k, on){ kalshiStratOpen['row:' + k] = on; var b = rowOf(k); if(b){ b.setAttribute('aria-expanded', String(on)); b.parentNode.classList.toggle('open', on); } };
-    var close = function(){ if(pop.hidden){ return; } var k = openKey; pop.hidden = true; openKey = null; if(k){ mark(k, false); } var b = k ? rowOf(k) : null; if(b && b.focus){ b.focus(); } };   // the row is found again by its key, since a redraw replaces the button that opened the sheet
+    var close = function(fromBack){ if(pop.hidden){ return; } var k = openKey; pop.hidden = true; openKey = null; if(!fromBack){ kalshiPopPop(); } if(k){ mark(k, false); } var b = k ? rowOf(k) : null; if(b && b.focus){ b.focus(); } };   // the row is found again by its key, since a redraw replaces the button that opened the sheet
     kalshiStratChart.open = function(k, btn){
       if(openKey && openKey !== k){ mark(openKey, false); }
       openKey = k; if(!draw()){ openKey = null; return; }
-      mark(k, true); pop.hidden = false;
+      mark(k, true); if(pop.hidden){ kalshiPopPush(); } pop.hidden = false;
       var sh = pop.querySelector('.sp-csheet'); if(!motionReduced()){ sh.classList.remove('sc-play'); void sh.offsetWidth; sh.classList.add('sc-play'); }
       document.getElementById('spChartClose').focus();
     };
+    kalshiStratChart.close = close;
     kalshiStratChart.refresh = function(){ if(!pop.hidden && openKey){ var b = rowOf(openKey); if(!b){ close(); return; } var sh = pop.querySelector('.sp-csheet'); sh.classList.remove('sc-play'); draw(); mark(openKey, true); } };
     pop.addEventListener('click', function(e){
       var t = e.target; if(t === pop || (t.closest && t.closest('#spChartClose'))){ close(); return; }
@@ -5301,7 +5312,7 @@ kalshiStatusTick();
     }
     // Listened to on the few containers that hold charts (never the whole page): the Strategies board, its chart sheet and Details popup, and Open positions on the Bot page.
     var at = function(e){ var box = e.target && e.target.closest ? e.target.closest('[data-hv]') : null; if(box){ show(box, e.clientX); } else { clear(); } };
-    ['stratBody', 'spChart', 'spPop', 'kalBotOpen'].forEach(function(id){ var root = document.getElementById(id); if(!root){ return; } root.addEventListener('pointermove', at); root.addEventListener('pointerdown', at); root.addEventListener('pointerleave', clear); root.addEventListener('pointercancel', function(e){ if(e.pointerType !== 'mouse'){ clear(); } }); });
+    ['stratBody', 'spChart', 'spPop', 'kalBotOpen'].forEach(function(id){ var root = document.getElementById(id); if(!root){ return; } root.addEventListener('pointermove', at); root.addEventListener('pointerdown', at); root.addEventListener('pointerleave', function(e){ if(e.pointerType === 'mouse'){ clear(); } }); root.addEventListener('pointercancel', function(e){ if(e.pointerType !== 'mouse'){ clear(); } }); });   // a lifted finger fires pointerleave; only the mouse leaving clears, so a tapped readout stays until the next touch (interaction check, Nov 13, 2026)
   })();
   // The board's controls (Nov 12, 2026): a row and its More open in place (a class and aria-expanded, the open state kept in kalshiStratOpen so the minute's redraw keeps it); a box opens by redrawing from the kept state, and the boxes glide to their new places (a FLIP slide of 620 ms, skipped under reduced motion). No network, no storage, no timer except the one that ends the entrance play.
   function kalshiStratStage(key){
@@ -5410,8 +5421,12 @@ kalshiStatusTick();
   }
   kalshiBuildCheck(); setInterval(function(){ if(document.visibilityState === 'visible'){ kalshiBuildCheck(); } }, 300000);   // the baseline is taken at load for everyone, then a header only check every 5 minutes
   // The Running pop-over closes when you tap anywhere else or press Escape.
+  // The Running, Tools and Layout menus all close on a click or tap outside and on Escape (interaction check, Nov 13, 2026: Tools and Layout stayed open; only the Running menu closed).
   document.addEventListener('click', function(e){ var m = document.getElementById('kalBotMenu'); if(m && m.open && !m.contains(e.target)){ m.open = false; } });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ var m = document.getElementById('kalBotMenu'); if(m && m.open){ m.open = false; } } });
+  var KAL_MENUS = ['kalTools', 'kalLayout'];
+  document.addEventListener('click', function(e){ KAL_MENUS.forEach(function(id){ var m = document.getElementById(id); if(m && m.open && !m.contains(e.target)){ m.open = false; } }); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ KAL_MENUS.forEach(function(id){ var m = document.getElementById(id); if(m && m.open){ m.open = false; } }); } });
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ kalshiResume(); } });
   window.addEventListener('pageshow', function(e){ if(e && e.persisted){ kalshiResume(); } });
   function startKalshiFeed(){
@@ -5426,7 +5441,7 @@ kalshiStatusTick();
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; kalshiSyncError = ''; kalshiFeedRender(); }, function(err){ kalshiFeedFailed(err); }); }
     if(api.watchKalshiSlot){ kalshiSlotUnsub = api.watchKalshiSlot(function(o){ kalshiSlotOrders = o; kalshiSlotError = ''; kalshiFeedRender(); }, function(err){ kalshiSlotOrders = []; kalshiSlotError = String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60); kalshiFeedRender(); }); }
-    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiL1(); } kalshiFeedRender(); }); }
+    if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session, loaded: true }; if(s.account){ kalshiAcctFromServer(s.account); } if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiL1(); } kalshiFeedRender(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; kalshiFeedRender(); }); }
   }
   function stopKalshiFeed(){
@@ -6072,6 +6087,7 @@ kalshiStatusTick();
     if(name !== 'brief' && name !== 'kalshi' && name !== 'strategies' && name !== 'settings'){ name = 'brief'; }
     if((name === 'kalshi' || name === 'strategies') && !currentUserIsAdmin){ name = 'brief'; }
     currentPageName = name; setPageTitle();
+    if(name !== 'strategies' && typeof kalshiStratChart === 'object'){ kalshiStratChart.close(true); kalshiStratPop.close(true); }   // a strategy pop-up never stays open over another page (interaction check, Nov 13, 2026); true: the page's own address change replaces the pop-up's history entry
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-kalshi').hidden = (name !== 'kalshi');
     document.getElementById('page-strategies').hidden = (name !== 'strategies');
@@ -6413,6 +6429,8 @@ kalshiStatusTick();
         // its own 3-minute cycle. This page makes no market-data call of its
         // own.
         sharedSnapshotUnsubscribe = api.watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate);
+        // Show the strip's row at once with a plain loading line, so the page does not jump down when the prices arrive (load check, Nov 13, 2026: on a phone the strip is its own row under the header).
+        (function(){ var te = document.getElementById('marketTape'); if(te && te.hidden && !marketTapeData){ te.innerHTML = '<span class="tape-asof">Loading prices...</span>'; te.hidden = false; } })();
         tapeUnsubscribe = api.watchMarketTape(handleMarketTapeUpdate);
         INDEX_PROXIES.forEach(function(ix){
           ensureInWatchlist(ix.sym, null, null);
@@ -6622,9 +6640,8 @@ kalshiStatusTick();
     }
     host.addEventListener('pointermove', move);
     host.addEventListener('pointerdown', move);   // a tap shows the readout at once on a phone, and a sideways drag moves it (mobile pass, Nov 13, 2026)
-    host.addEventListener('pointerleave', clear);
-    host.addEventListener('pointercancel', clear);
-    host.addEventListener('pointerup', function(e){ if(e.pointerType !== 'mouse'){ clear(); } });
+    host.addEventListener('pointerleave', function(e){ if(e.pointerType === 'mouse'){ clear(); } });   // a lifted finger stays: the readout holds until the next touch, like the Strategies charts (interaction check, Nov 13, 2026: a tap showed it for an instant only)
+    host.addEventListener('pointercancel', clear);   // a vertical scroll that starts on the chart clears it
   })();
   // The risk mood (the owner: "risk mood + maybe fear/greed index"): a one word read of the VIX, the VIX, the 10 year yield and long bonds, and the two fear and greed indexes (stocks from CNN, crypto from alternative.me). All of it
   // comes from the tape; anything that has not arrived is a dash, never a made-up number.

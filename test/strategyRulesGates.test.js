@@ -97,7 +97,7 @@ gates.SR4 = () => {
 gates.SR5 = () => {
   // the pop-ups draw them: the chart sheet shows Goes live when, Stops when, Comes back when and a Settings panel; the registry pop-up shows Stage and Goes live when
   assert.ok(/line\('Goes live when', c\.goes\) \+ line\('Stops when', c\.kill\) \+ line\('Comes back when', c\.ret\)/.test(html), 'the chart sheet shows the three lines');
-  assert.ok(/<h5>Settings<\/h5>/.test(html) && /line\('Stage', c\.stage\)/.test(html), 'the chart sheet shows the settings and the stage');
+  assert.ok(/<h5>Settings<\/h5>/.test(html) && /KAL_SETTINGS_KEEP = \/\^\(Contracts\|Daily loss cap\|Lifetime loss cap\|Window cap\|Started\|Next read\|Size if it goes live\)\$\//.test(html), 'the chart sheet shows only the settings not already said above (Nov 13, 2026, the owner: duplicates removed)');
   assert.ok(/f\('Stage', x\.stage\) \+ \(x\.stage === 'Retired' \? '' : f\('Goes live when', x\.goes \|\| x\.goesLive\)\) \+ f\('Stops when', x\.kill\)/.test(html), 'the registry pop-up shows the stage and the three lines');
   assert.ok(/params: s\.params/.test(html), 'the live cards carry their settings to the sheet');
 };
