@@ -1873,6 +1873,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Bot status: the amber "Needs a look" note no longer says gold has sent no order while gold is deliberately off (kill latch tripped, or its trial seat has not started yet), and when gold's trial starts its silence clock counts from the start, not from its old orders. The note also stays quiet while a strategy's state cannot be read. Page only.</li>
                   <li>Strategies page and site checks (the owner: "lets remove some info from the pop-up strategy card", "interaction bugs", "page loading bugs"): every strategy pop-up now shows only the essentials, one money chart with 7D, 30D and YTD, the four tiles, the nearest stop in plain words with the room left, one short sentence each for when it goes live, stops and comes back, and only the settings not already shown. Gold reads Trial 0 of 90 as a trial seat, "no losses" fits inside the small ring, and the Shadow box lost its repeated top line. Fixed from a click and tap test of every page: Back now closes a pop-up instead of leaving the site, the page behind no longer scrolls under a pop-up, a pop-up closes when you leave the page, the Tools and Layout menus close on a tap outside or Escape, and a tapped chart readout stays until the next tap. From a load test: the loss stop meter waits for the bot's settings instead of showing 100% used for a moment, "Reading the account" shows once, and the Brief no longer jumps when prices arrive. Page only.</li>
                   <li>Trading, built but switched off until a number is known: a trial seat in the second strategy slot for the S&amp;P 500 15 minute market (SPXOI1, the owner approved it as a trial below the research bar, with no evidence of an edge). It would buy the cheaper side at 8c to 50c when open interest rose enough in the minutes before the close, 3 contracts, held to the close, with its own limits of $3 an order and $9 lost a day. The open interest line is not known yet (it comes from the Nov 5 to Nov 13 candles), so the seat is not registered and nothing can be sent for it. Nothing else in the bot changed.</li>
                   <li>Strategies page cleanup (the owner: "what the hell are we doing"): a merge had kept both sides of a conflict and drew a second, smaller chart and a stray caption in the top card. The top card now has one chart, no middle caption, and Today, Last 7 days and All time as one row of three tiles inside the card. The Privacy button sits on the right, the top card and the stage bar have the same width, and a doubled changelog line is gone. Every strategy pop-up uses one layout, and CFRTI-K reads Trial in Live. The Off box is now "Off, coming back": it lists only strategies that traded live and are building a record to return; the retired history stays in the strategy list and the docs. Page only.</li>
@@ -3908,7 +3909,7 @@
   // own usual gap: 8 times the median gap of its last 3 days, and never under 3 hours. It needs 8 orders in those 3 days to know what usual is. Bitcoin and Ethereum are left out on purpose: the smooth climb rule removes most of their
   // orders by design, so their silence says nothing. Gold, the forex pairs and natural gas do not trade over the weekend, so for them the clock starts at Sunday 18:00 Central and nothing is said from Friday 17:00 to then; XRP and
   // Dogecoin trade all week. Pure: orders in, sentences out. It only reads; it can warn wrongly (a holiday), never act.
-  var KAL_WATCH = [{ name: 'Gold', weekdays: true, sid: 'L1' }, { name: 'XRP', weekdays: false, paused: true }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
+  var KAL_WATCH = [{ name: 'Gold', weekdays: true, sid: 'L1', heldFrom: Date.UTC(2026, 10, 10), startAt: Date.UTC(2026, 10, 14) }, { name: 'XRP', weekdays: false, paused: true }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
   function kalshiCtWeekMinute(ms){
     var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
     parts.forEach(function(x){ o[x.type] = x.value; });
@@ -3926,6 +3927,8 @@
     var wm = kalshiCtWeekMinute(now), closed = wm >= 7200 + 1020 || wm < 1080, reopen = now - ((wm - 1080 + 10080) % 10080) * 60000, out = [];
     KAL_WATCH.forEach(function(w){
       if(states && w.sid && states[w.sid] !== 'armed'){ return; }
+      // A strategy held off until its start time (gold's trial seat: GOLD_KILL.rearmAt, held off from GOLD_TRIAL.heldOffFrom) is not trying to trade yet, whatever its latch says; after the start its silence clock begins at the start, not at its last old order. Gate SM3 ties both dates to the bot's code.
+      if(w.startAt && w.heldFrom && now >= w.heldFrom && now < w.startAt){ return; }
       if(w.paused || (w.weekdays && closed)){ return; }   // a market paused in the bot's code (PAUSED_SERIES: XRP since Oct 28, 2026, Bitcoin and the probe markets since Oct 28 to 29) is silent on purpose
       var ts = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && Number.isFinite(Number(o.ts)) && kalshiMarketName(o) === w.name; }).map(function(o){ return Number(o.ts); }).sort(function(a, b){ return a - b; });
       var recent = ts.filter(function(x){ return x >= now - 3 * 86400000; });
@@ -3934,6 +3937,7 @@
       gaps.sort(function(a, b){ return a - b; });
       var usual = gaps[Math.floor(gaps.length / 2)], line = Math.max(3 * 3600000, 8 * usual);
       var from = ts[ts.length - 1]; if(w.weekdays && from < reopen){ from = reopen; }
+      if(w.startAt && now >= w.startAt && from < w.startAt){ from = w.startAt; }
       // A market with quiet hours (gold, 20:00 to 24:00 Central, from Oct 29, 2026) sends nothing in them on purpose: say nothing during the block, and restart the clock at its end when the last order came just before it.
       if(w.quiet){ var md = wm % 1440; if(md >= w.quiet[0] * 60 && md < w.quiet[1] * 60){ return; } var blockEnd = now - md * 60000; if(from < blockEnd && from >= blockEnd - 5 * 3600000){ from = blockEnd; } }
       if(now - from > line){ out.push(w.name + ' has sent no order for ' + kalshiDurationText(now - from) + ' (it usually sends one about every ' + kalshiDurationText(usual) + ').'); }
