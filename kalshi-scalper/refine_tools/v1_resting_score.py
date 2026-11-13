@@ -227,6 +227,33 @@ def pf(xs):
     return (g / l) if l > 0 else (float("inf") if g > 0 else float("nan"))
 
 
+def half_verdict(h):
+    """Head's D1 ruling for a half whose PF comparison is not finite: (passes, why). h = (version PF, parent PF at +1c, fills, version net, parent net at +0c)."""
+    vpf, ppf, nf, vnet, pnet0 = h
+    if nf == 0 or vpf != vpf:
+        return False, "empty half fails"
+    vinf, pinf = vpf == float("inf"), ppf == float("inf")
+    if vinf and pinf:
+        return vnet >= pnet0 - 1e-12, "both PFs infinite: decided on net (version not lower than parent at +0c)"
+    if vinf:
+        return True, "only the version PF is infinite: passes"
+    if pinf:
+        return False, "only the parent PF is infinite: fails"
+    return vpf - ppf >= 0, "finite"
+
+
+def bar3(h1, h2):
+    """Bar (3), second half not worse than the first (version minus parent). Both differences finite: as registered. Otherwise (an infinite PF in either half) the Head's D1 ruling decides the SECOND half on its own terms; an empty half in either half fails."""
+    for h in (h1, h2):
+        if h[2] == 0 or h[0] != h[0]:
+            return False, "empty half fails"
+    d1, d2 = h1[0] - h1[1], h2[0] - h2[1]
+    if all(x == x and abs(x) != float("inf") for x in (d1, d2)):
+        return d2 >= d1 - 1e-12, "finite differences: second half not below first"
+    ok, why = half_verdict(h2)
+    return ok, "an infinite PF in a half: second half decided alone (%s)" % why
+
+
 def evaluate(sig, days, block="dev"):
     """sig: signal dicts (status signal) in close order. Returns the report lines and the bar."""
     sig = sorted(sig, key=lambda s: s["ct"])
@@ -258,7 +285,8 @@ def evaluate(sig, days, block="dev"):
         f = [s for s in ss if s["filled"]]
         v = [net(s["p_bid"], s["win"], 0.0, MAKER_FEE_FRAC) for s in f]
         p = [net(s["p_ask"], s["win"], 0.01) for s in ss]
-        return pf(v), pf(p), len(f)
+        p0 = [net(s["p_ask"], s["win"], 0.0) for s in ss]
+        return pf(v), pf(p), len(f), sum(v), sum(p0)
     h1, h2 = part(sig[:half]), part(sig[half:])
     out.append("first half: version PF %.2f parent PF %.2f (filled %d) | second half: version PF %.2f parent PF %.2f (filled %d)" % (h1[0], h1[1], h1[2], h2[0], h2[1], h2[2]))
     c1 = pf(ver) - pf(par_all) >= BAR_PF
@@ -266,10 +294,10 @@ def evaluate(sig, days, block="dev"):
     c2_1 = sum(ver) / weeks >= sum(par_all) / weeks - 1e-12
     c2_0 = sum(ver) / weeks >= sum(par0) / weeks - 1e-12   # the stricter parent (+0c) governs: live fills are at or below the ask seen
     c2 = c2_0 and c2_1
-    d1, d2 = h1[0] - h1[1], h2[0] - h2[1]
-    c3 = d2 >= d1 - 1e-12
+    c3, c3_why = bar3(h1, h2)
     c4 = len(filled) >= BAR_N
     miss = pf(par_unf) - pf(ver) >= BAR_PF if unfilled and filled else False
+    out.append("bar (3) basis: " + c3_why)
     out.append("7g BAR: (1) PF beats parent by 0.10: %s | (2) net per contract-week not lower (vs parent +0c: %s, vs +1c: %s; +0c governs): %s | (3) second half not worse (version minus parent, second half vs first): %s | (4) at least %d filled: %s" % (
         "met" if c1 else "not met", "met" if c2_0 else "not met", "met" if c2_1 else "not met", "met" if c2 else "not met", "met" if c3 else "not met", BAR_N, "met" if c4 else "not met (NOT_ENOUGH_DATA)"))
     falsified = (not c2) or miss

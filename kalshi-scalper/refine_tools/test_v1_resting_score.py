@@ -140,6 +140,18 @@ class T(unittest.TestCase):
         lines = S.evaluate(sig, 7.0, "dev")
         self.assertTrue(any("(2) fails: yes" in l and "=> FALSIFIED" in l for l in lines))
         self.assertTrue([l for l in lines if l.startswith("VERDICT")][0].startswith("VERDICT (this block): NOT_ENOUGH_DATA"))   # thin sample: information only
+    def test_bar3_infinite_half_rulings(self):
+        inf = float("inf"); nan = float("nan")
+        # (vpf, parent pf +1c, fills, version net, parent net at +0c)
+        self.assertEqual(S.bar3((inf, inf, 1, 0.5, 0.4), (2.0, 2.0, 1, 0.1, 0.1))[0], True)    # first both inf, second finite and equal: second decides, 0 >= 0
+        self.assertEqual(S.bar3((1.0, 1.0, 1, 0.1, 0.1), (2.0, 1.0, 1, 0.1, 0.1))[0], True)    # finite: d2 1.0 >= d1 0.0
+        self.assertEqual(S.bar3((2.0, 1.0, 1, 0.1, 0.1), (1.0, 1.0, 1, 0.1, 0.1))[0], False)   # finite: d2 0 < d1 1
+        self.assertEqual(S.bar3((1.0, 1.0, 1, 0, 0), (inf, inf, 1, 0.3, 0.4))[0], False)      # second both inf, net lower: fails
+        self.assertEqual(S.bar3((1.0, 1.0, 1, 0, 0), (inf, inf, 1, 0.4, 0.4))[0], True)       # second both inf, net not lower: passes
+        self.assertEqual(S.bar3((1.0, 1.0, 1, 0, 0), (inf, 2.0, 1, 0.4, 0.4))[0], True)       # only version infinite: passes
+        self.assertEqual(S.bar3((1.0, 1.0, 1, 0, 0), (2.0, inf, 1, 0.4, 0.4))[0], False)      # only parent infinite: fails
+        self.assertEqual(S.bar3((nan, 1.0, 0, 0, 0), (2.0, 1.0, 1, 0.1, 0.1))[0], False)      # empty first half fails
+        self.assertEqual(S.bar3((1.0, 1.0, 1, 0, 0), (nan, 1.0, 0, 0, 0))[0], False)          # empty second half fails
     def test_labels_printed(self):
         self.assertIn("DEPTH1, CFRTI-B and CFRTI1-BTC", S.LABELS["V1"])
         self.assertEqual(S.LABELS["V2"], "not blind on EVENT830's forward windows")
