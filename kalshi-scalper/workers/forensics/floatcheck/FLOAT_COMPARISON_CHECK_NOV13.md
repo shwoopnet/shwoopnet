@@ -21,3 +21,13 @@ What counts as a hit: a registered line (a price band, a spread limit, a gap or 
 ## Suggested fix, one line a card
 
 Every "or less" and "or more" on a registered line uses a tolerance of 1e-9 (as MAPBREAK's Amendment 10 now says), or prices are held as whole tenths of a cent. A bucket edge is found by whole-number arithmetic on cents. A verdict bar is compared on the unrounded figure with the same tolerance.
+
+## Re-scans after the fixes (2026-11-13, later)
+
+| File (commit) | Finding |
+|---|---|
+| Desk A `inplayjump.py` (7eeacba5, sha256 `c889c333...`) | Both hits fixed: the bucket is whole-number arithmetic on cents, the verdict bars carry 1e-9. No raw comparison left on a registered line. |
+| Testing Desk `tie3.py` (sha256 `8f73f930...`) | Both hits on the old line 157 fixed (1e-9 on the spread and the 10c edge, and on the survive test). One line left for the record: 168, "nothing to buy" compares a share already rounded to three decimals with 0.5, so 0.4996 reads as half. It bites only on an exact near-tie. |
+| Testing Desk `breakplay.py`, `mapbreak.py`, `polcost.py`, `poli2_count.py` (c7fa2934) | No raw comparison on a registered price, spread, gap, cost or share line. `breakplay.py` line 106 compares a parsed bid with 0.90 directly (safe: no arithmetic). Lines 335 to 337, the profit factor bars of the rule step, are raw; the Head's standing rule covers them (a verdict figure within 0.001 of its bar is recomputed in exact whole cents by both builds). |
+| History Miner `esoctie.py` (sha256 `ce1e9030...`, NOTE 11) | Reported fixed by its author and audited CLEAN by Auditor B; not re-scanned here. |
+| Forensics `wheel0.py` | Left frozen by the Head's ruling; the exact-cents rule is a dated line in `wheel0/WHEEL0_PRECONDITION.md`. |
