@@ -2,7 +2,7 @@
 """COMBODONE stage 1, SECOND BUILD (History Miner, Nov 13, 2026), from Idea Desk C's card only (claude/idea-desk-c 593597e6, COMBODONE_CARD.md, Amendments 1 and 2) and Desk B's
 INPUT_LAYOUT.md (22c2f47a; layout and output names only). Desk B's combodone.py, outputs and generator are NOT read. Zero tries: a count. Reads files only; sends nothing.
 Usage: python3 -I combodone2.py count <combo dir> <legs run dir>"""
-import csv, gzip, io, json, os, statistics, sys
+import csv, gzip, hashlib, io, json, os, re, statistics, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import combodone2_core as K
 from datetime import datetime, timezone
@@ -85,9 +85,37 @@ def load_legs(run):
     return whole, asked, info
 
 
+def fingerprint(combo):
+    """Amendment 5 (replaces point 23): sha256 hex of UTF-8 lines 'relative/path<TAB>size<TAB>sha256 hex of the file's raw (stored, gzipped) bytes<NEWLINE>', one per regular file
+    at any depth under a top-level YYYY-MM-DD folder of the combo folder, forward-slash paths relative to the combo folder, sorted by path as plain strings.
+    A symbolic link anywhere in that tree (a day folder included) makes the count REFUSE. Returns (fingerprint, number of files)."""
+    lines = []
+    for day in os.listdir(combo):
+        dp = os.path.join(combo, day)
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+            continue
+        if os.path.islink(dp):
+            raise SystemExit("refused: %s is a symbolic link" % dp)
+        if not os.path.isdir(dp):
+            continue
+        for root, dirs, files in os.walk(dp, followlinks=False):
+            for nm in dirs + files:
+                if os.path.islink(os.path.join(root, nm)):
+                    raise SystemExit("refused: %s is a symbolic link" % os.path.join(root, nm))
+            for fn in files:
+                fpth = os.path.join(root, fn)
+                if os.path.isfile(fpth):
+                    raw = open(fpth, "rb").read()
+                    rel = os.path.relpath(fpth, combo).replace(os.sep, "/")
+                    lines.append("%s\t%d\t%s\n" % (rel, len(raw), hashlib.sha256(raw).hexdigest()))
+    lines.sort()
+    return hashlib.sha256("".join(lines).encode("utf-8")).hexdigest(), len(lines)
+
+
 def count(combo, legs_run):
+    fp, nfiles = fingerprint(combo)          # first line of the count (Amendment 5); computed before anything else is read
     runs = load_runs(combo)
-    out = {}
+    out = {"fingerprint": fp, "fingerprint_files": nfiles}
     by_day = {}
     for day, rp, cov, q, b in runs:
         by_day.setdefault(day, 0)

@@ -15,3 +15,9 @@ Usage: `python3 -I combodone2.py count <combo dir> <legs run dir>`.
 8. The leg pull is not whole if: the manifest status is not "complete"; a 200 row is truncated or has no file; a job request has no 200 answer; or a request's last 200 page has a cursor.
 9. "First eligible snapshot with a resting ask" is by receive time, then by run folder order; the median is over listed asks in cents, rounded to two places.
 10. The book figure uses the same run folder's books file, matched by ticker.
+
+## Final version (Nov 13, 2026, about 02:55Z), to the card through Amendment 5 (`claude/idea-desk-c` b0cb5a9e)
+- Amendment 3 (b8317f4b) and Amendment 4 (c6dc2630) matched this build's readings already; one fix from Amendment 4 point 20: a `legs` value that is not a whole number (for example 2.5) is "leg unknown" (it was read as 2). None of the eleven cases' figures changed.
+- Amendment 5 fingerprint, printed first with the number of files: sha256 of sorted lines "path<TAB>size<TAB>sha256 of the stored file's raw bytes" for every regular file at any depth under a top-level YYYY-MM-DD folder; a symbolic link anywhere there makes the count refuse (tested). It is computed before anything else is read.
+- The finding that led to Amendment 5: under the path-and-size wording, cases 01 and 09 printed the same fingerprint while 735 files differed in content and the verdicts differed; under Amendment 5 they differ.
+- `outputs/case_NN.json` now carry `fingerprint` and `fingerprint_files`; every other figure is identical to the compared set at 37332937 (same as Desk B on all 64 blocks).

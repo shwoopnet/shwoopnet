@@ -63,8 +63,9 @@ def classify(t, legs_str, legs_count, close_ts, leg_info):
     if legs is None:
         return ("no_leg_list", None)
     try:
-        lc = int(float(legs_count))
-    except (TypeError, ValueError):
+        f = float(legs_count)
+        lc = int(f) if f == int(f) else None          # Amendment 4 point 20: a legs value that is not a whole number is "leg unknown"
+    except (TypeError, ValueError, OverflowError):
         lc = None
     if lc != len(legs) or any(side is None for _, side in legs) or any(tk not in leg_info for tk, _ in legs):
         return ("leg_unknown", None)
