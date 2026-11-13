@@ -248,3 +248,5 @@ Card line format (lifecycle 7f): `NAME | family (entry mechanism + exit style) |
 ## 6. Protocols for the top three
 
 Deepened, ready-to-run protocols for EXDIV1, TIECOND1 and RETAILFRAC1 (with CRONCLUSTER1 stage A, which shares RETAILFRAC1's files) follow in `kalshi-scalper/workers/IDEA_DESK_A_PROTOCOLS.md` on this branch.
+
+**Dated line (2026-11-13, the owner, relayed by the Head of R&D):** "2026-11-13, the owner: CFRTI-K goes live at 3 contracts with a -$18 net floor (trial terms), runs its frozen held-out read on Nov 14 once, and is CLOSED FOR GOOD if that read fails its registered bar. The futures fair value family stays declined for any new card (owner: SPXFV1 'keep it closed'); CFRTI-K is the owner's named exception, ending at its read."
