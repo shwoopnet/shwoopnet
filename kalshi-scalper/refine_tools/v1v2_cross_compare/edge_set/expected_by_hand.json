@@ -1,0 +1,60 @@
+{
+ "signals": 8,
+ "fills": 6,
+ "weeks": 3,
+ "sorted_order": [
+  "U0W",
+  "U0L",
+  "A1",
+  "B1",
+  "B2",
+  "C4",
+  "D5",
+  "E6"
+ ],
+ "input_order_stable_by_close": [
+  "U0W",
+  "U0L",
+  "A1",
+  "B2",
+  "B1",
+  "C4",
+  "D5",
+  "E6"
+ ],
+ "version_pf_25": 3.933804785790642,
+ "parent_pf_p1": 3.8338047857906425,
+ "parent_pf_p0": 4.123412658520862,
+ "parent_pf_unfilled_p1": 4.033804785790641,
+ "bar1_diff": 0.09999999999999964,
+ "missed_diff": 0.0999999999999992,
+ "version_net_week": 0.5946333333333333,
+ "parent_net_week_p1": 0.6974095043390215,
+ "parent_net_week_p0": 0.7251137172773414,
+ "halves_sorted": {
+  "first": [
+   Infinity,
+   15.030317180926845
+  ],
+  "second": [
+   1.3110763917441002,
+   1.261843599418153
+  ],
+  "d1": Infinity,
+  "d2": 0.04923279232594724,
+  "bar3_finite_met": false
+ },
+ "halves_unsorted": {
+  "first": [
+   8.844942160964804,
+   5.142271274178991
+  ],
+  "second": [
+   2.948862234068809,
+   3.053398955888603
+  ],
+  "d1": 3.702670886785813,
+  "d2": -0.10453672181979412,
+  "bar3_finite_met": false
+ }
+}
