@@ -87,6 +87,37 @@ gates.S8 = () => {
   assert.deepStrictEqual(f.kalshiSilentMarkets(o, live, TUE), [], 'a paused market is not named as silent');
 };
 
+// Gold is deliberately off (kill latch tripped Nov 12) and its trial seat starts Nov 14 00:00Z: 24 hours of silence is not news (the owner, Nov 13, 2026).
+const NOV13 = T('2026-11-13T23:00:00Z'), GOLD_START = T('2026-11-14T00:00:00Z');
+gates.SM1 = () => {
+  const o = every('KXGOLD15M', NOV13 - 24 * H, 20 * MIN, 3);
+  assert.deepStrictEqual(f.kalshiSilentMarkets(o, live, NOV13, { L1: 'off' }), [], 'latched gold raises no alert');
+  assert.deepStrictEqual(f.kalshiSilentMarkets(o, live, NOV13, { L1: 'unknown' }), [], 'an unreadable state raises no alert');
+};
+gates.SM2 = () => {
+  const o = every('KXGOLD15M', NOV13 - 24 * H, 20 * MIN, 3);
+  assert.deepStrictEqual(f.kalshiSilentMarkets(o, live, NOV13, { L1: 'armed' }), [], 'gold before its start time is held off even when the latch reads armed');
+};
+gates.SM3 = () => {
+  const lib = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiGoldKillLib.js'), 'utf8');
+  assert.strictEqual(Date.parse(/rearmAt: Date\.parse\("([^"]+)"\)/.exec(lib)[1]), GOLD_START, 'the page start equals GOLD_KILL.rearmAt');
+  assert.strictEqual(Date.parse(/heldOffFrom: Date\.parse\("([^"]+)"\)/.exec(lib)[1]), T('2026-11-10T00:00:00Z'), 'the page held-from equals GOLD_TRIAL.heldOffFrom');
+  assert.ok(/startAt: Date\.UTC\(2026, 10, 14\)/.test(watch) && /heldFrom: Date\.UTC\(2026, 10, 10\)/.test(watch), 'KAL_WATCH carries both');
+};
+// Gold's market reopens Sunday 18:00 Central (Nov 16 00:00Z), after the start; the clock counts from the later of the start and the reopening.
+const REOPEN = T('2026-11-16T00:00:00Z');
+gates.SM4 = () => {
+  const o = every('KXGOLD15M', GOLD_START - 20 * MIN, 20 * MIN, 3);
+  const out = f.kalshiSilentMarkets(o, live, REOPEN + 4 * H, { L1: 'armed' });
+  assert.strictEqual(out.length, 1, 'a truly silent armed trial is still called out: ' + out.join(' | '));
+  assert.ok(/no order for 4 hours/.test(out[0]), 'the clock counts from the start: ' + out[0]);
+  assert.deepStrictEqual(f.kalshiSilentMarkets(o, live, REOPEN + 2 * H, { L1: 'armed' }), [], 'a freshly started trial is not silent for its history');
+};
+gates.SM5 = () => {
+  const o = every('KXGOLD15M', TUE - 6 * H, 20 * MIN, 3);
+  assert.strictEqual(f.kalshiSilentMarkets(o, live, TUE, { L1: 'armed' }).length, 1, 'an armed strategy that is truly silent still raises one');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
