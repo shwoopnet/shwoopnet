@@ -84,3 +84,24 @@ This build (sha256 `6be8be28...`) follows Amendment 11. The Testing Desk's final
 - **Landed first pull (282 requests), first look: 27 figures a title, all identical**, including both cost figures: the kill's 3.0c (Dota 2 3.5c) and the as-paid 4.0c (4.5c). The count of first looks where the observed winner differs from the posted map result is 0 in every title. The first look is recorded by the Head as out at step 1 for every title (45, 0, 3 and 2 fired and filled bets against 150; gap shares 7.1%, 1.4%, 6.1%, 5.7% against 10%).
 
 The second look waits for the `MAPBREAK_CANDLES_M2` run.
+
+## Fifth comparison: both looks on all landed candles, the second-look run included (2026-11-13): the same output
+
+Lists `MAPBREAK_LISTS/2026-11-12T1919Z_43289005222`; candles `MAPBREAK_CANDLES` (165 requests), `MAPBREAK_CANDLES_REST` (117) and `MAPBREAK_CANDLES_M2/2026-11-13T0030Z_43337581556` (65). Development only, counts only, no match result read by either build. This build `6be8be28...` with the disclosed second-look limit; the Testing Desk's 0794063a.
+
+**212 figures compared at both looks in four titles: all identical.**
+
+| Second look (one map each, before map 3) | CS2 | Dota 2 | Valorant | LoL |
+|---|---|---|---|---|
+| Looks reached / state observable / looks left | 388 / 363 / 363 | 109 / 101 / 101 | 20 / 19 / 19 | 17 / 13 / 13 |
+| Fired / filled at the next minute | 34 / 27 | 5 / 4 | 1 / 0 | 0 / 0 |
+| Gap share (8c or more, spread 4c or less) | 9.4% | 5.0% | 5.3% | 0% |
+| Placebo share, the second look's own looks | 0.8% | 1.0% | 0% | 0% |
+| One-way cost the kill reads / as paid at the limit | 3.5c / 4.5c | 4.0c / 5.0c | 3.0c / 4.0c | 2.5c / 3.5c |
+| Verdict, both builds | no evidence at n = 27 | no evidence at n = 4 | no evidence at n = 0 | no evidence at n = 0 |
+
+The disclosed limit, measured: on the landed candles the text's reading (observed winners) and the posted-results plan give the same looks left in every title, and the count of second looks where the observed map-2 winner differs from the posted one is 0 in every title. The limit's size here is therefore nil as far as the pulled candles can show; matches outside the plan have no candles and cannot be checked.
+
+Every title is under 150 fired and filled bets at the second look, and CS2's gap share (9.4%) is also under the 10% line. Dota 2's kill-line cost is exactly 4.0c, at the line and not above it; it does not decide anything because the count rule comes first.
+
+Output: `MAPBREAK_SECOND_OUTPUT_landed_all_347_requests_counts_only.json` (replaces the first-pull file's second-look block; the first look is unchanged).
