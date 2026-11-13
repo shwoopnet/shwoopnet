@@ -1,0 +1,2423 @@
+{
+ "job": {
+  "job_id": "SOCDERIV_LISTS",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/testing/SOCDERIV_MEASUREMENT.md",
+  "purpose": "SOCDERIV measurement stage 1: settled lists of the 16 leagues' winner, total-goals, both-teams-to-score and team-total series, and 3 fee-field reads (times and strikes only; no result used).",
+  "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor",
+     "min_close_ts",
+     "max_close_ts"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXAPFDDHBTTS",
+   "KXAPFDDHGAME",
+   "KXAPFDDHTEAMTOTAL",
+   "KXAPFDDHTOTAL",
+   "KXBRASILEIROBTTS",
+   "KXBRASILEIROGAME",
+   "KXBRASILEIROTEAMTOTAL",
+   "KXBRASILEIROTOTAL",
+   "KXBUNDESLIGABTTS",
+   "KXBUNDESLIGAGAME",
+   "KXBUNDESLIGATEAMTOTAL",
+   "KXBUNDESLIGATOTAL",
+   "KXCOPADELREYBTTS",
+   "KXCOPADELREYGAME",
+   "KXCOPADELREYTEAMTOTAL",
+   "KXCOPADELREYTOTAL",
+   "KXEERSTEDIVBTTS",
+   "KXEERSTEDIVGAME",
+   "KXEERSTEDIVTEAMTOTAL",
+   "KXEERSTEDIVTOTAL",
+   "KXEFLTROPHYBTTS",
+   "KXEFLTROPHYBTTS",
+   "KXEFLTROPHYGAME",
+   "KXEFLTROPHYTEAMTOTAL",
+   "KXEFLTROPHYTOTAL",
+   "KXEPLBTTS",
+   "KXEPLBTTS",
+   "KXEPLGAME",
+   "KXEPLGAME",
+   "KXEPLTEAMTOTAL",
+   "KXEPLTOTAL",
+   "KXLALIGABTTS",
+   "KXLALIGAGAME",
+   "KXLALIGATEAMTOTAL",
+   "KXLALIGATOTAL",
+   "KXLIGAMXBTTS",
+   "KXLIGAMXGAME",
+   "KXLIGAMXTEAMTOTAL",
+   "KXLIGAMXTOTAL",
+   "KXLIGAPORTUGALBTTS",
+   "KXLIGAPORTUGALGAME",
+   "KXLIGAPORTUGALTEAMTOTAL",
+   "KXLIGAPORTUGALTOTAL",
+   "KXLIGUE1BTTS",
+   "KXLIGUE1GAME",
+   "KXLIGUE1TEAMTOTAL",
+   "KXLIGUE1TOTAL",
+   "KXLVAVIRBTTS",
+   "KXLVAVIRGAME",
+   "KXLVAVIRTEAMTOTAL",
+   "KXLVAVIRTOTAL",
+   "KXMLSBTTS",
+   "KXMLSGAME",
+   "KXMLSTEAMTOTAL",
+   "KXMLSTOTAL",
+   "KXSERIEABTTS",
+   "KXSERIEAGAME",
+   "KXSERIEATEAMTOTAL",
+   "KXSERIEATOTAL",
+   "KXSERIECBTTS",
+   "KXSERIECGAME",
+   "KXSERIECTEAMTOTAL",
+   "KXSERIECTOTAL",
+   "KXUCLWBTTS",
+   "KXUCLWGAME",
+   "KXUCLWTEAMTOTAL",
+   "KXUCLWTOTAL"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 131,
+  "notes": "TIE3 measurement",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "live_KXEPLGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEPLGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEPLTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEPLTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEPLBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEPLBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEPLTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEPLTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLALIGAGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLALIGAGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLALIGATOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLALIGATOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLALIGABTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLALIGABTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLALIGATEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLALIGATEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIEAGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIEAGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIEATOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIEATOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIEABTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIEABTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIEATEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIEATEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBUNDESLIGAGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBUNDESLIGAGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBUNDESLIGATOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBUNDESLIGATOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBUNDESLIGABTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBUNDESLIGABTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBUNDESLIGATEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBUNDESLIGATEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGUE1GAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGUE1GAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGUE1TOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGUE1TOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGUE1BTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGUE1BTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGUE1TEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGUE1TEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXMLSGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXMLSGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXMLSTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXMLSTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXMLSBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXMLSBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXMLSTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXMLSTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAMXGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAMXGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAMXTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAMXTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAMXBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAMXBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAMXTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAMXTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBRASILEIROGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBRASILEIROGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBRASILEIROTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBRASILEIROTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBRASILEIROBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBRASILEIROBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXBRASILEIROTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBRASILEIROTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEFLTROPHYGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEFLTROPHYGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEFLTROPHYTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEFLTROPHYTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEFLTROPHYBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEFLTROPHYBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEFLTROPHYTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEFLTROPHYTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXCOPADELREYGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPADELREYGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXCOPADELREYTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPADELREYTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXCOPADELREYBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPADELREYBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXCOPADELREYTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPADELREYTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXUCLWGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUCLWGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXUCLWTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUCLWTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXUCLWBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUCLWBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXUCLWTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUCLWTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXAPFDDHGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXAPFDDHGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXAPFDDHTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXAPFDDHTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXAPFDDHBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXAPFDDHBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXAPFDDHTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXAPFDDHTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEERSTEDIVGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEERSTEDIVGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEERSTEDIVTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEERSTEDIVTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEERSTEDIVBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEERSTEDIVBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXEERSTEDIVTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEERSTEDIVTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAPORTUGALGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAPORTUGALGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAPORTUGALTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAPORTUGALTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAPORTUGALBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAPORTUGALBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLIGAPORTUGALTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLIGAPORTUGALTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLVAVIRGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLVAVIRGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLVAVIRTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLVAVIRTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLVAVIRBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLVAVIRBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXLVAVIRTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLVAVIRTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIECGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIECGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIECTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIECTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIECBTTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIECBTTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXSERIECTEAMTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIECTEAMTOTAL",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1794527999
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "fee_KXEPLGAME",
+    "path": "/series/KXEPLGAME"
+   },
+   {
+    "id": "fee_KXEPLBTTS",
+    "path": "/series/KXEPLBTTS"
+   },
+   {
+    "id": "fee_KXEFLTROPHYBTTS",
+    "path": "/series/KXEFLTROPHYBTTS"
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-13T0806Z",
+ "finished": "2026-11-13T0807Z",
+ "status": "complete",
+ "requests_sent": 70,
+ "bytes_stored": 42717221,
+ "rows": [
+  {
+   "index": 1,
+   "id": "live_KXEPLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 497572,
+   "t_send_ms": 1794557180229,
+   "t_recv_ms": 1794557180399,
+   "server_date": "Fri, 13 Nov 2026 08:06:20 GMT",
+   "file": "0001.json.gz",
+   "sha256": "322d757b75496654c35a6f4ed577ce53cc954a3e3983b84dd2e7e584274debae",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "live_KXEPLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 946738,
+   "t_send_ms": 1794557181229,
+   "t_recv_ms": 1794557181373,
+   "server_date": "Fri, 13 Nov 2026 08:06:21 GMT",
+   "file": "0002.json.gz",
+   "sha256": "b556053eab5606c0c56462a289e2c80298a055c1bf24df4518059bd5abd415ed",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "live_KXEPLBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 136002,
+   "t_send_ms": 1794557182229,
+   "t_recv_ms": 1794557182332,
+   "server_date": "Fri, 13 Nov 2026 08:06:22 GMT",
+   "file": "0003.json.gz",
+   "sha256": "5f961d0e6c8bcdc8036bf746e2dd2e9172b986f2663b23296e02832fe7b042e6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "live_KXEPLTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1151243,
+   "t_send_ms": 1794557183229,
+   "t_recv_ms": 1794557183515,
+   "server_date": "Fri, 13 Nov 2026 08:06:23 GMT",
+   "file": "0004.json.gz",
+   "sha256": "1bc84f4f1221ff531db6859046e19dce5382e67cd266919974989742399da93f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "live_KXLALIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGAGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 566093,
+   "t_send_ms": 1794557184229,
+   "t_recv_ms": 1794557184385,
+   "server_date": "Fri, 13 Nov 2026 08:06:24 GMT",
+   "file": "0005.json.gz",
+   "sha256": "87caf25c7654d321e61ee1368b798dad84f9e60c8dc4c2897cefc2d69cab3685",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "live_KXLALIGATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGATOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1098293,
+   "t_send_ms": 1794557185230,
+   "t_recv_ms": 1794557185440,
+   "server_date": "Fri, 13 Nov 2026 08:06:25 GMT",
+   "file": "0006.json.gz",
+   "sha256": "232bfbe6c902b58d5f5efe83612f0c3dea563087221b674ec09a78bca9ef8636",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "live_KXLALIGABTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGABTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 155327,
+   "t_send_ms": 1794557186230,
+   "t_recv_ms": 1794557186325,
+   "server_date": "Fri, 13 Nov 2026 08:06:26 GMT",
+   "file": "0007.json.gz",
+   "sha256": "450267cfa54c42458a81377df80c963633f71aa33bc13ccc54f2d5009c18ff18",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "live_KXLALIGATEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGATEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1361158,
+   "t_send_ms": 1794557187230,
+   "t_recv_ms": 1794557187450,
+   "server_date": "Fri, 13 Nov 2026 08:06:27 GMT",
+   "file": "0008.json.gz",
+   "sha256": "510cc01986ee22c4fbe9074bcda1504b63af5f5d105f59f2e188c37d18a0d78a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "live_KXSERIEAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEAGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 611214,
+   "t_send_ms": 1794557188230,
+   "t_recv_ms": 1794557188423,
+   "server_date": "Fri, 13 Nov 2026 08:06:28 GMT",
+   "file": "0009.json.gz",
+   "sha256": "9efdadbf5fffefad9525e150dc7865b245f18e4af7787c07e0c7f0ef13af889e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "live_KXSERIEATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEATOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1137589,
+   "t_send_ms": 1794557189230,
+   "t_recv_ms": 1794557189381,
+   "server_date": "Fri, 13 Nov 2026 08:06:29 GMT",
+   "file": "0010.json.gz",
+   "sha256": "c44ed0c5ca90ef91b17f42f74c23fb9264974637cefde812efaad1ea1311a26d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "live_KXSERIEABTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEABTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 154920,
+   "t_send_ms": 1794557190230,
+   "t_recv_ms": 1794557190349,
+   "server_date": "Fri, 13 Nov 2026 08:06:30 GMT",
+   "file": "0011.json.gz",
+   "sha256": "4cf4ceb802ce27faf81a6324e698a0319c695d40243ad57dcde975f79c9a3fe7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "live_KXSERIEATEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEATEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1379085,
+   "t_send_ms": 1794557191230,
+   "t_recv_ms": 1794557191388,
+   "server_date": "Fri, 13 Nov 2026 08:06:31 GMT",
+   "file": "0012.json.gz",
+   "sha256": "0c5bd78b489a31e7f6ddfeddd1d67dceb21caf2725fd7051042050e8fe82c3d8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "live_KXBUNDESLIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGAGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 446994,
+   "t_send_ms": 1794557192230,
+   "t_recv_ms": 1794557192391,
+   "server_date": "Fri, 13 Nov 2026 08:06:32 GMT",
+   "file": "0013.json.gz",
+   "sha256": "2f41f272744b8d42a854ee5dafe861373ac46140b2d90b5ee50b3530f265b491",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "live_KXBUNDESLIGATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGATOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 946361,
+   "t_send_ms": 1794557193230,
+   "t_recv_ms": 1794557193372,
+   "server_date": "Fri, 13 Nov 2026 08:06:33 GMT",
+   "file": "0014.json.gz",
+   "sha256": "83f4e3bad3cf8ce2d8cfad49eee7c742adeb5b4193967483181ad3015f4ca030",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "live_KXBUNDESLIGABTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGABTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 122667,
+   "t_send_ms": 1794557194230,
+   "t_recv_ms": 1794557194347,
+   "server_date": "Fri, 13 Nov 2026 08:06:34 GMT",
+   "file": "0015.json.gz",
+   "sha256": "03801beceb5df86f58abc8136aea36b86ee390750660fce0c3eab4ad4557cb1c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "live_KXBUNDESLIGATEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGATEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1131283,
+   "t_send_ms": 1794557195230,
+   "t_recv_ms": 1794557195437,
+   "server_date": "Fri, 13 Nov 2026 08:06:35 GMT",
+   "file": "0016.json.gz",
+   "sha256": "b76b364909381caf9de596a5d2de52b5f9c44eba5dc27ad3c931a7028124a71f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "live_KXLIGUE1GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 442747,
+   "t_send_ms": 1794557196230,
+   "t_recv_ms": 1794557196355,
+   "server_date": "Fri, 13 Nov 2026 08:06:36 GMT",
+   "file": "0017.json.gz",
+   "sha256": "744af4c599c3050a7726f376087077eae6b3d22ec3c02f1c54aa52711f4c9826",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "live_KXLIGUE1TOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1TOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 869194,
+   "t_send_ms": 1794557197231,
+   "t_recv_ms": 1794557197384,
+   "server_date": "Fri, 13 Nov 2026 08:06:37 GMT",
+   "file": "0018.json.gz",
+   "sha256": "6290f9e48cfc0da664fc2cd60db33ba5f6c62c0a387be6239b32e21eb329a5bf",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "live_KXLIGUE1BTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1BTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 121646,
+   "t_send_ms": 1794557198231,
+   "t_recv_ms": 1794557198358,
+   "server_date": "Fri, 13 Nov 2026 08:06:38 GMT",
+   "file": "0019.json.gz",
+   "sha256": "da437298947cd04430493848e283f2d5b27130ce3281ae63015407c546754800",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "live_KXLIGUE1TEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1TEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1056063,
+   "t_send_ms": 1794557199231,
+   "t_recv_ms": 1794557199478,
+   "server_date": "Fri, 13 Nov 2026 08:06:39 GMT",
+   "file": "0020.json.gz",
+   "sha256": "b46d4ea6df313d13eed5324a78f914d4417f1ea77d3463c5901b41d2aa522514",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "live_KXMLSGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1083185,
+   "t_send_ms": 1794557200231,
+   "t_recv_ms": 1794557200374,
+   "server_date": "Fri, 13 Nov 2026 08:06:40 GMT",
+   "file": "0021.json.gz",
+   "sha256": "ef87f4e73ff002ad94f2e25442a55bcf79875cf3d0c0873060ce8851cf8891c7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "live_KXMLSTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1940440,
+   "t_send_ms": 1794557201231,
+   "t_recv_ms": 1794557201425,
+   "server_date": "Fri, 13 Nov 2026 08:06:41 GMT",
+   "file": "0022.json.gz",
+   "sha256": "56c4cef06df53e9f3db7be54737e9455e918dfc343e1cbe6c117be2b04f6a42c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "live_KXMLSTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 306761,
+   "t_send_ms": 1794557202231,
+   "t_recv_ms": 1794557202376,
+   "server_date": "Fri, 13 Nov 2026 08:06:42 GMT",
+   "file": "0023.json.gz",
+   "sha256": "894599a49109a454a67758dd09b1ff5040e4f2cf728f3157a1c430e56f596784",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "live_KXMLSBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 296437,
+   "t_send_ms": 1794557203231,
+   "t_recv_ms": 1794557203364,
+   "server_date": "Fri, 13 Nov 2026 08:06:43 GMT",
+   "file": "0024.json.gz",
+   "sha256": "680aef364e7b4e9eca5512f8f3e67217513b2d23139dffbb70839e0d59924eaa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "live_KXMLSTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2142234,
+   "t_send_ms": 1794557204231,
+   "t_recv_ms": 1794557204421,
+   "server_date": "Fri, 13 Nov 2026 08:06:44 GMT",
+   "file": "0025.json.gz",
+   "sha256": "d769059e0be6f1d9ef0ab72b73b15bf95b6d322519e43cc1726d6dcc4cb70160",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 26,
+   "id": "live_KXMLSTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 597325,
+   "t_send_ms": 1794557205231,
+   "t_recv_ms": 1794557205443,
+   "server_date": "Fri, 13 Nov 2026 08:06:45 GMT",
+   "file": "0026.json.gz",
+   "sha256": "e0f0d59f52b21544ab91546f74dd33ee54326f6b54b4c6cb5f0273c366bece93",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 27,
+   "id": "live_KXLIGAMXGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 588806,
+   "t_send_ms": 1794557206231,
+   "t_recv_ms": 1794557206366,
+   "server_date": "Fri, 13 Nov 2026 08:06:46 GMT",
+   "file": "0027.json.gz",
+   "sha256": "2b8be38dd3503749835699c31efa57ad72195192427c0c6907024b12d6c57810",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 28,
+   "id": "live_KXLIGAMXTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1174824,
+   "t_send_ms": 1794557207231,
+   "t_recv_ms": 1794557207399,
+   "server_date": "Fri, 13 Nov 2026 08:06:47 GMT",
+   "file": "0028.json.gz",
+   "sha256": "675ffafaf95ef4ad277696797028785e0fa11fca08d531cc5965a8cb8ac4c1ad",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 29,
+   "id": "live_KXLIGAMXBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 161224,
+   "t_send_ms": 1794557208232,
+   "t_recv_ms": 1794557208326,
+   "server_date": "Fri, 13 Nov 2026 08:06:48 GMT",
+   "file": "0029.json.gz",
+   "sha256": "567ed4167fb26be7364f516a1e6e654486dc7d8b45c6e7feff96592651539e85",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 30,
+   "id": "live_KXLIGAMXTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1448473,
+   "t_send_ms": 1794557209232,
+   "t_recv_ms": 1794557209374,
+   "server_date": "Fri, 13 Nov 2026 08:06:49 GMT",
+   "file": "0030.json.gz",
+   "sha256": "9c2276bb4742cce2d2d41b8d93e281954fbf69dbc0f4184424faa84f003e60af",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 31,
+   "id": "live_KXBRASILEIROGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 601612,
+   "t_send_ms": 1794557210232,
+   "t_recv_ms": 1794557210378,
+   "server_date": "Fri, 13 Nov 2026 08:06:50 GMT",
+   "file": "0031.json.gz",
+   "sha256": "6ef4de42a493956d072bfcbfbec7d0ee914be37e1b27c0d1b0575ac5c383c243",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 32,
+   "id": "live_KXBRASILEIROTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1108447,
+   "t_send_ms": 1794557211232,
+   "t_recv_ms": 1794557211405,
+   "server_date": "Fri, 13 Nov 2026 08:06:51 GMT",
+   "file": "0032.json.gz",
+   "sha256": "ea344cfb359285e3704314197ab52bc75bc6ac46f7657402617b940878ff482b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 33,
+   "id": "live_KXBRASILEIROBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 163095,
+   "t_send_ms": 1794557212232,
+   "t_recv_ms": 1794557212346,
+   "server_date": "Fri, 13 Nov 2026 08:06:52 GMT",
+   "file": "0033.json.gz",
+   "sha256": "bce588c22f1f1e4d67351cee386981f5381bd6c2bcfa6404a3bdc83cf9146c52",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 34,
+   "id": "live_KXBRASILEIROTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1405117,
+   "t_send_ms": 1794557213232,
+   "t_recv_ms": 1794557213399,
+   "server_date": "Fri, 13 Nov 2026 08:06:53 GMT",
+   "file": "0034.json.gz",
+   "sha256": "3d2fdf25e4f505178763b70025d92a4cd6f55602057f14a1c12fcf840591abbe",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 35,
+   "id": "live_KXEFLTROPHYGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 214616,
+   "t_send_ms": 1794557214232,
+   "t_recv_ms": 1794557214399,
+   "server_date": "Fri, 13 Nov 2026 08:06:54 GMT",
+   "file": "0035.json.gz",
+   "sha256": "7f422082f48c04b04649ebfa08b5beeb7345ebce701c010a6020f910dfe4b384",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 36,
+   "id": "live_KXEFLTROPHYTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 416848,
+   "t_send_ms": 1794557215232,
+   "t_recv_ms": 1794557215410,
+   "server_date": "Fri, 13 Nov 2026 08:06:55 GMT",
+   "file": "0036.json.gz",
+   "sha256": "38c85548cea0de9459c2e17aa8614d9e8ff43b990ed711d02d715a8c8fc6673a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 37,
+   "id": "live_KXEFLTROPHYBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 58758,
+   "t_send_ms": 1794557216232,
+   "t_recv_ms": 1794557216328,
+   "server_date": "Fri, 13 Nov 2026 08:06:56 GMT",
+   "file": "0037.json.gz",
+   "sha256": "2fe74aed85fde48ac4f7a1dc9bff5846d80e0962235e321cc26ee80b93253e88",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 38,
+   "id": "live_KXEFLTROPHYTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794557217233,
+   "t_recv_ms": 1794557217319,
+   "server_date": "Fri, 13 Nov 2026 08:06:57 GMT",
+   "file": "0038.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 39,
+   "id": "live_KXCOPADELREYGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 654871,
+   "t_send_ms": 1794557218233,
+   "t_recv_ms": 1794557218367,
+   "server_date": "Fri, 13 Nov 2026 08:06:58 GMT",
+   "file": "0039.json.gz",
+   "sha256": "c4906824983bb43278b2d91cc6648169f4c0c378b88618c8479c80ccee0da5c3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 40,
+   "id": "live_KXCOPADELREYTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1169310,
+   "t_send_ms": 1794557219233,
+   "t_recv_ms": 1794557219405,
+   "server_date": "Fri, 13 Nov 2026 08:06:59 GMT",
+   "file": "0040.json.gz",
+   "sha256": "4e9a823b234ee5c00d181513a1e8e54e418187495ffa9faa4c169bfffd1f2a12",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 41,
+   "id": "live_KXCOPADELREYBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 172573,
+   "t_send_ms": 1794557220233,
+   "t_recv_ms": 1794557220350,
+   "server_date": "Fri, 13 Nov 2026 08:07:00 GMT",
+   "file": "0041.json.gz",
+   "sha256": "2d2166a401823dc62bebd5c1012dbdbee8f8aeef2d623ae491a61314ffd64fb5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 42,
+   "id": "live_KXCOPADELREYTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 160835,
+   "t_send_ms": 1794557221233,
+   "t_recv_ms": 1794557221341,
+   "server_date": "Fri, 13 Nov 2026 08:07:01 GMT",
+   "file": "0042.json.gz",
+   "sha256": "bcbb62b841f365e24b60cdbb805e7e1aeb9293627d5e9b653b89caad39bce675",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 43,
+   "id": "live_KXUCLWGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 259279,
+   "t_send_ms": 1794557222233,
+   "t_recv_ms": 1794557222354,
+   "server_date": "Fri, 13 Nov 2026 08:07:02 GMT",
+   "file": "0043.json.gz",
+   "sha256": "e1dcc0e900b8ba5843d7a0ba4ced10a6a723404359ea15dfe64a3ce754ae6653",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 44,
+   "id": "live_KXUCLWTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 549569,
+   "t_send_ms": 1794557223233,
+   "t_recv_ms": 1794557223365,
+   "server_date": "Fri, 13 Nov 2026 08:07:03 GMT",
+   "file": "0044.json.gz",
+   "sha256": "2ef17814aba60abebd7bd797f8b1cb5a11bec82fac29b6a9c5f1e2fe8707b71b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 45,
+   "id": "live_KXUCLWBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 70555,
+   "t_send_ms": 1794557224233,
+   "t_recv_ms": 1794557224369,
+   "server_date": "Fri, 13 Nov 2026 08:07:04 GMT",
+   "file": "0045.json.gz",
+   "sha256": "3a38e6cbcce34cf6a3efeb3615912ca37b2663a1721e92f68d24dc0916a1c37f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 46,
+   "id": "live_KXUCLWTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794557225233,
+   "t_recv_ms": 1794557225311,
+   "server_date": "Fri, 13 Nov 2026 08:07:05 GMT",
+   "file": "0046.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 47,
+   "id": "live_KXAPFDDHGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 382949,
+   "t_send_ms": 1794557226234,
+   "t_recv_ms": 1794557226375,
+   "server_date": "Fri, 13 Nov 2026 08:07:06 GMT",
+   "file": "0047.json.gz",
+   "sha256": "d7207a804652bd22a0f17b54edc9bfd1dfdc56733c22ae04ea0d45522be45515",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 48,
+   "id": "live_KXAPFDDHTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 683975,
+   "t_send_ms": 1794557227234,
+   "t_recv_ms": 1794557227363,
+   "server_date": "Fri, 13 Nov 2026 08:07:07 GMT",
+   "file": "0048.json.gz",
+   "sha256": "9a21bc84b7e320240611b70d40b40affde10032d31ee40f545ecb0a775c93588",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 49,
+   "id": "live_KXAPFDDHBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 102128,
+   "t_send_ms": 1794557228234,
+   "t_recv_ms": 1794557228345,
+   "server_date": "Fri, 13 Nov 2026 08:07:08 GMT",
+   "file": "0049.json.gz",
+   "sha256": "e2b1711480200e0da123ce8279ad671dfbd4da451655d2be74a1f0b1909e9001",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 50,
+   "id": "live_KXAPFDDHTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794557229234,
+   "t_recv_ms": 1794557229310,
+   "server_date": "Fri, 13 Nov 2026 08:07:09 GMT",
+   "file": "0050.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 51,
+   "id": "live_KXEERSTEDIVGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 573231,
+   "t_send_ms": 1794557230234,
+   "t_recv_ms": 1794557230486,
+   "server_date": "Fri, 13 Nov 2026 08:07:10 GMT",
+   "file": "0051.json.gz",
+   "sha256": "76c0c16211744be2f451fe12a6fee12434add3615e8f97a4ffc25a5b38cc9393",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 52,
+   "id": "live_KXEERSTEDIVTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1204194,
+   "t_send_ms": 1794557231234,
+   "t_recv_ms": 1794557231405,
+   "server_date": "Fri, 13 Nov 2026 08:07:11 GMT",
+   "file": "0052.json.gz",
+   "sha256": "516afe72157f3ea02c93885be9a181e7ca27a1db650d31e2b65ec8bcca0a8bf5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 53,
+   "id": "live_KXEERSTEDIVBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 156562,
+   "t_send_ms": 1794557232234,
+   "t_recv_ms": 1794557232340,
+   "server_date": "Fri, 13 Nov 2026 08:07:12 GMT",
+   "file": "0053.json.gz",
+   "sha256": "acb3f2dc85960cba20d89666b86176e16eb9c51a44edce83ad10f6eb1c821243",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 54,
+   "id": "live_KXEERSTEDIVTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794557233234,
+   "t_recv_ms": 1794557233313,
+   "server_date": "Fri, 13 Nov 2026 08:07:13 GMT",
+   "file": "0054.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 55,
+   "id": "live_KXLIGAPORTUGALGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 395436,
+   "t_send_ms": 1794557234235,
+   "t_recv_ms": 1794557234360,
+   "server_date": "Fri, 13 Nov 2026 08:07:14 GMT",
+   "file": "0055.json.gz",
+   "sha256": "cd19b1846449010a789c183334d3f00152efa1de39ccc43fd80287c309fad5e5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 56,
+   "id": "live_KXLIGAPORTUGALTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 724078,
+   "t_send_ms": 1794557235235,
+   "t_recv_ms": 1794557235394,
+   "server_date": "Fri, 13 Nov 2026 08:07:15 GMT",
+   "file": "0056.json.gz",
+   "sha256": "41141c516e8b85f0d7615631259bc40d3253ea44311af5a624ec9a2efd6cb11b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 57,
+   "id": "live_KXLIGAPORTUGALBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 108003,
+   "t_send_ms": 1794557236235,
+   "t_recv_ms": 1794557236360,
+   "server_date": "Fri, 13 Nov 2026 08:07:16 GMT",
+   "file": "0057.json.gz",
+   "sha256": "bc2033f0cf9cbf83576f02c8f97f2a8109cd654df626891eea2edbce5b299c7c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 58,
+   "id": "live_KXLIGAPORTUGALTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794557237235,
+   "t_recv_ms": 1794557237312,
+   "server_date": "Fri, 13 Nov 2026 08:07:17 GMT",
+   "file": "0058.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 59,
+   "id": "live_KXLVAVIRGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 249970,
+   "t_send_ms": 1794557238235,
+   "t_recv_ms": 1794557238345,
+   "server_date": "Fri, 13 Nov 2026 08:07:18 GMT",
+   "file": "0059.json.gz",
+   "sha256": "5661f6feb677a1ddd3f7055e8dd72ecac4b68b3da9ab888f2c88272aa178ecdd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 60,
+   "id": "live_KXLVAVIRTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 498625,
+   "t_send_ms": 1794557239235,
+   "t_recv_ms": 1794557239397,
+   "server_date": "Fri, 13 Nov 2026 08:07:19 GMT",
+   "file": "0060.json.gz",
+   "sha256": "24f0b2e577e48eb273882a1c99b01162623a707d1d4b3a9d6d234a7f68a5af8e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 61,
+   "id": "live_KXLVAVIRBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 68249,
+   "t_send_ms": 1794557240235,
+   "t_recv_ms": 1794557240343,
+   "server_date": "Fri, 13 Nov 2026 08:07:20 GMT",
+   "file": "0061.json.gz",
+   "sha256": "91313e255cddecf69b47828d747429d9c4bd8cb0eacef61cfc0d7ee0c98d2e89",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 62,
+   "id": "live_KXLVAVIRTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794557241235,
+   "t_recv_ms": 1794557241350,
+   "server_date": "Fri, 13 Nov 2026 08:07:21 GMT",
+   "file": "0062.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 63,
+   "id": "live_KXSERIECGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2102624,
+   "t_send_ms": 1794557242236,
+   "t_recv_ms": 1794557242508,
+   "server_date": "Fri, 13 Nov 2026 08:07:22 GMT",
+   "file": "0063.json.gz",
+   "sha256": "8f5a96a96d360087aaabde4d3d93e5648ecf9bd8cd5b705176c25e525a68c6ca",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 64,
+   "id": "live_KXSERIECTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1947406,
+   "t_send_ms": 1794557243236,
+   "t_recv_ms": 1794557243381,
+   "server_date": "Fri, 13 Nov 2026 08:07:23 GMT",
+   "file": "0064.json.gz",
+   "sha256": "de50ce65ee683d0b170c65035c6a92b4e17a43063a716d3367fc6d8dbae6fab8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 65,
+   "id": "live_KXSERIECTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1861820,
+   "t_send_ms": 1794557244236,
+   "t_recv_ms": 1794557244406,
+   "server_date": "Fri, 13 Nov 2026 08:07:24 GMT",
+   "file": "0065.json.gz",
+   "sha256": "2bee26ee15610e15c2714b1636d3ed57311f2f2c9365fbd347665012cba72387",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 66,
+   "id": "live_KXSERIECBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 574897,
+   "t_send_ms": 1794557245236,
+   "t_recv_ms": 1794557245378,
+   "server_date": "Fri, 13 Nov 2026 08:07:25 GMT",
+   "file": "0066.json.gz",
+   "sha256": "1d5278f5161bc7b65751853eca08effe97243cf980fa9bda5dcc66b6b4df510a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 67,
+   "id": "live_KXSERIECTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794557246236,
+   "t_recv_ms": 1794557246314,
+   "server_date": "Fri, 13 Nov 2026 08:07:26 GMT",
+   "file": "0067.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 68,
+   "id": "fee_KXEPLGAME",
+   "path": "/series/KXEPLGAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1837,
+   "t_send_ms": 1794557247236,
+   "t_recv_ms": 1794557247315,
+   "server_date": "Fri, 13 Nov 2026 08:07:15 GMT",
+   "file": "0068.json.gz",
+   "sha256": "d77f89db3b317cdadf59a0029ff36cdd3fa4c00def14b8ec0ca1f7395322c2c3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 69,
+   "id": "fee_KXEPLBTTS",
+   "path": "/series/KXEPLBTTS",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1811,
+   "t_send_ms": 1794557248236,
+   "t_recv_ms": 1794557248316,
+   "server_date": "Fri, 13 Nov 2026 08:07:28 GMT",
+   "file": "0069.json.gz",
+   "sha256": "927df8e9ff023c033caa8be57896e442fa586be8752344faf57723c9b6f3d931",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 70,
+   "id": "fee_KXEFLTROPHYBTTS",
+   "path": "/series/KXEFLTROPHYBTTS",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1854,
+   "t_send_ms": 1794557249236,
+   "t_recv_ms": 1794557249321,
+   "server_date": "Fri, 13 Nov 2026 08:07:29 GMT",
+   "file": "0070.json.gz",
+   "sha256": "1fcb462188f11af8537657f35efa2272396d37fd4566ba2f4f3c23a57ec5eabe",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
