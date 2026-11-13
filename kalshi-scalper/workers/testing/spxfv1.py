@@ -38,7 +38,7 @@ AMBIGUITIES = [
     "Two ES rows for one ts_event STOP the run, naming the window, when that bar is one the window reads (Head 16:51Z).",
     "The COMPARED z is clustered by the window's event ticker (Head 16:51Z); the UTC-day clustered z is printed beside it as INFORMATION ONLY.",
     "Thirds (Head 16:49Z): equal time spans from 2026-12-01T00:00Z to the last traded close at or before READ_DATE in the held-out read; in development (nothing reaches Dec 1) from the first to the last traded close. scorekit's equal-count windows are printed too.",
-    "A result of 'void' is a fee-only loss; an EMPTY result stops the run (Head); any other non-yes/no/void text drops the window (counted).",
+    "A result of 'void' is a fee-only loss; an empty result or any other text than yes, no or void STOPS the run, naming the window (Head 16:53Z).",
 ]
 
 
@@ -115,7 +115,7 @@ def decide(yes_bid, yes_ask, p_yes):
 def build(mk, cs, bars, cutoff_lo=None, cutoff_hi=None):
     """mk: scorekit.markets; cs: scorekit.candles; bars: load_bars. Windows with cutoff_lo <= close < cutoff_hi only (the others are counted, not read).
     -> (trades, gate0 counts). A trade is a scorekit Trade plus 'fee_rounded' bookkeeping done by the caller."""
-    g = {"windows_listed": 0, "not_in_range_not_read": 0, "no_close_time": 0, "no_decision_candle": 0, "result_not_yes_no_void": 0, "no_trade_signal": 0, "traded": 0, "void": 0, "ties_yes_ask_equals_no_ask": 0}
+    g = {"windows_listed": 0, "not_in_range_not_read": 0, "no_close_time": 0, "no_decision_candle": 0, "no_trade_signal": 0, "traded": 0, "void": 0, "ties_yes_ask_equals_no_ask": 0}
     trades = []
     for tkr in sorted(mk):
         m = mk[tkr]
@@ -131,7 +131,7 @@ def build(mk, cs, bars, cutoff_lo=None, cutoff_hi=None):
         if res is None or str(res).strip() == "":
             raise SystemExit("STOP: empty result on %s; a settled list must carry every result (Head ruling)" % tkr)
         if res not in ("yes", "no", "void"):
-            g["result_not_yes_no_void"] += 1; continue
+            raise SystemExit("STOP: result %r on window %s is not yes, no or void (Head ruling: odd result text stops the run)" % (res, tkr))
         dec = next((x for x in cs.get(tkr, []) if x["ts"] == c - 120), None)
         if dec is None:
             g["no_decision_candle"] += 1; continue
@@ -175,21 +175,12 @@ def date_thirds(trades, lo=None):
     return th
 
 
-CONSTANTS = {"fee_governing": "0.07 x C x p x (1 - p), C = 1, rounded UP to the cent per order (every bar, label, z and kill reads this); unrounded printed as INFORMATION ONLY",
-             "sd": "sample (n - 1) sd of consecutive one-minute log changes, both bars present on F_now's instrument id, at least 6 of 10, times sqrt(119/60)",
-             "H_seconds": H_SECONDS, "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL,
-             "quote": "decision candle yes_bid and yes_ask closes; crossed or locked (yes_bid + no_bid >= 1 - 1e-9) is no quote",
-             "tie": "equal asks go to YES; ties counted", "void": "fee-only loss", "empty_result": "stops the run",
-             "thirds": "equal time spans of traded closes: HELDOUT_FIRST to the last traded close at or before READ_DATE (held-out); first to last traded close (development)",
-             "HELDOUT_FIRST": "2026-12-01T00:00:00Z", "READ_DATE": "2027-02-26T00:00:00Z", "min_traded": MIN_TRADED, "series": SERIES}
-
-
 def upf(rows):
     """UNROUNDED profit factor of the governing nets (None when no loss and no win; inf when no loss)."""
     return k.pf([k.net_of(t) for t in rows])
 
 
-def card_label(rnd, thirds, wr, mp, mean_net):
+def card_label(rnd, thirds, wr, mp, mean_net, z_event=None):
     """The card's own verdict (never a research-bar pass). Every bar and kill reads the UNROUNDED profit factor of the governing (rounded-fee) nets."""
     n = len(rnd)
     p = upf(rnd)
@@ -204,7 +195,7 @@ def card_label(rnd, thirds, wr, mp, mean_net):
     else:
         tp = [upf(x) for x in thirds]
         ok = p is not None and p >= 1.5 - TOL and all(x is not None and x >= 1.5 - TOL for x in tp) and all(len(x) > 0 for x in thirds)
-        label = "BAR MET (not a research-bar pass): pooled PF and each third PF at 1.5 or better, n %d" % n if ok else "BAR NOT MET (pooled PF %s, thirds PF %s)" % (None if p is None else round(p, 4), [None if x is None else round(x, 4) for x in tp])
+        label = ("RESEARCH BAR MET (BAR MET and event-clustered z %.2f >= %.2f), n %d" % (z_event, k.Z_BAR, n) if (z_event is not None and z_event >= k.Z_BAR - TOL) else "BAR MET (not a research-bar pass): pooled PF and each third PF at 1.5 or better, n %d" % n) if ok else "BAR NOT MET (pooled PF %s, thirds PF %s)" % (None if p is None else round(p, 4), [None if x is None else round(x, 4) for x in tp])
     return label, kills, {"pooled_pf_unrounded": p, "thirds_pf_unrounded": [upf(x) for x in thirds]}
 
 
@@ -212,7 +203,7 @@ CONSTANTS = {"fee_governing": "0.07 x C x p x (1 - p), C = 1, rounded UP to the 
              "sd": "sample (n - 1) sd of consecutive one-minute log changes, both bars present on F_now's instrument id, at least 6 of 10, times sqrt(119/60)",
              "H_seconds": H_SECONDS, "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL,
              "quote": "decision candle yes_bid and yes_ask closes; crossed or locked (yes_bid + no_bid >= 1 - 1e-9) is no quote",
-             "tie": "equal asks go to YES; ties counted", "void": "fee-only loss", "empty_result": "stops the run", "duplicate_ts_event": "stops the run, naming the window",
+             "tie": "equal asks go to YES; ties counted", "void": "fee-only loss", "empty_result": "stops the run", "odd_result_text": "stops the run, naming the window", "duplicate_ts_event": "stops the run, naming the window",
              "bars_and_kills": "read the UNROUNDED profit factor of the governing nets; the rounded PF is printed for reading only",
              "thirds": "equal time spans of traded closes: HELDOUT_FIRST to the last traded close at or before READ_DATE (held-out); first to last traded close (development)",
              "HELDOUT_FIRST": "2026-12-01T00:00:00Z", "READ_DATE": "2027-02-26T00:00:00Z", "min_traded": MIN_TRADED, "series": SERIES}
@@ -227,7 +218,7 @@ def report(trades, g, label_cfg, lo=None):
     mp = (sum(t["price"] for t in trades) / n) if n else None
     th = date_thirds(rnd, lo)
     gov = k.stats(rnd)
-    label, kills, exact = card_label(rnd, th, wr, mp, (gov["mean"] if n else None))
+    label, kills, exact = card_label(rnd, th, wr, mp, (gov["mean"] if n else None), sc["cluster_z"]["z"])
     return {"constants": CONSTANTS, "gate0_counts": g, "traded": n, "CARD_LABEL": label, "kill_flags": kills, "unrounded_pf": exact,
             "win_rate": None if wr is None else round(wr, 4), "mean_price_paid": None if mp is None else round(mp, 4),
             "win_rate_minus_price_points": None if wr is None else round(100 * (wr - mp), 2),

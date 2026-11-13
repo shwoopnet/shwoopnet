@@ -3,6 +3,7 @@ Hand-worked expectations are in the comments. Run: python3 -W ignore test_spxfv1
 import calendar, csv, gzip, json, math, os, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import spxfv1 as s
+import scorekit as k
 
 # --- pure pieces ---
 assert abs(s.phi(0) - 0.5) < 1e-15 and abs(s.phi(1) - 0.8413447460685429) < 1e-12
@@ -44,6 +45,8 @@ assert s.futures_signal(C0, mixed)[0].startswith("fewer than 6")
 mixed = mk_bars(C0, 1.0); mixed[C0 - 180 - 60 * 3] = (2, mixed[C0 - 180 - 60 * 3][1]); assert s.futures_signal(C0, mixed)[0] is None          # one bar: 8 pairs left
 try: s.build({"t": {"series": "KXINX15M", "close": C0, "result": "", "event": "e"}}, {}, {}); assert 0
 except SystemExit as e: assert "empty result" in str(e)
+try: s.build({"t": {"series": "KXINX15M", "close": C0, "result": "scalar", "event": "e"}}, {}, {}); assert 0
+except SystemExit as e: assert "window t" in str(e) and "scalar" in str(e)
 amb = mk_bars(C0, 1.0); amb[C0 - 180] = s.AMBIG; assert s.futures_signal(C0, amb)[0] == "ambiguous bar"
 try: s.build({"t": {"series": "KXINX15M", "close": C0, "result": "yes", "event": "e"}}, {"t": [{"ts": C0 - 120, "bid": .9, "ask": .91}]}, amb); assert 0
 except SystemExit as e: assert "STOP" in str(e) and "window t" in str(e) and "ts_event" in str(e)
@@ -125,14 +128,16 @@ def synth(spec, price):
     return rows
 def lab(rows):
     wr = sum(1 for r in rows if r["win"]) / len(rows); mp = sum(r["price"] for r in rows) / len(rows)
-    return s.card_label(rows, s.date_thirds(rows), wr, mp, None)
+    return s.card_label(rows, s.date_thirds(rows), wr, mp, None, k.cluster_z(rows)["z"])
 r = synth([0.1] * 100 + [-0.10004] * 100, 0.30); r.sort(key=lambda x: x["close"])          # PF 0.9996: prints 1.0 when rounded, but is under 1.0
 assert round(s.upf(r), 3) == 1.0 and s.upf(r) < 1.0
 assert lab(r)[0].startswith("KILLED") and lab(r)[1]["cash_pf_under_1_at_n_100_plus"]
 rr = synth(([0.07498, -0.025, -0.025] * 50), 0.50)
 assert round(s.upf(rr), 3) == 1.5 and s.upf(rr) < 1.5 and lab(rr)[0].startswith("BAR NOT MET"), lab(rr)[0]
 good = synth(([0.3, 0.3, -0.1, -0.1, -0.1] * 30), 0.30)          # PF 2.0 pooled and in each third, n 150, win rate .4 vs price .3 (10 points)
-assert lab(good)[0].startswith("BAR MET (not a research-bar pass)"), lab(good)[0]
+assert abs(k.cluster_z(good)["z"] - 3.737479) < 1e-5 and lab(good)[0].startswith("BAR MET (not a research-bar pass)"), lab(good)[0]          # hand z 3.737: below 5.46
+tight = synth([0.30, 0.30, 0.29, 0.31, 0.30] * 30, 0.20)         # all wins, tiny sd: z far above 5.46, no loss
+assert lab(tight)[0].startswith("RESEARCH BAR MET"), lab(tight)[0]
 small = synth([0.3, -0.1] * 60, 0.30)          # n 120: not enough data; PF 1.5
 assert lab(small)[0].startswith("NOT_ENOUGH_DATA"), lab(small)[0]
 nill = synth([0.3, 0.3, -0.1, -0.1, -0.1] * 30, 0.37)          # win rate .4 within 3 points of price .37 (inclusive edge .03)
