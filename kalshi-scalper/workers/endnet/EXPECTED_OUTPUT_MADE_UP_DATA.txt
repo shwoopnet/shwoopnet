@@ -41,3 +41,16 @@ VERDICT: FALSIFIED (cash PF line 1.5, both halves at 1.0, net above 0) [invented
 REFUSED: game o1 closes outside the development window (held-out starts 2026-12-15T00:00:00Z)
 == score outside
 REFUSED: game o1 closes outside the development window (held-out starts 2026-12-15T00:00:00Z)
+== measure edge
+ENDNET stage 1: how often the trigger fires and at what price; NO result read [invented rows only, not a result]
+games 18 | entries 9 | skipped ask out of band 2, no candle at the entry minute 2, no state minute 2, no strike one goal away 2, spread too wide 1 [invented rows only, not a result]
+ask at entry: median 30.0 cents | lowest 15 | highest 40 [invented rows only, not a result]
+entries a week over the 4 week development window: 2.25 [invented rows only, not a result]
+STAGE 1: CLOSED (median ask above 45 cents: False | fewer than 6 entries a week: True) [invented rows only, not a result]
+== score edge
+ENDNET stage 2 on DEVELOPMENT rows only [invented rows only, not a result]
+games 18 | entries 9 | settled 7 | skipped ask out of band 2, no candle at the entry minute 2, no state minute 2, no strike one goal away 2, spread too wide 1 [invented rows only, not a result]
+development: n 7 | wins 4 | net +1.7780 | mean +0.2540 | cash PF 2.93 [invented rows only, not a result]
+first half: n 4 | wins 3 | net +1.8550 | mean +0.4638 | cash PF 11.91 [invented rows only, not a result]
+second half: n 3 | wins 1 | net -0.0770 | mean -0.0257 | cash PF 0.90 [invented rows only, not a result]
+VERDICT: NOT_ENOUGH_DATA (7 settled entries, need 150) [invented rows only, not a result]
