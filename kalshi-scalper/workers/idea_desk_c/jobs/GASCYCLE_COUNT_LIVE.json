@@ -34,7 +34,7 @@
   }
  ],
  "max_requests": 26,
- "notes": "Two series, each its settled live list with close from 2024-01-01 to before 2026-10-15, up to 12 pages of 1,000 (a daily ladder of about 10 to 30 strikes from the series start, unknown, to Oct 15 is at most about 10,000 markets a series). The live list holds markets closed after about 2026-09-13 only; older markets are in GASCYCLE_COUNT_HIST, a separate file because that endpoint takes no date bound. At most 24 pages, cap 26. Fields kept: ticker, event_ticker, close_time, floor_strike, cap_strike, strike_type, expiration_value, result.",
+ "notes": "Two series, each its settled live list with close from 2024-01-01 to before 2026-10-15, up to 12 pages of 1,000 (a daily ladder of about 10 to 30 strikes from the series start, unknown, to Oct 15 is at most about 10,000 markets a series). The live list holds markets closed after about 2026-09-13 only; older markets, if any, are fetched later by named per-event historical requests (each bounded by its own event date), never by an unbounded history list. At most 24 pages, cap 26. Fields kept: ticker, event_ticker, close_time, floor_strike, cap_strike, strike_type, expiration_value, result.",
  "requests": [
   {
    "id": "live_KXAAAGASDOH",
