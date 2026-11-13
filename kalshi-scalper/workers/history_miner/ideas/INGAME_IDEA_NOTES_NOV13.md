@@ -46,3 +46,18 @@ Nothing is registered. Each note goes to the VA only after Desk B confirms it ha
 - **Trigger:** the number of games hot at the same time (from the recorder's own polls).
 - **Bet:** none fixed. The prior claim is only that spreads widen and quotes go stale when makers are stretched. It is a measurement first; a directional rule would be written before any value is read.
 - **If SHAREDSTART is ruled NEW,** this would be a version of it (crowding at start time against crowding in play), so it is likely dropped.
+
+## VA ruling, 2026-11-13 22:25Z
+- **N1 INTERMISSION: a VERSION of displacement fade, not NEW.**
+  - Under 7f, the family is the entry mechanism plus the exit style. "The mid moved over a stretch, bet against it" is the same shape as SNAPBACK1 and SPIKE1 (both FALSIFIED, ledger row 58) and LIQREV (the third test, open).
+  - The trigger with no trades behind it is read as a filter on the fade, not a new mechanism (the Head may overrule that line).
+  - Not registered, no try counted, nothing run.
+  - The VA's cautions are kept here in case of an overrule:
+    - a mid that moves with no trades is a quote move and often information;
+    - check whether the recorder's quote is a live book or a market-list copy;
+    - a fill at the ask seen is an upper bound;
+    - the favourite-and-hold ban applies at 88c or more;
+    - cluster by game;
+    - fix a date cut before any read.
+- **N2 SLATE STRAIN:** folds into SHAREDSTART (the same crowded-slot trigger), as Desk B advised. Not sent separately.
+- **The displacement-fade row** is not on main's 7e table. It lives in the Head's Nov 13 ruling and in LIQREV's Amendment 2; the VA will ask the Head to add the row once LIQREV reads.
