@@ -18,3 +18,6 @@ CFRTI-K and PERPBIN1 each need a held-out reader written (CFRTI-K's formula is i
 
 ## The line DEPTH1's result will carry
 "shares Bitcoin windows Nov 9 to 13 with the CFRTI family's unread held-out (read Nov 20), frozen at the hashes in FROZEN_BEFORE_DEPTH1.md (cfrti_heldout.py c16248cc..., cfrti_b.py f19b472e..., registrations as listed there); CFRTI-K and PERPBIN1 are not frozen and carry the not-blind label." Added to `DEPTH1_READ_NOTES_DESK_A.md`.
+
+## Check of Nov 13, 2026 (Desk A)
+No other card on this branch reads Bitcoin or gold R6 windows of Oct 30 to Nov 13 without being frozen or moved: none other. CFRTI-K, CFRTI-K-TX and PERPBIN1 start their held-out at 2026-11-14T00:00:00Z (b3ae4974, cf864b55); NC15 cards touch neither series; MMMAP1's R6 part is spent and labelled.

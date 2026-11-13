@@ -690,3 +690,12 @@ The date is the first ISO date text on or after 2026-11-01 in that row's STATE a
 | KXYEARLOW | WXOTHER1 | none found |
 | KXYOUTUBESUBS | ENTER1 | none found |
 | KXZEC15M | LAG15, OICOREX1, QSTALE1, TSLM1, XCRY1, XOI1 | 2026-11-22 |
+
+## Dated corrections (Nov 13, 2026, Desk A; the table above is unchanged, these lines override its rows)
+- PERPBIN1: OPEN, held-out from closes 2026-11-14T00:00:00Z (Nov 5 to 13 rows printed apart, never pooled).
+- CFRTI-K and CFRTI-K-TX: held-out from 2026-11-14T00:00:00Z (not frozen; Nov 9 to 13 rows labelled "not blind", never pooled).
+- RECORD1: READ (2026-11-03). RECORD1B is the unread one and is void by Forensics' audit.
+- USWEEP2, SOCCER1, SOCCERELO1, FAMSPORTS: RELEASED (rnd-queue 0f7bfccb).
+- MM1, MAKER5, L1Q1, GF1, GF2, MKTTIME1-F, MUT1, GEN1, GEN1S, GEN2: CLOSED UNREAD.
+- COUNT2: holds out tornado counts only; its three politics series are listed as not runnable.
+- GEN6 to GEN11: the 2026-10-30 date is a freeze/run date. NEWH9, NEWH12, NEWH13: it is a data cut (holdout closes to 2026-10-30 00:00 UTC, exclusive).
