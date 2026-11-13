@@ -23,7 +23,7 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
  8. SETTLED by Amendment 3, item 3: the optimistic, same-candle figure books EVERY decision (the event's pick) at its limit, with no block and no fill test. (This build first booked fired decisions only.)
  9. The largest number open at once is taken at each filled bet's look (bets with look at or before it and close after it).
 10. Profit factor with no losses is infinite and passes a "1.5 or more" line; with no wins it is 0. The lines are tested with a 1e-9 tolerance on the float figure.
-11. Family rule (Amendment 1, point 2): if the pooled read would survive and one family's net is more than half of the pooled net, the verdict is that family's own read.
+11. Family rule, SETTLED by Amendment 4 (registration a13693f3...): the pooled verdict first; anything but a pooled pass is the verdict; on a pooled pass the family with the largest net (tie: alphabetical) is read alone if it supplies more than half of the pooled net.
 12. The hourly volume of a candle is its volume_fp (or volume) field read as a number; a missing volume is 0.
 """
 import sys, os, json, gzip, math, statistics, collections
@@ -233,10 +233,13 @@ def measure(spec, list_folders, hourly_folders, minute_folders):
         ok = ge(s["development"]["pf"], PF_LINE) and ge(s["first_half"]["pf"], HALF_LINE) and ge(s["second_half"]["pf"], HALF_LINE)
         return ("survives development (%s): a candidate for a wheel shadow place, never a pass of the research bar" % name) if ok else ("FALSIFIED (%s)" % name), ok
     v, ok = read(filled, "pooled"); net = out["filled"]["development"]["net"]
-    if ok and net > 0:
-        big = [f for f, s in fams.items() if s["development"]["net"] > net / 2 + EPS]
-        if big:
-            v2, _ = read([b for b in filled if b["family"] == big[0]], "the family '%s' alone, which supplies more than half of the pooled net" % big[0]); v = "the pooled pass does not count; " + v2
+    out["pooled_verdict"] = v
+    if ok:                                                                    # Amendment 4: the pooled verdict first; only a pooled pass can hand the card to one family
+        top = min(fams, key=lambda f: (-fams[f]["development"]["net"], f))        # the largest net; an exact tie goes to the name first in alphabetical order
+        over = [f for f in fams if fams[f]["development"]["net"] > net / 2 + EPS]
+        if top in over:
+            v2, _ = read([b for b in filled if b["family"] == top], "the family '%s' alone, which supplies more than half of the pooled net" % top); v = "the pooled pass does not count; " + v2
+            if len(over) > 1: v += " (two families each supply more than half; the one with the largest net is read)"
     out["verdict"] = v
     return out
 

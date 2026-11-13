@@ -11,7 +11,7 @@ Desk B's `polgaph.py` was not read. Nothing of this card has been requested or r
 | `polgaph_second.py` | the second build: lists, hourly candles and minute candles in, counts first, the cost line, and results only after the cost line passes |
 | `polgaph_compare.py` | compares Desk B's printed lines with my output, figure by figure; reads printed output only |
 | `make_polgaph_fixture.py` | invented lists, hourly and minute candles in the pull-run shape for all 69 series names; an `edge` argument plants or removes an effect |
-| `POLGAPH_SECOND_OUTPUT_fixture_seed5_{no_edge,edge035}_MADE_UP_DATA.{txt,json}` | my build's figures on the two fixtures |
+| `POLGAPH_SECOND_OUTPUT_fixture_seed5_{no_edge,edge035,edge032_others_minus05}_MADE_UP_DATA.{txt,json}` | my build's figures on the three fixtures |
 
 Commands:
 
@@ -44,6 +44,22 @@ These are invented rows; the figures mean nothing about the market.
 
 Not compared: Desk B prints "candles without a volume field"; this build reads a missing volume as 0 and does not count them (0 on both fixtures).
 
+## Nov 13, about 01:50Z: Amendment 4 (the pooling line read exactly) and a fixture that separates the two readings
+
+Auditor B found that Desk B's scorer let one family rescue a FAILED pooled read. Amendment 4 (registration `a13693f3...`, scorer `9186c8b5...` at `94ff7fa7`) reads it
+exactly: the pooled verdict first; anything but a pooled pass is the verdict; on a pooled pass the family with the largest net (tie: alphabetical) is read alone if it
+supplies more than half of the pooled net.
+
+- **This build already took the pooled verdict first.** One small change: it now picks the family with the largest net (it had picked the first family over half in file
+  order, which differs only when two families are each over half).
+- **A third fixture separates the readings:** `make_polgaph_fixture.py <dir> <series json> 5 0.32 -0.5` (edge 0.32 for activity counts, minus 0.5 for the other two
+  families). Pooled: n 288, PF 1.07, net positive, FALSIFIED. Activity counts alone: n 230, PF 1.93, more than half of the pooled net. Read "pooled first", the verdict is
+  FALSIFIED (pooled); under the old reading it would have been "activity counts: survives development".
+- **Both builds print FALSIFIED (pooled) on it,** and the same 155 of 155 figures. I ran Desk B's scorer at `94ff7fa7` on this fixture myself, with the two commands Desk B
+  gave, from a checkout of its branch, without reading it; its printed lines are saved here as
+  `POLGAPH_FIRST_BUILD_OUTPUT_fixture_seed5_edge032_others_minus05_MADE_UP_DATA_run_by_forensics.txt`.
+- The two earlier fixtures still agree against Desk B's refreshed lines at `94ff7fa7`: 155 of 155 and 156 of 156.
+
 ## Places where the registration leaves a choice
 
 The build prints its readings with the output (`ambiguities`). The ones most likely to move a figure:
@@ -51,7 +67,7 @@ The build prints its readings with the output (`ambiguities`). The ones most lik
 1. **The count "left after step 7"**: SETTLED by Amendment 3, item 2. A decision is the event's pick; fired is decisions less blocked.
 2. **"No fill data".** A market and morning has fill data if some answered minute request names the ticker and its time range contains the minute ending 07:01.
 3. **The optimistic figure**: SETTLED by Amendment 3, item 3. Every decision is booked at its limit, no block, no fill test.
-4. **The family rule.** If the pooled read would survive and one family's net is more than half the pooled net, the verdict is that family's own read against the same minimums.
+4. **The family rule**: SETTLED by Amendment 4. Pooled verdict first; only a pooled pass can hand the card to the family with the largest net.
 5. **A void** is any result that is neither yes nor no; the "settlement value paid" figure uses the listed settlement value and is left as the fee-only loss when none is listed.
 6. **A market closing on or after 2026-11-13**: SETTLED by Amendment 3, item 4. It stops the whole run.
 7. **Largest number open at once** is taken at each filled bet's look.

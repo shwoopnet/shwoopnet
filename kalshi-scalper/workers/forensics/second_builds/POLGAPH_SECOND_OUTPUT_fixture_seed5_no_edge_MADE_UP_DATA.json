@@ -41,7 +41,7 @@
   "8. SETTLED by Amendment 3, item 3: the optimistic, same-candle figure books EVERY decision (the event's pick) at its limit, with no block and no fill test. (This build first booked fired decisions only.)",
   "9. The largest number open at once is taken at each filled bet's look (bets with look at or before it and close after it).",
   "10. Profit factor with no losses is infinite and passes a \"1.5 or more\" line; with no wins it is 0. The lines are tested with a 1e-9 tolerance on the float figure.",
-  "11. Family rule (Amendment 1, point 2): if the pooled read would survive and one family's net is more than half of the pooled net, the verdict is that family's own read.",
+  "11. Family rule, SETTLED by Amendment 4 (registration a13693f3...): the pooled verdict first; anything but a pooled pass is the verdict; on a pooled pass the family with the largest net (tie: alphabetical) is read alone if it supplies more than half of the pooled net.",
   "12. The hourly volume of a candle is its volume_fp (or volume) field read as a number; a missing volume is 0."
  ],
  "filled_bets": {
@@ -346,5 +346,6 @@
    }
   }
  },
+ "pooled_verdict": "FALSIFIED (pooled)",
  "verdict": "FALSIFIED (pooled)"
 }

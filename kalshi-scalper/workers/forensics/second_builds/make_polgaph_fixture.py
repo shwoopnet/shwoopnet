@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """A MADE-UP fixture for POLGAPH in the pull-run folder shape (manifest.json + NNNN.json.gz): <out>/lists, <out>/hourly and <out>/minute, plus the marker file MADE_UP_DATA.
 Nothing here is real: only the series NAMES come from Desk B's POLGAPH_SERIES.json (so the family map applies); events, markets, quotes, volumes and results are invented.
-usage: python3 -I make_polgaph_fixture.py <out dir> <POLGAPH_SERIES.json> [seed] [edge]
+usage: python3 -I make_polgaph_fixture.py <out dir> <POLGAPH_SERIES.json> [seed] [edge] [other_edge]
+  other_edge (optional): the edge used for the shipping and single-question families, while `edge` is used for activity counts only. With edge 0.25 and other_edge -0.45 the
+  pooled read fails while activity counts alone would pass: the case that separates "pooled verdict first" (Amendment 4) from "a failed pooled read rescued by one family".
   edge (default 0.0): how far beyond a coin flip an overnight gap points toward the market's result. 0.0 = the gap says nothing; 0.35 = a strong planted effect.
 Planted on purpose: markets that open or close exactly at a 07:00 look (that morning is not theirs), missing hourly candles at 22:00, 06:00 or 07:00 ("no look"), empty books
 (0.00 and 1.00) and one-sided candles, gaps on a half-cent grid around 5c and 2c (exactly 5c and exactly 2c occur), asks on the band edges (0.10, 0.64, 0.65), spreads of
@@ -17,14 +19,14 @@ F = lambda x: datetime.fromtimestamp(x, timezone.utc).strftime("%Y-%m-%dT%H:%M:%
 W0 = int(datetime(2026, 9, 12, tzinfo=timezone.utc).timestamp()); W1 = int(datetime(2026, 11, 12, 23, 59, 59, tzinfo=timezone.utc).timestamp())
 
 
-def main(out, series_json, seed, edge):
+def main(out, series_json, seed, edge, other_edge=None):
     rng = random.Random(seed); os.makedirs(out); open(os.path.join(out, "MADE_UP_DATA"), "w").write("invented rows for a build comparison; nothing here is real\n")
     fam = json.load(open(series_json))["families"]
     use = fam["activity counts"] + fam["shipping counts"] + fam["single questions"]                    # all 69 series, so the counts clear the 150 and 40 minimums
     cent = lambda x: round(min(0.93, max(0.07, x)), 2)
     lists = {}; hourly = {}; looks = {}; q07 = {}; n_ev = 0
     for s in use:
-        single = s in fam["single questions"]; lists[s] = []
+        single = s in fam["single questions"]; lists[s] = []; e_s = edge if (other_edge is None or s in fam["activity counts"]) else other_edge
         day = datetime(2026, 9, rng.randint(5, 11), tzinfo=ET)
         while True:
             oh, om = rng.choice([(7, 0), (9, 30), (14, 0), (20, 15)]); ch, cm, cs = rng.choice([(7, 0, 0), (10, 0, 0), (16, 0, 0), (23, 59, 59)])
@@ -40,7 +42,7 @@ def main(out, series_json, seed, edge):
                 while h <= cl:
                     hr = datetime.fromtimestamp(h, ET).hour; key = hr in (22, 6, 7); mid = m
                     if hr == 22:
-                        g = rng.choice([0, 0, 0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.05, 0.06, 0.08, 0.10, 0.15]) * (1 if (rng.random() < 0.5 + edge) == truth else -1)
+                        g = rng.choice([0, 0, 0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.05, 0.06, 0.08, 0.10, 0.15]) * (1 if (rng.random() < 0.5 + e_s) == truth else -1)
                     elif hr == 6: mid = cent(m + g - rng.choice([0, 0, 0, 0, 0.01, -0.01, g, g]))
                     elif hr == 7: m = cent(m + g); mid = m; g = 0.0
                     elif 8 <= hr <= 21: m = cent(m + rng.choice([0, 0, 0, 0.01, -0.01])); mid = m
@@ -107,8 +109,8 @@ def main(out, series_json, seed, edge):
         mreq.append(("m_" + d, "/markets/candlesticks", params, {"markets": mk}))
     write_run(os.path.join(out, "minute"), mreq)
     print("made-up POLGAPH fixture written to %s: %d series, %d events, %d markets, %d hourly requests, %d minute requests over %d mornings, seed %d, edge %s" % (
-        out, len(use), n_ev, sum(len(v) for v in lists.values()), len(hreq), len(mreq), len(looks), seed, edge))
+        out, len(use), n_ev, sum(len(v) for v in lists.values()), len(hreq), len(mreq), len(looks), seed, edge) + ("" if other_edge is None else ", other families %s" % other_edge))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 5, float(sys.argv[4]) if len(sys.argv) > 4 else 0.0)
+    main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 5, float(sys.argv[4]) if len(sys.argv) > 4 else 0.0, float(sys.argv[5]) if len(sys.argv) > 5 else None)

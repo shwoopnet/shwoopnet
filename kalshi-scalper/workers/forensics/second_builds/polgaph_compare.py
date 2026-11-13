@@ -59,7 +59,7 @@ for l in theirs:
     g = re.match(r"information only, voids paid at their settlement value instead: " + ST, l)
     if g: cmp("voids at value", g.groups(), st(M["filled_with_the_settlement_value_paid_for_voids_information_only"])); seen.add("voids at value"); continue
     if l.startswith("POOLING CONDITION:"):
-        tot += 1; ok = "does not count" in M["verdict"] and re.search(r"POOLING CONDITION: (.+?) supplies", l).group(1) in M["verdict"]; bad += 0 if ok else 1; seen.add("pooling")
+        tot += 1; named = [f for f in M.get("by_family", {}) if (f + " supplies") in l]; ok = "does not count" in M["verdict"] and len(named) == 1 and ("'%s'" % named[0]) in M["verdict"]; bad += 0 if ok else 1; seen.add("pooling")
         if not ok: print("DIFFER pooling condition:", l[:120], "| mine:", M["verdict"][:120])
     if l.startswith("VERDICT:"):
         tot += 1; word = next((w for w in ("FALSIFIED", "survives development", "no evidence", "CLOSED on cost") if w in l), None); ok = word is not None and word in M["verdict"]; bad += 0 if ok else 1; seen.add("verdict")
