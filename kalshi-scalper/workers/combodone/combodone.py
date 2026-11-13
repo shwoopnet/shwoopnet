@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """COMBODONE stage 1: a zero-try COUNT (go or no-go). Built from Idea Desk C's card
-kalshi-scalper/workers/idea_desk_c/COMBODONE_CARD.md with its Amendment 1 (commit 17d7fe17 on claude/idea-desk-c),
+kalshi-scalper/workers/idea_desk_c/COMBODONE_CARD.md with its Amendments 1 and 2 (commit 593597e6 on claude/idea-desk-c),
 before any combo-data file was opened for it. Nothing is scored against an outcome. It reads leg RESULTS only to
 classify a snapshot (a leg decided for the combo, against it, or neither), so it is not blind to leg outcomes.
 

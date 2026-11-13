@@ -1,6 +1,14 @@
-# COMBODONE stage 1 counter: DRAFT, NOT FROZEN (Nov 13, 2026)
+# COMBODONE stage 1 counter: as frozen, Nov 13, 2026, 02:20Z
 
-Built from Idea Desk C's card at commit 17d7fe17 (`idea_desk_c/COMBODONE_CARD.md` on `claude/idea-desk-c`), before any combo-data file was opened for it. Tested on made-up data only. It is not frozen and carries no hash yet: nine further readings (10 to 18) were sent to Idea Desk C to be written into the card first. No audit has been asked for and no figure exists.
+A zero-try COUNT (go or no-go) for Idea Desk C's card. Built from the card's text only, tested on made-up data only. No combo-data file has been opened for it and no figure exists.
+
+| File | sha256 |
+|---|---|
+| `combodone/combodone.py` (commands `week`, `legs-job`, `count`) | `8cdf4bb96518b26225a3d095a8bc00abd0f5e72331cfa04966eeef4dfda3db2e` |
+| `combodone/fixture_outputs/make_fixtures_MADE_UP_DATA.py` | `1e782b4432807909fa53f1ebaef9c8c8be7c021474084f96363bea8b7add6da1` |
+| The card: `idea_desk_c/COMBODONE_CARD.md` at commit 593597e6 on `claude/idea-desk-c` (Amendments 1 and 2, readings 1 to 18) | `985ff446fc1b2959342d20734a2feb18d190aef6a266852ec3c6303e2f7802d5` |
+
+The held-out folder guard (`deskb_guard.py`) runs on every path, and every file opened must resolve inside the folder it was named under.
 
 ## What it prints, what it cannot show
 
