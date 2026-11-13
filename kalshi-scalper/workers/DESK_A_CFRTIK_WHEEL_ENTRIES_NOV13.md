@@ -21,3 +21,6 @@ Each entry is the SAME rule as the probation seat and as section 1 of `DESK_A_FR
 
 ## Rule for missing minute marks
 A window without every mark the formula needs (mark 0, the opening mark, and at least 6 log changes between neighbouring marks of marks 0 to 10) is "no signal"; a missing mark is never interpolated, carried forward or replaced by `reference_price`.
+
+## Addendum (Nov 13, 2026, the Head's ruling on the weekend finding; PRINTING ONLY, no definition changes)
+No filter on the perp's spread (a filter would be a parameter). Instead every logged signal on these five places prints the perp's RELATIVE SPREAD at the decision mark (mark 0: (ask close - bid close) / mid of the candle ending at D), and the block report prints the block's results with and without the signals whose perp spread was over 50 bp, as information only. The block verdict uses all signals. Accepted rulings recorded here: the later result read is a small kalshi-pull list job built by Desk A at each block read and run by the Chief of Staff; the worse-of-two fill price is the rule; the `KXBTCPERP` archive is with the Chief of Staff (until it lands the Bitcoin place logs "no signal: no mark"); each entry counts from the first archive file carrying its ticker and Auditor B's "closed" on this sheet.
