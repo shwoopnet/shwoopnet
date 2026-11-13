@@ -253,7 +253,7 @@ def measure(smp, cdata, complete, whole, nreq, novol, markets, lists):
     for tag, sub in (("ALL", smp), ("EXCL", excl)):
         for S in SERIES:
             strikes = [s for s in sub if s["series"] == S]
-            tr = sum(1 for s in strikes for c in cdata.get(s["ticker"], {}).values() if c.get("volume_fp") not in (None, "") and D(c["volume_fp"]) > 0)
+            tr = sum(1 for s in strikes for ts_, c in cdata.get(s["ticker"], {}).items() if s["open"] < ts_ <= s["close"] and c.get("volume_fp") not in (None, "") and D(c["volume_fp"]) > 0)          # candles ending after the market's own open and up to its close (Auditor B note 4)
             den = sum(s["life"] // 60 for s in strikes)
             print("  [%s] %s %s%% (%d of %d)  measurement, not a rule" % (tag, S, rnd(D(tr) * 100 / den, 1) if den else "n/a", tr, den))
     # size at touch from open_ answers
