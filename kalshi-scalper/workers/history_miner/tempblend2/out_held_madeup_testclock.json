@@ -1,8 +1,11 @@
 {
  "ambiguities": [
-  "Amendment 1 of TEMPBLEND_CARD.md (658817e9) rules A1 to A18; this build follows it line by line (see the card)."
+  "Amendments 1 and 2 of TEMPBLEND_CARD.md (515421f6) rule A1 to A18, F1 to F6 and Q1 to Q3; this build follows them line by line.",
+  "OPEN B1 (not ruled by the text): the bar 'cash PF 1.5 in each of three windows' does not name the three windows. Provisional: development first half, development second half, held-out.",
+  "OPEN B2 (not ruled): the z of 5.46 is not tied to a sample. Provisional: the held-out bets' day-clustered z (Q1); the development z is printed for information.",
+  "OPEN B3 (not ruled): Q1's standard deviation is not said to be the sample one; provisional: the sample standard deviation (n - 1); days without a bet are not days; under 2 days or a zero deviation gives no z, which fails the bar."
  ],
- "card": "TEMPBLEND_CARD.md 66483872 (f07129e1)",
+ "card": "TEMPBLEND_CARD.md 515421f6 (85d8f455)",
  "decisions": [
   {
    "S": 1790856000,
@@ -225,6 +228,13 @@
    "city": "C16",
    "status": "no station reading",
    "window": "dev"
+  },
+  {
+   "S": 1790877600,
+   "bet": null,
+   "city": "C17",
+   "status": "obs_after_point",
+   "window": "dev"
   }
  ],
  "development": {
@@ -234,6 +244,7 @@
    "pf": 1.703704,
    "voids": 1
   },
+  "days": 2,
   "days_0_1_info": {
    "n": 1,
    "net": -0.42,
@@ -275,7 +286,8 @@
    "pf": 0.851064,
    "voids": 1
   },
-  "verdict": "CLOSED"
+  "verdict": "CLOSED",
+  "z_day_info": 0.517241
  },
  "held_out": {
   "calibration_kill": "no evidence at n = 1",
@@ -285,6 +297,7 @@
    "pf": "inf",
    "voids": 0
   },
+  "days": 1,
   "days_0_1": {
    "n": 1,
    "net": -0.32,
@@ -296,8 +309,13 @@
    "net": 0.16,
    "pf": 1.5,
    "voids": 0
-  }
+  },
+  "verdict": "NOT PASS",
+  "windows_pf_ok": false,
+  "z_day": null
  },
+ "held_rows": 0,
+ "mode": "held",
  "outside_windows": 1,
  "statuses": {
   "bet": 9,
@@ -305,6 +323,7 @@
   "member station not ok": 1,
   "no index point": 1,
   "no station reading": 2,
-  "no strike passes band and spread": 1
+  "no strike passes band and spread": 1,
+  "obs_after_point": 1
  }
 }

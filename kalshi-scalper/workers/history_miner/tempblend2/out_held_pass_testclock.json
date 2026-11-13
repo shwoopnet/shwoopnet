@@ -1,0 +1,5294 @@
+{
+ "ambiguities": [
+  "Amendments 1 and 2 of TEMPBLEND_CARD.md (515421f6) rule A1 to A18, F1 to F6 and Q1 to Q3; this build follows them line by line.",
+  "OPEN B1 (not ruled by the text): the bar 'cash PF 1.5 in each of three windows' does not name the three windows. Provisional: development first half, development second half, held-out.",
+  "OPEN B2 (not ruled): the z of 5.46 is not tied to a sample. Provisional: the held-out bets' day-clustered z (Q1); the development z is printed for information.",
+  "OPEN B3 (not ruled): Q1's standard deviation is not said to be the sample one; provisional: the sample standard deviation (n - 1); days without a bet are not days; under 2 days or a zero deviation gives no z, which fails the bar."
+ ],
+ "card": "TEMPBLEND_CARD.md 515421f6 (85d8f455)",
+ "decisions": [
+  {
+   "S": 1789862400,
+   "bet": {
+    "K": 72,
+    "S": 1789862400,
+    "ask": 0.4,
+    "city": "P000",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P000",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789866000,
+   "bet": {
+    "K": 72,
+    "S": 1789866000,
+    "ask": 0.4,
+    "city": "P001",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P001",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789869600,
+   "bet": {
+    "K": 72,
+    "S": 1789869600,
+    "ask": 0.4,
+    "city": "P002",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P002",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789873200,
+   "bet": {
+    "K": 72,
+    "S": 1789873200,
+    "ask": 0.4,
+    "city": "P003",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P003",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789876800,
+   "bet": {
+    "K": 72,
+    "S": 1789876800,
+    "ask": 0.4,
+    "city": "P004",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P004",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789880400,
+   "bet": {
+    "K": 72,
+    "S": 1789880400,
+    "ask": 0.4,
+    "city": "P005",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P005",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789884000,
+   "bet": {
+    "K": 72,
+    "S": 1789884000,
+    "ask": 0.4,
+    "city": "P006",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P006",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789887600,
+   "bet": {
+    "K": 72,
+    "S": 1789887600,
+    "ask": 0.4,
+    "city": "P007",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P007",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789891200,
+   "bet": {
+    "K": 72,
+    "S": 1789891200,
+    "ask": 0.4,
+    "city": "P008",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P008",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789894800,
+   "bet": {
+    "K": 72,
+    "S": 1789894800,
+    "ask": 0.4,
+    "city": "P009",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P009",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789898400,
+   "bet": {
+    "K": 72,
+    "S": 1789898400,
+    "ask": 0.4,
+    "city": "P010",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P010",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789902000,
+   "bet": {
+    "K": 72,
+    "S": 1789902000,
+    "ask": 0.4,
+    "city": "P011",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P011",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789905600,
+   "bet": {
+    "K": 72,
+    "S": 1789905600,
+    "ask": 0.4,
+    "city": "P012",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P012",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789909200,
+   "bet": {
+    "K": 72,
+    "S": 1789909200,
+    "ask": 0.4,
+    "city": "P013",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P013",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789912800,
+   "bet": {
+    "K": 72,
+    "S": 1789912800,
+    "ask": 0.4,
+    "city": "P014",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P014",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789916400,
+   "bet": {
+    "K": 72,
+    "S": 1789916400,
+    "ask": 0.4,
+    "city": "P015",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P015",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789920000,
+   "bet": {
+    "K": 72,
+    "S": 1789920000,
+    "ask": 0.4,
+    "city": "P016",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P016",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789923600,
+   "bet": {
+    "K": 72,
+    "S": 1789923600,
+    "ask": 0.4,
+    "city": "P017",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P017",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789927200,
+   "bet": {
+    "K": 72,
+    "S": 1789927200,
+    "ask": 0.4,
+    "city": "P018",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P018",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789930800,
+   "bet": {
+    "K": 72,
+    "S": 1789930800,
+    "ask": 0.4,
+    "city": "P019",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P019",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789934400,
+   "bet": {
+    "K": 72,
+    "S": 1789934400,
+    "ask": 0.4,
+    "city": "P020",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P020",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789938000,
+   "bet": {
+    "K": 72,
+    "S": 1789938000,
+    "ask": 0.4,
+    "city": "P021",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P021",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789941600,
+   "bet": {
+    "K": 72,
+    "S": 1789941600,
+    "ask": 0.4,
+    "city": "P022",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P022",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789945200,
+   "bet": {
+    "K": 72,
+    "S": 1789945200,
+    "ask": 0.4,
+    "city": "P023",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P023",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789948800,
+   "bet": {
+    "K": 72,
+    "S": 1789948800,
+    "ask": 0.4,
+    "city": "P024",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P024",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789952400,
+   "bet": {
+    "K": 72,
+    "S": 1789952400,
+    "ask": 0.4,
+    "city": "P025",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P025",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789956000,
+   "bet": {
+    "K": 72,
+    "S": 1789956000,
+    "ask": 0.4,
+    "city": "P026",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P026",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789959600,
+   "bet": {
+    "K": 72,
+    "S": 1789959600,
+    "ask": 0.4,
+    "city": "P027",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P027",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789963200,
+   "bet": {
+    "K": 72,
+    "S": 1789963200,
+    "ask": 0.4,
+    "city": "P028",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P028",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789966800,
+   "bet": {
+    "K": 72,
+    "S": 1789966800,
+    "ask": 0.4,
+    "city": "P029",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P029",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789970400,
+   "bet": {
+    "K": 72,
+    "S": 1789970400,
+    "ask": 0.4,
+    "city": "P030",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P030",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789974000,
+   "bet": {
+    "K": 72,
+    "S": 1789974000,
+    "ask": 0.4,
+    "city": "P031",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P031",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789977600,
+   "bet": {
+    "K": 72,
+    "S": 1789977600,
+    "ask": 0.4,
+    "city": "P032",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P032",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789981200,
+   "bet": {
+    "K": 72,
+    "S": 1789981200,
+    "ask": 0.4,
+    "city": "P033",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P033",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789984800,
+   "bet": {
+    "K": 72,
+    "S": 1789984800,
+    "ask": 0.4,
+    "city": "P034",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P034",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789988400,
+   "bet": {
+    "K": 72,
+    "S": 1789988400,
+    "ask": 0.4,
+    "city": "P035",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P035",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789992000,
+   "bet": {
+    "K": 72,
+    "S": 1789992000,
+    "ask": 0.4,
+    "city": "P036",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P036",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789995600,
+   "bet": {
+    "K": 72,
+    "S": 1789995600,
+    "ask": 0.4,
+    "city": "P037",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P037",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1789999200,
+   "bet": {
+    "K": 72,
+    "S": 1789999200,
+    "ask": 0.4,
+    "city": "P038",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P038",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790002800,
+   "bet": {
+    "K": 72,
+    "S": 1790002800,
+    "ask": 0.4,
+    "city": "P039",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P039",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790006400,
+   "bet": {
+    "K": 72,
+    "S": 1790006400,
+    "ask": 0.4,
+    "city": "P040",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P040",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790010000,
+   "bet": {
+    "K": 72,
+    "S": 1790010000,
+    "ask": 0.4,
+    "city": "P041",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P041",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790013600,
+   "bet": {
+    "K": 72,
+    "S": 1790013600,
+    "ask": 0.4,
+    "city": "P042",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P042",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790017200,
+   "bet": {
+    "K": 72,
+    "S": 1790017200,
+    "ask": 0.4,
+    "city": "P043",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P043",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790020800,
+   "bet": {
+    "K": 72,
+    "S": 1790020800,
+    "ask": 0.4,
+    "city": "P044",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P044",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790024400,
+   "bet": {
+    "K": 72,
+    "S": 1790024400,
+    "ask": 0.4,
+    "city": "P045",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P045",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790028000,
+   "bet": {
+    "K": 72,
+    "S": 1790028000,
+    "ask": 0.4,
+    "city": "P046",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P046",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790031600,
+   "bet": {
+    "K": 72,
+    "S": 1790031600,
+    "ask": 0.4,
+    "city": "P047",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P047",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790035200,
+   "bet": {
+    "K": 72,
+    "S": 1790035200,
+    "ask": 0.4,
+    "city": "P048",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P048",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790038800,
+   "bet": {
+    "K": 72,
+    "S": 1790038800,
+    "ask": 0.4,
+    "city": "P049",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P049",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790042400,
+   "bet": {
+    "K": 72,
+    "S": 1790042400,
+    "ask": 0.4,
+    "city": "P050",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P050",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790046000,
+   "bet": {
+    "K": 72,
+    "S": 1790046000,
+    "ask": 0.4,
+    "city": "P051",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P051",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790049600,
+   "bet": {
+    "K": 72,
+    "S": 1790049600,
+    "ask": 0.4,
+    "city": "P052",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P052",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790053200,
+   "bet": {
+    "K": 72,
+    "S": 1790053200,
+    "ask": 0.4,
+    "city": "P053",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P053",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790056800,
+   "bet": {
+    "K": 72,
+    "S": 1790056800,
+    "ask": 0.4,
+    "city": "P054",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P054",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790060400,
+   "bet": {
+    "K": 72,
+    "S": 1790060400,
+    "ask": 0.4,
+    "city": "P055",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P055",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790064000,
+   "bet": {
+    "K": 72,
+    "S": 1790064000,
+    "ask": 0.4,
+    "city": "P056",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P056",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790067600,
+   "bet": {
+    "K": 72,
+    "S": 1790067600,
+    "ask": 0.4,
+    "city": "P057",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P057",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790071200,
+   "bet": {
+    "K": 72,
+    "S": 1790071200,
+    "ask": 0.4,
+    "city": "P058",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P058",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790074800,
+   "bet": {
+    "K": 72,
+    "S": 1790074800,
+    "ask": 0.4,
+    "city": "P059",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P059",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790078400,
+   "bet": {
+    "K": 72,
+    "S": 1790078400,
+    "ask": 0.4,
+    "city": "P060",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P060",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790082000,
+   "bet": {
+    "K": 72,
+    "S": 1790082000,
+    "ask": 0.4,
+    "city": "P061",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P061",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790085600,
+   "bet": {
+    "K": 72,
+    "S": 1790085600,
+    "ask": 0.4,
+    "city": "P062",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P062",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790089200,
+   "bet": {
+    "K": 72,
+    "S": 1790089200,
+    "ask": 0.4,
+    "city": "P063",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P063",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790092800,
+   "bet": {
+    "K": 72,
+    "S": 1790092800,
+    "ask": 0.4,
+    "city": "P064",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P064",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790096400,
+   "bet": {
+    "K": 72,
+    "S": 1790096400,
+    "ask": 0.4,
+    "city": "P065",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P065",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790100000,
+   "bet": {
+    "K": 72,
+    "S": 1790100000,
+    "ask": 0.4,
+    "city": "P066",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P066",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790103600,
+   "bet": {
+    "K": 72,
+    "S": 1790103600,
+    "ask": 0.4,
+    "city": "P067",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P067",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790107200,
+   "bet": {
+    "K": 72,
+    "S": 1790107200,
+    "ask": 0.4,
+    "city": "P068",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P068",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790110800,
+   "bet": {
+    "K": 72,
+    "S": 1790110800,
+    "ask": 0.4,
+    "city": "P069",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P069",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790114400,
+   "bet": {
+    "K": 72,
+    "S": 1790114400,
+    "ask": 0.4,
+    "city": "P070",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P070",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790118000,
+   "bet": {
+    "K": 72,
+    "S": 1790118000,
+    "ask": 0.4,
+    "city": "P071",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P071",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790121600,
+   "bet": {
+    "K": 72,
+    "S": 1790121600,
+    "ask": 0.4,
+    "city": "P072",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P072",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790125200,
+   "bet": {
+    "K": 72,
+    "S": 1790125200,
+    "ask": 0.4,
+    "city": "P073",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P073",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790128800,
+   "bet": {
+    "K": 72,
+    "S": 1790128800,
+    "ask": 0.4,
+    "city": "P074",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P074",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790132400,
+   "bet": {
+    "K": 72,
+    "S": 1790132400,
+    "ask": 0.4,
+    "city": "P075",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P075",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790136000,
+   "bet": {
+    "K": 72,
+    "S": 1790136000,
+    "ask": 0.4,
+    "city": "P076",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P076",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790139600,
+   "bet": {
+    "K": 72,
+    "S": 1790139600,
+    "ask": 0.4,
+    "city": "P077",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P077",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790143200,
+   "bet": {
+    "K": 72,
+    "S": 1790143200,
+    "ask": 0.4,
+    "city": "P078",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P078",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790146800,
+   "bet": {
+    "K": 72,
+    "S": 1790146800,
+    "ask": 0.4,
+    "city": "P079",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P079",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790150400,
+   "bet": {
+    "K": 72,
+    "S": 1790150400,
+    "ask": 0.4,
+    "city": "P080",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P080",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790154000,
+   "bet": {
+    "K": 72,
+    "S": 1790154000,
+    "ask": 0.4,
+    "city": "P081",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P081",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790157600,
+   "bet": {
+    "K": 72,
+    "S": 1790157600,
+    "ask": 0.4,
+    "city": "P082",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P082",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790161200,
+   "bet": {
+    "K": 72,
+    "S": 1790161200,
+    "ask": 0.4,
+    "city": "P083",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P083",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790164800,
+   "bet": {
+    "K": 72,
+    "S": 1790164800,
+    "ask": 0.4,
+    "city": "P084",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P084",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790168400,
+   "bet": {
+    "K": 72,
+    "S": 1790168400,
+    "ask": 0.4,
+    "city": "P085",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P085",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790172000,
+   "bet": {
+    "K": 72,
+    "S": 1790172000,
+    "ask": 0.4,
+    "city": "P086",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P086",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790175600,
+   "bet": {
+    "K": 72,
+    "S": 1790175600,
+    "ask": 0.4,
+    "city": "P087",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P087",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790179200,
+   "bet": {
+    "K": 72,
+    "S": 1790179200,
+    "ask": 0.4,
+    "city": "P088",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P088",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790182800,
+   "bet": {
+    "K": 72,
+    "S": 1790182800,
+    "ask": 0.4,
+    "city": "P089",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P089",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790186400,
+   "bet": {
+    "K": 72,
+    "S": 1790186400,
+    "ask": 0.4,
+    "city": "P090",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P090",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790190000,
+   "bet": {
+    "K": 72,
+    "S": 1790190000,
+    "ask": 0.4,
+    "city": "P091",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P091",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790193600,
+   "bet": {
+    "K": 72,
+    "S": 1790193600,
+    "ask": 0.4,
+    "city": "P092",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P092",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790197200,
+   "bet": {
+    "K": 72,
+    "S": 1790197200,
+    "ask": 0.4,
+    "city": "P093",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P093",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790200800,
+   "bet": {
+    "K": 72,
+    "S": 1790200800,
+    "ask": 0.4,
+    "city": "P094",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P094",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790204400,
+   "bet": {
+    "K": 72,
+    "S": 1790204400,
+    "ask": 0.4,
+    "city": "P095",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P095",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790208000,
+   "bet": {
+    "K": 72,
+    "S": 1790208000,
+    "ask": 0.4,
+    "city": "P096",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P096",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790211600,
+   "bet": {
+    "K": 72,
+    "S": 1790211600,
+    "ask": 0.4,
+    "city": "P097",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P097",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790215200,
+   "bet": {
+    "K": 72,
+    "S": 1790215200,
+    "ask": 0.4,
+    "city": "P098",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P098",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790218800,
+   "bet": {
+    "K": 72,
+    "S": 1790218800,
+    "ask": 0.4,
+    "city": "P099",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P099",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790222400,
+   "bet": {
+    "K": 72,
+    "S": 1790222400,
+    "ask": 0.4,
+    "city": "P100",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P100",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790226000,
+   "bet": {
+    "K": 72,
+    "S": 1790226000,
+    "ask": 0.4,
+    "city": "P101",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P101",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790229600,
+   "bet": {
+    "K": 72,
+    "S": 1790229600,
+    "ask": 0.4,
+    "city": "P102",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P102",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790233200,
+   "bet": {
+    "K": 72,
+    "S": 1790233200,
+    "ask": 0.4,
+    "city": "P103",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P103",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790236800,
+   "bet": {
+    "K": 72,
+    "S": 1790236800,
+    "ask": 0.4,
+    "city": "P104",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P104",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790240400,
+   "bet": {
+    "K": 72,
+    "S": 1790240400,
+    "ask": 0.4,
+    "city": "P105",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P105",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790244000,
+   "bet": {
+    "K": 72,
+    "S": 1790244000,
+    "ask": 0.4,
+    "city": "P106",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P106",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790247600,
+   "bet": {
+    "K": 72,
+    "S": 1790247600,
+    "ask": 0.4,
+    "city": "P107",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P107",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790251200,
+   "bet": {
+    "K": 72,
+    "S": 1790251200,
+    "ask": 0.4,
+    "city": "P108",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P108",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1790254800,
+   "bet": {
+    "K": 72,
+    "S": 1790254800,
+    "ask": 0.4,
+    "city": "P109",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P109",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792022400,
+   "bet": {
+    "K": 72,
+    "S": 1792022400,
+    "ask": 0.4,
+    "city": "P110",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P110",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792026000,
+   "bet": {
+    "K": 72,
+    "S": 1792026000,
+    "ask": 0.4,
+    "city": "P111",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P111",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792029600,
+   "bet": {
+    "K": 72,
+    "S": 1792029600,
+    "ask": 0.4,
+    "city": "P112",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P112",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792033200,
+   "bet": {
+    "K": 72,
+    "S": 1792033200,
+    "ask": 0.4,
+    "city": "P113",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P113",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792036800,
+   "bet": {
+    "K": 72,
+    "S": 1792036800,
+    "ask": 0.4,
+    "city": "P114",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P114",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792040400,
+   "bet": {
+    "K": 72,
+    "S": 1792040400,
+    "ask": 0.4,
+    "city": "P115",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P115",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792044000,
+   "bet": {
+    "K": 72,
+    "S": 1792044000,
+    "ask": 0.4,
+    "city": "P116",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P116",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792047600,
+   "bet": {
+    "K": 72,
+    "S": 1792047600,
+    "ask": 0.4,
+    "city": "P117",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P117",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792051200,
+   "bet": {
+    "K": 72,
+    "S": 1792051200,
+    "ask": 0.4,
+    "city": "P118",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P118",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792054800,
+   "bet": {
+    "K": 72,
+    "S": 1792054800,
+    "ask": 0.4,
+    "city": "P119",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P119",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792058400,
+   "bet": {
+    "K": 72,
+    "S": 1792058400,
+    "ask": 0.4,
+    "city": "P120",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P120",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792062000,
+   "bet": {
+    "K": 72,
+    "S": 1792062000,
+    "ask": 0.4,
+    "city": "P121",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P121",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792065600,
+   "bet": {
+    "K": 72,
+    "S": 1792065600,
+    "ask": 0.4,
+    "city": "P122",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P122",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792069200,
+   "bet": {
+    "K": 72,
+    "S": 1792069200,
+    "ask": 0.4,
+    "city": "P123",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P123",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792072800,
+   "bet": {
+    "K": 72,
+    "S": 1792072800,
+    "ask": 0.4,
+    "city": "P124",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P124",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792076400,
+   "bet": {
+    "K": 72,
+    "S": 1792076400,
+    "ask": 0.4,
+    "city": "P125",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P125",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792080000,
+   "bet": {
+    "K": 72,
+    "S": 1792080000,
+    "ask": 0.4,
+    "city": "P126",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P126",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792083600,
+   "bet": {
+    "K": 72,
+    "S": 1792083600,
+    "ask": 0.4,
+    "city": "P127",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P127",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792087200,
+   "bet": {
+    "K": 72,
+    "S": 1792087200,
+    "ask": 0.4,
+    "city": "P128",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P128",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792090800,
+   "bet": {
+    "K": 72,
+    "S": 1792090800,
+    "ask": 0.4,
+    "city": "P129",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P129",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792094400,
+   "bet": {
+    "K": 72,
+    "S": 1792094400,
+    "ask": 0.4,
+    "city": "P130",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P130",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792098000,
+   "bet": {
+    "K": 72,
+    "S": 1792098000,
+    "ask": 0.4,
+    "city": "P131",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P131",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792101600,
+   "bet": {
+    "K": 72,
+    "S": 1792101600,
+    "ask": 0.4,
+    "city": "P132",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P132",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792105200,
+   "bet": {
+    "K": 72,
+    "S": 1792105200,
+    "ask": 0.4,
+    "city": "P133",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P133",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792108800,
+   "bet": {
+    "K": 72,
+    "S": 1792108800,
+    "ask": 0.4,
+    "city": "P134",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P134",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792112400,
+   "bet": {
+    "K": 72,
+    "S": 1792112400,
+    "ask": 0.4,
+    "city": "P135",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P135",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792116000,
+   "bet": {
+    "K": 72,
+    "S": 1792116000,
+    "ask": 0.4,
+    "city": "P136",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P136",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792119600,
+   "bet": {
+    "K": 72,
+    "S": 1792119600,
+    "ask": 0.4,
+    "city": "P137",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P137",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792123200,
+   "bet": {
+    "K": 72,
+    "S": 1792123200,
+    "ask": 0.4,
+    "city": "P138",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P138",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792126800,
+   "bet": {
+    "K": 72,
+    "S": 1792126800,
+    "ask": 0.4,
+    "city": "P139",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P139",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792130400,
+   "bet": {
+    "K": 72,
+    "S": 1792130400,
+    "ask": 0.4,
+    "city": "P140",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P140",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792134000,
+   "bet": {
+    "K": 72,
+    "S": 1792134000,
+    "ask": 0.4,
+    "city": "P141",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P141",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792137600,
+   "bet": {
+    "K": 72,
+    "S": 1792137600,
+    "ask": 0.4,
+    "city": "P142",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P142",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792141200,
+   "bet": {
+    "K": 72,
+    "S": 1792141200,
+    "ask": 0.4,
+    "city": "P143",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P143",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792144800,
+   "bet": {
+    "K": 72,
+    "S": 1792144800,
+    "ask": 0.4,
+    "city": "P144",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P144",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792148400,
+   "bet": {
+    "K": 72,
+    "S": 1792148400,
+    "ask": 0.4,
+    "city": "P145",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P145",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792152000,
+   "bet": {
+    "K": 72,
+    "S": 1792152000,
+    "ask": 0.4,
+    "city": "P146",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P146",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792155600,
+   "bet": {
+    "K": 72,
+    "S": 1792155600,
+    "ask": 0.4,
+    "city": "P147",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P147",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792159200,
+   "bet": {
+    "K": 72,
+    "S": 1792159200,
+    "ask": 0.4,
+    "city": "P148",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P148",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792162800,
+   "bet": {
+    "K": 72,
+    "S": 1792162800,
+    "ask": 0.4,
+    "city": "P149",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P149",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792166400,
+   "bet": {
+    "K": 72,
+    "S": 1792166400,
+    "ask": 0.4,
+    "city": "P150",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P150",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792170000,
+   "bet": {
+    "K": 72,
+    "S": 1792170000,
+    "ask": 0.4,
+    "city": "P151",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P151",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792173600,
+   "bet": {
+    "K": 72,
+    "S": 1792173600,
+    "ask": 0.4,
+    "city": "P152",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P152",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792177200,
+   "bet": {
+    "K": 72,
+    "S": 1792177200,
+    "ask": 0.4,
+    "city": "P153",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P153",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792180800,
+   "bet": {
+    "K": 72,
+    "S": 1792180800,
+    "ask": 0.4,
+    "city": "P154",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P154",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792184400,
+   "bet": {
+    "K": 72,
+    "S": 1792184400,
+    "ask": 0.4,
+    "city": "P155",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P155",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792188000,
+   "bet": {
+    "K": 72,
+    "S": 1792188000,
+    "ask": 0.4,
+    "city": "P156",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P156",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792191600,
+   "bet": {
+    "K": 72,
+    "S": 1792191600,
+    "ask": 0.4,
+    "city": "P157",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P157",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792195200,
+   "bet": {
+    "K": 72,
+    "S": 1792195200,
+    "ask": 0.4,
+    "city": "P158",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P158",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792198800,
+   "bet": {
+    "K": 72,
+    "S": 1792198800,
+    "ask": 0.4,
+    "city": "P159",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P159",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792202400,
+   "bet": {
+    "K": 72,
+    "S": 1792202400,
+    "ask": 0.4,
+    "city": "P160",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P160",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792206000,
+   "bet": {
+    "K": 72,
+    "S": 1792206000,
+    "ask": 0.4,
+    "city": "P161",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P161",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792209600,
+   "bet": {
+    "K": 72,
+    "S": 1792209600,
+    "ask": 0.4,
+    "city": "P162",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P162",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792213200,
+   "bet": {
+    "K": 72,
+    "S": 1792213200,
+    "ask": 0.4,
+    "city": "P163",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P163",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792216800,
+   "bet": {
+    "K": 72,
+    "S": 1792216800,
+    "ask": 0.4,
+    "city": "P164",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P164",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792220400,
+   "bet": {
+    "K": 72,
+    "S": 1792220400,
+    "ask": 0.4,
+    "city": "P165",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P165",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792224000,
+   "bet": {
+    "K": 72,
+    "S": 1792224000,
+    "ask": 0.4,
+    "city": "P166",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P166",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792227600,
+   "bet": {
+    "K": 72,
+    "S": 1792227600,
+    "ask": 0.4,
+    "city": "P167",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P167",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792231200,
+   "bet": {
+    "K": 72,
+    "S": 1792231200,
+    "ask": 0.4,
+    "city": "P168",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P168",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792234800,
+   "bet": {
+    "K": 72,
+    "S": 1792234800,
+    "ask": 0.4,
+    "city": "P169",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P169",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792238400,
+   "bet": {
+    "K": 72,
+    "S": 1792238400,
+    "ask": 0.4,
+    "city": "P170",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P170",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792242000,
+   "bet": {
+    "K": 72,
+    "S": 1792242000,
+    "ask": 0.4,
+    "city": "P171",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P171",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792245600,
+   "bet": {
+    "K": 72,
+    "S": 1792245600,
+    "ask": 0.4,
+    "city": "P172",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P172",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792249200,
+   "bet": {
+    "K": 72,
+    "S": 1792249200,
+    "ask": 0.4,
+    "city": "P173",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P173",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792252800,
+   "bet": {
+    "K": 72,
+    "S": 1792252800,
+    "ask": 0.4,
+    "city": "P174",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P174",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792256400,
+   "bet": {
+    "K": 72,
+    "S": 1792256400,
+    "ask": 0.4,
+    "city": "P175",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P175",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792260000,
+   "bet": {
+    "K": 72,
+    "S": 1792260000,
+    "ask": 0.4,
+    "city": "P176",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P176",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792263600,
+   "bet": {
+    "K": 72,
+    "S": 1792263600,
+    "ask": 0.4,
+    "city": "P177",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P177",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792267200,
+   "bet": {
+    "K": 72,
+    "S": 1792267200,
+    "ask": 0.4,
+    "city": "P178",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P178",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792270800,
+   "bet": {
+    "K": 72,
+    "S": 1792270800,
+    "ask": 0.4,
+    "city": "P179",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P179",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792274400,
+   "bet": {
+    "K": 72,
+    "S": 1792274400,
+    "ask": 0.4,
+    "city": "P180",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P180",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792278000,
+   "bet": {
+    "K": 72,
+    "S": 1792278000,
+    "ask": 0.4,
+    "city": "P181",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P181",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792281600,
+   "bet": {
+    "K": 72,
+    "S": 1792281600,
+    "ask": 0.4,
+    "city": "P182",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P182",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792285200,
+   "bet": {
+    "K": 72,
+    "S": 1792285200,
+    "ask": 0.4,
+    "city": "P183",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P183",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792288800,
+   "bet": {
+    "K": 72,
+    "S": 1792288800,
+    "ask": 0.4,
+    "city": "P184",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P184",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792292400,
+   "bet": {
+    "K": 72,
+    "S": 1792292400,
+    "ask": 0.4,
+    "city": "P185",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P185",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792296000,
+   "bet": {
+    "K": 72,
+    "S": 1792296000,
+    "ask": 0.4,
+    "city": "P186",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P186",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792299600,
+   "bet": {
+    "K": 72,
+    "S": 1792299600,
+    "ask": 0.4,
+    "city": "P187",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P187",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792303200,
+   "bet": {
+    "K": 72,
+    "S": 1792303200,
+    "ask": 0.4,
+    "city": "P188",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P188",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792306800,
+   "bet": {
+    "K": 72,
+    "S": 1792306800,
+    "ask": 0.4,
+    "city": "P189",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P189",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792310400,
+   "bet": {
+    "K": 72,
+    "S": 1792310400,
+    "ask": 0.4,
+    "city": "P190",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P190",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792314000,
+   "bet": {
+    "K": 72,
+    "S": 1792314000,
+    "ask": 0.4,
+    "city": "P191",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P191",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792317600,
+   "bet": {
+    "K": 72,
+    "S": 1792317600,
+    "ask": 0.4,
+    "city": "P192",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P192",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792321200,
+   "bet": {
+    "K": 72,
+    "S": 1792321200,
+    "ask": 0.4,
+    "city": "P193",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P193",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792324800,
+   "bet": {
+    "K": 72,
+    "S": 1792324800,
+    "ask": 0.4,
+    "city": "P194",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P194",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792328400,
+   "bet": {
+    "K": 72,
+    "S": 1792328400,
+    "ask": 0.4,
+    "city": "P195",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P195",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792332000,
+   "bet": {
+    "K": 72,
+    "S": 1792332000,
+    "ask": 0.4,
+    "city": "P196",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P196",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792335600,
+   "bet": {
+    "K": 72,
+    "S": 1792335600,
+    "ask": 0.4,
+    "city": "P197",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P197",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792339200,
+   "bet": {
+    "K": 72,
+    "S": 1792339200,
+    "ask": 0.4,
+    "city": "P198",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P198",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792342800,
+   "bet": {
+    "K": 72,
+    "S": 1792342800,
+    "ask": 0.4,
+    "city": "P199",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P199",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792346400,
+   "bet": {
+    "K": 72,
+    "S": 1792346400,
+    "ask": 0.4,
+    "city": "P200",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P200",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792350000,
+   "bet": {
+    "K": 72,
+    "S": 1792350000,
+    "ask": 0.4,
+    "city": "P201",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P201",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792353600,
+   "bet": {
+    "K": 72,
+    "S": 1792353600,
+    "ask": 0.4,
+    "city": "P202",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P202",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792357200,
+   "bet": {
+    "K": 72,
+    "S": 1792357200,
+    "ask": 0.4,
+    "city": "P203",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P203",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792360800,
+   "bet": {
+    "K": 72,
+    "S": 1792360800,
+    "ask": 0.4,
+    "city": "P204",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P204",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792364400,
+   "bet": {
+    "K": 72,
+    "S": 1792364400,
+    "ask": 0.4,
+    "city": "P205",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P205",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792368000,
+   "bet": {
+    "K": 72,
+    "S": 1792368000,
+    "ask": 0.4,
+    "city": "P206",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P206",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792371600,
+   "bet": {
+    "K": 72,
+    "S": 1792371600,
+    "ask": 0.4,
+    "city": "P207",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P207",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792375200,
+   "bet": {
+    "K": 72,
+    "S": 1792375200,
+    "ask": 0.4,
+    "city": "P208",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P208",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792378800,
+   "bet": {
+    "K": 72,
+    "S": 1792378800,
+    "ask": 0.4,
+    "city": "P209",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P209",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792382400,
+   "bet": {
+    "K": 72,
+    "S": 1792382400,
+    "ask": 0.4,
+    "city": "P210",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P210",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792386000,
+   "bet": {
+    "K": 72,
+    "S": 1792386000,
+    "ask": 0.4,
+    "city": "P211",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P211",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792389600,
+   "bet": {
+    "K": 72,
+    "S": 1792389600,
+    "ask": 0.4,
+    "city": "P212",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P212",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792393200,
+   "bet": {
+    "K": 72,
+    "S": 1792393200,
+    "ask": 0.4,
+    "city": "P213",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P213",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792396800,
+   "bet": {
+    "K": 72,
+    "S": 1792396800,
+    "ask": 0.4,
+    "city": "P214",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P214",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792400400,
+   "bet": {
+    "K": 72,
+    "S": 1792400400,
+    "ask": 0.4,
+    "city": "P215",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P215",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792404000,
+   "bet": {
+    "K": 72,
+    "S": 1792404000,
+    "ask": 0.4,
+    "city": "P216",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P216",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792407600,
+   "bet": {
+    "K": 72,
+    "S": 1792407600,
+    "ask": 0.4,
+    "city": "P217",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P217",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792411200,
+   "bet": {
+    "K": 72,
+    "S": 1792411200,
+    "ask": 0.4,
+    "city": "P218",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P218",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1792414800,
+   "bet": {
+    "K": 72,
+    "S": 1792414800,
+    "ask": 0.4,
+    "city": "P219",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P219",
+   "status": "bet",
+   "window": "dev"
+  },
+  {
+   "S": 1794765600,
+   "bet": {
+    "K": 72,
+    "S": 1794765600,
+    "ask": 0.4,
+    "city": "P220",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P220",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794765660,
+   "bet": {
+    "K": 72,
+    "S": 1794765660,
+    "ask": 0.4,
+    "city": "P221",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P221",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794765720,
+   "bet": {
+    "K": 72,
+    "S": 1794765720,
+    "ask": 0.4,
+    "city": "P222",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P222",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794765780,
+   "bet": {
+    "K": 72,
+    "S": 1794765780,
+    "ask": 0.4,
+    "city": "P223",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P223",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794852000,
+   "bet": {
+    "K": 72,
+    "S": 1794852000,
+    "ask": 0.4,
+    "city": "P224",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P224",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794852060,
+   "bet": {
+    "K": 72,
+    "S": 1794852060,
+    "ask": 0.4,
+    "city": "P225",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P225",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794852120,
+   "bet": {
+    "K": 72,
+    "S": 1794852120,
+    "ask": 0.4,
+    "city": "P226",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P226",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794852180,
+   "bet": {
+    "K": 72,
+    "S": 1794852180,
+    "ask": 0.4,
+    "city": "P227",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P227",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794938400,
+   "bet": {
+    "K": 72,
+    "S": 1794938400,
+    "ask": 0.4,
+    "city": "P228",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P228",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794938460,
+   "bet": {
+    "K": 72,
+    "S": 1794938460,
+    "ask": 0.4,
+    "city": "P229",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P229",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794938520,
+   "bet": {
+    "K": 72,
+    "S": 1794938520,
+    "ask": 0.4,
+    "city": "P230",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P230",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1794938580,
+   "bet": {
+    "K": 72,
+    "S": 1794938580,
+    "ask": 0.4,
+    "city": "P231",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P231",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795024800,
+   "bet": {
+    "K": 72,
+    "S": 1795024800,
+    "ask": 0.4,
+    "city": "P232",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P232",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795024860,
+   "bet": {
+    "K": 72,
+    "S": 1795024860,
+    "ask": 0.4,
+    "city": "P233",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P233",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795024920,
+   "bet": {
+    "K": 72,
+    "S": 1795024920,
+    "ask": 0.4,
+    "city": "P234",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P234",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795024980,
+   "bet": {
+    "K": 72,
+    "S": 1795024980,
+    "ask": 0.4,
+    "city": "P235",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P235",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795111200,
+   "bet": {
+    "K": 72,
+    "S": 1795111200,
+    "ask": 0.4,
+    "city": "P236",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P236",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795111260,
+   "bet": {
+    "K": 72,
+    "S": 1795111260,
+    "ask": 0.4,
+    "city": "P237",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P237",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795111320,
+   "bet": {
+    "K": 72,
+    "S": 1795111320,
+    "ask": 0.4,
+    "city": "P238",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P238",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795111380,
+   "bet": {
+    "K": 72,
+    "S": 1795111380,
+    "ask": 0.4,
+    "city": "P239",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P239",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795197600,
+   "bet": {
+    "K": 72,
+    "S": 1795197600,
+    "ask": 0.4,
+    "city": "P240",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P240",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795197660,
+   "bet": {
+    "K": 72,
+    "S": 1795197660,
+    "ask": 0.4,
+    "city": "P241",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P241",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795197720,
+   "bet": {
+    "K": 72,
+    "S": 1795197720,
+    "ask": 0.4,
+    "city": "P242",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P242",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795197780,
+   "bet": {
+    "K": 72,
+    "S": 1795197780,
+    "ask": 0.4,
+    "city": "P243",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P243",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795284000,
+   "bet": {
+    "K": 72,
+    "S": 1795284000,
+    "ask": 0.4,
+    "city": "P244",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P244",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795284060,
+   "bet": {
+    "K": 72,
+    "S": 1795284060,
+    "ask": 0.4,
+    "city": "P245",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P245",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795284120,
+   "bet": {
+    "K": 72,
+    "S": 1795284120,
+    "ask": 0.4,
+    "city": "P246",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P246",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795284180,
+   "bet": {
+    "K": 72,
+    "S": 1795284180,
+    "ask": 0.4,
+    "city": "P247",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P247",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795370400,
+   "bet": {
+    "K": 72,
+    "S": 1795370400,
+    "ask": 0.4,
+    "city": "P248",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P248",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795370460,
+   "bet": {
+    "K": 72,
+    "S": 1795370460,
+    "ask": 0.4,
+    "city": "P249",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P249",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795370520,
+   "bet": {
+    "K": 72,
+    "S": 1795370520,
+    "ask": 0.4,
+    "city": "P250",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P250",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795370580,
+   "bet": {
+    "K": 72,
+    "S": 1795370580,
+    "ask": 0.4,
+    "city": "P251",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P251",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795456800,
+   "bet": {
+    "K": 72,
+    "S": 1795456800,
+    "ask": 0.4,
+    "city": "P252",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P252",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795456860,
+   "bet": {
+    "K": 72,
+    "S": 1795456860,
+    "ask": 0.4,
+    "city": "P253",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P253",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795456920,
+   "bet": {
+    "K": 72,
+    "S": 1795456920,
+    "ask": 0.4,
+    "city": "P254",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P254",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795456980,
+   "bet": {
+    "K": 72,
+    "S": 1795456980,
+    "ask": 0.4,
+    "city": "P255",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P255",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795543200,
+   "bet": {
+    "K": 72,
+    "S": 1795543200,
+    "ask": 0.4,
+    "city": "P256",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": -0.42,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P256",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795543260,
+   "bet": {
+    "K": 72,
+    "S": 1795543260,
+    "ask": 0.4,
+    "city": "P257",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P257",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795543320,
+   "bet": {
+    "K": 72,
+    "S": 1795543320,
+    "ask": 0.4,
+    "city": "P258",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P258",
+   "status": "bet",
+   "window": "held"
+  },
+  {
+   "S": 1795543380,
+   "bet": {
+    "K": 72,
+    "S": 1795543380,
+    "ask": 0.4,
+    "city": "P259",
+    "day2": true,
+    "gap": 1.0,
+    "member": true,
+    "pnl": 0.58,
+    "s": 71.0,
+    "side": "yes",
+    "v": 72.0,
+    "void": false
+   },
+   "city": "P259",
+   "status": "bet",
+   "window": "held"
+  }
+ ],
+ "development": {
+  "day_2_on_info": {
+   "n": 220,
+   "net": 107.6,
+   "pf": 13.809524,
+   "voids": 0
+  },
+  "days": 12,
+  "days_0_1_info": {
+   "n": 0,
+   "net": 0,
+   "pf": null,
+   "voids": 0
+  },
+  "first_half": {
+   "n": 110,
+   "net": 53.8,
+   "pf": 13.809524,
+   "voids": 0
+  },
+  "kills": {
+   "a_half_under_1_2": false,
+   "fewer_than_200": false,
+   "pooled_pf_under_1": false
+  },
+  "member": {
+   "n": 220,
+   "net": 107.6,
+   "pf": 13.809524,
+   "voids": 0
+  },
+  "non_member": {
+   "n": 0,
+   "net": 0,
+   "pf": null,
+   "voids": 0
+  },
+  "pooled": {
+   "n": 220,
+   "net": 107.6,
+   "pf": 13.809524,
+   "voids": 0
+  },
+  "second_half": {
+   "n": 110,
+   "net": 53.8,
+   "pf": 13.809524,
+   "voids": 0
+  },
+  "verdict": "CONTINUE",
+  "z_day_info": 5.025416
+ },
+ "held_out": {
+  "calibration_kill": "passes",
+  "day_2_on": {
+   "n": 40,
+   "net": 19.2,
+   "pf": 12.428571,
+   "voids": 0
+  },
+  "days": 10,
+  "days_0_1": {
+   "n": 0,
+   "net": 0,
+   "pf": null,
+   "voids": 0
+  },
+  "pooled": {
+   "n": 40,
+   "net": 19.2,
+   "pf": 12.428571,
+   "voids": 0
+  },
+  "verdict": "PASS",
+  "windows_pf_ok": true,
+  "z_day": 11.757551
+ },
+ "held_rows": 0,
+ "mode": "held",
+ "outside_windows": 0,
+ "statuses": {
+  "bet": 260
+ }
+}

@@ -1,16 +1,176 @@
 {
- "note": "Worked out by hand from TEMPBLEND_CARD.md with Amendment 1 (658817e9) before running the aligned tempblend2.py: fill at the ask seen, fee = ceil-to-cent 0.07 p (1-p) at that ask, band and spread first, then nearest. Correction before commit: C02 first worked with NO ask = 1 - yes_ask (0.37); the card (A8) says 1 - yes_bid (0.40), so C02 is -0.42 and the totals follow; the scorer had it right",
+ "note": "Worked out by hand from TEMPBLEND_CARD.md with Amendment 1 (658817e9) before running the aligned tempblend2.py: fill at the ask seen, fee = ceil-to-cent 0.07 p (1-p) at that ask, band and spread first, then nearest. Correction before commit: C02 first worked with NO ask = 1 - yes_ask (0.37); the card (A8) says 1 - yes_bid (0.40), so C02 is -0.42 and the totals follow; the scorer had it right. Amendment 2 (515421f6): voids are now the token 'void'; C17 added (Source A obs_time 60 s after t: obs_after_point); the development read ignores the two held-out rows (C12, C13) and counts them; dev z (Q1): Oct 1 Central net +0.22, Oct 20 Central net -0.07, z = 0.075 / (0.205061 / sqrt 2) = 0.517241",
  "per_row": {
-  "C01": ["bet", "yes", 71, 0.50], "C02": ["bet", "no", 72, -0.42], "C03": ["gap under 0.5F"], "C04": ["bet", "yes", 70, -0.34],
-  "C05": ["bet", "yes", 73, 0.48], "C06": ["bet", "yes", 72, 0.40], "C07": ["no strike passes band and spread"],
-  "C08": ["member station not ok"], "C09": ["no station reading"], "C10": ["bet", "yes", 72, -0.02, "void"],
-  "C11": ["outside windows"], "C12": ["bet", "yes", 72, 0.48], "C13": ["bet", "yes", 72, -0.32],
-  "C14": ["no index point"], "C15": ["bet", "yes", 73, -0.45], "C16": ["no station reading"]
+  "C01": [
+   "bet",
+   "yes",
+   71,
+   0.5
+  ],
+  "C02": [
+   "bet",
+   "no",
+   72,
+   -0.42
+  ],
+  "C03": [
+   "gap under 0.5F"
+  ],
+  "C04": [
+   "bet",
+   "yes",
+   70,
+   -0.34
+  ],
+  "C05": [
+   "bet",
+   "yes",
+   73,
+   0.48
+  ],
+  "C06": [
+   "bet",
+   "yes",
+   72,
+   0.4
+  ],
+  "C07": [
+   "no strike passes band and spread"
+  ],
+  "C08": [
+   "member station not ok"
+  ],
+  "C09": [
+   "no station reading"
+  ],
+  "C10": [
+   "bet",
+   "yes",
+   72,
+   -0.02,
+   "void"
+  ],
+  "C11": [
+   "outside windows"
+  ],
+  "C12": [
+   "bet",
+   "yes",
+   72,
+   0.48
+  ],
+  "C13": [
+   "bet",
+   "yes",
+   72,
+   -0.32
+  ],
+  "C14": [
+   "no index point"
+  ],
+  "C15": [
+   "bet",
+   "yes",
+   73,
+   -0.45
+  ],
+  "C16": [
+   "no station reading"
+  ],
+  "C17": [
+   "obs_after_point"
+  ]
  },
- "development": {"pooled": {"n": 7, "pf": 1.121951, "net": 0.15, "voids": 1},
-                 "first_half": {"n": 4, "pf": 1.289474, "net": 0.22}, "second_half": {"n": 3, "pf": 0.851064, "net": -0.07},
-                 "member": {"n": 4, "pf": 0.617284, "net": -0.31}, "non_member": {"n": 3, "pf": 2.095238, "net": 0.46},
-                 "days_0_1_info": {"n": 1, "net": -0.42},
-                 "kills": {"fewer_than_200": true, "pooled_pf_under_1": false, "a_half_under_1_2": true}, "verdict": "CLOSED"},
- "held_out": {"pooled": {"n": 2, "net": 0.16}, "day_2_on": {"n": 1, "net": 0.48}, "days_0_1": {"n": 1, "net": -0.32}, "calibration_kill": "no evidence at n = 1"}
+ "development": {
+  "pooled": {
+   "n": 7,
+   "pf": 1.121951,
+   "net": 0.15,
+   "voids": 1
+  },
+  "first_half": {
+   "n": 4,
+   "pf": 1.289474,
+   "net": 0.22
+  },
+  "second_half": {
+   "n": 3,
+   "pf": 0.851064,
+   "net": -0.07
+  },
+  "member": {
+   "n": 4,
+   "pf": 0.617284,
+   "net": -0.31
+  },
+  "non_member": {
+   "n": 3,
+   "pf": 2.095238,
+   "net": 0.46
+  },
+  "days_0_1_info": {
+   "n": 1,
+   "net": -0.42
+  },
+  "kills": {
+   "fewer_than_200": true,
+   "pooled_pf_under_1": false,
+   "a_half_under_1_2": true
+  },
+  "verdict": "CLOSED",
+  "z_day_info": 0.517241,
+  "days": 2
+ },
+ "dev_mode": {
+  "held_rows": 2
+ },
+ "held_mode_set1": {
+  "pooled": {
+   "n": 2,
+   "net": 0.16
+  },
+  "calibration_kill": "no evidence at n = 1",
+  "verdict": "NOT PASS"
+ },
+ "set2_pass": {
+  "note": "220 development bets at YES ask 0.40 (fee 0.02): 100 wins of +0.58 and 10 losses of -0.42 in each half; 40 held-out bets on 10 Central days, 6 days of 4 wins (+2.32) and 4 days of 3 wins and 1 loss (+1.32); z = 1.92 / (sqrt(2.4/9) / sqrt 10) = 11.757550",
+  "development": {
+   "pooled": {
+    "n": 220,
+    "pf": 13.809524,
+    "net": 107.6
+   },
+   "first_half": {
+    "n": 110,
+    "pf": 13.809524,
+    "net": 53.8
+   },
+   "second_half": {
+    "n": 110,
+    "pf": 13.809524,
+    "net": 53.8
+   },
+   "verdict": "CONTINUE"
+  },
+  "held_out": {
+   "pooled": {
+    "n": 40,
+    "pf": 12.428571,
+    "net": 19.2
+   },
+   "day_2_on": {
+    "n": 40
+   },
+   "calibration_kill": "passes",
+   "z_day": 11.75755,
+   "days": 10,
+   "verdict": "PASS"
+  }
+ },
+ "set3_refusals": {
+  "rows_dup.jsonl": "duplicate row",
+  "rows_badresult.jsonl": "result None refused",
+  "held before 2026-12-10": "held-out read refused before",
+  "held with marker present": "read-once marker"
+ }
 }
