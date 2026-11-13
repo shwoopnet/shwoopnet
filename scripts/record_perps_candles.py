@@ -22,6 +22,8 @@ import urllib.request
 
 BASE = "https://external-api.kalshi.com/trade-api/v2/margin"
 CLASSES = ("Equities", "Indices")
+# Nov 13, 2026 (the Head of R&D, the owner's merge): six more fixed tickers, the Kalshi perpetuals on the underlyings of five NC15 series plus Bitcoin, so the frozen CFRTI-K formula can be replayed forward. A ticker not on the public list is simply absent.
+EXTRA_TICKERS = ("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KXHYPEPERP", "KXBNBPERP")
 STOP_DATE = dt.date(2027, 2, 26)
 GAP_S = 1.2
 MAX_429_IN_A_ROW = 3
@@ -93,7 +95,7 @@ def run(out_dir, now=None, get=None, sleep=time.sleep):
     try:
         listing = call(BASE + "/markets?limit=200")
         markets = (listing or {}).get("markets") or []
-        tickers = sorted(m["ticker"] for m in markets if m.get("asset_class") in CLASSES and m.get("ticker"))
+        tickers = sorted(m["ticker"] for m in markets if (m.get("asset_class") in CLASSES or m.get("ticker") in EXTRA_TICKERS) and m.get("ticker"))
         if not tickers:
             print("no stock or index perps listed; nothing written")
             return 1
