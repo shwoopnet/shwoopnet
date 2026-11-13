@@ -8,6 +8,7 @@ D = lambda day, hour=12: calendar.timegm((2026, 11, day, hour, 0, 0))
 def row(ts, side, sz, inst="BTC-USDT-SWAP", px=100000, pos="net"): return {"inst_id": inst, "ts_ms": int(ts * 1000), "side": side, "pos_side": pos, "sz": sz, "bk_px": px}
 def poll(recv_s, yb, nb): return (int(round(recv_s * 1000)), yb, nb)
 # --- pure pieces ---
+assert q.EVIDENCE_N == 100 and q.MIN_BETS == 60 and q.MIN_TRIGGERED == 60          # the registered constants (the Head, 21:15Z: the evidence label threshold is 100)
 assert q.btc_size("BTC-USDT-SWAP", 600, None) == 6.0 and abs(q.btc_size("BTC-USD-SWAP", 10000, 100000) - 10.0) < 1e-12
 for bad in ("ETH-USDT-SWAP", "BTC-USDC-SWAP", ""):
     try: q.btc_size(bad, 1, 1); assert 0
@@ -86,10 +87,14 @@ means = [0.61, -0.40, -0.44, (-0.02 + 0.51) / 2]
 assert abs(o["z_by_central_day_cluster_z"]["z"] - (sum(means) / 4) / (st.stdev(means) / math.sqrt(4))) < 1e-9 and o["z_by_central_day_cluster_z"]["clusters"] == 4
 assert o["evidence_label"] == "n = 5 bets"
 # kill lines and labels: the registered thresholds
-q.MIN_TRIGGERED, q.MIN_BETS, q.EVIDENCE_N = 60, 60, 30
+q.MIN_TRIGGERED, q.MIN_BETS, q.EVIDENCE_N = 60, 60, 100
 o2 = q.dev_read(markets, rows, polls, cov, H, NOW)
 assert o2["evidence_label"] == "no evidence at n = 5" and "zero-try count: 7 triggered windows" in o2["development_verdict"] and "fewer than 60 bets (n = 5)" in o2["development_verdict"] and "half 1 PF under 1.2" in o2["development_verdict"]
 q.MIN_TRIGGERED, q.MIN_BETS, q.EVIDENCE_N = 3, 3, 3
+# Head's ruling (21:15Z): below 100 bets the evidence label reads 'no evidence at n = x', and the registered constant is 100; the verdict is the headline and both always print
+
+assert q.evidence_label(99, 100) == "no evidence at n = 99" and q.evidence_label(100, 100) == "n = 100 bets" and q.evidence_label(0, 100) == "no evidence at n = 0"
+assert "development_verdict" in o2 and "evidence_label" in o2 and list(o2).index("development_verdict") < list(o2).index("evidence_label")
 # a continuing read: only the good windows (W1, W2 flipped to a win, W11): PF >= 1, halves >= 1.2
 good = [dict(m, result=("no" if m["ticker"] == "KXBTC15M-W2" else m["result"])) for m in markets if m["ticker"] in ("KXBTC15M-W1", "KXBTC15M-W2", "KXBTC15M-W11", "KXBTC15M-W10")]
 og = q.dev_read(good, rows, polls, cov, H, NOW)
