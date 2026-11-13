@@ -2,7 +2,7 @@
 
 Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing scored, no Kalshi request made; job files go to Main. Screen of every published effect read: `OUTSIDE_SCREEN_NOV12.md` (same folder). [research]
 
-**Index (Nov 13, 2026):** open cards are FOMCTEXT (`FOMCTEXT_CARD.md`, slow family, paper list at most, prior about 3%) and COMBODONE (`COMBODONE_CARD.md`, paper only, prior about 2%); evidence pages: `OUTSIDE_SCREEN_NOV12.md`, `DIRECTION_EVIDENCE_NOV12.md`, `COMMUNITY_SOURCES_LOG.md`, `RESTING_AND_EXITS_EVIDENCE_NOV12.md`, `POLITICS_NEAR_RESOLUTION_EVIDENCE_NOV12.md`, `FORWARD_LOG_MECHANISMS_NOV13.md`, `RULES_CLAUSE_CENSUS_NOV13.md`, `LANE_A_MENTIONS_NOV13.md`, `LANES_B_C_NOV13.md`, `FLOOR_ANSWER_NOV13.md`.
+**Index (Nov 13, 2026):** open cards are FOMCTEXT (`FOMCTEXT_CARD.md`, slow family, paper list at most, prior about 3%) COMBODONE (`COMBODONE_CARD.md`, paper only, prior about 2%) and TEMPBLEND (`TEMPBLEND_CARD.md`, prior about 2%); TEMPINDEX ruled in the closed weather family; evidence pages: `OUTSIDE_SCREEN_NOV12.md`, `DIRECTION_EVIDENCE_NOV12.md`, `COMMUNITY_SOURCES_LOG.md`, `RESTING_AND_EXITS_EVIDENCE_NOV12.md`, `POLITICS_NEAR_RESOLUTION_EVIDENCE_NOV12.md`, `FORWARD_LOG_MECHANISMS_NOV13.md`, `RULES_CLAUSE_CENSUS_NOV13.md`, `LANE_A_MENTIONS_NOV13.md`, `LANES_B_C_NOV13.md`, `FLOOR_ANSWER_NOV13.md`.
 
 **Counts as of Nov 12 (PROPUNDER only):** cards 0 open; PROPUNDER CLOSED UNREAD by the Head of R&D on Nov 12 (F7's failed rule on a new ladder, see its registration); published effects dropped 22; pending 0.** The tennis, table tennis and esports read found no published model edge that reaches the bar (best: weighted Elo +3.6% ROI on ATP at the best of 11 books, negative at one book's price); see the screen rows 14 to 22.
 

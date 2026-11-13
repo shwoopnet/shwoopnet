@@ -1,5 +1,7 @@
 # TEMPINDEX: the hourly temperature market against Kalshi's own settling index (Idea Desk C, Nov 13, 2026)
 
+**RULED IN THE CLOSED WEATHER FAMILY AS WRITTEN (Head of R&D, Nov 13, 14:51Z): the trend projection with a fitted sigma is a nowcast. Not counted, not registered. The non-forecast half is `TEMPBLEND_CARD.md`.**
+
 **Written before any index value, price, list or result was read.** A card for the Head of R&D's read, not registered. The feed is allowed by the owner as a recorded terms risk (Head of R&D, 13:55Z Nov 13). Nothing is read until the Chief of Staff's record is on main and the zero-try probe has run. [research]
 
 `TEMPINDEX | family: the settlement index itself (a five-station, offset-adjusted, one-minute mean) against a market whose traders see one station; entry 15 minutes before the hour, hold to settlement (15 minutes) | risk class: mid price (20c to 80c), 1 contract | stage Idea | prior about 3%`
