@@ -75,3 +75,14 @@ The rule reads only the **state average path itself, from Kalshi's own settled m
 3. **Close time of the day-D market**, and whether it is open at 20:00 ET on D-1.
 4. **Candles** at 20:00 ET on D-1, and whether quotes are two-sided.
 5. **Other cycling states:** whether Kalshi lists Michigan, Illinois or Wisconsin daily markets (the census listed only Ohio and Indiana).
+
+## Amendment 1 (Nov 13, 2026, before any data): uniqueness score and held-out position
+
+- **Uniqueness:** the Verification Analyst scored GASCYCLE UNIQUE, with low to medium confidence.
+- **Closest overlap in market terms:** GAS1-F, V2's forward test of the favourite on the KXAAAGASD* series. GAS1-F buys the favourite on the state and national daily gas markets. GASCYCLE buys mid-band YES only on predicted restoration days in two cycling states, from the cycle phase. They can share a market and a day; the two rules are scored apart and never pooled.
+- **Held-out position (to be settled before the zero-try count):**
+  - USWEEP1 (frozen at 79724f00) holds state gas windows;
+  - W-CAT-ECON1 holds state gas windows (closed unread; its release has been asked of Refinement);
+  - GAS1-F's windows are being checked.
+  - Under rule (h), GASCYCLE's development and held-out dates may need to move to avoid those windows. Its constants (development D before 2026-10-15; held-out D 2026-10-15 to before 2026-12-15) stand only if the Head confirms no overlap. Otherwise the Head re-rules them before any read.
+- **Stage 0** until those are settled and the zero-try count runs. No probe job yet.
