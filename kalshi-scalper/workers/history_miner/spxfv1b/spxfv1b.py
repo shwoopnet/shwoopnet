@@ -22,13 +22,13 @@ EDGE, SPREAD_MAX, BAND = 0.05, 0.03, (0.05, 0.30)
 Z_BAR = 5.46
 MARKER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SPXFV1_HELD_READ_DONE")
 RULINGS = {   # the Head of R&D's rulings of Nov 13, 2026 (16:47Z), printed as constants in every run header
-    "S1_fee": "0.07 x C x p x (1 - p), rounded UP to the cent per order, C = 1 (quadratic, multiplier 1, standard schedule); the unrounded figure is information only",
+    "S1_fee": "0.07 x C x p x (1 - p), rounded UP to the cent per order as scorekit does (the cents rounded to 6 places, then ceil; Head of R&D, 16:54Z), C = 1 (quadratic, multiplier 1, standard schedule); the unrounded figure is information only",
     "S2_sd": "consecutive bar pairs both present on F_now's instrument id, at least 6 of the 10, sample (n - 1) sd, times sqrt(119/60)",
     "S3_quote": "the decision candle's YES bid and ask closes; YES bid + NO bid >= 1 - 1e-9 (crossed or locked) is no quote (rule 18)",
     "S4_tie": "a tie of the two asks goes to YES; every window with a valid quote whose two asks are equal is counted (asks_tie) BEFORE the spread and band tests, a diagnostic",
     "S5_thirds": "three equal time spans from 2026-12-01T00:00Z to the last traded close at or before READ_DATE",
     "S6_void": "a void is a fee-only loss; an empty result stops the run",
-    "Z_event": "z clustered by event ticker (Head of R&D, Nov 13, 16:51Z): mean of the per-event summed net over the sample sd of those sums times sqrt(number of events); under 2 events or a zero sd, no z; the held verdict reads RESEARCH BAR MET only if the card's thirds and kills pass AND z >= 5.46, BAR MET (not a research-bar pass) if they pass without it, else BAR NOT MET",
+    "Z_event": "z clustered by event ticker (Head of R&D, Nov 13, 16:51Z, scorekit convention 16:54Z): mean over events of each event's MEAN net per contract, over the sample sd of those event means divided by sqrt(number of events); under 2 events or a zero sd, no z; the held verdict reads RESEARCH BAR MET only if the card's thirds and kills pass AND z >= 5.46, BAR MET (not a research-bar pass) if they pass without it, else BAR NOT MET",
 }
 
 
@@ -46,7 +46,7 @@ def phi(z):
 
 def fee(p):
     """S1: per order, C = 1, rounded up to the cent."""
-    return math.ceil(100 * 0.07 * p * (1 - p) - 1e-9) / 100
+    return math.ceil(round(100 * 0.07 * p * (1 - p), 6)) / 100                 # scorekit: cents rounded to 6 places, then ceil
 
 
 def fee_raw(p):
@@ -122,8 +122,8 @@ def shown(x):
 def z_event(trades):
     ev = {}
     for t in trades:
-        ev[t["event"]] = ev.get(t["event"], 0.0) + t["net"]
-    v = list(ev.values())
+        ev.setdefault(t["event"], []).append(t["net"])
+    v = [sum(x) / len(x) for x in ev.values()]                                  # scorekit: each event's MEAN net per contract
     if len(v) < 2:
         return None, len(v)
     sd = statistics.stdev(v)
