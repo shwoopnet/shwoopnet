@@ -53,6 +53,36 @@ passes under; and the reading.
 Two print-only notes: on a tie for line 3's best reference the builds may name different references (none did on these fixtures); Desk B's "events with any candle"
 counts candles returned for the event, not candles inside its window (my output prints both).
 
+## Result 3: SAME OUTPUT on the landed candle run (Nov 13, 05:35Z): stage 1 reads CLOSED in both builds
+
+Desk B read stage 1 once on its audited scorer (`voidsnap.py`, sha256 `c176146b...`) after Auditor B's structure check of the landed run, and asked for this build on
+the same files under rule 16b. The files: candle run `pull/VOIDSNAP_CANDLES/2026-11-13T0244Z_43354200129` on `kalshi-pull-data` (79 of 79 requests answered, none
+truncated); lists run `pull/MAPBREAK_LISTS/2026-11-12T1919Z_43289005222`, development answers only; card with Amendments 1 to 3 (`cfababd6...`).
+
+**Order kept:** my output was printed and committed (`b10f83da`, 05:33:57Z, `VOIDSNAP_SECOND_OUTPUT_landed_VOIDSNAP_CANDLES_2026-11-13T0244Z.{txt,json}`) BEFORE I opened
+Desk B's printed lines (`voidsnap/stage1_read/desk_b_printed_lines.txt` at `b4ba1a37`). I have not opened Desk B's read note.
+
+**Comparison:** `voidsnap_compare.py` parsed all 53 of Desk B's lines: 157 figures compared, 0 differ, and no tie in a reference name. The sample is the same 195 pairs
+(whole-file equality with `VOIDSNAP_SAMPLE.json`).
+
+**What both builds print (a hindsight measurement on voids chosen by their result; an upper bound, not a rule):**
+
+| | Registered carry | 60 minute carry | No carry |
+|---|---|---|---|
+| Voids with a side buyable 10c under its settlement for 5 minutes in a row, of 195 | 24 | 24 | 14 |
+| D1 (frozen after the start): voids flagged, played flagged, implied share of voids | 22, 7, 25.3% | 22, 7, 25.3% | 7, 3, 20.1% |
+| D2 (no trade after the start) | 48, 13, 28.4% | 48, 13, 28.4% | 48, 13, 28.4% |
+| D3 (ran before the start) | 25, 16, 14.4% | 25, 16, 14.4% | 7, 9, 7.7% |
+| Line 1 (needs 40 voids flagged and buyable from the detector's minute): D1, D2, D3 | 0, 0, 7 | 0, 0, 7 | 0, 0, 2 |
+| Line 2 (implied share 30% or more) | none | none | none |
+| Line 3 (settlement within 3c of a known mid in 70% of voids): best share | 35.9% | 35.4% | 23.1% |
+
+Every detector fails all three lines under every carry. **Reading in both builds: CLOSED, no try spent.** The three carries agree. The one-way cost on buyable minutes
+is 3.5c at the median. 16 of the 195 voids had no window at all (closed more than 185 minutes before the start) and stay in every denominator.
+
+In plain words: the fair price was not knowable from the market's own earlier mids (about a third of voids settled within 3c of them, against the 70% the card asked
+for), and almost no voided match showed a book standing 10c under its settlement after any of the three detectors could have seen it.
+
 ## Places where the card leaves a choice
 
 My build prints these with its output (`readings`). The ones most likely to move a figure are first.
@@ -76,4 +106,4 @@ My build prints these with its output (`readings`). The ones most likely to move
 ## Limits
 
 - The fixtures are invented. Agreement on them shows the two builds read the card the same way on the planted cases, not that either is right about the market.
-- The real candle answers may hold shapes neither build has met (as REMATCH's omitted minutes did). The first run on landed candles is compared line by line again.
+- The landed candle answers were compared line by line (Result 3): no shape arose that the two builds read differently.
