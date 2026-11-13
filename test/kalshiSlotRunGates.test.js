@@ -199,7 +199,7 @@ gates['OICORE end to end through the engine: a rise of 86,300 or more buys the r
   assert.strictEqual(yes.ex.posts.length, 1, JSON.stringify(yes.out));
   const b = yes.ex.posts[0];
   assert.strictEqual(b.side, 'bid', 'the cheaper side here is YES, a YES buy'); assert.strictEqual(Number(b.count), 15, 'fifteen contracts (the ladder bottom step since Nov 13, 2026)'); assert.strictEqual(b.time_in_force, 'immediate_or_cancel');
-  assert.ok(Math.abs(Number(b.price) - 0.19) < 1e-9, 'limit 1c above the 18c touch (SLOT_LIMIT_SLIP, Nov 3, 2026): ' + b.price);
+  assert.ok(Math.abs(Number(b.price) - 0.18) < 1e-9, 'limit at the 18c touch (the OICORE slip was switched off Nov 13, 2026): ' + b.price);
   const d = [...yes.db.slot.values()][0];
   assert.strictEqual(d.slotId, 'OICORE'); assert.strictEqual(d.oiRise, 90000, 'the rise that triggered it is on the record'); assert.strictEqual(yes.db.locks.get(T).by, 'SLOT:OICORE');
   assert.strictEqual((await world(86300)).ex.posts.length, 1, 'exactly the line trades');
