@@ -1,0 +1,60 @@
+# OIVER-SPREAD build 2: rules as read and expected figures by hand (History Miner, Nov 13, 2026)
+
+Written BEFORE the code, from Desk A's card 1 only: `kalshi-scalper/workers/DESK_A_OICORE_VERSIONS_NOV13.md` at 741092a7 (sha256 e7b918b0), with the parent rule as the card states it. Desk A's build was not read. No real row read; no real run (queued behind V1).
+
+## Rules as built (the parent is OICORE as the card states it)
+1. Inputs, one row a KXBTC15M window: ticker, close_ts, oi_180 (OI of the candle ending close - 180), oi_360 (OI of the candle ending close - 360), yes_bid, yes_ask (the decision candle), result (yes, no or void). A row builder is separate and is audited on its own.
+2. Signal: oi_180 - oi_360 >= 86,300. A missing OI value drops the window, counted.
+3. Quote: a bid of 0 or an ask of 1 is no quote. A crossed or locked quote (yes bid >= yes ask - 1e-9) is no quote (rule 18). Either way the window is counted and is not traded, by both parent and version.
+4. Side: the cheaper ask of YES (yes_ask) and NO (1 - yes_bid); a tie goes to YES.
+5. Band: the side's ask in [0.08, 0.50] (1e-9 tolerance). Under 0.08 is cheap_skipped; over 0.50 is out_of_band.
+6. Price paid: min(ask + 0.01, 0.50), the limit 1c above the touch and never past the ceiling, booked as the fill.
+7. Fee per order of C = 10 contracts: ceil(round(100 x 0.07 x 10 x p x (1 - p), 6)) / 100 dollars, divided by 10 for the per-contract figure.
+8. Net per contract: a win is 1 - price - fee; a loss is -price - fee; a void is -fee.
+9. VERSION: the parent's trade, kept only if yes_ask - yes_bid <= 0.03 + 1e-9 at the decision candle. Otherwise it is counted as spread_wide.
+10. Blocks: development is close < 2026-12-01T00:00:00Z. Held-out rows are ignored and counted in development mode. A held-out read is refused in this build.
+11. Printed: the removed share first, then for parent and version: n, PF (sum of wins over the absolute sum of losses), net sum and mean per contract, the halves (signals in close order; the first half is the first floor(n/2)), and net per contract-week (net sum / (span / 604,800 s), where the span is from the first to the last development window in the FILE, the same denominator for both). The 7g takeover check and the card's kills are informational; under 60 version signals the label is "no evidence at n = x".
+
+## Open readings for the Head
+- (a) The decision candle is the one ending at close - 120 (the end of OICORE's 180 to 120 s entry span).
+- (b) C = 10 for the fee (OICORE's bottom step when the card was written; the ladder now starts at 20).
+- (c) The price is booked at the limit (ask + 1c), not the touch.
+- (d) The tie goes to YES.
+- (e) The halves split by signal count.
+- (f) The contract-week denominator is the file's development span.
+- (g) The 86,300 threshold is inclusive.
+
+## Made-up windows (inv/windows.csv), close = 1794000000 + 900 k for window k (W10 closes 2026-12-02)
+| W | rise | bid | ask | side, ask | spread | parent | version | result | net |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | 90,000 | 0.20 | 0.22 | YES 0.22 | 0.02 | trade, price 0.23, fee 12.397c -> 13c/10 = 0.013 | keep | yes | +0.757 |
+| 2 | 100,000 | 0.70 | 0.75 | NO 0.30 | 0.05 | trade, price 0.31, fee 14.973c -> 0.015 | spread_wide | yes | -0.325 |
+| 3 | 86,300 | 0.88 | 0.90 | NO 0.12 | 0.02 | trade, price 0.13, fee 7.917c -> 0.008 | keep | no | +0.862 |
+| 4 | 86,299 | 0.30 | 0.32 | | | oi_below | | no | |
+| 5 | 120,000 | 0.03 | 0.06 | YES 0.06 | | cheap_skipped | | no | |
+| 6 | 95,000 | 0.40 | 0.40 | | | no_quote (locked) | | yes | |
+| 7 | 95,000 | 0 | 0.30 | | | no_quote (no bid) | | no | |
+| 8 | 90,000 | 0.45 | 0.49 | YES 0.49 | 0.04 | trade, price 0.50, fee 17.5c -> 0.018 | spread_wide | no | -0.518 |
+| 9 | 90,000 | 0.69 | 0.72 | NO 0.31 | 0.03 | trade, price 0.32, fee 15.232c -> 0.016 | keep | yes | -0.336 |
+| 10 | 90,000 | 0.20 | 0.22 | | | held_out_ignored | | yes | |
+
+**Parent:** n 5, wins 1.619, losses 1.179, PF 1.373198, net 0.440, mean 0.088.
+- Halves: W1 and W2 give PF 2.329231 (0.757 / 0.325). W3, W8 and W9 give PF 1.009368 (0.862 / 0.854).
+
+**Version:** n 3, wins 1.619, losses 0.336, PF 4.818452, net 1.283, mean 0.427667.
+- Halves: W1 gives PF inf. W3 and W9 give PF 2.565476.
+
+**Removed share:** 2 / 5 = 0.4.
+
+**Per contract-week:** the span is W1 to W9 = 7,200 s, so the factor is 84. Parent 36.96, version 107.772.
+
+**Counts:** signal 7 (W1, 2, 3, 5, 6, 7, 8, 9 less W5 cheap... see list); exactly: oi_below 1, cheap_skipped 1, no_quote 2, held_out_ignored 1, parent traded 5, version spread_wide 2, version traded 3.
+
+**Takeover check (info):** PF +3.445 >= 0.10 yes; net per week not lower, yes; second half not worse, yes; 60 signals, no. Label: "no evidence at n = 3".
+
+**Kills (info):** removed more than half, no; PF below the parent's, no.
+
+## Refusals expected
+- a held mode run
+- a HELDOUT_ path
+- a result other than yes, no or void on a development row
