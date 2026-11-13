@@ -53,6 +53,11 @@ def v1cases():
     add(17,yb=0.10,nb=0.85,trades=[(t(B+900*17,3000),0.05,"yes")],result="yes")           # wrong taker side
     add(18,yb=0.30,nb=0.65,trades=[(t(B+900*18,3000),0.29,"no")],result="yes")           # YES ask .35 bid .30 fill, win
     add(19,yb=0.30,nb=0.65,trades=[(t(B+900*19,3000),0.20,"no")],result="no")            # fill, loss
+    add(20,yb=0.10,nb=0.0,result="yes")                                                    # NO bid 0.00: no YES ask; NO ask .90 out of band
+    add(21,yb=0.0,nb=0.85,result="no")                                                     # YES bid 0.00: no YES bid, YES ask .15, no order
+    add(22,yb=0.10,nb=0.85,close=B+900*22,trades=[(t(B+900*22,3000),0.09,"no")],result="no")   # two windows with the SAME close: ticker order decides the half split
+    add(23,yb=0.10,nb=0.85,close=B+900*22,result="yes")
+    add(24,yb=0.10,nb=0.85,close=B+900*22,trades=[(t(B+900*22,3000),0.05,"no")],result="yes")
     return C
 def v2cases():
     t=lambda close,off: (close-180)*1000+500+off

@@ -13,12 +13,12 @@ bar (3) basis: an infinite PF in a half: second half decided alone (finite)
 adverse selection check (parent PF on missed windows, no-bid windows included, exceeds the version's PF on its fills by 0.10 or more): no
 FALSIFIED on development if (2) fails OR the missed windows' parent PF exceeds the version PF by 0.10 or more: (2) fails: no | adverse selection: no => not falsified
 VERDICT (this block): NOT_ENOUGH_DATA
-KXSILVER15M-X1 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': True, 'filled': True}
-KXSILVER15M-X2 {'status': 'signal', 'side': 'yes', 'p_ask': 0.4, 'p_bid': 0.3, 'win': False, 'filled': False}
+KXSILVER15M-X1 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': True, 'filled': True, 'tk': 'KXSILVER15M-X1'}
+KXSILVER15M-X2 {'status': 'signal', 'side': 'yes', 'p_ask': 0.4, 'p_bid': 0.3, 'win': False, 'filled': False, 'tk': 'KXSILVER15M-X2'}
 KXSILVER15M-X3 {'status': 'spread_wide'}
 KXSILVER15M-X4 {'status': 'spread_wide'}
-KXSILVER15M-X5 {'status': 'signal', 'side': 'no', 'p_ask': 0.30000000000000004, 'p_bid': 0.25, 'win': False, 'filled': True}
-KXSILVER15M-X6 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': True, 'filled': True}
+KXSILVER15M-X5 {'status': 'signal', 'side': 'no', 'p_ask': 0.30000000000000004, 'p_bid': 0.25, 'win': False, 'filled': True, 'tk': 'KXSILVER15M-X5'}
+KXSILVER15M-X6 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': True, 'filled': True, 'tk': 'KXSILVER15M-X6'}
 KXSILVER15M-X7 outside_block
-KXSILVER15M-X8 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': False, 'filled': True}
+KXSILVER15M-X8 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': False, 'filled': True, 'tk': 'KXSILVER15M-X8'}
 AGG {"fills": 4, "h1": [Infinity, 1.7745243398847126], "h2": [1.7479341674317899, 1.335289141124839], "parent_net_sum_p0": 0.572464, "parent_net_sum_p1": 0.520903, "parent_pf_p0": 1.5941430931841014, "parent_pf_p1": 1.5238875875864801, "parent_pf_p1_on_missed": 0.0, "signals": 5, "version_net_sum_25": 1.13831875, "version_pf_0": 3.555555555555556, "version_pf_100": 3.3259895641174304, "version_pf_25": 3.4958683348635797}
