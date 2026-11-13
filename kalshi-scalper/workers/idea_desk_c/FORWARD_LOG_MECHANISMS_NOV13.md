@@ -93,3 +93,20 @@ For the Head of R&D and the idea desks. Evidence only: no card, no threshold, no
 - The one published size that matters is the combo leg-count markup. It belongs to the registered combo house-side paper test as a filter.
 - The best documented mechanism with a named counterparty is intraday momentum into the US close on the perps, at a small size.
 - Everything else is low or very low, or a version of something registered.
+
+## Correction (Nov 13, 2026, after reading Brown and Yang in full)
+
+Source 6, item 1 was misdescribed above. Read from the full text of Brown and Yang, "The Role of Speculative Trade in Market Efficiency: Evidence from a Betting Exchange" (University of East Anglia, April 19, 2016, https://ueaeprints.uea.ac.uk/58626/1/Speculative_Trade_Revisedv5.pdf):
+
+- **The variable is not trade size.** It is whether a HORSE received more than the median total trading VOLUME within its race (Betfair, 9,562 UK races, 2013 and 2014, about 225 million observations), compared with horses at nearly the same price.
+- **Pre-race (stale information), nearest-neighbour matching:** a high-volume horse is 6.2% more likely to WIN, and 1.1% LESS likely to place.
+  - In the linear regression (Table 2) the pre-race win coefficient is 0.0002, not significant, and the place coefficient is -0.013.
+  - The authors: "the average trade prior to races is not consistently predictive of fundamentals."
+- **In running:** 9.3% more likely to win and 18.9% more likely to place by matching. The Table 2 regression gives -0.124 (win) and +0.119 (place), so the sign depends on the method.
+- **Strategy:** the paper reports no strategy, no commission and no cost; it is a market-efficiency study.
+
+**What this changes:**
+- The usable field for our sports tape would be relative volume by side within an event, not print size.
+- The pre-game evidence (the only window a one-minute bot can use outside play) is weak and method-dependent.
+- Prior lowered from "low to moderate" to "low".
+- Whether a volume field sits inside the closed flow row is the Head's ruling again, since it is no longer a size field.
