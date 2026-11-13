@@ -1,0 +1,20 @@
+settled markets in the sample 6720 | clock hours 166 | requests 129: full-hour 84, late strikes 45 (cap 140)
+strikes added after their hour opened (kept, each read from its own open): 140 of 6720 markets
+   life   540 s:   3 (KXTEMPCHIHS 3)
+   life   780 s:   6 (KXTEMPCHIHS 6)
+   life  1140 s:   9 (KXTEMPLAXHS 9)
+   life  1740 s:  24 (KXTEMPCHIHS 15, KXTEMPLAXHS 6, KXTEMPMIAH 3)
+   life  2280 s:   6 (KXTEMPLAXHS 3, KXTEMPNYCHS 3)
+   life  2340 s:  80 (KXTEMPCHIHS 18, KXTEMPLAXHS 50, KXTEMPMIAH 12)
+   life  2400 s:   6 (KXTEMPCHIHS 3, KXTEMPNYCHS 3)
+   life  2940 s:   6 (KXTEMPCHIHS 3, KXTEMPNYCHS 3)
+series-hours 658 | that gained strikes after opening 43
+   KXTEMPCHIHS gained strikes in 15 series-hours (close hour UTC, strikes added): 2026-11-07T14 +3, 2026-11-07T15 +3, 2026-11-07T16 +3, 2026-11-08T14 +3, 2026-11-08T18 +3, 2026-11-09T14 +3, 2026-11-09T15 +6, 2026-11-09T16 +3, 2026-11-10T14 +3, 2026-11-10T15 +3, 2026-11-10T16 +3, 2026-11-10T17 +3, 2026-11-10T23 +3, 2026-11-11T00 +3, 2026-11-11T15 +3
+   KXTEMPLAXHS gained strikes in 20 series-hours (close hour UTC, strikes added): 2026-11-05T16 +3, 2026-11-05T17 +3, 2026-11-06T16 +3, 2026-11-06T17 +3, 2026-11-06T18 +3, 2026-11-07T16 +5, 2026-11-07T17 +3, 2026-11-07T18 +3, 2026-11-08T16 +3, 2026-11-08T17 +6, 2026-11-08T18 +3, 2026-11-09T16 +3, 2026-11-09T17 +3, 2026-11-09T18 +3, 2026-11-10T16 +6, 2026-11-10T17 +3, 2026-11-10T18 +3, 2026-11-11T16 +3, 2026-11-11T17 +3, 2026-11-11T18 +3
+   KXTEMPMIAH gained strikes in 5 series-hours (close hour UTC, strikes added): 2026-11-05T13 +3, 2026-11-07T13 +3, 2026-11-08T14 +3, 2026-11-09T13 +3, 2026-11-10T13 +3
+   KXTEMPNYCHS gained strikes in 3 series-hours (close hour UTC, strikes added): 2026-11-09T08 +3, 2026-11-11T13 +3, 2026-11-11T14 +3
+   KXTEMPCHIHS: clock hours present 166 of 168, as they are, not filled; missing: 2026-11-05T09, 2026-11-05T10
+   KXTEMPLAXHS: clock hours present 166 of 168, as they are, not filled; missing: 2026-11-05T09, 2026-11-05T10
+   KXTEMPMIAH: clock hours present 166 of 168, as they are, not filled; missing: 2026-11-05T09, 2026-11-05T10
+   KXTEMPNYCHS: clock hours present 160 of 168, as they are, not filled; missing: 2026-11-05T09, 2026-11-05T10, 2026-11-08T01, 2026-11-09T02, 2026-11-09T07, 2026-11-09T10, 2026-11-09T11, 2026-11-09T17
+written: markets.json and HOURLYTEMP_CANDLES.json in <out dir>
