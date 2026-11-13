@@ -32,7 +32,7 @@ def check(j, rows):
         assert set(r["params"]) == {"market_tickers", "start_ts", "end_ts", "period_interval"}
     assert j["max_requests"] == len(j["requests"]) == len(j["ticker_allowlist"])
 def main(path, outdir):
-    import heldout_guard; heldout_guard.refuse_heldout(path, "depth1 btc candle builder")
+    import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(path, "depth1 btc candle builder")
     with open(path, newline="") as f:
         rd = csv.DictReader(f); assert rd.fieldnames == ["ticker", "close_ts"], "input must have exactly the columns ticker,close_ts"
         rows = [(r["ticker"], int(r["close_ts"])) for r in rd]
