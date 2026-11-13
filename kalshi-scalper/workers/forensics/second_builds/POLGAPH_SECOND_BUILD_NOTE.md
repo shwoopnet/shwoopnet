@@ -20,7 +20,7 @@ python3 -I make_polgaph_fixture.py <dir> <POLGAPH_SERIES.json> 5 0.0       (and:
 python3 -I polgaph_second.py <POLGAPH_SERIES.json> --lists <dir>/lists --hourly <dir>/hourly --minute <dir>/minute
 ```
 
-## SAME OUTPUT as Desk B's build on two made-up fixtures (Nov 13, about 01:45Z)
+## SAME OUTPUT as Desk B's build on two made-up fixtures (Nov 13, about 01:39Z)
 
 Desk B ran its scorer on the same rows and committed its printed lines (`claude/idea-desk-b` at `93e2d076`, `polgap/fixture_outputs/`; scorer sha256 `0c089c23...`,
 registration `b1ac127d...` with Amendments 1 to 3). `polgaph_compare.py` reads those lines and my output and compares every figure.
