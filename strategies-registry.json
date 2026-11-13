@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-12",
+ "asOf": "2026-11-13",
  "note": "The one list of every strategy and its stage. Edit it by a reviewed pull request. It holds no live figures: names, stage, rules in plain words, dates, and an n only when it comes from public data (nBasis says which).",
  "stages": [
   "Idea",
@@ -22,7 +22,7 @@
    "n": null,
    "nBasis": null,
    "kill": "Gold kill latch: off for good at a drawdown of $58.75 from its own peak, or net under -$20 after 40 trades; only a reviewed edit re-arms it",
-   "return": "Shadow profit factor 1.3+ over at least 60 trades and 7 days, second half 1.3+, then a reviewed re-arm at half size for the first 30 trades (GOLDOFF supplies the record)",
+   "return": "Shadow profit factor 1.3+ over at least 60 trades and 7 days with at least 10 losses in the record, second half 1.3+, then a reviewed re-arm at half size for the first 30 trades (GOLDOFF supplies the record)",
    "retiredOn": null,
    "reason": null,
    "notes": [],
