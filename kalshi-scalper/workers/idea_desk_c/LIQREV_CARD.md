@@ -1,5 +1,4 @@
-**PAUSED (Head of R&D, Nov 13, 2026, 19:20Z): the owner set one priority, proving a strategy with OICORE first. The card is kept as written (a16c8e3c); H is NOT computed and nothing is read until the Head resumes it.**
-
+**Status note (Nov 13, 2026): paused at 19:20Z and UNPAUSED at about 19:21Z by the Head of R&D, on the owner's correction ("wait we still need new research"). It carries on as amended (a16c8e3c). The Verification Analyst's re-score and Auditor B's check are still due before H is computed.**
 # LIQREV: OKX liquidation cascades against the Bitcoin 15 minute market, the reversal side (Idea Desk C, Nov 13, 2026)
 
 **Written before any OKX liquidation row, Kalshi quote, candle or result was read.** Forward only. A card for the Head of R&D's read, not registered; the Verification Analyst scores it. [research]
