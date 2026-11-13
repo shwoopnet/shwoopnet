@@ -1,5 +1,7 @@
 # POLGAPH: follow an overnight gap in a short-dated politics market and HOLD to settlement (Idea Desk B)
 
+**What this is, in one line (the Head of R&D's ruling of 00:51Z): POLGAPH is the ONE permitted rule (i) variant of POL-i2: the same overnight gap, held to settlement instead of the 24 hour taker exit that closed on cost, for the stated mechanical reason that holding pays one way only (about 2.5c to 3c against the 4c line). It uses up POL-i2's one variant; there is no second. It is not a version of INPLAYJUMP (ruled). 1 try, on the ledger. Honest prior that it clears the bar: 3%.**
+
 **Registered Nov 13, 2026, 00:47Z, before any price path or result of a gap morning was read by this desk.** Research and paper only. Nothing here places, changes or cancels an order, and nothing here asks for a live probe. No Kalshi request was made to write it.
 
 `POLGAPH | family: follow an overnight price gap at the US morning, taker entry, hold to settlement | risk class: mid price (10c to 64c), 1 contract in the score (3 on a politics single by the rulebook), one-way cost | stage Idea, registered, unscored | tries 1`
@@ -71,3 +73,17 @@ Every "or more", "or less", "within" and band edge is compared with a tolerance 
 - No book and no tape exist for these markets, so no resting entry and no resting target is scored here. Each would be a further variant and a further try, only after a book-and-tape recorder exists.
 - The sibling strikes of one ladder settle together. The rule takes one bet per event and morning for that reason, and the z is clustered by event.
 - Live, a seat would need the bot's long-hold order path, the rulebook's limits (3 contracts, 10 open, the $200 lifetime budget, the kill at net under -$15 after 20 fills or 5 losses in a row) and the owner's own popup. None of that is asked for here.
+
+## AMENDMENT 1, Nov 13, 2026, 01:06Z: the Head of R&D's rulings of 00:51Z, written before any list, candle, price path or result of this card was requested or read
+
+1. **Identity.** The line now at the top of this page. The section "Where it comes from" asked whether section 7g applied; the Head ruled it does not: the information is an overnight repricing over nine hours in politics count and event markets, not a state change inside a live game within minutes, and the market family, clock and counterparty differ.
+2. **Pooling is allowed for this research card on three conditions, fixed now:**
+   - one bet per independent event and morning (rule step 7, unchanged);
+   - **every figure is printed by family beside the pooled line.** The three families are fixed in `POLGAPH_SERIES.json` under `families`: activity counts (48 series), shipping counts (7), single questions (14);
+   - **a pooled pass does not count if one family supplies more than half of the pooled net.** Then the card is read as that family's alone, against the same minimums (150 filled bets, 40 in each half) and the same lines. "Net" is the sum of cash results over filled development bets.
+3. **A wheel place is not decided here.** Whether a pooled series can hold one is the Head's to take to the owner, and only if the development read is not under 1.0.
+4. **Process, no shortcuts:** the scorer and builders frozen by commit and sha256; a 1e-9 tolerance on every registered comparison; the held-out folder guard; Auditor B CLEAN; and a second build from this text by another desk, BEFORE the lists job is dispatched. Cost by the template of rule (d). Development dates bounded in the job file; held-out from Nov 13. It queues behind Friday's reads.
+5. **Three pins the builder needs, clarifying, no rule changed:**
+   - "Unsettled" in step 7 means the earlier FILLED bet's market has a close time later than the look. An order that did not fill blocks nothing.
+   - A fill can be judged only where the minute request for that market and morning was answered. A decision whose minute request is missing or failed is "no fill data": counted, not a bet, never treated as filled.
+   - A market that settles at a set price (result neither yes nor no) is a void under the money rule. The count is printed, and beside it, information only, the figure with the settlement value paid instead.
