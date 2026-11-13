@@ -1,0 +1,8 @@
+# CANDLEGAP, dated note beside the design (Nov 13, 2026, about 02:10Z, the Head's request after the Testing Desk's second build)
+
+The frozen design and `candlegap.py` are not edited. This note says which reading each of my figures uses. [research]
+
+- **"Touch moved"** (the secondary column 872 / 417 / 767 / 256 / 0): my build compares the LAST stored row of the minute with the last stored row before the minute (best YES bid and best NO bid). The Testing Desk counts a minute as moved if ANY stored row inside it differs at the touch from the row before it (979 / 310). Both readings are recorded; neither is preferred.
+- **"Candles with a bid and ask"** (1,151; bid within 1c 1,130; ask within 1c 1,114; both 1,102): my build keeps a present candle only if the candle has both a bid close and an ask close AND the recorder's book at the minute's end has both a YES bid and a NO bid. All 138 excluded candles (1,289 - 1,151) are minutes where the book was missing a side, and each of them carries a 0.00 or 1.00 placeholder close. So the Testing Desk's description ("excludes the placeholder") matches the same 138 minutes, but my test was the book, not the placeholder. The Testing Desk counts both candle fields present (1,289; 1,212; 1,169).
+- **The sentence "a present candle does not mean the touch moved"** is given as a range: **310 to 417 of 1,289** present candles (24% to 32%), by the two readings.
+- **The headline holds under both readings:** count 5 on the touch basis (candle missing although the touch moved) is 0 either way; 767 two-sided and 256 empty or one-sided of 1,023 missing.
