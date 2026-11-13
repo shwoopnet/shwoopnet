@@ -15,6 +15,7 @@ Expected lucky clears with no edge anywhere (a fairly priced market, one fee los
 | 2026-11-13 00:16Z (four forex places withdrawn: cannot reach 60 signals in 21 days; five CFRTI-K places listed pending the perps archive; frozen definition sheet 3b8bf486 committed 00:14Z, awaiting the auditor) | 22 | 8 logging, 0 counting yet | 0 | 0 | 0 | 0 |
 | 2026-11-13T00:23:49Z (batch 2 admitted on the auditor's "closed", definitions only: 7 NC15 depth-cell places count from this instant; CFRTI-K on Bitcoin is admitted but mute until the archive carries its perpetual) | 22 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
 | 2026-11-13 00:26Z (REMATCH's e-soccer place withdrawn: closed at stage 1 on tradeability, two builds agree) | 21 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
+| 2026-11-13 00:48Z (both MAPBREAK places withdrawn: out at step 1 at both looks on every title, two builds agree) | 19 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
 
 ## Probation seats (rules section 5a; live results by message only, never here)
 
