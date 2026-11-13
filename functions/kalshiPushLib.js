@@ -50,6 +50,9 @@ function sessionKinds(before, after) {
   // A market skipped for low money on its own exchange shard (kalshiShardAlertLib): same rule, only a CHANGED stamp alerts.
   const wasShard = before.shardAlert && before.shardAlert.at, nowShard = after.shardAlert && after.shardAlert.at;
   if (after.active === true && Number.isFinite(Number(nowShard)) && Number(nowShard) !== Number(wasShard)) out.push("shard");
+  // The hard account stop tripped (kalshiHardStopLib): same rule, only a CHANGED stamp alerts, and it does not need the session to be on (the stop holds either way).
+  const wasHard = before.hardStopAlert && before.hardStopAlert.at, nowHard = after.hardStopAlert && after.hardStopAlert.at;
+  if (Number.isFinite(Number(nowHard)) && Number(nowHard) !== Number(wasHard)) out.push("hardstop");
   return out;
 }
 
@@ -96,6 +99,9 @@ function message(kind, o, ctx) {
   if (kind === "shard") {
     const a = (o && o.shardAlert) || {}, have = Number(a.avail), need = Number(a.need);
     return { title: "Check the bot: a market cannot trade, low money on exchange " + String(a.shard || "?").slice(0, 3), body: (Number.isFinite(have) && Number.isFinite(need) ? "Only $" + have.toFixed(2) + " there and an order needs $" + need.toFixed(2) + ". " : "") + "Money on another exchange does not count. Top it up in Kalshi under Transfers.", tag: "issue-shard" };
+  }
+  if (kind === "hardstop") {
+    return { title: "Hard stop: all new buys are off", body: "The account fell to the hard stop line on trading results. No strategy will buy until you re-arm it with a reviewed change. Open positions are still sold. Open the Bot page and look.", tag: "issue-hardstop" };
   }
   if (kind === "exitwatch") {
     const a = (o && o.exitWatchAlert) || {}, mins = Number(a.silentMin);

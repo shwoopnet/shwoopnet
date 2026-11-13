@@ -156,6 +156,9 @@ function makeRunners(flags) {
     };
     const done = async (out) => { await flushSkips(); return out; };
 
+    // Hard account stop (docs/HARD_ACCOUNT_STOP.md): decided by the caller from the sizing document it already read. Entries only; the exit and settle passes are separate and never see it.
+    if (args.hardStopBlocked === true) { skipAll("hard_stop"); return done({ skipped: "hard account stop" }); }
+
     const sh = args.shared;
     if (!sh || !Number.isFinite(sh.sizeBase) || !(sh.sizeBase > 0) || !sh.risk || !Number.isFinite(sh.risk.worst) || !Number.isFinite(sh.floor)) { skipAll("no_shared_risk"); return done({ skipped: "no shared risk figures from the L1 tick" }); }
     // Ending the session must never be skipped because a write failed: each step is tried on its own.
