@@ -707,3 +707,9 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
 - 17:11Z, CFRTI-K reader, FINAL (Auditor B, from the card text): the fee is unrounded (lines 12 and 67); the band is 0.05 to 0.30 (line 66); EVERY label needs n of 50 or more and under 50 is NOT_ENOUGH_DATA (the dated lines written before data govern over sections 3 and 4).
   - The Head's error, recorded: a 17:09Z message ordered a 30/50 split and was withdrawn two minutes later. It cost Desk A one revert, and one note to the EA had to be withdrawn. Lesson, again: check the dated lines before ruling, and send one ruling.
   - Testing Desk 7201609a (39e44d82) already matches. Desk A reverts 594e8c40. Auditor B audits both before 2026-11-20.
+- 18:53Z, the evening hunt (all desks assigned at 18:52Z after the EA's idle flag).
+  - Desk C, recorder hunt (2793e3d2): 0 cards pass.
+  - Desk B, book and tape cards (115ff02e): WITHDRAW1 and AIRGAP1 scored NOT UNIQUE by the VA (DEPTH1 f6, f8 and f9, BOOKCH1), closed at intake, counted as tries.
+  - SPXOI1 T: build 1 is Desk A abaad267, build 2 is the History Miner 875bf8e6 (unreadable OI drops the window, counted, in both). Auditor B audits the code now and the landed runs after 00:00Z; both must print the same n and T.
+  - Testing Desk live-against-shadow harness fc38c74d (liveshadow.py c5290079), tools only.
+  - Stocks: both old sessions are archived; the "R&D: Stocks" session is Auditor B.
