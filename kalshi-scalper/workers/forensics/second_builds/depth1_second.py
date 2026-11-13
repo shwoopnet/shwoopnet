@@ -89,7 +89,7 @@ def _imb(a, b): return None if a + b <= 0 else (a - b) / (a + b)
 def _tot(lv): return sum(s for _, s in lv)
 def f1(b): return None if (not b["y"] or not b["n"]) else _imb(_tot(b["y"]), _tot(b["n"]))      # both sides must be quoted at that poll (aligned to the first build, Nov 13)
 def f2(b): return None if not b["y"] or not b["n"] else _imb(b["y"][0][1], b["n"][0][1])
-F3_SUM = "numpy"          # "numpy": weighted prices by numpy array sums, which reproduces the first build's f3 to the trade; "python": a plain running sum of the SAME formula.
+F3_SUM = "python"         # "python": a plain running sum, left to right, as the first build does (Desk A's note under Amendment 4); "numpy": numpy array sums of the SAME formula.
                           # The two differ only in floating point residue, and that residue alone moves f3's trade count (296 against 276 on the no-edge fixture).
 
 
@@ -152,7 +152,13 @@ def load(root):
                 if tr is None: continue
                 d = email.utils.parsedate_to_datetime(r["server_date_header"]) if r.get("server_date_header") else None
                 if d is not None: offs.append(d.timestamp() * 1000 + 500 - tr)
-                if r.get("series") in MARKETS and r.get("ticker"): polls[run][r["ticker"]].append((tr, book(r)))
+                if r.get("series") in MARKETS and r.get("ticker"):
+                    polls[run][r["ticker"]].append((tr, book(r)))
+                    for col in ("yes_bid_px_1", "no_bid_px_1"):                  # the grid check (Head and Desk A, Nov 13): thousandths of a dollar are exact only on the tenth-of-a-cent grid
+                        v = num(r.get(col))
+                        if v is not None:
+                            C["level-1 bid prices read (gold and Bitcoin book rows)"] += 1
+                            if abs(v * 1000 - round(v * 1000)) > 1e-6: C["level-1 bid prices NOT on the 0.001 grid"] += 1
         runs[run] = statistics.median(offs) if offs else None
         tp = os.path.join(run, "trades.csv.gz")
         if os.path.exists(tp):
@@ -224,8 +230,8 @@ def prepare(w):
         if bf["y"]: q["no"] = (1 - bf["y"][0][0], bf["y"][0][1])
     held = None                                                               # Bitcoin: unknown (no candle file at the read, the Head's ruling of Nov 13)
     if w["series"] == "KXGOLD15M":
-        held = False                                                          # gold with no usable poll at T-360 s is "not held" (aligned to the first build, which reports no unknown gold window)
-        l1 = last_at_or_before(w["polls"], T - 360000, DEC_EARLY_S * 1000)
+        l1 = last_at_or_before(w["polls"], T - 360000, DEC_EARLY_S * 1000)       # no poll at T-360 s within 10 s: UNKNOWN (Desk A, Nov 13); a poll with a missing side: not held
+        held = None if l1 is None else False
         if l1 is not None and l1[1]["y"] and l1[1]["n"]:
             asks = (1 - l1[1]["n"][0][0], 1 - l1[1]["y"][0][0]); held = sum(1 for x in asks if 0.88 - EPS <= x <= 0.97 + EPS) == 1
     nxt = [b for pt, b in w["polls"] if pt > t0][:2]                           # the next two polls after the decision poll, by order (no time limit), for the noise description only
@@ -341,6 +347,10 @@ def measure(root, made_up=False, now=None):
                 fired_windows.add(tk)
                 if r[3] is None and tk not in fired_noresult: fired_noresult.add(tk); raw_noresult[w["result"] or "(empty)"] += 1
             tries[(m, f)] = trs
+    asks = [t["ask"] for trs in tries.values() for t in trs]
+    out["GRID CHECK (information)"] = {"level_1_bid_prices_read": C["level-1 bid prices read (gold and Bitcoin book rows)"], "of_which_not_on_the_0.001_grid": C["level-1 bid prices NOT on the 0.001 grid"],
+                                       "fill_prices_of_all_trades": len(asks), "fill_prices_not_on_the_0.001_grid": sum(1 for a in asks if abs(a * 1000 - round(a * 1000)) > 1e-6),
+                                       "rule": "if either count is not zero, both builds recompute the bars in exact fractions before any verdict is recorded (the Head, Nov 13)"}
     out["AMENDMENT 1 COUNT"] = {"fired_windows": len(fired_windows), "fired_windows_with_no_yes_or_no_result": len(fired_noresult), "raw_result_values_of_those_windows": dict(raw_noresult)}
     out["no_trade_reasons"] = dict(reasons)
     if fired_windows and len(fired_noresult) > 0.01 * len(fired_windows):
@@ -418,6 +428,8 @@ def lines(out):
                      + "; z uncorrected %s; scored windows with a raw feature within 1e-12 of zero, not zero (set to zero, no trade): %d" % (f(v["z_uncorrected_beside"]), v["scored_windows_with_a_raw_feature_within_1e-12_of_zero_but_not_zero"]))
     flags = [k for k, v in allt.items() if v["second_look_flag_55pct_at_300"]]
     L.append("second look flags (accuracy >= 55% with n >= 300; not a verdict): " + (", ".join(flags) if flags else "none"))
+    g = out.get("GRID CHECK (information)") or {}
+    L.append("GRID CHECK (information): level-1 bid prices not on the 0.001 grid %s of %s; fill prices not on the 0.001 grid %s of %s" % (g.get("of_which_not_on_the_0.001_grid"), g.get("level_1_bid_prices_read"), g.get("fill_prices_not_on_the_0.001_grid"), g.get("fill_prices_of_all_trades")))
     return L
 
 

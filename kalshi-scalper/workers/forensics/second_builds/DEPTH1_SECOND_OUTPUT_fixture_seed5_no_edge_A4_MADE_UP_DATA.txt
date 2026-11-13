@@ -23,6 +23,7 @@ f8_hole_asymmetry n 211 PF 0.82 blocks 0.65 (n 83) / 1.44 (n 64) / 0.62 (n 64) h
 f9_book_slope n 270 PF 0.88 blocks 0.85 (n 97) / 0.87 (n 95) / 0.94 (n 78) halves 0.77 / 1.02 net -2.70c stress PF 0.87 acc 0.481 vs mean ask 0.490 z -1.14 control p(best of 20) 1.000 fail; no-result fee-only 0; without windows L1 / OICORE holds: n 0 PF n/a; z uncorrected -1.18; scored windows with a raw feature within 1e-12 of zero, not zero (set to zero, no trade): 2
 f10_imb_3c n 308 PF 0.95 blocks 0.86 (n 107) / 1.01 (n 112) / 1.01 (n 89) halves 0.82 / 1.11 net -1.06c stress PF 0.93 acc 0.497 vs mean ask 0.489 z -0.50 control p(best of 20) 0.999 fail; no-result fee-only 1; without windows L1 / OICORE holds: n 0 PF n/a; z uncorrected -0.52; scored windows with a raw feature within 1e-12 of zero, not zero (set to zero, no trade): 0
 second look flags (accuracy >= 55% with n >= 300; not a verdict): none
+GRID CHECK (information): level-1 bid prices not on the 0.001 grid 0 of 386417; fill prices not on the 0.001 grid 0 of 5099
 KXGOLD15M noise: f10_imb_3c 39.1% of 504; f1_imb5 34.7% of 504; f2_imb1 12.0% of 440; f3_dwmid_minus_mid 41.6% of 428; f8_hole_asymmetry 15.5% of 296; f9_book_slope 35.0% of 417 | median fill delay 2.1 s
 KXBTC15M noise: f10_imb_3c 41.9% of 499; f1_imb5 38.2% of 498; f2_imb1 11.4% of 440; f3_dwmid_minus_mid 40.0% of 425; f8_hole_asymmetry 17.6% of 318; f9_book_slope 37.5% of 416 | median fill delay 2.1 s
 control to four decimals: 99th percentile 7.0468c, median 2.5972c

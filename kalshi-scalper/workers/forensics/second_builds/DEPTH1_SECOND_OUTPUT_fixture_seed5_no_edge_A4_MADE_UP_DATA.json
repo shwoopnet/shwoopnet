@@ -3,6 +3,7 @@
  "label": "blind as to its own features; not blind as to cheap-side and favourite-side baselines on the same windows",
  "made_up_data": true,
  "counts": {
+  "level-1 bid prices read (gold and Bitcoin book rows)": 386417,
   "usable windows (Amendment 1: never dropped for a missing result)": 1267,
   "windows not usable": 221,
   "windows with no clock": 49
@@ -105,6 +106,13 @@
    "median_fill_delay_s": 2.0915,
    "windows_with_no_fill_poll": 0
   }
+ },
+ "GRID CHECK (information)": {
+  "level_1_bid_prices_read": 386417,
+  "of_which_not_on_the_0.001_grid": 0,
+  "fill_prices_of_all_trades": 5099,
+  "fill_prices_not_on_the_0.001_grid": 0,
+  "rule": "if either count is not zero, both builds recompute the bars in exact fractions before any verdict is recorded (the Head, Nov 13)"
  },
  "AMENDMENT 1 COUNT": {
   "fired_windows": 797,

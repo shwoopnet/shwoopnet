@@ -111,7 +111,15 @@ The Head ruled both points raised above: the zero rule was a fault and the uncor
 
 The earlier open point (the control's median on the planted-edge fixture) is closed: under Amendment 4 both control figures agree at printed precision on all three fixtures.
 
+### Last notes applied (Desk A's dated note under Amendment 4, f8858783; the Head's grid check)
+
+- f3's weighted sums are a plain left-to-right sum, as in the first build (the order no longer changes any count under the 1e-12 rule).
+- Gold's overlap mark: no poll at T-360 s within 10 s is "unknown"; a poll with a missing side is "not held".
+- **Grid check, printed by this build at the read (information):** how many level-1 bid prices and how many fill prices are NOT on the 0.001 grid. Whole thousandths of a dollar are exact only on that grid; if either count is not zero, both builds recompute the bars in exact fractions before any verdict is recorded. On the fixtures both builds count 0 (Desk A's `depth1_grid_check.py`: 195,200 and 404,736 book rows read; this build: the same rows, 0 off the grid, and 0 of 5,099 and 0 of 12,744 fill prices).
+
+With these applied the three-fixture match is unchanged: 360 of 360 per-try figures on each, the control at printed precision, and the one information-only figure (the uncorrected z of a one-date try) still the only difference. `depth1_second.py` sha256 `0092b363...`.
+
 ## Files added
 
-`DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_A4_MADE_UP_DATA.{json,txt}` and `DEPTH1_SECOND_OUTPUT_tie_fixture_seed5_MADE_UP_DATA.{json,txt}` (this build under Amendments 1 to 4); `DEPTH1_WRAPPER_OUTPUT_tie_fixture_seed5_MADE_UP_DATA_run_by_forensics.txt` (Desk A's harness run on the tie fixture); `make_depth1_tie_fixture.py`. `depth1_second.py` sha256 `3db8b6df...`.
+`DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_A4_MADE_UP_DATA.{json,txt}` and `DEPTH1_SECOND_OUTPUT_tie_fixture_seed5_MADE_UP_DATA.{json,txt}` (this build under Amendments 1 to 4); `DEPTH1_WRAPPER_OUTPUT_tie_fixture_seed5_MADE_UP_DATA_run_by_forensics.txt` (Desk A's harness run on the tie fixture); `make_depth1_tie_fixture.py`. `depth1_second.py` sha256 `0092b363...`.
 
