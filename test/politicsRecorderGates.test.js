@@ -101,7 +101,7 @@ gates.PR6 = () => {
   assert.ok(cfg.series.length >= 17 && cfg.series.length <= 60 && cfg.max_series <= 60 && cfg.max_requests_per_run > 0 && cfg.cap_days === 30);
   assert.ok(cfg.series.every((s) => /^[A-Z0-9]{2,40}$/.test(s)) && new Set(cfg.series).size === cfg.series.length);
   for (const must of ['KXTRUMPAPPROVE', 'KXVHGCB', 'KXTRUMPACT', 'KXHORMUZWEEKLY', 'KXTRUTHSOCIAL', 'KXACTBLUETOP', 'KXBABELMANDEBWEEKLY', 'KXHORMUZPEAK', 'KXTRUMPENDORSEMENTS', 'KXAPRPOTUS', 'KXAPRPOTUSD', 'KXGENERICBALLOTVOTEHUB', 'KXVOTEHUBTRUMPUPDOWN']) assert.ok(cfg.series.includes(must), must);
-  assert.strictEqual(cfg.series.length, 45, 'Nov 12, 2026: 42 series plus the three Refinement additions');
+  assert.strictEqual(cfg.series.length, 51, 'Nov 13, 2026: 45 series plus the six mention series Desk B asked for (the only politics family with enough events for a 60 signal block)');
   assert.ok(!cfg.series.includes('KXGENERICBALLOT'), 'one event in all history: left out on purpose');
   assert.ok(!cfg.series.some((s) => cfg.later_only.includes(s)), 'a later-only series is not recorded');
   assert.ok(!/KX[A-Z0-9]{3,}/.test(code), 'no series name is hard coded in the script');
