@@ -830,3 +830,11 @@ Owner: "youre utilizing scalps right, not everything has to be hold to settlemen
 - Every NEW card registers at least ONE exit variant beside hold-to-settlement (profit target, stop, time exit, or in-and-out inside the window), fixed in the card before any data, priced with real fees and the book fill check (R6 next poll within 4 s, NC15 within 6 s; candle-only cards say so and are labelled upper bound).
 - Each exit variant is a separate try in the deflation ledger. No exit is chosen after seeing results; the card names which variant is its headline before the read.
 - Cards already registered tonight (OPENGAP1, CONGCAL, FEDREGPI, CROWDLEG, NOTAKER, DOGMOVE queued) add one dated exit-variant line before any read.
+
+## 2026-11-13 21:38Z, owner order: unique AND above the cutoff, nothing new merged
+Owner (via EA): "please do not merge or create anything new until weve found our guarenteed shadow list of 20-30 COMPLETELY UNIQUE strategies that are above the pf cutoff."
+- Target: 20 to 30 strategies the VA rules NEW (not versions) that clear cash PF 1.3+ with both halves 1.0+ on development data, fill-checked, fees in.
+- Versions of OICORE, EVENT830, OIVER and place-copies do not count; work on them stops.
+- No new PR or job file goes to Main. Reads only on data already recorded or merged. Held: nightly OI recorder, OICAND jobs, CROWDLEG trial, OIFIELD (unless already merged).
+- Held-out rules unchanged: development reads only; held-out windows stay unread.
+- Running tally (unique + above cutoff), sent to the EA each evening. 2026-11-13: 0. Nobody can guarantee the count; it is reported as it is.
