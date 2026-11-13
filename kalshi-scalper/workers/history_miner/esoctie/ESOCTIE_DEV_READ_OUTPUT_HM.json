@@ -1,0 +1,91 @@
+{
+ "note": "Development only. The half split was moved to 2026-10-15T12:00Z after the lists landed and before any price or result was read (registration NOTE 10). About 7,100 development events: this read can falsify or show a lead; it cannot reach the research bar alone.",
+ "measurement": {
+  "events_listed": 7120,
+  "dropped": {
+   "shape": 0,
+   "start not derivable": 37,
+   "outside development": 0,
+   "held-out (refused)": 0
+  },
+  "events_kept": 7083,
+  "not_filled": 5466,
+  "filled": 1617,
+  "base_building": 1186,
+  "filled_eligible": 431,
+  "median_spread": 0.04,
+  "median_round_trip": 0.0569,
+  "gap": {
+   "0.25": -0.059,
+   "0.5": -0.0436,
+   "0.75": -0.0272,
+   "0.9": -0.0108
+  },
+  "share_gap10_spread4": 0.0,
+  "placebo_share_mirror": 0.0,
+  "by_bucket": {
+   "0": {
+    "f": [
+     0.0,
+     0.45
+    ],
+    "n": 0,
+    "share": null,
+    "placebo": null,
+    "gap_median": null
+   },
+   "1": {
+    "f": [
+     0.45,
+     0.55
+    ],
+    "n": 313,
+    "share": 0.0,
+    "placebo": 0.0,
+    "gap_median": -0.0487
+   },
+   "2": {
+    "f": [
+     0.55,
+     0.65
+    ],
+    "n": 118,
+    "share": 0.0,
+    "placebo": 0.0,
+    "gap_median": -0.0175
+   },
+   "3": {
+    "f": [
+     0.65,
+     0.75
+    ],
+    "n": 0,
+    "share": null,
+    "placebo": null,
+    "gap_median": null
+   },
+   "4": {
+    "f": [
+     0.75,
+     1.0
+    ],
+    "n": 0,
+    "share": null,
+    "placebo": null,
+    "gap_median": null
+   }
+  },
+  "freshness": "candle freshness measured on Bitcoin 15 minute only, not on e-soccer",
+  "median_one_way_entry_cost": 0.035,
+  "unsettled_or_void_eligible": 0,
+  "median_tie_ask": 0.18,
+  "kill": [
+   "efficient, move on (90th percentile gap -0.0108)"
+  ],
+  "rule_may_be_scored": false
+ },
+ "rule": "NOT SCORED: a kill line closed the card",
+ "kill": [
+  "efficient, move on (90th percentile gap -0.0108)"
+ ]
+}

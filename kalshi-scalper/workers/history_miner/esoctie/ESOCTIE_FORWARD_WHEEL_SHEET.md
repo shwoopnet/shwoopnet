@@ -1,5 +1,7 @@
 # Frozen forward definition sheet: the ESOCTIE wheel place (KXESOCCERGAME, one place). History Miner, Nov 13, 2026.
 
+**WITHDRAWN (Nov 13, 2026, about 02:05Z):** ESOCTIE closed on its development read by the registered kill line (0 bets; `ESOCTIE_DEV_READ.md`). This place is not admitted.
+
 Written at the Head of R&D's order, in the form of Desk A's `DESK_A_FROZEN_WHEEL_DEFINITIONS_NOV13.md`, against the wheel book recorder's files as found (`wheelbook/2026-11-12/2031/` on `wheelbook-2026w46`, and the recorder fix PR 860, merged 2026-11-13 00:36Z). Nothing here reads an outcome; the counts in section 3 are from book columns only. A shadow record, not research evidence, and not a read of ESOCTIE's registered development or held-out samples. [research]
 
 ## -1. Version rule and admission

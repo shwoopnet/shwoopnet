@@ -1,0 +1,88 @@
+{
+ "measurement": {
+  "counts_first": {
+   "events_listed": 7120,
+   "bad_shape": 0,
+   "held_out_refused": 0,
+   "before_development": 0,
+   "start_not_derivable": 37,
+   "kept": 7083,
+   "not_filled": 5466,
+   "filled": 1617,
+   "base_building": 1186,
+   "filled_eligible": 431
+  },
+  "label": "selected on development: this figure can falsify, it cannot support; only the frozen held-out read can",
+  "median_spread": 0.04,
+  "median_round_trip_information_only": 0.0569,
+  "median_one_way_entry_cost": 0.035,
+  "median_tie_ask": 0.18,
+  "gap_q25_q50_q75_p90": [
+   -0.059,
+   -0.0436,
+   -0.0272,
+   -0.0108
+  ],
+  "share_gap10_spread4": 0.0,
+  "placebo_share": 0.0,
+  "by_bucket": {
+   "0": {
+    "f": [
+     0.0,
+     0.45
+    ],
+    "n": 0,
+    "share": null,
+    "placebo": null,
+    "median_gap": null
+   },
+   "1": {
+    "f": [
+     0.45,
+     0.55
+    ],
+    "n": 313,
+    "share": 0.0,
+    "placebo": 0.0,
+    "median_gap": -0.0487
+   },
+   "2": {
+    "f": [
+     0.55,
+     0.65
+    ],
+    "n": 118,
+    "share": 0.0,
+    "placebo": 0.0,
+    "median_gap": -0.0175
+   },
+   "3": {
+    "f": [
+     0.65,
+     0.75
+    ],
+    "n": 0,
+    "share": null,
+    "placebo": null,
+    "median_gap": null
+   },
+   "4": {
+    "f": [
+     0.75,
+     1.0
+    ],
+    "n": 0,
+    "share": null,
+    "placebo": null,
+    "median_gap": null
+   }
+  },
+  "freshness": "candle freshness measured on Bitcoin 15 minute only, not on e-soccer",
+  "kill": [
+   "CLOSED: efficient, move on (90th percentile gap -0.0108)"
+  ],
+  "rule_may_be_scored": false,
+  "eligible_void_or_unsettled": 0
+ },
+ "rule": "NOT SCORED: a kill line closed the card (no bet booked)"
+}
