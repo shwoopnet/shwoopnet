@@ -221,7 +221,7 @@ Card line format (lifecycle 7f): `NAME | family (entry mechanism + exit style) |
 | Futures roll gap in commodity markets | Tested or thin | NEWH17 ROLL (about 15 events), CMD3 (zero events in development). See alert 2 below |
 | Pooled tie premium | Closed by arithmetic | NEWH15 (1.3c against a 1.75c fee). Card 2 is the conditional version |
 | One-touch versus terminal dominance, reflection pricing | Thin and partly run | BARRIER1 (NOT_ENOUGH_DATA); no terminal monthly ladder to pair with |
-| Quotes inside the last 150 s with the average partly fixed | Tested | QUOTE1 (PF about 0), AVG1, CFRTI1; also sub-minute, so not implementable |
+| Quotes inside the last 150 s with the average partly fixed | Tested | QUOTE1 **VOID, Nov 12 stale-quote audit; superseded by MAKER5.** (PF about 0), AVG1, CFRTI1; also sub-minute, so not implementable |
 | At-the-money range bracket against ladder-implied volatility | Same signal on another market | VOLGAP1; a variant under 7g |
 | Daily gold or oil ladder still trading after its settlement print is fixed | Does not exist | KXGOLDD settles on the 5 PM ET candle; KXWTI closes at 14:30 ET with its settlement |
 | Range brackets versus the above ladder (three-leg lock) | Grids share no edge | THREELEG1 |

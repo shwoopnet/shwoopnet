@@ -24,3 +24,7 @@ Checked against: STRATEGY_LIFECYCLE 7e (declined list, all rows read), 7d, RND_C
 - Gate 0 for each (field exists, update interval), by a Main-dispatched pull or by Desk B, who owns the events side.
 - A decision whether Card 2's faster sample is worth a recorder change, or the card waits.
 - I name no live trading figure; every number above is a prediction written before any data.
+
+## Dated line (Nov 13, 2026, the Head of R&D's ruling)
+- **TEMPLAG1: CLOSED, no further work.** It buys YES at an ask up to 0.93 or 0.96 and holds to settlement, which is the banned favourite-and-hold (the owner's exceptions cover named ids and combos only); the line above saying neither card is favourite-and-hold was wrong for this card. It is also the mechanism of WXDAYEND (card 74, closed on existence) on an intraday reading, so a version of a closed card. Refinement's TEMPNOW1 is the same idea.
+- **SCORELAG1: CANDIDATE, held at gate 0.** Needs (a) Desk B's zero-try scores probe showing the relayed score field and its timing, (b) a quote source fast enough around score events (a recorder change, the owner's, with a written case after gate 0), (c) correlation with INPLAYJUMP under 0.3 shown on data. Refinement's SCOREJUMP1 is merged into it; its 60 s time exit is one of the variants, counted. Not registered, not counted toward the floor until a named source is collecting and a read date is set.

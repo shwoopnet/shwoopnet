@@ -65,7 +65,7 @@ Design notes from the old session (thoughts, NOT registered; choose and fix befo
 
 Two-sided resting quotes, by V2's README and workers files:
 - **FALSIFIED: 3.** H5 (Oct 6, quoting both sides, the first test of the idea), MAKER1 (Oct 27, tennis, all six fill and fee assumptions), MAKER4 (Oct 28, two-sided maker scalp on the Bitcoin, Ethereum and gold 15 minute markets).
-- NOT_ENOUGH_DATA with a profit factor about zero: QUOTE1 (Oct 28, last 150 seconds; a later README line calls it falsified). NOT_ENOUGH_DATA or not runnable: MM1 (Oct 29, gold).
+- NOT_ENOUGH_DATA with a profit factor about zero: QUOTE1 **VOID, Nov 12 stale-quote audit; superseded by MAKER5.** (Oct 28, last 150 seconds; a later README line calls it falsified). NOT_ENOUGH_DATA or not runnable: MM1 (Oct 29, gold).
 - Registered, never read: QUOTE2B (hourly Bitcoin ladder, through-price fills) and MAKER5 (15 minute, on R6).
 - MMSIM1: NOT_YET_FALSIFIED as registered (Rule Q); under Rule P its development result is a loss. MMSIM2 (9 variants) and MMHOUR1 (92 looks): both closed NOT_ENOUGH_DATA, all on Rule Q.
 - One-sided maker ENTRIES (a different family by MMSIM1's own card): MAKER2, MAKER3 and MWIDE1 FALSIFIED; MAKERTAIL1 and MAKERMID1 NOT_ENOUGH_DATA with a negative sign.
