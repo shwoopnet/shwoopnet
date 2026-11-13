@@ -13,10 +13,12 @@ const bot = require("./kalshiSignalLib");
 
 const WHEEL_SEATS = Object.freeze([]);                          // EMPTY. An entry is a reviewed edit (ROTATION_LANE section 1.4).
 const WHEEL_RULE_IDS = Object.freeze([]);                       // the fixed code-side list of rule ids a seat may name; empty until an admission adds one
+const WHEEL_ALLOWED_EXISTING_IDS = Object.freeze([]);          // ids that may reuse a registered or keyed name; empty, an admission edit may add one on purpose
 const WHEEL_FULL_SEATS_ENABLED = false;                         // full 10 contract seats wait for the premise test (section 9.5) and a bigger account; a constant, never a stored value
 const WHEEL_MAX_PROBATION_SEATS = 5;
 const WHEEL_PROBATION_CONTRACTS = 3, WHEEL_PROBATION_MAX_ORDER_COST = 3, WHEEL_PROBATION_NET_FLOOR = -18;
 const WHEEL_FULL_CONTRACTS = 10, WHEEL_FULL_MAX_ORDER_COST = 10;
+const WHEEL_PROBATION_FLOOR_AFTER_FILLS = 5;
 const WHEEL_PROBATION_FAVOURITE_FROM = 0.88;                   // a probation seat may not reach a price of 88c or above (section 5a.2)
 const WHEEL_CHECK_MIN_ORDERS = 20, WHEEL_CHECK_MIN_FILL_SHARE = 0.6, WHEEL_CHECK_MAX_WORSE = 0.01;
 
@@ -49,6 +51,9 @@ function validateWheelSeatWith(flags, seat) {
   if (typeof seat.probation !== "boolean") e.push("probation must be true or false");
   if (!isDate(seat.popupDate)) e.push("popupDate (the owner's popup) must be YYYY-MM-DD");
   else if (isDate(seat.reviewedAt) && seat.popupDate > seat.reviewedAt) e.push("the owner's popup must not be later than reviewedAt");
+  // A seat id must be new: one that already names a registered strategy or a keyed table (limit slip, skip floor, hold list) would inherit that strategy's rules. Default refuse; an admission may name an id in `allowedIds`.
+  const allowed = Array.isArray(f.allowedIds) ? f.allowedIds : WHEEL_ALLOWED_EXISTING_IDS;
+  if (!allowed.includes(seat.id) && (slot.SLOT_STRATEGIES.some((x) => x.id === seat.id) || [slot.SLOT_LIMIT_SLIP, slot.SLOT_SKIP_BELOW].some((t) => Object.prototype.hasOwnProperty.call(t, seat.id)) || slot.SLOT_HOLD_ALLOWED.includes(seat.id))) e.push("the id already exists in the slot registry or a keyed table and is not explicitly allowed at admission");
   const sv = slot.validateSlotStrategy(seatToSlotStrategy(seat));
   for (const x of sv.errors) e.push(x);
   const contracts = seat.contractsPerOrder;
@@ -60,6 +65,7 @@ function validateWheelSeatWith(flags, seat) {
     if (isNum(entry.priceMax) && entry.priceMax >= WHEEL_PROBATION_FAVOURITE_FROM - 1e-9) e.push("a probation seat may not buy at 88c or above (favourites need the 150 signal, 10 loss record)");
     const k = isObj(seat.killRules) && isObj(seat.killRules.minNet) ? seat.killRules.minNet : null;
     if (!k || !isNum(k.net) || k.net < WHEEL_PROBATION_NET_FLOOR) e.push("a probation seat's net floor must be no looser than $" + WHEEL_PROBATION_NET_FLOOR);
+    if (!k || !isNum(k.afterFills) || k.afterFills > WHEEL_PROBATION_FLOOR_AFTER_FILLS) e.push("a probation seat's net floor must apply from fill " + WHEEL_PROBATION_FLOOR_AFTER_FILLS + " at the latest");
   } else if (seat.probation === false) {
     if (fullOn !== true) e.push("full seats are not enabled (WHEEL_FULL_SEATS_ENABLED is false until the premise test is read)");
     if (!Number.isInteger(contracts) || contracts > WHEEL_FULL_CONTRACTS) e.push("a full seat is at most " + WHEEL_FULL_CONTRACTS + " contracts");
@@ -89,7 +95,7 @@ const activeWheelSeats = () => activeWheelSeatsWith({});
 // The caps a seat runs under: the slot's own caps from the sizing base, and the seat's per order ceiling on top, the SMALLER always winning (section 5.1).
 function wheelSeatCaps(seat, sizingBase) {
   const caps = slot.slotCaps(sizingBase);
-  const own = seat && seat.probation === true ? WHEEL_PROBATION_MAX_ORDER_COST : WHEEL_FULL_MAX_ORDER_COST;
+  const own = seat && seat.probation === false ? WHEEL_FULL_MAX_ORDER_COST : WHEEL_PROBATION_MAX_ORDER_COST;   // anything but an explicit false is probation
   caps.perOrder = Math.min(caps.perOrder, own);
   return caps;
 }

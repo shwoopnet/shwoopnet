@@ -59,6 +59,16 @@ bad(seat({ series: ['KXDOGE15M'] }));                                // a market
 bad(seat({ popupDate: undefined }));
 bad(seat({ reviewedAt: '2099-01-01' }));                             // a future reviewedAt would blind the kill rules
 
+// W3b (security review): the probation floor applies from fill 5 at the latest; a seat id may not reuse a registered or keyed id; caps default to probation.
+bad(seat({ killRules: { maxConsecutiveLosses: 30, minNet: { afterFills: 6, net: -18 } } }));
+bad(seat({ id: 'OICORE' }));
+bad(seat({ id: 'EVENT830' }));
+bad(seat({ id: 'CFRTIK' }));
+assert.strictEqual(V(Object.assign({ allowedIds: ['OICORE'] }, FL), seat({ id: 'OICORE' })).errors.some((x) => /already exists/.test(x)), false);
+assert.strictEqual(wheel.wheelSeatCaps({ probation: 'yes' }, 100000).perOrder, 3);
+assert.strictEqual(wheel.wheelSeatCaps({}, 100000).perOrder, 3);
+assert.strictEqual(wheel.wheelSeatCaps(null, 100000).perOrder, 3);
+
 // W4: at most 5 probation seats, repeated ids and any single bad entry refuse the whole list.
 const mk = (n) => Array.from({ length: n }, (_, i) => seat({ id: 'SEAT' + 'ABCDEFG'[i], ruleId: 'RULE' + 'ABCDEFG'[i] }));
 assert.strictEqual(A(FL, mk(5)).length, 5);
