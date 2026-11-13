@@ -1,0 +1,288 @@
+{
+ "note": "WRITTEN BY HAND FROM THE CARD TEXT (TEMPBLEND_CARD.md at 658817e9, sha256 32112a10, Amendment 1 A1 to A18) BEFORE either build was run on this set (Forensics desk, Nov 13, 2026). Fee = 0.07 x p x (1 - p), rounded up to the cent; fill at the ask seen (A10); a win pays 1 - ask - fee, a loss costs ask + fee, a void costs the fee (A12). All bets are 1 contract. The rule of each row is in edge_rows.py (its comment); the expectation here does not read it. day2 true means 172800 s or more since the calibration's effective time at the decision (A15).",
+ "rows": {
+  "E01_gap_exactly_0.5": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 70.5,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "E02_gap_0.49": {
+   "expect": "skip",
+   "class": "gap small"
+  },
+  "E03_ask_exactly_0.20": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.2,
+   "fee": 0.02,
+   "pnl": -0.22,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "E04_ask_0.19": {
+   "expect": "skip",
+   "class": "no strike"
+  },
+  "E05_ask_exactly_0.80": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.8,
+   "fee": 0.02,
+   "pnl": 0.18,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "E06_ask_0.81": {
+   "expect": "skip",
+   "class": "no strike"
+  },
+  "E07_spread_exactly_0.04": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": -0.52,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "E08_spread_0.05": {
+   "expect": "skip",
+   "class": "no strike"
+  },
+  "E09_reading_exactly_600s_old": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "E10_reading_601s_old": {
+   "expect": "skip",
+   "class": "no station reading"
+  },
+  "E11_calibration_exactly_172800s": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "E12_calibration_172799s": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": false
+  },
+  "W01_S_2026-09-12T23:59:59Z": {
+   "expect": "skip",
+   "class": "outside windows"
+  },
+  "W02_S_2026-09-13T00:00:00Z_dev_first_half": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "W03_S_2026-10-08T23:59:59Z_dev_first_half": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "W04_S_2026-10-09T00:00:00Z_dev_second_half": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "W05_S_2026-11-04T23:59:59Z_dev_second_half": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "W06_S_2026-11-05T00:00:00Z": {
+   "expect": "skip",
+   "class": "outside windows"
+  },
+  "W07_S_2026-11-11T23:59:59Z": {
+   "expect": "skip",
+   "class": "outside windows"
+  },
+  "W08_S_2026-11-12T00:00:00Z_held": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "W09_S_2026-12-09T23:59:59Z_held": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "W10_S_2026-12-10T00:00:00Z": {
+   "expect": "skip",
+   "class": "outside windows"
+  },
+  "T01_midpoint_tie_exact": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 70.5,
+   "ask": 0.45,
+   "fee": 0.02,
+   "pnl": 0.53,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "T02_midpoint_tie_in_floating_point_only": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 70.7,
+   "ask": 0.45,
+   "fee": 0.02,
+   "pnl": 0.53,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "V01_void": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": -0.02,
+   "void": true,
+   "member": true,
+   "day2": true
+  },
+  "M01_member_code_missing": {
+   "expect": "skip",
+   "class": "member not ok"
+  },
+  "M02_member_code_degraded": {
+   "expect": "skip",
+   "class": "member not ok"
+  },
+  "B01_source_B_non_member": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": false,
+   "day2": true
+  },
+  "N01_gap_exactly_minus_0.5_NO": {
+   "expect": "bet",
+   "side": "no",
+   "K": 70.0,
+   "ask": 0.48,
+   "fee": 0.02,
+   "pnl": 0.5,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "N02_NO_ask_exactly_0.20": {
+   "expect": "bet",
+   "side": "no",
+   "K": 70.0,
+   "ask": 0.2,
+   "fee": 0.02,
+   "pnl": 0.78,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "N03_NO_ask_exactly_0.80": {
+   "expect": "bet",
+   "side": "no",
+   "K": 70.0,
+   "ask": 0.8,
+   "fee": 0.02,
+   "pnl": -0.82,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "I01_index_point_exactly_600s_before_decision": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "I02_index_point_601s_before_decision": {
+   "expect": "skip",
+   "class": "no index point"
+  },
+  "I03_index_point_299s_before_decision_too_new": {
+   "expect": "skip",
+   "class": "no index point"
+  }
+ }
+}
