@@ -43,6 +43,11 @@ def game_specs(name):
     elif name == "case_16":                                                                                                     # real ticker layout and the leg-shape edge cases
         S = {lg: mk(50) for lg in A8[:3]}
         S[A8[0]][0].update(codes=("CR", "CRU")); S[A8[0]][1].update(two_btts=True); S[A8[0]][2].update(no_btts=True); S[A8[0]][3].update(bad_tie=True)
+    elif name == "case_17": S = {lg: [dict(btts=(2, 2), edge=15) if i % 10 == 0 else dict(btts=(2, 2)) for i in range(50)] for lg in A8[:4]}   # exactly 4c spreads on the target, 20 of 200 fire (10 percent)
+    elif name == "case_18": S = {lg: mk(50, btts=(2, 2), btts_mid=50) for lg in A8[:3]}                                              # ask + bid = 1.00 (0.46 and 0.54): the cheaper-side tie
+    elif name == "case_19": S = {lg: mk(50, high=True) for lg in A8[:3]}                                                               # total strikes 9.5, 10.5, 11.5 on the ladder
+    elif name == "case_20": S = {lg: mk(50) for lg in A8[:3]}                                                                          # an incomplete candle run (one request missing)
+    elif name == "case_21": S = {lg: mk(50, tie50=True) for lg in A8[:3]}                                                              # total mids 0.45 and 0.55: a tie at 50c
     elif name == "case_13": S = {lg: mk(40, btts=(2, 3)) for lg in A8[:3]}                                                    # under 150 filled and over the cost line
     elif name == "case_14": S = {lg: [dict(fill=(i < 20)) for i in range(60)] for lg in A8[:3]}                           # under 150 filled and under half filled
     return S
@@ -58,13 +63,13 @@ def build_case(name, out):
         for i, g in enumerate(gl):
             ko = BASE + i * 3 * 3600 + A8.index(lg) * 600
             close = ko + g.get("close_min", 120) * 60; occ = ko + 180 * 60
-            real = name in ("case_15", "case_16"); c1, c2 = g.get("codes", ("ARS", "LFC") if real else ("AAA", "BBB"))
+            real = name in ("case_15", "case_16", "case_17", "case_18", "case_19", "case_20", "case_21"); c1, c2 = g.get("codes", ("ARS", "LFC") if real else ("AAA", "BBB"))
             gk = ("26%s%02d%s%s" % (("SEP", "OCT", "NOV")[i // 28], i % 28 + 1, c1, c2)) if real else "26OCT%03dAAABBB" % i
             def M(series, sfx, **kw):
                 return dict({"ticker": "%s-%s-%s" % (series, gk, sfx), "event_ticker": "%s-%s" % (series, gk), "open_time": F(close - 86400), "close_time": F(close), "occurrence_datetime": F(occ),
                              "expected_expiration_time": F(occ), "volume_fp": "10.00", "title": "MADE-UP", "strike_type": "greater", "result": "MADE-UP, never read"}, **kw)
             for sfx in (c1, c2, "DRAW" if g.get("bad_tie") else "TIE"): lists["live_KX%sGAME" % lg]["markets"].append(M("KX%sGAME" % lg, sfx, strike_type="custom" if not real else "structured"))
-            for n_, kk in enumerate((0.5, 1.5, 2.5, 3.5, 4.5), 1): lists["live_KX%sTOTAL" % lg]["markets"].append(M("KX%sTOTAL" % lg, str(n_) if real else "T%s" % kk, floor_strike=kk))
+            for n_, kk in enumerate((0.5, 1.5, 2.5, 3.5, 4.5) + ((9.5, 10.5, 11.5) if g.get("high") else ()), 1): lists["live_KX%sTOTAL" % lg]["markets"].append(M("KX%sTOTAL" % lg, str(n_) if real else "T%s" % kk, floor_strike=kk))
             if not g.get("no_btts"):
                 for sfx in (("BTTS", "BTTS2") if g.get("two_btts") else ("BTTS" if real else "YES",)): lists["live_KX%sBTTS" % lg]["markets"].append(M("KX%sBTTS" % lg, sfx, strike_type="custom"))
             for nm in ((c1 + "2", c2 + "2") if real else ("AAA2", "BBB2")): lists["live_KX%sTEAMTOTAL" % lg]["markets"].append(M("KX%sTEAMTOTAL" % lg, nm, floor_strike=1.5))
@@ -96,7 +101,11 @@ def build_case(name, out):
         for w in sg["winner"]: price[w] = d_ if w.endswith("-TIE") else (h if s.code(w) == sg["team1"] else a_)
         for t, kk in sg["totals"].items(): price[t] = s.over(l1 + l2, kk)
         near = min(sg["totals"], key=lambda t: abs(price[t] - 0.5))
+        if e.get("tie50"):
+            for t, kk in sg["totals"].items(): price[t] = {0.5: 0.93, 1.5: 0.75, 2.5: 0.45, 3.5: 0.55, 4.5: 0.14}.get(kk, price[t])
         for t in sg["btts"]: price[t] = (1 - 2.718281828459045 ** -l1) * (1 - 2.718281828459045 ** -l2) - e.get("edge", 0) / 100.0
+        if e.get("btts_mid"):
+            for t in sg["btts"]: price[t] = e["btts_mid"] / 100.0
         for t, (tm, kk) in sg["teamtotals"].items(): price[t] = s.over(l1 if tm == sg["team1"] else l2, kk)
         for t, p in price.items():
             lo, hi = e.get("btts", (1, 1)) if t in sg["btts"] else (1, 1)
@@ -114,11 +123,12 @@ def build_case(name, out):
                 cs.append({"end_period_ts": sg["kickoff"] - 1800 - 60 * m, "yes_bid": {"close_dollars": "%.4f" % b}, "yes_ask": {"close_dollars": "%.4f" % a}, "volume_fp": "3.00"})
             cm[t] = cs
     bodies = {r["id"]: {"markets": [{"market_ticker": x, "candlesticks": cm[x]} for x in r["params"]["market_tickers"].split(",") if x in cm]} for r in jc["requests"]}
+    if name == "case_20": bodies.pop(jc["requests"][0]["id"])
     mkrun(os.path.join(out, name, "candles"), jc, bodies)
     return counts
 
 
 if __name__ == "__main__":
     out = sys.argv[1]
-    for n in ["case_%02d" % i for i in range(1, 17)]:
+    for n in ["case_%02d" % i for i in range(1, 22)]:
         print(n, build_case(n, out))
