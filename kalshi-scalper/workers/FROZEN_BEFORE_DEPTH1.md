@@ -21,3 +21,9 @@ CFRTI-K and PERPBIN1 each need a held-out reader written (CFRTI-K's formula is i
 
 ## Check of Nov 13, 2026 (Desk A)
 No other card on this branch reads Bitcoin or gold R6 windows of Oct 30 to Nov 13 without being frozen or moved: none other. CFRTI-K, CFRTI-K-TX and PERPBIN1 start their held-out at 2026-11-14T00:00:00Z (b3ae4974, cf864b55); NC15 cards touch neither series; MMMAP1's R6 part is spent and labelled.
+
+## NC15DEPTH1 scorer frozen (Nov 13, 2026, Auditor B CLEAN)
+| Card | Registration (commit, sha256) | Scorer (commit, sha256) | Held-out/score start; read | STATE |
+|---|---|---|---|---|
+| NC15DEPTH1 (pooled cell, 11 nc15 series) | `NC15DEPTH1_POOLED_REGISTRATION.md` (2e595c54, b970b512ab8e780e31941bc3417dd97ac45ebe8f8e80789c9daf43d94e4a0490) | `desk_a_verify/nc15depth1.py` (2e595c54, 0a6c1f519ca66820ed4a10951dcd20a54febf7dadb2457d5c4f95aed25af57a3); test `nc15depth1_test.py` 307485e489a19ce98982005f5e1a83a698539e67971cb5916ae350e0a97b6162 | scoring from closes 2026-11-19T00:00:00Z; ONE read at 3,400 or more scored trades | FROZEN, Auditor B CLEAN |
+Auditor B's three non-blocking notes, kept as known behaviour (no edit, so the hash stays): N1 the read-once marker path can be overridden by the NC15DEPTH1_MARKER environment variable; the Head's go for the read must name the marker path (the default is nc15depth1_read_marker.txt beside the script). N2 the scorer takes results from `coverage.csv.gz` in the run folders (the recorder's own settled-result column), which is the settled-market list the registration means; a window whose row has no yes, no or void is UNRESOLVED. N3 the marker is checked after the data is read, so a second figure-printing run re-reads the data before it refuses; it still prints no figure.
