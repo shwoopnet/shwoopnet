@@ -25,6 +25,10 @@ plus what this desk already knows of the cards. A field named in a loader is not
 | **deribit** (stopped, W-DERIBIT1 retired) | `mark_iv, underlying_index, creation_timestamp, bid_price, ask_price, mark_price, open_interest, expiry_rank` | W-DERIBIT1, DERIBIT-IMPLIED (research branch) | the rest; data stopped, so no new rows |
 | **wheelbook** (Kalshi books for the wheel; tiers) | same book columns with `poll_id, tier` | the wheel shadow design (not yet scored) | all of it, by construction |
 
+## 1b. Update, Nov 13 at about 21:50Z (the Head's order of 21:05Z, item 3): KXINX15M in NC15
+
+`record_nc_book.py` now records KXINX15M (13 windows, one run, Nov 13 17:00Z to 20:00Z, polls at 5 s, same book, tape and coverage columns as the other NC15 series; counts in `WHEEL_PLACES_COVERAGE_NOV13.md`). **No new field**: the columns are the NC15 columns (levels 1 to 5 of both sides with sizes, tape with taker side, coverage, clock). **Read by:** no scored card. The cards on this market are SPXFV1 (closed unread; its input is Databento futures bars plus the candle at close minus 120 s, not these books), SPXOI1 (needs per-candle open interest, which no recorder saves; SPXOI1_LISTS and SPXOI1_CANDLES not yet landed) and SPXEVENT1 (paused; two frozen windows). So every KXINX15M book and tape field is unread, as for the other NC15 markets. The ranking below is unchanged: KXINX15M adds one more market to item 3 (cross-series timing against R6 and the other NC15 series) and to item 7 (book levels 2 to 5); it adds no unread field.
+
 ## 2. The unread fields ranked: could a counterparty pay for them?
 
 Ranked by a stated mechanism (who is on the other side and why they lose), not by any value. A candidate must still clear the four uniqueness checks of `docs/STRATEGY_LIFECYCLE.md` 7d and the declined list 7e before anything is built; where a field's likely strategy is only a variation of a live or closed one it is marked "version risk" (7g).
