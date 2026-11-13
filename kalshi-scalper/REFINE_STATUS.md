@@ -4,6 +4,10 @@ HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; line
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-13 09:52 AM CT (15:52Z): OICORE Nov 13 read done
+
+Registered read run on the fresh report. Verdict: net above 0 (minimum met), neither registered kill hit, FALSIFIED rule not yet reachable (under 100 fills). Figures were sent to Main by message only (privacy rule).
+
 ## 2026-11-10 10:41 AM CT (16:41Z): W-POSTREL2: 8:45 ET cheap-side lead FAILS on an independent window
 
 Registered first (S/w_postrel2), N +2 (about 800). PF (n) POST 8:45 ET vs CONTROL (8:15, 9:00, 9:15 pooled): +0c 0.68 (143) vs 0.66 (452), mean P/L -0.057 vs -0.065, difference interval -0.061 to +0.081; +1c 0.64 vs 0.62. Bar PF 1.3, n 40, interval above zero: PF and interval miss. Coverage: weekdays before 2026-10-11 (silver, copper, WTI, HYPE, BNB from 2026-08-28; [live figure removed, ask Main] 2 h cap stopped at 760 of 1,836 windows. Control PF below 1 too: these markets lose on the cheap side generally. Backlog item 13 closed.
