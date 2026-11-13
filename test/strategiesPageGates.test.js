@@ -79,9 +79,9 @@ gates.SP3 = () => {
   assert.strictEqual(R('2.40').frac, 1, 'clamped to a full ring'); assert.strictEqual(R('no losses').frac, 1);
   assert.deepStrictEqual(R('1.30').tick, { x1: 50, y1: 84, x2: 50, y2: 96 }, 'the 1.0 tick is at the bottom of the ring, where half way ends');
   const oi = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, money);
-  assert.ok(Math.abs(oi.frac - 0.75) < 1e-9 && oi.big === '$1.50' && oi.cap === 'of room before the net floor', 'OICORE: the net floor binds, 4.5 of 6 used: ' + JSON.stringify(oi));
+  assert.ok(Math.abs(oi.frac - 0.75) < 1e-9 && oi.big === '$1.50' && oi.cap === 'left before its loss limit', 'OICORE: the net floor binds, 4.5 of 6 used: ' + JSON.stringify(oi));
   const oi2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, money);
-  assert.ok(oi2.frac === 0.5 && oi2.big === 'Streak 12 of 24' && /net floor: \$9\.00 of room/.test(oi2.cap), 'the streak binds: ' + JSON.stringify(oi2));
+  assert.ok(oi2.frac === 0.5 && oi2.big === '12 losses of 24' && /loss limit: \$9\.00 of room/.test(oi2.cap), 'the streak binds: ' + JSON.stringify(oi2));
   assert.strictEqual(P.kalshiStratGauge('OICORE', { streak: 0, net: -5, floorOn: false, floorRoom: 1 }, money).frac, 0, 'the net floor is not counted before 40 fills');
   const l1 = P.kalshiStratGauge('L1', { count: 18 }, money);
   assert.ok(l1.frac === 0.18 && l1.big === '18 of 100', 'the gold tripwire is n of 100 trades');
@@ -95,7 +95,7 @@ gates.SP3 = () => {
   const m = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, mask);
   assert.ok(m.big === '****' && !/\d/.test(m.cap), 'Privacy view masks the dollar figure of the gauge');
   const m2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, mask);
-  assert.ok(m2.cap === 'losses in a row; net floor: **** of room', 'and the dollar figure in the caption');
+  assert.ok(m2.cap === 'losses in a row; loss limit: **** of room', 'and the dollar figure in the caption');
 };
 const panel = (h, k) => new RegExp('<section class="lp-p" id="lp-p-' + k + '"[\\s\\S]*?</section>').exec(h)[0];
 const BR = { live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' } };
@@ -107,7 +107,7 @@ gates.RT1 = () => {
   for (const id of ['XRPYES10', 'KESTREL', 'GOLDALL', 'XRPFAV6', 'LANTERN']) {
     const r = P.KAL_BOARD_RETIRED.rows.find((x) => x.name === id);
     assert.ok(r, id + ' is under Retired');
-    assert.ok(/Return rule: /.test(r.note) && /retired Nov 11/.test(r.note) && /duplicate of gold L1/.test(r.note), id + ' states its written return rule');
+    assert.ok(/Return rule: /.test(r.note) && /retired Nov 11/.test(r.note) && /copy of gold L1/.test(r.note), id + ' states its written return rule');
     assert.ok(!('pf' in r) && !('n' in r), id + ' carries no invented figure');
   }
   assert.strictEqual(P.KAL_BOARD_RETIRED.asOf, 'Nov 11');
@@ -151,7 +151,7 @@ gates.SP5 = () => {
   const noRules = (x) => x.replace(/<ul class="kal-bd-rules">[\s\S]*?<\/ul>/g, '').replace(/<span class="bd-w"[^>]*>[^<]*<\/span>/g, '').replace(/<dd>[^<]*<\/dd>/g, '').replace(/ title="[^"]*"/g, '');
   assert.ok(!/\$\d/.test(noRules(h)) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.ok(/\$5\.00/.test(plain) && /of room before the net floor/.test(plain) && !/drawdown room/.test(plain), 'and with it off the room is shown, with no fixed drawdown badge');
+  assert.ok(/\$5\.00/.test(plain) && /left before its loss limit/.test(plain) && !/drawdown room/.test(plain), 'and with it off the room is shown, with no fixed drawdown badge');
   const n = P.KAL_BOARD_LIVE.length + SHADOW_FIX.length;
   assert.strictEqual((plain.match(/class="rw(?: open)?(?: near)?"/g) || []).length, n, 'one row per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/<dt>Sizing<\/dt>/g) || []).length, n, 'every row keeps the Sizing line in More');
@@ -379,13 +379,13 @@ gates.FB2b = () => {
 };
 gates.FB3 = () => {
   const B = (l, x) => P.kalshiStratBadge(l, x).text;
-  assert.strictEqual(B('live', { n: 0 }), 'ARMED'); assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.2, useFrac: true }), 'HEALTHY');
+  assert.strictEqual(B('live', { n: 0 }), 'NO TRADES YET'); assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.2, useFrac: true }), 'HEALTHY');
   assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.5, useFrac: true }), 'WATCH'); assert.strictEqual(B('live', { n: 20, pf: 0.9, frac: 0.1, useFrac: true }), 'WATCH');
-  assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.8, useFrac: true }), 'NEAR KILL');
+  assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.8, useFrac: true }), 'NEAR STOP');
   assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.95, useFrac: false }), 'HEALTHY', 'the gold tripwire count is a count of trades, not distance to a kill');
-  assert.strictEqual(B('shadow', { state: 'ok', status: 'collecting', fillable: 5 }), 'COLLECTING'); assert.strictEqual(B('shadow', { state: 'ok', status: 'kill: net', fillable: 60 }), 'KILL');
+  assert.strictEqual(B('shadow', { state: 'ok', status: 'collecting', fillable: 5 }), 'COLLECTING'); assert.strictEqual(B('shadow', { state: 'ok', status: 'kill: net', fillable: 60 }), 'DROP');
   assert.strictEqual(B('shadow', { state: 'ok', status: 'ready: meets', fillable: 150 }), 'READY'); assert.strictEqual(B('shadow', { state: 'loading' }), 'WAITING');
-  assert.strictEqual(B('shadow', { state: 'ok', status: 'collecting', fillable: 40, netCents: -0.5 }), 'NEAR KILL'); assert.strictEqual(B('retired'), 'RETIRED');
+  assert.strictEqual(B('shadow', { state: 'ok', status: 'collecting', fillable: 40, netCents: -0.5 }), 'NEAR STOP'); assert.strictEqual(B('retired'), 'RETIRED');
 };
 gates.FB4 = () => {
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
@@ -431,7 +431,7 @@ gates.GK2 = () => {
 gates.GK3 = () => {
   // Consequence: a tripped gold card never says HEALTHY; neither does one whose state could not be read or is still loading.
   const base = { n: 40, pf: 1.4, frac: 0.1, useFrac: false };
-  assert.strictEqual(P.kalshiStratBadge('live', { ...base, killState: 'killed' }).text, 'KILLED');
+  assert.strictEqual(P.kalshiStratBadge('live', { ...base, killState: 'killed' }).text, 'STOPPED');
   assert.strictEqual(P.kalshiStratBadge('live', { ...base, killState: 'killed' }).tone, 'hot');
   for (const k of ['unknown', 'loading']) assert.ok(!/HEALTHY/.test(P.kalshiStratBadge('live', { ...base, killState: k }).text), k + ' is not healthy');
   assert.strictEqual(P.kalshiStratBadge('live', { ...base, killState: 'armed' }).text, 'HEALTHY', 'only a known armed state can read healthy');
@@ -460,7 +460,7 @@ gates.GK6 = () => {
   const cell = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*><b data-count="(\\d+)"').exec(out)[1]);
   assert.deepStrictEqual([cell('shadow'), cell('live'), cell('off')], [0, 3, 1]);
   assert.ok(/<b>3<\/b> of the live strategies are on trial/.test(out) && !/off or retired/.test(out), 'the header line adds only the trial count, which no box shows');
-  assert.ok(/>KILLED</.test(out) === false && />COOLING</.test(out) && !/>HEALTHY</.test(/<section class="lp-p" id="lp-p-off"[\s\S]*?<\/section>/.exec(out)[0]), 'the killed gold row reads cooling down, never healthy');
+  assert.ok(/>STOPPED</.test(out) === false && />COOLING</.test(out) && !/>HEALTHY</.test(/<section class="lp-p" id="lp-p-off"[\s\S]*?<\/section>/.exec(out)[0]), 'the killed gold row reads cooling down, never healthy');
   assert.ok(/Gold is off: the kill rule tripped/.test(out), 'the plain line is in the open detail');
 };
 gates.GK7 = () => {
@@ -485,12 +485,12 @@ gates.GK8 = () => {
 gates.OK1 = () => {
   // OICORE's badge is room left against the kill that binds first (Nov 12, 2026, the owner); the fixed $50 drawdown is no longer a badge or gauge figure.
   const g = (kill) => P.kalshiStratGauge('OICORE', kill, money);
-  assert.strictEqual(g({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).big, 'Streak 20 of 24', 'the streak is closer');
+  assert.strictEqual(g({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).big, '20 losses of 24', 'the streak is closer');
   assert.strictEqual(g({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).big, '$1.00', 'the net floor is closer');
   const b = (kill) => P.kalshiStratBadge('live', { n: 40, pf: 1.4, frac: g(kill).frac, useFrac: true, killState: undefined });
-  assert.strictEqual(b({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).text, 'NEAR KILL', '20 of 24 is over 80% of the streak kill');
-  assert.strictEqual(b({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).text, 'NEAR KILL', '5 of 6 of the net floor used');
-  assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 6 }).text, 'NEAR KILL');
+  assert.strictEqual(b({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).text, 'NEAR STOP', '20 of 24 is over 80% of the streak kill');
+  assert.strictEqual(b({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).text, 'NEAR STOP', '5 of 6 of the net floor used');
+  assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 6 }).text, 'NEAR STOP');
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(!/ddStop|drawdown room/i.test(src.replace(/<li>[\s\S]*?<\/li>/g, '')), 'no fixed drawdown gauge code is left on the page');
 };

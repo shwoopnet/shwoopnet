@@ -106,7 +106,7 @@ gates.RG5 = () => {
   // The Details sheet shows ONLY: what it does, kill, return, room left, one chart.
   const g = list.find((x) => x.id === 'GOLDOFF');
   const sheet = P.kalshiRegistrySheetHtml(g, { n: 14, spark: [0.5, 0.8, 1.1, 1.2] }, esc);
-  for (const w of ['Does', 'Kill', 'Return', 'Room left', '<svg']) assert.ok(sheet.includes(w), 'sheet has ' + w);
+  for (const w of ['What it does', 'Stops when', 'Comes back when', 'Room left before a stop', '<svg']) assert.ok(sheet.includes(w), 'sheet has ' + w);
   assert.ok(!/Started|Next read|To confirm|>n</.test(sheet) && (sheet.match(/<svg/g) || []).length === 1, 'and nothing else: one chart');
   assert.ok(/46 to go/.test(sheet), 'room left counts toward the target in the file');
   const empty = P.kalshiRegistrySheetHtml(g, null, esc);
@@ -137,14 +137,14 @@ gates.RG6 = () => {
   }
   assert.ok(P.kalshiStratSheetRow('NOPE', list, P.KAL_BOARD_LIVE) === null);
   const fb = P.kalshiStratSheetRow('OICORE', [], P.KAL_BOARD_LIVE);
-  assert.ok(fb && /drawdown/.test(fb.kill) && /re-arms/.test(fb['return']) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
+  assert.ok(fb && /24 losses in a row/.test(fb.kill) && /never restarts by itself/.test(fb['return']) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
   // the content: five things only
   const live = { live: true, spark: [0.9, 1.1, 1.3, 1.2], kill: { streak: 3, net: -1, floorOn: true, floorRoom: 5, count: 18, lines: [] } };
   const row = P.kalshiStratSheetRow('OICORE', list, P.KAL_BOARD_LIVE);
   const shown = P.kalshiRegistrySheetHtml(row, P.kalshiStratSheetData('OICORE', live, money), esc);
-  for (const w of ['Does', 'Kill', 'Return', 'Room left']) assert.ok(shown.includes(w), 'popup has ' + w);
+  for (const w of ['What it does', 'Stops when', 'Comes back when', 'Room left before a stop']) assert.ok(shown.includes(w), 'popup has ' + w);
   assert.strictEqual((shown.match(/<svg/g) || []).length, 1, 'one small chart');
-  assert.ok(/Rolling 30 trade cash PF/.test(shown) && /of room before the net floor/.test(shown) && /\$5\.00/.test(shown), 'the live read fills room left and the chart');
+  assert.ok(/Win\/loss ratio, last 30 trades/.test(shown) && /left before its loss limit/.test(shown) && /\$5\.00/.test(shown), 'the live read fills room left and the chart');
   assert.ok(!/Started|Next read|To confirm|Sizing|Implement|Last 8|Best day|Fees/.test(shown), 'and nothing else (no ladder, no trade list, no extras)');
   // Privacy view
   const masked = P.kalshiRegistrySheetHtml(row, P.kalshiStratSheetData('OICORE', live, mask), esc);
