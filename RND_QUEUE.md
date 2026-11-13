@@ -641,3 +641,4 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
 - Refinement applied the rule 18 scope ruling at ca51fa54. Its rows are at 7072ec1c (v1edge2/book.csv, 21 data rows), with one crossed later row added on U0L. The hand expectation was committed first: U0L stays NOT FILLED.
 - Refinement's scorer: fc2889324f93c87f. Registrations: V1 e9223260, V2 76dff5e6.
 - Forwarded to the History Miner for an independent build from the text. Both builds re-run when it reports. Auditor B diffs them after the 23:30Z DEPTH1 byte check.
+- 16:24Z: the edge set v2 read SAME on both builds (Refinement fc2889324f93c87f, Miner ad97de4a at e19f5fde), matching the hand expectation at ca51fa54. The Miner's old build ae3cafe4 fills U0L, so the scope row tells the builds apart. These are edge set fixture figures only; nothing here is a development or held-out read. Auditor B's final diff is queued behind the 23:30Z DEPTH1 byte check.
