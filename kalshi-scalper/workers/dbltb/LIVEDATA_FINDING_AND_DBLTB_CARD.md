@@ -107,3 +107,12 @@ No card, open or closed, holds out an hourly temperature series: the family was 
 3. What a hourly temperature event's milestone looks like, and so whether the index is tied to the event.
 4. How often the calibration changed.
 It answers nothing about sports. Section 4's other unlocks (play-by-play, the reference price series, state reads) are NOT probed and wait for the owner.
+
+### (c), corrected 05:30Z after Auditor B's audit of the reader (NOT CLEAN on c0de2ca6: one defect, two hardening points; no value leak found)
+
+1. **The defect.** The pull runner records the sha256 and the length of each answer's UNPACKED body; the first reader hashed the stored compressed file, and its made-up cases were built the same wrong way, so they passed while every real run would have been refused. The reader now unpacks each file and requires both the sha256 and the length to match; a row with no sha256 is refused. The made-up cases follow the runner's convention (checked in the runner's own code on main).
+2. **Keys.** A key is printed only if it is lowercase letters and underscores. ANY digit makes it `<key>`, so a key cannot carry a number (a planted `high_77` and `px_1` both print as `<key>`). The limit that stays, said plainly: a lowercase WORD used as a key (a city name, say) in an object that is not a map of same-shaped objects is printed as if it were a field name. It is a word, not a reading.
+3. **A run that is not whole is REPORTED, not refused** (the first text said "refuses", the code did not): each request's line says answered, refused with its status, or never sent, and the header says whether the run finished. For this probe a refusal is itself an answer (an old window that no longer exists).
+4. **The job is checked.** The reader takes the committed job file as its second argument and refuses unless the run's own copy of the job has the same job id and the same request ids, paths and parameters.
+
+Seven made-up cases now (normal, refused, bad_sha, no_sha, no_job, other_job, not_json); no sentinel appears in any output.

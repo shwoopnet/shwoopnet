@@ -6,6 +6,10 @@ the number 77.77 or 66.61, a word starting SENTINEL (in either case), or the id 
   normal      four answered requests: an events list with milestones, an index series, an old index window, calibrations.
   refused     as normal, one request answered 429 and one never sent.
   bad_sha     as normal, one file altered after the manifest was written: the reader must refuse.
+  no_sha      as normal, one row carries no sha256: the reader must refuse.
+  other_job   as normal, but the run's job asked one request with another parameter than the job file: refuse.
+The manifest's sha256 and bytes are of the UNPACKED body, as the pull runner records them. Each case also gets the job
+file the reader is given (job.json); a key carrying digits (high_77, px_1) and a two-key map keyed by words are planted.
   no_job      as normal, the manifest carries no job: the reader must refuse.
   not_json    as normal, one stored answer is not JSON.
 """
@@ -20,7 +24,7 @@ T0 = 1794536000
 
 def answers():
     series = {"city": "SENTINELCITY", "config_version": "SENTINEL-v1.0", "units": "SENTINELUNIT",
-              "timeseries": [{"t": (T0 + 60 * i) * 1000, "v": 77.77, "status": "SENTINELSTATUS", "contributors": 3,
+              "timeseries": [{"t": (T0 + 60 * i) * 1000, "v": 77.77, "status": "SENTINELSTATUS", "contributors": 3, "high_77": 1, "px_1": 66.61,
                               "stations": {"ZZ9A%02d" % k: {"reading": 66.61, "code": "SENTINELCODE"} for k in range(15)}} for i in range(5)]}
     events = {"events": [{"event_ticker": "KXTEMPMIAH-ZZ9", "title": "SENTINEL title", "strike_date": "2026-11-13T05:00:00Z"}],
               "milestones": [{"id": "ZZ9-milestone", "type": "SENTINELTYPE", "start_date": "2026-11-13T04:00:00Z", "end_date": "2026-11-13T05:00:00Z",
@@ -44,19 +48,26 @@ def build(out, name, kind="normal"):
         if kind == "refused" and rid == "wx_calibrations":
             continue
         fn = "%04d.json.gz" % n
-        raw = gzip.compress(json.dumps(body).encode() if not (kind == "not_json" and rid == "wx_recent") else b"SENTINEL not json 77.77")
-        open(os.path.join(folder, fn), "wb").write(raw)
-        rows.append({"index": n, "id": rid, "page": 1, "status": 200, "file": fn, "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False})
+        raw = json.dumps(body).encode() if not (kind == "not_json" and rid == "wx_recent") else b"SENTINEL not json 77.77"
+        open(os.path.join(folder, fn), "wb").write(gzip.compress(raw))
+        row = {"index": n, "id": rid, "page": 1, "status": 200, "bytes": len(raw), "file": fn, "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False}
+        if kind == "no_sha" and rid == "wx_recent":
+            del row["sha256"]
+        rows.append(row)
     man = {"status": "complete", "rows": rows}
     if kind != "no_job":
         man["job"] = {"job_id": "MADE_UP", "requests": reqs}
     json.dump(man, open(os.path.join(folder, "manifest.json"), "w"))
+    want = [dict(r) for r in reqs]
+    if kind == "other_job":
+        want[1] = dict(want[1], params={"last_sec": 1})
+    json.dump({"job_id": "MADE_UP", "requests": want}, open(os.path.join(folder, "job.json"), "w"))
     if kind == "bad_sha":
         open(os.path.join(folder, "0002.json.gz"), "wb").write(gzip.compress(b'{"timeseries": [{"t": 1, "v": 66.61}]}'))
 
 
 def main():
-    for k in ("normal", "refused", "bad_sha", "no_job", "not_json"):
+    for k in ("normal", "refused", "bad_sha", "no_sha", "no_job", "other_job", "not_json"):
         build(sys.argv[1], k, k)
 
 

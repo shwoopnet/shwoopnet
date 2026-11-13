@@ -1,0 +1,24 @@
+job MADE_UP | 4 requests, the same ids, paths and parameters as the committed job file [field names only, no value]
+LIVEDATA_PROBE_A field reader | requests asked 4 | answered whole 4 | run finished: yes [field names only, no value]
+ev_temp_miami page 1: 450 bytes, cut short by the runner: no, 20 distinct fields [field names only, no value]
+  $ | object x 1
+  $.cursor | string x 1
+  $.events | array x 1 | array length 1 to 1
+  $.events[] | object x 1
+  $.events[].event_ticker | string x 1
+  $.events[].strike_date | string x 1 | times from 2026-11-13T05:00:00Z to 2026-11-13T05:00:00Z
+  $.events[].title | string x 1
+  $.milestones | array x 1 | array length 1 to 1
+  $.milestones[] | object x 1
+  $.milestones[].details | object x 1
+  $.milestones[].details.away_score | number x 1
+  $.milestones[].details.home_score | number x 1
+  $.milestones[].details.status | string x 1
+  $.milestones[].end_date | string x 1 | times from 2026-11-13T05:00:00Z to 2026-11-13T05:00:00Z
+  $.milestones[].id | string x 1
+  $.milestones[].last_updated_ts | string x 1 | times from 2026-11-13T04:30:00Z to 2026-11-13T04:30:00Z
+  $.milestones[].primary_event_tickers | array x 1 | array length 1 to 1
+  $.milestones[].primary_event_tickers[] | string x 1
+  $.milestones[].start_date | string x 1 | times from 2026-11-13T04:00:00Z to 2026-11-13T04:00:00Z
+  $.milestones[].type | string x 1
+REFUSED: 0002.json.gz does not match the sha256 and length the manifest records for its unpacked body

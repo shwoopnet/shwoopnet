@@ -4,10 +4,14 @@ its path, its types and how often it occurs, and for time fields the first and l
 a temperature, a score, a status word, a name or an id. Written before the run exists (the Head of R&D, seq 6:
 the answers are outcome data, and nothing else may open them).
 
-  livedata_fields.py <probe run folder>
+  livedata_fields.py <probe run folder> <the committed job file>
 
-It reads the files the manifest lists (never a folder walk), checks each file's sha256 against the manifest where the
-manifest gives one, and refuses a HELDOUT_ path, a path outside the run, and a run that is not whole.
+It reads the files the manifest lists (never a folder walk). The run's own copy of the job must ask exactly what the
+committed job file asks (ids, paths, parameters), or it refuses. Each stored answer is unpacked and its sha256 and its
+length are checked against the manifest's (the runner records both for the UNPACKED body); a row with no sha256 is
+refused. It refuses a HELDOUT_ path, a link and a path outside the run. A run that did not finish, or a request that
+was refused or never sent, is REPORTED on its line and the other answers are still listed: for this probe "no answer"
+is itself an answer (an old window that no longer exists).
 Standard library only.
 """
 import gzip
@@ -22,7 +26,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from deskb_guard import refuse_all, refuse_heldout  # noqa: E402
 
 TIME_KEY = re.compile(r"(^t$|^ts$|time|date|_ts$|_at$|timestamp|effective|expir|updated|created)", re.I)
-SAFE_KEY = re.compile(r"[a-z][a-z_]{0,39}(_[0-9]{1,3})?")      # a plain lowercase field name; digits only as a _N ending
+SAFE_KEY = re.compile(r"[a-z][a-z_]{0,39}")      # a plain lowercase field name: letters and underscores only, no digit
 TAG = " [field names only, no value]"
 
 
@@ -55,7 +59,7 @@ def as_time(v):
 
 def key_name(k, node):
     """A field name as printed. A key is printed only if it is a plain lowercase field name. Anything else (capitals,
-    digits inside it, a dash, a dot: an id, a ticker, a station, a number) is printed as <key>. So is every key of an
+    ANY digit, a dash, a dot: an id, a ticker, a station, a number) is printed as <key>, so no key can carry a number. So is every key of an
     object that has three or more keys whose values are all objects with one and the same set of keys: that is a map
     keyed by something, not a record."""
     if not SAFE_KEY.fullmatch(str(k)):
@@ -95,14 +99,20 @@ def iso(t):
 
 def main():
     refuse_all()
-    if len(sys.argv) != 2:
+    if len(sys.argv) != 3:
         sys.exit(__doc__)
-    run = sys.argv[1]
+    run, job_path = sys.argv[1], sys.argv[2]
     refuse_heldout(run)
+    refuse_heldout(job_path)
     man = json.load(open(inside(run, "manifest.json")))
     reqs = (man.get("job") or {}).get("requests")
     if not isinstance(reqs, list) or not reqs:
         sys.exit("REFUSED: the run's manifest does not carry its job")
+    want = json.load(open(job_path))
+    shape = lambda rs: [(r.get("id"), r.get("path"), json.dumps(r.get("params", {}), sort_keys=True), r.get("max_pages", 1)) for r in rs]
+    if (man.get("job") or {}).get("job_id") != want.get("job_id") or shape(reqs) != shape(want.get("requests", [])):
+        sys.exit("REFUSED: the run's job is not the committed job file (job id, request ids, paths or parameters differ)")
+    print("job %s | %d requests, the same ids, paths and parameters as the committed job file%s" % (want.get("job_id"), len(reqs), TAG))
     rows = man.get("rows", [])
     asked = [r.get("id") for r in reqs]
     good = {r.get("id") for r in rows if r.get("status") == 200 and not r.get("truncated") and r.get("file")}
@@ -117,17 +127,20 @@ def main():
             if r.get("status") != 200 or not r.get("file"):
                 print("%s: HTTP %s, no answer stored%s" % (head, r.get("status"), TAG))
                 continue
-            raw = open(inside(run, r["file"]), "rb").read()
-            if r.get("sha256") and hashlib.sha256(raw).hexdigest() != r["sha256"]:
-                sys.exit("REFUSED: %s does not match the sha256 in the manifest" % r["file"])
             try:
-                body = json.loads(gzip.decompress(raw).decode("utf-8"))
-            except (OSError, ValueError):
-                print("%s: the answer is not JSON (%d stored bytes)%s" % (head, len(raw), TAG))
+                raw = gzip.decompress(open(inside(run, r["file"]), "rb").read())
+            except (OSError, EOFError):
+                sys.exit("REFUSED: %s cannot be unpacked" % r["file"])
+            if not r.get("sha256") or hashlib.sha256(raw).hexdigest() != r["sha256"] or r.get("bytes") != len(raw):
+                sys.exit("REFUSED: %s does not match the sha256 and length the manifest records for its unpacked body" % r["file"])
+            try:
+                body = json.loads(raw.decode("utf-8"))
+            except ValueError:
+                print("%s: the answer is not JSON (%d bytes)%s" % (head, len(raw), TAG))
                 continue
             out = {}
             walk(body, "$", out)
-            print("%s: %d stored bytes, cut short by the runner: %s, %d distinct fields%s" % (head, len(raw), "yes" if r.get("truncated") else "no", len(out), TAG))
+            print("%s: %d bytes, cut short by the runner: %s, %d distinct fields%s" % (head, len(raw), "yes" if r.get("truncated") else "no", len(out), TAG))
             for path in sorted(out):
                 rec = out[path]
                 types = ", ".join("%s x %d" % kv for kv in sorted(rec["types"].items()))
