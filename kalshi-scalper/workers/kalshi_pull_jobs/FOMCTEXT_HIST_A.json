@@ -1,0 +1,135 @@
+{
+ "job_id": "FOMCTEXT_HIST_A",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/FOMCTEXT_CARD.md",
+ "purpose": "FOMCTEXT development markets (Idea Desk C): one /historical/markets list per development KXFEDMENTION event, 11 FOMC press conferences Jan 2025 to Apr 2026, by event_ticker. Owner MAIN: the runner lists no Desk C.",
+ "heldout": "FOMCTEXT_CARD.md: decision dates on or after 2026-06-17 are held out; no event dated 2026-06-17 or later is requested here",
+ "allowed_endpoints": [
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "event_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXFEDMENTION"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 25,
+ "requests": [
+  {
+   "id": "hist_KXFEDMENTION-25JAN",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25JAN",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-25MAR",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25MAR",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-25MAY",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25MAY",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-25JUN",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25JUN",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-25JUL",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25JUL",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-25SEP",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25SEP",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-25OCT",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25OCT",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-25DEC",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25DEC",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-26JAN",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26JAN",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-26MAR",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26MAR",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXFEDMENTION-26APR",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26APR",
+    "limit": 1000
+   },
+   "max_pages": 2
+  }
+ ],
+ "notes": "Event tickers are DERIVED from the pattern KXFEDMENTION-YYMON (confirmed for KXFEDMENTION-26MAR by the Chief of Staff's probe, Nov 13); only development months are listed (2025: JAN, MAR, MAY, JUN, JUL, SEP, OCT, DEC; 2026: JAN, MAR, APR). An EMPTY answer means a wrong guess (or a meeting the series did not list), NOT an empty meeting, and is reported as such. Limit 1000 with max_pages 2 so no list can end on a cursor (an event holds tens of strikes); page budget 22, cap 25. No event dated 2026-06-17 or later is requested. Slow family: 8 events a year, paper list at most.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
