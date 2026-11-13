@@ -337,6 +337,8 @@
   .brief-chart-tf{ text-transform:uppercase; letter-spacing:.12em; font-size:12px; }
   .brief-chart-chg.up{ color:var(--gain); } .brief-chart-chg.down{ color:var(--loss-text); }
   .brief-chart{ position:relative; }
+  /* Tap and drag on a phone (mobile pass, Nov 13, 2026): a sideways drag on a chart moves its readout, an up or down drag still scrolls the page. */
+  .brief-chart, .kal-plot{ touch-action:pan-y; }
   .brief-plot{ position:relative; margin:6px 46px 0 0; } .brief-yaxis{ position:absolute; left:100%; top:0; bottom:0; width:46px; } .brief-yaxis span{ position:absolute; left:6px; transform:translateY(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .brief-xaxis{ position:relative; height:18px; margin:3px 46px 0 0; } .brief-xaxis span{ position:absolute; top:0; transform:translateX(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; } .brief-xaxis span.l{ transform:none; } .brief-xaxis span.r{ transform:translateX(-100%); }
   .brief-chart svg{ display:block; width:100%; height:92px; touch-action:pan-y; cursor:crosshair; }
@@ -1095,7 +1097,7 @@
   @keyframes lpTileIn{ from{ opacity:0; transform:translateY(10px); } }
   .lp-p.play .rw{ animation:lpRow .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i,0) * 80ms + 160ms); } .lp-p.play .lp-prog i{ animation:lpFill 1.2s cubic-bezier(.2,.7,.2,1) both .25s; } .lp-p.play .lp-prog i::after{ animation:lpTip 1.2s cubic-bezier(.2,.7,.2,1) both .25s; }
   @media (max-width:760px){ .rw-h{ grid-template-columns:20px 44px minmax(0,1fr) auto; gap:4px 10px; padding:8px 10px 8px 6px; } .rw-h .chev{ grid-column:1; grid-row:1 / 3; } .rw-ring{ grid-column:2; grid-row:1 / 3; } .rw-n{ grid-column:3; grid-row:1; } .rw-h .sp-badge{ grid-column:4; grid-row:1; justify-self:end; } .rw-w{ grid-column:4; grid-row:2; justify-self:end; } .rw-k{ grid-column:3; grid-row:2; } .rw-d, .mo-body{ grid-template-columns:1fr; } .bd-l{ grid-template-columns:52px minmax(0,1fr); } .bd-b{ grid-column:2; } }
-  @media (max-width:700px){ .lp{ padding:10px 8px; } .lp-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; } .lp-c, .lp-ret{ display:none; }
+  @media (max-width:700px){ .lp{ padding:10px 8px; } .lp-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; align-items:stretch; }   /* the two top boxes start and end level, like the desktop row (mobile pass, Nov 13, 2026) */ .lp-c, .lp-ret{ display:none; }
     .lp-t{ display:block; padding:6px 10px; } .lp-t b{ display:inline; margin-right:6px; } .lp-t em{ display:block; } .lp-then{ display:block; margin-top:2px; } .lp-t .chev{ position:absolute; right:8px; top:14px; margin:0; }
     .lp-t[data-i="2"]{ grid-column:1 / -1; }   /* three boxes (Nov 13, 2026): Shadow and Live side by side, Off / Retired across the row below */
     .lp-t::after{ position:absolute; color:var(--muted); font-size:13px; } .lp-t[data-i="0"]::after{ content:'\25B6'; right:-21px; top:40%; } .lp-t[data-i="1"]::after{ content:'\25BC'; bottom:-17px; right:22%; } .lp-t[data-i="2"]::after{ content:'\25B2'; top:-17px; left:22%; } }
@@ -1141,6 +1143,9 @@
     .kal-console [data-card="account"] .kal-strat-tbl th:nth-child(2), .kal-console [data-card="account"] .kal-strat-tbl td:nth-child(2){ display:block; }
     .kal-console [data-card="account"] .kal-strat-tbl td.kal-nil{ display:none; }   /* after the rule above, so an empty cell (the total row has no markets or status) stays hidden */
     .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
+    /* The same order as the desktop left column, then the strategies table (mobile pass, Nov 13, 2026): balance, Today, the loss stop, then the order switch and any notes, then the table. */
+    .kal-console [data-card="account"] .kal-acct-head{ grid-row:1; } .kal-console [data-card="account"] .kal-acct-total{ grid-row:2; } .kal-console [data-card="account"] .kal-rows > div.kal-today{ grid-row:3; } .kal-console [data-card="account"] > .kal-acct-risk{ grid-row:4; }
+    .kal-console [data-card="account"] #kalStrategies{ order:1; }
   }
   /* The Account card at less than the full width (a choice since Nov 5, 2026): about 680px is too narrow for the balance beside the strategies table, so its pieces stack, as on a phone. The table keeps its desktop columns. */
   .kal-console [data-card="account"]:not([data-w="12"]){ grid-template-columns:minmax(0,1fr); gap:12px; }
@@ -1728,7 +1733,7 @@
         <button class="kal-mini" id="stratPresentBtn" type="button" aria-pressed="false" title="Shows **** instead of dollar amounts">Privacy</button>
       </div>
     </div>
-    <p class="sp-lede">Every strategy, where it stands and what would stop it. Profit factor is on the cash basis, after fees. Nothing here changes the bot.</p>
+    <p class="sp-lede">Every strategy, where it stands and what would stop it. Results are the real money made or lost, after fees. Nothing on this page changes the bot.</p>
     <div id="stratBody"></div>
   </main>
 
@@ -1861,6 +1866,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Phone layout matches the desktop site (the owner: "lets start building mobile out too"): the Bot page Account card shows the balance, Today, the loss stop and then the order switch, in the desktop order; on the Strategies page the stage boxes line up, the top box says "N trades" and the page opens with a plain line on what it shows; a tap on any chart shows its readout and a sideways drag moves it (the Account result line and the Brief charts now answer a tap too), while an up or down drag still scrolls. Page only.</li>
                   <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
                   <li>Trading: OICORE's limit is back at the price it sees (the 1c above it is switched off), because the orders that filled above the price first seen netted negative; it fills a little less often and never pays more than the price it sees</li>
                   <li>Plain words across the site (the owner: "easily readable by someone who doesn't understand anything"): each strategy's rule, stop rule and comeback rule now read in everyday sentences; chart labels say "Money made over time", "Win/loss ratio, last 30 trades", "Nearest stop rule", "Stops when" and "Comes back when"; status words read NEAR STOP, STOPPED and NO TRADES YET; the Strategies page has a "What the words on this page mean" panel; the Bot page Rules explain contracts, the strategies' names, open interest and the spread. Only the words changed. Page and strategy list only.</li>
@@ -3649,6 +3655,7 @@
       paint(head, pt.cum, kalshiPnlPct(pt.cum, d.startBal), kalDateTime(pt.t));
     }
     host.addEventListener('pointermove', move);
+    host.addEventListener('pointerdown', move);   // a tap shows the readout at once on a phone, and a sideways drag moves it (mobile pass, Nov 13, 2026)
     host.addEventListener('pointerleave', clear);
     host.addEventListener('pointercancel', clear);
     host.addEventListener('pointerup', function(e){ if(e.pointerType !== 'mouse'){ clear(); } });
@@ -4606,7 +4613,7 @@ kalshiStatusTick();
     var chart = line ? '<svg class="sp-sum-curve" viewBox="0 0 300 70" preserveAspectRatio="none" role="img" aria-label="' + esc('30 day cash result over ' + (line.n - 1) + ' trades') + '"><line x1="0" x2="300" y1="' + line.zeroY + '" y2="' + line.zeroY + '" class="sp-sum-zero"/><path class="sp-sum-area" d="' + line.d + ' L' + line.lastX + ' 70 L0 70Z"/><path class="sp-sum-ln" d="' + line.d + '"/></svg><i class="sp-sum-dot" style="left:' + (line.lastX / 3).toFixed(2) + '%;top:' + (line.lastY / 0.7).toFixed(2) + '%"></i>' :
       '<div class="sp-sum-none">No settled trades in the last 30 days.</div>';
     return '<div class="kal-card sp-sum">' + ring +
-      '<div class="sp-sum-mid"><div class="sp-sum-k">All strategies &middot; 30 days &middot; n ' + s.w30.n + '</div>' +
+      '<div class="sp-sum-mid"><div class="sp-sum-k">All strategies &middot; last 30 days &middot; ' + s.w30.n + ' trades</div>' +
       '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? '30 days ago' : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || '30 days ago') + '</span><span>30 day cash result, dashed line is zero</span><span>Today</span></div></div>' +
       '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>All time</span><b>' + esc(sg(s.net)) + '</b><em class="sp-sum-sub">' + esc(s.open + ' open · ' + money(s.atRisk) + ' at risk') + '</em></div>' + '</div></div>';
   }
@@ -4847,7 +4854,6 @@ kalshiStatusTick();
       (c.gauge ? bar('Nearest stop rule', c.gauge.frac, c.gauge.big + ' · ' + c.gauge.cap) : '') +
       (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? 'Record complete · ' + (c.trialNote || 'review due') : c.trial + ' of 90 fills toward the 60 + 30 record')) +
       (c.kill || c.ret ? '<dl class="sc-rules">' + line('Stops when', c.kill) + line('Comes back when', c.ret) + '</dl>' : '') + '</div>';
-      (c.kill || c.ret ? '<dl class="sc-rules">' + line('Kill', c.kill) + line('Return', c.ret) + '</dl>' : '') + '</div>';
   }
   function kalshiBoardHtml(model, esc, money){
     var openSet = model.open || {}, now = model.now || 0, tt = model.timeText || String;
@@ -4993,7 +4999,6 @@ kalshiStatusTick();
     var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[KAL_STAGES.length - 1].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
     return '<div class="sp-wrap">' + summary + pipe + (typeof KAL_GLOSSARY_HTML === 'string' ? KAL_GLOSSARY_HTML : '') + '</div>';
-    return '<div class="sp-wrap">' + summary + pipe + '</div>';
   }
   // One GET of the committed list per page load (it is a static file next to index.html, so it costs no Firestore read); a failure is kept as the answer, never retried in a loop.
   var kalshiRegistryLoading = false;
@@ -6526,6 +6531,7 @@ kalshiStatusTick();
       paint(card, v, d.prev);
     }
     host.addEventListener('pointermove', move);
+    host.addEventListener('pointerdown', move);   // a tap shows the readout at once on a phone, and a sideways drag moves it (mobile pass, Nov 13, 2026)
     host.addEventListener('pointerleave', clear);
     host.addEventListener('pointercancel', clear);
     host.addEventListener('pointerup', function(e){ if(e.pointerType !== 'mouse'){ clear(); } });
