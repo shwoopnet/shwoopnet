@@ -171,6 +171,12 @@ class T(unittest.TestCase):
         self.assertEqual(self.window([brow("T1", t0, 0.50, 0.50)], [])["status"], "crossed_quote")   # locked
         self.assertEqual(self.window([brow("T1", t0, 0.30, 0.70)], [])["status"], "crossed_quote")   # locked, float 1 - .7 = .30000000000000004 (standing 1e-9)
         self.assertEqual(self.window([brow("T1", t0, 0.10, 0.85)], [])["status"], "signal")           # legal two-sided quote
+    def test_crossed_later_row_never_fills(self):
+        t0, b = self.base()
+        w = self.window(b + [brow("T1", t0 + 4000, 0.60, 0.95)], [])   # YES ask would be .05 (below our .10 bid) but the row is crossed
+        self.assertFalse(w["filled"])
+        w = self.window(b + [brow("T1", t0 + 4000, 0.05, 0.90)], [])   # a legal row with the same ask fills
+        self.assertTrue(w["filled"])
     def test_labels_printed(self):
         self.assertIn("DEPTH1, CFRTI-B and CFRTI1-BTC", S.LABELS["V1"])
         self.assertEqual(S.LABELS["V2"], "not blind on EVENT830's forward windows")

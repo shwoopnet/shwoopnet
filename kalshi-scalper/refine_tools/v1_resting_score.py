@@ -196,6 +196,8 @@ def one_window(version, tk, ct, book, trades, cover):
         if ms >= cancel_ms:
             break
         yb2, nb2 = sides(r)
+        if yb2 is not None and nb2 is not None and yb2 >= (1 - nb2) - TOL:
+            continue   # rule 18 applies to every book row: a crossed or locked later row can never fill (Head's scope ruling)
         ask2 = (1 - nb2) if side == "yes" and nb2 is not None else ((1 - yb2) if side == "no" and yb2 is not None else None)
         if ask2 is not None and ask2 <= p_bid + 1e-9:
             out["filled"] = True

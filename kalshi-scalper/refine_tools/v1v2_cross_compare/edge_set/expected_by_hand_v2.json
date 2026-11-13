@@ -71,5 +71,10 @@
  "missed_expected_under_1e-9_tolerance": true,
  "bar1_strict_compare": false,
  "missed_strict_compare": false,
- "bar2_met": false
+ "bar2_met": false,
+ "scope_ruling_row": {
+  "window": "KXBTC15M-U0L (unfilled loss, our bid 0.10)",
+  "added_row": "one later book row at t0 + 4000 ms: yes bid 0.60, no bid 0.95 (sum 1.55: crossed); its YES ask 1 - 0.95 = 0.05 would otherwise fill our 0.10 bid",
+  "expected": "row skipped (rule 18 on every book row): U0L stays NOT FILLED; every figure above is unchanged (6 fills, 2 not filled, crossed_quote 2); a build that fills U0L would read 7 fills and a different version PF, parent unfilled PF and net"
+ }
 }
