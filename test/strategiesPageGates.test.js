@@ -158,7 +158,7 @@ gates.SP5 = () => {
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 4 && (plain.match(/class="lp-p"/g) || []).length === 4 && /id="lp"/.test(plain), 'four boxes and four panels in one loop');
   assert.ok((plain.match(/class="bd-b near"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a kill line with the closest limit hatched on each live row');
-  assert.ok((plain.match(/<circle class="sp-ring-bg"/g) || []).length === n, 'a ring dial in every row');
+  assert.ok((plain.match(/<circle class="sp-ring-bg"/g) || []).length === 2 * n && (plain.match(/class="rw-ring"/g) || []).length === n, 'a small ring on every row head and a ring dial in every row\'s detail (Nov 13, 2026)');
   assert.ok((plain.match(/class="kal-bd-rules"/g) || []).length === n, 'every row keeps Implement, Kill and Return in More');
   assert.ok(/41 of 150 signals/.test(plain), 'a signals of 150 bar on each shadow rule');
   assert.ok(!/#[0-9a-f]{3,6}|green|\bred\b|rgb\(/i.test(plain.replace(/aria-label="[^"]*"/g, '')), 'black and white only: no colour in the markup');
@@ -199,7 +199,7 @@ gates.SP8 = () => {
 };
 
 // SP9 to SP14: the summary bar, the detail panels and the timeline (Nov 10, 2026, the owner: more informational, an evidence or odds panel explicitly not wanted).
-const names2 = ['kalshiStratLaneOf', 'kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStageBoxOf', 'kalshiClosestKill', 'kalshiGoldReturnStats', 'kalshiPromotedAgo', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
+const names2 = ['kalshiStratLaneOf', 'kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStageBoxOf', 'kalshiClosestKill', 'kalshiGoldReturnStats', 'kalshiPromotedAgo', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
 const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STAGES') + varLine('KAL_RETIRED_CAUSES') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
 const Q = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', 'Object', src2 + '; return { ' + names2.join(', ') + ', KAL_RETIRED_CAUSES, KAL_BOARD_RETIRED, kalshiStratOpen };')(Math, Number, Array, isFinite, Intl, Date, Object);
 const CT = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
@@ -222,8 +222,13 @@ gates.SP9 = () => {
   assert.deepStrictEqual(Q.kalshiStratSummary([], NOW, NaN, CT).atRisk, 0, 'an unreadable risk figure is 0, not NaN');
   assert.strictEqual(Q.kalshiStratOpenCount([ord(NOW, 'yes', 0.9, true, { settled: false }), ord(NOW, 'yes', 0.9, true, { settled: false, exitCount: 10 }), { fillCount: 0 }]), 1, 'a sold out or unfilled order is not a position');
   const html = Q.kalshiStratSummaryHtml(s, esc, money);
-  assert.ok(html.indexOf('sp-sum-pf') < html.indexOf('sp-sum-grid') && /<b data-pf="\d\.\d\d"[^>]*>\d\.\d\d<\/b>/.test(html), 'the blended PF is big and first');
-  assert.ok(/Net cash/.test(html) && /Today/.test(html) && /Last 7 days/.test(html) && /At risk now/.test(html) && /Open positions/.test(html));
+  assert.ok(html.indexOf('sp-sum-pf') < html.indexOf('sp-sum-grid') && /<b data-pf="\d\.\d\d"[^>]*>\d\.\d\d<\/b>/.test(html), 'the blended PF is big and first, inside its ring');
+  assert.ok(/net cash since the start/.test(html) && /Today/.test(html) && /Last 7 days/.test(html) && /at risk/.test(html) && /Open now/.test(html));
+  // the dial and curve (Nov 13, 2026, the owner chose A): the 30 day cash curve starts at zero and ends at the 30 day net; no trades draws no curve and says so
+  assert.deepStrictEqual(s.curve, [0, 0.945 * 0 - 9.055, -9.055 + 0.945, -9.055 + 0.945 * 2].map((x) => Math.round(x * 10000) / 10000));
+  assert.ok(/class="sp-sum-curve"/.test(html) && /class="sp-sum-ring"/.test(html), 'a ring and a curve');
+  const none = Q.kalshiStratSummaryHtml(Q.kalshiStratSummary([], NOW, 0, CT), esc, money);
+  assert.ok(!/sp-sum-curve/.test(none) && /No settled trades in the last 30 days/.test(none), 'no trades, no made-up curve');
 };
 gates.SP10 = () => {
   // the detail panel numbers: win rate, average win and loss, fees, best and worst day, the last 8 trades, the cumulative line
@@ -270,7 +275,7 @@ gates.SP12 = () => {
   assert.ok(!/KAL_STRAT_TIMELINE|kalshiStratTimeline|sp-tl|>Timeline</.test(html), 'no timeline anywhere in the page');
   const h = Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, timeline: [{ date: 'Nov 9', label: 'x', when: 'y' }], activity: { state: 'ok', items: [] } }, esc, money);
   assert.ok(!/Timeline|sp-tl/.test(h), 'a stray timeline field in the model draws nothing');
-  assert.ok(/Recent activity/.test(h), 'Recent activity stays');
+  assert.ok(!/Recent activity|sp-act/.test(h), 'Recent activity is gone (the owner, Nov 13, 2026)');
 };
 gates.SP12b = () => {
   // The stage board's helpers. Consequence: the nearest kill is the one with the most used and above zero (a strategy with nothing used is never marked nearest), a lane maps to exactly one box, a promotion label needs a real registry date, and gold's return record is the least advanced of its three counts.
@@ -311,15 +316,9 @@ gates.SP12c = () => {
   const sh = by('XRP').sheet; assert.strictEqual(sh.stage, 'Retired');
 };
 gates.SP13 = () => {
-  // recent activity: critical and warning items and session starts and stops only; a quiet log says so
-  const items = [{ level: 'info', title: 'Bought Gold', ts: 5 }, { level: 'warning', title: 'Sold Gold early', ts: 4 }, { level: 'info', title: 'Session started', ts: 3 }, { level: 'critical', title: 'The bot stopped by itself', ts: 2 }, { level: 'info', title: 'Bot stopped by you', ts: 1 }, { level: 'info', title: 'Won Gold +$1.00', ts: 0 }];
-  const a = Q.kalshiStratActivity(items, 8);
-  assert.deepStrictEqual(a.map((x) => x.ts), [4, 3, 2, 1]);
-  assert.strictEqual(Q.kalshiStratActivity(items, 2).length, 2);
-  const quiet = Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: Q.KAL_BOARD_RETIRED_X || { rows: [], back: 'b', asOf: 'a' }, timeline: [], activity: { state: 'ok', items: [] } }, esc, money);
-  assert.ok(/No kills or promotions recorded\./.test(quiet), 'the static line when nothing happened');
-  const loud = Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, timeline: [], activity: { state: 'ok', items: [{ level: 'critical', title: '<img src=x onerror=1>', body: '"q"', ts: 1 }] }, timeText: (t) => 'T' + t }, esc, money);
-  assert.ok(!/<img/.test(loud) && /&#60;img/.test(loud), 'an event text is escaped');
+  // Recent activity is removed (the owner, Nov 13, 2026: "we have notifications/trade logs elsewhere"): no function, no markup, no style, and the page makes no notification read for it.
+  assert.ok(!/kalshiStratActivity|sp-act|Recent activity</.test(html), 'no Recent activity anywhere in the page');
+  assert.ok(!/kalshiNotifFeed\(/.test(fn('renderStrategiesPage')), 'the Strategies page no longer reads the notification items');
 };
 gates.SP14 = () => {
   // privacy masks every dollar in the new sections, escaping holds, black and white, no em dash, and the new code has no timer, write or host
@@ -340,7 +339,6 @@ gates.SP14 = () => {
   const mine = body + css;
   assert.ok(!mine.includes(String.fromCharCode(8212)), 'no em dash in the new code or styles');
   assert.ok(/kalshiStratSummary\(all, now, kalshiRiskMeter\(all,/.test(fn('renderStrategiesPage')), 'the at risk figure is the Stop Loss meter\'s open cost over every order');
-  assert.ok(/kalshiNotifFeed\(kalshiLiveEvents/.test(fn('renderStrategiesPage')), 'the activity reuses the notification center items');
   const claude = fs.readFileSync(path.join(root, 'CLAUDE.md'), 'utf8');
   assert.ok(/Summary bar, detail panels and timeline \(Nov 10/.test(claude.slice(claude.indexOf('## Strategies page (Nov 10, 2026'))), 'CLAUDE.md describes them');
   const top = html.indexOf('<div class="changelog-day">Nov 10</div>');
