@@ -20,3 +20,20 @@ The pull runner counts every PAGE against `max_requests`, and its gate needs the
 ## The lists landed; the hourly candle job is built (Nov 13, 2026, 06:33Z)
 
 The lists run `pull/POLGAPH_LISTS/2026-11-13T0627Z_43378777252/` (69 of 69 answers) passed Auditor B's structure check before it was opened (the job equal to the committed one, every sha256 and length, no stray file, no answer left on a cursor, 1,548 markets, every close time inside 2026-09-12 to 2026-11-12). Then one command on the audited scorer (9186c8b5): `polgaph.py hourly-job`, which reads tickers, events and open and close times only. It printed: series answered 69, markets in the window 1,548, with a 07:00 Eastern look inside their life 1,538, hourly requests 65 (its own cap 240). The job is `desk_b_jobs/POLGAPH_HOURLY.json`, sha256 dfc645334fc8a990c971265bece8075ab0a0d3c2956d47389d2c7ed7bbff9f51; it passes the check and dry run of main's pull runner. Requests so far against the rule's ceiling of 380: 69 for the lists, 65 for the hourly candles, 134 in all, leaving 246 for the minute job. No price has been read; no decision, fill or score exists.
+
+## STOPPED: the landed lists run is HELD-OUT MATERIAL (Nov 13, 2026, 06:40Z; the Head of R&D, seq 14 to 16)
+
+**What happened.** POLGAPH's development cut was set at 2026-11-12 without checking the held-out constants of other cards on the same series. The Head's standing rule (a job's held-out line names every card that ever held out those series and dates) was applied to the hourly job before it was sent, and the check found overlaps. They were found before any price or result was read. POLGAPH's one try is still unspent.
+
+**The overlaps found (state of each card as found):**
+1. POLI2 (Testing Desk; closed on cost Nov 12, zero tries, nothing pulled, held-out never read): its universe holds all 69 POLGAPH series and its constant is HELD_OUT_FROM = 2026-11-05T00:00Z. POLGAPH's window ran to Nov 12: eight days, all 69 series.
+2. W-CAT-POLENT1 (Refinement; registered, held-out not read): KXTRUTHSOCIALD-26NOV10 (close 2026-11-11T04:59Z) is in its held-out third.
+3. COUNT1 (V2; "last third frozen") on KXTRUTHSOCIAL and KXTRUTHSOCIALD: its frozen third is the latest weekly and daily events before early November, inside the window. Exact dates not known to this desk.
+4. COUNT1D (V2; a forward test) on KXTRUTHSOCIALD, days from 2026-11-04.
+No overlap: NO_ARM_APPROVAL, NOSIDE1, POLAPPR1 (approval and generic ballot series only).
+
+**The landed run.** `pull/POLGAPH_LISTS/2026-11-13T0627Z_43378777252/` was bounded at Nov 12, so it holds markets closing 2026-11-05 to 2026-11-12, with their result fields, in a folder not marked held-out. **It is held-out material from now on and is opened by no development scorer or builder again.** Who touched it: Auditor B's structure check (manifest, hashes, cursors, tickers, close times; it printed no price, volume or result) and this desk's one command, `polgaph.py hourly-job` (tickers, events, open and close times only). No result or price in it was read or printed by anyone. The Chief of Staff is asked by the Head to mark the folder.
+
+**Dead:** `desk_b_jobs/POLGAPH_HOURLY.json` (dfc64533), which asks for held-out tickers. It was never sent.
+
+**Ruled (seq 16), to be written ONCE when the sweep of every branch is finished:** development becomes closes 2026-09-12 to 2026-11-04 23:59:59Z; held-out from 2026-11-05T00:00Z; a new lists job bounded there; the hourly job rebuilt; new hashes for the scorer and registration; Auditor B's diff; Forensics' re-match. Whether KXTRUTHSOCIAL and KXTRUTHSOCIALD drop (overlap 3) waits on the Head.
