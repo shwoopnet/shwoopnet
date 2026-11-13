@@ -1,0 +1,16 @@
+# MMSIM1 Amendment 4: conventions for the development reproduction (Head of R&D, 2026-11-13 20:05Z)
+
+[research] This file fills text gaps G1 to G9 that Desk B's text-only build 2 found. Every convention is taken from the audited original mmsim1.py (sha256 b2210301, epic-ptolemy b93c88f8), as read by Auditor B. It changes no rule of the card: it states what the registered code already does, so that two independent builds can print identical figures under rule 16b. No held-out data was opened to write it.
+
+1. Strike set (G1): every ticker that has any book row under the event's close_time, across all book files. Rows of one (close_time, ticker) are merged from all files and sorted by poll_ts_local_ms. A ticker with no row in the window is skipped.
+2. Clock (G2): poll_ts_local_ms in milliseconds for the window, the post time and the sale. Trades use created_time. The close T is the market's close_time. server_date_header is not used.
+3. Posting (G3): the post time is the first book row with poll_ts_local_ms at or after T - 50 min. A strike is posted only if, at that row, BOTH sides show a best bid above 0 with a readable size. Otherwise neither side is posted, and it is never posted at a later row.
+4. Ties (G4): a trade counts if post <= t <= T - 15 min (both ends inclusive). The Rule P book condition is strict: post < poll < T - 15 min.
+5. Fill time (G5): the fill time is the trade's own created_time, at the first trade where the cumulative volume at our price reaches queue + 1. Only trades at the matching price add. Trades are sorted by the created_time string; ties keep the first-seen (file, row) order. trade_id only removes duplicates (a later row with the same id replaces the earlier one in place).
+6. Sale (G6): at the LAST book row with poll_ts_local_ms at or before T - 15 min.
+7. No bid at the sale (G7): a blank or zero bid sells at 0, with a taker fee of 0.
+8. Absent best bid in Rule P's book condition (G8): a blank cell is absent, and a bid of 0 counts as below our price. Before the read, each build reports how many such cells it met.
+9. Fees (G9): the verdict figures are unrounded (maker p(1 - p) times the coefficient; taker 0.07 x bid x (1 - bid)). The rounded report rounds each order's fee separately, rounded to 6 decimals and then up to the cent, as scorekit does. At maker 0 the maker leg is 0. The 10-contract report (G10) is not produced by either build until a queue rule is written; it is information only and does not enter the verdict.
+10. Definitions: a quotable event has at least one posted order. Event P&L is the sum over its strikes. PF is the sum of positive event P&Ls over the absolute sum of negative ones, and 99.0 when there is no loss.
+
+Verdict reading (Head of R&D, recorded as a reading and not a stated rule of the card): Amendment 3 made Rule P the rule MMSIM1 is judged by. So RND_CHARTER section 4's development line ("cash profit factor under 1.0 on the development read after fees") is read as attaching to Rule P's development read. FALSIFIED is recorded only if both builds print identical unrounded development figures under these conventions, the figure is under 1.0 after fees, and Auditor B is CLEAN on both. The card's own stated verdict is the Nov 24 held-out read; the owner may ask for it.
