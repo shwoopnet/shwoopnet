@@ -79,3 +79,25 @@ A kalshi-pull lists job, built after the week is recorded, asking `/markets` wit
 
 - **Paper only.** Under the owner's combo rules (docs/POLITICS_RULES.md section 7): any live probe is $2 a combo with a $40 total stop, needs a paper edge of 10c per dollar first, and needs the owner's own popup with the exact spec.
 - **Weakness, stated:** a 30 minute poll misses an order that lives seconds. A burst poll after a leg settles would be a recorder change for the owner.
+
+## Amendment 1 (Nov 13, 2026, 02:20Z, before the counter is built and before any combo-data file is opened for this card)
+
+Desk B raised nine readings that could go two ways. All nine are adopted as Desk B proposed, and they are now part of the card:
+
+1. **The week.** 80% is counted over the seven days: at least 269 of 336 scheduled runs (48 a day), AND no single UTC day with fewer than 24 runs.
+   - A run counts as completed when its folder has a coverage row with `stopped_early` = 0 and a quotes file.
+   - `list_complete` is printed as a share, not required.
+   - If more than one week qualifies, the earliest is used.
+2. **A leg with a result other than yes or no** (scalar or void) settled at or before t: the snapshot is NOT eligible. Counted and printed apart.
+3. **A leg that is unknown:** the leg pull does not return it, it has a result but no settlement time, or its string has no side. The snapshot is NOT eligible, and it is counted and printed apart as "leg unknown".
+4. **A leg settled on C's side less than 60 seconds before t** does not satisfy (b). It counts as settled for (d) and for the still-unsettled set.
+5. **Rounding.** The ask is rounded UP to the whole cent first, then compared with 0.87, using a 1e-9 tolerance (0.8701 becomes 0.88 and is out).
+6. **Independent combo with a resting ask.** A (still-unsettled set, UTC day of t) pair counts if ANY of its eligible snapshots that day has a resting ask. The same set on two days counts twice. The number of distinct sets over the whole week is printed as well.
+7. **Median ask.** Taken over independent combos, using each one's FIRST eligible snapshot with a resting ask, not its lowest.
+8. **Leg-list share.** The share of ALL quote rows of the week whose leg string is present and not cut, printed with the counts of empty and cut strings.
+9. **Book figure.** For eligible rows whose ticker is in the same run's books file: the count with 1 minus `no_bid_px_1` at most 0.87 (same rounding) and `no_bid_sz_1` of 1 or more, and the count of independent combos by that test, printed beside the list figures. The kill line reads the list figure only.
+
+**Added limits:**
+- The leg pull needs the runner to allow `/markets` with a `tickers` parameter (the Chief of Staff's change).
+- Desk B counts the distinct legs exactly from the files only after Auditor B's CLEAN.
+- **This count reads leg RESULTS to classify snapshots.** It scores nothing, but it is not blind to leg outcomes. Any stage 2 registration must say so and must fix its own held-out block by a date constant before the gap is priced.
