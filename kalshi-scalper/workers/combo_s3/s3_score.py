@@ -41,6 +41,7 @@ MIN_CLUSTERS = 10
 MAX_CLUSTER_SHARE = 0.30
 MAX_UNRESOLVED_SHARE = 0.10
 BOOT_N, BOOT_SEED = 2000, 20261112
+WEATHER_PREFIXES = ("KXHIGH", "KXLOW", "KXTEMP", "KXRAIN", "KXSNOW", "KXHURR", "KXTORN", "KXWIND")   # clarifying line of Nov 13, 2026, 00:20Z
 
 
 def ts(iso):
@@ -58,12 +59,29 @@ def fee(p):
     return 0.07 * p * (1.0 - p)
 
 
+def leg_series(text):
+    """Series tickers of a combo's legs from the recorder's leg_tickers column ("TICKER:side|TICKER:side|...")."""
+    out = []
+    for part in (text or "").split("|"):
+        tk = part.strip().split(":")[0].strip()
+        if tk:
+            out.append(tk.split("-")[0])
+    return out
+
+
+LEGS = {}   # combo ticker -> leg series, from any snapshot that stored them (a combo's legs do not change)
+
+
 def load(root):
     snaps, results = [], {}
     for q in sorted(glob.glob(os.path.join(root, "combo", "*", "*", "quotes.csv.gz"))):
         rows = list(csv.DictReader(gzip.open(q, "rt", newline="")))
         if rows:
             snaps.append(rows)
+        for r in rows:
+            ls = leg_series(r.get("leg_tickers"))
+            if ls and r.get("ticker"):
+                LEGS.setdefault(r["ticker"], ls)
     for r in sorted(glob.glob(os.path.join(root, "combo", "*", "*", "results.csv.gz"))):
         for row in csv.DictReader(gzip.open(r, "rt", newline="")):
             if row.get("ticker") and row.get("result"):
@@ -114,30 +132,12 @@ def pf(rows):
     return won / lost if lost else float("inf")
 
 
-def main():
-    root, read_iso = sys.argv[1], sys.argv[2]
-    which = sys.argv[3] if len(sys.argv) > 3 else "dev"
-    read_t = ts(read_iso)
-    lo, hi, gate = (ts(START_UTC), ts(HELDOUT_START_UTC), ts(READ1_NOT_BEFORE)) if which == "dev" else (ts(HELDOUT_START_UTC), ts(HELDOUT_END_UTC), ts(READ2_NOT_BEFORE))
-    if read_t < gate:
-        print("REFUSED: this read is not allowed before its pinned date")
-        return
-    snaps, results = load(root)
-    fl = fills(snaps, lo, hi)
-    due = [f for f in fl if f["close"] + DUE_AFTER_CLOSE_S <= read_t]
-    settled, unresolved, other = [], 0, 0
-    for f in due:
-        res = results.get(f["ticker"])
-        if res is None:
-            unresolved += 1
-            continue
-        if res not in ("yes", "no"):
-            other += 1
-            continue
-        f["cost"] = f["p"] + fee(f["p"])
-        f["net"] = (1.0 - f["cost"]) if res == "no" else -f["cost"]
-        settled.append(f)
-    print(f"{which}: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | other result {other}")
+def describe(name, settled, due_n, unresolved, verdict):
+    """The registered figures over one set of settled fills. Only the all-combos call carries the registered verdict;
+    the no-weather-leg call prints the same figures as information (clarifying line of Nov 13, 2026)."""
+    tag = "" if verdict else " [information only; the registered verdict is the all-combos line]"
+    kill, label = ("KILLED", "LABEL") if verdict else ("would read KILLED", "would read")
+    print(f"== {name}: settled {len(settled)}{tag}")
     # kill 1: running paper net at $2 a fill, in fill order
     run, killed_at = 0.0, None
     for i, f in enumerate(settled):
@@ -146,18 +146,18 @@ def main():
             killed_at = i + 1
             break
     if killed_at:
-        print(f"KILLED: running paper net fell under ${KILL_DOLLARS:.0f} at settled fill {killed_at}")
+        print(f"{kill}: running paper net fell under ${KILL_DOLLARS:.0f} at settled fill {killed_at}")
         return
     if len(settled) < BAR_N:
-        print(f"LABEL: no evidence at n = {len(settled)} (need {BAR_N} settled fills)")
+        print(f"{label}: no evidence at n = {len(settled)} (need {BAR_N} settled fills)")
         return
-    if due and unresolved / len(due) > MAX_UNRESOLVED_SHARE:
-        print(f"LABEL: NOT_ENOUGH_DATA (unresolved share {unresolved/len(due):.0%} is over {MAX_UNRESOLVED_SHARE:.0%}); figures below are a description")
+    if due_n and unresolved / due_n > MAX_UNRESOLVED_SHARE:
+        print(f"{label}: NOT_ENOUGH_DATA (unresolved share {unresolved/due_n:.0%} is over {MAX_UNRESOLVED_SHARE:.0%}); figures below are a description")
     # kill 2: cash PF on the FIRST 100 settled fills
     first = settled[:KILL_N]
     print(f"first {KILL_N} settled: wins {sum(1 for f in first if f['net'] > 0)} | cash PF {pf(first):.2f} | net per dollar {per_dollar(first):+.3f}")
     if pf(first) < KILL_PF:
-        print(f"KILLED: cash PF under {KILL_PF} at n = {KILL_N}")
+        print(f"{kill}: cash PF under {KILL_PF} at n = {KILL_N}")
         return
     # the owner's bar: on EVERY settled fill of this window (at least 100)
     ppd, n = per_dollar(settled), len(settled)
@@ -176,10 +176,52 @@ def main():
     p5 = boots[int(0.05 * BOOT_N)]
     print(f"halves net per dollar {h1:+.3f} / {h2:+.3f} | close dates {len(clusters)} | largest close date share of net {top / net_total if net_total > 0 else float('nan'):.0%} | bootstrap 5th percentile by close date {p5:+.3f}")
     ok = (ppd >= BAR_PER_DOLLAR and h1 > 0 and h2 > 0 and len(clusters) >= MIN_CLUSTERS and net_total > 0 and top / net_total <= MAX_CLUSTER_SHARE and p5 > 0
-          and not (due and unresolved / len(due) > MAX_UNRESOLVED_SHARE))
-    print("LABEL: " + ("paper edge shown (unproven)" if ok else "bar not met"))
+          and not (due_n and unresolved / due_n > MAX_UNRESOLVED_SHARE))
+    print(f"{label}: " + ("paper edge shown (unproven)" if ok else "bar not met"))
     if unresolved:
         print(f"note: {unresolved} due fills have no recorded result; if every one of them lost, the picture is worse than shown")
+
+
+def main():
+    root, read_iso = sys.argv[1], sys.argv[2]
+    which = sys.argv[3] if len(sys.argv) > 3 else "dev"
+    read_t = ts(read_iso)
+    lo, hi, gate = (ts(START_UTC), ts(HELDOUT_START_UTC), ts(READ1_NOT_BEFORE)) if which == "dev" else (ts(HELDOUT_START_UTC), ts(HELDOUT_END_UTC), ts(READ2_NOT_BEFORE))
+    if read_t < gate:
+        print("REFUSED: this read is not allowed before its pinned date")
+        return
+    snaps, results = load(root)
+    fl = fills(snaps, lo, hi)
+    # weather legs (clarifying line of Nov 13, 2026): known from the recorder's leg_tickers column, by series prefix
+    seen = {}
+    for f in fl:
+        ls = LEGS.get(f["ticker"])
+        f["legs_known"] = bool(ls)
+        f["weather"] = bool(ls) and any(x.startswith(WEATHER_PREFIXES) for x in ls)
+        for x in ls or []:
+            seen[x] = seen.get(x, 0) + 1
+    due = [f for f in fl if f["close"] + DUE_AFTER_CLOSE_S <= read_t]
+    settled, unresolved, other = [], 0, 0
+    unresolved_nw = 0
+    for f in due:
+        res = results.get(f["ticker"])
+        if res is None:
+            unresolved += 1
+            unresolved_nw += f["legs_known"] and not f["weather"]
+            continue
+        if res not in ("yes", "no"):
+            other += 1
+            continue
+        f["cost"] = f["p"] + fee(f["p"])
+        f["net"] = (1.0 - f["cost"]) if res == "no" else -f["cost"]
+        settled.append(f)
+    print(f"{which}: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | other result {other}")
+    print(f"legs: paper fills with leg tickers stored {sum(1 for f in fl if f['legs_known'])} | leg unknown {sum(1 for f in fl if not f['legs_known'])} | with a weather leg {sum(1 for f in fl if f['weather'])}")
+    print("leg series seen in paper fills, with counts: " + (", ".join("%s %d" % kv for kv in sorted(seen.items(), key=lambda kv: (-kv[1], kv[0]))) or "none"))
+    describe("ALL COMBOS (the registered line)", settled, len(due), unresolved, True)
+    nw = [f for f in settled if f["legs_known"] and not f["weather"]]
+    due_nw = sum(1 for f in due if f["legs_known"] and not f["weather"])
+    describe("NO WEATHER LEG (legs known, no leg on a weather series)", nw, due_nw, unresolved_nw, False)
 
 
 if __name__ == "__main__":

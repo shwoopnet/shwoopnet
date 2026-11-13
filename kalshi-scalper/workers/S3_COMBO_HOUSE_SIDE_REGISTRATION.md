@@ -107,3 +107,12 @@ The registered sample does not change. **Every S3 figure is printed twice: over 
 - The registered verdict, the kill lines and the read dates are on the all-combos line, as registered. The no-weather-leg line is information for one purpose: **any probe spec that ever goes to the owner from S3 leaves out combos with a weather leg unless the owner says otherwise** (the owner's ban on 65c to 87c weather NO legs).
 - S3 stays on the paper track with its own read dates (Nov 26, Dec 12). It is NOT on the wheel list (the Head's ruling: listing it twice would pad the wheel). The optional cut at 7 or more legs is not registered.
 - The scorer change (the second line and the leg-series count) is made and re-hashed before the Nov 26 read; the leg-ticker column is checked on Nov 19.
+
+## Scorer change made, Nov 13, 2026, 01:17Z, before any outcome is joined (the change promised in the clarifying line of 00:20Z)
+
+`combo_s3/s3_score.py` now prints, after the registered line, the same figures over combos with no weather leg, and the count of every leg series seen in paper fills. Nothing about the registered line moved: on two made-up sets of recorder files every line the old scorer printed appears unchanged in the new output (the old scorer's sha256 was 00ddac486e041a5f16af12d9d666528466a1c9e2f87a67781dd09acfd20b9b7a).
+
+- New sha256: 1fb56ae201fa120e5b7d889c8835e31817eb8a989a212eb6997f6928b1b46157.
+- A combo's legs are taken from any snapshot that stored them (a combo's legs do not change), so "leg unknown" means no snapshot ever stored them.
+- The no-weather-leg lines say "would read" in place of a verdict and carry the tag "information only; the registered verdict is the all-combos line".
+- **A fact the read depends on, sent to Main at 01:20Z:** the combo recorder has landed 2 snapshots since it merged (one by hand, one scheduled start of about 21). Paper fills come from snapshots. Unless the recorder is fixed, the Nov 26 read will most likely say "no evidence at n = x".
