@@ -4,11 +4,11 @@ Usage: python3 -I oicore_proven.py <nightly report json>   (the report's slotOrd
 Rules: rows = OICORE orders with status filled and result yes or no; rows with result exit, or an unreadable avgFill or avgFee, are EXCLUDED and COUNTED.
 n >= 100 rows (rows, not contracts), sorted by ts (fill order), split rows[i*n//3:(i+1)*n//3] into 3 windows.
 Cash PF per window, unrounded, fill-booked basis: paid = avgFill for YES, 1 - avgFill for NO; win = count*(1 - paid) - avgFee*count, loss = -(count*paid) - avgFee*count.
-PROVEN if at least 2 of 3 windows have PF >= 1.3 (1e-9 tolerance), else NOT YET. Run once at 100: a marker refuses a second read.
-Under 100 rows: counts only, no read."""
+PROVEN if at least 2 of 3 windows have PF >= 1.3 (1e-9 tolerance), else NOT YET. Read points: 100 rows, then 150 rows only if the 100 read said NOT YET; each read once (a marker per read point), no other read in between.
+Open (filled, unsettled) orders are counted and printed. Under 100 rows: counts only, no read."""
 import json, math, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
-MARKER = os.path.join(HERE, "read_markers", "OICORE_PROVEN_READ_DONE")   # fixed path
+MARKER_DIR = os.path.join(HERE, "read_markers")   # fixed path; one marker per read point: OICORE_PROVEN_READ_100_DONE, OICORE_PROVEN_READ_150_DONE
 BAR, TOL, NEED_N, NEED_WIN = 1.3, 1e-9, 100, 2
 
 def num(x):
@@ -27,26 +27,37 @@ def pf(v):
     g = sum(x for x in v if x > 0); l = -sum(x for x in v if x < 0)
     return float("nan") if (g == 0 and l == 0) else (math.inf if l == 0 else g / l)
 
-def run(report, marker=MARKER):
-    rows, excl_exit, excl_unreadable = [], 0, 0
+def run(report, marker_dir=MARKER_DIR):
+    rows, excl_exit, excl_unreadable, n_open = [], 0, 0, 0
     for o in report.get("slotOrders", []):
         if o.get("strategy") != "OICORE" or o.get("status") != "filled":
             continue
         if o.get("result") == "exit":
             excl_exit += 1; continue
         if o.get("result") not in ("yes", "no"):
-            continue   # not settled yet
+            n_open += 1; continue   # filled but not settled yet: counted and printed
         p = cash(o)
         if p is None:
             excl_unreadable += 1; continue
         rows.append((o["ts"], p))
     rows.sort(key=lambda r: r[0])
     n = len(rows)
-    out = {"n": n, "excluded_exit": excl_exit, "excluded_unreadable": excl_unreadable}
+    out = {"n": n, "excluded_exit": excl_exit, "excluded_unreadable": excl_unreadable, "open_unsettled": n_open}
+    m100 = os.path.join(marker_dir, "OICORE_PROVEN_READ_100_DONE"); m150 = os.path.join(marker_dir, "OICORE_PROVEN_READ_150_DONE")
     if n < NEED_N:
         out["verdict"] = "NO READ (%d of %d rows)" % (n, NEED_N); return out
-    if os.path.exists(marker):
-        out["verdict"] = "REFUSED: already read once (%s)" % marker; return out
+    if os.path.exists(m150):
+        out["verdict"] = "REFUSED: both read points are used (%s)" % m150; return out
+    if not os.path.exists(m100):
+        point, marker = 100, m100
+    else:
+        first = open(m100).read().split()[0] if open(m100).read().strip() else ""
+        if first == "PROVEN":
+            out["verdict"] = "REFUSED: the 100 read said PROVEN, no 150 read"; return out
+        if n < 150:
+            out["verdict"] = "NO READ (the 100 read is done; the 150 read needs 150 rows, have %d)" % n; return out
+        point, marker = 150, m150
+    out["read_point"] = point
     wins = []
     for i in range(3):
         w = [p for _, p in rows[i * n // 3:(i + 1) * n // 3]]
@@ -54,7 +65,7 @@ def run(report, marker=MARKER):
     out["windows"] = wins
     out["verdict"] = "PROVEN" if sum(w["met"] for w in wins) >= NEED_WIN else "NOT YET"
     os.makedirs(os.path.dirname(marker), exist_ok=True)
-    open(marker, "w").write("read done\n")
+    open(marker, "w").write(out["verdict"] + "\n")
     return out
 
 if __name__ == "__main__":
