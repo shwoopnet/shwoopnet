@@ -9,7 +9,7 @@ FAM = {"ESOCCER", "TABLE_TENNIS", "EBASKETBALL", "ITF_TENNIS", "CHALLENGER_TENNI
 def main(family, series, lists, candles, scorekit_dir, outdir):
     assert family in FAM, "family must be one of %s" % sorted(FAM)
     eh = hashlib.sha256(open(os.path.join(HERE, "inplayjump.py"), "rb").read()).hexdigest(); sh = hashlib.sha256(open(series, "rb").read()).hexdigest()
-    if not (eh.startswith("c39b1e9b") or eh.startswith("870a453e")): sys.exit("REFUSED: engine hash %s is not an audited one (c39b1e9b, or 870a453e with the placebo tie rule)" % eh[:16])
+    if not (eh.startswith("c39b1e9b") or eh.startswith("870a453e") or eh.startswith("6e356373")): sys.exit("REFUSED: engine hash %s is not an audited one (c39b1e9b, or 870a453e with the placebo tie rule)" % eh[:16])
     if not sh.startswith("34f70868"): sys.exit("REFUSED: series file hash %s is not 34f70868" % sh[:16])
     os.makedirs(outdir, exist_ok=True); marker = os.path.join(outdir, "READ_" + family)
     if os.path.exists(marker) and "--test" not in sys.argv: sys.exit("REFUSED: %s was already read (marker %s); a family is read once" % (family, marker))

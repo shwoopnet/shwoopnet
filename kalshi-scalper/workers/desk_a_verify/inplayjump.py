@@ -136,6 +136,10 @@ def run_family(fam, K, markets, candles, bounds):
     byday = collections.defaultdict(float)
     for b in bets: byday[b["day"]] += b["net"]
     ds = list(byday.values()); z = (st.mean(ds) / (st.stdev(ds) / math.sqrt(len(ds)))) if len(ds) > 2 and st.stdev(ds) > 0 else None
+    z_first = z                                                                                                                      # Nov 13: the first print (t statistic on daily SUMS), kept as information
+    bynet = collections.defaultdict(list)
+    for b in bets: bynet[b["day"]].append(b["net"])
+    cm = [st.mean(v) for v in bynet.values()]; z = (st.mean(cm) / (st.stdev(cm) / math.sqrt(len(cm)))) if len(cm) >= 2 and st.stdev(cm) > 0 else None   # Nov 13 (the Head, clarification 11): the cluster-robust z of the per-bet mean, the UTC close date as the cluster (scorekit's cluster_z: equal-weight clusters)
     zm = (st.mean(nets) / (st.stdev(nets) / math.sqrt(n))) if n > 2 and st.stdev(nets) > 0 else None
     zmin = min(x for x in (z, zm) if x is not None) if (z is not None or zm is not None) else None
     topshare = max(byday.values()) / sum(nets) if sum(nets) > 0 else None
@@ -170,8 +174,8 @@ def run_family(fam, K, markets, candles, bounds):
     rule_mean = st.mean(nets); rse = st.stdev(nets) / math.sqrt(n) if n > 1 else 0
     diff = (rule_mean - pnet) if pnet is not None else None; dse = math.sqrt(rse ** 2 + (se or 0) ** 2)
     h1, h2 = pf(nets[:0] or [b["net"] for b in bets[:h]]), pf([b["net"] for b in bets[h:]])
-    L.append("bets %d | wins %d | mean price paid %.3f | cash PF %s | net %+.2fc a contract | halves by date PF %s / %s | share paid 70c to 85c %.1f%% | largest day share of net %s | z (days) %s | z (matches, one bet each) %s | the smaller is used: %s" %
-             (n, sum(b["win"] for b in bets), st.mean(b["price"] for b in bets), "%.2f" % pf(nets), 100 * rule_mean, h1 and "%.2f" % h1, h2 and "%.2f" % h2, 100 * sum(1 for b in bets if b["price"] >= 0.70) / n, topshare and "%.0f%%" % (100 * topshare), z and "%.2f" % z, zm and "%.2f" % zm, zmin and "%.2f" % zmin))
+    L.append("bets %d | wins %d | mean price paid %.3f | cash PF %s | net %+.2fc a contract | halves by date PF %s / %s | share paid 70c to 85c %.1f%% | largest day share of net %s | z (days, cluster-robust, UTC close date) %s | z (matches, one bet each) %s | the smaller is used: %s | FIRST PRINT z (days, t statistic on daily sums, superseded Nov 13) %s" %
+             (n, sum(b["win"] for b in bets), st.mean(b["price"] for b in bets), "%.2f" % pf(nets), 100 * rule_mean, h1 and "%.2f" % h1, h2 and "%.2f" % h2, 100 * sum(1 for b in bets if b["price"] >= 0.70) / n, topshare and "%.0f%%" % (100 * topshare), z and "%.2f" % z, zm and "%.2f" % zm, zmin and "%.2f" % zmin, z_first and "%.2f" % z_first))
     L.append("PLACEBO (Amendment 2, matched one for one): %d placebo bets, %d bets with no placebo (counted); median elapsed minute %s (rule %s); net at the rule's price mix %s; difference %s (se %s)" % (len(plb), nplb_none, ("%.1f" % st.median(p["into_play"] for p in plb)) if plb else "n/a", ("%.1f" % st.median(d["elapsed"] for _, _, d in dec if d["elapsed"] is not None)) if dec else "n/a", "%+.2fc" % (100 * pnet) if pnet is not None else "n/a (no placebo in the rule's price buckets)", "%+.2fc" % (100 * diff) if diff is not None else "n/a", "%.2fc" % (100 * dse)))
     p = pf(nets)
     if n < K["min_development_bets"]: lab = "NOT_ENOUGH_DATA at n = %d" % n
