@@ -91,3 +91,11 @@ So a mid-priced bet needs about 9 to 12 points of error in the market's price, e
 2. **"Buyable" is no longer the best of two minutes.** The registered verdict now reads: the cheaper side's ask is 43c or lower with a spread of 3c or less at the detection minute, AND a limit one cent above that ask is filled the next minute (the SAME contract's ask one minute later is at or under the limit). The earlier "at the detection minute or the next" figure is printed beside it, labelled optimistic. The 30% line and every other number are unchanged.
 3. **The reader refuses a HELDOUT_ folder** (the shared guard of this desk, added the same night).
 
+## NHLOT: second dated amendment, Nov 13, 2026, 00:10Z, before any NHL candle was read (Head of R&D's ruling of 00:09Z on Auditor B's findings). It replaces point 2 of the amendment above.
+
+1. **One price, one chance.** "Buyable" is the cheaper side's OWN contract (the side that was cheaper at the detection minute) at its ask ONE MINUTE AFTER the detection minute: 43c or lower with a spread of 3c or less at that minute. Not the detection minute's price, and not the better of two. The earlier best-of-two figure is still printed, labelled optimistic.
+2. **Every line the reader prints carries the label "hindsight window: detection uses the close time; upper bound, not a live rule".** The fire rate and every price are from a window that ends at the game's close, which a live bot cannot know.
+3. **No rule is registered from this measurement** without a detector that scans forward from the game's scheduled start with no close time, on games the measurement did not use. The 150 most recent games are its whole sample, so it has no held-out.
+4. Its pull is moved behind the WHEEL0 files and the INPLAYJUMP candles (the Head's order), because as built it cannot produce a candidate.
+5. **Said plainly for the owner's count:** NHLOT and MAPBREAK are one candidate. MAPBREAK is out on CS2 and short of its minimum elsewhere until the rest of its candles are read; NHLOT has no live detector. That candidate stands at "no evidence".
+

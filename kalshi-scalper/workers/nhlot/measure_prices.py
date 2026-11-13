@@ -117,7 +117,7 @@ def detect(g, cand):
                     nxt.append((b, a))
             cheap_next = min(nxt, key=lambda s: s[1]) if len(nxt) == 2 else None
             return {"game": g["game"], "minute": m, "minutes_before_close": last - m, "ask": cheap[1], "spread": cheap[1] - cheap[0],
-                    "same_ask_next": same_next[1] if same_next else None, "window_edge": (m - (last - LAST_MIN)) < 5,
+                    "same_ask_next": same_next[1] if same_next else None, "same_spread_next": (same_next[1] - same_next[0]) if same_next else None, "window_edge": (m - (last - LAST_MIN)) < 5,
                     "ask_next": cheap_next[1] if cheap_next else None, "spread_next": (cheap_next[1] - cheap_next[0]) if cheap_next else None}, True
     return None, True
 
@@ -136,7 +136,13 @@ def ot_state(g, cand, minutes):
     return "open"
 
 
+HINDSIGHT = "  [hindsight window: detection uses the close time; upper bound, not a live rule]"
+
+
 def main():
+    import builtins
+    def print(*a, **k):                      # every figure carries the label (Head of R&D, Nov 13, 00:09Z)
+        builtins.print(" ".join(str(x) for x in a) + HINDSIGHT, **k)
     run, games = sys.argv[1], json.load(open(sys.argv[2]))
     cand = {}
     for f in sorted(glob.glob(os.path.join(run, "[0-9]*.json.gz"))):
@@ -184,12 +190,11 @@ def main():
         nxt = h["ask_next"] is not None and h["ask_next"] <= ASK_BAR + 1e-9 and h["spread_next"] <= SPREAD_BAR + 1e-9
         return now or nxt
     def buyable(h):
-        """Amendment of Nov 13 (Auditor B): decide on the detection minute (ask at the bar or lower, spread at the bar or less);
-        a limit at that ask plus 1c is filled only if the SAME contract's ask one minute later is at or under the limit."""
-        decided = h["ask"] <= ASK_BAR + 1e-9 and h["spread"] <= SPREAD_BAR + 1e-9
-        return decided and h["same_ask_next"] is not None and h["same_ask_next"] <= h["ask"] + 0.01 + 1e-9
+        """Head of R&D's ruling of Nov 13, 00:09Z: ONE price, the minute after detection, one chance: the SAME contract that was
+        the cheaper side at the detection minute, at its ask one minute later, with that minute's spread."""
+        return (h["same_ask_next"] is not None and h["same_ask_next"] <= ASK_BAR + 1e-9 and h["same_spread_next"] <= SPREAD_BAR + 1e-9)
     share = sum(1 for h in hits if buyable(h)) / n
-    print(f"detections where the cheaper side was at {ASK_BAR:.2f} or lower (spread {SPREAD_BAR:.2f} or less) at the detection minute AND a limit one cent higher was filled the next minute: {share:.0%}  [the registered verdict]")
+    print(f"detections where the cheaper side's own contract was at {ASK_BAR:.2f} or lower (spread {SPREAD_BAR:.2f} or less) ONE MINUTE AFTER the detection minute, one price, one chance: {share:.0%}  [the registered verdict]")
     print(f"  optimistic, best of the detection minute or the next, as first written: {sum(1 for h in hits if optimistic(h)) / n:.0%}  [information only]")
     print("VERDICT: " + ("CARD CLOSED (the market already prices overtime as close to even)" if share < SHARE_BAR else "SURVIVES the price measurement (nothing beyond it is approved)"))
 
