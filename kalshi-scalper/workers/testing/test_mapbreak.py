@@ -215,4 +215,13 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert bp.observe_winner(ixb, {"A": "MA", "B": "MB"}, 200, close=300) == "A"          # an empty candle (no bid, no ask) is not 'the last candle'
     ixe = {"MA": {100: cdt(100, 0.93, None), 150: cdt(150, 0.0, 1.0)}, "MB": {100: cdt(100, 0.05, 0.08), 150: cdt(150, 0.0, 1.0)}}
     assert bp.observe_winner(ixe, {"A": "MA", "B": "MB"}, 200, close=300) == "A"          # a closed market's empty book (bid 0.00, ask 1.00) is not a quote
+    # Auditor B (Nov 13): a candle AFTER the map market's close never names a winner, whatever it shows
+    ixp = {"MA": {100: cdt(100, 0.55, 0.57), 400: cdt(400, 1.0, 1.0)}, "MB": {100: cdt(100, 0.43, 0.45), 400: cdt(400, 0.0, 0.0)}}
+    assert bp.observe_winner(ixp, {"A": "MA", "B": "MB"}, 500, close=300) is None            # pre-close both undecided; the post-close settlement candle is ignored
+    ixq = {"MA": {100: cdt(100, 0.55, 0.57), 400: cdt(400, 0.99, None)}, "MB": {100: cdt(100, 0.43, 0.45)}}
+    assert bp.observe_winner(ixq, {"A": "MA", "B": "MB"}, 500, close=300) is None
+    ixr = {"MA": {250: cdt(250, 0.95, 0.97), 400: cdt(400, 0.0, 1.0)}, "MB": {250: cdt(250, 0.03, 0.05)}}
+    assert bp.observe_winner(ixr, {"A": "MA", "B": "MB"}, 500, close=300) == "A" and bp.observe_winner(ixr, {"A": "MA", "B": "MB"}, 500, close=851) is None and bp.observe_winner(ixr, {"A": "MA", "B": "MB"}, 500, close=850) == "A"
+    ixs = {"MA": {300: cdt(300, 0.95, 0.97)}, "MB": {300: cdt(300, 0.03, 0.05)}}
+    assert bp.observe_winner(ixs, {"A": "MA", "B": "MB"}, 500, close=300) == "A"            # a candle ending exactly at the close is allowed
 print("mapbreak synthetic tests passed")

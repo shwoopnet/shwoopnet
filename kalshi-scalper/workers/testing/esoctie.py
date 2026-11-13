@@ -85,7 +85,7 @@ def walk(spec, evs, idx):
             ts = e["S"] - back; q = {t: two(idx, t, ts) for t in [e["tie"]] + e["teams"]}
             if all(q.values()): got = (ts, q); break
         if got is None: nf += 1; continue
-        ts, q = got; f = max(sum(q[t]) / 2 for t in e["teams"]); (tb, ta) = q[e["tie"]]
+        ts, q = got; f = round(max(sum(q[t]) / 2 for t in e["teams"]), 6); (tb, ta) = q[e["tie"]]          # NOTE 11: f rounded to 6 decimals before it is bucketed (every quote is a whole cent, so a true mid is a multiple of 0.005)
         filled.append({"event": e["event"], "S": e["S"], "close": e["close"], "ts": ts, "f": f, "bk": bucket(edges, f), "bid": tb, "ask": ta, "spread": round(ta - tb, 4), "result": e["result"]})
     filled.sort(key=lambda r: (r["ts"], r["event"]))
     pending = [(r["close"] + settle, r["event"], r) for r in filled]; heapq.heapify(pending)
@@ -129,9 +129,10 @@ def measure(spec, list_folders, candle_folders):
 
 
 def verdict(n, pf_all, halves):
+    """NOTE 11: compares the UNROUNDED cash profit factors (overall and each half) with a tolerance of 1e-9: FALSIFIED below 1.0 minus 1e-9; a half passes above 1.0 plus 1e-9; the bar is met at 1.5 minus 1e-9."""
     if n < 100: return "no evidence at n = %d" % n
-    if (pf_all is not None and pf_all < 1.0) or any(h is not None and h < 1.0 for h in halves): return "FALSIFIED"
-    if (pf_all is None or pf_all >= 1.5) and all(h is None or h > 1.0 for h in halves): return "development bar met (ask the Head for the held-out pull)"
+    if (pf_all is not None and pf_all < 1.0 - 1e-9) or any(h is not None and h < 1.0 - 1e-9 for h in halves): return "FALSIFIED"
+    if (pf_all is None or pf_all >= 1.5 - 1e-9) and all(h is None or h > 1.0 + 1e-9 for h in halves): return "development bar met (ask the Head for the held-out pull)"
     return "below the bar at n = %d, PF %s" % (n, None if pf_all is None else round(pf_all, 3))
 
 
@@ -152,7 +153,7 @@ def score(spec, list_folders, candle_folders):
     tot = sum(byday.values())
     out.update({"bets": len(tr), "wins": wins, "mean_price_paid": round(sum(t["price"] for t in tr) / len(tr), 4), "halves": halves, "by_bucket": {i: k.stats([t for t in tr if t["bk"] == i]) for i in sorted({t["bk"] for t in tr})},
                 "largest_day_share_of_net": None if tot <= 0 else round(max(byday.values()) / tot, 3), "void_bets_booked_as_fee_loss": sum(1 for t in tr if t["void"]), "void_note": "NOTE 5: price refunded, fee kept is an ASSUMPTION about how Kalshi settles a voided market, not a measurement; if the fee is also refunded this booking is slightly conservative",
-                "registered_verdict": verdict(len(tr), out["all"]["pf"], [h["pf"] for h in halves if h["n"]]) + " (selected on development: can falsify, cannot support)"})
+                "registered_verdict": verdict(len(tr), k.pf([t["net"] for t in tr]), [k.pf([t["net"] for t in tr if (t["ts"] < half) == first]) for first in (True, False) if any((t["ts"] < half) == first for t in tr)]) + " (selected on development: can falsify, cannot support)"})
     return {"measurement": rep, "rule": out}
 
 

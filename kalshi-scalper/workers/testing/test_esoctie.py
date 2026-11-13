@@ -78,6 +78,9 @@ j, c = E.build_candles(spec, [L]); kp.check_job(j); assert j["requests"] and len
 # verdict wording
 assert E.verdict(99, 3, [3, 3]).startswith("no evidence at n = 99") and E.verdict(100, 0.9, [2, 2]) == "FALSIFIED" and E.verdict(100, 1.6, [2, 1.2]).startswith("development bar met") and E.verdict(100, 1.2, [2, 1.2]).startswith("below the bar")
 
+# NOTE 11: a mid of exactly an edge lands in the bucket point 3 says (0.43/0.47 -> 0.45 -> bucket 1); the bars compare the UNROUNDED PF with 1e-9
+assert E.bucket(spec["strength_buckets_on_f"], round((0.43 + 0.47) / 2, 6)) == 1 and E.bucket(spec["strength_buckets_on_f"], round((0.61 + 0.69) / 2, 6)) == 3
+assert E.verdict(100, 1.0, [1.0, 1.0]) .startswith("below") and E.verdict(100, 1.0 - 1e-10, [2, 2]).startswith("below") and E.verdict(100, 0.9999, [2, 2]) == "FALSIFIED" and E.verdict(100, 1.5, [1.0 + 1e-8, 1.2]).startswith("development bar met") and E.verdict(100, 1.5 - 1e-10, [1.2, 1.2]).startswith("development bar met") and E.verdict(100, 1.4999, [1.2, 1.2]).startswith("below")
 ref = os.environ.get("ESOCTIE_REF")
 if ref:                                                           # cross-check: the History Miner's reference reader on the SAME input
     sys.path.insert(0, ref); import importlib.util
