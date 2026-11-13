@@ -57,7 +57,7 @@ def core(mks, binary, perp, out=print):
     return dict(n=n, hold=mh, exit=mx, z=zd, helps=helps)
 def r6_line(mks, binary, perp, root, out=print):
     """separate line: exit at the R6 book bid at the first poll at or after close-60 s (within 4 s, else held), entry by the IOC convention at the ask seen, 6 s delay, on the development trades that have an R6 book."""
-    import heldout_guard; heldout_guard.refuse_heldout(root, "cfrti_k_tx.r6_line")
+    import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(root, "cfrti_k_tx.r6_line")
     import cfrti_b; cfrti_b.load_book(root, before="2026-11-05"); B = cfrti_b.book                       # only run folders dated before the cutoff are opened
     rows = []
     for t in trades_of(mks, binary, perp):
