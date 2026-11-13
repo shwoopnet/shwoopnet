@@ -39,3 +39,9 @@ Added by the same lines as above (the shared rule, T per market, gate 0, NC15, "
 | OICORE-USDCAD | KXUSDCAD15M | NC15 | same |
 | OICORE-NATGAS | KXNATGAS15M | NC15 | same |
 **Gold stays out for now:** it is L1's market, and a cheap-side place there needs an interference ruling first (a shared stop or window budget with L1). The Head asked Desk B to write the open-interest candle jobs for the places. The count is now twelve places.
+
+## Dated line (Nov 13, 2026, the Head of R&D, 21:17Z): OICORE-ETH added
+| Place | Series | Book source | Needs before seating |
+|---|---|---|---|
+| OICORE-ETH | KXETH15M | R6 (2 s polls, to 2026-12-31 for the series R6 still records; R6 drops to Bitcoin and Ethereum only after 2026-11-13 23:59Z, so Ethereum stays on R6) | open-interest candles; 20 trading days; the candles must carry open interest |
+Same frozen parameters as every other place (shared rule, T = the market's own 90th percentile of 3 minute open-interest rises over the previous 20 trading days, cheaper side 0.08 to 0.50, limit = ask seen, hold, 1 contract in shadow). Labelled **"research doubts carry-over"**: the research session scored the mechanism on Ethereum and found it did not carry over (the earlier note above stands); this place is versions-as-shadow, a forward record only, with no claim and "no evidence at n = x". The count is now thirteen places.
