@@ -107,7 +107,7 @@ gates.RT1 = () => {
   for (const id of ['XRPYES10', 'KESTREL', 'GOLDALL', 'XRPFAV6', 'LANTERN']) {
     const r = P.KAL_BOARD_RETIRED.rows.find((x) => x.name === id);
     assert.ok(r, id + ' is under Retired');
-    assert.ok(/Return rule: /.test(r.note) && /retired Nov 11/.test(r.note) && /copy of gold L1/.test(r.note), id + ' states its written return rule');
+    assert.ok(/Comes back when: 14 days after a slow-down stop/.test(r.note) && !/owner/.test(r.note) && /retired Nov 11/.test(r.note) && /copy of gold L1/.test(r.note), id + ' states its written return rule');
     assert.ok(!('pf' in r) && !('n' in r), id + ' carries no invented figure');
   }
   assert.strictEqual(P.KAL_BOARD_RETIRED.asOf, 'Nov 11');
@@ -441,7 +441,7 @@ gates.GK4 = () => {
   const ret = Q.kalshiGoldReturnProgress([{ rule: 'GOLDOFF', atMs: Date.UTC(2026, 10, 12, 20, 0), settled: true, wouldFill: true, pnl: 1 }, { rule: 'GOLDOFF', atMs: Date.UTC(2026, 10, 12, 20, 15), settled: true, wouldFill: true, pnl: -1 }, { rule: 'GOLDOFF', atMs: Date.UTC(2026, 10, 12, 20, 30), settled: false, wouldFill: true }, { rule: 'OTHER', atMs: 1, settled: true, wouldFill: true, pnl: 5 }], Date.UTC(2026, 10, 14, 20, 0));
   assert.strictEqual(ret, 'Return record (GOLDOFF shadow): 2 of 60 trades, 1 of 10 losses, day 2 of 7, cash PF 1.00.');
   const note = P.kalshiGoldKillNote(P.kalshiGoldKillState(TRIPPED), ret, (t) => 'Nov 12, 1:12 PM');
-  assert.ok(note.startsWith('Gold is off: the kill rule tripped; it returns only by the written return rule (shadow profit factor 1.3 or better, at least 60 trades, at least 10 losses, at least 7 days, second half 1.3, then the owner re-arms)'), note);
+  assert.ok(note.startsWith('Gold is off: the kill rule tripped; it returns only by the written return rule (shadow profit factor 1.3 or better, at least 60 trades, at least 10 losses, at least 7 days, second half 1.3, then half size for 30 trades)'), note);
   assert.ok(/Return record \(GOLDOFF shadow\)/.test(note) && /tripped Nov 12/.test(note), 'progress and time are shown');
   assert.ok(!/\$/.test(note), 'no dollar figure typed into the line');
   assert.ok(/not readable/.test(P.kalshiGoldKillNote({ state: 'unknown' }, '', String)) && !/healthy\b(?! )/i.test(P.kalshiGoldKillNote({ state: 'unknown' }, '', String).replace('as healthy', '')), 'unknown says not readable');

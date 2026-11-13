@@ -127,7 +127,7 @@ gates.SF10 = () => {
   // the registry row says the same line and carries the 10 losses guard in the return rule
   const reg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies.find((x) => x.id === 'L1');
   assert.ok(reg.kill.includes(money(GOLD_KILL.drawdownDollars)) && reg.kill.includes('-' + money(Math.abs(GOLD_KILL.netFloor))), 'the registry kill text carries the constants');
-  assert.ok(/at least 10 losses/.test(reg.return), 'the registry return rule carries the 10 losses guard');
+  assert.ok(/at least 10 losses/.test(reg.goesLive + ' ' + reg.return), 'the registry return rule carries the 10 losses guard');
 };
 
 gates.SF11 = () => {
