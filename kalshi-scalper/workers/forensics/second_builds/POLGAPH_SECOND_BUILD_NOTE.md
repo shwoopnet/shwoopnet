@@ -136,6 +136,10 @@ Two things for Desk B and the Head, neither a figure:
 2. **A held-out close on a series OUTSIDE the 63 does not stop either build**; both skip the market by its series and never read its result. The new lists job asks only
    the 63 series, so none should arrive. If rule (h) is meant to stop a run on any held-out row, whatever its series, that is a ruling.
 
+**The Head's rulings on the two points (07:12Z), neither changes a hash:** (1) no change to Desk B's scorer now; the stricter refusal by job and start minute stays in
+this build, and Desk B's scorer takes that check only if it changes for another reason before the read. (2) Skipping a market of a series outside the 63 by its series,
+without reading its result, is correct and enough: rule (h) stops a run on a held-out close of a series the card scores. The re-match is recorded by the Head.
+
 **Standing:** second build re-matched on the amended text. Nothing of this card has been requested by this desk. The comparison is made again when the bounded lists
 and the candles land.
 
