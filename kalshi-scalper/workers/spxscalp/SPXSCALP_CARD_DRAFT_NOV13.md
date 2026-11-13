@@ -3,7 +3,7 @@
 Status: DRAFT written Nov 13, 2026 for the owner's S&P scalp. Nothing is registered, committed to a job or read. It is registered only after the owner names the market and before anyone reads the candles. VA ruling (Nov 13): VERSION of the closed mid-band scalp family, not NEW, so it does not count toward the 20 to 30. The Head freezes it as ONE try, counted.
 
 ## Rule (fixed before any data)
-- Market: KXINX15M for the 15 minute variant (the owner's main case, about 25 minutes left, needs another series: market not named yet).
+- Market: KXINX15M (named by the owner, Nov 13). The owner's main case (about 25 minutes left) would need another series and is not part of this card.
 - Entry: buy the CHEAP side when its ask is 20c to 25c, with 10 or more minutes left. Variant: band 20c to 30c (one variant, counted as part of this one try).
 - Exits, all fixed now:
   - Headline: sell at 2x the entry price, or at the fixed time exit with 5 minutes left, whichever comes first.
@@ -26,3 +26,11 @@ Development: KXINX15M closes before 2026-12-01T00:00:00Z, on landed candles only
 
 ## Closest existing
 GEN12 and GEN13 (226 exits searched, 0 survivors), H4, SS1, SS2, EXIT1, EXIT2, HS1, and the 7e row "cheap-side price, regime and grammar rules".
+
+## Update Nov 13: the owner's outside input (still no read, not registered)
+The owner: "spx future charts are usually a little ahead it seems". The entry becomes a lead trigger, not a bare price band:
+- With 10 or more minutes left, take the ES future's 1 minute close at the decision minute minus its close at the window's start minute. If the move is at least THRESHOLD in one direction, the side that direction favours is the candidate side. THRESHOLD is 0.05% of the ES level (a move of a few index points), fixed here from the owner's description only ("a little ahead" gives no number), not from any data; it is a guess and the card says so. No other threshold is tried.
+- Buy the candidate side only if its Kalshi ask is 20c to 25c (variant 20c to 30c). If the candidate side is the favourite (priced above 50c) no order: the cheap-side rule is the only arm, and the favourite arm is the favourite-and-hold ban.
+- Exits, haircuts C1 to C10 and the held-out date 2026-12-01 are unchanged. One try, counted.
+- Data: KXINX15M candles (landing) and the ES one minute bars for Nov 5 to 12 held in the Testing Desk's scratch. The ES bars come from Databento: NO ES value, figure or derived row is ever written to this repo or any branch; this card only names the source; results go by message only. The scorer must read ES from the scratch path given as an argument and write no ES-derived file.
+- Pending VA ruling NEW or VERSION against SPXFV1, LEADLAG1 and CFRTI-K. Register only after that ruling. Counterparty: if a lead is real, the counterparty is slower quote updaters on Kalshi; this is a guess and is "none named" until the VA accepts it.
