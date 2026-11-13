@@ -77,7 +77,7 @@ gates.S7 = () => {
   const names = { KXGOLD15M: 'Gold', KXXRP15M: 'XRP', KXDOGE15M: 'Dogecoin', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'Natural gas' };
   const smooth = ['KXBTC15M', 'KXETH15M'];
   all.forEach((s) => assert.ok(smooth.includes(s) || (names[s] && new RegExp("name: '" + names[s].replace('/', '\\/') + "'").test(watch)), s + ' is either watched or deliberately left out'));
-  assert.ok(/kalshiSilentMarkets\(orders, s, now\)/.test(html) && /Needs a look/.test(html), 'the Bot status card shows the warning');
+  assert.ok(/kalshiSilentMarkets\(orders, s, now, liveState\)/.test(html) && /Needs a look/.test(html), 'the Bot status card shows the warning');
   assert.ok(/insertAdjacentHTML\('beforeend', '<div class="kal-warn kal-silent">/.test(html), 'it is added without redrawing the heartbeat trace');
 };
 
