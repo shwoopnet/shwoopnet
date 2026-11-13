@@ -6,12 +6,14 @@ const path = require('path');
 const live = require('../functions/kalshiLiveLib');
 const gk = require('../functions/kalshiGoldKillLib');
 const root = path.join(__dirname, '..');
-const NOW = Date.parse('2026-11-12T14:00:00Z');
+const NOW = Date.parse('2026-11-14T03:00:00Z');   // inside the trial seat's period (it starts 2026-11-14T00:00Z; goldTrialGates.test.js GT1 to GT8 cover the trial itself)
 const iso = (ms) => new Date(ms).toISOString();
 const pem = crypto.generateKeyPairSync('ed25519').privateKey.export({ type: 'pkcs8', format: 'pem' });
 const R = gk.GOLD_KILL.rearmAt;
 const BASE = 1000, LIMIT = 58.75;   // BASE is an invented round number; LIMIT is the fixed dollar line in code
 const gates = {};
+// K1 to K13 test the latch mechanics themselves, so they run with the trial seat's extra floor and size left out (trial = null); the trial has its own gates in goldTrialGates.test.js.
+const check = (io, cfg) => gk.runGoldKillCheck(io, cfg || gk.GOLD_KILL, null);
 
 let n = 0;
 // A settled gold order that made `pnl` dollars. A loss is an early sell with a stored settledPnl; a win settles at the close on the cash basis (0.92 fill + 0.01 fee, 10 contracts: +0.70).
@@ -35,11 +37,11 @@ function checker(orders, sizing) {
 gates.K1 = async () => {
   const short = [win(at(0)), loss(-(LIMIT - 0.01), at(1))];   // peak +0.70 after the win, then down by just under the line from that peak
   const a = checker(short);
-  const ra = await gk.runGoldKillCheck(a.io);
+  const ra = await check(a.io);
   assert.ok(!ra.tripped && !gk.goldKillActive(a.state.sizing, 'KXGOLD15M'), 'just under the line: still trading');
   const over = [win(at(0)), loss(-(LIMIT + 0.01), at(1))];
   const b = checker(over);
-  const rb = await gk.runGoldKillCheck(b.io);
+  const rb = await check(b.io);
   assert.strictEqual(rb.tripped, 'drawdown');
   assert.ok(gk.goldKillActive(b.state.sizing, 'KXGOLD15M'), 'the latch is on the sizing document the tick reads');
   assert.ok(b.events.some((e) => e.kind === 'gold kill'), 'and the owner is told');
@@ -49,9 +51,9 @@ gates.K1 = async () => {
 gates.K2 = async () => {
   const mk = (k) => Array.from({ length: k }, (_, i) => loss(-0.55, at(i)));   // each far inside the drawdown line, together past -$20
   const a = checker(mk(39));
-  assert.ok(!(await gk.runGoldKillCheck(a.io)).tripped, '39 trades: not yet');
+  assert.ok(!(await check(a.io)).tripped, '39 trades: not yet');
   const b = checker(mk(40));
-  assert.strictEqual((await gk.runGoldKillCheck(b.io)).tripped, 'net');
+  assert.strictEqual((await check(b.io)).tripped, 'net');
 };
 
 // K3: a win after the trip does not un-kill, in the replay and in the stored record.
@@ -59,15 +61,15 @@ gates.K3 = async () => {
   const rows = [loss(-(LIMIT + 1), at(0))];
   for (let i = 1; i <= 120; i++) rows.push(win(at(i)));   // +84 dollars of wins afterwards: net positive, drawdown gone
   const w = checker(rows);
-  const first = await gk.runGoldKillCheck(w.io);
+  const first = await check(w.io);
   assert.strictEqual(first.tripped, 'drawdown');
-  assert.ok(gk.evaluateGold({ orders: rows, base: BASE }).trip, 'the replay stays tripped');
-  await gk.runGoldKillCheck(w.io);   // later minutes
+  assert.ok(gk.evaluateGold({ orders: rows, base: BASE, trial: null }).trip, 'the replay stays tripped');
+  await check(w.io);   // later minutes
   assert.ok(gk.goldKillActive(w.state.sizing, 'KXGOLD15M'));
   assert.ok(w.wrote.every((p) => p.tripped !== false), 'nothing ever writes the latch off');
   // even if the replay alone would not trip, the stored latch holds
   const w2 = checker([loss(-1, at(0))], { base: BASE, goldKill: { tripped: true, rearmAt: R } });
-  await gk.runGoldKillCheck(w2.io);
+  await check(w2.io);
   assert.ok(gk.goldKillActive(w2.state.sizing, 'KXGOLD15M'));
 };
 
@@ -78,10 +80,10 @@ gates.K4 = async () => {
   const later = Object.freeze({ ...gk.GOLD_KILL, rearmAt: R + 7 * 86400000 });
   assert.ok(!gk.goldKillActive(stored, 'KXGOLD15M', later), 'a code edit that moves the date past the latch re-arms it');
   const rows = [loss(-(LIMIT + 5), at(0))];   // before the new date
-  const ev = gk.evaluateGold({ orders: rows, base: BASE, cfg: later });
+  const ev = gk.evaluateGold({ orders: rows, base: BASE, cfg: later, trial: null });
   assert.strictEqual(ev.trip, null, 'old trades no longer count');
   const w = checker(rows, stored);
-  const r = await gk.runGoldKillCheck(w.io, later);
+  const r = await check(w.io, later);
   assert.ok(!r.killed && w.wrote.some((p) => p.tripped === false && p.rearmAt === later.rearmAt), 'the new generation is recorded as not tripped');
   // nothing on the sizing document can set the date back: a stored date older than the code's is ignored
   assert.ok(!gk.goldKillActive({ goldKill: { tripped: true, rearmAt: R - 1 } }, 'KXGOLD15M'));
@@ -90,7 +92,8 @@ gates.K4 = async () => {
 // K5: the tick places no gold order while latched and does when it is not; the other series are untouched by it.
 const TICKER = 'KXGOLD15M-26NOV121415-06';
 const sess = () => ({ active: true, until: NOW + 3600000, ordersSent: 0, startCash: 100, sizing: true, sizeCap: 15, sizeAddon: 0, sizeBase: 1000, sizeNextReview: NOW + 86400000 });
-const state = { cap: 15, base: 1000, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null };
+const hsLib = require('../functions/kalshiHardStopLib');
+const state = { hardStop: { rearmAt: hsLib.HARD_STOP.rearmAt, status: 'ok', tripped: false, checkedAt: NOW - 60000 }, cap: 15, base: 1000, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null };
 function world() {
   const posts = [], docs = new Map(), notes = [], s = sess();
   const store = {
@@ -131,12 +134,12 @@ gates.K6 = async () => {
   // Trades since the re-arm date (the read never goes further back): alerts inform, the kill rules do not fire on them.
   for (let i = 0; i < 100; i++) rows.push(i % 2 === 0 ? loss(-1.05, R + 3600000 + i * 60000) : win(R + 3600000 + i * 60000));   // PF 0.67 over the last 60, 50 early sells, net -17.5 (inside both kill lines)
   const w = checker(rows);
-  const r = await gk.runGoldKillCheck(w.io);
+  const r = await check(w.io);
   assert.ok(!r.tripped, 'an alert is not a kill');
   assert.ok(r.alerts.includes('pf60') && r.alerts.includes('early'), 'the weak run and the early sells both alert');
   assert.deepStrictEqual(w.events.map((e) => e.kind), r.alerts.map(() => 'gold alert'));
   assert.ok(!gk.goldKillActive(w.state.sizing, 'KXGOLD15M'));
-  const again = await gk.runGoldKillCheck(w.io);
+  const again = await check(w.io);
   assert.strictEqual(w.events.length, r.alerts.length, 'an alert that is still on is not repeated every minute');
   assert.ok(!again.tripped);
   const t = world(); await tick(t, { ...state, goldKill: { tripped: false, rearmAt: R, alerts: { pf60: true, pf100: true, early: true } } });
@@ -181,14 +184,14 @@ gates.K8 = () => {
 // K9: nothing stored or typed loosens it. A stored "not tripped" does not stop a replay from tripping; a failed read changes nothing; the exports offer no way to clear it.
 gates.K9 = async () => {
   const w = checker([win(at(0)), loss(-(LIMIT + 1), at(1))], { base: BASE, goldKill: { tripped: false, rearmAt: R } });
-  assert.strictEqual((await gk.runGoldKillCheck(w.io)).tripped, 'drawdown');
+  assert.strictEqual((await check(w.io)).tripped, 'drawdown');
   const bad = checker([], { base: BASE });
   bad.io.readOrders = async () => { throw new Error('down'); };
-  assert.deepStrictEqual(await gk.runGoldKillCheck(bad.io), { skipped: 'unreadable' });
+  assert.deepStrictEqual(await check(bad.io), { skipped: 'unreadable' });
   assert.strictEqual(bad.wrote.length, 0);
   const failW = checker([loss(-(LIMIT + 1), at(0))]);
   failW.io.writeGoldKill = async () => { throw new Error('no'); };
-  const r = await gk.runGoldKillCheck(failW.io);
+  const r = await check(failW.io);
   assert.strictEqual(r.skipped, 'unwritten'); assert.strictEqual(failW.events.length, 0, 'no event for a latch that was not written (the next minute tries again)');
   assert.ok(Object.isFrozen(gk.GOLD_KILL), 'the thresholds are frozen constants');
   const src = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8') + fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
@@ -202,11 +205,11 @@ gates.K10 = async () => {
   assert.ok(gk.goldHalfSize(null, 'KXGOLD15M', ret), 'a return starts at half size even before the record exists');
   assert.ok(!gk.goldHalfSize(null, 'KXXRP15M', ret));
   const w = checker([win(at(2000))], { base: BASE });
-  await gk.runGoldKillCheck(w.io, ret);
+  await check(w.io, ret);
   assert.ok(w.wrote.some((p) => p.half === true), 'records half size while under 30 trades');
   const rows = Array.from({ length: 30 }, (_, i) => win(ret.rearmAt + 1000 + i * 1000));
   const w2 = checker(rows, { base: BASE, goldKill: { tripped: false, rearmAt: ret.rearmAt, half: true } });
-  await gk.runGoldKillCheck(w2.io, ret);
+  await check(w2.io, ret);
   assert.strictEqual(w2.state.sizing.goldKill.half, false, 'after 30 trades full size');
   assert.ok(!gk.goldHalfSize(w2.state.sizing, 'KXGOLD15M', ret));
   assert.strictEqual(gk.GOLD_KILL.rearmIsReturn, false, 'the shipped config is the first arming, so the tick sizes gold as before');
@@ -230,15 +233,15 @@ gates.K12 = async () => {
   const rows = [win(at(0)), loss(-(LIMIT + 0.01), at(1))];
   for (const sz of [{ base: 5000 }, { base: 1 }, {}, null]) {
     const w = checker(rows, sz);
-    assert.strictEqual((await gk.runGoldKillCheck(w.io)).tripped, 'drawdown', 'same trip whatever the base says: ' + JSON.stringify(sz));
+    assert.strictEqual((await check(w.io)).tripped, 'drawdown', 'same trip whatever the base says: ' + JSON.stringify(sz));
   }
   // a clobber: the latch was written, then the tick wrote the sizing document back without it; the next minute re-derives and writes it again
   const w = checker(rows, { base: BASE });
-  await gk.runGoldKillCheck(w.io);
+  await check(w.io);
   assert.ok(gk.goldKillActive(w.state.sizing, 'KXGOLD15M'));
   w.state.sizing = { base: BASE * 3 };   // the stale full write, with a base that has since risen
   assert.ok(!gk.goldKillActive(w.state.sizing, 'KXGOLD15M'));
-  await gk.runGoldKillCheck(w.io);
+  await check(w.io);
   assert.ok(gk.goldKillActive(w.state.sizing, 'KXGOLD15M'), 're-derived identically');
 };
 
@@ -248,7 +251,7 @@ gates.K13 = async () => {
   const old = Array.from({ length: 100 }, (_, i) => (i % 2 === 0 ? loss(-1.2, R - 86400000 + i * 60000) : win(R - 86400000 + i * 60000)));
   const w = checker(old);
   w.io.readOrders = async (since) => { asked.push(since); return old; };
-  const r = await gk.runGoldKillCheck(w.io);
+  const r = await check(w.io);
   assert.deepStrictEqual(asked, [R], 'one read, starting at the re-arm date, never 30 days back');
   assert.deepStrictEqual(r.alerts, [], 'pre-re-arm trades raise no alert');
   assert.ok(!r.tripped);

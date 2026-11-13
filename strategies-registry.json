@@ -15,18 +15,20 @@
    "name": "Gold closing buy",
    "stage": "Live",
    "rule": "Gold: about 6 minutes before each 15 minute market closes, buys whichever side costs 88c to 97c (the side the market already expects to win)",
-   "goesLive": "Its paper record wins at least 1.3 times what it loses over at least 60 trades and 7 days, with at least 10 losses and the second half as strong. It then trades at half size for 30 trades, and at full size if those 30 don't lose money",
+   "goesLive": "Trial: below the research bar (the owner's written exception to the return rule, Nov 13). At most 3 contracts and no profit add-on while the trial runs. Nov 19 checkpoint of its paper record: 1.3 or better takes the normal return path (at least 60 trades and 7 days, at least 10 losses, the second half as strong, then half size for 30 trades); 1.0 to 1.3 stays at 3 contracts until 60 rows; under 1.0 the trial seat is cut",
    "label": null,
    "startDate": null,
    "nextRead": null,
    "nextReadText": null,
    "n": null,
    "nBasis": null,
-   "kill": "Gold switches itself off if it falls $58.75 below its best point, or its result is under -$20 after 40 trades. Any gold position that drops to 25c is sold at once",
+   "kill": "Gold switches itself off if it is down more than $18 after 5 trades, if it falls $58.75 below its best point, or if its result is under -$20 after 40 trades. Any gold position that drops to 25c is sold at once",
    "return": "The same paper record clears again after the stop. It can come back by itself twice; a third stop retires it",
    "retiredOn": null,
    "reason": null,
-   "notes": [],
+   "notes": [
+    "Trial: below the research bar. Trial seat from 2026-11-14: 3 contracts at most, no profit add-on, 25c early sell kept, net floor -$18 after 5 trades. Nov 19 GOLDOFF checkpoint decides the next step."
+   ],
    "code": {
     "live": "L1"
    },

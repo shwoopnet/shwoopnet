@@ -156,7 +156,7 @@ gates.SP5 = () => {
   const n = P.KAL_BOARD_LIVE.length + SHADOW_FIX.length;
   assert.strictEqual((plain.match(/class="rw(?: open)?(?: near)?"/g) || []).length, n, 'one row per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/<dt>Sizing<\/dt>/g) || []).length, n, 'every row keeps the Sizing line in More');
-  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 20 (20, 25, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
+  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Trial seat: 3 contracts, no add-on (balance ladder, held at 15, once the trial ends)', OICORE: 'Own ladder, step 20 (20, 25, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
   assert.strictEqual((plain.match(/<dd>Next: 3 contracts as a probe<\/dd>/g) || []).length, 4, 'all four fixture shadow rules say next 3 contracts');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 3 && (plain.match(/class="lp-p"/g) || []).length === 3 && /id="lp"/.test(plain), 'three boxes and three panels in one loop');
