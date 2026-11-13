@@ -48,3 +48,6 @@ Same frozen parameters as every other place (shared rule, T = the market's own 9
 
 ## Dated correction (Nov 13, 2026, Desk A, 21:35Z)
 The OICORE-ETH line above said R6 runs "to 2026-12-31". Wrong: the R6 extension keeps Bitcoin and Ethereum only, to 2026-11-20 23:59Z (the other R6 series, XRP included, stop 2026-11-13 23:59Z). OICORE-ETH's book source therefore ends 2026-11-20 unless the Head extends R6; OICORE-XRP has no R6 book after 2026-11-13 and is withdrawn by source unless R6 is extended for it. Details in `DESK_A_FROZEN_OICORE_PLACES_DEFINITIONS_NOV13.md` section 4.
+
+## Dated correction 2 (Nov 13, 2026, Desk A, after the Head's 21:21Z check of `scripts/record_15m_book.py` on main)
+My correction above is WITHDRAWN: R6 records Bitcoin, Ethereum and gold to 2026-12-31 23:59Z (only XRP stops at 2026-11-13 23:59Z), so the ETH line was right as first written. **OICORE-XRP is marked "no log source"** (no book after 2026-11-13 23:59Z) and is withdrawn; the list is twelve places with XRP out. The open interest source for every place is the nightly candle pull (Main's choice (b)); the bot's P3 skip rows are not a source.
