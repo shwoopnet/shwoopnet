@@ -15,6 +15,7 @@ TOL = 1e-9
 SERIES_SHA256 = "34f708687df24f5a6243c710eb2d1f6b8d7559c965b8c18a97e27248c2ed06e8"
 JUMP, PRE_LO, PRE_HI, ASK_LO, ASK_HI, SPREAD_MAX, SLIP = 0.10, 0.15, 0.75, 0.20, 0.85, 0.04, 0.01
 AMBIGUITIES = [
+    "0. DATED Nov 13 06:28Z (Head ruling after Auditor B): the placebo contract is the one with the higher mid; at exactly equal mids (within 1e-9) the ticker that sorts first in ascending order.",
     "1. first_in_play for tennis = the first minute at which the alive rule holds for EITHER contract; every minute is in play only if the alive rule holds AT THAT MINUTE (not 'from the first on'). Clock families: in play from the minute ending at S + 60 s.",
     "2. Elapsed minute e: clock = (t - S) / 60 with t the jump minute's END ts; tennis = (t - first in-play minute) / 60. The placebo's own minute is S_Y + 60 e (clock) or first_in_play_Y + 60 e (tennis).",
     "3. Placebo search: the NEXT matches after X in (start or open, ticker) order, no wrap-around, up to 20; a match is 'used' only when a placebo BET is made; ANY failed condition, including the entry price band or spread at e + 1, sends the search on to the next match.",
@@ -171,7 +172,8 @@ def placebo_for(bet_match, bet, matches_sorted, pos, idx, used):
             mids = [mid(d[tau]) for tau in range(tY - 5 * 60, tY + 60, 60) if tau in d and two(d[tau])]
             if not two(d.get(tY)) or not mids or max(mids) - min(mids) >= 0.05 - TOL: quiet = False
         if not quiet: continue
-        best = max(ser, key=lambda c: mid(ser[c][tY]))
+        top = max(mid(ser[c][tY]) for c in ser)          # the higher mid; at equal mids (1e-9) the ticker that sorts first (Head's ruling Nov 13, 06:28Z; touches the placebo only)
+        best = min((c for c in ser if mid(ser[c][tY]) >= top - TOL), key=lambda c: y["codes"][c])
         ent = ser[best].get(tY + 60)
         if not two(ent) or not (ASK_LO - TOL <= ent["ask"] <= ASK_HI + TOL and ent["ask"] - ent["bid"] <= SPREAD_MAX + TOL): continue
         return {"event": y["event"], "code": best, "t": tY, "price": round(ent["ask"] + SLIP, 4)}, "ok"

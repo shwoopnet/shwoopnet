@@ -75,6 +75,12 @@ p2, _ = J.placebo_for(X, dec[X["event"]], srt, 0, idx, {Y["event"]}); assert p2 
 idy = merge(idx); idy[Y["codes"]["AAA"]][S0 + 600 + 5 * 60] = cd(0.65, 0.67)             # Y moves 11c by its minute e: not quiet -> next match
 p3, _ = J.placebo_for(X, dec[X["event"]], srt, 0, idy, set()); assert p3 and p3["event"] == Z["event"]
 p4, why4 = J.placebo_for(X, dec[X["event"]], srt, 0, idx, {Y["event"], Z["event"]}); assert p4 is None and why4 == "no_placebo_within_20"       # no wrap-around
+# placebo tie (Head ruling Nov 13): equal mids -> the ticker that sorts first, whatever the order of the contracts
+idt = merge(idx)
+for t in list(idt[Y["codes"]["AAA"]]): idt[Y["codes"]["AAA"]][t] = cd(0.54, 0.56); idt[Y["codes"]["BBB"]][t] = cd(0.54, 0.56)
+Yr = dict(Y, codes={"BBB": Y["codes"]["BBB"], "AAA": Y["codes"]["AAA"]})
+for YY in (Y, Yr):
+    srt2 = [X, YY, Z]; pt, wt = J.placebo_for(X, dec[X["event"]], srt2, 0, idt, set()); assert pt and pt["event"] == Y["event"] and pt["code"] == "AAA", (pt, wt)
 # ---- results are joined only in score_family; a void is a fee-only loss ----
 assert J.net_of(0.62, "AAA", {"AAA": "yes"})[0] > 0 and J.net_of(0.62, "AAA", {"AAA": "no"})[0] < 0 and J.net_of(0.62, "AAA", {"AAA": ""}) == (-0.02, True)
 f = J.score_family([X, Y, Z], idx, S0 - 86400, S0 + 86400); assert f["bets"] == 1 and f["placebo_bets"] == 1 and f["verdict"].startswith("NOT_ENOUGH_DATA at n = 1"), f
