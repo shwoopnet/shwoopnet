@@ -25,10 +25,10 @@ RULINGS = {   # the Head of R&D's rulings of Nov 13, 2026 (16:47Z), printed as c
     "S1_fee": "0.07 x C x p x (1 - p), rounded UP to the cent per order, C = 1 (quadratic, multiplier 1, standard schedule); the unrounded figure is information only",
     "S2_sd": "consecutive bar pairs both present on F_now's instrument id, at least 6 of the 10, sample (n - 1) sd, times sqrt(119/60)",
     "S3_quote": "the decision candle's YES bid and ask closes; YES bid + NO bid >= 1 - 1e-9 (crossed or locked) is no quote (rule 18)",
-    "S4_tie": "a tie of the two asks goes to YES; the tie count is printed",
+    "S4_tie": "a tie of the two asks goes to YES; every window with a valid quote whose two asks are equal is counted (asks_tie) BEFORE the spread and band tests, a diagnostic",
     "S5_thirds": "three equal time spans from 2026-12-01T00:00Z to the last traded close at or before READ_DATE",
     "S6_void": "a void is a fee-only loss; an empty result stops the run",
-    "Z_event": "z clustered by event ticker (Head of R&D, Nov 13, 16:51Z): mean of the per-event summed net over the sample sd of those sums times sqrt(number of events); under 2 events or a zero sd, no z; the held verdict needs z >= 5.46",
+    "Z_event": "z clustered by event ticker (Head of R&D, Nov 13, 16:51Z): mean of the per-event summed net over the sample sd of those sums times sqrt(number of events); under 2 events or a zero sd, no z; the held verdict reads RESEARCH BAR MET only if the card's thirds and kills pass AND z >= 5.46, BAR MET (not a research-bar pass) if they pass without it, else BAR NOT MET",
 }
 
 
@@ -66,7 +66,7 @@ def load_futures(path):
     return bars
 
 
-def decide(w, bars):
+def decide(w, bars, tally=None):
     close = w["close_ts"]
     now, opn = bars.get(close - 180), bars.get(close - 960)                     # D7
     if now is None or opn is None:
@@ -87,10 +87,12 @@ def decide(w, bars):
     b, a = w["yes_bid"], w["yes_ask"]
     if not (0 < b < 1 and 0 < a < 1) or b >= a - EPS:                         # S3, rule 18: crossed or locked is no quote
         return "no_quote", None
+    asks = {"yes": a, "no": 1 - b}
+    tie = abs(asks["yes"] - asks["no"]) <= EPS                                  # S4: counted before the spread and band tests
+    if tie and tally is not None:
+        tally["asks_tie"] = tally.get("asks_tie", 0) + 1
     if a - b > SPREAD_MAX + EPS:
         return "no_trade", None
-    asks = {"yes": a, "no": 1 - b}
-    tie = abs(asks["yes"] - asks["no"]) <= EPS
     side = "yes" if asks["yes"] <= asks["no"] + EPS else "no"                  # S4
     ask = asks[side]
     p_side = p_yes if side == "yes" else 1 - p_yes
@@ -134,7 +136,7 @@ def agg(trades):
     xs = [t["net"] for t in trades]
     n = len(xs)
     z, ne = z_event(trades)
-    return {"n": n, "events": ne, "z_event": shown(z), "pf": shown(pf(xs)), "pf_unrounded_info": shown(pf([t["net_unrounded"] for t in trades])), "ties": sum(t["tie"] for t in trades),
+    return {"n": n, "events": ne, "z_event": shown(z), "pf": shown(pf(xs)), "pf_unrounded_info": shown(pf([t["net_unrounded"] for t in trades])),
             "mean_net": round(sum(xs) / n, 6) if n else None,
             "win_rate": round(sum(t["won"] for t in trades) / n, 6) if n else None, "mean_price": round(sum(t["ask"] for t in trades) / n, 6) if n else None}
 
@@ -169,7 +171,7 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
                 raise Stop("result %r refused (%s)" % (r["result"], r["ticker"]))
             W.append({"ticker": r["ticker"], "event_ticker": r["event_ticker"], "close_ts": close, "yes_bid": float(r["yes_bid"]), "yes_ask": float(r["yes_ask"]), "result": r["result"]})
     for w in sorted(W, key=lambda w: (w["close_ts"], w["ticker"])):
-        st, t = decide(w, bars)
+        st, t = decide(w, bars, counts)
         counts[st] = counts.get(st, 0) + 1
         if t:
             trades.append(t)
@@ -189,8 +191,10 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
             kills = {"pf_under_1_at_100": pf([t["net"] for t in trades]) < 1.0,
                      "win_rate_within_3_points": abs(A["win_rate"] - A["mean_price"]) < 0.03 + EPS}
             z, _ = z_event(trades)
-            passes = all(r is not None and r >= 1.5 - EPS for r in raw) and not any(kills.values()) and z is not None and z >= Z_BAR - EPS
-            A.update({"thirds": th, "kills": kills, "verdict": "BAR MET (not a research-bar pass)" if passes else "BAR NOT MET"})   # F3
+            card = all(r is not None and r >= 1.5 - EPS for r in raw) and not any(kills.values())
+            research = card and z is not None and z >= Z_BAR - EPS
+            A.update({"thirds": th, "kills": kills,
+                      "verdict": "RESEARCH BAR MET" if research else ("BAR MET (not a research-bar pass)" if card else "BAR NOT MET")})
             out["aggregate"] = A
         with open(marker, "w") as f:
             f.write("SPXFV1 held read done\n")

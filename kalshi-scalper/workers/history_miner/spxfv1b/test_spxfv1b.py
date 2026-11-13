@@ -11,7 +11,8 @@ o = S.run("dev", W, F)
 for k, v in E["dev"]["counts"].items():
     if o["counts"].get(k, 0) != v: bad.append(("count", k, o["counts"].get(k), v))
 a = o["aggregate"]
-for k in ("pf", "mean_net", "label", "ties"):
+if o["counts"].get("asks_tie", 0) != E["dev"]["ties"]: bad.append(("asks_tie", o["counts"].get("asks_tie", 0)))
+for k in ("pf", "mean_net", "label"):
     want = E["dev"][k]; got = a[k]
     if (isinstance(want, float) and abs(got - want) > 1e-6) or (not isinstance(want, float) and got != want): bad.append((k, got, want))
 if a["n"] != E["dev"]["traded_n"]: bad.append(("n", a["n"]))
@@ -45,5 +46,11 @@ oz = S.run("dev", os.path.join(inv, "windows_z.csv"), os.path.join(inv, "futures
 az = oz["aggregate"]
 if az["n"] != E["z_set"]["traded"] or az["events"] != E["z_set"]["events"] or abs(az["z_event"] - E["z_set"]["z_event"]) > 1e-6:
     bad.append(("z set", az["n"], az["events"], az["z_event"], E["z_set"]))
+ot = S.run("dev", os.path.join(inv, "windows_tie.csv"), os.path.join(inv, "futures_z.csv"))
+for k, v in E["tie_set"]["counts"].items():
+    if ot["counts"].get(k, 0) != v: bad.append(("tie set", k, ot["counts"].get(k), v))
+odd = os.path.join(tempfile.mkdtemp(), "w.csv")
+open(odd, "w").write(open(W).read().replace(",no\n", ",NO\n", 1))
+refused(lambda: S.run("dev", odd, F), "odd result text")
 print("MISMATCHES", bad)
 sys.exit(1 if bad else 0)
