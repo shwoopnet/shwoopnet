@@ -144,7 +144,8 @@ def load_obs(rows, cuts):
                 d = abs((mid if mid is not None else p) - 0.5)
                 o = dict(s=j["s"], e=j["e"], t=j["t"], ct=ct, ect=ect, look=ln, pb=b, side=side, p=p, win=win, qt=q[0], dist=d)
                 k = (j["e"], ln, b, side)
-                if k not in obs or d < obs[k]["dist"]:
+                # Amendment 4 (Nov 13): exact ties (within 1e-9) go to the lower ticker, not to file order.
+                if k not in obs or d < obs[k]["dist"] - 1e-9 or (abs(d - obs[k]["dist"]) <= 1e-9 and o["t"] < obs[k]["t"]):
                     obs[k] = o
     return list(obs.values())
 

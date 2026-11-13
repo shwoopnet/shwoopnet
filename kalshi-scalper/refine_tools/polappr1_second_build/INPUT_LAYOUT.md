@@ -22,3 +22,5 @@ MADEUP_CAND.jsonl: 4 made-up approval events of series KXTRUMPAPPROVE (2 closing
 each, plus a generic-ballot event of series KXGENERICBALLOTVOTEHUB closing in the GCB TRAIN range (2 markets), with
 invented tickers, closes, results and hourly prices. They exist only to run your reader and compare it with mine
 on the same rows; the prices are random walks and mean nothing.
+
+Nov 13 addition: MADEUP_CAND_EXT.jsonl = MADEUP_CAND.jsonl plus 49 more made-up rows (63 in all) that exercise: (a) a cell with 26 daily-approval events at one constant price whose as-if-live replay passes fill 20 without the net rule and later crosses it (kill timing); (b) a cell of 17 events in the RCP family with a run of consecutive losses early (streak rule); (c) a KXGENERICBALLOT event (2 markets) and a KXAPRPOTUSD event (a series in no family); (d) one event with 3 markets in the same mid bucket (calibration unit). Constant hourly prices, results chosen only to hit those shapes. No expected output.
