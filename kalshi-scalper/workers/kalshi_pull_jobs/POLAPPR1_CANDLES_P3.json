@@ -4,7 +4,7 @@
  "owner": "REFINEMENT",
  "registration": "kalshi-scalper/refine_tools/POLITICS_APPROVAL_CAL_REGISTRATION.md",
  "purpose": "W-POL-APPR1 full pull, part 3 of 3: hourly candles (8.5 days before close to close plus 1 h) for every development market of the approval and generic ballot universe not yet held; live events one batched request, older markets one historical request each.",
- "heldout": "W-POL-APPR1: events in the HELD-OUT third per POL_APPR1_CUTS.json and POL_APPR1_CUTS_A3.json (ALL_APPR also) are never requested; one read of the result after every part is complete",
+ "heldout": "W-POL-APPR1's own held-out thirds (POL_APPR1_CUTS.json, POL_APPR1_CUTS_A3.json, ALL_APPR also) are never requested; W-NO-ARM1 (NO_ARM_APPROVAL, NO_ARM_CUTS.json) reservation was RELEASED by the Head of R&D on 2026-11-13 06:50Z, card closed, so its held-out thirds are development data here (part 1 holds 618 requests in 95 events inside them: KXAPRPOTUS 79, KXVOTEHUBTRUMPUPDOWN 12, KXAPRPOTUSD 3, KXGENERICBALLOTVOTEHUB 1); APPROVAL1 (V2) frozen third (KXTRUMPAPPROVE, KXVHGCB, about Oct 13 to Nov 2) not requested; one read of the result after every part is complete; landed runs unchanged, text corrected for the record",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "allowed_endpoints": [
