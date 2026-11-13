@@ -1,0 +1,44 @@
+{
+ "mode": "dev",
+ "bets": [
+  {
+   "ticker": "KXBTC15M-W1",
+   "trigger_minute": "2026-11-18T12:04:00Z",
+   "side": "yes",
+   "L_btc": 5.5,
+   "ask": 0.48,
+   "fee": 0.02,
+   "pnl": 0.5
+  },
+  {
+   "ticker": "KXBTC15M-W2",
+   "trigger_minute": "2026-11-18T12:21:00Z",
+   "side": "no",
+   "L_btc": 5.5,
+   "ask": 0.4,
+   "fee": 0.02,
+   "pnl": -0.42
+  }
+ ],
+ "skips": {
+  "no_trigger": 2,
+  "band_or_spread": 1,
+  "held_window_ignored": 1
+ },
+ "dev": {
+  "n": 2,
+  "won": 1,
+  "void": 0,
+  "pf": 1.1905,
+  "net": 0.08
+ },
+ "worked_by_hand": [
+  "W1: minute 12:03 (12 min before the close) sees [12:00,12:03): 3.0 BTC < 5. Minute 12:04 sees [12:01,12:04): 3.0 + 2.5 = 5.5 >= 5, long side, so YES. First poll after 12:04:00 is 12:04:01: YES ask = 1 - 0.52 = 0.48, spread = 0.48 - 0.45 = 0.03. Fee = ceil(0.07 x 0.48 x 0.52 x 100) = ceil(1.7472) = 2c. Result yes: pnl = 1 - 0.48 - 0.02 = +0.50.",
+  "W2: USD swap 2000 x 100 / 100000 = 2.0 BTC, USDT 350 x 0.01 = 3.5 BTC, both side buy (short liquidations) inside [12:18,12:21): 5.5 at minute 12:21 (9 min before the close); minute 12:20 sees only [12:17,12:20): 2.0 < 5. NO. Poll 12:21:02: NO ask = 1 - 0.60 = 0.40, spread = (1 - 0.37) - 0.60 = 0.03. Fee = ceil(1.68) = 2c. Result yes: the NO loses 0.40 + 0.02 = -0.42.",
+  "W3: the 6.0 BTC row at 12:42:30 is first inside a window at minute 12:43, 2 min before the 12:45 close, outside 12 to 3 minutes: no trigger.",
+  "W4: 6.0 BTC at 12:50:00 triggers at minute 12:51 (9 min before 13:00). YES ask = 1 - 0.13 = 0.87 > 0.80: no bet, and the window is used (no later minute is tried).",
+  "W5: the duplicate row counts once: 3.0 + 1.5 = 4.5 < 5: no trigger.",
+  "W6: close 2026-12-01 is in the held-out window: ignored and counted in dev mode.",
+  "dev: wins 0.50, losses 0.42, PF = 0.50 / 0.42 = 1.1905, net +0.08."
+ ]
+}
