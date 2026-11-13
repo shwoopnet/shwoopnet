@@ -78,9 +78,9 @@ An entry has exactly these fields (any other field is rejected, any missing fiel
 | `SLOT_MAX_OPEN_CONTRACTS_PER_MARKET` | 10 (the slot's own unsold contracts in a ticker, all strategies together) |
 | `SLOT_MAX_SCALE_STEPS` | 3 |
 | `SLOT_DEPTH_SHARE` | 0.25 of the size resting at the touch |
-| `SLOT_WINDOW_SHARE` | 0.5 of the shared window cap, at most |
+| `SLOT_WINDOW_SHARE` | 0.75 of the shared window cap, at most (was 0.5 until Nov 13, 2026) |
 | `SLOT_L1_RESERVE` | $1.05 of window room always left for one more L1 contract |
-| `SLOT_CAP_FRACTIONS` | shares of the sizing base: `perOrder` 1%, `perWindow` 2%, `openTotal` 3%, `daily` 2%, `lifetime` 6% |
+| `SLOT_CAP_FRACTIONS` | shares of the sizing base: `perOrder` 2.5%, `perWindow` 4%, `openTotal` 5%, `daily` 2.5%, `lifetime` 7.5% |
 | `SLOT_CAP_CEILINGS` | hard dollar ceilings: `perOrder` $20, `perWindow` $40, `openTotal` $60, `daily` $20, `lifetime` $60 |
 | `slotCaps(sizingBase)` | `min(fraction * base, ceiling)` for each cap; all zero for a base that is not a positive finite number, which refuses every order |
 
