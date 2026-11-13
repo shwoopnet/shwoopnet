@@ -151,10 +151,10 @@ Builds compared at 02:24Z: mine `nc15_wheel_second.py` sha256 `ade91e30...`; Des
   that holds an open result (item (q)'s "expiry not yet decided" for a block); a rule in the favourites class (150 signals).
 - The files `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_2921a03a_run_by_forensics.txt` are Desk A's block output from these runs.
 
-## Nov 13, 02:40Z: the two plants the Head asked for, and A DIFFERENCE the ties plant found (the offset of polls received at the same instant)
+## Nov 13, 02:38Z: the two plants the Head asked for, and A DIFFERENCE the ties plant found (the offset of polls received at the same instant)
 
 The Head recorded the comparison above, wrote the places' start time (2026-11-13T02:24:00Z, `rnd-queue` `fb978196`), and asked for two more cases before any block is
-read. Both builds are now run with `--start 2026-11-13T02:24:00Z`. Builds: mine `nc15_wheel_second.py` sha256 `ab3343b9...` plus the switch below; Desk A's unchanged
+read. Both builds are now run with `--start 2026-11-13T02:24:00Z`. Builds: mine `nc15_wheel_second.py` sha256 `fa2f89bc...` (it holds the switch described below); Desk A's unchanged
 (`8d1055df`, `38ec4c46`, reader `2921a03a` at `4774933b`).
 
 1. **A block past its 21 days that still holds an open result: SAME.** Fixture `make_nc15_wheel_fixture.py <dir> 6 openexp`. Read at `--now 2026-12-26T12:00:00Z`
@@ -186,7 +186,7 @@ decides the order of signals of one place decided at the same time (which the re
 
 **An honest note on my earlier "same":** my comparison tool did not compare exchange times until now, so the "same" of 02:24Z was true of every status, figure, block
 and state, and silent about those hundredths of a second. The tool now compares them (`nc15_wheel_compare.py` with the first build's records file as third argument).
-Put to the Head for a ruling at 02:40Z; my default stays the per-instant reading until then.
+Put to the Head for a ruling at 02:39Z; my default stays the per-instant reading until then.
 
 ## Places where the sheet or the lane leaves a choice
 
