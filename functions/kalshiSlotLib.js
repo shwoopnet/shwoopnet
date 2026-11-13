@@ -39,7 +39,10 @@ function slotCaps(sizingBase) {
 // OICORE limit 1c above the touch (Nov 3, 2026, the owner: "build 1", on the refinement chat's S-LIM1 read: 6 of 24 OICORE limits went unfilled because the ask moved up 1c within
 // seconds, and 3 of those 6 won). The order still fills at the best ask when the ask has not moved (Kalshi gives price improvement), so this only adds fills that would have been missed,
 // at most 1c a contract worse. Never past the strategy's own priceMax. A reviewed edit; at most 2c for any strategy.
-const SLOT_LIMIT_SLIP = Object.freeze({ OICORE: 0.01 });
+// SWITCHED OFF Nov 13, 2026 (the owner: "Yes, switch it off", on the review rule written with this slip: revert if the orders that filled above the price first seen net below zero). The review
+// read (OICORE Nov 13): the orders that filled 0.95c or more above the first seen ask were net negative while the rest were net positive, so the table is empty again and OICORE's limit is the touch.
+// Putting a slip back is a reviewed edit of this table; the mechanism stays.
+const SLOT_LIMIT_SLIP = Object.freeze({});
 const SLOT_LIMIT_SLIP_MAX = 0.02;
 // OICORE skips its very cheap entries (Nov 8, 2026, the owner approved designing small tests of the refinement chat's lead; skip-only, no new strategy). Live fills paid under 8c won
 // 1 in 27 and a forward group under 10c 0 in 17, while the simulation says about break-even, so this is a bet that live beats the simulation. It only REMOVES orders (a skipped signal is
@@ -73,11 +76,16 @@ function slotLimitFor(strategy, sidePrice) {
 const SLOT_LADDER_MAX_CONTRACTS = 30;
 const SLOT_LADDERS = Object.freeze({
   OICORE: Object.freeze({
-    steps: Object.freeze([10, 12, 15, 20, 30]),
-    minBase: Object.freeze([0, 825, 900, 1030, 1350]),
+    // Nov 13, 2026, the Risk Analyst under the owner's grant ("you have full control over risk parameters"; goals: $10,000+ in a year, a 40% fall from the high stops
+    // everything, "bigger now, accept the swings"): the bottom step is 15 (was 10, then 12), steps 20 and 30 need a base of $1,000 and $1,350. At 15 contracts the
+    // daily cap is $37.50 and the drawdown stop $75, about a quarter of the owner's 40% loss budget. Bigger size does not add edge: it scales results and swings alike.
+    steps: Object.freeze([15, 20, 30]),
+    minBase: Object.freeze([0, 1000, 1350]),
     upFills: 20, upDays: 7,   // faster steps (Nov 3, 2026, the owner: "maybe be more aggressive", chose faster steps over lower floors or bigger jumps; was 40 fills and 14 days)
-     upWinRate: 0.20, upNetPerContract: 1.0, upPf: 1.3, upMaxDrawdownPerContract: 3,
-    downDrawdownPerContract: 3, downWindow: 40, downWinRate: 0.15, downNetPerContract: -2,
+    // Win rate lines matched to OICORE's shape (Nov 13, 2026): at a 12.8c average entry plus fees it breaks even near a 14% win rate, so a 20% bar to step up could never
+    // be met by a profitable OICORE and a 15% line to step down sat on its live 16%; profit factor, net and drawdown still do the real gating. (Were 0.20 and 0.15.)
+    upWinRate: 0.14, upNetPerContract: 1.0, upPf: 1.3, upMaxDrawdownPerContract: 3,
+    downDrawdownPerContract: 3, downWindow: 40, downWinRate: 0.10, downNetPerContract: -2,
     dailyPerContract: 2.5, dailyMaxFraction: 0.06, dailyCeiling: 75,
     stopPerContract: 5, stopMaxFraction: 0.12, stopCeiling: 150,
   }),
@@ -468,7 +476,9 @@ function killCheck(strategy, slotOrders, latch) {
 // ---- The ladder, replayed from the strategy's own record (pure) --------------------------------------------------------------------------------
 function validLadder(L, strategy) {
   if (!isObj(L) || !Array.isArray(L.steps) || !Array.isArray(L.minBase) || L.steps.length < 1 || L.steps.length !== L.minBase.length) return false;
-  if (L.steps[0] !== strategy.contractsPerOrder) return false;
+  // The bottom step may be at or above the registry size (never below it): the registry contractsPerOrder stays the validated per-order size, and an invalid ladder falls back to
+  // it, which is always the smaller size (Nov 13, 2026: OICORE's ladder starts at 15 over a registry size of 10).
+  if (!Number.isInteger(L.steps[0]) || L.steps[0] < strategy.contractsPerOrder) return false;
   for (let k = 0; k < L.steps.length; k++) {
     if (!Number.isInteger(L.steps[k]) || L.steps[k] < 1 || L.steps[k] > SLOT_LADDER_MAX_CONTRACTS || !isNum(L.minBase[k]) || L.minBase[k] < 0) return false;
     if (k > 0 && !(L.steps[k] > L.steps[k - 1] && L.minBase[k] >= L.minBase[k - 1])) return false;

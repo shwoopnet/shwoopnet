@@ -121,10 +121,10 @@ gates.ST12 = () => {
 // ST13: a trial seat past 90 fills never reads like a pass: it says the record is complete and, under the 1.3 bar, what it still needs.
 gates.ST13 = () => {
   const h = B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94, pf: 1.2 } } })]), esc, money);
-  assert.ok(/>Record complete</.test(panel(h, 'live')) && !/90 of 90/.test(h), 'the row badge is short');
-  assert.ok(/Record complete · win\/loss 1\.20, needs 1\.3 to pass/.test(B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, rows: [], daily: [], w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94, pf: 1.2 } } })]), esc, money)), 'under the bar, the sheet says what it still needs (Nov 13, 2026)');
+  assert.ok(/sp-b-live">Live</.test(panel(h, 'live')) && !/Record complete/.test(h) && !/90 of 90/.test(h), 'a finished record reads plain Live (Nov 13, 2026, the owner)');
+  assert.ok(/Not proven yet · 1\.20 of 1\.3/.test(B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, rows: [], daily: [], w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94, pf: 1.2 } } })]), esc, money)), 'under the bar, the sheet says what it still needs (Nov 13, 2026)');
   const ok = B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.4, net: 2 }, all: { n: 94, pf: 1.42 } } })]), esc, money);
-  assert.ok(/>Record complete</.test(panel(ok, 'live')), 'at or over the bar: the same short badge');
+  assert.ok(/sp-b-live">Live</.test(panel(ok, 'live')), 'at or over the bar: the same plain Live badge');
 };
 // ST14: the chart sheet (Nov 13, 2026, the owner chose A, "Sheet"): a row carries its charts (Cash, Rolling PF, Daily, the closest kill and trial gauges, the last trades) only when it has its settled rows; a tap opens the pop-up outside #stratBody instead of a dropdown; every dollar goes through money(), so Privacy masks it; an empty record says so instead of drawing.
 gates.ST14 = () => {
