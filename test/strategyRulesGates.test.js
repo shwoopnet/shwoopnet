@@ -76,7 +76,7 @@ gates.SR4 = () => {
   assert.ok(P.KAL_BOARD_SHADOW_RULES.length === 3 && !P.KAL_BOARD_SHADOW_RULES.some((t) => OWNER.test(t)), 'the shadow rules depend on nobody');
   assert.ok(!P.KAL_STAGES.some((s) => OWNER.test(s.then) || OWNER.test(s.head)), 'the stage flow says no owner approves');
   assert.ok(!OWNER.test(P.KAL_BOARD_RETIRED.back) && P.KAL_BOARD_RETIRED.rows.every((r) => !OWNER.test(r.note || '')), 'the retired lines depend on nobody');
-  assert.ok(/stays off until the owner starts it again/.test(P.KAL_ACCOUNT_STOP) && /12% of the account/.test(P.KAL_ACCOUNT_STOP) && live.L1_SIZED_STOP_FRACTION === 0.12, 'the one owner step, the account safety stop, is said plainly and matches the code');
+  assert.ok(/restarts by itself 24 hours later \(at most once in 7 days\)/.test(P.KAL_ACCOUNT_STOP) && /a second 12% stop within 7 days stays off until the owner restarts it/.test(P.KAL_ACCOUNT_STOP) && /12% of the account/.test(P.KAL_ACCOUNT_STOP) && live.L1_SIZED_STOP_FRACTION === 0.12, 'the one owner step, the account safety stop, is said plainly and matches the code');
   assert.ok(/being built/.test(P.KAL_RULES_BUILDING), 'until the rotation code is live the page says these are the written rules being built');
   for (const r of reg) {
     if (r.stage === 'Retired') { assert.ok(!OWNER.test(r['return'] || ''), r.id + ': a retired row\'s comeback line depends on nobody'); continue; }
@@ -97,6 +97,12 @@ gates.SR5 = () => {
   assert.ok(/params: s\.params/.test(html), 'the live cards carry their settings to the sheet');
 };
 
+gates.SR6 = () => {
+  // the glossary panel is gone (Nov 13, 2026, the owner: "this can get removed"), and Off / Retired groups are Live rows (the owner: "this card doesnt match")
+  assert.ok(!/KAL_GLOSSARY|sp-gloss|<summary>What the words on this page mean/.test(html), 'no glossary panel');
+  assert.ok(/<details class="sp-rgrp rw" data-k="ret:/.test(html) && /<summary class="rw-h"><i class="chev"><\/i><span class="rw-ring" aria-hidden="true"><\/span><b class="rw-n sp-rgt">/.test(html), 'a retired group uses the Live row markup');
+  assert.ok(/\.sp-b-off\{ border-color:var\(--paper\); \}/.test(html), 'the Off badge is the same solid badge as the Live rows');
+};
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
 if (failed) process.exit(1);

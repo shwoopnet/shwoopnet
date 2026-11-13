@@ -155,12 +155,12 @@ gates.SP5 = () => {
   const n = P.KAL_BOARD_LIVE.length + SHADOW_FIX.length;
   assert.strictEqual((plain.match(/class="rw(?: open)?(?: near)?"/g) || []).length, n, 'one row per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/<dt>Sizing<\/dt>/g) || []).length, n, 'every row keeps the Sizing line in More');
-  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
+  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 15 (15, 20, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
   assert.strictEqual((plain.match(/<dd>Next: 3 contracts as a probe<\/dd>/g) || []).length, 4, 'all four fixture shadow rules say next 3 contracts');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 3 && (plain.match(/class="lp-p"/g) || []).length === 3 && /id="lp"/.test(plain), 'three boxes and three panels in one loop');
   assert.ok((plain.match(/class="bd-b near"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a kill line with the closest limit hatched on each live row');
-  assert.ok((plain.match(/<circle class="sp-ring-bg"/g) || []).length === 2 * n && (plain.match(/class="rw-ring"/g) || []).length === n, 'a small ring on every row head and a ring dial in every row\'s detail (Nov 13, 2026)');
+  assert.ok((plain.match(/<circle class="sp-ring-bg"/g) || []).length === 2 * n && (plain.match(/class="rw-ring">/g) || []).length === n, 'a small ring on every row head and a ring dial in every row\'s detail (Nov 13, 2026)');
   assert.ok((plain.match(/class="kal-bd-rules"/g) || []).length === n, 'every row keeps Implement, Kill and Return in More');
   assert.ok(/41 of 150 signals/.test(plain), 'a signals of 150 bar on each shadow rule');
   assert.ok(!/#[0-9a-f]{3,6}|green|\bred\b|rgb\(/i.test(plain.replace(/aria-label="[^"]*"/g, '')), 'black and white only: no colour in the markup');
@@ -310,12 +310,12 @@ gates.SP12c = () => {
   assert.ok(Q.KAL_BOARD_RETIRED.rows.every((r) => Q.KAL_RETIRED_CAUSES.includes(r.cause)), 'every old row has a cause');
   const h = Q.kalshiRetiredGroupsHtml(en, {}, esc);
   assert.ok(!/<details[^>]* open/.test(h), 'closed by default');
-  assert.deepStrictEqual([...h.matchAll(/<summary><i class="chev"><\/i><span class="sp-rgt">([^<]+)<\/span>/g)].map((m) => m[1]), Q.KAL_RETIRED_CAUSES, 'groups by cause, in a fixed order');
+  assert.deepStrictEqual([...h.matchAll(/<summary class="rw-h"><i class="chev"><\/i><span class="rw-ring" aria-hidden="true"><\/span><b class="rw-n sp-rgt">([^<]+)<\/b>/g)].map((m) => m[1]), Q.KAL_RETIRED_CAUSES, 'groups by cause, in a fixed order');
   assert.ok(/sp-rnote">n 172 and 173, PF about 0.55 to 0.60 \u00b7 Nov 12</.test(h), 'one line: key numbers and date (the group header names the cause, Nov 13, 2026)');
   assert.ok(/<span class="sp-rnote">Nov 12<\/span>/.test(h), 'no figures: only the date');
   assert.strictEqual((h.match(/data-reg-details=/g) || []).length, en.length, 'every line has Details');
   assert.ok(!/<img|bogus/.test(h) && /&#60;img/.test(h), 'escaped');
-  assert.ok(/<details class="sp-rgrp" data-k="ret:superseded" open>/.test(Q.kalshiRetiredGroupsHtml(en, { 'ret:superseded': true }, esc)), 'an opened group stays open across a redraw');
+  assert.ok(/<details class="sp-rgrp rw" data-k="ret:superseded" open>/.test(Q.kalshiRetiredGroupsHtml(en, { 'ret:superseded': true }, esc)), 'an opened group stays open across a redraw');
   const sh = by('XRP').sheet; assert.strictEqual(sh.stage, 'Retired');
 };
 gates.SP13 = () => {
@@ -333,7 +333,7 @@ gates.SP14 = () => {
   const evil = Q.kalshiStratDetailHtml(Q.kalshiStratDetail([W(NOW)], () => '<b onmouseover=1>', CT, 8), esc, money, () => '<i>');
   assert.ok(!/<b onmouseover|<i>/.test(evil), 'market name and time are escaped');
   const open = Q.kalshiBoardHtml({ live: [{ id: 'L1', name: 'n', rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 0, pf: null }, all: { n: 0 } }, kill: { lines: [] }, spark: [], detail: Q.kalshiStratDetail(orders, () => 'Gold', CT, 8) }], deck: { state: 'ok', rows: [] }, retired: { rows: [{ name: 'Q', cause: 'superseded', note: 'n' }], back: 'b', asOf: 'a' }, open: { 'ret:superseded': true } }, esc, money);
-  assert.ok(/<details class="sp-rgrp" data-k="ret:superseded" open>/.test(open), 'an open Retired group stays open across a redraw');
+  assert.ok(/<details class="sp-rgrp rw" data-k="ret:superseded" open>/.test(open), 'an open Retired group stays open across a redraw');
   assert.ok(/data-row="L1"/.test(open) && !/data-reg-details="L1"/.test(open), 'a Live strategy is a row that opens its chart sheet (option A, Nov 13, 2026), not the registry popup');
   const body = html.slice(html.indexOf('// ---- Summary bar, detail panels'), html.indexOf('  // ---- Stage board')) + fn('kalshiBoardHtml') + fn('renderStrategiesPage');
   assert.ok(!/setInterval|setTimeout|fetch\(|XMLHttpRequest|https?:\/\/|\.set\(|setDoc|addDoc/.test(body), 'no timer, write or host');

@@ -137,7 +137,7 @@ gates.RG6 = () => {
   }
   assert.ok(P.kalshiStratSheetRow('NOPE', list, P.KAL_BOARD_LIVE) === null);
   const fb = P.kalshiStratSheetRow('OICORE', [], P.KAL_BOARD_LIVE);
-  assert.ok(fb && /24 losses in a row/.test(fb.kill) && /30 days after a stop/.test(fb['return']) && /Live now at 10 contracts/.test(fb.goes) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
+  assert.ok(fb && /24 losses in a row/.test(fb.kill) && /30 days after a stop/.test(fb['return']) && /Live now at 15 contracts/.test(fb.goes) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
   // the content: five things only
   const live = { live: true, spark: [0.9, 1.1, 1.3, 1.2], kill: { streak: 3, net: -1, floorOn: true, floorRoom: 5, count: 18, lines: [] } };
   const row = P.kalshiStratSheetRow('OICORE', list, P.KAL_BOARD_LIVE);
