@@ -101,3 +101,30 @@ No outcome is joined for any Bitcoin 15 minute close on or after 2026-11-05.
 ## Limits of this audit
 
 The V2 write-ups sweep read the files that matched a search for the recorder's names, not all 648 worker files; about 40 code modules that mention a bid or ask field were classified from their loader line only. The Refinement status file is heavily redacted and ends Nov 10. A test that read a list quote under a name none of the searches used would have been missed. Not checked by the Verification Analyst.
+
+## Status as of Nov 13, 2026, 14:40Z (restated on the Head of R&D's order of 14:23Z; the rows above are not rewritten)
+
+**Counts, corrected.** The Counts table's "11 VOID" is right: eleven rows carry a plain VOID call (rows 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 21). Row 1 (RECORD1) is a RE-SCORE of the covered part with the uncovered part (Oct 22 to 29 and Solana) VOID, so it is partly withdrawn; the Head's ruling of Nov 12 spoke of "ten withdrawn results" before MM1 moved from RE-SCORE to VOID, which makes eleven. A count of "12 rows" is wrong: it counted row 1. Rows 20 and 23 are not results (a retired run and a moot test).
+
+**One list of withdrawn figures. Do not quote any of these as standing:**
+
+| Row | Test | The figure withdrawn | Status today |
+|---|---|---|---|
+| 1 (uncovered part) | RECORD1 | mean +3.81c, z 1.60, n 300 on the quote file; the covered part on books reads "no evidence at n = 66, direction negative" | withdrawn; the registered read was made once (Nov 3) and is spent |
+| 2 | RECORD1B | none (unread) | VOID as registered; needs a book version as a new card |
+| 3 | record_info "quote follows a spot jump" | followed in 10 of 22 jumps, median 4.6 s | withdrawn (it measures the copy's age) |
+| 4 | GEN4 discovery and validation | 51 of 113 rules passed; favourite core PF 1.61 and 1.57; ten spot-momentum rules | withdrawn; the forward ledger is CLOSED (re-score, Nov 12) |
+| 7 | LATECAL | "won 61 of 61" | withdrawn; read spent |
+| 8 | BTCAVG | the 7 to 16 trade figures | withdrawn; read spent |
+| 9 | QUOTE1 | the PF at the taker fee and at zero maker fee | withdrawn, superseded by MAKER5 (market making closed Nov 12) |
+| 10 | MM1 and MM1S | none (unread) | retired unread; its self-running scorer is not to be run |
+| 11 | GOLDFILL, recorder side table | the 13 signal fill rate | withdrawn; superseded by GF1, GF2, GOLDHAIRCUT1 |
+| 14 | AVG1 | the largest cell PF 7.2, n 28 | withdrawn; retired Nov 12 |
+| 17 | CFRTI development replay join on the quote-recorder columns | "2 s / 6 s later" fills | withdrawn by Desk A's own correction |
+| 21 | INGAMELAG1 | none (unread) | VOID as designed; the in-game lag question was closed by Desk B's INGAMELAG1-M on Nov 12 |
+
+**Where they were found quoted as standing (text search of main and the five branches on Nov 13, no data opened):** QUOTE1's "PF about zero" in two files on `claude/idea-desk-a` (the Head asked Desk A to add the VOID label); the original wording of several of them in the retired research branch's README, which is frozen at its tip and is not edited (the Head writes a pointer line in RND_QUEUE.md instead). Not quoted on main. The DEFLATION_LEDGER counts their tries, correctly.
+
+**Pending reads (rows 18 to 21 and 23), status today as far as this desk knows:** 20 retired unread (ruling Nov 12); 21 closed through INGAMELAG1-M; 23 moot (recorder stopped). Rows 18 (the CFRTI1-BTC held-out script's `replay()`) and 19 (its forward shadow) were Desk A's to change before Nov 20 and Nov 23; this desk has not re-read them since, so their status is not stated here.
+
+**Rows 5, 15 and 16** (the RE-SCORE calls) are done: the GEN4 forward and RECORD1 re-scores are in `RESCORE_GEN4_RECORD1_RESULT.md`, the CFRTI replay in `CFRTI_DEV_REPLAY_NOTE.md`.
