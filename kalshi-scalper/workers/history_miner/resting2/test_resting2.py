@@ -62,5 +62,12 @@ refused(lambda: R.run("V1", "dev", os.path.join(inv, "v1run_signals.csv"), [os.p
 fresh = os.path.join(tempfile.mkdtemp(), "new", "markers")
 R.run("V2", "dev", os.path.join(inv, "v2run_signals.csv"), [os.path.join(inv, "v2run")], None, fresh, NOW2, nc)
 if not os.path.isdir(fresh): bad.append(("marker_dir not created",))
+FWD = R.iso("2026-12-24T00:00:00Z")
+o3 = R.run("V2", "fwd", os.path.join(inv, "v2run_signals.csv"), [os.path.join(inv, "v2run")], None, tempfile.mkdtemp(), FWD, nc)
+for k, v in E["V2_fwd"]["counts"].items():
+    if o3["counts"].get(k, 0) != v: bad.append(("V2 fwd count", k, o3["counts"].get(k), v))
+for k, v in E["V2_fwd"]["report"].items():
+    if not eq(o3["report"][k], v): bad.append(("V2 fwd report", k, o3["report"][k], v))
+refused(lambda: R.run("V2", "fwd", os.path.join(inv, "v2run_signals.csv"), [os.path.join(inv, "v2run")], None, tempfile.mkdtemp(), FWD, None), "V2 fwd without the NC15DEPTH1 record")
 print("MISMATCHES", bad)
 sys.exit(1 if bad else 0)

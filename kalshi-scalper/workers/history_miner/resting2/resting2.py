@@ -1,6 +1,6 @@
 """V1 (OICORE resting bid) and V2 (EVENT830 resting entry) SECOND BUILD (History Miner, Nov 13, 2026), written from the two registrations alone:
 kalshi-scalper/refine_tools/V1_OICORE_RESTING_BID_REGISTRATION.md (fc528cd3) and V2_EVENT830_RESTING_ENTRY_REGISTRATION.md (4221ab37) on claude/refine-live
-(at 9f576a29: V1 863eb2fa, V2 f266cf68, with the dated amendments and lines of Nov 13, including G1 to G3, D1 and D2), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
+(at e3cba56a, with the dated amendments and lines of Nov 13, including G1 to G3, D1, D2 and H1 to H4), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
 Invented rows only. Every reading below is now RULED by the registrations' dated amendments (R1 to R14, C1 to C4, the NOT_ENOUGH_DATA order).
 
 Input:
@@ -155,7 +155,7 @@ def window(sig, book, trades, result, cfg):
     return out
 
 
-def block_report(sigs, start, end):
+def block_report(sigs, start, end, block="dev"):
     n = len(sigs)
     fills = [s for s in sigs if s.get("filled")]
     missed = [s for s in sigs if not s.get("filled")]
@@ -197,10 +197,14 @@ def block_report(sigs, start, end):
     gap_missed = (missed_parent is not None and vpf is not None and
                   (missed_parent - vpf >= 0.10 - EPS if not (math.isinf(missed_parent) or math.isinf(vpf)) else math.isinf(missed_parent) and not math.isinf(vpf)))
     falsified = (not bar["net_per_week_not_lower"]) or gap_missed
-    if len(fills) < MIN_FILLS:                                    # NOT_ENOUGH_DATA first; FALSIFIED is information only
+    if block != "dev":                                            # H2: FALSIFIED only on development
+        verdict = "NOT_ENOUGH_DATA" if len(fills) < MIN_FILLS else ("PASS" if all(bar.values()) else "does not meet the 7g bar")
+    elif len(fills) < MIN_FILLS:                                  # NOT_ENOUGH_DATA first; FALSIFIED is information only
         verdict = "NOT_ENOUGH_DATA (FALSIFIED OR, information only: %s)" % ("true" if falsified else "false")
     else:
         verdict = "FALSIFIED" if falsified else ("PASSES the 7g bar" if all(bar.values()) else "does not pass the 7g bar")
+    if block != "dev":
+        falsified = None
     return {"signals": n, "orders": sum(1 for s in sigs if s.get("order")), "fills": len(fills),
             "fill_rate": shown(len(fills) / n) if n else None,                        # D2: fills / signals
             "version_pf_25": shown(vpf), "version_pf_0": shown(pf([s["version"]["0"] for s in fills])), "version_pf_100": shown(pf([s["version"]["100"] for s in fills])),
@@ -225,9 +229,9 @@ def run(version, block, signals_path, folders, depth1_marker=DEPTH1_RECORD, mark
     now = datetime.now(timezone.utc).timestamp() if now is None else now
     if version == "V1" and block == "dev" and not first_line(depth1_marker).startswith("DEPTH1 READ MADE:"):
         raise SystemExit("REFUSED: V1 development needs the DEPTH1 marker file starting 'DEPTH1 READ MADE:'")
-    if version == "V2" and block == "dev":
-        if now < iso(cfg["dev_read"]):
-            raise SystemExit("REFUSED: V2 development is read on or after %s" % cfg["dev_read"])
+    if version == "V2" and block == "dev" and now < iso(cfg["dev_read"]):
+        raise SystemExit("REFUSED: V2 development is read on or after %s" % cfg["dev_read"])
+    if version == "V2":                                           # H1: both V2 blocks
         line = first_line(nc15_record)
         if not (line.startswith("NC15DEPTH1 SCORER HASH: ") and NC15_HASH in line):
             raise SystemExit("REFUSED: V2 development needs the NC15DEPTH1 scorer hash record")
@@ -258,7 +262,7 @@ def run(version, block, signals_path, folders, depth1_marker=DEPTH1_RECORD, mark
         if w["status"] == "signal":
             scored.append(w)
     out = {"version": version, "block": block, "label": LABELS[version], "registrations": "V1 64539074, V2 5e156f3e", "counts": counts,
-           "report": block_report(scored, start, end), "windows": [{k: (shown(v) if isinstance(v, float) else v) for k, v in w.items() if k != "version"} for w in scored],
+           "report": block_report(scored, start, end, block), "windows": [{k: (shown(v) if isinstance(v, float) else v) for k, v in w.items() if k != "version"} for w in scored],
            "ambiguities": AMBIG}
     with open(marker, "w") as f:
         f.write("read\n")

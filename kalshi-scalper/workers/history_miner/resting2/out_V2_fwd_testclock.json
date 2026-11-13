@@ -1,0 +1,40 @@
+{
+ "ambiguities": [
+  "All readings ruled (V1 64539074 and V2 5e156f3e dated amendments): R1 best bids at level 1; R2/C2 a tie of the asks takes YES; R3 V2 spread on YES ask minus YES bid, 10c inclusive; R4 band inclusive; R5 rest open at both ends; C1 t0 row more than 10 s late is no_t0_row; R6 taker side from taker_outcome_side; R7 book ask at or below our price; R8 parent +1c fee at p + 0.01, version fee at our bid unrounded; R9 no result: counted, out of every PF; R10 blocks inclusive; R11/C4 halves by count, n // 2 first; R12 ceil weeks; C3 bar (2) against the parent at +0c and +1c, the stricter governs; R13 FALSIFIED = bar (2) fails OR missed windows' parent PF exceeds the VERSION PF by 0.10 or more; R14 a set with no bet fails; under 60 fills NOT_ENOUGH_DATA comes first and FALSIFIED is information only; D1 bar (3) with infinite PFs decided on the second half alone (see bar3_basis); D2 fill rate = fills / signals; G1 to G3 fixed record paths, no clock option."
+ ],
+ "block": "fwd",
+ "counts": {
+  "outside_block": 2
+ },
+ "label": "not blind on EVENT830's forward windows",
+ "registrations": "V1 64539074, V2 5e156f3e",
+ "report": {
+  "bar": {
+   "at_least_60_fills": false,
+   "net_per_week_not_lower": true,
+   "pf_beats_parent_by_0_10": false,
+   "second_half_not_worse": false
+  },
+  "bar3_basis": "an empty half (no version fills): fails",
+  "falsified": null,
+  "fill_rate": null,
+  "fills": 0,
+  "missed_parent_minus_version_pf_ge_0_10": false,
+  "orders": 0,
+  "parent_net_per_week": 0.0,
+  "parent_net_per_week_p0": 0.0,
+  "parent_pf_p0": null,
+  "parent_pf_p1": null,
+  "parent_pf_p1_on_filled": null,
+  "parent_pf_p1_on_missed": null,
+  "signals": 0,
+  "verdict": "NOT_ENOUGH_DATA",
+  "version_net_per_week": 0.0,
+  "version_pf_0": null,
+  "version_pf_100": null,
+  "version_pf_25": null,
+  "weeks": 2
+ },
+ "version": "V2",
+ "windows": []
+}
