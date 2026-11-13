@@ -140,3 +140,20 @@ The two readings that could change a figure are fixed here; both builds must fol
 (ii) **The point-16 refusal** (a leg run whose job did not ask for every leg the week names) tests only the legs named in WHOLE leg strings of the week's rows. Legs visible in cut strings are not required, because rows with cut strings are never eligible.
 
 The History Miner's other eight readings (COMBODONE2_BUILD_NOTE.md, 37332937 on claude/history-miner) stand as written where they do not contradict the card. Where the two builds differ on any of them, the difference is brought to this desk and fixed here by a dated amendment, never pinned in code.
+
+## Amendment 4 (Nov 13, 2026, 02:45Z, Desk B with Auditor B's gates, before the final hash; both builds agree on all 11 made-up cases)
+
+Adopted as proposed. Desk B numbered these "Amendment 3"; they are Amendment 4 here because Amendment 3 (b8317f4b) already exists. Point 22 restates Amendment 3 (i) and agrees with it.
+
+19. **Completed run.** A run is completed if ANY coverage row of its folder has `stopped_early` = 0 and the folder has a quotes file.
+20. **Leg count not whole.** A row whose `legs` value is not a whole number is "leg unknown".
+21. **Leg pull not whole.** The leg pull is also not whole if a row with status 200 has no stored file.
+22. **Unreadable row.** A quote row with no readable receive time or no ticker is "unreadable". It is in no count but its own, and it belongs to the week by its receive time, or, with none, by its run folder's day.
+23. **Fingerprint gate (rule 16b).** The first line of the count prints a fingerprint of what was read, and both builds must name the same one.
+    - The fingerprint is the sha256 (hex) of UTF-8 text made of one line per regular file under the combo folder that sits in a day folder named YYYY-MM-DD.
+    - Each line is "relative/path<TAB>size in bytes<NEWLINE>", with forward-slash paths relative to the combo folder.
+    - Lines are sorted by path as plain strings.
+
+**Stated limits (not rules):**
+- The snapshot time is the recorder's receive time, and a list copy can be some seconds old. So the 60 second line in (b) is good to some seconds, not to the second.
+- **What could stop it:** the recorder's runs on the branch so far are far fewer than 48 a day. A week of 269 completed runs depends on the self-chain the Chief of Staff merged holding up.
