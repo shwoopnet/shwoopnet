@@ -1,6 +1,7 @@
 {
- "build": "Forensics second build of MAPBREAK step 1, Amendments 1 to 10",
+ "build": "Forensics second build of MAPBREAK step 1, Amendments 1 to 11",
  "match_results_read": 0,
+ "second_look_sample": "planned from posted results: a known limit; it can only flatter the second look (Amendment 11, line 3)",
  "freshness": "candle freshness measured on Bitcoin 15 minute only, not on esports",
  "label": "selected on development: these lines can close a title, they cannot support a result",
  "titles": {
@@ -21,7 +22,8 @@
     "look_1_reached_state_observable": 874,
     "look_2_minute_found": 492,
     "look_2_minute_found_but_no_pre_match_minute_and_state_not_observable": 94,
-    "look_2_no_look_minute": 779,
+    "look_2_no_look_minute": 15,
+    "look_2_not_in_the_posted_results_plan": 764,
     "look_2_reached_state_not_observable": 398,
     "look_2_reached_state_not_observable_pre_match_minute_for_both_teams": 378,
     "matches_listed": 2006,
@@ -37,7 +39,8 @@
     "fired_and_filled": 45,
     "median_minutes_from_the_map_close": 2.7,
     "median_spread_of_the_match_contracts": 0.03,
-    "median_one_way_cost_over_the_looks_left": 0.04,
+    "median_one_way_cost_over_the_looks_left": 0.03,
+    "cost_as_paid_at_the_limit_information_only": 0.04,
     "gap_on_the_cheaper_side": {
      "n": 874,
      "gap_median": 0.0162,
@@ -58,6 +61,7 @@
      "of_which_map_1_winner": 0.0,
      "of_which_other_team": 0.0057
     },
+    "placebo_denominators": "this look's own looks: 874; the title's first-look looks: 874",
     "verdict": "no evidence at n = 45 fired and filled"
    },
    "look_2_before_map_3": {
@@ -69,8 +73,10 @@
     "median_minutes_from_the_map_close": null,
     "median_spread_of_the_match_contracts": null,
     "median_one_way_cost_over_the_looks_left": null,
+    "cost_as_paid_at_the_limit_information_only": null,
     "gap_on_the_cheaper_side": null,
     "placebo_at_the_pre_match_minute_same_matches": null,
+    "placebo_denominators": "this look's own looks: 0; the title's first-look looks: 874",
     "verdict": "no evidence at n = 0 fired and filled"
    }
   },
@@ -88,9 +94,10 @@
     "look_1_reached_state_not_observable": 12,
     "look_1_reached_state_not_observable_pre_match_minute_for_both_teams": 11,
     "look_1_reached_state_observable": 219,
-    "look_2_minute_found": 131,
-    "look_2_minute_found_but_no_pre_match_minute_and_state_not_observable": 17,
-    "look_2_no_look_minute": 187,
+    "look_2_minute_found": 130,
+    "look_2_minute_found_but_no_pre_match_minute_and_state_not_observable": 16,
+    "look_2_no_look_minute": 2,
+    "look_2_not_in_the_posted_results_plan": 186,
     "look_2_reached_state_not_observable": 114,
     "look_2_reached_state_not_observable_pre_match_minute_for_both_teams": 100,
     "matches_listed": 414,
@@ -106,7 +113,8 @@
     "fired_and_filled": 0,
     "median_minutes_from_the_map_close": 2.6833,
     "median_spread_of_the_match_contracts": 0.03,
-    "median_one_way_cost_over_the_looks_left": 0.045,
+    "median_one_way_cost_over_the_looks_left": 0.035,
+    "cost_as_paid_at_the_limit_information_only": 0.045,
     "gap_on_the_cheaper_side": {
      "n": 219,
      "gap_median": 0.0017,
@@ -127,6 +135,7 @@
      "of_which_map_1_winner": 0.0046,
      "of_which_other_team": 0.0137
     },
+    "placebo_denominators": "this look's own looks: 219; the title's first-look looks: 219",
     "verdict": "no evidence at n = 0 fired and filled"
    },
    "look_2_before_map_3": {
@@ -138,8 +147,10 @@
     "median_minutes_from_the_map_close": null,
     "median_spread_of_the_match_contracts": null,
     "median_one_way_cost_over_the_looks_left": null,
+    "cost_as_paid_at_the_limit_information_only": null,
     "gap_on_the_cheaper_side": null,
     "placebo_at_the_pre_match_minute_same_matches": null,
+    "placebo_denominators": "this look's own looks: 0; the title's first-look looks: 219",
     "verdict": "no evidence at n = 0 fired and filled"
    }
   },
@@ -159,7 +170,7 @@
     "look_1_reached_state_observable": 49,
     "look_2_minute_found": 26,
     "look_2_minute_found_but_no_pre_match_minute_and_state_not_observable": 6,
-    "look_2_no_look_minute": 45,
+    "look_2_not_in_the_posted_results_plan": 45,
     "look_2_reached_state_not_observable": 20,
     "look_2_reached_state_not_observable_pre_match_minute_for_both_teams": 18,
     "matches_listed": 104,
@@ -175,7 +186,8 @@
     "fired_and_filled": 3,
     "median_minutes_from_the_map_close": 2.6,
     "median_spread_of_the_match_contracts": 0.03,
-    "median_one_way_cost_over_the_looks_left": 0.04,
+    "median_one_way_cost_over_the_looks_left": 0.03,
+    "cost_as_paid_at_the_limit_information_only": 0.04,
     "gap_on_the_cheaper_side": {
      "n": 49,
      "gap_median": 0.0142,
@@ -196,6 +208,7 @@
      "of_which_map_1_winner": 0.0204,
      "of_which_other_team": 0.0
     },
+    "placebo_denominators": "this look's own looks: 49; the title's first-look looks: 49",
     "verdict": "no evidence at n = 3 fired and filled"
    },
    "look_2_before_map_3": {
@@ -207,8 +220,10 @@
     "median_minutes_from_the_map_close": null,
     "median_spread_of_the_match_contracts": null,
     "median_one_way_cost_over_the_looks_left": null,
+    "cost_as_paid_at_the_limit_information_only": null,
     "gap_on_the_cheaper_side": null,
     "placebo_at_the_pre_match_minute_same_matches": null,
+    "placebo_denominators": "this look's own looks: 0; the title's first-look looks: 49",
     "verdict": "no evidence at n = 0 fired and filled"
    }
   },
@@ -228,7 +243,7 @@
     "look_1_reached_state_observable": 35,
     "look_2_minute_found": 20,
     "look_2_minute_found_but_no_pre_match_minute_and_state_not_observable": 3,
-    "look_2_no_look_minute": 30,
+    "look_2_not_in_the_posted_results_plan": 30,
     "look_2_reached_state_not_observable": 17,
     "look_2_reached_state_not_observable_pre_match_minute_for_both_teams": 15,
     "matches_listed": 338,
@@ -244,7 +259,8 @@
     "fired_and_filled": 2,
     "median_minutes_from_the_map_close": 2.4833,
     "median_spread_of_the_match_contracts": 0.03,
-    "median_one_way_cost_over_the_looks_left": 0.04,
+    "median_one_way_cost_over_the_looks_left": 0.03,
+    "cost_as_paid_at_the_limit_information_only": 0.04,
     "gap_on_the_cheaper_side": {
      "n": 35,
      "gap_median": 0.0101,
@@ -265,6 +281,7 @@
      "of_which_map_1_winner": 0.0,
      "of_which_other_team": 0.0
     },
+    "placebo_denominators": "this look's own looks: 35; the title's first-look looks: 35",
     "verdict": "no evidence at n = 2 fired and filled"
    },
    "look_2_before_map_3": {
@@ -276,8 +293,10 @@
     "median_minutes_from_the_map_close": null,
     "median_spread_of_the_match_contracts": null,
     "median_one_way_cost_over_the_looks_left": null,
+    "cost_as_paid_at_the_limit_information_only": null,
     "gap_on_the_cheaper_side": null,
     "placebo_at_the_pre_match_minute_same_matches": null,
+    "placebo_denominators": "this look's own looks: 0; the title's first-look looks: 35",
     "verdict": "no evidence at n = 0 fired and filled"
    }
   }
@@ -287,7 +306,7 @@
   "2. A quote candle carries a bid above 0 or an ask below 1; a zero bid with an ask of 1 is an empty book (Amendment 10, line 9, no longer a choice). The state candle is the last quote candle ending at or before the map market's close (line 10); each contract's OWN close_time is used for the cap and for the 10 minute age limit.",
   "3. The age limit is applied to both teams' candles: a candle that ended more than 10 minutes before its map market's close shows no 0.90 bid for either team. A contract with no quote candle at all at or before its close makes the state not observable (Amendments 7 and 8, point 3).",
   "4. The pre-match minute for a named map-1 winner W: the first minute from S-10 back to S-40 at which W's match contract and BOTH map-1 contracts are two-sided (Amendment 3). 'Look reached' (Amendment 10, line 3) for a look whose state is NOT observable cannot name W; it is counted when such a minute exists for EITHER team, and the count for BOTH teams is printed beside it.",
-  "5. Looks left = a look minute, an observable state and a pre-match minute for the map-1 winner. The gap share, the placebo share and the cost line are over the looks left, per title and look (Amendment 7 point 3, Amendment 10 lines 2 and 8).",
+  "5. Looks left = a look minute, an observable state and a pre-match minute for the map-1 winner. The gap share, the placebo share and the cost line are over the looks left, per title and look. The cost the kill reads is (ask minus mid) plus the fee at the limit (Amendment 11, line 1); (limit minus mid) plus the fee is printed beside it.",
   "6. Equal gaps (within 1e-9): no bet, counted (Amendment 10, line 4). The look stays in the looks left: it is in the gap distribution with its gap, it is not a hit for the gap share, and it has no cheaper side, so it is left out of the cost line.",
   "7. The fill (Amendment 9, point 2): the candle ending exactly one minute after the look minute must exist and carry an ask at or under the limit (the look candle's ask plus 1c). No candle that minute, or no ask in it, is 'not filled'. It does not have to be two-sided.",
   "8. 'Median spread of the match contracts' at the look: over BOTH match contracts of every look left (two values a look).",

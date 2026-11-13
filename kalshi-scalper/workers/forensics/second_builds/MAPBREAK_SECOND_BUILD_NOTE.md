@@ -72,3 +72,15 @@ After Amendment 10 lines 9 (an empty book is not a quote) and 10 (the candle tha
 Readings 3 (the placebo set at the second look) and 4 (second-look matches planned from posted map results) bear on the second look only, which waits for the `MAPBREAK_CANDLES_M2` run.
 
 Output: `MAPBREAK_SECOND_OUTPUT_landed_first_pull_282_requests_counts_only.json`.
+
+## Fourth comparison, after the Head's final rulings and Amendment 11 (2026-11-13): the same output
+
+Rulings: (1) the state candle is capped at the map market's close (Amendment 10 line 10); (2) the KILL reads the standing template, (ask minus mid) plus the fee as charged at the limit, and (limit minus mid) plus the fee is printed beside it as "cost as paid at the limit, information only" (the finding on line 8 was correct as the text stood; the text was corrected to the template); (3) the second look's placebo is over the second look's own looks; (4) the text stands on observed winners, and the landed data's restriction to matches whose posted results say one map each is printed as a disclosed limit that can only flatter the second look.
+
+This build (sha256 `6be8be28...`) follows Amendment 11. The Testing Desk's final build is 0794063a (`breakplay.py` sha256 `a8e64bbe...`, `mapbreak.py` `881988a5...`).
+
+- **Fixture version 2, seed 7 (invented rows), with the disclosed limit applied (`--second-look-planned-from-posted-results`): 212 figures compared at both looks in four titles, all identical** (one apparent difference of 0.001 in a share was my comparison script rounding a figure twice; the two builds print 5 of 68 as 0.0735 and 0.074).
+- By the text alone (observed winners), the second look has 1 to 2 more looks a title on the fixture; the count is printed by this build ("observed one map each but the posted results do not say so": 1, 2, 1, 2).
+- **Landed first pull (282 requests), first look: 27 figures a title, all identical**, including both cost figures: the kill's 3.0c (Dota 2 3.5c) and the as-paid 4.0c (4.5c). The count of first looks where the observed winner differs from the posted map result is 0 in every title. The first look is recorded by the Head as out at step 1 for every title (45, 0, 3 and 2 fired and filled bets against 150; gap shares 7.1%, 1.4%, 6.1%, 5.7% against 10%).
+
+The second look waits for the `MAPBREAK_CANDLES_M2` run.

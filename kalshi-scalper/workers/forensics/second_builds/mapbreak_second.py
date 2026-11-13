@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """MAPBREAK, an independent SECOND build of step 1 (Forensics desk, 2026-11-13, on the Head of R&D's order), rebuilt to the FINAL text:
-Desk B's registration and Amendments 1 to 10, lines 1 to 10 (workers/mapbreak/MAPBREAK_REGISTRATION.md at 7898840b on claude/idea-desk-b). The first version of this file
+Desk B's registration and Amendments 1 to 11 (workers/mapbreak/MAPBREAK_REGISTRATION.md at 31bf8552 on claude/idea-desk-b). The first version of this file
 (commit db1c0354) followed Amendments 1 to 7 and is what found the float comparison on the 4c line.
 DISCLOSURE: this desk leak-audited the Testing Desk's mapbreak.py and breakplay.py on Nov 12, so it is not a clean-room reader; every place where the text alone
 did not settle a choice is listed in AMBIGUITIES and printed.
@@ -8,7 +8,8 @@ did not settle a choice is listed in AMBIGUITIES and printed.
 Step 1 only: counts, the observable state, decisions and fills at each look, the one-way cost, the gap share and its placebo. NO MATCH RESULT IS READ ANYWHERE IN
 THIS FILE: the result field of a match market and of a map-3 market is never touched. A map-1 or map-2 result is read for ONE count only (Amendment 7, point 1):
 looks where the observed winner differs from the posted result. It never names a team.
-usage: python3 -I mapbreak_second.py measure --lists <run folder ...> --candles <run folder ...>
+usage: python3 -I mapbreak_second.py measure [--second-look-planned-from-posted-results] --lists <run folder ...> --candles <run folder ...>
+  --second-look-planned-from-posted-results: the DISCLOSED LIMIT of the landed data (Amendment 11, line 3): a second look only for matches whose POSTED map results say one map each.
 Invented rows only until the Head says otherwise: this file refuses any HELDOUT_ folder and any match closing on or after 2026-10-23T00:00Z.
 """
 import sys, os, json, gzip, math, calendar, time, statistics as st, collections
@@ -33,7 +34,7 @@ AMBIGUITIES = [
     "2. A quote candle carries a bid above 0 or an ask below 1; a zero bid with an ask of 1 is an empty book (Amendment 10, line 9, no longer a choice). The state candle is the last quote candle ending at or before the map market's close (line 10); each contract's OWN close_time is used for the cap and for the 10 minute age limit.",
     "3. The age limit is applied to both teams' candles: a candle that ended more than 10 minutes before its map market's close shows no 0.90 bid for either team. A contract with no quote candle at all at or before its close makes the state not observable (Amendments 7 and 8, point 3).",
     "4. The pre-match minute for a named map-1 winner W: the first minute from S-10 back to S-40 at which W's match contract and BOTH map-1 contracts are two-sided (Amendment 3). 'Look reached' (Amendment 10, line 3) for a look whose state is NOT observable cannot name W; it is counted when such a minute exists for EITHER team, and the count for BOTH teams is printed beside it.",
-    "5. Looks left = a look minute, an observable state and a pre-match minute for the map-1 winner. The gap share, the placebo share and the cost line are over the looks left, per title and look (Amendment 7 point 3, Amendment 10 lines 2 and 8).",
+    "5. Looks left = a look minute, an observable state and a pre-match minute for the map-1 winner. The gap share, the placebo share and the cost line are over the looks left, per title and look. The cost the kill reads is (ask minus mid) plus the fee at the limit (Amendment 11, line 1); (limit minus mid) plus the fee is printed beside it.",
     "6. Equal gaps (within 1e-9): no bet, counted (Amendment 10, line 4). The look stays in the looks left: it is in the gap distribution with its gap, it is not a hit for the gap share, and it has no cheaper side, so it is left out of the cost line.",
     "7. The fill (Amendment 9, point 2): the candle ending exactly one minute after the look minute must exist and carry an ask at or under the limit (the look candle's ask plus 1c). No candle that minute, or no ask in it, is 'not filled'. It does not have to be two-sided.",
     "8. 'Median spread of the match contracts' at the look: over BOTH match contracts of every look left (two values a look).",
@@ -197,9 +198,9 @@ def stats(rows):
             "of_which_map_1_winner": round(sum(1 for r in hit if r["side"] == "map-1 winner") / len(rows), 4), "of_which_other_team": round(sum(1 for r in hit if r["side"] == "other team") / len(rows), 4)}
 
 
-def measure(list_folders, candle_folders):
+def measure(list_folders, candle_folders, second_look_planned_from_posted_results=False):
     ev = read_lists(list_folders); cd = read_candles(candle_folders)
-    T = {c: {"counts": collections.Counter(), "L": {1: [], 2: []}, "P": {1: [], 2: []}, "cost": {1: [], 2: []}, "spr": {1: [], 2: []}, "mins": {1: [], 2: []}} for c in TITLES}
+    T = {c: {"counts": collections.Counter(), "L": {1: [], 2: []}, "P": {1: [], 2: []}, "cost": {1: [], 2: []}, "paid": {1: [], 2: []}, "spr": {1: [], 2: []}, "mins": {1: [], 2: []}} for c in TITLES}
     for (cell, key), e in sorted(ev.items()):
         C = T[cell]["counts"]
         if len(e["match"]) != 2 or any(v["close"] is None for v in e["match"].values()): continue
@@ -227,8 +228,9 @@ def measure(list_folders, candle_folders):
             T[cell]["P"][k].append(side_row(q - bw[1], bw, (1 - q) - bo[1], bo))
             C["look_%d_looks_left" % k] += 1
             if row["side"] is None: C["look_%d_equal_gaps_no_bet" % k] += 1; return
-            limit = round(row["ask"] + SLIP, 6)
-            T[cell]["cost"][k].append((limit - (row["ask"] + row["bid"]) / 2) + fee_up(limit))
+            limit = round(row["ask"] + SLIP, 6); mid_ = (row["ask"] + row["bid"]) / 2
+            T[cell]["cost"][k].append((row["ask"] - mid_) + fee_up(limit))              # Amendment 11, line 1: the KILL reads the template, (ask minus mid) plus the fee as charged at the limit
+            T[cell]["paid"][k].append((limit - mid_) + fee_up(limit))                   # printed beside it: cost as paid at the limit, information only
             if not row["hit"]: return
             C["look_%d_fired_optimistic_same_candle_fill" % k] += 1
             nxt = (cd.get(mt[w1 if row["side"] == "map-1 winner" else other]) or {}).get(L + 60)
@@ -256,6 +258,8 @@ def measure(list_folders, candle_folders):
                     look(1, L1, w1, lambda q: 1 - (1 - q) ** 2)
         # ---- second look: one map each
         L2 = look_minute(cd, c2, list(mt.values()))
+        p1, p2 = result_winner(m1), result_winner(m2); posted_one_each = p1 is not None and p2 is not None and p1 != p2       # MAP results only, for the disclosed limit and one count; never names a team
+        if second_look_planned_from_posted_results and not posted_one_each: C["look_2_not_in_the_posted_results_plan"] += 1; continue
         if L2 is None: C["look_2_no_look_minute"] += 1; continue
         C["look_2_minute_found"] += 1
         w1b = w1 if w1 is not None else observed_winner(cd, m1, L2); w2 = observed_winner(cd, m2, L2)
@@ -264,10 +268,12 @@ def measure(list_folders, candle_folders):
         if rw2 is not None and rw2 != w2: C["count_only_look_2_observed_map_2_winner_differs_from_the_posted_map_result"] += 1
         if w2 == w1b: C["look_2_no_break_same_winner_twice"] += 1; continue
         C["look_2_one_map_each"] += 1
+        if not posted_one_each: C["count_only_look_2_observed_one_map_each_but_the_posted_results_do_not_say_so"] += 1
         if pre[w1b] is None: C["look_2_observable_but_no_pre_match_minute"] += 1; continue
         C["look_2_reached_state_observable"] += 1; T[cell]["mins"][2].append((L2 - c2) / 60.0)
         look(2, L2, w1b, lambda q: q)
-    out = {"build": "Forensics second build of MAPBREAK step 1, Amendments 1 to 10", "match_results_read": 0, "freshness": "candle freshness measured on Bitcoin 15 minute only, not on esports",
+    out = {"build": "Forensics second build of MAPBREAK step 1, Amendments 1 to 11", "match_results_read": 0,
+           "second_look_sample": ("planned from posted results: a known limit; it can only flatter the second look (Amendment 11, line 3)" if second_look_planned_from_posted_results else "by observed winners, as the text says (on landed data the candles were pulled only for matches whose posted results say one map each)"), "freshness": "candle freshness measured on Bitcoin 15 minute only, not on esports",
            "label": "selected on development: these lines can close a title, they cannot support a result", "titles": {}, "ambiguities": AMBIGUITIES}
     for cell, D in T.items():
         C = D["counts"]; res = {"counts": dict(sorted(C.items()))}
@@ -282,7 +288,8 @@ def measure(list_folders, candle_folders):
             res[name] = {"looks_reached": reached, "of_which_state_observable": C["look_%d_reached_state_observable" % k], "looks_left": len(D["L"][k]),
                          "fired_optimistic_same_candle_fill": C["look_%d_fired_optimistic_same_candle_fill" % k], "fired_and_filled": filled,
                          "median_minutes_from_the_map_close": quant(D["mins"][k], .5), "median_spread_of_the_match_contracts": quant(D["spr"][k], .5),
-                         "median_one_way_cost_over_the_looks_left": cost, "gap_on_the_cheaper_side": s, "placebo_at_the_pre_match_minute_same_matches": pl, "verdict": v}
+                         "median_one_way_cost_over_the_looks_left": cost, "cost_as_paid_at_the_limit_information_only": quant(D["paid"][k], .5), "gap_on_the_cheaper_side": s,
+                         "placebo_at_the_pre_match_minute_same_matches": pl, "placebo_denominators": "this look's own looks: %d; the title's first-look looks: %d" % (len(D["P"][k]), len(D["P"][1])), "verdict": v}
         out["titles"][cell] = res
     return out
 
@@ -290,5 +297,6 @@ def measure(list_folders, candle_folders):
 if __name__ == "__main__":
     a = sys.argv[1:]
     if len(a) < 5 or a[0] != "measure" or "--lists" not in a or "--candles" not in a: print(__doc__); print("\n".join(AMBIGUITIES)); sys.exit(2)
+    plan = "--second-look-planned-from-posted-results" in a; a = [x for x in a if x != "--second-look-planned-from-posted-results"]
     i, j = a.index("--lists"), a.index("--candles")
-    print(json.dumps(measure(a[i + 1:j], a[j + 1:]), indent=1))
+    print(json.dumps(measure(a[i + 1:j], a[j + 1:], second_look_planned_from_posted_results=plan), indent=1))
