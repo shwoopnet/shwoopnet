@@ -28,6 +28,12 @@ gates.WR2 = () => {
     assert.strictEqual(inRet, r.stage === 'Retired', r.id + ' sits in the lane its stage names');
   }
 };
+// WR3 (same pull request, the owner: "text under bot status can be removed"): the bot's gold kill latch note is not drawn under Bot status.
+gates.WR3 = () => {
+  const i = html.indexOf("if(/^\\s*(watching|nothing to do)/i.test(note)){ note = ''; }");
+  assert.ok(i > 0, 'the Bot status note filter is where it was');
+  assert.ok(/if\(\/\^\\s\*gold is switched off by its own kill latch\/i\.test\(note\)\)\{ note = ''; \}/.test(html.slice(i, i + 600)), 'the gold latch note is dropped from Bot status');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
