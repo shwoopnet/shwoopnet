@@ -22,3 +22,7 @@ Desk A sent the exact format (text only, from `lead_lag` in `desk_a_verify/cfrti
 - Lags stay -3 to +3 (as registered; CFRTI-K printed -2 to +2). A lag with fewer than 30 pooled pairs is "n/a", a zero variance is "n/a". The fixture is run with the floor lowered to 3 by an argument, and the real run uses 30.
 - Printed: CFRTI-K's one line with %+d lags and %.3f values, then (the card's own addition, since CFRTI-K did not print it) the pair count per lag. Pooled over windows before correlating.
 - The prediction (peak at lag 0, no lead) is unchanged. EXPECTED_ESLEAD1_fixture.md is rewritten for log changes in the same commit.
+
+
+## Amendment 2 (Nov 13, 2026, before any data is opened): licensed-data handling
+The ES bars are Databento licensed data. They are never sent to any other session and never land in a public repo. Desk B's build 1 is NOT run on them in Desk B's session. The Testing Desk, which holds the file, runs BOTH builds (Desk B's and its own) on the same file; code goes to it, and only the aggregate figures come back. Auditor B compares the printed figures and the input file's sha256 (named by the Testing Desk), never the bars, and is never sent the ES file. Each scorer prints aggregates only (no bar value, no per-bar line, no per-window line that would reveal a bar) and writes no file derived from the ES bars.
