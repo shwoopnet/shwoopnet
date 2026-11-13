@@ -1,6 +1,6 @@
 # VOIDSNAP: a match that will be voided at a fair price still trades away from it (Idea Desk B)
 
-**Written Nov 13, 2026, 01:05Z. A card with a zero-try MEASUREMENT registered first; no rule is registered yet and no try is spent.** Research and paper only. No Kalshi request was made: every count below comes from lists already landed for other cards (the Nov 10 census listing, and the MAPBREAK lists of run 2026-11-12T1919Z, a card that is now closed). No candle of a voided match has been read by anyone.
+**Written Nov 13, 2026, 01:05Z. A card with a zero-try MEASUREMENT registered first; no rule is registered yet and no try is spent.** Research and paper only. No Kalshi request was made: every count below comes from lists already landed for other cards (the Nov 10 census listing, and the MAPBREAK lists of run 2026-11-12T1919Z, a card that is now closed). No candle of a voided match has been read by this desk.
 
 `VOIDSNAP | family: settlement by rule (a contract that will settle at a set "fair" price, not 0 or 1), bought under that price, held to settlement | risk class: mid price (15c to 64c), 1 contract | stage Idea, measurement registered, zero tries`
 
