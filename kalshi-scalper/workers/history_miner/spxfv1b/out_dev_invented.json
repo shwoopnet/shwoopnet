@@ -1,5 +1,6 @@
 {
  "aggregate": {
+  "events": 1,
   "label": "no evidence at n = 1",
   "mean_net": 0.68,
   "mean_price": 0.3,
@@ -7,7 +8,8 @@
   "pf": "inf",
   "pf_unrounded_info": "inf",
   "ties": 0,
-  "win_rate": 1.0
+  "win_rate": 1.0,
+  "z_event": null
  },
  "card": "DESK_A_SPX_CARDS_NOV13.md 94c4dfbc",
  "counts": {
@@ -24,6 +26,7 @@
   "S3_quote": "the decision candle's YES bid and ask closes; YES bid + NO bid >= 1 - 1e-9 (crossed or locked) is no quote (rule 18)",
   "S4_tie": "a tie of the two asks goes to YES; the tie count is printed",
   "S5_thirds": "three equal time spans from 2026-12-01T00:00Z to the last traded close at or before READ_DATE",
-  "S6_void": "a void is a fee-only loss; an empty result stops the run"
+  "S6_void": "a void is a fee-only loss; an empty result stops the run",
+  "Z_event": "z clustered by event ticker (Head of R&D, Nov 13, 16:51Z): mean of the per-event summed net over the sample sd of those sums times sqrt(number of events); under 2 events or a zero sd, no z; the held verdict needs z >= 5.46"
  }
 }

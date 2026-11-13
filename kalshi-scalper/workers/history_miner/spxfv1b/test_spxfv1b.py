@@ -19,7 +19,7 @@ if a["n"] != E["dev"]["traded_n"]: bad.append(("n", a["n"]))
 import csv
 bars = S.load_futures(F)
 w = [r for r in csv.DictReader(open(W)) if r["ticker"] == "KXINX15M-A"][0]
-st, t = S.decide({"ticker": w["ticker"], "close_ts": int(w["close_ts"]), "yes_bid": float(w["yes_bid"]), "yes_ask": float(w["yes_ask"]), "result": w["result"]}, bars)
+st, t = S.decide({"ticker": w["ticker"], "event_ticker": w["event_ticker"], "close_ts": int(w["close_ts"]), "yes_bid": float(w["yes_bid"]), "yes_ask": float(w["yes_ask"]), "result": w["result"]}, bars)
 x = E["dev"]["windows_A"]
 if st != "traded" or t["side"] != x["side"] or abs(t["ask"] - x["ask"]) > 1e-9 or abs(t["net"] - x["net"]) > 1e-9 or abs(t["net_unrounded"] - x["net_unrounded_info"]) > 1e-9:
     bad.append(("window A", st, t))
@@ -40,5 +40,10 @@ o3 = S.run("dev", os.path.join(inv, "windows_heldempty.csv"), F)
 for k, v in E["dev_heldempty"]["counts"].items():
     if o3["counts"].get(k, 0) != v: bad.append(("F1 count", k, o3["counts"].get(k), v))
 refused(lambda: S.run("dev", W, os.path.join(inv, "futures_mes.csv")), "a non-ES futures row (F2)")
+if a["z_event"] is not None: bad.append(("dev z should be none", a["z_event"]))
+oz = S.run("dev", os.path.join(inv, "windows_z.csv"), os.path.join(inv, "futures_z.csv"))
+az = oz["aggregate"]
+if az["n"] != E["z_set"]["traded"] or az["events"] != E["z_set"]["events"] or abs(az["z_event"] - E["z_set"]["z_event"]) > 1e-6:
+    bad.append(("z set", az["n"], az["events"], az["z_event"], E["z_set"]))
 print("MISMATCHES", bad)
 sys.exit(1 if bad else 0)

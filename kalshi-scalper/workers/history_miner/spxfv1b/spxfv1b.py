@@ -4,7 +4,7 @@ The Testing Desk's build was not read. Research only. Nothing Databento-derived 
 output holds AGGREGATES only (counts, PF, mean, labels), never a per-window probability or a bar value (D8).
 
 Inputs (this build's layout; the real rows are built by another script and audited):
-  windows CSV: ticker, close_ts (epoch s), yes_bid, yes_ask (the Kalshi decision candle, end time close - 120 s), result (yes | no | void | empty)
+  windows CSV: ticker, event_ticker, close_ts (epoch s), yes_bid, yes_ask (the Kalshi decision candle, end time close - 120 s), result (yes | no | void | empty)
   futures CSV: ts_event_s (bar START, epoch s, D7), symbol, instrument_id, close  - ES.c.0 1 minute bars only (D7); any other symbol stops the run (F2)
 Usage: python3 -I spxfv1b.py dev|held <windows.csv> <futures.csv> <out.json>"""
 import csv, json, math, os, statistics, sys
@@ -19,6 +19,7 @@ READ_DATE = "2027-02-26T00:00:00Z"          # D4
 MIN_READ = 150
 H_FACTOR = math.sqrt(119 / 60)               # D1
 EDGE, SPREAD_MAX, BAND = 0.05, 0.03, (0.05, 0.30)
+Z_BAR = 5.46
 MARKER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SPXFV1_HELD_READ_DONE")
 RULINGS = {   # the Head of R&D's rulings of Nov 13, 2026 (16:47Z), printed as constants in every run header
     "S1_fee": "0.07 x C x p x (1 - p), rounded UP to the cent per order, C = 1 (quadratic, multiplier 1, standard schedule); the unrounded figure is information only",
@@ -27,6 +28,7 @@ RULINGS = {   # the Head of R&D's rulings of Nov 13, 2026 (16:47Z), printed as c
     "S4_tie": "a tie of the two asks goes to YES; the tie count is printed",
     "S5_thirds": "three equal time spans from 2026-12-01T00:00Z to the last traded close at or before READ_DATE",
     "S6_void": "a void is a fee-only loss; an empty result stops the run",
+    "Z_event": "z clustered by event ticker (Head of R&D, Nov 13, 16:51Z): mean of the per-event summed net over the sample sd of those sums times sqrt(number of events); under 2 events or a zero sd, no z; the held verdict needs z >= 5.46",
 }
 
 
@@ -101,7 +103,7 @@ def decide(w, bars):
         won = res == side
         net = (1 - ask - fee(ask)) if won else (-ask - fee(ask))
         raw = (1 - ask - fee_raw(ask)) if won else (-ask - fee_raw(ask))
-    return "traded", {"close": close, "side": side, "ask": ask, "won": res == side, "net": net, "net_unrounded": raw, "tie": tie}
+    return "traded", {"close": close, "event": w["event_ticker"], "side": side, "ask": ask, "won": res == side, "net": net, "net_unrounded": raw, "tie": tie}
 
 
 def pf(xs):
@@ -115,10 +117,24 @@ def shown(x):
     return None if x is None else ("inf" if x == math.inf else round(x, 6))
 
 
+def z_event(trades):
+    ev = {}
+    for t in trades:
+        ev[t["event"]] = ev.get(t["event"], 0.0) + t["net"]
+    v = list(ev.values())
+    if len(v) < 2:
+        return None, len(v)
+    sd = statistics.stdev(v)
+    if sd == 0:
+        return None, len(v)
+    return (sum(v) / len(v)) / (sd / math.sqrt(len(v))), len(v)
+
+
 def agg(trades):
     xs = [t["net"] for t in trades]
     n = len(xs)
-    return {"n": n, "pf": shown(pf(xs)), "pf_unrounded_info": shown(pf([t["net_unrounded"] for t in trades])), "ties": sum(t["tie"] for t in trades),
+    z, ne = z_event(trades)
+    return {"n": n, "events": ne, "z_event": shown(z), "pf": shown(pf(xs)), "pf_unrounded_info": shown(pf([t["net_unrounded"] for t in trades])), "ties": sum(t["tie"] for t in trades),
             "mean_net": round(sum(xs) / n, 6) if n else None,
             "win_rate": round(sum(t["won"] for t in trades) / n, 6) if n else None, "mean_price": round(sum(t["ask"] for t in trades) / n, 6) if n else None}
 
@@ -151,7 +167,7 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
                 continue
             if r["result"] not in ("yes", "no", "void"):                        # S6, only rows of the block being read
                 raise Stop("result %r refused (%s)" % (r["result"], r["ticker"]))
-            W.append({"ticker": r["ticker"], "close_ts": close, "yes_bid": float(r["yes_bid"]), "yes_ask": float(r["yes_ask"]), "result": r["result"]})
+            W.append({"ticker": r["ticker"], "event_ticker": r["event_ticker"], "close_ts": close, "yes_bid": float(r["yes_bid"]), "yes_ask": float(r["yes_ask"]), "result": r["result"]})
     for w in sorted(W, key=lambda w: (w["close_ts"], w["ticker"])):
         st, t = decide(w, bars)
         counts[st] = counts.get(st, 0) + 1
@@ -172,7 +188,8 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
             raw = [pf([t["net"] for t in x]) for x in thirds]
             kills = {"pf_under_1_at_100": pf([t["net"] for t in trades]) < 1.0,
                      "win_rate_within_3_points": abs(A["win_rate"] - A["mean_price"]) < 0.03 + EPS}
-            passes = all(r is not None and r >= 1.5 - EPS for r in raw) and not any(kills.values())
+            z, _ = z_event(trades)
+            passes = all(r is not None and r >= 1.5 - EPS for r in raw) and not any(kills.values()) and z is not None and z >= Z_BAR - EPS
             A.update({"thirds": th, "kills": kills, "verdict": "BAR MET (not a research-bar pass)" if passes else "BAR NOT MET"})   # F3
             out["aggregate"] = A
         with open(marker, "w") as f:
