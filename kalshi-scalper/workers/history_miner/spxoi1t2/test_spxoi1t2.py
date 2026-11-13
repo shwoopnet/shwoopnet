@@ -5,6 +5,7 @@ import spxoi1t2 as S
 
 C0 = 1793901600
 RISE = [500, -200, 0, 1200, 300, 800, 50, 2000, 700, 100, None, None, None, 1500]
+ODD = {14: "nan", 15: "inf", 16: True}                                         # run C: close - 180 OI of W15 to W17
 
 
 def tick(close):
@@ -27,6 +28,8 @@ def make(base, n=14, job_id="SPXOI1_CANDLES", status="complete", drop_sha=False,
             cs.append({"end_period_ts": close - 360, "open_interest_fp": "10000.00"})
         if i == 12:
             cs.append({"end_period_ts": close - 180, "open_interest_fp": None})
+        elif i in ODD:
+            cs.append({"end_period_ts": close - 180, "open_interest_fp": ODD[i]})
         elif i != 11:
             cs.append({"end_period_ts": close - 180, "open_interest_fp": "%.2f" % (10000 + (RISE[i] or 0))})
         cs.append({"end_period_ts": close - 120, "open_interest_fp": "99999.00"})
@@ -56,6 +59,12 @@ jp, run, sha = make(root, n=13)
 b = S.derive(jp, run, sha)
 if (b["n"], b["T"]) != (10, 1200.0):
     bad.append(("B", b))
+
+
+jp, run, sha = make(root, n=17)
+c = S.derive(jp, run, sha)
+if c != {"n": 11, "T": 1500.0, "counts": {"windows": 17, "used": 11, "dropped_no_candle": 2, "dropped_no_oi": 4}}:
+    bad.append(("C", c))
 
 
 def refused(kw, what, base=root):

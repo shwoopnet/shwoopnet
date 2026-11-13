@@ -3,7 +3,7 @@ EXPECTED_BY_HAND.md, committed first (9a91f648). Reads open interest only from o
 oi_rise = OI(candle ending close - 180) - OI(candle ending close - 360); T = nearest-rank 90th percentile. Prints n, T and counts; writes nothing.
 A non-200 page stops the run (a market that does not exist blocks it). Runs only after Auditor B's structure check of the landed run and the Head's go.
 Usage: python3 -I spxoi1t2.py <SPXOI1_CANDLES.json job file> <candles run folder>"""
-import gzip, hashlib, json, os, sys
+import gzip, hashlib, json, math, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import hm_guard  # noqa: E402
@@ -56,10 +56,13 @@ def oi(c):
     if c is None:
         return "no_candle"
     v = c.get("open_interest_fp", c.get("open_interest"))
+    if isinstance(v, bool):                                                     # finite check (Head, 18:55Z): a bool is not OI
+        return "no_oi"
     try:
-        return float(v)
+        x = float(v)
     except (TypeError, ValueError):
         return "no_oi"
+    return x if math.isfinite(x) else "no_oi"                                   # NaN and inf are not OI
 
 
 def derive(job_path, folder, job_sha=JOB_SHA):
