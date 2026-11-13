@@ -127,3 +127,16 @@ Desk B's nine further choices, made while building the counter, are adopted as b
 18. **Leg job cap:** at most 100 requests of 100 tickers. Over that it writes nothing, and Desk B sends the Head the count. No leg is dropped to fit.
 
 **Correction to the card:** the main pull runner already accepts a `tickers` parameter (Desk B ran its check on the builder's job with made-up tickers). The runner change named in Amendment 1 is therefore not needed.
+
+## Amendment 3 (Nov 13, 2026, 02:40Z, the History Miner's second build, before either counter has read combo-data)
+
+The two readings that could change a figure are fixed here; both builds must follow them.
+
+(i) **An unreadable quote row** (a receive time or a field that does not parse) is never eligible and never a snapshot.
+- It is counted and printed apart as "unreadable".
+- It is placed on a day by its receive time when that parses, and otherwise by its run folder's UTC day.
+- It does not enter the 80% run test, which uses run folders only (Amendment 2, point 11).
+
+(ii) **The point-16 refusal** (a leg run whose job did not ask for every leg the week names) tests only the legs named in WHOLE leg strings of the week's rows. Legs visible in cut strings are not required, because rows with cut strings are never eligible.
+
+The History Miner's other eight readings (COMBODONE2_BUILD_NOTE.md, 37332937 on claude/history-miner) stand as written where they do not contradict the card. Where the two builds differ on any of them, the difference is brought to this desk and fixed here by a dated amendment, never pinned in code.
