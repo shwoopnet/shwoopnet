@@ -670,3 +670,8 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - The Testing Desk has the GO for the ES 1-minute pull for Nov 5 to 12 (cost check first, scratch only, spend to Main) and writes scorer build 1.
   - The History Miner writes build 2 independently.
   - No data run until Auditor B is CLEAN on both builds.
+- 16:58Z: SPXFV1, both builds CLEAN on code (Auditor B): Testing Desk spxfv1.py a0b428df (f97ac0bc) and History Miner spxfv1b.py 9032013a (3ecd0925).
+  - Rulings: odd result text and a duplicate ts_event both stop the run; ties are counted on two-sided quotes before the spread and band tests; z is scorekit cluster_z by event; fee rounding is scorekit's; bars and kills use unrounded figures with the PF kill at < 1.0 - 1e-9; labels are "RESEARCH BAR MET" (z >= 5.46) or "BAR MET (not a research-bar pass)"; 16b compares the label class.
+  - Build 2's rows builder: Forensics, with its own identical ES query. Both sides print a canonical-extract sha256, which must match.
+  - Development go waits on the KXINX15M runs landing (the jobs PR, the owner's merge), Auditor B's structure check and the builder audit.
+- 16:56Z: 11 AM CT count line sent to the EA, plus an addendum (4 unique against the floor of 5: TEMPBLEND, ENDNET, GASCYCLE, plus SPXFV1 awaiting its uniqueness score). The Verification Analyst is asked to score SPXFV1.
