@@ -53,7 +53,8 @@ Said plainly: **nothing on this desk has evidence today, and three cards closed 
 
 | Item | What is pending | When | My odds |
 |---|---|---|---|
-| **POLGAPH** (politics: follow an overnight gap, hold to settlement) | Registered Nov 13 before data. Needs the Head's ruling on whether it is a version of INPLAYJUMP, then a scorer, an audit and at most 380 requests. | After Friday's queue | About 3% |
+| **VOIDSNAP** (a CS2 match voided at Kalshi's "fair market price" still trades away from it) | A zero-try hindsight measurement, first in the Head's order. Sample named (195 voids, 195 matched played matches), scorer frozen, 79 candle requests built; waits for the auditor and a second build. No rule and no try until it says "worth a rule"; the Head sends the owner the rule text first. | As soon as the audit and second build are done | 20% that stage 1 passes; about 5% overall |
+| **POLGAPH** (politics: follow an overnight gap, hold to settlement) | Registered Nov 13 before data as the one permitted variant of POL-i2; ruled not a version of INPLAYJUMP; 1 try. Scorer frozen and with the auditor; a second build is asked for; then at most 380 requests. | After VOIDSNAP and Friday's reads | About 3% |
 | **INPLAYJUMP** (five families) | Lists, the 5 request cost pilot, the tennis validation pull, then up to 1,800 candle requests. The third and last look at this idea. | Friday at the earliest | About 1% a family |
 | **S3** (combo house side, paper) | Forward snapshots; development read Nov 26, held-out Dec 12. | Nov 26 | Low |
 | **Hourly temperature** | A cost and settlement-source measurement, zero tries, last in the pull queue. A card only after it. | Next week | Low; everyone can see the thermometer |
