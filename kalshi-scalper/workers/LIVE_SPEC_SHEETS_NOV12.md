@@ -35,7 +35,8 @@ Asked for by the Head of R&D at 19:59Z for the owner's "probation seats" decisio
 2. **State.**
    - Start S from the ticker clock; map 1 must have closed 15 to 150 minutes after S, else no order.
    - Pre-match mids of both match contracts at the candle ending at S minus 10 minutes (step back to S minus 40).
-   - Who won map 1: the map-1 market's result. In the listing a map's result is posted 3.0 minutes after its close, so a bot that waits for it looks at close plus 3 to plus 5 minutes: inside the registered window, sometimes a minute later than the scorer's look. The read also counts how often the winner's last quote was 90c or more, the only earlier signal.
+   - **Changed Nov 13, 00:10Z by MAPBREAK Amendment 7:** who won a map is the OBSERVED winner, not the result field: at the look, the team whose map contract shows a YES bid of 0.90 or more in its last candle, or whose opponent's map contract shows a YES ask of 0.10 or less; exactly one team must qualify, else no order. The sentences that follow about waiting for the posted result are superseded.
+   - (Superseded) Who won map 1: the map-1 market's result. In the listing a map's result is posted 3.0 minutes after its close, so a bot that waits for it looks at close plus 3 to plus 5 minutes: inside the registered window, sometimes a minute later than the scorer's look. The read also counts how often the winner's last quote was 90c or more, the only earlier signal.
    - The model: p = pre-match mid of the map-1 winner's match contract; q solves p = q x q x (3 minus 2q); value one map up = 1 minus (1 minus q) squared; at one map each the map-1 winner's value is q.
    - Second look: the map-2 market's result must name the team that lost map 1.
    - Which titles are "in" is decided by the development kill lines (cost, gap share, placebo). A title that is out cannot be traded faithfully.
