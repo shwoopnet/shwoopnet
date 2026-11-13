@@ -12,7 +12,7 @@ Rules: `ROTATION_LANE.md` on this branch (v1.0, approved by the owner Nov 12, 20
 |---|---|---|---|---|
 | 1, 2 | WITHDRAWN at 20:05Z, the Head of R&D's error: DEPTH1 is not one rule. It is 20 registered tries (10 book features on gold and Bitcoin; Ethereum is not in it), and a rule exists only if one try clears its read from Nov 14 00:00Z. No place before that | none | none | withdrawn |
 | 3 | CFRTI-K, the Kalshi-only Bitcoin cheap side with a model edge (Desk A's registration) | Bitcoin 15 minute | replay of the R6 books plus the public candles of the Bitcoin perpetual; same limit after Nov 20. It buys the same market, side and minute as OICORE, so rule 4.7 may keep it off a seat | waits for a log source after Nov 20 |
-| 4 | MAPBREAK, the esports break rule (Desk B, with Amendments to 6) | CS2 matches | no recorder follows this series; needs a book or quote recorder with polls 4 seconds apart or closer around the looks | no log source yet |
+| 4 | MAPBREAK, the esports break rule (Desk B, with Amendments to 6) | CS2 matches | no recorder follows this series; needs a book or quote recorder with polls 4 seconds apart or closer around the looks | WITHDRAWN Nov 13 00:04Z: out on its own registered screen (step 1, counts only: the 10c gap share was 6.8 and 8.3 percent at the two looks against the 10 percent line) |
 | 5 | MAPBREAK | Dota 2 matches | as above | no log source yet |
 | 6 | INPLAYJUMP, follow an in-play price jump (Desk B, Amendments to 6; engine by Desk A) | e-soccer | needs in-play quotes of every open match each minute plus a second look; no recorder follows it | no log source yet |
 | 7 | INPLAYJUMP | table tennis | as above | no log source yet |
@@ -30,7 +30,7 @@ Rules: `ROTATION_LANE.md` on this branch (v1.0, approved by the owner Nov 12, 20
 
 These eleven places are lane shadows only. **They are not reads of the registered NC15DEPTH1 cell**, whose registration says pooled, never split by series; its pooled read (n 3,400, window from Nov 19) is untouched and no try is spent on it here. Eight of the eleven markets are reserved in the bot to EVENT830; a seat there would need the Chief of Staff to resolve that first.
 
-**21 places on 6 mechanisms. 12 have a log source today (1 to Nov 20, 11 to Dec 31).** (Corrected at 20:05Z from 23 and 14: the two DEPTH1 places were withdrawn.) The owner approved a new public book recorder for the nine sports and esports places on Nov 12 ("Yes, build it"); the Chief of Staff builds it from Desk B's spec.
+**20 places on 6 mechanisms. 12 have a log source today (1 to Nov 20, 11 to Dec 31).** (Nov 13 00:04Z: MAPBREAK's CS2 place withdrawn on its registered screen, from 21. MAPBREAK's Dota 2 place stays pending the rest of its candles and an amendment that defines the map state from Kalshi's own data at the look.) (Corrected at 20:05Z from 23 and 14: the two DEPTH1 places were withdrawn.) The owner approved a new public book recorder for the nine sports and esports places on Nov 12 ("Yes, build it"); the Chief of Staff builds it from Desk B's spec.
 
 Shards (an order needs money on its own shard; the owner moves money by hand): the e-soccer series reads exchange 0 on every listed market; CS2 and Dota 2 read exchange 0; the crypto 15 minute markets are on the shard the bot trades today.
 
