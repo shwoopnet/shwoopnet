@@ -20,7 +20,7 @@ X1 = window("KXINX15M-X1", D(5), [1000, 1000.2] + [1001.0] * 14, {1: (.20, .22),
 X2 = window("KXINX15M-X2", D(6), [1000, 1000.7, 1000.8, 1000.9] + [1000.9] * 12, {1: (.26, .28), 2: (.25, .27), 3: (.22, .24), 4: (.22, .24), 5: (.22, .24), 6: (.22, .24), 7: (.22, .24), 8: (.22, .24), 9: (.22, .24), 10: (.15, .17)}, "no")
 X3 = window("KXINX15M-X3", D(8), [1000, 999.4, 999.3] + [999.3] * 13, {m: (.60, .62) for m in range(1, 6)}, "yes")
 X4 = window("KXINX15M-X4", D(8, 19), [1000] + [1000.4] * 15, {m: (.20, .22) for m in range(1, 6)}, "yes")
-X5 = window("KXINX15M-X5", D(9), [1000, 1000.7] + [1000.7] * 14, {1: (.20, .22), **{m: (.38, .40) for m in range(2, 10)}}, "yes", omit=(10,))
+X5 = window("KXINX15M-X5", D(9), [1000, 1000.7] + [1000.7] * 14, {1: (.20, .22), **{m: (.38, .40) for m in range(2, 10)}}, "yes", omit=(10, 11, 12, 13, 14, 15))
 X6 = window("KXINX15M-X6", D(11), [None, 1000.7] + [1000.7] * 14, {1: (.20, .22)}, "yes")
 X7 = window("KXINX15M-X7", D(10), [1000, 1000.6] + [1000.6] * 14, {1: (.19, .21), **{m: (.38, .40) for m in range(2, 10)}, 10: (.30, .32)}, "void")
 X8 = window("KXINX15M-X8", calendar.timegm((2026, 12, 1, 0, 0, 0)), [1000, 1002] + [1002] * 14, {1: (.20, .22)}, "yes")
@@ -34,26 +34,27 @@ A = rep["arms"]
 c = rep["counts"]
 assert c["windows_listed"] == 8 and c["not_touched_on_or_after_2026-12-01"] == 1 and c["no_es_start_bar"] == 1, c
 h = A["band_25_headline"]
-assert h["entries_found"] == 4 and h["windows_without_entry"] == 2 and h["dropped_no_time_exit_candle"] == 1, h
-assert h["dropped_share"] == 0.25 and near(h["dropped_entry_fill_sum_1c"], 0.23) and near(h["dropped_hold_net_sum_1c"], 0.75) and A["band_25_hold"]["dropped_share"] == 0.0 and "mostly the losers" in h["drop_note"]
-assert h["1c"]["n"] == 3 and near(h["1c"]["net"], 0.19 - 0.14 + 0.03) and near(h["1c"]["pf"], 0.22 / 0.14) and near(h["1c"]["pf"], 1.5714285714)
-assert h["1c"]["n_half1"] == 1 and h["1c"]["n_half2"] == 2 and h["1c"]["half1_pf"] == float("inf") and near(h["1c"]["half2_pf"], 0.03 / 0.14)
-assert near(h["2c"]["pf"], 0.21 / 0.16) and near(h["2c"]["net"], 0.20 - 0.16 + 0.01) and h["counts_the_bar"] is False and h["label"].startswith("FALSIFIED (fewer than 100 entries, n = 3)") and h["label"].endswith("(upper bound, not fill-checked)")
+assert h["entries_found"] == 4 and h["windows_without_entry"] == 2, h
+assert h["settled_at_close_count"] == 1 and h["settled_at_close_share"] == 0.25 and near(h["settled_at_close_entry_fill_sum_1c"], 0.23) and h["time_exit_moved_count"] == 0 and A["band_25_hold"].get("settled_at_close_count") is None and "settlement" in h["settled_at_close_note"]
+assert h["1c"]["n"] == 4 and near(h["1c"]["net"], 0.19 - 0.14 + 0.75 + 0.03) and near(h["1c"]["pf"], 0.97 / 0.14) and near(h["1c"]["pf"], 6.9285714286)
+assert h["1c"]["n_half1"] == 2 and h["1c"]["n_half2"] == 2 and near(h["1c"]["half1_pf"], 0.19 / 0.14) and h["1c"]["half2_pf"] == float("inf")
+assert near(h["2c"]["pf"], 0.95 / 0.16) and near(h["2c"]["net"], 0.20 - 0.16 + 0.74 + 0.01) and near(h["2c"]["pf"], 5.9375) and h["counts_the_bar"] is False and h["label"].startswith("FALSIFIED (fewer than 100 entries, n = 4)") and h["label"].endswith("(upper bound, not fill-checked)")
 d = A["band_25_hold"]
 assert d["1c"]["n"] == 4 and near(d["1c"]["net"], 0.75 - 0.27 + 0.75 - 0.02) and near(d["1c"]["pf"], 1.5 / 0.29) and near(d["1c"]["half1_pf"], 0.75 / 0.27) and near(d["1c"]["half2_pf"], 0.75 / 0.02) and d["voids"] == 1
-assert near(d["2c"]["pf"], 1.48 / 0.30) and d["dropped_no_time_exit_candle"] == 0
+assert near(d["2c"]["pf"], 1.48 / 0.30)
 v = A["band_25_variant"]
-assert v["1c"]["n"] == 3 and near(v["1c"]["pf"], 0.81 / 0.27) and near(v["1c"]["net"], 0.74 - 0.27 + 0.07) and v["1c"]["half1_pf"] == float("inf") and near(v["1c"]["half2_pf"], 0.07 / 0.27) and v["dropped_no_time_exit_candle"] == 1
+assert v["1c"]["n"] == 4 and near(v["1c"]["pf"], 2.32 / 0.27) and near(v["1c"]["net"], 0.74 - 0.27 + 1.51 + 0.07) and near(v["1c"]["half1_pf"], 0.74 / 0.27) and v["1c"]["half2_pf"] == float("inf") and v["settled_at_close_count"] == 1
 h30 = A["band_30_headline"]
-assert h30["1c"]["n"] == 3 and near(h30["1c"]["net"], 0.19 - 0.18 + 0.03) and near(h30["1c"]["pf"], 0.22 / 0.18) and near(h30["1c"]["pf"], 1.2222222222)
+assert h30["1c"]["n"] == 4 and near(h30["1c"]["net"], 0.19 - 0.18 + 0.75 + 0.03) and near(h30["1c"]["pf"], 0.97 / 0.18) and near(h30["1c"]["pf"], 5.3888888889)
 # C1: the share of look candles with both sides and the spread distribution (nothing missing here; spreads are 2c except the 2c-candles .22/.24 and .38/.40 and .60/.62)
 c1 = rep["C1_candles_two_sided_and_spread"]; assert c1["look_candles"] == 30 and c1["two_sided"] == 30 and c1["two_sided_share"] == 1.0 and c1["spread_cents_median"] == 2.0 and c1["spread_cents_p90"] == 2.0
 # --- the individual numbers of the hand case through the pure functions ---
 def pathfor(cmap, t0=0):
     return [(60 * m, cmap[m]) for m in sorted(cmap)]
 X1p = {3: .30, 4: .35, 5: .40, 6: .47, 7: .50, 8: .60, 9: .82, 10: .70}
-assert near(q.headline(0.23, 0.01, pathfor(X1p), 0.70), 0.19) and near(q.headline(0.24, 0.02, pathfor(X1p), 0.70), 0.20)
-assert near(q.variant(0.23, 0.01, pathfor(X1p), 0.70), 0.74) and near(q.variant(0.24, 0.02, pathfor(X1p), 0.70), 0.73)
+TE = ("bid", 0.70, False)
+assert near(q.headline(0.23, 0.01, pathfor(X1p), TE, "yes", "yes"), 0.19) and near(q.headline(0.24, 0.02, pathfor(X1p), TE, "yes", "yes"), 0.20)
+assert near(q.variant(0.23, 0.01, pathfor(X1p), TE, "yes", "yes"), 0.74) and near(q.variant(0.24, 0.02, pathfor(X1p), TE, "yes", "yes"), 0.73)
 assert near(q.hold(0.23, "yes", "yes"), 0.75) and near(q.hold(0.24, "yes", "yes"), 0.74) and near(q.hold(0.25, "yes", "no"), -0.27) and near(q.hold(0.22, "yes", "void"), -0.02) and near(q.hold(0.22, "no", "no"), 0.76)
 assert near(q.fee(0.23), 0.02) and near(q.fee(0.23, 2), 0.03) and near(q.fee(0.25, 2), 0.03) and near(q.fee(0.46), 0.02) and near(q.fee(0.14), 0.01) and near(q.fee(0.81), 0.02)
 # --- looks, thresholds, bands, sides ---
@@ -86,18 +87,30 @@ Cl = D(5); O = Cl - 900
 cands = lambda m2b: [{"ts": O + 60 * m, "bid": b, "ask": b + 0.02} for m, b in sorted(m2b.items())]
 p = q.after_entry(cands({m: .15 for m in range(1, 16)}), O + 120, Cl); assert [t for t, _ in p] == [O + 60 * m for m in range(3, 11)]          # after the entry candle, through the minute ending close - 300 s (m = 10)
 fill = 0.23
-hit10 = [(O + 60 * m, .15) for m in range(3, 10)] + [(O + 600, 0.46)]; assert near(q.headline(fill, 0.01, hit10, 0.46), 0.45 - 0.23 - q.fee(fill) - q.fee(0.45))          # the m = 10 candle can be the target (inclusive)
-nohit = [(O + 60 * m, .15) for m in range(3, 11)]; assert near(q.headline(fill, 0.01, nohit, 0.15), (0.14 - 0.23) - q.fee(fill) - q.fee(0.14))
-assert q.headline(fill, 0.01, nohit, None) is None and q.variant(fill, 0.01, nohit, None) is None          # no time-exit bid and no target: dropped
-assert q.headline(fill, 0.01, [(O + 180, 0.46)], None) is not None          # a target hit needs no time-exit candle
-assert near(q.headline(0.25, 0.01, [(O + 180, 0.50)], None), 0.49 - 0.25 - q.fee(0.25) - q.fee(0.49))          # exactly 2 x fill hits
-assert q.headline(0.25, 0.01, [(O + 180, 0.4999)], None) is None
-assert q.headline(fill, 0.02, nohit, 0.005) is not None          # an exit price below 0: the fee is clamped, no error
+TB = lambda b: ("bid", b, False); ST = ("settle", None, True)
+hit10 = [(O + 60 * m, .15) for m in range(3, 10)] + [(O + 600, 0.46)]; assert near(q.headline(fill, 0.01, hit10, TB(0.46), "yes", "yes"), 0.45 - 0.23 - q.fee(fill) - q.fee(0.45))          # the m = 10 candle can be the target (inclusive)
+nohit = [(O + 60 * m, .15) for m in range(3, 11)]; assert near(q.headline(fill, 0.01, nohit, TB(0.15), "yes", "yes"), (0.14 - 0.23) - q.fee(fill) - q.fee(0.14))
+# settlement: yes wins, no loses, void refunds; no exit fee; entry fee kept
+assert near(q.headline(fill, 0.01, nohit, ST, "yes", "yes"), 1 - 0.23 - q.fee(fill)) and near(q.headline(fill, 0.01, nohit, ST, "yes", "no"), -0.23 - q.fee(fill)) and near(q.headline(fill, 0.01, nohit, ST, "yes", "void"), -q.fee(fill)) and near(q.headline(fill, 0.01, nohit, ST, "no", "no"), 1 - 0.23 - q.fee(fill))
+assert near(q.variant(fill, 0.01, nohit, ST, "yes", "yes"), 2 * (1 - 0.23) - q.fee(fill, 2)) and near(q.variant(fill, 0.01, nohit, ST, "yes", "no"), -2 * 0.23 - q.fee(fill, 2)) and near(q.variant(fill, 0.01, nohit, ST, "yes", "void"), -q.fee(fill, 2))
+assert near(q.headline(fill, 0.01, [(O + 180, 0.46)], ST, "yes", "no"), 0.45 - 0.23 - q.fee(fill) - q.fee(0.45))          # a target hit needs no time exit
+assert near(q.headline(0.25, 0.01, [(O + 180, 0.50)], ST, "yes", "no"), 0.49 - 0.25 - q.fee(0.25) - q.fee(0.49))          # exactly 2 x fill hits
+assert near(q.headline(0.25, 0.01, [(O + 180, 0.4999)], ST, "yes", "no"), -0.25 - q.fee(0.25))          # just under 2 x: no hit, settles
+assert q.headline(fill, 0.02, nohit, TB(0.005), "yes", "yes") is not None          # an exit price below 0: the fee is clamped, no error
 # variant: only 2x hit (no 80c): half at 2x, the rest at the time exit; neither: both at the time exit
 only2x = [(O + 240, 0.50)] + [(O + 60 * m, .15) for m in range(6, 11)]
-assert near(q.variant(fill, 0.01, only2x, 0.15), (0.49 - fill) + (0.14 - fill) - q.fee(fill, 2) - q.fee(0.49) - q.fee(0.14))
-assert near(q.variant(fill, 0.01, nohit, 0.15), 2 * (0.14 - fill) - q.fee(fill, 2) - 2 * q.fee(0.14))
-exact80 = [(O + 240, 0.46), (O + 300, 0.80)]; assert near(q.variant(fill, 0.01, exact80, 0.15), (0.45 - fill) + (0.79 - fill) - q.fee(fill, 2) - q.fee(0.45) - q.fee(0.79))          # 0.80 exactly counts
+assert near(q.variant(fill, 0.01, only2x, TB(0.15), "yes", "yes"), (0.49 - fill) + (0.14 - fill) - q.fee(fill, 2) - q.fee(0.49) - q.fee(0.14))
+assert near(q.variant(fill, 0.01, nohit, TB(0.15), "yes", "yes"), 2 * (0.14 - fill) - q.fee(fill, 2) - 2 * q.fee(0.14))
+assert near(q.variant(fill, 0.01, only2x, ST, "yes", "yes"), (0.49 - fill) - q.fee(0.49) + (1 - fill) - q.fee(fill, 2))          # half A sold at 2x, half B settles
+exact80 = [(O + 240, 0.46), (O + 300, 0.80)]; assert near(q.variant(fill, 0.01, exact80, TB(0.15), "yes", "yes"), (0.45 - fill) + (0.79 - fill) - q.fee(fill, 2) - q.fee(0.45) - q.fee(0.79))          # 0.80 exactly counts
+# time_exit: the candle ending close - 300 s if two-sided, else the next two-sided one through the close, else settle
+cd = lambda t, b, a: {"ts": t, "bid": b, "ask": a}
+assert q.time_exit([cd(Cl - 300, .30, .32)], Cl) == ("bid", .30, False)
+assert q.time_exit([cd(Cl - 300, 0.0, .02), cd(Cl - 240, .15, .17)], Cl) == ("bid", .15, True)
+assert q.time_exit([cd(Cl - 300, .30, 1.0), cd(Cl - 180, .30, .30), cd(Cl - 120, .35, .33), cd(Cl, .12, .14)], Cl) == ("bid", .12, True)          # empty ask, locked, crossed move on; the candle ending at the close counts
+assert q.time_exit([cd(Cl - 360, .30, .32), cd(Cl - 240, 0.0, .02)], Cl) == ("settle", None, True) and q.time_exit([], Cl) == ("settle", None, True)          # a candle before close - 300 s is not an exit minute
+assert q.time_exit([cd(Cl + 60, .30, .32)], Cl) == ("settle", None, True)
+assert q.settles(nohit, fill, ST, "headline") and not q.settles(hit10, fill, ST, "headline") and not q.settles(nohit, fill, TB(.15), "headline") and q.settles(only2x, fill, ST, "variant") and q.settles(exact80, fill, ST, "variant") is False
 # --- arm verdict rules ---
 def rows(nets): return [((i, "t"), n) for i, n in enumerate(nets)]
 mix = ([0.3, -0.1, -0.1] * 34)[:100]          # 34 wins and 66 losses interleaved
@@ -108,6 +121,7 @@ assert bad_half["label"].startswith("FALSIFIED (a half PF under 1.0") and bad_ha
 two_c = q.arm_report({0.01: rows([0.3, -0.1] * 50), 0.02: rows([-0.3, 0.1] * 50)}); assert two_c["label"].startswith("FALSIFIED (a half PF under 1.0 at 1c, or 2c PF under 1.0)")
 noev = q.arm_report({0.01: rows([0.12, -0.1] * 50), 0.02: rows([0.12, -0.1] * 50)}); assert noev["label"].startswith("no evidence") and near(noev["1c"]["pf"], 1.2) and noev["counts_the_bar"] is False          # PF 1.2: both halves above 1.0 but under the 1.3 bar
 exact13 = q.arm_report({0.01: rows([0.13, -0.1] * 50), 0.02: rows([0.13, -0.1] * 50)}); assert exact13["counts_the_bar"] is True          # PF 1.3 counts (inside 1e-9)
+odd = q.arm_report({0.01: rows([0.3, -0.1, 0.2, 0.1, -0.05]), 0.02: rows([0.3, -0.1, 0.2, 0.1, -0.05])}); assert odd["1c"]["n_half1"] == 2 and odd["1c"]["n_half2"] == 3 and near(odd["1c"]["half1_pf"], 0.3 / 0.1) and near(odd["1c"]["half2_pf"], 0.3 / 0.05)          # floor(5 / 2) = 2 first
 empty = q.arm_report({0.01: [], 0.02: []}); assert empty["label"].startswith("FALSIFIED (fewer than 100") and empty["1c"]["pf"] is None
 # --- ADDENDUM: F1 rule 18 at entry ---
 f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (0.0, .22), 2: (.20, .22)}); assert f[0.25][:3] == (2, "yes", 0.22) and cnt["look_not_two_sided"] == 1          # Z1
@@ -119,20 +133,23 @@ f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (.01, .22)}); assert f[0.25][
 f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (.22 - 4e-10, .22)}); assert cnt["look_not_two_sided"] == 1          # a 0.5e-9 spread is locked
 # a candle that is not two-sided is no price even where the ES move does not qualify: not counted
 f, cnt = one([1000.0, 1000.1] + [1000.1] * 14, {1: (0.0, .22)}); assert f == {} and cnt["look_not_two_sided"] == 0
-# --- F2: a no-bid or one-sided candle is no exit price ---
-cd = lambda t, b, a: {"ts": t, "bid": b, "ask": a}
-assert q.time_exit_bid([cd(Cl - 300, 0.0, 0.02)], Cl) is None and q.time_exit_bid([cd(Cl - 300, .30, 1.0)], Cl) is None and q.time_exit_bid([cd(Cl - 300, .30, .30)], Cl) is None and q.time_exit_bid([cd(Cl - 300, .30, .32)], Cl) == .30
+# --- F2 / Amendment 3: a no-bid or one-sided candle is no exit price; the exit minute moves, else the position settles ---
 pp = q.after_entry([cd(O + 180, .50, 1.0), cd(O + 240, 0.0, .02), cd(O + 300, .50, .52)], O + 120, Cl); assert pp == [(O + 300, .50)]
-def zrun(cmap_extra, result="yes"):
+def zrun(cmap_extra, result="yes", late=True):
     cm = {1: (.20, .22), **{m: (.30, .32) for m in range(2, 10)}, 10: (0.0, .02), **cmap_extra}
-    return q.run_windows(*assemble(window("KXINX15M-Z", D(5), [1000, 1001] + [1001.0] * 14, cm, result)))[ "arms"]
-Za = zrun({})          # Z2a
-assert Za["band_25_headline"]["entries_found"] == 1 and Za["band_25_headline"]["dropped_no_time_exit_candle"] == 1 and Za["band_25_headline"]["1c"]["n"] == 0 and Za["band_25_variant"]["dropped_no_time_exit_candle"] == 1
-assert Za["band_25_headline"]["dropped_share"] == 1.0 and near(Za["band_25_headline"]["dropped_entry_fill_sum_1c"], 0.23) and near(Za["band_25_headline"]["dropped_hold_net_sum_1c"], 0.75) and near(Za["band_25_hold"]["1c"]["net"], 0.75) and Za["band_25_hold"]["dropped_share"] == 0.0
-assert Za["band_25_variant"]["dropped_share"] == 1.0 and near(Za["band_25_variant"]["dropped_entry_fill_sum_1c"], 0.23) and near(Za["band_25_variant"]["dropped_hold_net_sum_1c"], 0.75)
-Zb = zrun({4: (.50, .52)})          # Z2b: a target hit at m = 4 keeps the headline although the time exit has no bid; the variant is dropped
-assert Zb["band_25_headline"]["dropped_no_time_exit_candle"] == 0 and Zb["band_25_headline"]["1c"]["n"] == 1 and near(Zb["band_25_headline"]["1c"]["net"], 0.22) and Zb["band_25_variant"]["dropped_no_time_exit_candle"] == 1
-Zc = zrun({4: (.50, 1.0)}); assert Zc["band_25_headline"]["dropped_no_time_exit_candle"] == 1          # a hit candle with an empty ask is not a hit
+    om = () if late else (11, 12, 13, 14, 15)
+    cm.update({m: (0.0, .02) for m in om})
+    return q.run_windows(*assemble(window("KXINX15M-Z", D(5), [1000, 1001] + [1001.0] * 14, cm, result)))["arms"]
+Za = zrun({})          # Z2a: m = 10 has no bid: moves to m = 11 (bid .15)
+assert near(Za["band_25_headline"]["1c"]["net"], -0.12) and near(Za["band_25_variant"]["1c"]["net"], -0.23) and near(Za["band_25_hold"]["1c"]["net"], 0.75)
+assert Za["band_25_headline"]["settled_at_close_count"] == 0 and Za["band_25_headline"]["time_exit_moved_count"] == 1 and Za["band_25_variant"]["time_exit_moved_count"] == 1 and Za["band_25_headline"]["1c"]["n"] == 1
+Zb = zrun({4: (.50, .52)})          # Z2b: a target hit at m = 4; the variant's second half goes at the moved time exit
+assert near(Zb["band_25_headline"]["1c"]["net"], 0.22) and near(Zb["band_25_variant"]["1c"]["net"], 0.11) and Zb["band_25_headline"]["time_exit_moved_count"] == 0 and Zb["band_25_variant"]["time_exit_moved_count"] == 1
+Zc = zrun({4: (.50, 1.0)}); assert near(Zc["band_25_headline"]["1c"]["net"], -0.12)          # a hit candle with an empty ask is not a hit
+for res, hn, vn in (("yes", 0.75, 1.51), ("no", -0.25, -0.49), ("void", -0.02, -0.03)):          # Z2d: nothing two-sided from m = 10 to the close: held to the close
+    Zd = zrun({}, res, late=False)
+    assert near(Zd["band_25_headline"]["1c"]["net"], hn) and near(Zd["band_25_variant"]["1c"]["net"], vn), (res, Zd["band_25_headline"]["1c"]["net"], Zd["band_25_variant"]["1c"]["net"])
+    assert Zd["band_25_headline"]["settled_at_close_count"] == 1 and Zd["band_25_headline"]["time_exit_moved_count"] == 0 and Zd["band_25_variant"]["settled_at_close_count"] == 1
 # --- C1 on two-sided candles only (Z3) ---
 Z3 = {1: (0.0, .22), 2: (.20, .22), 3: (.30, 1.0)}
 rz = q.run_windows(*assemble(window("KXINX15M-Q", D(5), [1000, 1001] + [1001.0] * 14, Z3, omit=(4, 5))))["C1_candles_two_sided_and_spread"]
@@ -144,9 +161,16 @@ bad = ["1762354800000000000,33,1,7,1,1,1,1000.5,10\n", "2026-11-06T14:00:00.0000
 with tempfile.TemporaryDirectory() as tmpd:
     def es_file(rows):
         f = os.path.join(tmpd, "x.csv"); open(f, "w").write(HDR + "".join(rows)); return f
-    out, st = q.load_es_counted(es_file([good(0), good(1)] + bad)); assert st == {"rows_read": 5, "rows_kept": 2, "skipped_ts": 1, "skipped_value": 2} and len(out) == 2
+    out, st = q.load_es_counted(es_file([good(0), good(1)] + bad)); assert st == {"rows_read": 5, "rows_kept": 2, "skipped_ts": 1, "skipped_value": 2, "skipped_instrument": 0} and len(out) == 2
     try: q.check_es_rows(st); assert 0
     except SystemExit as ex: assert "rows_read 5" in str(ex) and "skipped_ts 1" in str(ex) and "skipped_value 2" in str(ex)
+    inst = lambda i, iid: good(i).replace(",33,1,7,", ",33,1,%d," % iid)
+    out, sti = q.load_es_counted(es_file([inst(0, 7), inst(1, 7), inst(2, 7), inst(3, 7), inst(4, 8)]))
+    assert sti == {"rows_read": 5, "rows_kept": 4, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 1} and len(out) == 4 and all(v[0] == 7 for v in out.values())
+    try: q.check_es_rows(sti); assert 0          # 1 of 5 = 20%
+    except SystemExit as ex: assert "skipped_instrument 1" in str(ex)
+    try: q.load_es_counted(es_file([inst(0, 7), inst(1, 8)])); assert 0
+    except SystemExit as ex: assert "tie" in str(ex) and "7" in str(ex) and "8" in str(ex)
     ok = [good(i) for i in range(100)]
     assert q.check_es_rows(q.load_es_counted(es_file(ok + bad[:1]))[1]) is None
     assert q.check_es_rows(q.load_es_counted(es_file([good(i) for i in range(95)] + [bad[0]] * 5))[1]) is None          # exactly 5%

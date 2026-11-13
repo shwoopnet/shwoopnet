@@ -21,7 +21,8 @@ AMBIGUITIES = [
     "An instrument_id change between the two ES bars of a change drops it (counted as 'roll'); the card is silent.",
     "Rule 18 (Auditor B F1): a candle has a mid only if 0 < bid < ask < 1 (1e-9 slack); an empty, locked or crossed book has none, is never carried, and is counted as not_two_sided. The card line stating it is pending (Head or Desk B).",
     "ES loader (F2): rows read, kept and skipped (timestamp or value) are counted and returned; STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice, not in the card).",
-    "Prediction over the defined lags only; n/a lags are named; a tie at lag 0 passes (1e-9).",
+    "Prediction (Amendment 3): lag 0 needs at least min_pairs pairs (30 in the real run) and must be the largest of the defined lags (a tie passes, 1e-9), none of +1 to +3 above it; if lag 0 is n/a the text is 'untestable at n = N', not a pass; n/a lags are named.",
+    "ES file's single instrument = the most frequent id (a tie stops); a bar with another id is dropped at load and counted skipped_instrument (in the 5% stop).",
     "The printed line's exact text in CFRTI-K is not known to this desk: the numbers are what compare.",
 ]
 
@@ -33,7 +34,7 @@ def load_es_counted(path):
     """-> ({end_ts: (instrument_id, close)} keyed by the minute END (ts_event + 60 s), counts). A duplicate ts_event stops the run naming the minute.
     counts: rows_read, rows_kept, skipped_ts (ts_event missing or not an ISO string), skipped_value (instrument_id or close does not parse)."""
     out, seen = {}, set()
-    st = {"rows_read": 0, "rows_kept": 0, "skipped_ts": 0, "skipped_value": 0}
+    st = {"rows_read": 0, "rows_kept": 0, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 0}
     with open(path, newline="") as fh:
         for r in csv.DictReader(fh):
             st["rows_read"] += 1
@@ -48,13 +49,22 @@ def load_es_counted(path):
             except (KeyError, TypeError, ValueError):
                 st["skipped_value"] += 1; continue
             st["rows_kept"] += 1
+    if out:          # Amendment 3: the file's single instrument is the most frequent id; a bar with another id is dropped and counted
+        n_by = {}
+        for iid, _ in out.values():
+            n_by[iid] = n_by.get(iid, 0) + 1
+        top = max(n_by.values()); lead = sorted(i for i, n in n_by.items() if n == top)
+        if len(lead) > 1:
+            raise SystemExit("STOP: two instrument_ids tie for the most rows in the ES file: %s" % lead)
+        for t in [t for t, (iid, _) in out.items() if iid != lead[0]]:
+            del out[t]; st["skipped_instrument"] += 1; st["rows_kept"] -= 1
     return out, st
 
 
 def check_es_rows(st):
     """STOP if no ES row was kept or the skipped share is above MAX_SKIP_SHARE; the message carries the counts."""
-    skipped = st["skipped_ts"] + st["skipped_value"]
-    desc = "rows_read %d, rows_kept %d, skipped_ts %d, skipped_value %d" % (st["rows_read"], st["rows_kept"], st["skipped_ts"], st["skipped_value"])
+    skipped = st["skipped_ts"] + st["skipped_value"] + st["skipped_instrument"]
+    desc = "rows_read %d, rows_kept %d, skipped_ts %d, skipped_value %d, skipped_instrument %d" % (st["rows_read"], st["rows_kept"], st["skipped_ts"], st["skipped_value"], st["skipped_instrument"])
     if st["rows_kept"] == 0:
         raise SystemExit("STOP: no ES row kept (%s): the file is not in the expected format" % desc)
     if skipped > MAX_SKIP_SHARE * st["rows_read"]:
@@ -152,8 +162,9 @@ def measure(markets, cs, es, min_pairs, es_stats=None):
         res[kk] = {"n_pairs": len(pairs[kk][0]), "corr": r, "na_reason": why, "pairs_dropped_missing_change": drops[kk]}
     defined = {kk: v["corr"] for kk, v in res.items() if v["corr"] is not None}
     pred = prediction(defined)
+    pred_text = "untestable at n = %d" % len(pairs[0][0]) if pred is None else ("pass" if pred else "fail")
     line = "lead_lag (positive lag = Kalshi lags ES): " + " ".join("%+d:%s" % (kk, ("%.3f" % res[kk]["corr"]) if res[kk]["corr"] is not None else "n/a") for kk in LAGS)
-    return {"line": line, "lags": res, "prediction_peak_at_lag_0_passed": pred, "na_lags": [kk for kk in LAGS if res[kk]["corr"] is None], "counts": cnt, "es_rows": es_stats, "min_pairs": min_pairs,
+    return {"line": line, "lags": res, "prediction_peak_at_lag_0_passed": pred, "prediction": pred_text, "na_lags": [kk for kk in LAGS if res[kk]["corr"] is None], "counts": cnt, "es_rows": es_stats, "min_pairs": min_pairs,
             "defined_peak_lag": (max(defined, key=lambda kk: defined[kk]) if defined else None), "ambiguities": AMBIGUITIES}
 
 

@@ -22,13 +22,12 @@ EXITS = ("headline", "variant", "hold")
 UPPER_BOUND = "upper bound, not fill-checked"
 AMBIGUITIES = [
     "The variant exit (half at 2x, the rest at 80c) is modelled as a 2-contract position: one entry order of 2 contracts (fee on 2), two exit orders of 1 contract; the card says size 1 for the read. PF is scale-free.",
-    "A half with no hit goes at the time exit as its own order; if a needed time-exit candle is missing the entry is dropped.",
+    "A half with no hit goes at the time exit as its own order (or settles, Amendment 3).",
     "An exit price at or below 0 (bid - s) is clamped to 0 for the fee only; the net uses the unclamped price.",
     "The hold arm's primary slip is 1c (entry slip only); every figure is also printed at 2c.",
     "A look whose candle lacks a bid or an ask has no price: no entry at that look. A look with a missing ES bar, or an instrument change from the start bar, is skipped (counted).",
-    "Rule 18 (Auditor B F1, F2): every candle price used must be two-sided (0 < bid < ask < 1, 1e-9); at entry a candle that is not is no price (look_not_two_sided); an exit, target or 80c candle that is not has no bid, and a missing time-exit bid drops the entry (never an exit at 0 - s). A target or 80c hit on a candle with an empty ask is not a hit. The card line is pending (Desk B or the Head).",
-    "Drops for a no-bid exit are printed (share, fill sum at 1c, hold net of the same entries) and biased upward; the hold arm is the unbiased comparison. The Head decides whether a zero bid should instead exit at 0 (then the card needs that line).",
-    "ES loader (F3): rows read, kept and skipped counted; STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice).",
+    "Rule 18 and Amendment 3 (ee92cf2f): every candle price used must be two-sided (0 < bid < ask < 1, 1e-9); at entry a candle that is not is no price (look_not_two_sided). The time exit is the first two-sided candle ending in [close - 300 s, close] (a missing candle counts as not two-sided); if none, each open half settles (payout, no exit fee, void refunds the price, entry fee kept). Nothing is dropped for the exit arms. A target or 80c hit needs a two-sided candle.",
+    "ES loader: rows read, kept and skipped (timestamp, value, instrument) counted; the file's single instrument is the most frequent id (a tie stops); STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice, the card does not state it).",
     "Rule label order: fewer than 100 entries -> FALSIFIED; a half under 1.0 at 1c or PF under 1.0 at 2c -> FALSIFIED; counts -> 'counts the bar'; else 'no evidence'. An empty half is reported 'undefined' and does not by itself falsify.",
     "'Window-close order' for the halves = ascending close time, ties by ticker.",
 ]
@@ -41,7 +40,7 @@ def load_es_counted(path):
     """-> ({end_ts: (instrument_id, close)} keyed by the minute END (ts_event + 60 s), counts). A duplicate ts_event stops the run naming the minute.
     counts: rows_read, rows_kept, skipped_ts (ts_event missing or not an ISO string), skipped_value (instrument_id or close does not parse)."""
     out, seen = {}, set()
-    st = {"rows_read": 0, "rows_kept": 0, "skipped_ts": 0, "skipped_value": 0}
+    st = {"rows_read": 0, "rows_kept": 0, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 0}
     with open(path, newline="") as fh:
         for r in csv.DictReader(fh):
             st["rows_read"] += 1
@@ -56,13 +55,22 @@ def load_es_counted(path):
             except (KeyError, TypeError, ValueError):
                 st["skipped_value"] += 1; continue
             st["rows_kept"] += 1
+    if out:
+        cnt = {}
+        for iid, _ in out.values():
+            cnt[iid] = cnt.get(iid, 0) + 1
+        top = max(cnt.values()); lead = sorted(i for i, n in cnt.items() if n == top)
+        if len(lead) > 1:
+            raise SystemExit("STOP: two instrument_ids tie for the most rows in the ES file: %s" % lead)
+        for t in [t for t, (iid, _) in out.items() if iid != lead[0]]:
+            del out[t]; st["skipped_instrument"] += 1; st["rows_kept"] -= 1
     return out, st
 
 
 def check_es_rows(st):
     """STOP if no ES row was kept or the skipped share is above MAX_SKIP_SHARE; the message carries the counts."""
-    skipped = st["skipped_ts"] + st["skipped_value"]
-    desc = "rows_read %d, rows_kept %d, skipped_ts %d, skipped_value %d" % (st["rows_read"], st["rows_kept"], st["skipped_ts"], st["skipped_value"])
+    skipped = st["skipped_ts"] + st["skipped_value"] + st["skipped_instrument"]
+    desc = "rows_read %d, rows_kept %d, skipped_ts %d, skipped_value %d, skipped_instrument %d" % (st["rows_read"], st["rows_kept"], st["skipped_ts"], st["skipped_value"], st["skipped_instrument"])
     if st["rows_kept"] == 0:
         raise SystemExit("STOP: no ES row kept (%s): the file is not in the expected format" % desc)
     if skipped > MAX_SKIP_SHARE * st["rows_read"]:
@@ -120,34 +128,60 @@ def after_entry(candles, t_entry, close):
     return [(c["ts"], c.get("bid")) for c in sorted(candles, key=lambda c: c["ts"]) if t_entry < c["ts"] <= last and two_sided(c)]
 
 
-def time_exit_bid(candles, close):
-    c = {x["ts"]: x for x in candles}.get(close - TIME_EXIT_BEFORE_CLOSE_S)
-    return c["bid"] if c is not None and two_sided(c) else None
+def time_exit(candles, close):
+    """Amendment 3: the first TWO-SIDED candle ending in [close - 300 s, close]; its bid is the exit price. A missing or not-two-sided minute moves to the next two-sided one.
+    -> ("bid", bid, moved) or ("settle", None, True) when none is left through the close (the position is held to the close and settled)."""
+    for c in sorted(candles, key=lambda c: c["ts"]):
+        if close - TIME_EXIT_BEFORE_CLOSE_S <= c["ts"] <= close and two_sided(c):
+            return ("bid", c["bid"], c["ts"] != close - TIME_EXIT_BEFORE_CLOSE_S)
+    return ("settle", None, True)
 
 
-def headline(fill, s, path, tbid):
-    """-> (net, exit_price) or None (dropped). Target: first bid >= 2 x fill; else the time exit."""
-    target = TARGET_MULT * fill
-    for _, bid in path:
-        if bid is not None and bid >= target - TOL:
-            ex = bid - s
-            return ex - fill - fee(fill) - fee(ex)
-    if tbid is None:
-        return None
-    ex = tbid - s
-    return ex - fill - fee(fill) - fee(ex)
+def first_hit(path, level):
+    return next((bid for _, bid in path if bid is not None and bid >= level - TOL), None)
 
 
-def variant(fill, s, path, tbid):
-    """2-contract position: half at 2x, the rest at the first bid >= 0.80, a half with no hit at the time exit. -> net or None."""
-    target = TARGET_MULT * fill
-    a = next((bid for _, bid in path if bid is not None and bid >= target - TOL), None)
-    b = next((bid for _, bid in path if bid is not None and bid >= REST_PRICE - TOL), None)
-    if (a is None or b is None) and tbid is None:
-        return None
-    ea = (a if a is not None else tbid) - s
-    eb = (b if b is not None else tbid) - s
-    return (ea - fill) + (eb - fill) - fee(fill, 2) - fee(ea) - fee(eb)
+def close_leg(fill, s, texit, side, res):
+    """One contract's result at the time exit (a sale at bid - s, fee on the exit) or at settlement (payout 1 or 0, price refunded on a void, no exit fee); the entry fee is NOT in it."""
+    if texit[0] == "bid":
+        ex = texit[1] - s
+        return ex - fill - fee(ex)
+    payout = fill if res == "void" else (1.0 if res == side else 0.0)
+    return payout - fill
+
+
+def headline(fill, s, path, texit, side, res):
+    """Sell at the first bid >= 2 x fill, else at the time exit (or settle). Never dropped."""
+    hit = first_hit(path, TARGET_MULT * fill)
+    if hit is not None:
+        ex = hit - s
+        return ex - fill - fee(fill) - fee(ex)
+    return close_leg(fill, s, texit, side, res) - fee(fill)
+
+
+def variant(fill, s, path, texit, side, res):
+    """2-contract position: half at the first bid >= 2 x fill, the rest at the first bid >= 0.80, a half with no hit at the time exit (or settled). Never dropped."""
+    total = -fee(fill, 2)
+    for level in (TARGET_MULT * fill, REST_PRICE):
+        hit = first_hit(path, level)
+        if hit is not None:
+            ex = hit - s
+            total += ex - fill - fee(ex)
+        else:
+            total += close_leg(fill, s, texit, side, res)
+    return total
+
+
+def uses_time_exit(path, fill, kind):
+    """True if this arm's closing leg (a half, for the variant) goes at the time exit."""
+    if kind == "headline":
+        return first_hit(path, TARGET_MULT * fill) is None
+    return first_hit(path, TARGET_MULT * fill) is None or first_hit(path, REST_PRICE) is None
+
+
+def settles(path, fill, texit, kind):
+    """True if this arm's closing leg ended at settlement instead of a sale (entry counted in the 'settled at close' print)."""
+    return texit[0] == "settle" and uses_time_exit(path, fill, kind)
 
 
 def hold(fill, side, result):
@@ -174,7 +208,7 @@ def arm_report(rows_by_slip):
         out["%dc" % round(s * 100)] = {"n": len(nets), "pf": pf_of(nets), "net": sum(nets), "half1_pf": pf_of(h1), "half2_pf": pf_of(h2), "n_half1": len(h1), "n_half2": len(h2)}
     one, two = out["1c"], out["2c"]
     def lt1(p): return p is not None and p < 1.0 - TOL
-    counts = (one["pf"] is not None and one["pf"] >= PF_BAR - TOL and one["half1_pf"] is not None and one["half1_pf"] >= 1.0 - TOL and one["half2_pf"] is not None and one["half2_pf"] >= 1.0 - TOL
+    counts = (one["n"] >= MIN_ENTRIES and one["pf"] is not None and one["pf"] >= PF_BAR - TOL and one["half1_pf"] is not None and one["half1_pf"] >= 1.0 - TOL and one["half2_pf"] is not None and one["half2_pf"] >= 1.0 - TOL
               and two["pf"] is not None and two["pf"] >= 1.0 - TOL)
     if one["n"] < MIN_ENTRIES:
         label = "FALSIFIED (fewer than %d entries, n = %d)" % (MIN_ENTRIES, one["n"])
@@ -188,16 +222,16 @@ def arm_report(rows_by_slip):
     return out
 
 
-DROP_NOTE = "Entries dropped because the exit candle has no bid (rule 18) are mostly the losers: this figure is biased UPWARD; read it with the printed drop share and the hold arm (never dropped)."
+SETTLED_NOTE = "Amendment 3: an exit minute with no two-sided candle moves to the next two-sided minute; if none through the close the position is held to the close and settled. Those entries carry the full win or loss at settlement, not a sale at a quote."
 
 
 def run_windows(markets, cs, es, es_stats=None):
     c = {"windows_listed": 0, "not_touched_on_or_after_2026-12-01": 0, "no_es_start_bar": 0, "look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0, "look_not_two_sided": 0}
     spreads, n_two_sided, looks_total = [], 0, 0
     arms = {(hi, ex, s): [] for hi in BANDS for ex in EXITS for s in SLIPS}
-    drops = {(hi, ex): 0 for hi in BANDS for ex in EXITS}
-    drop_fill = {(hi, ex): 0.0 for hi in BANDS for ex in EXITS}
-    drop_hold = {(hi, ex): 0.0 for hi in BANDS for ex in EXITS}
+    settled = {(hi, ex): 0 for hi in BANDS for ex in EXITS}
+    settled_fill = {(hi, ex): 0.0 for hi in BANDS for ex in EXITS}
+    moved = {(hi, ex): 0 for hi in BANDS for ex in EXITS}
     entered = {hi: 0 for hi in BANDS}
     no_entry = {hi: 0 for hi in BANDS}
     voids = {hi: 0 for hi in BANDS}
@@ -229,32 +263,28 @@ def run_windows(markets, cs, es, es_stats=None):
             if res is None or str(res).strip() == "" or res not in ("yes", "no", "void"):
                 raise SystemExit("STOP: result %r on entered window %s is not yes, no or void" % (res, tk))
             voids[hi] += (res == "void")
-            path, tbid = after_entry(candles, t, close), time_exit_bid(candles, close)
+            path, texit = after_entry(candles, t, close), time_exit(candles, close)
             for s in SLIPS:
                 fill = ask + s
                 key = (close, tk)
-                nh = headline(fill, s, path, tbid)
-                if nh is None:
-                    if s == SLIPS[0]:
-                        drops[(hi, "headline")] += 1; drop_fill[(hi, "headline")] += fill; drop_hold[(hi, "headline")] += hold(fill, side, res)
-                else:
-                    arms[(hi, "headline", s)].append((key, nh))
-                nv = variant(fill, s, path, tbid)
-                if nv is None:
-                    if s == SLIPS[0]:
-                        drops[(hi, "variant")] += 1; drop_fill[(hi, "variant")] += fill; drop_hold[(hi, "variant")] += hold(fill, side, res)
-                else:
-                    arms[(hi, "variant", s)].append((key, nv))
+                arms[(hi, "headline", s)].append((key, headline(fill, s, path, texit, side, res)))
+                arms[(hi, "variant", s)].append((key, variant(fill, s, path, texit, side, res)))
                 arms[(hi, "hold", s)].append((key, hold(fill, side, res)))
+                if s == SLIPS[0]:
+                    for ex in ("headline", "variant"):
+                        if settles(path, fill, texit, ex):
+                            settled[(hi, ex)] += 1; settled_fill[(hi, ex)] += fill
+                        elif texit[0] == "bid" and texit[2] and uses_time_exit(path, fill, ex):
+                            moved[(hi, ex)] += 1
     rep = {}
     for hi in BANDS:
         for ex in EXITS:
             rows = {s: sorted(arms[(hi, ex, s)]) for s in SLIPS}
             r = arm_report(rows)
-            r["entries_found"] = entered[hi]; r["dropped_no_time_exit_candle"] = drops[(hi, ex)]; r["windows_without_entry"] = no_entry[hi]
-            r["dropped_share"] = (drops[(hi, ex)] / entered[hi]) if entered[hi] else None
-            r["dropped_entry_fill_sum_1c"] = drop_fill[(hi, ex)]; r["dropped_hold_net_sum_1c"] = drop_hold[(hi, ex)]
-            r["drop_note"] = DROP_NOTE
+            r["entries_found"] = entered[hi]; r["windows_without_entry"] = no_entry[hi]
+            if ex != "hold":
+                r["settled_at_close_count"] = settled[(hi, ex)]; r["settled_at_close_share"] = (settled[(hi, ex)] / entered[hi]) if entered[hi] else None
+                r["settled_at_close_entry_fill_sum_1c"] = settled_fill[(hi, ex)]; r["time_exit_moved_count"] = moved[(hi, ex)]; r["settled_at_close_note"] = SETTLED_NOTE
             if ex == "hold": r["voids"] = voids[hi]
             rep["band_%02d_%s" % (round(hi * 100), ex)] = r
     spreads.sort()

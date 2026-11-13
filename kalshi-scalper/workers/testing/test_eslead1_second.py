@@ -114,6 +114,12 @@ with tempfile.TemporaryDirectory() as d:
     open(f, "a").write("2026-11-05T14:45:00.000000000Z,33,1,7,1,1,1,1002.5,10\n")
     try: e.load_es(f); assert 0
     except SystemExit as ex: assert "duplicate ES ts_event 2026-11-05T14:45:00" in str(ex)
+# Amendment 3: the prediction text. Pass / fail / "untestable at n = N" when lag 0 is n/a (under the floor or zero variance)
+assert r["prediction"] == "fail" and r0["prediction"] == "pass"
+r6 = e.measure(mk, cs, es, 6); assert r6["prediction"] == "untestable at n = 5" and r6["prediction_peak_at_lag_0_passed"] is None and 0 in r6["na_lags"]
+Mz = [0.50] * 6; rz0 = e.measure(*assemble(window("KXINX15M-Zv", D(5), Mz)), 3); assert rz0["prediction"] == "untestable at n = 5" and rz0["prediction_peak_at_lag_0_passed"] is None          # no Kalshi change at all: lag 0 zero variance
+rm6 = e.measure(*assemble(window("KXINX15M-E", D(5), M1, drop_es=(0,))), 6); n0, n1 = rm6["lags"][0]["n_pairs"], rm6["lags"][1]["n_pairs"]
+assert n0 != n1 and rm6["prediction"] == "untestable at n = %d" % n0, (n0, n1, rm6["prediction"])
 # F1 (rule 18): a candle with an empty side, a locked or a crossed book has no mid (never carried); counted as not_two_sided
 def with_candle(w, m_, bid, ask):
     mk_, cs_, es_ = assemble(w)
@@ -134,10 +140,17 @@ def es_file(rows):
     f = os.path.join(tmpd, "x.csv"); open(f, "w").write(HDR + "".join(rows)); return f
 with tempfile.TemporaryDirectory() as tmpd:
     out, st = e.load_es_counted(es_file([good(0), good(1)] + bad))
-    assert st == {"rows_read": 5, "rows_kept": 2, "skipped_ts": 1, "skipped_value": 2} and len(out) == 2, st
+    assert st == {"rows_read": 5, "rows_kept": 2, "skipped_ts": 1, "skipped_value": 2, "skipped_instrument": 0} and len(out) == 2, st
     for f_, why in ((es_file([good(0), good(1)] + bad), "5 rows"),):
         try: e.check_es_rows(st); assert 0
         except SystemExit as ex: assert "rows_read 5" in str(ex) and "skipped_ts 1" in str(ex) and "skipped_value 2" in str(ex), str(ex)
+    inst = lambda i, iid: good(i).replace(",33,1,7,", ",33,1,%d," % iid)          # Amendment 3: the file's single instrument is the most frequent id
+    out, sti = e.load_es_counted(es_file([inst(0, 7), inst(1, 7), inst(2, 7), inst(3, 7), inst(4, 8)]))
+    assert sti == {"rows_read": 5, "rows_kept": 4, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 1} and len(out) == 4 and all(v[0] == 7 for v in out.values())
+    try: e.check_es_rows(sti); assert 0
+    except SystemExit as ex: assert "skipped_instrument 1" in str(ex)
+    try: e.load_es_counted(es_file([inst(0, 7), inst(1, 8)])); assert 0
+    except SystemExit as ex: assert "tie" in str(ex) and "7" in str(ex) and "8" in str(ex)
     ok = [good(i) for i in range(100)]
     _, st1 = e.load_es_counted(es_file(ok + bad[:1])); assert st1["rows_read"] == 101 and e.check_es_rows(st1) is None
     _, st5 = e.load_es_counted(es_file(ok + [bad[0]] * 5)); assert e.check_es_rows(st5) is None          # 5 of 105 = 4.76%
@@ -156,7 +169,7 @@ with tempfile.TemporaryDirectory() as tmpd:
     saved = (e.k.guard, e.k.markets, e.k.candles); e.k.guard = lambda f: None; e.k.markets = lambda l: mkw; e.k.candles = lambda c: csw
     try:
         fgood = es_file([good(i) for i in range(10)])
-        ro = e.run(["l"], ["c"], fgood, 3); assert ro["es_rows"] == {"rows_read": 10, "rows_kept": 10, "skipped_ts": 0, "skipped_value": 0}
+        ro = e.run(["l"], ["c"], fgood, 3); assert ro["es_rows"] == {"rows_read": 10, "rows_kept": 10, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 0}
         try: e.run(["l"], ["c"], es_file(bad), 3); assert 0
         except SystemExit as ex: assert "skipped" in str(ex)
     finally:
