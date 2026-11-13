@@ -4,6 +4,9 @@
 # The built-in GITHUB_TOKEN pushes gzipped files to its OWN weekly orphan branch wheelbook-<ISO year>w<week> (under wheelbook/), never to main, quote-data or nc-data.
 # Triggered every 15 minutes (two cron pairs) under one concurrency group that never cancels a running job; each job records up to the next 4 hour boundary and stops.
 # A continuous recorder like R6 and NC15 (about 43,000 runner minutes a month, free on a public repo; the owner's approval accepts that, see CLAUDE.md).
+# Self-chaining (Nov 12, 2026): GitHub drops scheduled starts, which left hours unrecorded. After the data push a final step (if: !cancelled()) re-dispatches this same workflow on main with the built-in token at once (no sleep),
+# so the next job queues behind this one in the concurrency group and starts the moment it ends. It does NOT chain when the run was past the end date, ran under 2 minutes (a start with nothing to record; the cron restarts it)
+# or wrote no data file, so a chain cannot spin. The cron stays as the restart path. Needs `actions: write` for the dispatch. No change to billed minutes: the recorder already runs back to back around the clock.
 # It stops by itself: from 2027-01-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-wheelbook
 on:
@@ -13,6 +16,7 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: record-wheelbook
   cancel-in-progress: false
@@ -24,6 +28,7 @@ jobs:
       - name: Stop for good after the end date (2027-01-31 23:59 UTC)
         id: gate
         run: |
+          echo "start=$(date -u +%s)" >> "$GITHUB_OUTPUT"   # the run's own start time (github.run_started_at is not a context value)
           if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the recorder script from main
         if: steps.gate.outputs.go == 'true'
@@ -45,9 +50,11 @@ jobs:
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           if git fetch -q --depth 1 origin "$BRANCH"; then git checkout -q -b "$BRANCH" FETCH_HEAD; else git checkout -q --orphan "$BRANCH"; fi
       - name: Record every market up to the next 4 hour boundary
+        id: rec
         if: steps.gate.outputs.go == 'true'
         run: |
           STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
           mkdir -p "data/wheelbook/$STAMP"
           python3 code/scripts/record_wheelbook.py "data/wheelbook/$STAMP" --cycle-hours 4
           gzip -9 -f data/wheelbook/$STAMP/*.csv
@@ -64,3 +71,18 @@ jobs:
           git commit -q -m "wheelbook $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           for i in 1 2 3 4 5 6; do git push -q origin "$BRANCH" && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin "$BRANCH" || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
           exit 1
+      - name: Chain the next job (at once, so a dropped cron start leaves no gap)
+        if: "!cancelled() && steps.gate.outputs.go == 'true'"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_START: ${{ steps.gate.outputs.start }}
+          STAMP: ${{ steps.rec.outputs.stamp }}
+        run: |
+          END="$(date -u -d '2027-01-31T23:59:00Z' +%s)"
+          NOW="$(date -u +%s)"
+          START="${RUN_START:-$NOW}"
+          if [ "$NOW" -ge "$END" ]; then echo "past the end date: not chaining"; exit 0; fi
+          if [ $(( NOW - START )) -lt 120 ]; then echo "run shorter than 2 minutes: not chaining (the cron restarts it)"; exit 0; fi
+          if [ -z "$STAMP" ] || ! ls data/wheelbook/$STAMP/*.csv.gz >/dev/null 2>&1; then echo "nothing was recorded: not chaining"; exit 0; fi
+          gh workflow run record-wheelbook.yml --ref main

@@ -60,7 +60,7 @@ gates.CB3 = () => {
   assert.ok(!/quote-data|nc-data|pol-data|perp-data|sports-data/.test(wf.replace(/#[^\n]*/g, '')), 'it never touches the other data branches');
   assert.ok(/git fetch -q --depth 1 origin combo-data; then git checkout -q -b combo-data FETCH_HEAD; else git checkout -q --orphan combo-data/.test(wf));
   assert.deepStrictEqual([...wf.matchAll(/git add ([^\n]+)/g)].map((x) => x[1].trim()), ['combo']);
-  assert.ok(/^permissions:\s*\n\s*contents: write\s*\n(?!\s+\w)/m.test(wf), 'contents write and nothing wider');
+  assert.ok(/^permissions:\s*\n\s*contents: write\s*\n\s*actions: write\s*\n(?!\s+\w)/m.test(wf), 'contents write and actions write (the chain dispatch), nothing wider');
   assert.ok(/concurrency:\s*\n\s*group: record-combo\s*\n\s*cancel-in-progress: false/.test(wf));
   const uses = [...wf.matchAll(/uses:\s*([^\s#]+)/g)].map((x) => x[1]);
   assert.ok(uses.length && uses.every((u) => /@[0-9a-f]{40}$/.test(u)));
@@ -68,7 +68,7 @@ gates.CB3 = () => {
   assert.ok(/ref: main/.test(wf) && /record_combo\.py "data\/combo\/\$STAMP"/.test(wf));
   const cfg = fs.readFileSync(path.join(root, '_config.yml'), 'utf8');
   assert.ok(/- \.github/.test(cfg) && /- scripts/.test(cfg) && /- docs/.test(cfg), 'workflow, script and docs are not published with the site');
-  assert.ok(/timeout-minutes: (\d+)/.test(wf) && Number(wf.match(/timeout-minutes: (\d+)/)[1]) <= 20, 'a stuck job is cut off');
+  assert.ok(/timeout-minutes: (\d+)/.test(wf) && Number(wf.match(/timeout-minutes: (\d+)/)[1]) <= 60, 'a stuck job is cut off');
 };
 
 // CB4: it stops by itself on 2027-01-31, in the workflow and in the script.
@@ -76,7 +76,7 @@ gates.CB4 = () => {
   assert.deepStrictEqual(py('print(json.dumps([m.END_UTC, m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH)]))'), ['2027-01-31T23:59:00Z', false, true]);
   assert.ok(/date -u -d '2027-01-31T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf));
   const steps = wf.split(/\n      - name: /).slice(2);
-  assert.ok(steps.length === 4 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)));
+  assert.ok(steps.length === 6 && steps.every((s) => /if: "?(always\(\) && |!cancelled\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)));
   assert.ok(/if past_end\(time\.time\(\)\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code));
 };
 
@@ -253,6 +253,20 @@ gates.CB9 = () => {
 // CB10: the repo's other rules hold for the new files: no em dash, no live account figures.
 gates.CB10 = () => {
   for (const f of [scriptPath, path.join(root, '.github', 'workflows', 'record-combo.yml'), path.join(root, 'docs', 'COMBO_RECORDER.md'), __filename]) assert.ok(!new RegExp(String.fromCharCode(8212)).test(fs.readFileSync(f, 'utf8')), 'no em dash in ' + path.basename(f));
+};
+
+// CB14: self-chaining (Nov 12, 2026): the last step runs after a failed poll, sleeps to :11 or :41 at least 25 minutes after the start, checks the end date before and after, dispatches only this workflow on main; cron stays.
+gates.CB14 = () => {
+  const chain = wf.split(/\n      - name: /).pop();
+  assert.ok(/^Chain the next run/.test(chain));
+  assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true' && steps\.fresh\.outputs\.poll == 'true'"/.test(chain), 'never from a skipped or past-end run');
+  assert.ok(/2027-01-31T23:59:00Z/.test(chain) && (chain.match(/not chaining/g) || []).length >= 2, 'end date before and after the sleep');
+  assert.ok(chain.indexOf('sleep $((') > -1 && chain.indexOf('sleep $((') < chain.indexOf('gh workflow run'));
+  assert.ok(/START \+ 1500/.test(chain) && /660/.test(chain) && /1800/.test(chain), 'at least 25 minutes after the start, on :11 or :41');
+  assert.ok(/RUN_START: \$\{\{ steps\.gate\.outputs\.start \}\}/.test(chain) && !/github\.run_started_at/.test(wf.replace(/#[^\n]*/g, '').replace(/\([^)]*run_started_at[^)]*\)/g, '')), 'start time from the first step');
+  assert.deepStrictEqual([...wf.matchAll(/gh workflow run ([^\n]+)/g)].map((x) => x[1].trim()), ['record-combo.yml --ref main'], 'only this workflow, only on main');
+  assert.deepStrictEqual([...wf.matchAll(/cron:\s*"([^"]+)"/g)].map((x) => x[1]), ['11,41 * * * *'], 'cron stays as the restart path');
+  assert.ok(/steps\.fresh\.outputs\.poll == 'true'/.test(wf.split('- name: One poll')[1].split('- name:')[0]), 'a skipped poll does not poll');
 };
 
 let failed = 0;
