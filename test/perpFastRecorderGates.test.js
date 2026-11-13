@@ -88,6 +88,33 @@ gates.PF5 = () => {
   assert.ok(/cancel-in-progress: false/.test(wf) && /STOP_DATE|2027-02-26/.test(wf + script), 'stop date and queueing kept');
 };
 
+// PF6 (Nov 13, 2026): the workflow chains itself. Consequence: a dropped cron start costs at most one link, and the chain can neither run past the stop date, spin faster than every 5 minutes, nor widen its permissions.
+gates.PF6 = () => {
+  assert.ok(/id: gate/.test(wf) && /echo "start=\$\(date -u \+%s\)" >> "\$GITHUB_OUTPUT"/.test(wf) && !/github\.run_started_at/.test(wf.replace(/#.*$/gm, '').replace(/\(github\.run_started_at[^)]*\)/g, '')), 'start time is a step output, never github.run_started_at');
+  const chain = wf.slice(wf.indexOf('- name: Chain the next run'));
+  assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true' && steps\.rec\.outcome != 'failure'"/.test(chain), 'chains unless cancelled, past the end date or the record step failed');
+  assert.ok(/gh workflow run record-perps-fast\.yml --ref main/.test(chain) && !/gh workflow run (?!record-perps-fast\.yml)/.test(wf), 'it re-dispatches only itself, on main');
+  assert.ok(/permissions:\s*\n\s*contents: write\s*\n\s*actions: write\s*\n/.test(wf), 'contents and actions write, nothing wider');
+  assert.ok(/2027-02-26T23:59:00Z/.test(chain) && (chain.match(/past the end date|pass the end date/g) || []).length >= 2, 'end date checked before and after the sleep');
+  assert.ok(/START \+ 300/.test(chain) && /--chain-wait/.test(chain), 'never chains faster than every 5 minutes; the sleep comes from the script');
+  assert.ok(/schedule:/.test(wf) && /cancel-in-progress: false/.test(wf), 'cron stays as the restart path; never cancels');
+  assert.ok(/timeout-minutes: 345/.test(wf), 'a link (80 minute window plus at most a 4 hour sleep) fits under the 6 hour cap');
+};
+
+// PF7: the chain's sleep: inside a window until it ends, outside until 5 minutes before the next open (New York time, both daylight saving offsets), over a weekend to Monday capped at 4 hours, -1 past the stop date.
+gates.PF7 = () => {
+  const r = py(`u = dt.timezone.utc
+f = lambda *a: m.chain_wait_seconds(dt.datetime(*a, tzinfo=u))
+print(json.dumps([f(2026,11,13,14,20), f(2026,11,13,15,31), f(2026,11,13,14,8), f(2026,11,14,12,0), f(2026,7,15,13,0), f(2027,2,26,22,5), m.next_window_start(dt.datetime(2026,11,13,22,5,tzinfo=u)).isoformat()]))`);
+  assert.strictEqual(r[0], 70 * 60, 'inside the winter open window: sleep to its 10:30 end');
+  assert.strictEqual(r[1], 4 * 3600, 'outside: capped at 4 hours');
+  assert.strictEqual(r[2], 120, 'closer than 5 minutes: sleep to the open itself');
+  assert.strictEqual(r[3], 4 * 3600, 'weekend: capped, the next link recomputes');
+  assert.strictEqual(r[4], 300, 'summer: 13:00Z is 09:00 EDT, 10 minutes before the open, so wake 5 minutes early');
+  assert.strictEqual(r[5], -1, 'past the stop date nothing chains');
+  assert.strictEqual(r[6], '2026-11-16T14:10:00+00:00', 'Friday after the close: Monday 09:10 EST');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
