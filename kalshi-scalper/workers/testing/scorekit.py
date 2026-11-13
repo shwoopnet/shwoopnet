@@ -14,7 +14,7 @@ Basis rules enforced here, from the Head's standing rules: z bar 5.46 at N about
   under 100 trades the label is 'no evidence at n = x' (30 for the slow-family paper screen); FALSIFIED means cash PF under 1.0 at 100 or more;
   every taker rule prints the haircut line (a third of orders at the ask seen do not fill) and, when given, a book-replay line; price source and freshness are printed, never assumed.
 """
-import gzip, json, math, os, re, statistics as st, time
+import gzip, hashlib, json, math, os, re, statistics as st, sys, time
 
 Z_BAR, N_SHARED, PF_BAR, MIN_N, SLOW_MIN_N = 5.46, 2113000, 1.5, 100, 30
 # Haircut table: Forensics' HOW_TO_PRICE_A_PAPER_TRADE.md (722ef2d) section 3, rule 2 (no book recorded: cut the COUNT, and add 1c to the price paid on the rest as the worst case).
@@ -33,13 +33,17 @@ def refuse_heldout(folder, allow=False):
 
 
 _LIST_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "HELDOUT_PULL_RUNS.md")          # the copy beside the readers' folder, kept equal to the one on main
+_LIST_PRINTED = None
 _ROW = __import__("re").compile(r"^\|\s*`([A-Za-z0-9_\-]+)/([A-Za-z0-9_\-]+)`\s*\|")
 
 
 def listed_heldout_runs():
     """Run folder names (the last part, <UTC stamp>_<run id>) of every row of HELDOUT_PULL_RUNS.md. An unreadable list, or a file that is not that list, refuses everything (Head, Nov 13, 2026; logic copied from deskb_guard)."""
-    try: lines = open(_LIST_FILE, encoding="utf-8").read().splitlines()
-    except OSError: raise SystemExit("refused: %s cannot be read, so no run can be shown to be clean (standing rule (h))" % _LIST_FILE)
+    try: raw = open(_LIST_FILE, "rb").read(); lines = raw.decode("utf-8").splitlines()
+    except (OSError, UnicodeDecodeError): raise SystemExit("refused: %s cannot be read, so no run can be shown to be clean (standing rule (h))" % _LIST_FILE)
+    global _LIST_PRINTED
+    if _LIST_PRINTED != raw:          # one line a process (and again if the file changes), on stderr so a printed result stays clean: a run log without this line is not counted (Head, Nov 13)
+        _LIST_PRINTED = raw; print("HELDOUT_PULL_RUNS.md copy read by the guard: sha256 %s" % hashlib.sha256(raw).hexdigest(), file=sys.stderr)
     if not any(ln.startswith("| Run folder") for ln in lines): raise SystemExit("refused: %s has no table header; it is not the list this guard expects" % _LIST_FILE)
     return {m.group(2) for m in map(_ROW.match, lines) if m}
 
