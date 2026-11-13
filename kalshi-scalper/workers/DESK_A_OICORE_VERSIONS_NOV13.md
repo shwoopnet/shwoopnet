@@ -37,3 +37,6 @@ A version replaces its parent only if its cash PF beats the parent's by 0.10 at 
 
 ## Rejected before writing (so they are not re-proposed)
 Entry time (180 s against 120 s before the close) and the open-interest threshold's level: both are parameters OICORE's own research already scanned; a change is a sweep (row 190) and cannot be defended by a mechanism I can state without looking at its trades. A stop or profit target: OICORE holds to settlement by an owner exception and the exit research (EXIT1) found holding better.
+
+## Dated line (Nov 13, 2026, the Head of R&D, 19:52Z): the OIVER-SPREAD scoring convention
+For the history screen of card 1 (the scorer is `desk_a_verify/oiver_spread.py`): the decision is at the candle ending close - 180 s; the price is the ASK SEEN at that candle (the cheaper side's price, ties to YES), with NO +0.01 slip (OICORE's slip was switched off in PR 895); it is filled at that ask, with NO next-candle fill check; C = 20 contracts for the fee rounding; halves are by COUNT (date order, the first ceil(n / 2) and the rest); the open-interest threshold 86,300 is inclusive; the band is 0.08 <= ask <= 0.50. This replaces the limit and fill-check wording in my build 1 (ef5bf7b9) description. The spread condition (yes ask - yes bid at that candle at most 0.03, inclusive) and the rest of the card are unchanged.
