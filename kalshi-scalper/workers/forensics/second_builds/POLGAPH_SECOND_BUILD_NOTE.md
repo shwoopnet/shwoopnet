@@ -85,7 +85,7 @@ The Head's last word (01:44Z): align to Desk B's `94ff7fa7` (scorer `9186c8b5...
 - **At the read:** if that count differs by more than the number of exactly-zero voids, it goes to the Head.
 - **Standing:** text closed, scorer frozen, auditor clean, second build matched. This desk's POLGAPH work is closed until the lists land; nothing has been requested.
 
-## Nov 13, about 07:35Z: re-match after Amendment 5 (development ends Nov 4, 63 series): SAME OUTPUT on six made-up fixtures
+## Nov 13, about 07:09Z (machine clock): re-match after Amendment 5 (development ends Nov 4, 63 series): SAME OUTPUT on six made-up fixtures
 
 Desk B asked for a re-match at 07:03Z. Amendment 5 (registration sha256 `7280653e...`, series file `c22f1aae...`, scorer `198d9bf0...`, `claude/idea-desk-b` at `4b3c8aaf`;
 the three hashes checked on the branch head `2e142312`) moves three things and no rule: development closes end 2026-11-04T23:59:59Z, six activity-count series leave
