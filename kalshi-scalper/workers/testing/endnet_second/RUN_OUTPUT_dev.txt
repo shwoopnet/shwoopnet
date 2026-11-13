@@ -1,0 +1,10 @@
+HELDOUT_PULL_RUNS.md copy read by the guard: sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d
+COUNTS: games 14 (outside the development window 0); games with a qualifying state 12; entries made 6; states not entered 6: {'ask_outside_band': 1, 'no_strike': 1, 'no_usable_quote': 2, 'not_two_sided': 1, 'spread_too_wide': 1}
+MEDIAN ASK: entries made 28.5 (asks [15, 20, 28, 29, 34, 45]); every state with a strike and a two-sided quote 31.5 (asks [15, 20, 28, 29, 34, 35, 45, 46])
+ENTRIES BY CLOSE DATE (UTC): {'2026-11-18': 2, '2026-11-19': 1, '2026-11-22': 1, '2026-11-24': 1, '2026-11-26': 1}
+ENTRIES BY WEEK (Monday of the UTC close date): {'2026-11-16': 4, '2026-11-23': 2}
+WEEK TESTS (fewer than 6 a week): every week under 6: True; mean over the weeks with entries under 6: True; mean over the 4 weeks of the development window under 6: True
+STAGE 1 VERDICT: CLOSED: fewer than 6 qualifying entries a week (all three readings)
+STAGE 2 (development only): n = 6 filled; wins 3, losses 3 (a void is a fee-only loss counted); net +141 c, 23.5 c a contract; cash PF 2.9315; halves PF 6.3478 / 1.36
+STAGE 2 VERDICT: NOT_ENOUGH_DATA at n = 6
+label: provisional, one build; invented rows; every reading in AMBIGUITIES is unruled

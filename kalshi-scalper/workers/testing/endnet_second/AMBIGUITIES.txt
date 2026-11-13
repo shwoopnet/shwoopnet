@@ -1,0 +1,19 @@
+ENDNET independent SECOND build (Testing Desk, Nov 13, 2026), from the card text alone (LIVEDATA_CARDS_NOV13.md, claude/idea-desk-b aca441ae: card 1 and the "three readings pinned" lines); endnet.py was NOT read.
+Usage: python3 -I endnet_second.py <stage1|stage2> <input json>. Invented rows only so far; no Kalshi request, no data. Stage 1 never touches a result; stage 2 is development only.
+STRUCTURE: map_input() is the ONLY function that knows the input layout (the real feed layout is not known yet); everything below it works on the internal form
+Game(game_id, close_ts, minutes=[Minute(end_ts, period, left_s, home, away)], strikes={ticker: floor}, quotes={ticker: {end_ts: (bid, ask) cents}}, results={ticker: str} or None). A later remap touches map_input() only.
+Readings of the text where it leaves a choice are NOT chosen silently: they are in AMBIGUITIES, and where they change a printed line both are printed.
+1. 'qualifying entries' (stage 1): entries actually made (state, strike, two-sided quote, band and spread all pass), taken here; a state that is reached but fails a filter is counted separately. The text does not say whether the band and spread are part of 'qualifying'.
+2. 'median ask' (stage 1): the 15c to 45c band makes the median of ENTRIES at most 45c by construction; so the median is printed twice: over the entries made (ask before the +1c) and over every state with a strike and a two-sided quote at the entry minute (before the band and spread filters).
+3. 'fewer than 6 qualifying entries a week': read three ways and all printed: every calendar week (Monday to Sunday of the UTC close date) with an entry under 6; the mean over those weeks; the mean over the whole development window (4 weeks). The verdict says so where they differ.
+4. 'game night' and week: by the UTC date of the game's close time (a game closing at 03:30Z belongs to the previous US evening); not decided by the text.
+5. 'the clock reads 3:00 or less': left_s <= 180 inclusive; the minute's left_s is the clock at the END of the minute (the candle's end time), an assumption about the real feed.
+6. 'one goal apart': |home - away| == 1 at that minute; the total is home + away at that minute.
+7. The strike rule 0 <= f - total < 1 can match two strikes if a ladder has lines closer than 1 apart: this build then takes NO strike and counts the game (ambiguous strike) rather than choosing; the real ladder is 1 apart so it should not occur.
+8. 'ask 15c to 45c' and 'spread 4c or less': inclusive on both ends, tested on the ask BEFORE the +1c; the price paid is ask + 1c.
+9. Fee: 0.07 x p x (1 - p) of the price paid, rounded up to the next cent (the standing hold-to-settlement template); the text does not name it.
+10. 'one entry a game' and 'filled': every entry is counted FILLED at ask + 1c (a taker); stage 2's '150 filled entries' is read as 150 entries.
+11. A result that is not yes or no (void, missing): price refunded, fee kept, a fee-only loss counted in n and PF (the Head's one void rule for hold-to-settlement cards; the card does not repeat it).
+12. Halves: the entries sorted by (close time, game id), the first n // 2 and the rest; 'halves at 1.0' is printed under both readings (above 1.0, and 1.0 or above); the deflated z is NOT computed ('at the then-current bar' is not stated).
+13. Games closing before 2026-11-17T00:00Z are counted as outside the development window and not used; any game closing on or after 2026-12-15T00:00Z refuses the whole run before a state is read.
+14. A game with no third-period minute at or under 180 s with a one-goal score has no state and is counted; a game whose feed is missing a minute is not repaired.
