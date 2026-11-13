@@ -1,0 +1,146 @@
+{
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/dbltb/LIVEDATA_FINDING_AND_DBLTB_CARD.md",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "status": "active",
+ "job_id": "LIVEDATA_PROBE_A2",
+ "purpose": "Zero-try field probe, version 2 of probe A (Idea Desk C's TEMPBLEND delta): Kalshi's temperature index with per-station detail, how far back it is served, the calibration timeline, and the settlement source of the four hourly temperature series. Fields and counts only.",
+ "heldout": "none in range for any result: no request asks for a price or a result, and the readers print field names, types and counts, never a value. The temperature VALUES in the answers are not read by anyone. Cards that hold an hourly temperature series out: W-CAT-CAL1 weather (released by the Head 2026-11-13 06:51Z); WXNEW1 (holdout 2026-10-19 to 2026-10-31, not read, no value read here); WXOTHER1 (closed unread); Idea Desk C's TEMPBLEND (card, not registered, Nov 13): development settlement times 2026-09-13 to before 2026-11-05, HELD-OUT 2026-11-12 to before 2026-12-10, read once on or after 2026-12-10. This probe's recent request (last 30 minutes, Nov 13) and its 2026-11-12 onward answers fall inside that held-out window: the values in them are third-party-free Kalshi index data but are NOT opened, only field names and counts. The other two index windows (2026-09-13 and 2026-11-03) lie in TEMPBLEND's development window. This desk's own cost measurement uses 2026-11-05 to 2026-11-11 (no held-out). THE EXCEPTION: Kalshi's index endpoints and per-station detail are outside the owner's earlier read-and-allowed terms; the owner accepted that risk on Nov 13 ('Both, ignore the terms'). Must NOT be dispatched until that acceptance is recorded in CLAUDE.md on main.",
+ "allowed_endpoints": [
+  {
+   "name": "events",
+   "method": "GET",
+   "path_pattern": "/events",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "with_milestones"
+   ]
+  },
+  {
+   "name": "markets",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit"
+   ]
+  },
+  {
+   "name": "weather_index",
+   "method": "GET",
+   "path_pattern": "/live_data/weather/miami",
+   "params_allowed": [
+    "last_sec",
+    "detailed",
+    "from",
+    "to"
+   ]
+  },
+  {
+   "name": "weather_calibrations",
+   "method": "GET",
+   "path_pattern": "/live_data/weather/miami/calibrations",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXTEMPMIAH",
+  "KXTEMPCHIHS",
+  "KXTEMPNYCHS",
+  "KXTEMPLAXHS"
+ ],
+ "ticker_allowlist": [],
+ "requests": [
+  {
+   "id": "ev_kxtempmiah",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   }
+  },
+  {
+   "id": "ev_kxtempchihs",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPCHIHS",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   }
+  },
+  {
+   "id": "ev_kxtempnychs",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPNYCHS",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   }
+  },
+  {
+   "id": "ev_kxtemplaxhs",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPLAXHS",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   }
+  },
+  {
+   "id": "mk_miami_rules",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "settled",
+    "limit": 1
+   }
+  },
+  {
+   "id": "wx_recent_detailed",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "last_sec": 1800,
+    "detailed": "true"
+   }
+  },
+  {
+   "id": "wx_nov3_detailed",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "from": 1793664000000,
+    "to": 1793671200000,
+    "detailed": "true"
+   }
+  },
+  {
+   "id": "wx_sep13_detailed",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "from": 1789257600000,
+    "to": 1789264800000,
+    "detailed": "true"
+   }
+  },
+  {
+   "id": "wx_calibrations",
+   "path": "/live_data/weather/miami/calibrations"
+  }
+ ],
+ "max_requests": 12,
+ "notes": "Written not sent (the Head of R&D, 14:26Z Nov 13). Delta from Idea Desk C's TEMPBLEND card. LIMITS the reader cannot meet as it stands (field names, types, counts only): the settlement-source WORD in the rules text, and the station_id VALUES, are values; a reader extension printing only an allowlisted set of keys (source, code, station_id) would need a new hash and Auditor B. The city key is only known for Miami (other cities' live-data keys are not guessed; the three other city events are listed so their milestone fields show the key). Probe A (7f79c9f8) stays as it was."
+}
