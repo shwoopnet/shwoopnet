@@ -1,0 +1,12 @@
+development events 171 | held-out events dropped at load (counted, never simulated) 10 | strikes 1197 [development only, no held-out mode]
+== Rule Q: quotable events 168 | strikes posted 1176 | orders 2294 | fills 800 (trade fills 800, fractional filling trades 382, book fills 0) | pairs 175 | singles 450
+  1 contract, fee unrounded, maker 0: net +9.184616 | mean per event +0.054670 | PF 1.43 | days 10, positive days 8
+  1 contract, fee unrounded, maker 0.0175 x p x (1 - p): net +6.893399 | mean per event +0.041032 | PF 1.31 | days 10, positive days 7
+  1 contract, fee rounded to the cent per leg, maker 0: net +6.460000 | mean per event +0.038452 | PF 1.29 | days 10, positive days 7
+  1 contract, fee rounded to the cent per leg, maker 0.0175 x p x (1 - p): net -1.540000 | mean per event -0.009167 | PF 0.94 | days 10, positive days 4
+== Rule P: quotable events 168 | strikes posted 1176 | orders 2294 | fills 2032 (trade fills 609, fractional filling trades 297, book fills 1423) | pairs 913 | singles 206
+  1 contract, fee unrounded, maker 0: net -29.170205 | mean per event -0.173632 | PF 0.18 | days 10, positive days 1
+  1 contract, fee unrounded, maker 0.0175 x p x (1 - p): net -34.637221 | mean per event -0.206174 | PF 0.07 | days 10, positive days 1
+  1 contract, fee rounded to the cent per leg, maker 0: net -29.700000 | mean per event -0.176786 | PF 0.18 | days 10, positive days 1
+  1 contract, fee rounded to the cent per leg, maker 0.0175 x p x (1 - p): net -50.020000 | mean per event -0.297738 | PF 0.00 | days 10, positive days 0
+10 contract report: NOT implemented (text gap G10)

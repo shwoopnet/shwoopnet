@@ -14,7 +14,12 @@ LAST_FOLDER = "2026-11-08"
 POST_MIN, FLAT_MIN = 50, 15
 OPT = {"POST": os.environ.get("B2_POST", "first_only"),        # G3: first_only | first_with_bid
        "FLAT": os.environ.get("B2_FLAT", "first_at_or_after"), # G6: first_at_or_after | last_before
-       "NOBID_SALE": 0.0}                                      # G7
+       "NOBID_SALE": 0.0,                                      # G7
+       "CLOCK": os.environ.get("B2_CLOCK", "date"),            # G2: date (server Date header) | local (poll_ts_local_ms)
+       "STRICT": os.environ.get("B2_STRICT", "strict"),        # G4: strict | incl (a trade AT the post second counts)
+       "FILLT": os.environ.get("B2_FILLT", "created"),         # G5: created | poll (the trade's own poll time)
+       "STRIKES": os.environ.get("B2_STRIKES", "all"),
+       "NOBID": os.environ.get("B2_NOBID", "zero")}                   # G7: zero (default) | last_known         # G1: all | first_poll (strikes of the event's first book poll)
 EPS = 1e-9
 
 def num(x):
@@ -43,11 +48,11 @@ def load(data):
                 if r["close_time"] >= PINNED_CUTOFF:
                     dropped.add(r["close_time"]); continue     # held-out event: counted, not kept
                 book[(r["close_time"], r["ticker"])].append(
-                    (parsedate_to_datetime(r["server_date_header"]).timestamp(), num(r["yes_bid_px_1"]), num(r["yes_bid_sz_1"]), num(r["no_bid_px_1"]), num(r["no_bid_sz_1"])))
+                    ((parsedate_to_datetime(r["server_date_header"]).timestamp() if OPT["CLOCK"] == "date" else float(r["poll_ts_local_ms"]) / 1000.0), num(r["yes_bid_px_1"]), num(r["yes_bid_sz_1"]), num(r["no_bid_px_1"]), num(r["no_bid_sz_1"])))
         tp = os.path.join(f, "trades.csv.gz")
         if os.path.exists(tp):
             for r in csv.DictReader(gzip.open(tp, "rt")):
-                trades[r["ticker"]].append((trade_epoch(r["created_time"]), r["trade_id"], num(r["yes_price_dollars"]), num(r["count_fp"]) or 0.0, r["taker_outcome_side"]))
+                trades[r["ticker"]].append((trade_epoch(r["created_time"]), r["trade_id"], num(r["yes_price_dollars"]), num(r["count_fp"]) or 0.0, r["taker_outcome_side"], float(r["poll_ts_local_ms"]) / 1000.0))
     seen_tid = set(); clean = defaultdict(list)
     for tk, v in trades.items():
         for t in sorted(v, key=lambda x: (x[0], x[1])):
@@ -89,13 +94,14 @@ def simulate_strike(polls, tr, T, rule):
         fills = []
         cum = 0.0
         for t in tr:
-            if t[0] <= pt or t[0] > flat_t:
+            te = t[0] if OPT["FILLT"] == "created" else t[5]
+            if (te < pt if OPT["STRICT"] == "incl" else te <= pt) or te > flat_t:
                 continue
             qual = (t[4] == "no" and abs(t[2] - want) < EPS) if side == "yes" else (t[4] == "yes" and abs(t[2] - want) < EPS)
             if qual:
                 cum += t[3]
                 if cum >= queue + 1 - EPS:
-                    fills.append((t[0], "queue", t[3])); break
+                    fills.append((te, "queue", t[3])); break
         if rule == "P":
             for t in tr:
                 if t[0] <= pt or t[0] > flat_t:
@@ -118,6 +124,9 @@ def simulate_strike(polls, tr, T, rule):
         before = [r for r in polls if r[0] <= flat_t]
         r = (after[0] if after else None) if OPT["FLAT"] == "first_at_or_after" else (before[-1] if before else None)
         s = side_px(r, side)[0] if r else None
+        if s is None and OPT["NOBID"] == "last_known":                # G7 alternative: the latest earlier best bid of that side
+            earlier = [x for x in polls if x[0] <= flat_t and side_px(x, side)[0] is not None]
+            s = side_px(earlier[-1], side)[0] if earlier else None
         sale[side] = OPT["NOBID_SALE"] if s is None else s
     return orders, legs, sale
 
@@ -138,6 +147,10 @@ def main():
     events = defaultdict(list)
     for (ct, tk) in book:
         events[ct].append(tk)
+    if OPT["STRIKES"] == "first_poll":
+        for ct in list(events):
+            t0 = min(book[(ct, tk)][0][0] for tk in events[ct])
+            events[ct] = [tk for tk in events[ct] if book[(ct, tk)][0][0] <= t0 + 60]
     print("development events %d | held-out events dropped at load (counted, never simulated) %d | strikes %d [development only, no held-out mode]" % (len(events), len(dropped), len(book)))
     for rule in ("Q", "P"):
         sims = {}
