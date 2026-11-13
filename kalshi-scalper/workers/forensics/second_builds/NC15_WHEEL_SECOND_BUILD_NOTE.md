@@ -209,6 +209,8 @@ writer `38ec4c46...` and block reader v6 `5525cbbb...` at `claude/idea-desk-a` `
 The fixture blocks that used to fail on the day line now read on the remaining tests in both builds (for example copper's first block on seed 6 clears and qualifies).
 The files `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_5525cbbb_run_by_forensics.txt` are Desk A's block output from these runs.
 Still agreed by reading only: a favourites-class rule (150 signals); the Head has said that case can wait until a favourite is registered.
+After this comparison the lane gained three details under item (u) (`rnd-queue` `b25284ef`): the 120 rows are header-readable rows, a row with no readable receive
+time is dropped before the sort, and a run's rows come from `book.csv.gz` in file order. They describe what both builds already do, so nothing was changed or re-run for them.
 
 ## Places where the sheet or the lane leaves a choice
 
