@@ -8,3 +8,7 @@ Messages crossed four times in fifteen minutes on one block of code. Nothing of 
 - **History, in order:** 94ff7fa7 (stands) -> 8c1c7d5d (the Head's first ruling) -> 5a7de18e (restored to 94ff7fa7) -> d31f2ebb (restored to 8c1c7d5d on a "final" the Head then withdrew) -> this commit (restored to 94ff7fa7, the last word).
 - The printed lines in `fixture_outputs/` were re-made with the scorer that stands.
 - The Head's rule from here: no ruling on a card while its desk is editing it, until the desk sends a "done" line.
+
+## A known print-only difference, left in the frozen scorer (found by the Forensics desk, 01:48Z)
+
+On one made-up fixture the information-only line "voids paid at their settlement value instead" counted 95 wins where the second build counted 94; n, profit factor, net, mean and z were equal. The bet was a void whose settlement value gave a cash result of exactly zero (0.53 minus 0.51 minus 0.02), which floating point holds as +1.7e-17, and the frozen scorer counts any result above zero as a win. **No registered line can be touched by this:** under the registered money rule a result is a win (1 minus the limit minus the fee), a loss (the limit plus the fee) or a void (the fee, at least 1c), never zero. The hash is not moved for it. When that line is read, a result within 1e-9 of zero is neither a win nor a loss.
