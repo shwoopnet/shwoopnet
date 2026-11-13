@@ -136,10 +136,10 @@
   "f. The ladder is the met side's present levels as asks (1 minus the bid price), cheapest first. \"Offers 10\" is the sizes at or under limit + 1e-9 summing to 10 - 1e-9 or more. The walked price takes the first 10 contracts of the levels at or under the limit.",
   "g. A decision instant before the sheet's commit time (2026-11-13T00:23:49Z) does not count; a close after 2026-12-31T23:59:59Z is past the log's stop. Both are counted and left out.",
   "h. Result: a coverage row's result of yes or no, from any run folder that holds the ticker (two runs that disagree stop this build's run; Desk A's choice 6 takes the first found). Any other non-empty value is a void. An empty result is OPEN until 7 days after the close (by --now), then a void. A void is a fee-only loss, counted.",
-  "i. A day is the US Central calendar date of the decision instant.",
-  "j. Blocks, per place, over its fillable signals in order of decision instant: a block is the next 60; while it holds fewer than 10 wins or fewer than 10 losses it grows one signal at a time (a void is neither). It is READ only when every signal in it has a final value; a block holding an open signal WAITS, and so does everything after it.",
-  "k. A block FAILS if its first and last decision are more than 21 days apart, if it has fewer than 7 different days, if one day holds more than 30 percent of a positive block net, if its cash profit factor is under 1.3, or if either half (the first n // 2 signals and the rest) is under 1.0. Otherwise it CLEARS. No sliding and no re-read: the next block starts at the first signal after it.",
-  "l. After a cleared block the next 30 fillable signals are its confirmation (profit factor 1.0 or better: QUALIFIED); they belong to no block. The next block starts after them.",
+  "i. A day is the US Central calendar date of the signal poll's exchange time (the Head's ruling (d), Nov 13 02:05Z, ROTATION_LANE.md section 4 at rnd-queue 7c4c71d2).",
+  "j. Blocks, per place, over its fillable signals in order of signal poll time, then ticker (rulings (a) to (e)): a block grows signal by signal and ends, and is read once, at the first signal at which it holds at least 60 signals, at least 7 different days, at least 10 wins AND at least 10 losses. A void is a fee-only loss and counts as a loss (Desk A's reading; this build first counted it as neither).",
+  "k. EXPIRED: a signal whose time is more than 21 x 24 hours after the block's first signal finds the block not complete: the block ends UNREAD and that signal starts the next block. A block's start never slides. An open result inside a block (before that point) makes the block WAIT, and nothing after it is read.",
+  "l. A read block FAILS if one day holds more than 30 percent of a positive net, if its cash profit factor is under 1.3, or if either half (the first n // 2 signals and the rest) is under 1.0; otherwise it CLEARS. After a cleared block the next 30 fillable signals are its confirmation and belong to no block: profit factor 1.0 or better is QUALIFIED and no further block is read for the place; under 1.0, the next block starts after them.",
   "m. Profit factor: wins over losses in dollars; no losses is infinite and passes; no wins is zero. Every bar is tested with a 1e-9 tolerance on the float figure, and the figure in exact tenths of a cent is printed beside any figure within 0.001 of its bar.",
   "n. Only the seven series the sheet keeps (copper, WTI, natural gas, HYPE, BNB, silver, USD/CAD) are places; the four withdrawn series are counted and not scored."
  ],
@@ -163,7 +163,7 @@
       71203
      ],
      "days": 10,
-     "span_days": 12.885416666666666,
+     "span_days": 12.885415960649649,
      "top_day_share_of_net": 0.40462156115600323,
      "verdict": "FAILED",
      "fails": [
@@ -187,7 +187,7 @@
       84102
      ],
      "days": 14,
-     "span_days": 15.15625,
+     "span_days": 15.1562486458349,
      "top_day_share_of_net": 0.26823786417963746,
      "verdict": "CLEARED",
      "fails": [],
@@ -195,7 +195,8 @@
      "confirmation": "QUALIFIED"
     }
    ],
-   "state": "block in progress: 7 of 60 fillable signals"
+   "state": "QUALIFIED: the place takes a seat; no further block is read",
+   "qualified": true
   },
   "KXWTI15M": {
    "fillable": 153,
@@ -205,7 +206,7 @@
      "last": "KXWTI15M-26NOV302345-00",
      "n": 60,
      "wins": 26,
-     "losses": 33,
+     "losses": 34,
      "voids": 1,
      "net": -17.543,
      "pf": 0.8446023155078792,
@@ -216,7 +217,7 @@
       112891
      ],
      "days": 15,
-     "span_days": 17.864583333333332,
+     "span_days": 17.864587309029368,
      "top_day_share_of_net": null,
      "verdict": "FAILED",
      "fails": [
@@ -240,7 +241,7 @@
       134544
      ],
      "days": 11,
-     "span_days": 10.635416666666666,
+     "span_days": 10.635414988426147,
      "top_day_share_of_net": null,
      "verdict": "FAILED",
      "fails": [
@@ -249,483 +250,146 @@
      ]
     }
    ],
-   "state": "block in progress: 33 of 60 fillable signals"
+   "state": "WAITS: a signal in the block still has no final result (block holds 28 so far)",
+   "qualified": false
   },
   "KXNATGAS15M": {
    "fillable": 1123,
    "blocks": [
     {
      "first": "KXNATGAS15M-26NOV130045-00",
-     "last": "KXNATGAS15M-26NOV161415-00",
-     "n": 60,
-     "wins": 35,
-     "losses": 24,
-     "voids": 1,
-     "net": 72.526,
-     "pf": 2.074666232015055,
-     "pf_first_half": 2.2376855441051338,
-     "pf_second_half": 1.9299977626132676,
-     "pf_exact_tenths_of_a_cent": [
-      140013,
-      67487
-     ],
-     "days": 4,
-     "span_days": 3.5625,
-     "top_day_share_of_net": 0.665871549513278,
-     "verdict": "FAILED",
-     "fails": [
-      "4 different days, under 7",
-      "one day holds 67% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26NOV161430-00",
-     "last": "KXNATGAS15M-26NOV172230-00",
-     "n": 60,
-     "wins": 37,
-     "losses": 23,
-     "voids": 0,
-     "net": 63.043000000000006,
-     "pf": 1.7707533559918822,
-     "pf_first_half": 2.154719640806098,
-     "pf_second_half": 1.4325070137515523,
-     "pf_exact_tenths_of_a_cent": [
-      144837,
-      81794
-     ],
-     "days": 2,
-     "span_days": 1.3333333333333333,
-     "top_day_share_of_net": 0.8250717764065796,
-     "verdict": "FAILED",
-     "fails": [
-      "2 different days, under 7",
-      "one day holds 83% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26NOV172300-00",
      "last": "KXNATGAS15M-26NOV190745-00",
-     "n": 60,
-     "wins": 33,
-     "losses": 26,
-     "voids": 1,
-     "net": 30.467000000000006,
-     "pf": 1.352447827495257,
-     "pf_first_half": 1.3987952363367797,
-     "pf_second_half": 1.3058725299192877,
+     "n": 180,
+     "wins": 105,
+     "losses": 75,
+     "voids": 2,
+     "net": 166.036,
+     "pf": 1.704363135009015,
+     "pf_first_half": 2.1036532917434663,
+     "pf_second_half": 1.3792426691295314,
      "pf_exact_tenths_of_a_cent": [
-      116911,
-      86444
+      401761,
+      235725
      ],
-     "days": 3,
-     "span_days": 1.3645833333333333,
-     "top_day_share_of_net": 1.091574490432271,
+     "days": 7,
+     "span_days": 6.291667997685296,
+     "top_day_share_of_net": 0.5006986436676382,
      "verdict": "FAILED",
      "fails": [
-      "3 different days, under 7",
-      "one day holds 109% of the net, over 30%"
+      "one day holds 50% of the net, over 30%"
      ]
     },
     {
      "first": "KXNATGAS15M-26NOV190815-00",
-     "last": "KXNATGAS15M-26NOV201700-00",
-     "n": 60,
-     "wins": 35,
-     "losses": 25,
-     "voids": 0,
-     "net": 55.436,
-     "pf": 1.6770643770533848,
-     "pf_first_half": 1.6465133906013139,
-     "pf_second_half": 1.7056528831832043,
+     "last": "KXNATGAS15M-26NOV260615-00",
+     "n": 206,
+     "wins": 126,
+     "losses": 80,
+     "voids": 2,
+     "net": 188.2608,
+     "pf": 1.7070642274193728,
+     "pf_first_half": 1.6171176840780366,
+     "pf_second_half": 1.8065493375519084,
      "pf_exact_tenths_of_a_cent": [
-      137313,
-      81877
+      454518,
+      266257
      ],
-     "days": 2,
-     "span_days": 1.3645833333333333,
-     "top_day_share_of_net": 0.6566671477018544,
-     "verdict": "FAILED",
-     "fails": [
-      "2 different days, under 7",
-      "one day holds 66% of the net, over 30%"
-     ]
+     "days": 7,
+     "span_days": 6.91666971064828,
+     "top_day_share_of_net": 0.24398069061642141,
+     "verdict": "CLEARED",
+     "fails": [],
+     "confirmation_pf": 0.9888923171860536,
+     "confirmation": "confirmation failed"
     },
     {
-     "first": "KXNATGAS15M-26NOV201730-00",
-     "last": "KXNATGAS15M-26NOV232315-00",
-     "n": 60,
-     "wins": 38,
-     "losses": 21,
-     "voids": 1,
-     "net": 64.5008,
-     "pf": 1.9529556031617048,
-     "pf_first_half": 1.497521441889372,
-     "pf_second_half": 2.6201019664967227,
+     "first": "KXNATGAS15M-26NOV262115-00",
+     "last": "KXNATGAS15M-26DEC030615-00",
+     "n": 168,
+     "wins": 97,
+     "losses": 71,
+     "voids": 2,
+     "net": 102.45799999999998,
+     "pf": 1.3867127641104227,
+     "pf_first_half": 0.9831756459935613,
+     "pf_second_half": 1.9341362104083466,
      "pf_exact_tenths_of_a_cent": [
-      132186,
-      67685
+      367404,
+      264946
      ],
-     "days": 3,
-     "span_days": 3.2395833333333335,
-     "top_day_share_of_net": 0.6765497482201771,
+     "days": 7,
+     "span_days": 6.375001799770527,
+     "top_day_share_of_net": 0.5665736204103144,
      "verdict": "FAILED",
      "fails": [
-      "3 different days, under 7",
-      "one day holds 68% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26NOV232330-00",
-     "last": "KXNATGAS15M-26NOV251200-00",
-     "n": 60,
-     "wins": 38,
-     "losses": 21,
-     "voids": 1,
-     "net": 62.038,
-     "pf": 1.7932132308754523,
-     "pf_first_half": 0.9362830610914346,
-     "pf_second_half": 4.059366262814539,
-     "pf_exact_tenths_of_a_cent": [
-      140249,
-      78211
-     ],
-     "days": 3,
-     "span_days": 1.5208333333333333,
-     "top_day_share_of_net": 0.6263580386214902,
-     "verdict": "FAILED",
-     "fails": [
-      "3 different days, under 7",
-      "one day holds 63% of the net, over 30%",
+      "one day holds 57% of the net, over 30%",
       "a half under 1.0"
      ]
     },
     {
-     "first": "KXNATGAS15M-26NOV251215-00",
-     "last": "KXNATGAS15M-26NOV262215-00",
-     "n": 60,
-     "wins": 31,
-     "losses": 29,
-     "voids": 0,
-     "net": 16.07499999999999,
-     "pf": 1.1648887065340034,
-     "pf_first_half": 1.1968387040433148,
-     "pf_second_half": 1.136574701079596,
-     "pf_exact_tenths_of_a_cent": [
-      113565,
-      97490
-     ],
-     "days": 2,
-     "span_days": 1.4166666666666667,
-     "top_day_share_of_net": 0.6761430793157077,
-     "verdict": "FAILED",
-     "fails": [
-      "2 different days, under 7",
-      "one day holds 68% of the net, over 30%",
-      "profit factor under 1.3"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26NOV262245-00",
-     "last": "KXNATGAS15M-26NOV301330-00",
-     "n": 60,
-     "wins": 31,
-     "losses": 29,
-     "voids": 0,
-     "net": -17.114000000000004,
-     "pf": 0.8462215832509659,
-     "pf_first_half": 0.8574985534183163,
-     "pf_second_half": 0.834368491863101,
-     "pf_exact_tenths_of_a_cent": [
-      94176,
-      111290
-     ],
-     "days": 4,
-     "span_days": 3.6145833333333335,
-     "top_day_share_of_net": null,
-     "verdict": "FAILED",
-     "fails": [
-      "4 different days, under 7",
-      "profit factor under 1.3",
-      "a half under 1.0"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26NOV301400-00",
-     "last": "KXNATGAS15M-26DEC012230-00",
-     "n": 60,
-     "wins": 35,
-     "losses": 24,
+     "first": "KXNATGAS15M-26DEC030700-00",
+     "last": "KXNATGAS15M-26DEC100630-00",
+     "n": 207,
+     "wins": 130,
+     "losses": 77,
      "voids": 1,
-     "net": 46.297,
-     "pf": 1.5372564492358396,
-     "pf_first_half": 1.0714570706590922,
-     "pf_second_half": 2.2682170542635656,
+     "net": 211.478,
+     "pf": 1.745609612489467,
+     "pf_first_half": 1.594200156411615,
+     "pf_second_half": 1.9375494703178096,
      "pf_exact_tenths_of_a_cent": [
-      132470,
-      86173
+      495109,
+      283631
      ],
-     "days": 2,
-     "span_days": 1.3541666666666667,
-     "top_day_share_of_net": 0.8729723308205714,
+     "days": 7,
+     "span_days": 6.979169959489394,
+     "top_day_share_of_net": 0.5033620518446361,
      "verdict": "FAILED",
      "fails": [
-      "2 different days, under 7",
-      "one day holds 87% of the net, over 30%"
+      "one day holds 50% of the net, over 30%"
      ]
     },
     {
-     "first": "KXNATGAS15M-26DEC012245-00",
-     "last": "KXNATGAS15M-26DEC031430-00",
-     "n": 60,
-     "wins": 36,
-     "losses": 23,
+     "first": "KXNATGAS15M-26DEC100730-00",
+     "last": "KXNATGAS15M-26DEC170615-00",
+     "n": 194,
+     "wins": 112,
+     "losses": 82,
      "voids": 1,
-     "net": 79.54899999999999,
-     "pf": 1.8684009431902535,
-     "pf_first_half": 2.3489916578926056,
-     "pf_second_half": 1.5421439436981106,
+     "net": 113.738,
+     "pf": 1.4119837434890645,
+     "pf_first_half": 1.7139137857447717,
+     "pf_second_half": 1.1894175832473382,
      "pf_exact_tenths_of_a_cent": [
-      171153,
-      91604
+      389812,
+      276074
      ],
-     "days": 3,
-     "span_days": 1.65625,
-     "top_day_share_of_net": 0.646720889011804,
+     "days": 7,
+     "span_days": 6.94791754629325,
+     "top_day_share_of_net": 0.3976419490407779,
      "verdict": "FAILED",
      "fails": [
-      "3 different days, under 7",
-      "one day holds 65% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC031445-00",
-     "last": "KXNATGAS15M-26DEC042300-00",
-     "n": 60,
-     "wins": 32,
-     "losses": 28,
-     "voids": 0,
-     "net": 29.175000000000004,
-     "pf": 1.2900820283370618,
-     "pf_first_half": 1.0038976777701352,
-     "pf_second_half": 1.732341254776909,
-     "pf_exact_tenths_of_a_cent": [
-      129750,
-      100575
-     ],
-     "days": 2,
-     "span_days": 1.34375,
-     "top_day_share_of_net": 0.7001542416452441,
-     "verdict": "FAILED",
-     "fails": [
-      "2 different days, under 7",
-      "one day holds 70% of the net, over 30%",
-      "profit factor under 1.3"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC070045-00",
-     "last": "KXNATGAS15M-26DEC080615-00",
-     "n": 60,
-     "wins": 44,
-     "losses": 16,
-     "voids": 0,
-     "net": 101.294,
-     "pf": 2.7650113260149856,
-     "pf_first_half": 2.36865806064245,
-     "pf_second_half": 3.3132890365448504,
-     "pf_exact_tenths_of_a_cent": [
-      158684,
-      57390
-     ],
-     "days": 3,
-     "span_days": 1.2291666666666667,
-     "top_day_share_of_net": 1.050901336703062,
-     "verdict": "FAILED",
-     "fails": [
-      "3 different days, under 7",
-      "one day holds 105% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC080730-00",
-     "last": "KXNATGAS15M-26DEC100000-00",
-     "n": 60,
-     "wins": 39,
-     "losses": 20,
-     "voids": 1,
-     "net": 62.17,
-     "pf": 1.8440703278799808,
-     "pf_first_half": 1.0960956011125993,
-     "pf_second_half": 3.2892515923566883,
-     "pf_exact_tenths_of_a_cent": [
-      135825,
-      73655
-     ],
-     "days": 2,
-     "span_days": 1.6875,
-     "top_day_share_of_net": 0.7845584687148142,
-     "verdict": "FAILED",
-     "fails": [
-      "2 different days, under 7",
-      "one day holds 78% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC100145-00",
-     "last": "KXNATGAS15M-26DEC111930-00",
-     "n": 60,
-     "wins": 40,
-     "losses": 20,
-     "voids": 0,
-     "net": 59.071999999999996,
-     "pf": 1.8524098124098123,
-     "pf_first_half": 1.1326485037963376,
-     "pf_second_half": 3.166884176182708,
-     "pf_exact_tenths_of_a_cent": [
-      128372,
-      69300
-     ],
-     "days": 3,
-     "span_days": 1.7395833333333333,
-     "top_day_share_of_net": 0.6165696099674973,
-     "verdict": "FAILED",
-     "fails": [
-      "3 different days, under 7",
-      "one day holds 62% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC111945-00",
-     "last": "KXNATGAS15M-26DEC150530-00",
-     "n": 60,
-     "wins": 36,
-     "losses": 24,
-     "voids": 0,
-     "net": 44.746,
-     "pf": 1.5192457209167392,
-     "pf_first_half": 1.0611039794608472,
-     "pf_second_half": 1.9722594045695823,
-     "pf_exact_tenths_of_a_cent": [
-      130921,
-      86175
-     ],
-     "days": 3,
-     "span_days": 3.40625,
-     "top_day_share_of_net": 0.45798507129128857,
-     "verdict": "FAILED",
-     "fails": [
-      "3 different days, under 7",
-      "one day holds 46% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC150600-00",
-     "last": "KXNATGAS15M-26DEC161215-00",
-     "n": 60,
-     "wins": 31,
-     "losses": 28,
-     "voids": 1,
-     "net": 13.195999999999996,
-     "pf": 1.1381809043121323,
-     "pf_first_half": 1.8619802473234293,
-     "pf_second_half": 0.6973597748984852,
-     "pf_exact_tenths_of_a_cent": [
-      108694,
-      95498
-     ],
-     "days": 3,
-     "span_days": 1.2604166666666667,
-     "top_day_share_of_net": 0.789026977872082,
-     "verdict": "FAILED",
-     "fails": [
-      "3 different days, under 7",
-      "one day holds 79% of the net, over 30%",
-      "profit factor under 1.3",
-      "a half under 1.0"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC161445-00",
-     "last": "KXNATGAS15M-26DEC180315-00",
-     "n": 60,
-     "wins": 35,
-     "losses": 25,
-     "voids": 0,
-     "net": 50.730999999999995,
-     "pf": 1.6279910377183315,
-     "pf_first_half": 1.0426327013754377,
-     "pf_second_half": 2.6362901051496364,
-     "pf_exact_tenths_of_a_cent": [
-      131514,
-      80783
-     ],
-     "days": 2,
-     "span_days": 1.5208333333333333,
-     "top_day_share_of_net": 0.9946975222250695,
-     "verdict": "FAILED",
-     "fails": [
-      "2 different days, under 7",
-      "one day holds 99% of the net, over 30%"
-     ]
-    },
-    {
-     "first": "KXNATGAS15M-26DEC180330-00",
-     "last": "KXNATGAS15M-26DEC211830-00",
-     "n": 60,
-     "wins": 35,
-     "losses": 25,
-     "voids": 0,
-     "net": 41.605,
-     "pf": 1.459993145156832,
-     "pf_first_half": 1.1792977725451472,
-     "pf_second_half": 1.8511882707881224,
-     "pf_exact_tenths_of_a_cent": [
-      132052,
-      90447
-     ],
-     "days": 4,
-     "span_days": 3.625,
-     "top_day_share_of_net": 0.4632375916356207,
-     "verdict": "FAILED",
-     "fails": [
-      "4 different days, under 7",
-      "one day holds 46% of the net, over 30%"
+      "one day holds 40% of the net, over 30%"
      ]
     }
    ],
-   "state": "block in progress: 43 of 60 fillable signals"
+   "state": "WAITS: a signal in the block still has no final result (block holds 101 so far)",
+   "qualified": false
   },
   "KXHYPE15M": {
    "fillable": 62,
    "blocks": [
     {
+     "verdict": "EXPIRED",
+     "n": 36,
      "first": "KXHYPE15M-26NOV140030-00",
-     "last": "KXHYPE15M-26DEC181630-00",
-     "n": 60,
-     "wins": 33,
-     "losses": 27,
-     "voids": 0,
-     "net": 13.615999999999996,
-     "pf": 1.1199087650700554,
-     "pf_first_half": 0.6277737321553702,
-     "pf_second_half": 1.99840576866477,
-     "pf_exact_tenths_of_a_cent": [
-      127169,
-      113553
-     ],
-     "days": 29,
-     "span_days": 34.666666666666664,
-     "top_day_share_of_net": 1.6490893066980028,
-     "verdict": "FAILED",
-     "fails": [
-      "spans 34.7 days, over 21",
-      "one day holds 165% of the net, over 30%",
-      "profit factor under 1.3",
-      "a half under 1.0"
-     ]
+     "last": "KXHYPE15M-26DEC041915-00",
+     "span_days": 20.78125328124949,
+     "fails": []
     }
    ],
-   "state": "block in progress: 2 of 60 fillable signals"
+   "state": "block in progress: 26 signals, 14 days, 18 wins, 8 losses",
+   "qualified": false
   },
   "KXBNB15M": {
    "fillable": 183,
@@ -746,37 +410,16 @@
       38589
      ],
      "days": 14,
-     "span_days": 12.25,
+     "span_days": 12.249995578704057,
      "top_day_share_of_net": 0.17492009845339995,
      "verdict": "CLEARED",
      "fails": [],
      "confirmation_pf": 14.791815181518153,
      "confirmation": "QUALIFIED"
-    },
-    {
-     "first": "KXBNB15M-26DEC020815-00",
-     "last": "KXBNB15M-26DEC162000-00",
-     "n": 66,
-     "wins": 56,
-     "losses": 10,
-     "voids": 0,
-     "net": 218.578,
-     "pf": 8.693428601597972,
-     "pf_first_half": 7.671738603297768,
-     "pf_second_half": 10.1079311791859,
-     "pf_exact_tenths_of_a_cent": [
-      246989,
-      28411
-     ],
-     "days": 15,
-     "span_days": 14.489583333333334,
-     "top_day_share_of_net": 0.17388300743899204,
-     "verdict": "CLEARED",
-     "fails": [],
-     "confirmation": "in progress: 27 of 30"
     }
    ],
-   "state": "cleared block, confirmation in progress"
+   "state": "QUALIFIED: the place takes a seat; no further block is read",
+   "qualified": true
   },
   "KXSILVER15M": {
    "fillable": 153,
@@ -797,7 +440,7 @@
       201415
      ],
      "days": 13,
-     "span_days": 13.40625,
+     "span_days": 13.406250671294552,
      "top_day_share_of_net": null,
      "verdict": "FAILED",
      "fails": [
@@ -810,7 +453,7 @@
      "last": "KXSILVER15M-26DEC111045-00",
      "n": 60,
      "wins": 20,
-     "losses": 39,
+     "losses": 40,
      "voids": 1,
      "net": -108.672,
      "pf": 0.4028879755599024,
@@ -821,7 +464,7 @@
       181996
      ],
      "days": 14,
-     "span_days": 14.833333333333334,
+     "span_days": 14.833333327546717,
      "top_day_share_of_net": null,
      "verdict": "FAILED",
      "fails": [
@@ -830,7 +473,8 @@
      ]
     }
    ],
-   "state": "block in progress: 33 of 60 fillable signals"
+   "state": "WAITS: a signal in the block still has no final result (block holds 29 so far)",
+   "qualified": false
   },
   "KXUSDCAD15M": {
    "fillable": 170,
@@ -851,7 +495,7 @@
       45817
      ],
      "days": 13,
-     "span_days": 13.989583333333334,
+     "span_days": 13.98958108217628,
      "top_day_share_of_net": 0.2367557625559939,
      "verdict": "CLEARED",
      "fails": [],
@@ -874,7 +518,7 @@
       199465
      ],
      "days": 12,
-     "span_days": 13.322916666666666,
+     "span_days": 13.32291523726726,
      "top_day_share_of_net": null,
      "verdict": "FAILED",
      "fails": [
@@ -883,7 +527,8 @@
      ]
     }
    ],
-   "state": "block in progress: 20 of 60 fillable signals"
+   "state": "WAITS: a signal in the block still has no final result (block holds 16 so far)",
+   "qualified": false
   }
  }
 }

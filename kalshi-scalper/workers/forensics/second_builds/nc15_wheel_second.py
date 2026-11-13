@@ -18,10 +18,10 @@ Places where the sheet or the lane leaves a choice (READINGS, printed with the o
  f. The ladder is the met side's present levels as asks (1 minus the bid price), cheapest first. "Offers 10" is the sizes at or under limit + 1e-9 summing to 10 - 1e-9 or more. The walked price takes the first 10 contracts of the levels at or under the limit.
  g. A decision instant before the sheet's commit time (2026-11-13T00:23:49Z) does not count; a close after 2026-12-31T23:59:59Z is past the log's stop. Both are counted and left out.
  h. Result: a coverage row's result of yes or no, from any run folder that holds the ticker (two runs that disagree stop this build's run; Desk A's choice 6 takes the first found). Any other non-empty value is a void. An empty result is OPEN until 7 days after the close (by --now), then a void. A void is a fee-only loss, counted.
- i. A day is the US Central calendar date of the decision instant.
- j. Blocks, per place, over its fillable signals in order of decision instant: a block is the next 60; while it holds fewer than 10 wins or fewer than 10 losses it grows one signal at a time (a void is neither). It is READ only when every signal in it has a final value; a block holding an open signal WAITS, and so does everything after it.
- k. A block FAILS if its first and last decision are more than 21 days apart, if it has fewer than 7 different days, if one day holds more than 30 percent of a positive block net, if its cash profit factor is under 1.3, or if either half (the first n // 2 signals and the rest) is under 1.0. Otherwise it CLEARS. No sliding and no re-read: the next block starts at the first signal after it.
- l. After a cleared block the next 30 fillable signals are its confirmation (profit factor 1.0 or better: QUALIFIED); they belong to no block. The next block starts after them.
+ i. A day is the US Central calendar date of the signal poll's exchange time (the Head's ruling (d), Nov 13 02:05Z, ROTATION_LANE.md section 4 at rnd-queue 7c4c71d2).
+ j. Blocks, per place, over its fillable signals in order of signal poll time, then ticker (rulings (a) to (e)): a block grows signal by signal and ends, and is read once, at the first signal at which it holds at least 60 signals, at least 7 different days, at least 10 wins AND at least 10 losses. A void is a fee-only loss and counts as a loss (Desk A's reading; this build first counted it as neither).
+ k. EXPIRED: a signal whose time is more than 21 x 24 hours after the block's first signal finds the block not complete: the block ends UNREAD and that signal starts the next block. A block's start never slides. An open result inside a block (before that point) makes the block WAIT, and nothing after it is read.
+ l. A read block FAILS if one day holds more than 30 percent of a positive net, if its cash profit factor is under 1.3, or if either half (the first n // 2 signals and the rest) is under 1.0; otherwise it CLEARS. After a cleared block the next 30 fillable signals are its confirmation and belong to no block: profit factor 1.0 or better is QUALIFIED and no further block is read for the place; under 1.0, the next block starts after them.
  m. Profit factor: wins over losses in dollars; no losses is infinite and passes; no wins is zero. Every bar is tested with a 1e-9 tolerance on the float figure, and the figure in exact tenths of a cent is printed beside any figure within 0.001 of its bar.
  n. Only the seven series the sheet keeps (copper, WTI, natural gas, HYPE, BNB, silver, USD/CAD) are places; the four withdrawn series are counted and not scored.
 """
@@ -184,7 +184,7 @@ def measure(root, now, made_up=False, block_read=False):
     out = {"build": "Forensics second scorer of the NC15 depth-cell wheel replay", "sheet": "DESK_A_FROZEN_WHEEL_DEFINITIONS_NOV13.md v4 (8679f760, sha256 c53d2b9f...)", "now": now,
            "counts": {s: dict(C[s]) for s in PLACES + WITHDRAWN}, "readings": READINGS, "places": {}}
     for s in PLACES:
-        sig = sorted((r for r in recs if r["series"] == s and r["status"].startswith("fillable")), key=lambda r: (r["D"], r["ticker"]))
+        sig = sorted((r for r in recs if r["series"] == s and r["status"].startswith("fillable")), key=lambda r: (r["signal_exchange"], r["ticker"]))
         out["places"][s] = blocks(sig)
     return out, recs
 
@@ -203,41 +203,40 @@ def ge(x, bar): return x is not None and x >= bar - EPS
 
 
 def blocks(sig):
-    res = {"fillable": len(sig), "blocks": [], "state": None}; i = 0
-    day = lambda r: datetime.fromtimestamp(r["D"], CT).date().isoformat()
-    while True:
-        n = BLOCK
-        if i + n > len(sig): res["state"] = "block in progress: %d of 60 fillable signals" % (len(sig) - i); break
-        def rare(k): b = sig[i:i + k]; return min(sum(1 for r in b if r["win"] is True), sum(1 for r in b if r["win"] is False))
-        waiting = False
-        while True:
-            b = sig[i:i + n]
-            if any(r["cash"] is None for r in b): waiting = True; break
-            if rare(n) >= RARE: break
-            if i + n >= len(sig): break
-            n += 1
-        b = sig[i:i + n]
-        if waiting: res["state"] = "block of %d WAITS: it holds a signal whose result is still open" % n; break
-        if rare(n) < RARE: res["state"] = "block in progress: %d signals, still under 10 of the rarer outcome" % n; break
-        v = [r["cash"] for r in b]; net = sum(v); h = n // 2; days = collections.defaultdict(float)
-        for r in b: days[day(r)] += r["cash"]
-        top = max(days.values()); P, P1, P2 = pf(v), pf(v[:h]), pf(v[h:]); span = (b[-1]["D"] - b[0]["D"]) / 86400.0
-        fails = []
-        if span > SPAN_DAYS + EPS: fails.append("spans %.1f days, over 21" % span)
-        if len(days) < MIN_DAYS: fails.append("%d different days, under 7" % len(days))
+    """the lane's section 4 as ruled by the Head of R&D on Nov 13, 2026 02:05Z (rnd-queue 7c4c71d2). sig: a place's fillable signals in order of signal poll time, then ticker."""
+    res = {"fillable": len(sig), "blocks": [], "state": None, "qualified": False}; i = 0
+    day = lambda r: datetime.fromtimestamp(r["signal_exchange"], CT).date().isoformat()
+    while i < len(sig):
+        t0 = sig[i]["signal_exchange"]; j = i; wins = losses = 0; days = set(); end = None
+        while j < len(sig):
+            r = sig[j]
+            if r["signal_exchange"] - t0 > SPAN_DAYS * 86400 + EPS: end = "EXPIRED"; break       # not complete within 21 x 24 hours: the crossing signal starts the next block
+            if r["cash"] is None: end = "WAITS"; break
+            wins += r["win"] is True; losses += r["win"] is not True; days.add(day(r)); j += 1     # a void is a fee-only loss and counts as a loss
+            if j - i >= BLOCK and len(days) >= MIN_DAYS and wins >= RARE and losses >= RARE: end = "COMPLETE"; break
+        b = sig[i:j]; n = len(b)
+        if end == "WAITS": res["state"] = "WAITS: a signal in the block still has no final result (block holds %d so far)" % n; break
+        if end is None: res["state"] = "block in progress: %d signals, %d days, %d wins, %d losses" % (n, len(days), wins, losses); break
+        if end == "EXPIRED":
+            res["blocks"].append({"verdict": "EXPIRED", "n": n, "first": b[0]["ticker"], "last": b[-1]["ticker"], "span_days": (b[-1]["signal_exchange"] - t0) / 86400.0, "fails": []}); i = j; continue
+        v = [r["cash"] for r in b]; net = sum(v); h = n // 2; dn = collections.defaultdict(float)
+        for r in b: dn[day(r)] += r["cash"]
+        top = max(dn.values()); P, P1, P2 = pf(v), pf(v[:h]), pf(v[h:]); fails = []
         if net > EPS and top > DAY_SHARE * net + EPS: fails.append("one day holds %.0f%% of the net, over 30%%" % (100 * top / net))
         if not ge(P, PF_BLOCK): fails.append("profit factor under 1.3")
         if not ge(P1, PF_HALF) or not ge(P2, PF_HALF): fails.append("a half under 1.0")
-        blk = {"first": b[0]["ticker"], "last": b[-1]["ticker"], "n": n, "wins": sum(1 for r in b if r["win"] is True), "losses": sum(1 for r in b if r["win"] is False), "voids": sum(1 for r in b if r["win"] is None),
-               "net": net, "pf": P, "pf_first_half": P1, "pf_second_half": P2, "pf_exact_tenths_of_a_cent": pf_exact(v), "days": len(days), "span_days": span, "top_day_share_of_net": (top / net) if net > EPS else None,
-               "verdict": "CLEARED" if not fails else "FAILED", "fails": fails}
-        i += n
+        blk = {"first": b[0]["ticker"], "last": b[-1]["ticker"], "n": n, "wins": wins, "losses": losses, "voids": sum(1 for r in b if r["win"] is None),
+               "net": net, "pf": P, "pf_first_half": P1, "pf_second_half": P2, "pf_exact_tenths_of_a_cent": pf_exact(v), "days": len(dn), "span_days": (b[-1]["signal_exchange"] - t0) / 86400.0,
+               "top_day_share_of_net": (top / net) if net > EPS else None, "verdict": "CLEARED" if not fails else "FAILED", "fails": fails}
+        i = j; res["blocks"].append(blk)
         if not fails:
-            cf = sig[i:i + CONFIRM]
-            if len(cf) < CONFIRM: blk["confirmation"] = "in progress: %d of 30" % len(cf); res["blocks"].append(blk); res["state"] = "cleared block, confirmation in progress"; break
-            if any(r["cash"] is None for r in cf): blk["confirmation"] = "WAITS: a result is still open"; res["blocks"].append(blk); res["state"] = "cleared block, confirmation waits"; break
-            cp = pf([r["cash"] for r in cf]); blk["confirmation_pf"] = cp; blk["confirmation"] = "QUALIFIED" if ge(cp, PF_CONFIRM) else "confirmation failed"; i += CONFIRM
-        res["blocks"].append(blk)
+            cf = sig[i:i + CONFIRM]; k = next((x for x, r in enumerate(cf) if r["cash"] is None), None)
+            if k is not None: blk["confirmation"] = "WAITS: a result is still open (%d of 30 so far)" % k; res["state"] = "cleared block, confirmation waits"; break
+            if len(cf) < CONFIRM: blk["confirmation"] = "in progress: %d of 30" % len(cf); res["state"] = "cleared block, confirmation in progress"; break
+            cp = pf([r["cash"] for r in cf]); blk["confirmation_pf"] = cp; i += CONFIRM
+            if ge(cp, PF_CONFIRM): blk["confirmation"] = "QUALIFIED"; res["qualified"] = True; res["state"] = "QUALIFIED: the place takes a seat; no further block is read"; break
+            blk["confirmation"] = "confirmation failed"
+    if res["state"] is None: res["state"] = "block in progress: 0 signals, 0 days, 0 wins, 0 losses"
     return res
 
 
@@ -254,6 +253,8 @@ def lines(out):
         c = out["counts"][s]; L.append("%s COUNTS: " % s + "; ".join("%s %d" % (k, c.get(k, 0)) for k in order))
         p = out["places"][s]
         for k, b in enumerate(p["blocks"], 1):
+            if b["verdict"] == "EXPIRED":
+                L.append("%s BLOCK %d: EXPIRED (unread; not complete within 21 days) | n %d span %s days | %s to %s" % (s, k, b["n"], f(b["span_days"], 1), b["first"], b["last"])); continue
             near = any(x is not None and x != float("inf") and abs(x - bar) < 0.001 for x, bar in ((b["pf"], PF_BLOCK), (b["pf_first_half"], PF_HALF), (b["pf_second_half"], PF_HALF)))
             L.append("%s BLOCK %d: %s | n %d (%s to %s) wins %d losses %d voids %d | net %s PF %s halves %s / %s | days %d span %s top day %s%s%s%s" % (
                 s, k, b["verdict"], b["n"], b["first"], b["last"], b["wins"], b["losses"], b["voids"], f(b["net"]), f(b["pf"]), f(b["pf_first_half"]), f(b["pf_second_half"]), b["days"], f(b["span_days"], 1),

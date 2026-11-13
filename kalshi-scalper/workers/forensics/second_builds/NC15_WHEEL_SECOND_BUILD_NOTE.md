@@ -11,6 +11,7 @@ Nothing here is a read of the registered NC15DEPTH1 cell, and no block data has 
 |---|---|
 | `nc15_wheel_second.py` | the second scorer: signal poll, cell, band, second look, walk and fill price, fee, result and void rule, then blocks and confirmation for the 7 places |
 | `nc15_wheel_compare.py` | compares Desk A's printed records and per-series lines with my records file; reads printed output only |
+| `nc15_wheel_block_compare.py` | compares Desk A's printed block lines with mine, block by block and state by state |
 | `make_nc15_wheel_fixture.py` | invented NC15 book and coverage rows for all 11 series over 40 days, with the awkward cases listed in its header |
 | `NC15_WHEEL_SECOND_OUTPUT_fixture_seed{6,7}_MADE_UP_DATA.{txt,json}` | my figures on two fixtures |
 
@@ -72,16 +73,40 @@ longer than the sheet says. (On both fixtures, every such signal older than 7 da
   (60 fillable signals, 1.3, halves, days, confirmation) "is the lane's" and is not built there. So the block lines in my output have nothing to be compared with yet,
   and three of their readings are open (below, 3 to 5).
 
+## Nov 13, about 02:20Z: the Head's rulings applied, and the block layer compared (SAME on both fixtures)
+
+The Head of R&D ruled the open readings at 02:05Z and wrote them into `ROTATION_LANE.md` section 4 (`rnd-queue` 7c4c71d2): a block keeps growing until it holds 60
+signals, 7 different days and 10 wins and 10 losses; a block not complete within 21 x 24 hours ends unread and is EXPIRED; a day is US Central from the signal poll's time;
+halves are the first floor(n / 2); the 6 seconds are on estimated exchange time. Desk A built a block reader from that text (`desk_a_verify/wheel_block_reader.py`,
+sha256 `aee149e7...` at `93a02b44`), and its signal scorer is now `nc15_wheel_replay.py` sha256 `8d1055df...` (the hash the note above names, `b44c1d8f...`, is the earlier one).
+I rewrote my block layer to the rulings and ran Desk A's three commands myself, unread, from a checkout of `93a02b44`
+(`nc15_wheel_replay_records.py`, `nc15_wheel_records_csv.py`, `wheel_block_reader.py --kind=either`); its block output reproduces its committed files byte for byte.
+
+| Fixture | Records the same in status | Differ | Record figures | Differ | Per-series figures | Differ | Blocks (both builds) | Block figures | Differ | Place states | Differ |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| seed 6 | 20,994 | 0 | 18,343 | 0 | 63 | 0 | 15 | 243 | 0 | 7 | 0 |
+| seed 7 | 20,994 | 0 | 18,390 | 0 | 63 | 0 | 14 | 226 | 1 (print only) | 7 | 0 |
+
+- **The scalar-result difference is gone** with Desk A's `8d1055df`: both builds now book a final value that is neither yes nor no as a void at once.
+- **The one differing block figure is print rounding of an exact half cent.** Copper block 1 on seed 7 has a net of exactly $121.305; one build prints 121.31 and the
+  other 121.30. Every other figure of that block is the same, and the net is not a bar. Printing the net in tenths of a cent would remove it.
+- **Three conventions I took from Desk A's block reader, which the ruling text does not spell out** (put to the Head for a yes): a void counts as a loss when the block
+  waits for 10 losses; once a place is QUALIFIED no further block is read for it; when a signal comes more than 21 x 24 hours after a block's first signal, the block is
+  EXPIRED and that signal starts the next block.
+- **A print convention only:** Desk A's waiting state counts the pending signal in its `block_n`; mine counts the signals before it. The comparison maps one to the other.
+- **What the fixtures exercised:** cleared and QUALIFIED, cleared with a failed confirmation (one with a profit factor that prints 1.00 and is under 1.0 in both builds),
+  blocks that grew to 191 and 206 signals to reach 7 days, an EXPIRED block, FAILED on the profit factor, on a half and on the 30 percent day rule, and places waiting on
+  an open result.
+
 ## Places where the sheet or the lane leaves a choice
 
 The scorer prints its readings with its output. The ones most likely to move a figure:
 
 1. **How the 6 seconds to the second poll are measured.** Now exchange time, as the first build (see above); I first used the recorder's clock.
 2. **A ticker in two run folders.** The signal poll is the latest by exchange time over all run folders; the second poll is the next poll in the SAME run folder (Desk A's choice 1).
-3. **What a block is when its 60 signals fall on fewer than 7 days, or span more than 21.** I read both as FAILED, and the next block starts after it. The lane text can
-   also be read as "the block keeps growing until it has 7 days".
-4. **The rarer outcome for a rule that buys either side at 10c to 90c.** I need 10 wins AND 10 losses (a void is neither); the block grows one signal at a time until then.
-5. **The 30 percent day rule** is tested only when the block's net is positive. **A day** is the US Central date of the decision instant.
+3. **What a block is when its 60 signals fall on fewer than 7 days, or span more than 21.** RULED by the Head (02:05Z): it keeps growing to 7 days; past 21 x 24 hours it is EXPIRED, unread. (I had read both as FAILED.)
+4. **The rarer outcome for a rule that buys either side at 10c to 90c.** RULED: 10 wins AND 10 losses. A void counts as a loss (Desk A's reading, taken).
+5. **The 30 percent day rule** is tested only when the block's net is positive. **A day** is the US Central date of the signal poll's time (RULED).
 6. **Halves** of a block of n signals are the first n // 2 and the rest.
 7. **Open results.** A block that holds an open signal waits, and so does everything after it. A signal is open until 7 days after its close, by the `--now` time.
 8. **The confirmation's 30 signals** belong to no block; the next block starts after them.
@@ -90,6 +115,6 @@ The scorer prints its readings with its output. The ones most likely to move a f
 
 ## Limits
 
-- Records and per-series totals are compared with the first build; the block lines are not (no first build of them exists). Nothing here is a verdict of any kind.
+- Records, per-series totals and block lines are all compared with the first build on invented rows. Nothing here is a verdict of any kind.
 - The fixture's polls are regular; real NC15 runs have fallback reads and gaps that may hold shapes neither build has met.
 - The later public result read (the Chief of Staff's list job) has no input in this build yet: results come from the coverage files only.
