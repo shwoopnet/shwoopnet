@@ -12,6 +12,10 @@ Rule (sections 7 and 12): decision candle = the KXBTC15M candle ending close - 1
   buy 1 contract of the cheap side when chance(side) - ask >= 0.05, held to settlement, fee 0.07 p (1 - p) UNROUNDED, void = fee-only loss. Every comparison carries 1e-9; the bar and the labels read UNROUNDED figures.
 Labels at n >= 50 (dated lines of Nov 13): PASS = cash PF >= 1.3 and mean > 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF < 1.0. Under 50: only 'NOT_ENOUGH_DATA, n = x'.
 Beside it: haircut (a), line (b) ran rows dropped, BOOK-REPLAY +2 s and +6 s and the stale-ask count (the last two only when R6 polls are given).
+LINES FOLLOWED (quoted from CFRTI_K_REGISTRATION.md at 3be6d090, the registration text governs):
+  FEE (sections 1 and 7): "One contract, held to settlement, fee 0.07 x p x (1 - p) unrounded, cash."  -> the fee is UNROUNDED in every decided figure; the rounded-up fee prints as information only.
+  LABELS (dated line, 2026-11-13, the Head of R&D, 17:04Z): "the held-out read prints THREE labels at n of 50 or more: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3 ...; FAIL = cash PF under 1.0 (then CFRTI-K is CLOSED FOR GOOD per the owner's decision). Under 50 rows it is NOT_ENOUGH_DATA."
+  READ (dated line, 2026-11-13): "reading only closes from 2026-11-14T00:00:00Z, refusing before 2026-11-20, read-once marker checked before any data is read, only the count printed under 50."
 Usage: cfrti_k_heldout_second.py <registration file> --lists <runs>... --candles <KXBTC15M candle runs>... --perp <PERPBTC1M runs>... [--r6 <root holding book15r6/>]
 """
 import calendar, glob, json, math, os, random, statistics as st, sys, time
@@ -291,7 +295,8 @@ def heldout_read(marker, lists, cands, perp, r6_root=None, now=None, local_marke
     with open(local_marker, "w") as fh:
         fh.write("HELD-OUT READ MADE at %s UTC; folders %s\n" % (time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(now)), [os.path.basename(x.rstrip("/")) for x in list(lists) + list(cands) + list(perp)]))
     r6 = load_r6(r6_root) if r6_root else None
-    return {"constants": {"HELDOUT_FIRST": "2026-11-14T00:00:00Z", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "PASS": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)", "NO_CALL": "cash PF from 1.0 up to 1.3", "FAIL": "cash PF < 1.0 (then CLOSED FOR GOOD)", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
+    return {"constants": {"card": "CFRTI_K_REGISTRATION.md at Desk A 3be6d090, sha256 35b8a1fc6a9f5268", "fee_line_followed": "fee 0.07 x p x (1 - p) unrounded, cash (sections 1 and 7)",
+                          "label_line_followed": "dated line 2026-11-13 17:04Z: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0; under 50 NOT_ENOUGH_DATA", "HELDOUT_FIRST": "2026-11-14T00:00:00Z", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "PASS": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)", "NO_CALL": "cash PF from 1.0 up to 1.3", "FAIL": "cash PF < 1.0 (then CLOSED FOR GOOD)", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
                           "haircut_seed": HAIRCUT_SEED}, "rules_primary_text": rules, "counts": g,
             "HELDOUT": group_report(held, r6), "ambiguities": AMBIGUITIES}
 
