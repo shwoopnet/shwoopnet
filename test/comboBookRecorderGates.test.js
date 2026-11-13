@@ -112,8 +112,8 @@ print(json.dumps({"sts": sts, "stopped": s.stopped, "calls": s.calls, "r2": r2, 
 
 // CB6: bounded requests per run: the constants cap one run at 90 requests, 6 seconds apart (at most 10 a minute), and a run can never ask for more than its caps.
 gates.CB6 = () => {
-  const c = py('print(json.dumps({"budget": m.BUDGET, "pages": m.MAX_LIST_PAGES, "books": m.MAX_BOOKS, "trades": m.MAX_TRADES, "settled": m.SETTLED_PAGES, "gap": m.GAP_S, "rows": m.MAX_QUOTE_ROWS}))');
-  assert.ok(c.pages + c.books + c.trades + c.settled <= c.budget, 'the caps add up to no more than the budget');
+  const c = py('print(json.dumps({"budget": m.BUDGET, "pages": m.MAX_LIST_PAGES, "books": m.MAX_BOOKS, "tape": m.MAX_TAPE_PAGES, "lookups": m.MAX_LEG_LOOKUPS, "settled": m.SETTLED_PAGES, "gap": m.GAP_S, "rows": m.MAX_QUOTE_ROWS}))');
+  assert.ok(c.pages + c.books + c.tape + c.lookups + c.settled <= c.budget, 'the caps add up to no more than the budget (Nov 13: the tape pages and legs look-ups replace the 15 trade reads)');
   assert.ok(c.budget <= 100 && 60 / c.gap <= 10);
   const perDay = 48 * c.budget;
   assert.ok(perDay <= 4320, 'at most 4,320 requests a day');
@@ -127,19 +127,21 @@ urls = []
 def fake(u):
     urls.append(u)
     if "/orderbook" in u: return 200, {"orderbook_fp": {"yes_dollars": [["0.3900", "5.00"], ["0.4000", "7.00"]], "no_dollars": [["0.5500", "9.00"]]}}, "D"
-    if "/trades" in u: return 200, {"trades": [{"trade_id": "t1", "ticker": "KXMVE-1", "created_time": "x", "yes_price_dollars": "0.4", "count_fp": "1.00", "taker_outcome_side": "yes"}]}, "D"
+    if "/trades" in u: return 200, {"trades": [{"trade_id": "t%d-%d" % (len(urls), i), "ticker": "KXMVE-X%d" % (len(urls) * 1000 + i), "created_time": "x", "yes_price_dollars": "0.4", "count_fp": "1.00", "taker_outcome_side": "yes"} for i in range(1000)], "cursor": "c%d" % len(urls)}, "D"
+    if "tickers=" in u: return 200, {"markets": []}, "D"
     return 200, {"markets": [mk(len(urls) * 1000 + i) for i in range(1000)], "cursor": "c%d" % len(urls)}, "D"
 s = m.Stream(m.BUDGET, fetch=fake, clock=lambda: 0.0, sleep=lambda d: None)
 d = tempfile.mkdtemp()
 cov = m.poll(s, 1.0e9 + 3600, d)
-print(json.dumps({"calls": s.calls, "cov": cov, "books": sum("/orderbook" in u for u in urls), "trades": sum("/trades" in u for u in urls), "lists": sum("/markets?" in u for u in urls), "files": sorted(os.listdir(d)),
+print(json.dumps({"calls": s.calls, "cov": cov, "books": sum("/orderbook" in u for u in urls), "trades": sum("/trades" in u for u in urls), "lists": sum("/markets?mve" in u for u in urls), "look": sum("tickers=" in u for u in urls), "files": sorted(os.listdir(d)),
   "q": len(open(os.path.join(d, "quotes.csv")).read().splitlines())}))`);
   assert.ok(out.calls <= c.budget);
   assert.strictEqual(out.lists, c.pages);
   assert.strictEqual(out.books, c.books);
-  assert.strictEqual(out.trades, c.trades);
+  assert.strictEqual(out.trades, c.tape, 'an endless tape stops at the page cap');
+  assert.strictEqual(out.look, c.lookups, 'the legs look-ups stop at their cap');
   assert.strictEqual(out.q - 1, c.rows, 'quote rows are capped');
-  assert.deepStrictEqual(out.files, ['books.csv', 'quotes.csv', 'trades.csv']);
+  assert.deepStrictEqual(out.files, ['books.csv', 'legs.csv', 'quotes.csv', 'trades.csv']);
 };
 
 // CB7: any combo with a posted bid or ask at any price on the yes or the no side, or any volume, is kept (widened Nov 12, 2026); an empty side (bid 0, ask 1.0000) is not a price; the order is
@@ -178,9 +180,10 @@ def fake(u):
 s = m.Stream(m.BUDGET, fetch=fake, clock=lambda: 0.0, sleep=lambda d: None)
 m.poll(s, 1.0e9 + 3600, tempfile.mkdtemp())
 books = [u.split("/markets/")[1].split("/")[0] for u in urls if "/orderbook" in u]
-print(json.dumps({"books": books, "calls": s.calls, "trades": [u.split("ticker=")[1].split("&")[0] for u in urls if "/trades" in u]}))`);
+print(json.dumps({"books": books, "calls": s.calls, "trades": [u for u in urls if "/trades" in u]}))`);
   assert.deepStrictEqual(out.books, Array.from({ length: 40 }, (_, i) => 'T' + String(i).padStart(3, '0')), 'tightest spreads first');
-  assert.strictEqual(out.trades.length, 15);
+  assert.strictEqual(out.trades.length, 1, 'one tape page for a quiet tape (Nov 13: no per-combo trade reads any more)');
+  assert.ok(!/ticker=/.test(out.trades[0]), 'the tape read names no ticker');
   assert.ok(out.calls <= 90);
 };
 
@@ -214,10 +217,11 @@ print(json.dumps({"cols": cols, "short": short[-2:], "n": len(short), "long": ln
   assert.ok(/^(KXLONGLEGTICKER-\d{3}:yes\|)+\.\.\.$/.test(out.long[1].replace(/\|\.\.\.$/, '|...')) || /:yes\|\.\.\.$/.test(out.long[1]), 'cut at a whole leg');
   assert.deepStrictEqual(out.nolegs, ['', ''], 'no legs list: both empty, never zero');
   assert.strictEqual(out.off[1], '');
-  assert.strictEqual(out.filled, out.legrows, 'only the first rows carry leg tickers');
+  assert.strictEqual(out.filled, out.rows, 'every quote row carries its leg tickers (Nov 13, 2026; it was the first 100)');
+  assert.strictEqual(out.legrows, 400);
   assert.deepStrictEqual(out.hdr, ['legs', 'leg_tickers']);
-  assert.ok(out.cap <= 600 && out.legrows <= 100);
-  assert.strictEqual(out.calls, 1 + 40 + 0, 'no request was added for the legs: one list page and the 40 books');
+  assert.ok(out.cap <= 600 && out.legrows <= 400);
+  assert.strictEqual(out.calls, 1 + 1 + 40, 'no request was added for the quote legs: one list page, one (quiet) tape page and the 40 books');
   assert.ok(!/mve_selected_legs[^\n]*(Stream|\.get\()/.test(code), 'the legs are read from the listing, never asked for');
 };
 
@@ -253,6 +257,71 @@ gates.CB9 = () => {
 // CB10: the repo's other rules hold for the new files: no em dash, no live account figures.
 gates.CB10 = () => {
   for (const f of [scriptPath, path.join(root, '.github', 'workflows', 'record-combo.yml'), path.join(root, 'docs', 'COMBO_RECORDER.md'), __filename]) assert.ok(!new RegExp(String.fromCharCode(8212)).test(fs.readFileSync(f, 'utf8')), 'no em dash in ' + path.basename(f));
+};
+
+// CB15 (Nov 13, 2026, CROWDLEG and NOTAKER): the combo tape. The whole public tape since the previous poll is read with min_ts and max_ts (no ticker), the cursor is followed to its end or the
+// page cap, only combo rows (KXMVE, a safe shape) are written, a trade_id is written once, and complete is true only when the cursor ran out. The window is clamped to 25 minutes to 2 hours back.
+gates.CB15 = () => {
+  const out = py(`
+pages = {"": ({"trades": [{"trade_id": "a", "ticker": "KXMVE-A1", "created_time": "t1", "yes_price_dollars": "0.30", "count_fp": "2.00", "taker_outcome_side": "yes"},
+                          {"trade_id": "b", "ticker": "KXBTC15M-X", "created_time": "t1", "yes_price_dollars": "0.50", "count_fp": "1.00", "taker_outcome_side": "no"},
+                          {"trade_id": "c", "ticker": "KXMVE-BAD/../x", "created_time": "t1"}, "junk"], "cursor": "p2"}),
+         "p2": ({"trades": [{"trade_id": "a", "ticker": "KXMVE-A1", "created_time": "t1"}, {"trade_id": "d", "ticker": "KXMVE-B2", "created_time": "t2", "taker_outcome_side": "no"}], "cursor": ""})}
+urls = []
+def fake(u):
+    urls.append(u)
+    cur = u.split("cursor=")[1] if "cursor=" in u else ""
+    return 200, pages[cur], "D"
+s = m.Stream(50, fetch=fake, clock=lambda: 0.0, sleep=lambda d: None)
+rows, cov = m.read_tape(s, 100000, 100000 - 1800)
+endless = lambda u: (200, {"trades": [], "cursor": "more"}, "D")
+s2 = m.Stream(50, fetch=endless, clock=lambda: 0.0, sleep=lambda d: None)
+_r2, cov2 = m.read_tape(s2, 100000, None)
+s3 = m.Stream(50, fetch=lambda u: (500, None, ""), clock=lambda: 0.0, sleep=lambda d: None)
+_r3, cov3 = m.read_tape(s3, 100000, None)
+print(json.dumps({"rows": [[r[1], r[-1], r[-2]] for r in rows], "cov": cov, "cov2": [cov2["pages"], cov2["complete"]], "cov3": [cov3["pages"], cov3["complete"]], "urls": urls,
+  "win": [m.tape_window(100000, x) for x in (None, 0, 100000 - 60, 100000 - 1800, 100000 - 99999, 100000 + 50, True)]}))`);
+  assert.deepStrictEqual(out.rows, [['KXMVE-A1', 'a', 'yes'], ['KXMVE-B2', 'd', 'no']], 'combo rows only, a safe ticker only, each trade once');
+  assert.deepStrictEqual([out.cov.pages, out.cov.complete, out.cov.rows], [2, true, 6], 'complete when the cursor ran out; tape_rows counts every row read');
+  assert.deepStrictEqual(out.cov2, [30, false], 'an endless tape stops at the page cap and says it is not complete');
+  assert.deepStrictEqual(out.cov3, [0, false], 'a failed read is not a quiet tape');
+  assert.ok(out.urls.every((u) => /^https:\/\/external-api\.kalshi\.com\/trade-api\/v2\/markets\/trades\?min_ts=\d+&max_ts=\d+&limit=1000(&cursor=\w+)?$/.test(u)), out.urls.join(' '));
+  assert.deepStrictEqual(out.win, [[97600, 100000], [97600, 100000], [98500, 100000], [98200, 100000], [92800, 100000], [97600, 100000], [97600, 100000]], 'default 40 minutes, clamped to 25 minutes to 2 hours, junk ignored');
+};
+
+// CB16: the legs of every combo that printed: from the listing when it was listed (no request), else /markets?tickers= in batches of 40, at most 5 requests; still unknown is counted missing, never guessed.
+gates.CB16 = () => {
+  const out = py(`
+leg = lambda t: [{"market_ticker": t, "side": "yes"}]
+listed = {"KXMVE-L1": {"ticker": "KXMVE-L1", "event_ticker": "E", "mve_selected_legs": leg("KXA")}}
+wanted = ["KXMVE-L1"] + ["KXMVE-Q%03d" % i for i in range(250)] + ["KXBTC-NOT"]
+urls = []
+def fake(u):
+    urls.append(u)
+    ts = u.split("tickers=")[1].split(",")
+    return 200, {"markets": [{"ticker": t, "event_ticker": "E", "mve_selected_legs": leg("KXB")} for t in ts[:-1]] + [{"ticker": "KXMVE-NOTASKED"}]}, "D"
+s = m.Stream(50, fetch=fake, clock=lambda: 0.0, sleep=lambda d: None)
+rows, cov = m.combo_legs(s, listed, wanted, 7)
+print(json.dumps({"n": len(rows), "first": rows[0], "src": sorted(set(r[3] for r in rows)), "cov": [len(cov["want"]), cov["from_list"], cov["looked_up"], cov["missing"]], "urls": len(urls),
+  "sizes": [len(u.split("tickers=")[1].split(",")) for u in urls], "asked": any("NOTASKED" == r[1] for r in rows), "notcombo": any("KXBTC" in u for u in urls), "cols": m.LEG_COLS}))`);
+  assert.deepStrictEqual(out.first, [7, 'KXMVE-L1', 'E', 'list', 1, 'KXA:yes']);
+  assert.strictEqual(out.urls, 5, 'at most 5 look-ups');
+  assert.ok(out.sizes.every((n) => n <= 40));
+  assert.deepStrictEqual(out.cov, [251, 1, 5, 251 - 1 - 5 * 39], 'listed from the listing, 39 found per batch here, the rest missing');
+  assert.strictEqual(out.asked, false, 'a market the look-up did not ask for is never written');
+  assert.strictEqual(out.notcombo, false, 'only combo tickers are sent');
+  assert.deepStrictEqual(out.cols, ['t_recv_ms', 'ticker', 'event_ticker', 'source', 'legs', 'leg_tickers']);
+};
+
+// CB17: the workflow hands the previous poll's time to the script, digits only (else the default window); the coverage row says how complete the tape and the legs were.
+gates.CB17 = () => {
+  const poll = wf.split('- name: One poll')[1].split('- name:')[0];
+  assert.ok(/SINCE: \$\{\{ steps\.fresh\.outputs\.since \}\}/.test(poll) && /case "\$SINCE" in ''\|\*\[!0-9\]\*\) SINCE=0 ;; esac/.test(poll) && /--since "\$SINCE"/.test(poll));
+  assert.ok(!/\$\{\{ steps\.fresh\.outputs\.since \}\}/.test(poll.split('run: |')[1]), 'the value reaches the shell through env, never pasted into the script');
+  assert.ok(/echo "since=\$THEN"/.test(wf));
+  const cols = py('print(json.dumps(m.COVER_COLS))');
+  for (const k of ['tape_min_ts', 'tape_max_ts', 'tape_pages', 'tape_complete', 'tape_rows', 'combo_trades', 'combos_traded', 'legs_from_list', 'legs_looked_up', 'legs_missing']) assert.ok(cols.includes(k), k);
+  assert.ok(!/MAX_TRADES/.test(code), 'the 15 per-combo trade reads are gone');
 };
 
 // CB14: self-chaining (Nov 12, 2026): the last step runs after a failed poll, sleeps to :11 or :41 at least 25 minutes after the start, checks the end date before and after, dispatches only this workflow on main; cron stays.

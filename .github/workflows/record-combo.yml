@@ -1,3 +1,5 @@
+# Combo trades (Nov 13, 2026, the owner's one freeze exception, for Idea Desk C's CROWDLEG and NOTAKER cards): the 15 per-combo trade reads are replaced by the whole public trade tape since the previous poll
+# (combo rows only, at most 30 pages), the legs of every combo that printed go to legs.csv, and every quote row carries its leg tickers. Same 30 minute poll, same 90 request budget, same branch.
 # Nov 12, 2026 (the owner approved). Combo book recorder: Kalshi combo (multivariate) markets, exchange_index 1. Every 30 minutes one poll lists open combos, keeps every combo with a posted price and records their
 # quotes, the order book (best 5 YES and 5 NO bids with sizes) of the 40 tightest spreads and the public trades of up to 15; once a day it also reads settled combos that traded. Research data only: public Kalshi market data, no key, no secret, no order, no Firestore.
 # The built-in GITHUB_TOKEN pushes gzipped files to its OWN `combo-data` branch (under combo/), never to main. The first run creates `combo-data` as an orphan branch.
@@ -51,14 +53,18 @@ jobs:
             D="$(basename "$(dirname "$LAST")")"; T="$(basename "$LAST" | cut -c1-4)"
             THEN="$(date -u -d "$D ${T:0:2}:${T:2:2}" +%s 2>/dev/null || echo 0)"
             if [ $(( $(date -u +%s) - THEN )) -lt 1500 ]; then echo "last poll $LAST is under 25 minutes old: skipping"; echo "poll=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+            echo "since=$THEN" >> "$GITHUB_OUTPUT"   # the previous poll's minute: the combo tape is read from here (the script clamps it to 25 minutes to 2 hours back)
           fi
           echo "poll=true" >> "$GITHUB_OUTPUT"
       - name: One poll
         if: steps.gate.outputs.go == 'true' && steps.fresh.outputs.poll == 'true'
+        env:
+          SINCE: ${{ steps.fresh.outputs.since }}
         run: |
           STAMP="$(date -u +%Y-%m-%d/%H%M)"
           mkdir -p "data/combo/$STAMP"
-          python3 code/scripts/record_combo.py "data/combo/$STAMP"
+          case "$SINCE" in ''|*[!0-9]*) SINCE=0 ;; esac   # digits only, else the script's default window
+          python3 code/scripts/record_combo.py "data/combo/$STAMP" --since "$SINCE"
           gzip -9 -f data/combo/$STAMP/*.csv
       - name: Commit and push the data branch
         if: always() && steps.gate.outputs.go == 'true'

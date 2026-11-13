@@ -3,8 +3,10 @@
 
 Kalshi's combo (multivariate) markets live on exchange_index 1 and number in the tens of thousands, so they are sampled, not recorded in full. Each run does ONE poll:
 list the open combos (mve_filter=only, at most MAX_LIST_PAGES pages), keep every combo with a posted bid or ask at ANY price on the yes or the no side, or any traded volume (widened Nov 12, 2026 so the cheap side and the house side are both testable),
-rank them tightest yes spread first (then volume, then ticker), write the quotes of the first MAX_QUOTE_ROWS, then read the order book (best DEPTH YES and NO bids with sizes) of the first MAX_BOOKS
-and the public trades of the MAX_TRADES most traded.
+rank them tightest yes spread first (then volume, then ticker), write the quotes of the first MAX_QUOTE_ROWS (every one with its leg tickers), then read the order book (best DEPTH YES and NO bids with sizes)
+of the first MAX_BOOKS. Combo trades (Nov 13, 2026, the owner's one freeze exception, for Idea Desk C's CROWDLEG and NOTAKER cards): the whole PUBLIC trade tape since the previous poll
+(`/markets/trades?min_ts=&max_ts=`, cursor paged, at most MAX_TAPE_PAGES pages), keeping only combo rows (ticker starting KXMVE), replaces the old 15 per-combo trade reads; the legs of
+every combo that printed are written to legs.csv, from the listing when it was listed and otherwise from `/markets?tickers=` (at most LEG_BATCH tickers a request, MAX_LEG_LOOKUPS requests).
 Once a day (the 00 UTC hour) it also reads settled combos with volume, so a paper test of buying either side of a combo has the outcomes next to the depth.
 
 PUBLIC Kalshi market data only: no key, no signing, no auth header, no account path, no order, no Firestore. One request stream, at least GAP_S seconds between calls (at most 10 a
@@ -34,8 +36,14 @@ PAGE_LIMIT = 1000
 MAX_LIST_PAGES = 5                 # at most 5,000 open combos listed per run
 MAX_QUOTE_ROWS = 400
 MAX_BOOKS = 40
-MAX_TRADES = 15
-MAX_LEG_ROWS = 100                 # leg_tickers is filled for the first 100 quote rows only (the tightest spreads, which also get the books); later rows leave it empty so a day stays under 1 MB gzipped
+MAX_TAPE_PAGES = 30               # the public trade tape since the last poll, 1,000 trades a page; sized from the CROWDLEG_TAPE_TRIAL page count (see docs/COMBO_RECORDER.md)
+TAPE_DEFAULT_S = 40 * 60           # the window when the previous poll's time is not known: 40 minutes (overlap is fine, trade_id de-duplicates)
+TAPE_MAX_S = 2 * 3600              # never read further back than 2 hours, whatever --since says (a long gap is a gap, not a bigger read)
+TAPE_MIN_S = 25 * 60               # and never less than the 25 minute freshness line
+COMBO_PREFIX = "KXMVE"             # a combo ticker; every other tape row is dropped before it is written
+LEG_BATCH = 40                     # traded combos looked up per /markets?tickers= request (combo tickers are long; 40 keeps the URL under about 3 KB)
+MAX_LEG_LOOKUPS = 5                # at most 200 traded combos a poll are looked up when the listing did not carry them
+MAX_LEG_ROWS = 400                 # leg_tickers is filled on every quote row (Nov 13, 2026; it was the first 100)
 LEGS_MAX_CHARS = 600               # cap on the leg_tickers string of one quote row; the true leg count stays in `legs`
 LEGS_MARKER = "|..."               # ends a truncated leg_tickers string
 DEPTH = 5
@@ -48,8 +56,10 @@ QUOTE_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "event_t
 BOOK_COLS = ["t_recv_ms", "server_date_header", "ticker", "close_time"] + ["yes_bid_px_%d" % i for i in range(1, 6)] + ["yes_bid_sz_%d" % i for i in range(1, 6)] \
     + ["no_bid_px_%d" % i for i in range(1, 6)] + ["no_bid_sz_%d" % i for i in range(1, 6)]
 TRADE_COLS = ["t_recv_ms", "ticker", "created_time", "yes_price_dollars", "count_fp", "taker_outcome_side", "trade_id"]
+LEG_COLS = ["t_recv_ms", "ticker", "event_ticker", "source", "legs", "leg_tickers"]
 RESULT_COLS = ["t_recv_ms", "ticker", "event_ticker", "close_time", "result", "last_price", "volume"]
-COVER_COLS = ["t_recv_ms", "listed", "pages", "list_complete", "selected", "quote_rows", "books", "trades_read", "requests", "n429", "stopped_early"]
+COVER_COLS = ["t_recv_ms", "listed", "pages", "list_complete", "selected", "quote_rows", "books", "trades_read", "requests", "n429", "stopped_early",
+              "tape_min_ts", "tape_max_ts", "tape_pages", "tape_complete", "tape_rows", "combo_trades", "combos_traded", "legs_from_list", "legs_looked_up", "legs_missing"]
 
 
 def epoch_of(iso_s):
@@ -251,6 +261,88 @@ def result_row(t_recv, m):
     return [t_recv, m["ticker"], g("event_ticker"), g("close_time"), m["result"], g("last_price_dollars"), g("volume_fp")]
 
 
+COMBO_TICKER_RE = re.compile(r"^KXMVE[A-Z0-9._-]{1,120}$")
+
+
+def is_combo(t):
+    """A combo ticker of a safe shape: it is the only text from an answer that ever goes into a URL we build (the legs look-up), so anything else is dropped."""
+    return isinstance(t, str) and t.startswith(COMBO_PREFIX) and COMBO_TICKER_RE.match(t) is not None
+
+
+def tape_window(now, since):
+    """(min_ts, max_ts) of the tape read: from the previous poll's time (`since`, from the workflow) to now, clamped to TAPE_MIN_S..TAPE_MAX_S back; TAPE_DEFAULT_S when `since` is unknown or junk."""
+    now = int(now)
+    back = TAPE_DEFAULT_S
+    if isinstance(since, (int, float)) and not isinstance(since, bool) and 0 < since <= now:
+        back = min(TAPE_MAX_S, max(TAPE_MIN_S, now - int(since)))
+    return now - back, now
+
+
+def tape_url(min_ts, max_ts, cursor=""):
+    return "%s/markets/trades?min_ts=%d&max_ts=%d&limit=1000%s" % (BASE, min_ts, max_ts, ("&cursor=" + cursor) if cursor else "")
+
+
+def read_tape(stream, now, since):
+    """The public trade tape of every market in the window, cursor followed for at most MAX_TAPE_PAGES pages; only combo rows are kept, de-duplicated by trade_id. Returns (rows, coverage).
+    complete is True only when the cursor ran out: a page cap, a failed read, a non-object body or a stopped stream leaves it False, so a reader can tell a truncated tape from a quiet one."""
+    lo, hi = tape_window(now, since)
+    rows, seen, cursor, pages, n_rows, complete, retried = [], set(), "", 0, 0, False, False
+    while pages < MAX_TAPE_PAGES:
+        st, body, _d, r = stream.get(tape_url(lo, hi, cursor))
+        if st == 429 and not retried:
+            retried = True
+            continue
+        if st != 200 or not isinstance(body, dict) or not isinstance(body.get("trades"), list):
+            break
+        retried = False
+        pages += 1
+        n_rows += len(body["trades"])
+        for row in trade_rows(r, [t for t in body["trades"] if isinstance(t, dict) and is_combo(t.get("ticker"))]):
+            if row[-1] not in seen:
+                seen.add(row[-1])
+                rows.append(row)
+        cursor = body.get("cursor")
+        if not isinstance(cursor, str) or not cursor:
+            complete = True
+            break
+    return rows, {"min_ts": lo, "max_ts": hi, "pages": pages, "complete": complete, "rows": n_rows}
+
+
+def leg_row(t_recv, m, source):
+    legs = m.get("mve_selected_legs")
+    return [t_recv, m["ticker"], m.get("event_ticker") or "", source, len(legs) if isinstance(legs, list) else "", leg_tickers(legs)]
+
+
+def combo_legs(stream, listed, wanted, t_list=""):
+    """One legs row per combo that printed on the tape: from the listing already in hand when it was listed (no request), otherwise from /markets?tickers= in batches of LEG_BATCH, at most
+    MAX_LEG_LOOKUPS requests. A combo still unknown after that is counted as missing, never guessed. Only combo tickers are ever sent."""
+    rows, todo, got = [], [], set()
+    for t in wanted:
+        if not is_combo(t):
+            continue
+        if t in listed:
+            rows.append(leg_row(t_list, listed[t], "list"))
+            got.add(t)
+        else:
+            todo.append(t)
+    looked = 0
+    for i in range(0, len(todo), LEG_BATCH):
+        if looked >= MAX_LEG_LOOKUPS:
+            break
+        batch = todo[i:i + LEG_BATCH]
+        st, body, _d, r = stream.get("%s/markets?tickers=%s" % (BASE, ",".join(batch)))
+        if st in (-1, -2):
+            break
+        looked += 1
+        if st == 200 and isinstance(body, dict) and isinstance(body.get("markets"), list):
+            for m in body["markets"]:
+                if isinstance(m, dict) and m.get("ticker") in batch and m["ticker"] not in got:
+                    rows.append(leg_row(r, m, "lookup"))
+                    got.add(m["ticker"])
+    want = [t for t in wanted if is_combo(t)]
+    return rows, {"want": want, "from_list": sum(1 for r in rows if r[3] == "list"), "looked_up": looked, "missing": len(want) - len(got)}
+
+
 def write_csv(path, cols, rows):
     new = not os.path.exists(path)
     with open(path, "a", newline="") as f:
@@ -260,13 +352,18 @@ def write_csv(path, cols, rows):
         w.writerows(rows)
 
 
-def poll(stream, now, out_dir):
+def poll(stream, now, out_dir, since=None):
     """One poll. Returns the coverage row."""
     markets, date, tr, pages, complete = list_combos(stream, "open", MAX_LIST_PAGES)
     chosen = pick(markets)
     qrows = [r for r in (quote_row(tr, date, m, i < MAX_LEG_ROWS) for i, m in enumerate(chosen[:MAX_QUOTE_ROWS])) if r]
     write_csv(os.path.join(out_dir, "quotes.csv"), QUOTE_COLS, qrows)
-    brows, trows, nbooks, ntrades = [], [], 0, 0
+    # the combo tape and its legs come before the books: the tape is what the CROWDLEG and NOTAKER cards count, so a refused read eats into the books, not the tape
+    trows, tcov = read_tape(stream, now, since)
+    write_csv(os.path.join(out_dir, "trades.csv"), TRADE_COLS, trows)
+    lrows, lcov = combo_legs(stream, {m["ticker"]: m for m in markets if isinstance(m, dict) and m.get("ticker")}, sorted({r[1] for r in trows}), tr)
+    write_csv(os.path.join(out_dir, "legs.csv"), LEG_COLS, lrows)
+    brows, nbooks = [], 0
     for m in chosen[:MAX_BOOKS]:
         st, body, d, r = stream.get("%s/markets/%s/orderbook?depth=%d" % (BASE, m["ticker"], DEPTH))
         if st in (-1, -2):
@@ -276,32 +373,24 @@ def poll(stream, now, out_dir):
         if row:
             brows.append(row)
     write_csv(os.path.join(out_dir, "books.csv"), BOOK_COLS, brows)
-    # trades go to the MOST traded combos (volume, then ticker), not to the tightest spreads: a trade read is the scarce one
-    traded = sorted([m for m in chosen if (num(m.get("volume_fp")) or 0) > 0], key=lambda m: (-(num(m.get("volume_fp")) or 0), m["ticker"]))[:MAX_TRADES]
-    for m in traded:
-        st, body, d, r = stream.get("%s/markets/trades?ticker=%s&limit=100" % (BASE, m["ticker"]))
-        if st in (-1, -2):
-            break
-        ntrades += 1
-        if st == 200 and isinstance(body, dict) and isinstance(body.get("trades"), list):
-            trows += trade_rows(r, body["trades"])
-    write_csv(os.path.join(out_dir, "trades.csv"), TRADE_COLS, trows)
     if time.gmtime(now).tm_hour == 0 and not stream.stopped:
         sm, _d, str_, _p, _c = list_combos(stream, "settled", SETTLED_PAGES, int(now) - SETTLED_LOOKBACK_S)
         write_csv(os.path.join(out_dir, "results.csv"), RESULT_COLS, [r for r in (result_row(str_, m) for m in sm) if r])
-    return [tr, len(markets), pages, int(complete), len(chosen), len(qrows), nbooks, ntrades, stream.calls, stream.n429, int(stream.stopped)]
+    return [tr, len(markets), pages, int(complete), len(chosen), len(qrows), nbooks, tcov["pages"], stream.calls, stream.n429, int(stream.stopped),
+            tcov["min_ts"], tcov["max_ts"], tcov["pages"], int(tcov["complete"]), tcov["rows"], len(trows), len(lcov["want"]), lcov["from_list"], lcov["looked_up"], lcov["missing"]]
 
 
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("out_dir")
+    ap.add_argument("--since", type=int, default=0, help="unix seconds of the previous poll (from the workflow); 0 means the default window")
     a = ap.parse_args(argv)
     if past_end(time.time()):
         print("past the end date %s: nothing to record" % END_UTC)
         return 0
     os.makedirs(a.out_dir, exist_ok=True)
     stream = Stream()
-    cov = poll(stream, time.time(), a.out_dir)
+    cov = poll(stream, time.time(), a.out_dir, a.since or None)
     write_csv(os.path.join(a.out_dir, "coverage.csv"), COVER_COLS, [cov])
     print("done: %d requests, %d refused (429)%s" % (stream.calls, stream.n429, ", stopped early after repeated refusals" if stream.stopped else ""))
     return 0
