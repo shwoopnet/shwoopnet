@@ -1,0 +1,42 @@
+{
+ "label": "hindsight window: detection uses the close time; upper bound, not a live rule",
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on these markets",
+ "games": 150,
+ "games_with_moneyline_candles": 150,
+ "detections": 34,
+ "fire_rate": 0.2267,
+ "cross_check": {
+  "detected": {
+   "undecided": 28,
+   "says overtime": 6
+  },
+  "not_detected": {
+   "says no overtime": 92,
+   "undecided": 24
+  }
+ },
+ "cheaper_ask": {
+  "median": 0.49,
+  "quartiles": [
+   0.47,
+   0.49,
+   0.5
+  ],
+  "lowest": 0.42,
+  "at_or_under": {
+   "40c": 0,
+   "43c": 2,
+   "45c": 8,
+   "47c": 13
+  }
+ },
+ "detection_minutes_before_close": {
+  "median": 9.866666666666667,
+  "min": 3.5833333333333335,
+  "max": 19.833333333333332
+ },
+ "detections_in_first_5_minutes": 0,
+ "buyable_share_registered": 0.1176,
+ "best_of_two_share_optimistic": 0.1176,
+ "verdict": "CLOSED on the price share (0.1176 buyable, under 0.30)"
+}
