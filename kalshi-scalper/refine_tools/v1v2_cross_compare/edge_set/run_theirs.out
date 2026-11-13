@@ -1,0 +1,148 @@
+hm_guard: HELDOUT_PULL_RUNS list read, sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d (/tmp/cmp_hm/kalshi-scalper/workers/HELDOUT_PULL_RUNS.md)
+{
+ "ambiguities": [
+  "All readings ruled (V1 64539074 and V2 5e156f3e dated amendments): R1 best bids at level 1; R2/C2 a tie of the asks takes YES; R3 V2 spread on YES ask minus YES bid, 10c inclusive; R4 band inclusive; R5 rest open at both ends; C1 t0 row more than 10 s late is no_t0_row; R6 taker side from taker_outcome_side; R7 book ask at or below our price; R8 parent +1c fee at p + 0.01, version fee at our bid unrounded; R9 no result: counted, out of every PF; R10 blocks inclusive; R11/C4 halves by count, n // 2 first; R12 ceil weeks; C3 bar (2) against the parent at +0c and +1c, the stricter governs; R13 FALSIFIED = bar (2) fails OR missed windows' parent PF exceeds the VERSION PF by 0.10 or more; R14 a set with no bet fails; under 60 fills NOT_ENOUGH_DATA comes first and FALSIFIED is information only; D1 bar (3) with infinite PFs decided on the second half alone (see bar3_basis); D2 fill rate = fills / signals; G1 to G3 fixed record paths, no clock option."
+ ],
+ "block": "dev",
+ "counts": {
+  "filled": 6,
+  "not filled": 2,
+  "outside_block": 0
+ },
+ "label": "not blind on Bitcoin windows to Nov 13: DEPTH1, CFRTI-B and CFRTI1-BTC read them (DEPTH1 on 2026-11-14)",
+ "registrations": "V1 64539074, V2 5e156f3e",
+ "report": {
+  "bar": {
+   "at_least_60_fills": false,
+   "net_per_week_not_lower": false,
+   "pf_beats_parent_by_0_10": true,
+   "second_half_not_worse": true
+  },
+  "bar3_basis": "second half alone, finite: version PF against the parent PF at +1c",
+  "falsified": true,
+  "fill_rate": 0.75,
+  "fills": 6,
+  "missed_parent_minus_version_pf_ge_0_10": true,
+  "orders": 8,
+  "parent_net_per_week": 0.69741,
+  "parent_net_per_week_p0": 0.725114,
+  "parent_pf_p0": 4.123413,
+  "parent_pf_p1": 3.833805,
+  "parent_pf_p1_on_filled": 3.787863,
+  "parent_pf_p1_on_missed": 4.033805,
+  "signals": 8,
+  "verdict": "NOT_ENOUGH_DATA (FALSIFIED OR, information only: true)",
+  "version_net_per_week": 0.594633,
+  "version_pf_0": 4.0,
+  "version_pf_100": 3.745334,
+  "version_pf_25": 3.933805,
+  "weeks": 3
+ },
+ "version": "V1",
+ "windows": [
+  {
+   "ask": 0.416547,
+   "close_ts": 1793793600,
+   "filled": false,
+   "limit": 0.1,
+   "order": true,
+   "parent_p0": 0.56644,
+   "parent_p1": 0.55633,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-U0W",
+   "won": true
+  },
+  {
+   "ask": 0.12,
+   "close_ts": 1793794500,
+   "filled": false,
+   "limit": 0.1,
+   "order": true,
+   "parent_p0": -0.127392,
+   "parent_p1": -0.137917,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-U0L",
+   "won": false
+  },
+  {
+   "ask": 0.12,
+   "close_ts": 1793795400,
+   "filled": true,
+   "limit": 0.1,
+   "order": true,
+   "parent_p0": 0.872608,
+   "parent_p1": 0.862083,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-A1",
+   "won": true
+  },
+  {
+   "ask": 0.32,
+   "close_ts": 1793796300,
+   "filled": true,
+   "limit": 0.3,
+   "order": true,
+   "parent_p0": 0.664768,
+   "parent_p1": 0.654523,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-B1",
+   "won": true
+  },
+  {
+   "ask": 0.12,
+   "close_ts": 1793796300,
+   "filled": true,
+   "limit": 0.1,
+   "order": true,
+   "parent_p0": -0.127392,
+   "parent_p1": -0.137917,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-B2",
+   "won": false
+  },
+  {
+   "ask": 0.32,
+   "close_ts": 1793797200,
+   "filled": true,
+   "limit": 0.3,
+   "order": true,
+   "parent_p0": -0.335232,
+   "parent_p1": -0.345477,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-C4",
+   "won": false
+  },
+  {
+   "ask": 0.22,
+   "close_ts": 1793798100,
+   "filled": true,
+   "limit": 0.2,
+   "order": true,
+   "parent_p0": 0.767988,
+   "parent_p1": 0.757603,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-D5",
+   "won": true
+  },
+  {
+   "ask": 0.100139,
+   "close_ts": 1793799000,
+   "filled": true,
+   "limit": 0.2,
+   "order": true,
+   "parent_p0": -0.106447,
+   "parent_p1": -0.117,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-E6",
+   "won": false
+  }
+ ]
+}

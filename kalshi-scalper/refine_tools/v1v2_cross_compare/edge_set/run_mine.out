@@ -1,0 +1,24 @@
+V1 dev block (2026-10-29T22:15:00Z to 2026-11-13T23:59:59Z, constants of the registration); candidate windows by status: {"signal": 8}
+LABEL: not blind on Bitcoin windows to Nov 13: DEPTH1, CFRTI-B and CFRTI1-BTC read them (DEPTH1 on 2026-11-14)
+signals 8, orders placed 8, filled 6 (fill rate 75.0%), no order (no bid) 0
+PRIMARY (parent +1c, maker fee 25%): version PF 3.93 (n 6, mean +29.73c) | parent PF all signals 3.83 (n 8, mean +26.15c) | parent PF on unfilled 4.03 (n 2) | net per contract-week version +0.595 parent +0.697
+sens parent +0c maker fee 0%: version PF 4.00 (n 6, mean +30.00c) | parent PF all signals 4.12 (n 8, mean +27.19c) | parent PF on unfilled 4.45 (n 2) | net per contract-week version +0.600 parent +0.725
+sens parent +0c maker fee 25%: version PF 3.93 (n 6, mean +29.73c) | parent PF all signals 4.12 (n 8, mean +27.19c) | parent PF on unfilled 4.45 (n 2) | net per contract-week version +0.595 parent +0.725
+sens parent +0c maker fee 100%: version PF 3.75 (n 6, mean +28.93c) | parent PF all signals 4.12 (n 8, mean +27.19c) | parent PF on unfilled 4.45 (n 2) | net per contract-week version +0.579 parent +0.725
+sens parent +1c maker fee 0%: version PF 4.00 (n 6, mean +30.00c) | parent PF all signals 3.83 (n 8, mean +26.15c) | parent PF on unfilled 4.03 (n 2) | net per contract-week version +0.600 parent +0.697
+sens parent +1c maker fee 100%: version PF 3.75 (n 6, mean +28.93c) | parent PF all signals 3.83 (n 8, mean +26.15c) | parent PF on unfilled 4.03 (n 2) | net per contract-week version +0.579 parent +0.697
+first half: version PF inf parent PF 15.03 (filled 2) | second half: version PF 1.31 parent PF 1.26 (filled 4)
+bar (3) basis: an infinite PF in a half: second half decided alone (finite)
+7g BAR: (1) PF beats parent by 0.10: met | (2) net per contract-week not lower (vs parent +0c: not met, vs +1c: not met; +0c governs): not met | (3) second half not worse (version minus parent, second half vs first): met | (4) at least 60 filled: not met (NOT_ENOUGH_DATA)
+adverse selection check (parent PF on missed windows, no-bid windows included, exceeds the version's PF on its fills by 0.10 or more): YES
+FALSIFIED on development if (2) fails OR the missed windows' parent PF exceeds the version PF by 0.10 or more: (2) fails: yes | adverse selection: yes => FALSIFIED
+VERDICT (this block): NOT_ENOUGH_DATA (the FALSIFIED test above is information only on a thin sample)
+KXBTC15M-U0W {'status': 'signal', 'side': 'yes', 'p_ask': 0.41654741511396287, 'p_bid': 0.1, 'win': True, 'filled': False, 'tk': 'KXBTC15M-U0W'}
+KXBTC15M-U0L {'status': 'signal', 'side': 'yes', 'p_ask': 0.12, 'p_bid': 0.1, 'win': False, 'filled': False, 'tk': 'KXBTC15M-U0L'}
+KXBTC15M-A1 {'status': 'signal', 'side': 'yes', 'p_ask': 0.12, 'p_bid': 0.1, 'win': True, 'filled': True, 'tk': 'KXBTC15M-A1'}
+KXBTC15M-B2 {'status': 'signal', 'side': 'yes', 'p_ask': 0.12, 'p_bid': 0.1, 'win': False, 'filled': True, 'tk': 'KXBTC15M-B2'}
+KXBTC15M-B1 {'status': 'signal', 'side': 'yes', 'p_ask': 0.31999999999999995, 'p_bid': 0.3, 'win': True, 'filled': True, 'tk': 'KXBTC15M-B1'}
+KXBTC15M-C4 {'status': 'signal', 'side': 'yes', 'p_ask': 0.31999999999999995, 'p_bid': 0.3, 'win': False, 'filled': True, 'tk': 'KXBTC15M-C4'}
+KXBTC15M-D5 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': True, 'filled': True, 'tk': 'KXBTC15M-D5'}
+KXBTC15M-E6 {'status': 'signal', 'side': 'yes', 'p_ask': 0.10013914562879689, 'p_bid': 0.2, 'win': False, 'filled': True, 'tk': 'KXBTC15M-E6'}
+AGG {"fills": 6, "h1": [8.844942160964804, 5.142271274178991], "h2": [2.948862234068809, 3.053398955888603], "parent_net_sum_p0": 2.1753411518320243, "parent_net_sum_p1": 2.0922285130170644, "parent_pf_p0": 4.123412658520862, "parent_pf_p1": 3.8338047857906425, "parent_pf_p1_on_missed": 4.033804785790641, "signals": 8, "version_net_sum_25": 1.7839, "version_pf_0": 4.0, "version_pf_100": 3.7453337551407784, "version_pf_25": 3.933804785790642}
