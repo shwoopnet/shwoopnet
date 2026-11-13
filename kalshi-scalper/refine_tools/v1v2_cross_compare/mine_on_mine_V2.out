@@ -1,0 +1,24 @@
+V2 dev block (2026-11-12T00:00:00Z to 2026-12-04T23:59:59Z, constants of the registration); candidate windows by status: {"signal": 5, "spread_wide": 2}
+LABEL: not blind on EVENT830's forward windows
+signals 5, orders placed 5, filled 4 (fill rate 80.0%), no order (no bid) 0
+PRIMARY (parent +1c, maker fee 25%): version PF 3.50 (n 4, mean +28.46c) | parent PF all signals 1.52 (n 5, mean +10.42c) | parent PF on unfilled 0.00 (n 1) | net per contract-week version +0.285 parent +0.130
+sens parent +0c maker fee 0%: version PF 3.56 (n 4, mean +28.75c) | parent PF all signals 1.59 (n 5, mean +11.45c) | parent PF on unfilled 0.00 (n 1) | net per contract-week version +0.288 parent +0.143
+sens parent +0c maker fee 25%: version PF 3.50 (n 4, mean +28.46c) | parent PF all signals 1.59 (n 5, mean +11.45c) | parent PF on unfilled 0.00 (n 1) | net per contract-week version +0.285 parent +0.143
+sens parent +0c maker fee 100%: version PF 3.33 (n 4, mean +27.58c) | parent PF all signals 1.59 (n 5, mean +11.45c) | parent PF on unfilled 0.00 (n 1) | net per contract-week version +0.276 parent +0.143
+sens parent +1c maker fee 0%: version PF 3.56 (n 4, mean +28.75c) | parent PF all signals 1.52 (n 5, mean +10.42c) | parent PF on unfilled 0.00 (n 1) | net per contract-week version +0.288 parent +0.130
+sens parent +1c maker fee 100%: version PF 3.33 (n 4, mean +27.58c) | parent PF all signals 1.52 (n 5, mean +10.42c) | parent PF on unfilled 0.00 (n 1) | net per contract-week version +0.276 parent +0.130
+first half: version PF inf parent PF 1.77 (filled 1) | second half: version PF 1.75 parent PF 1.34 (filled 3)
+bar (3) basis: an infinite PF in a half: second half decided alone (finite)
+7g BAR: (1) PF beats parent by 0.10: met | (2) net per contract-week not lower (vs parent +0c: met, vs +1c: met; +0c governs): met | (3) second half not worse (version minus parent, second half vs first): met | (4) at least 60 filled: not met (NOT_ENOUGH_DATA)
+adverse selection check (parent PF on missed windows, no-bid windows included, exceeds the version's PF on its fills by 0.10 or more): no
+FALSIFIED on development if (2) fails OR the missed windows' parent PF exceeds the version PF by 0.10 or more: (2) fails: no | adverse selection: no => not falsified
+VERDICT (this block): NOT_ENOUGH_DATA
+KXSILVER15M-X1 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': True, 'filled': True}
+KXSILVER15M-X2 {'status': 'signal', 'side': 'yes', 'p_ask': 0.4, 'p_bid': 0.3, 'win': False, 'filled': False}
+KXSILVER15M-X3 {'status': 'spread_wide'}
+KXSILVER15M-X4 {'status': 'spread_wide'}
+KXSILVER15M-X5 {'status': 'signal', 'side': 'no', 'p_ask': 0.30000000000000004, 'p_bid': 0.25, 'win': False, 'filled': True}
+KXSILVER15M-X6 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': True, 'filled': True}
+KXSILVER15M-X7 outside_block
+KXSILVER15M-X8 {'status': 'signal', 'side': 'yes', 'p_ask': 0.21999999999999997, 'p_bid': 0.2, 'win': False, 'filled': True}
+AGG {"fills": 4, "h1": [Infinity, 1.7745243398847126], "h2": [1.7479341674317899, 1.335289141124839], "parent_net_sum_p0": 0.572464, "parent_net_sum_p1": 0.520903, "parent_pf_p0": 1.5941430931841014, "parent_pf_p1": 1.5238875875864801, "parent_pf_p1_on_missed": 0.0, "signals": 5, "version_net_sum_25": 1.13831875, "version_pf_0": 3.555555555555556, "version_pf_100": 3.3259895641174304, "version_pf_25": 3.4958683348635797}

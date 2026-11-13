@@ -1,7 +1,7 @@
 hm_guard: HELDOUT_PULL_RUNS list read, sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d (/tmp/cmp_hm/kalshi-scalper/workers/HELDOUT_PULL_RUNS.md)
 {
  "ambiguities": [
-  "All readings ruled (V1 64539074 and V2 5e156f3e dated amendments): R1 best bids at level 1; R2/C2 a tie of the asks takes YES; R3 V2 spread on YES ask minus YES bid, 10c inclusive; R4 band inclusive; R5 rest open at both ends; C1 t0 row more than 10 s late is no_t0_row; R6 taker side from taker_outcome_side; R7 book ask at or below our price; R8 parent +1c fee at p + 0.01, version fee at our bid unrounded; R9 no result: counted, out of every PF; R10 blocks inclusive; R11/C4 halves by count, n // 2 first; R12 ceil weeks; C3 bar (2) against the parent at +0c and +1c, the stricter governs; R13 FALSIFIED = bar (2) fails OR missed windows' parent PF exceeds the VERSION PF by 0.10 or more; R14 a set with no bet fails; under 60 fills NOT_ENOUGH_DATA comes first and FALSIFIED is information only."
+  "All readings ruled (V1 64539074 and V2 5e156f3e dated amendments): R1 best bids at level 1; R2/C2 a tie of the asks takes YES; R3 V2 spread on YES ask minus YES bid, 10c inclusive; R4 band inclusive; R5 rest open at both ends; C1 t0 row more than 10 s late is no_t0_row; R6 taker side from taker_outcome_side; R7 book ask at or below our price; R8 parent +1c fee at p + 0.01, version fee at our bid unrounded; R9 no result: counted, out of every PF; R10 blocks inclusive; R11/C4 halves by count, n // 2 first; R12 ceil weeks; C3 bar (2) against the parent at +0c and +1c, the stricter governs; R13 FALSIFIED = bar (2) fails OR missed windows' parent PF exceeds the VERSION PF by 0.10 or more; R14 a set with no bet fails; under 60 fills NOT_ENOUGH_DATA comes first and FALSIFIED is information only; D1 bar (3) with infinite PFs decided on the second half alone (see bar3_basis); D2 fill rate = fills / signals; G1 to G3 fixed record paths, no clock option."
  ],
  "block": "dev",
  "counts": {
@@ -17,13 +17,12 @@ hm_guard: HELDOUT_PULL_RUNS list read, sha256 6d85f5f558df9cbb91974ef99cc6ba448a
    "at_least_60_fills": false,
    "net_per_week_not_lower": true,
    "pf_beats_parent_by_0_10": true,
-   "second_half_not_worse": false
+   "second_half_not_worse": true
   },
+  "bar3_basis": "second half alone, finite: version PF against the parent PF at +1c",
   "falsified": false,
   "fill_rate": 0.8,
   "fills": 4,
-  "half_diff_first": "inf",
-  "half_diff_second": 0.412645,
   "missed_parent_minus_version_pf_ge_0_10": false,
   "orders": 5,
   "parent_net_per_week": 0.130226,
