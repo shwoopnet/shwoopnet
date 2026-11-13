@@ -50,4 +50,10 @@ st = []; M.simulate({(ct, "KXA"): rowsA}, {"KXA": {x["trade_id"]: x for x in trA
 assert sorted((s["kind"], s["frac"]) for s in st) == [("b", None), ("x", False)], st
 trFr = [tr(40, 0.39, 5.5, "no")]; st2 = []; M.simulate({(ct, "KXA"): rowsA}, {"KXA": {x["trade_id"]: x for x in trFr}}, 0.0, "P", 1, False, st2)
 assert ("x", True) in [(s["kind"], s["frac"]) for s in st2], st2
+# Amendment 4 item 8: the count of blank and of zero best-bid cells met in Rule P's book condition (a print only; the figures do not change)
+cn = {}; r1 = M.simulate({(ct, "KXA"): rowsD}, {"KXA": {}}, 0.0, "P", 1, False, None, True, cn); assert (cn.get("blank", 0), cn.get("zero", 0)) == (1, 0), cn      # the first blank cell fills the YES leg (the loop stops there); the NO side's cells are 0.55
+rowsZ = [post, row(30, "0", "100", "0.55", "100"), row(16, "0.40", "100", "0.55", "100")]; cz = {}; rz = M.simulate({(ct, "KXA"): rowsZ}, {"KXA": {}}, 0.0, "P", 1, False, None, True, cz); assert (cz.get("blank", 0), cz.get("zero", 0)) == (0, 1) and rz[0][3] == 1, (cz, rz)     # a bid of 0 is below our price: a fill, counted as a zero cell
+c0 = {}; M.simulate({(ct, "KXA"): rowsB}, {"KXA": {}}, 0.0, "P", 1, False, None, True, c0); assert (c0.get("blank", 0), c0.get("zero", 0)) == (0, 0), c0
+# G9: the rounded fee is rounded to 6 decimals and then up to the cent, each order separately
+assert M.fee_leg(0.07, 0.5, 1, True) == 0.02 and M.fee_leg(0.0175, 0.40, 1, True) == 0.01 and M.fee_leg(0.07, 0.0, 1, True) == 0.0
 print("MMSIM1 RULE P HAND CASES OK (through print, book poll, quote moving away, T-15 edge, absent bid, same-price print, Rule Q unchanged)")

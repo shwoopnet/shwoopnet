@@ -29,11 +29,11 @@ def fnum(x):
 def fee_leg(coef, p, size=1, rounded=False):
     """per-contract fee of one order of `size` contracts: coef x size x p x (1 - p), rounded UP to the cent per order when `rounded` (Amendment 1 item 4), divided back to one contract"""
     raw = coef * size * p * (1 - p)
-    return (math.ceil(raw * 100 - 1e-9) / 100 if rounded else raw) / size
+    return (math.ceil(round(raw, 6) * 100 - 1e-9) / 100 if rounded else raw) / size      # G9: rounded to 6 decimals, then up to the cent, each order separately
 def pts(r):
     try: return int(r["poll_ts_local_ms"])
     except Exception: return None
-def simulate(books, trades, maker_coef, rule="Q", size=1, rounded=False, stats=None, dev_only=True):
+def simulate(books, trades, maker_coef, rule="Q", size=1, rounded=False, stats=None, dev_only=True, counts=None):
     events = collections.defaultdict(list)          # close_time -> [ticker]
     for (ct, tk) in books: events[ct].append(tk)
     out = []                                         # per event: (close_time, pnl, strikes, fills_yes, fills_no, pairs, singles)
@@ -75,6 +75,9 @@ def simulate(books, trades, maker_coef, rule="Q", size=1, rounded=False, stats=N
                             ts = int(r["poll_ts_local_ms"])
                             if ts <= post or ts >= flat: continue
                             bp = fnum(r["yes_bid_px_1" if side == "yes" else "no_bid_px_1"])
+                            if counts is not None:      # Amendment 4 item 8: a print-only count of the blank and the zero best-bid cells met here
+                                if bp is None: counts["blank"] = counts.get("blank", 0) + 1
+                                elif bp == 0: counts["zero"] = counts.get("zero", 0) + 1
                             if bp is None or bp < p - 1e-6: filled = ts; fkind = "b"; ffrac = None; break
                 if filled:
                     legs[side] = (p, filled)
@@ -112,7 +115,7 @@ if __name__ == "__main__":
     registered = {}
     for rule in ("Q", "P"):
         print("RULE", rule)
-        for (size, rounded, name) in ((1, False, "1 contract, fee unrounded (registered basis)"), (1, True, "1 contract, fee rounded up"), (10, True, "10 contracts, fee rounded up"), (10, False, "10 contracts, fee unrounded (reference: the Nov 12 note read 1.48 and 1.35 under Rule Q)")):
+        for (size, rounded, name) in ((1, False, "1 contract, fee unrounded (registered basis)"), (1, True, "1 contract, fee rounded up (information only)")):
             for coef in (0.0, 0.0175):
                 res = [r for r in simulate(books, trades, coef, rule, size, rounded, dev_only=not HELD) if (r[0] >= cut if HELD else r[0] < cut)]
                 x = [r[1] for r in res]; n = len(x)
@@ -121,7 +124,11 @@ if __name__ == "__main__":
                 if size == 1 and not rounded: registered[(rule, coef)] = pf(x)
                 print("%s | maker coef %.4f: dev events %d days %d | strikes quoted %d | fills yes %d no %d | pairs %d singles %d | PF %.2f | mean per strike %+.2fc | mean per event %+.2fc | net %+.2f$ per contract-set" % (
                     name, coef, n, days, strikes, sum(r[3] for r in res), sum(r[4] for r in res), sum(r[5] for r in res), sum(r[6] for r in res), pf(x), 100 * sum(x) / max(1, strikes), 100 * sum(x) / max(1, n), sum(x)))
-        st = []; simulate(books, trades, 0.0175, rule, 1, False, st, dev_only=not HELD)
+        st = []; cnt = {}; simulate(books, trades, 0.0175, rule, 1, False, st, dev_only=not HELD, counts=cnt)
+        if rule == "P": print("RULE P BOOK CONDITION CELLS MET (Amendment 4 item 8, print only): blank best-bid cells %d, zero best-bid cells %d" % (cnt.get("blank", 0), cnt.get("zero", 0)))
+        for coef in (0.0, 0.0175):
+            res = [r for r in simulate(books, trades, coef, rule, 1, False, dev_only=not HELD) if (r[0] >= cut if HELD else r[0] < cut)]; x = [r[1] for r in res]; ns = sum(r[2] for r in res)
+            print("FULL PRECISION (16b) rule %s maker %s, 1 contract, fee unrounded: events %d strikes %d PF %r sum_pos %r sum_neg %r net %r mean_per_strike %r mean_per_event %r" % (rule, coef, len(x), ns, pf(x), sum(v for v in x if v > 0), sum(v for v in x if v < 0), sum(x), sum(x) / max(1, ns), sum(x) / max(1, len(x))))
         tape = [f for f in st if f["kind"] in ("q", "x")]; book_fills = sum(1 for f in st if f["kind"] == "b")
         print("fractional-size share of the fills behind the P&L (Amendment 2; fills triggered by a trade print, fractional = a non-integer contract count): %d of %d (%.1f%%) | fills triggered by the book alone (no trade): %d | all fills %d" % (
             sum(1 for f in tape if f["frac"]), len(tape), 100 * sum(1 for f in tape if f["frac"]) / max(1, len(tape)), book_fills, len(st)))
