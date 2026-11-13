@@ -8,8 +8,8 @@ o = S.run("dev", W)
 bad = []
 exp = {"removed_share": 0.4,
        "counts": {"oi_below": 1, "cheap_skipped": 1, "no_quote": 2, "held_out_ignored": 1, "spread_wide": 2},
-       "parent": {"n": 5, "pf": 1.373198, "net": 0.44, "mean": 0.088, "half1_pf": 2.329231, "half2_pf": 1.009368, "net_per_contract_week": 36.96},
-       "version": {"n": 3, "pf": 4.818452, "net": 1.283, "mean": 0.427667, "half1_pf": "inf", "half2_pf": 2.565476, "net_per_contract_week": 107.772},
+       "parent": {"n": 5, "pf": 1.429194, "net": 0.4925, "mean": 0.0985, "half1_pf": 2.436508, "half2_pf": 1.048048, "net_per_contract_week": 41.37},
+       "version": {"n": 3, "pf": 5.046154, "net": 1.315, "mean": 0.438333, "half1_pf": "inf", "half2_pf": 2.684615, "net_per_contract_week": 110.46},
        "takeover_info": {"pf_lift_ge_0.10": True, "net_week_not_lower": True, "half2_not_worse": True, "signals_ge_60": False},
        "kills_info": {"removed_more_than_half": False, "pf_below_parent": False},
        "label": "no evidence at n = 3"}

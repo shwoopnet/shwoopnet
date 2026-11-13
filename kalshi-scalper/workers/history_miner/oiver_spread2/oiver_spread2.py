@@ -1,5 +1,5 @@
 """OIVER-SPREAD, BUILD 2 (History Miner, Nov 13, 2026), from Desk A's card 1 only (DESK_A_OICORE_VERSIONS_NOV13.md at 741092a7, sha256 e7b918b0);
-Desk A's build was not read. Rules and hand figures in EXPECTED_BY_HAND.md (889d41d0), committed first; open readings (a) to (g) there await the Head.
+Desk A's build was not read. Rules and hand figures in EXPECTED_BY_HAND.md (889d41d0), committed first; the Head's convention of 19:53Z (dated line there) governs: the decision quote is the candle ending close - 180 s (the input's yes_bid and yes_ask), C = 20, the price is the ask seen.
 Development only: a held-out read is refused in this build. Prints aggregates only.
 Usage: python3 -I oiver_spread2.py dev <windows.csv>"""
 import csv, json, math, os, sys
@@ -11,8 +11,8 @@ EPS = 1e-9
 HELDOUT_FIRST = 1796083200          # 2026-12-01T00:00:00Z
 OI_MIN = 86300                      # (g) inclusive
 FLOOR, CEIL = 0.08, 0.50
-SLIP = 0.01                         # (c) booked at the limit
-C = 10                              # (b)
+SLIP = 0.0                          # (c) Head 19:53Z: the ask seen, no +1c (PR 895); filled at that ask, an UPPER BOUND on fills
+C = 20                              # (b) Head 19:53Z: OICORE bottom step (PR 901), fee rounded up per order
 SPREAD_MAX = 0.03                   # the version's one condition
 WEEK = 604800
 MIN_SIGNALS = 60
