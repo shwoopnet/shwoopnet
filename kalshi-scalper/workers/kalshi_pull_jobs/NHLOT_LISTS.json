@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/IDEA_DESK_B_WAVE3.md",
  "purpose": "NHLOT price measurement (zero tries), stage 1: settled market lists of the NHL game and total-goals series, for the tickers and close times, and the two series reads for the rules text. No candle is read and no result is used.",
- "heldout": "none read: a price measurement, no outcome is read and no rule is scored; 150 games of nhlot/games.json (closes 2026-10-21 to 2026-11-12), KXNHLGAME, KXNHLTOTAL, KXNHLOT; W-CAT-SPORTS1 (Refinement) held out closes at or after 2026-10-30T02:53:19Z, never read, RELEASED by the Head of R&D 2026-11-13 06:51Z so development here; TIE3 (Testing Desk) KXNHLOT held out from 2026-11-13, no overlap; two CLOSED old-team cards (FAMSPORTS, USWEEP2) have unread held-out overlapping it, released by the Head of R&D (rnd-queue 0f7bfccb, to confirm with the Head of R&D); landed runs unchanged, text corrected for the record",
+ "heldout": "none read: lists for a price measurement, no outcome is read and no rule is scored; UNBOUNDED: every settled market of KXNHLGAME and KXNHLTOTAL at the run time (2026-11-12T19:07Z); the builder read tickers, event tickers, close times and exchange index only; W-CAT-SPORTS1 (Refinement) held out closes at or after 2026-10-30T02:53:19Z, never read, RELEASED by the Head of R&D 2026-11-13 06:51Z; FAMSPORTS and USWEEP2 (old research team, closed) have unread last thirds overlapping it, RELEASED by the Head of R&D 2026-11-13 07:08Z (rnd-queue 0f7bfccb); the run landed BEFORE those releases, under a note of the Head's that wrongly said it shared no series with a card; landed run unchanged, text corrected for the record",
  "allowed_endpoints": [
   {
    "name": "markets_list",

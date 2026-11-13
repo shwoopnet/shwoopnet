@@ -3,7 +3,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/testing/SOCDERIV_MEASUREMENT.md",
  "purpose": "SOCDERIV measurement stage 1: settled lists of the 16 leagues' winner, total-goals, both-teams-to-score and team-total series, and 3 fee-field reads (times and strikes only; no result used).",
- "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try; W-CAT-SPORTS1 (Refinement) held out five of the 64 series (KXEPLGAME, KXLALIGAGAME, KXSERIEAGAME, KXBUNDESLIGAGAME, KXMLSGAME) at closes on or after 2026-10-30T02:53:19Z, never read, RELEASED by the Head of R&D 2026-11-13 06:51Z so development here; SHARP1 (old team, open) held-out kickoffs 2026-03-07 to 2026-09-07 do not overlap; landed run unchanged, text corrected for the record",
+ "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try; W-CAT-SPORTS1 (Refinement) held out five of the 64 series (KXEPLGAME, KXLALIGAGAME, KXSERIEAGAME, KXBUNDESLIGAGAME, KXMLSGAME) at closes on or after 2026-10-30T02:53:19Z, never read, RELEASED by the Head of R&D 2026-11-13 06:51Z so development here; SOCCER1 and SOCCERELO1 (old research team, closed) froze matches starting at or after 2026-10-03T16:00Z on 24 of the 64 series (eight leagues), never read; USWEEP2 (old research team, closed) froze the last third of 22 of the 64 series, never fetched; all three RELEASED by the Head of R&D 2026-11-13 07:08Z (rnd-queue 0f7bfccb), development here; SHARP1 (old team, open) held-out kickoffs 2026-03-07 to 2026-09-07 do not overlap; landed run unchanged, text corrected for the record",
  "allowed_endpoints": [
   {
    "name": "markets_list",
