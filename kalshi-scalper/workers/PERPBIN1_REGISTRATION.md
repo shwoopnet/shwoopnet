@@ -27,3 +27,6 @@ The binary side is cleared: on `KXBTC15M` the 1 minute candle's bid and ask clos
 
 
 DEVELOPMENT READ ON 2026-11-12 (PERPBIN1, once): try A n 963 PF 0.91, try B n 971 PF 0.93, both FALSIFIED on development. See `PERPBIN1_DEV_RESULT_NOV12.md`.
+
+## Amendment (Nov 13, 2026; ruling of the Head of R&D, committed BEFORE DEPTH1's read of 2026-11-14T00:00Z and before any held-out row of this card is opened)
+PERPBIN1 has no held-out reader, so it does not pool Bitcoin windows that DEPTH1 reads. **The held-out starts at closes from 2026-11-14T00:00:00Z** (a date constant `HELDOUT_FIRST_DAY = "2026-11-14"`, replacing the registered 2026-11-05). Rows on closes 2026-11-05 to 2026-11-13 are printed SEPARATELY: Nov 5 to 8 under Forensics' note ("NOT BLIND: a baseline for this side and band was printed by Forensics on Nov 12") and Nov 9 to 13 as "not blind: shares Bitcoin windows with DEPTH1's read of 2026-11-14"; none is pooled with the held-out. The registered pass lines and minimum row counts do not change; the read date of 2026-11-20 moves later if the held-out count is short.

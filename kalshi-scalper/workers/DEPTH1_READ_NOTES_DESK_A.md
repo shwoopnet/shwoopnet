@@ -11,3 +11,8 @@ READ-ONCE MARKER: not yet read.
 
 ## Dated line (Nov 13, 2026): shared Bitcoin windows with the CFRTI family
 DEPTH1's result will print: "shares Bitcoin windows Nov 9 to 13 with the CFRTI family's unread held-out (read Nov 20), frozen at cfrti_heldout.py c16248cc7cd3fe05..., cfrti_b.py f19b472ef02fc587..., registrations as listed in FROZEN_BEFORE_DEPTH1.md (CFRTI-K and PERPBIN1 are not frozen and carry the not-blind label)". (A notes file; the wrapper and its hash do not change.)
+
+## Dated line (Nov 13, 2026): earlier reads that touched the same windows (the Head's ruling, for the result's label)
+"Refinement's W-SPOTLEAD1 first read (Nov 11) already scored Bitcoin and Ethereum R6 windows closing at or before 2026-11-11T16:00Z; Forensics' FILLHAIRCUT1 read Bitcoin book rows, no outcome, for Nov 9 to 11." These join the Amendment 1 item 10 label ("blind as to its own features; not blind as to cheap-side and favourite-side baselines on the same windows"). The wrapper and its hash do not change.
+## Dated line (Nov 13, 2026): CFRTI-K and PERPBIN1
+Both start their held-out at closes from 2026-11-14T00:00Z by dated amendments committed before DEPTH1's read; Nov 9 to 13 rows (PERPBIN1 Nov 5 to 13) are printed separately as not blind.

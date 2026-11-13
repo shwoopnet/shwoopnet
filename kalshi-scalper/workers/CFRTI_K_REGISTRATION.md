@@ -121,3 +121,6 @@ CANDLEVSBOOK1 (Forensics, `claude/forensics-desk` a87b5c4): the KXBTC15M 1 minut
 
 
 DEVELOPMENT READ ON 2026-11-12 (CFRTI-K, once): n 601, cash PF 1.07, z 0.60; line (b) PF 0.16; Block P NOT MET. See `CFRTI_K_DEV_RESULT_NOV12.md`. The held-out read stays at 2026-11-20.
+
+## Amendment (Nov 13, 2026; ruling of the Head of R&D, committed BEFORE DEPTH1's read of 2026-11-14T00:00Z and before any held-out row of this card is opened)
+CFRTI-K is NOT frozen (no held-out reader exists), so under standing rule 17 it does not pool Bitcoin windows that DEPTH1 reads. **The held-out starts at closes from 2026-11-14T00:00:00Z** (a date constant, `HELDOUT_FIRST_DAY = "2026-11-14"`, replacing the 2026-11-09 of the Nov 12 amendment for this card). Rows on closes 2026-11-09 to 2026-11-13 are printed SEPARATELY as "not blind: shares Bitcoin windows with DEPTH1's read of 2026-11-14" and are never pooled with the held-out. The registered pass line (cash PF 1.3 or better, positive mean, n of 50 or more), the minimum row count and everything else do not change; the read date of 2026-11-20 moves later if the held-out count (50 rows from Nov 14) is short. Desk A chose not to build the held-out reader tonight to keep Nov 9 (the Head's offered alternative).
