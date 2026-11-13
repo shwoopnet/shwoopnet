@@ -3,8 +3,10 @@ A path whose REAL path has a part starting HELDOUT_ is refused, so a link with a
 The current folder is tested too.
 
 Since Nov 13, 2026 it also refuses any landed pull run listed in HELDOUT_PULL_RUNS.md (the copy beside this file, kept
-equal to the one on main): a path with a part equal to a listed run's folder name is refused, wherever the run was
-copied to. If the list cannot be read, everything is refused: no list means no proof that a run is clean."""
+equal to the one on main). It refuses BY THE RUN'S FOLDER NAME, as typed and after links resolve: a path with a part
+equal to a listed run's folder name. A copy of the run under another folder name, or a single file copied out of it,
+is NOT caught. This is a name filter, not a content filter, and it is no proof that a held-out file was not read.
+If the list cannot be read, everything is refused."""
 import os
 import re
 import sys

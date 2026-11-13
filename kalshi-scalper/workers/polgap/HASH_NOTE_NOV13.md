@@ -64,3 +64,14 @@ Written on the Head of R&D's ruling of 06:50Z, after the sweep, before any price
 **One thing for the Head to rule if they wish, before dispatch:** the halves keep the registered date 2026-10-13, so the first half now covers about 31 days of gap mornings and the second about 23. Nothing was read, so either date is unbiased; I did not move a registered constant the ruling did not name.
 
 **Sweep of the research chat's code and JSON (finished 07:02Z):** on its branch at 79724f00, no `.json` or `.py` file under `kalshi-scalper/workers`, and no file under `kalshi-scalper/src` or `kalshi-scalper/tests`, names any of the 63 kept series (a whole-word search for the 63 names; it ended with no match, not on a time limit). Its markdown files were read as Amendment 5, item 4 says. A card that holds a whole category out without naming a series would not be found by a search on names; none is known to this desk for these 63 beyond POLI2.
+
+## Auditor B's wording gate and the registry note (Nov 13, 2026, 07:10Z). Text and a docstring only.
+
+Auditor B passed the Amendment 5 diff CLEAN with one wording gate: the guard matches a listed run by its folder name, so a copy under another name or a file copied out of the run is not caught, and my words "wherever it was copied" said more than that. Done as a dated clarifying line in the registration (which also records that the registry's COUNT2 row is loose and that the halves keep 2026-10-13) and in the guard's docstring. No code path changed: the guard's functions are byte for byte as audited.
+
+| File | sha256 now | was |
+|---|---|---|
+| `polgap/POLGAPH_REGISTRATION.md` | d0585800a8f498352474b29f1d4709bf4e2cefd12fdf69c8ac025f171632d77d | 7280653eb3ae2bf1b1ed04aad93a159b2d7760158f156f4f551cb7c654fa23d9 |
+| `deskb_guard.py` (docstring only) | a199f946cca9da8e0a3c56f0524109629b420ef91b20e77d54fa3b6b6b0f9dcd | 14f969bc8983bff2a0696b3dcab745d748119de28fc4c5692370933cad0b1df9 |
+
+Unchanged: `polgaph.py` 198d9bf0, `POLGAPH_SERIES.json` c22f1aae, `desk_b_jobs/POLGAPH_LISTS_NOV4.json` ce2fe54d (the file the Head of R&D read and sent on). Correction to the section above: where it says a copy of the listed run "under another folder" is refused, the copy tested kept the run's folder name. The guard hash named in the hourly temperature and NHLOT hash notes of 07:07Z (14f969bc) is the one before this docstring change.
