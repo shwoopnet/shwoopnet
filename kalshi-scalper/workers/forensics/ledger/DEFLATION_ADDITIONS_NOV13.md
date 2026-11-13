@@ -30,7 +30,7 @@ One-sided normal quantile at 1 minus 0.05 / N (the ledger's convention; two-side
 | 2,113,011 | 5.4611 | 5.5828 | plus today's 11 (a floor: it assumes every row added since the ruling was already in the 2,113,000) |
 | 2,113,449 | 5.4611 | 5.5829 | plus today's 11 and all 438 explicit tries in the ledger's "added since" table (a ceiling: it assumes none of them was in the 2,113,000; PERPBIN1 and CFRTI-K each appear twice in that table and are counted once) |
 
-**The bar does NOT move off 5.46.** Rounded to two decimals the one-sided bar stays 5.46 until N passes about 2,161,000, which is 48,000 more tries than the ruling's figure; today adds 11. Two-sided stays 5.58.
+**The bar does NOT move off 5.46.** Rounded to two decimals the one-sided bar stays 5.46 until N passes about 2,160,300, which is about 47,300 more tries than the ruling's figure; today adds 11. Two-sided stays 5.58.
 
 ## What this check did and did not do
 
