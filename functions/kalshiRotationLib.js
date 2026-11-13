@@ -14,8 +14,8 @@
 //  A3. "wouldFill: false" is a miss and a row with no secondLookAtMs is "not fill-checked"; both are skipped under (m). A row's second look must come strictly after the decision.
 //  A4. The signal's limit in whole cents is limitCents if given, else round(100*price)+1 (the touch plus 1c, section 4 and ruling (i)).
 //  A5. Both a rule without the favourites class and a favourites class rule use ONE minimum (60 or 150); `rule.minSignals` can only RAISE it, never lower it.
-//  A6. The probation kill: section 5a.4 says a drawdown of $18 from the seat's own peak; 4a says the BUILT slot uses a net floor of minus $18. The replay uses 5a.4 (the rule text) by default;
-//      opts.probationKill = "net_floor" selects 4a.
+//  A6. The probation kill: section 5a.4 says a drawdown of $18 from the seat's own peak; 4a says the BUILT slot uses a net floor of minus $18. The replay now DEFAULTS to the built behaviour
+//      (net floor, 4a) and says so in the log header; opts.probationKill = "drawdown" (5a.4) selects the rule text. An OWNER DECISION: which one the lane means.
 //  A7. "Net under minus 1c a contract at the 50th fill" is read as: total cash cents at the 50th filled order < -(1 x contracts x 50), checked once, at that fill.
 //  A8. "At every 60th fill, the last 60 under 1.0" is read as gross wins W < gross losses L over those 60 (so W=0 with L>0 is under, L=0 is not).
 //  A9. The live-against-shadow check (6.4) runs when the 20th live ORDER (filled or not) is recorded: fewer than 60 percent filled, or the sum of (fill cents - shadow cents) over filled orders
@@ -24,6 +24,9 @@
 //  A11. A third exit means a third exit or kill in the place's history; at most 2 automatic returns, counted from the history given by the caller.
 //  A12. Section 8 is exact arithmetic on stated caps. The sizing base is a parameter in cents; no account figure is stored here.
 //  A13. A rule's seat conflict (4.7) is a string key (market|side|minute) that the caller puts in rule.collisionKey and ctx.liveKeys; the library only compares them.
+//  A15. Ruling (s): rows are one signal per rule, ticker (the market instance) and side; later rows of the same key are repeats of the same signal and are dropped AFTER the other filters (the earliest counted row stays).
+//  A16. The replay honours its stated nowMs: a row decided after it, a second look after it, or a result not settled by it (settledAtMs, else closeMs) is treated as not yet there / open.
+//  A17. secondLookMaxMs is clamped to 4000 (fast logs) or 6000 (slow logs, 6000 or more); any other value is the stricter 4000.
 //  A14. Full seats need ctx.premiseRead (9.5); probation seats do not (the lane's opening paragraph). Both need the owner's popup (rule.ownerAdmitted), the controller review and the caps check.
 
 // ---- constants, each with its section ---------------------------------------------------------------------------------------------------------------------------------
@@ -55,7 +58,8 @@ const REARM_AFTER_KILL_MS = 30 * DAY_MS;  // 7.2
 const ALERT_PF60 = 0.7, ALERT_EARLY_SELLS = 3, ALERT_EARLY_WINDOW = 40; // 6 alerts only
 const LUCKY_RATE = 0.04, LUCKY_RATE_FAV = 0.05; // 9.2
 // Slot caps today (5.1): fractions of the sizing base with fixed ceilings, in cents.
-const SLOT_CAPS = Object.freeze({ order: [0.01, 2000], window: [0.02, 4000], open: [0.03, 6000], day: [0.02, 2000], lifetime: [0.06, 6000] });
+// COPIED from functions/kalshiSlotLib.js (SLOT_CAP_FRACTIONS and SLOT_CAP_CEILINGS in dollars, here in cents). This module requires nothing, so a drift gate in the TEST compares them (RR_CAPS).
+const SLOT_CAPS = Object.freeze({ order: [0.025, 2000], window: [0.02, 4000], open: [0.03, 6000], day: [0.025, 2000], lifetime: [0.075, 6000] });
 const ACCOUNT_STOP_FRACTION = 0.12;       // 8.2 the shared 12 percent account stop
 
 // ---- small pure helpers -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -87,7 +91,7 @@ function fillChecked(rule, r) {
   if (r.live === true) return true;
   if (r.wouldFill === false) return false;
   if (!isNum(r.secondLookAtMs) || r.secondLookFill !== true) return false;
-  const maxMs = isNum(rule.secondLookMaxMs) ? rule.secondLookMaxMs : SECOND_LOOK_FAST_MS;
+  const maxMs = isNum(rule.secondLookMaxMs) && rule.secondLookMaxMs >= SECOND_LOOK_SLOW_MS ? SECOND_LOOK_SLOW_MS : SECOND_LOOK_FAST_MS; // A17
   const gap = r.secondLookAtMs - r.atMs;
   return gap > 0 && gap / 1000 <= maxMs / 1000 + TOL_SEC;
 }
@@ -97,18 +101,25 @@ function countedSignals(rule, rows, opts) {
   const cls = classOf(rule);
   const startMs = Math.max(isNum(rule.startMs) ? rule.startMs : 0, opts && isNum(opts.afterMs) ? opts.afterMs + 1 : 0); // (l); A10 for a return block
   const out = [];
+  const hasNow = !!opts && isNum(opts.nowMs);
   for (const r of rows || []) {
     if (r.rule !== rule.id || rowMarket(r) !== rule.market) continue;
     if (!isNum(r.atMs) || r.atMs < startMs) continue;                                  // (l)
+    if (hasNow && r.atMs > opts.nowMs) continue;                                       // A16: not decided yet at the stated now
     if (!fillChecked(rule, r)) continue;                                               // (m)
+    if (hasNow && r.live !== true && isNum(r.secondLookAtMs) && r.secondLookAtMs > opts.nowMs) continue; // A16
     if (!cls.favourites && limitCentsOf(r) >= FAV_LIMIT_CENTS) continue;               // (i) skipped, not counted
     const isVoid = r.void === true;
-    const final = isVoid || (r.settled === true && isNum(r.pnl));
+    const settledBy = isNum(r.settledAtMs) ? r.settledAtMs : isNum(r.closeMs) ? r.closeMs : null;
+    const knownByNow = !hasNow || settledBy === null || settledBy <= opts.nowMs;                // A16
+    const final = knownByNow && (isVoid || (r.settled === true && isNum(r.pnl)));
     out.push({ atMs: r.atMs, ticker: String(r.ticker || ""), side: r.side, void: isVoid, final,
       cents: !final ? 0 : isVoid ? -feeCentsUp(r.fee) : centsOf(r.pnl), day: centralDay(r.atMs) });
   }
   out.sort((a, b) => a.atMs - b.atMs || (a.ticker < b.ticker ? -1 : a.ticker > b.ticker ? 1 : 0) || sideRank(a.side) - sideRank(b.side));
-  return out;
+  const seen = new Set(), uniq = [];                                                   // ruling (s), A15
+  for (const s of out) { const k = rule.id + "|" + s.ticker + "|" + s.side; if (seen.has(k)) continue; seen.add(k); uniq.push(s); }
+  return uniq;
 }
 
 const tally = (list) => { let W = 0, L = 0, w = 0, l = 0; for (const s of list) { if (s.cents > 0) { W += s.cents; if (!s.void) w++; } else if (s.cents < 0) { L -= s.cents; if (!s.void) l++; } } return { W, L, wins: w, losses: l, n: list.length }; };
@@ -125,7 +136,7 @@ function countsHold(cls, list, daySet) {
 // status: COLLECTING | WAITING_RESULTS | CONFIRMING | QUALIFIED.
 function readPlace(rule, rows, nowMs, opts) {
   const cls = classOf(rule);
-  const sigs = countedSignals(rule, rows, opts);
+  const sigs = countedSignals(rule, rows, Object.assign({}, opts, { nowMs }));
   const events = [], blocks = [];
   let status = "COLLECTING";
   let i = 0;
@@ -224,19 +235,19 @@ function replaySeat(seatKind, orders, opts) {
   const contracts = full ? FULL_CONTRACTS : PROBATION_CONTRACTS;
   const sorted = (orders || []).slice().sort((a, b) => a.atMs - b.atMs);
   const events = [];
-  let cum = 0, peak = 0, fills = 0, seen = 0, filledSeen = 0, slip = 0;
+  let cum = 0, peak = 0, fills = 0, seen = 0, filledSeen = 0, slip = 0, missing = false;
   const cents = [];
   for (const ord of sorted) {
     seen++;
-    if (ord.filled) { filledSeen++; slip += (isNum(ord.fillCents) && isNum(ord.shadowCents)) ? ord.fillCents - ord.shadowCents : 0; }
+    if (ord.filled) { filledSeen++; if (isNum(ord.fillCents) && isNum(ord.shadowCents)) slip += ord.fillCents - ord.shadowCents; else missing = true; }
     if (seen === LIVE_CHECK_ORDERS) {              // 5.2, 6.4, A9
       const slow = LIVE_CHECK_MIN_FILL_DEN * filledSeen < LIVE_CHECK_MIN_FILL_NUM * LIVE_CHECK_ORDERS;
-      const bad = slip > LIVE_CHECK_SLIP_CENTS * filledSeen;
-      if (slow || bad) { events.push({ atMs: ord.atMs, kind: "KILL", reason: "live against shadow (6.4)", latched: true }); return { events, ended: true }; }
+      const bad = missing || slip > LIVE_CHECK_SLIP_CENTS * filledSeen; // A9: a missing fill or shadow price fails closed
+      if (slow || bad) { events.push({ atMs: ord.atMs, kind: "KILL", reason: missing ? "live against shadow (6.4): fill or shadow price missing, failed closed" : "live against shadow (6.4)", latched: true }); return { events, ended: true }; }
     }
     if (!ord.filled || !isNum(ord.pnl)) continue;
     const c = centsOf(ord.pnl); fills++; cents.push(c); cum += c; if (cum > peak) peak = cum;
-    const dd = (full || o.probationKill !== "net_floor") ? peak - cum : -cum; // A6
+    const dd = (full || o.probationKill === "drawdown") ? peak - cum : -cum; // A6: probation defaults to the built net floor
     if (dd >= killCents) { events.push({ atMs: ord.atMs, kind: "KILL", reason: (full ? "$60" : "$18") + " drawdown (6.1, 5a.4)", latched: true, fills }); return { events, ended: true }; }
     if (fills === EXIT50_FILLS && cum < EXIT50_MIN_CENTS_PER_CONTRACT * contracts * EXIT50_FILLS) { events.push({ atMs: ord.atMs, kind: "EXIT", reason: "net under minus 1c a contract at 50 fills (6.2)", fills }); return { events, ended: true }; }
     if (fills % EXIT60_EVERY === 0) {
@@ -306,6 +317,7 @@ function replay(input) {
   if (!isNum(inp.nowMs)) throw new Error("replay needs a stated nowMs");
   const nowMs = inp.nowMs, ctxIn = inp.ctx || {};
   const rules = (inp.rules || []).slice().sort((a, b) => (placeKey(a) < placeKey(b) ? -1 : placeKey(a) > placeKey(b) ? 1 : 0));
+  const probationKill = inp.probationKill === "drawdown" ? "drawdown" : "net_floor"; // A6
   const log = [], places = {};
   let probation = ctxIn.probationSeatsTaken || 0;
   for (const rule of rules) {
@@ -315,17 +327,20 @@ function replay(input) {
     const live = (inp.liveOrders && inp.liveOrders[key]) || [];
     const ctx = Object.assign({}, ctxIn, { nowMs, probationSeatsTaken: probation });
     let seat = seatDecision(rule, rec, ctx);
-    let seatEvents = [];
+    let seatEvents = [], ended = false;
     if (live.length && seat.seat !== "none") {
-      const rs = replaySeat(seat.seat, live, {});
+      const rs = replaySeat(seat.seat, live, { probationKill });
+      ended = rs.ended;
       seatEvents = rs.events;
       for (const e of rs.events) log.push(Object.assign({ place: key }, e));
+      if (ended) log.push({ atMs: rs.events[rs.events.length - 1].atMs, place: key, kind: "SEAT_ENDED", seatState: "ended", by: rs.events[rs.events.length - 1].kind });
     }
-    if (seat.seat === "probation" && !seatEvents.length) probation++;
+    if (seat.seat === "probation" && !ended) probation++;
     log.push({ atMs: nowMs, place: key, kind: "SEAT_DECISION", seat: seat.seat, contracts: seat.contracts, reason: seat.reason, status: rec.status });
-    places[key] = { status: rec.status, blocks: rec.blocks, seat: seat.seat, seatEvents };
+    places[key] = { status: rec.status, blocks: rec.blocks, seat: ended ? "ended" : seat.seat, seatState: ended ? "ended" : seat.seat === "none" ? "none" : "open", seatEvents };
   }
   log.sort((a, b) => a.atMs - b.atMs || (a.place < b.place ? -1 : a.place > b.place ? 1 : 0));
+  log.unshift({ atMs: nowMs, kind: "HEADER", lane: "ROTATION_LANE v1.3", probationKill, nowMs, scope: "sections 4 to 6 plus the seat decision; sections 7 and 8 are exported pure functions only" });
   return { log, places };
 }
 

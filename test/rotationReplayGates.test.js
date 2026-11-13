@@ -167,21 +167,24 @@ gates.RR16 = () => { // a full seat is not killed by one trade or five worst-pri
   const pro = lib.replaySeat('probation', losses(2).map((o) => Object.assign({}, o, { pnl: -3 })).concat([{ atMs: 9, filled: true, pnl: -3 }, { atMs: 10, filled: true, pnl: -3 }, { atMs: 11, filled: true, pnl: -3 }, { atMs: 12, filled: true, pnl: -3 }]), {});
   assert.strictEqual(pro.events[0].kind, 'KILL', 'a probation seat is killed at an $18 drawdown (six $3 losses)');
   assert.ok(pro.events[0].reason.includes('$18'));
+  const dd = [{ atMs: 0, filled: true, pnl: 10 }].concat(Array.from({ length: 6 }, (_, i) => ({ atMs: 1 + i, filled: true, pnl: -3 })));
+  assert.strictEqual(lib.replaySeat('probation', dd, {}).ended, false, 'default is the built net floor: +10 then -18 is net -8');
+  assert.strictEqual(lib.replaySeat('probation', dd, { probationKill: 'drawdown' }).ended, true, 'the rule text (5a.4) kills at an $18 drawdown from peak');
 };
 
 gates.RR17 = () => { // the performance exits: net under -1c a contract at the 50th fill, and the last 60 under 1.0 at every 60th fill
-  const flat = (n, pnl) => Array.from({ length: n }, (_, i) => ({ atMs: i, filled: true, pnl }));
-  const a = lib.replaySeat('full', flat(49, 0).concat([{ atMs: 49, filled: true, pnl: -6 }]), {});
+  const flat = (n, pnl) => Array.from({ length: n }, (_, i) => ({ atMs: i, filled: true, pnl, fillCents: 30, shadowCents: 30 }));
+  const a = lib.replaySeat('full', flat(49, 0).concat([{ atMs: 49, filled: true, pnl: -6, fillCents: 30, shadowCents: 30 }]), {});
   assert.strictEqual(a.events[0].kind, 'EXIT'); assert.strictEqual(a.events[0].fills, 50);   // -600c < -1 x 10 x 50 = -500c
-  const b = lib.replaySeat('full', flat(49, 0).concat([{ atMs: 49, filled: true, pnl: -5 }]), {});
+  const b = lib.replaySeat('full', flat(49, 0).concat([{ atMs: 49, filled: true, pnl: -5, fillCents: 30, shadowCents: 30 }]), {});
   assert.strictEqual(b.ended, false, 'exactly minus 5.00 is not under the line');
   const ok60 = flat(60, 0).map((o, i) => Object.assign(o, { pnl: i % 2 ? 1 : -1 }));
   assert.strictEqual(lib.replaySeat('full', ok60, {}).ended, false, 'a 1.0 block of 60 stays');
   const bad60 = flat(60, 0).map((o, i) => Object.assign(o, { pnl: i === 0 ? -0.2 : i % 2 ? 0.1 : -0.1 }));
   assert.ok(lib.replaySeat('full', bad60.slice(0, 60), { }).ended === false || true);
-  const under = Array.from({ length: 60 }, (_, i) => ({ atMs: i, filled: true, pnl: i < 30 ? 0.01 : 0.0 })); // wins small, no losses
+  const under = Array.from({ length: 60 }, (_, i) => ({ atMs: i, filled: true, fillCents: 30, shadowCents: 30, pnl: i < 30 ? 0.01 : 0.0 })); // wins small, no losses
   assert.strictEqual(lib.replaySeat('full', under, {}).ended, false, 'no losses is not under 1.0');
-  const sixty = Array.from({ length: 60 }, (_, i) => ({ atMs: i, filled: true, pnl: i % 2 ? 0.02 : -0.03 })); // cum small negative, above -500c
+  const sixty = Array.from({ length: 60 }, (_, i) => ({ atMs: i, filled: true, fillCents: 30, shadowCents: 30, pnl: i % 2 ? 0.02 : -0.03 })); // cum small negative, above -500c
   const r = lib.replaySeat('full', sixty, {}); assert.ok(r.ended && r.events[0].reason.includes('last 60'));
 };
 
@@ -214,8 +217,8 @@ gates.RR19 = () => { // cooling and return: not before cooling ends; never autom
 };
 
 gates.RR20 = () => { // the total at risk never exceeds the stated cap, and the order cap refuses what a small base cannot carry
-  assert.strictEqual(lib.orderAllowed(1000, 100000), true, 'a $10 order needs a $1,000 base');
-  assert.strictEqual(lib.orderAllowed(1000, 99000), false);
+  assert.strictEqual(lib.orderAllowed(1000, 40000), true, 'a $10 order needs a $400 base at 2.5 percent an order');
+  assert.strictEqual(lib.orderAllowed(1000, 39999), false);
   const caps = lib.slotCaps(1000000); assert.deepStrictEqual(caps, { order: 2000, window: 4000, open: 6000, day: 2000, lifetime: 6000 }, 'ceilings bind on a big base');
   assert.deepStrictEqual(lib.slotCaps(0), { order: 0, window: 0, open: 0, day: 0, lifetime: 0 }, 'an unusable base gives no order');
   for (const base of [50000, 100000, 300000, 1000000]) for (const n of [1, 5, 20, 60]) {
@@ -225,7 +228,7 @@ gates.RR20 = () => { // the total at risk never exceeds the stated cap, and the 
   }
   const t = lib.totalAtRisk(Array(30).fill('full'), 100000);
   assert.strictEqual(t.accountStop, 12000); assert.ok(t.stopBinds, 'with many seats the shared stop is the only hard daily bound');
-  const small = lib.totalAtRisk(['full'], 50000); assert.strictEqual(small.lifetimeKillSum, 3000, 'at a small base the lifetime cap stops a rule before its $60 kill line');
+  const small = lib.totalAtRisk(['full'], 50000); assert.strictEqual(small.lifetimeKillSum, 3750, 'at a small base the lifetime cap stops a rule before its $60 kill line');
   assert.ok(Math.abs(lib.luckyClears(100, false) - 4) < 1e-9 && Math.abs(lib.luckyClears(100, true) - 5) < 1e-9);
   assert.deepStrictEqual(lib.alertsFor(Array(60).fill(0).map((_, i) => (i % 3 ? -100 : 50)), []).length, 1, 'an alert, never an exit');
 };
@@ -239,7 +242,8 @@ gates.RR21 = () => { // the same input gives the same log (idempotence), and the
   assert.strictEqual(a.places['R1|KXSILVER15M'].seat, 'full');
   assert.strictEqual(a.places['R2|KXWTI15M'].status, 'CONFIRMING'); assert.strictEqual(a.places['R2|KXWTI15M'].seat, 'probation');
   assert.strictEqual(a.places['R3|KXBNB15M'].seat, 'none', 'an unregistered rule takes no probation seat');
-  const times = a.log.map((e) => e.atMs); assert.deepStrictEqual(times, times.slice().sort((x, y) => x - y), 'the log runs in time order');
+  assert.strictEqual(a.log[0].kind, 'HEADER'); assert.strictEqual(a.log[0].probationKill, 'net_floor');
+  const times = a.log.slice(1).map((e) => e.atMs); assert.deepStrictEqual(times, times.slice().sort((x, y) => x - y), 'the log runs in time order');
   assert.throws(() => lib.replay({ rules, rows: rs }), /nowMs/, 'the replay never reads a clock: nowMs must be stated');
   const probationRules = Array.from({ length: 7 }, (_, i) => rule({ id: 'P' + i }));
   const p = lib.replay({ rules: probationRules, rows: [], nowMs: NOW, ctx: { controllerReviewed: true, capsChecked: true } });
@@ -250,6 +254,60 @@ gates.RR22 = () => { // stepping up from probation needs the full record on the 
   const live = rows(90, every4).map((r) => Object.assign({}, r, { secondLookAtMs: undefined, wouldFill: undefined }));
   assert.strictEqual(lib.stepUpDecision(rule(), live, NOW).stepUp, true);
   assert.strictEqual(lib.stepUpDecision(rule(), live.slice(0, 40), NOW).stepUp, false);
+};
+
+gates.RR_CAPS = () => { // drift gate: the module's copied slot caps equal the slot library's (the module itself requires nothing)
+  const slot = require(path.join(root, 'functions', 'kalshiSlotLib.js'));
+  const map = { order: 'perOrder', window: 'perWindow', open: 'openTotal', day: 'daily', lifetime: 'lifetime' };
+  for (const [k, v] of Object.entries(map)) {
+    assert.strictEqual(lib.SLOT_CAPS[k][0], slot.SLOT_CAP_FRACTIONS[v], k + ' fraction');
+    assert.strictEqual(lib.SLOT_CAPS[k][1], slot.SLOT_CAP_CEILINGS[v] * 100, k + ' ceiling in cents');
+  }
+};
+
+gates.RR_NOW = () => { // the replay honours its stated now: later rows, later second looks and results not yet settled do not exist yet
+  const all = rows(90, every4);
+  const at = atOf(59) + 6000;
+  const r = lib.readPlace(rule(), all, at);
+  assert.strictEqual(r.signalsCounted, 60, 'rows decided after nowMs are dropped');
+  assert.strictEqual(r.status, 'CONFIRMING');
+  const late = all.map((x, i) => (i === 59 ? Object.assign({}, x, { settledAtMs: at + 5000 }) : x));
+  assert.strictEqual(lib.readPlace(rule(), late, at).status, 'WAITING_RESULTS', 'a result settled after now is still open');
+  assert.strictEqual(lib.readPlace(rule(), late, at + 6000).blocks[0].result, 'CLEARED');
+  const closing = all.map((x, i) => (i === 59 ? Object.assign({}, x, { closeMs: at + 5000 }) : x));
+  assert.strictEqual(lib.readPlace(rule(), closing, at).status, 'WAITING_RESULTS', 'no settledAtMs: open while the close time is after now');
+  const sl = [row(0, 8, { atMs: at - 2000, secondLookAtMs: at + 1000 })];
+  assert.strictEqual(lib.readPlace(rule(), sl, at).signalsCounted, 0, 'a second look after now has not happened');
+};
+
+gates.RR_DUP = () => { // ruling (s): a later poll of the same rule, market and side is not a second signal
+  const a = row(0, 8), b = Object.assign({}, a, { atMs: a.atMs + 60000, secondLookAtMs: a.atMs + 65000 });
+  const other = Object.assign({}, a, { side: 'no' });
+  assert.strictEqual(lib.countedSignals(rule(), [a, b], {}).length, 1);
+  assert.strictEqual(lib.countedSignals(rule(), [a, b], {})[0].atMs, a.atMs, 'the earliest row stays');
+  assert.strictEqual(lib.countedSignals(rule(), [a, b, other], {}).length, 2, 'the other side is its own signal');
+};
+
+gates.RR_A9 = () => { // a filled order with no fill or shadow price fails closed
+  const o = Array.from({ length: 20 }, (_, i) => ({ atMs: i, filled: true, pnl: 0.1, fillCents: i === 3 ? undefined : 30, shadowCents: 30 }));
+  const r = lib.replaySeat('full', o, {});
+  assert.strictEqual(r.events[0].kind, 'KILL'); assert.ok(/failed closed/.test(r.events[0].reason));
+};
+
+gates.RR_CLAMP = () => { // secondLookMaxMs can only be 4000 or 6000
+  const gap = (ms) => lib.countedSignals(rule({ secondLookMaxMs: 60000 }), [row(0, 8, { secondLookAtMs: atOf(0) + ms })], {}).length;
+  assert.strictEqual(gap(6000), 1); assert.strictEqual(gap(6001), 0, 'a huge setting is clamped to 6000');
+  const fast = (ms) => lib.countedSignals(rule({ secondLookMaxMs: 5000 }), [row(0, 8, { secondLookAtMs: atOf(0) + ms })], {}).length;
+  assert.strictEqual(fast(4000), 1); assert.strictEqual(fast(4001), 0, 'an in-between setting is the stricter 4000');
+  assert.strictEqual(lib.countedSignals(rule({ secondLookMaxMs: undefined }), [row(0, 8, { secondLookAtMs: atOf(0) + 4001 })], {}).length, 0);
+};
+
+gates.RR_ENDED = () => { // after a kill or exit the log and the place say the seat ended
+  const q = rows(90, every4);
+  const live = Array.from({ length: 6 }, (_, i) => ({ atMs: START + i, filled: true, pnl: -10 }));
+  const out = lib.replay({ rules: [rule()], rows: q, liveOrders: { 'R1|KXSILVER15M': live }, nowMs: NOW, ctx: { controllerReviewed: true, capsChecked: true, premiseRead: true } });
+  assert.ok(out.log.some((e) => e.kind === 'KILL') && out.log.some((e) => e.kind === 'SEAT_ENDED' && e.seatState === 'ended'));
+  assert.strictEqual(out.places['R1|KXSILVER15M'].seatState, 'ended'); assert.strictEqual(out.places['R1|KXSILVER15M'].seat, 'ended');
 };
 
 gates.RR_PURE = () => { // purity: no clock, no randomness, no I/O, no module of any kind
@@ -288,6 +346,9 @@ gates.RR_CLI = () => { // the CLI prints a decision log from a JSON file and wri
   execFileSync('node', [path.join(root, 'scripts', 'rotation_replay.js'), inFile, '--out=' + outFile], { encoding: 'utf8' });
   assert.strictEqual(fs.readFileSync(outFile, 'utf8'), out);
   assert.throws(() => execFileSync('node', [path.join(root, 'scripts', 'rotation_replay.js'), '/nonexistent.json'], { stdio: 'pipe' }));
+  assert.throws(() => execFileSync('node', [path.join(root, 'scripts', 'rotation_replay.js'), inFile, '--out=' + outFile], { stdio: 'pipe' }), 'an existing --out path is refused, never overwritten');
+  assert.strictEqual(fs.readFileSync(outFile, 'utf8'), out);
+  assert.throws(() => execFileSync('node', [path.join(root, 'scripts', 'rotation_replay.js'), inFile, '--out=/etc/rot-test-out.jsonl'], { stdio: 'pipe' }), 'a path outside the repo and temp folder is refused');
 };
 
 let failed = 0;
