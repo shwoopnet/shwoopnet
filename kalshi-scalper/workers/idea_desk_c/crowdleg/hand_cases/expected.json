@@ -1,0 +1,50 @@
+{
+ "complete": {
+  "rows": 5,
+  "kxmve_rows": 3,
+  "kxmve_share": 0.6,
+  "unreadable": [],
+  "labels": [
+   "complete tape"
+  ],
+  "by_hand": "page 1: 3 rows, 2 KXMVE, cursor open; page 2: 2 rows, 1 KXMVE, cursor empty; status complete; the stray 0009.json.gz is not in the manifest and is not counted. 5 rows, 3 KXMVE, 0.6, complete tape."
+ },
+ "stopped": {
+  "rows": 3,
+  "kxmve_rows": 2,
+  "kxmve_share": 0.6667,
+  "unreadable": [],
+  "labels": [
+   "INCOMPLETE run, status stopped_429, a lower bound",
+   "truncated: the last page still carries a cursor"
+  ],
+  "by_hand": "one page, 3 rows, 2 KXMVE (2/3 = 0.6667), its cursor open, status stopped_429."
+ },
+ "truncated": {
+  "rows": 5,
+  "kxmve_rows": 3,
+  "kxmve_share": 0.6,
+  "unreadable": [],
+  "labels": [
+   "truncated: the last page still carries a cursor"
+  ],
+  "by_hand": "as complete, but the last page's cursor is 'c2': truncated although only 2 pages."
+ },
+ "corrupt": {
+  "rows": 3,
+  "kxmve_rows": 2,
+  "kxmve_share": 0.6667,
+  "unreadable": [
+   "0002.json.gz: sha256 or bytes differ from the manifest"
+  ],
+  "labels": [
+   "a lower bound: 1 unreadable page(s)",
+   "end of tape unknown: the last page is unreadable"
+  ],
+  "by_hand": "page 2's content was changed after its sha256 was recorded: unreadable; page 1 counts 3 rows, 2 KXMVE; the last page is unreadable so the end is unknown."
+ },
+ "wrongjob": {
+  "refused": true,
+  "by_hand": "the manifest's job has max_requests 56, so its canonical hash is not 6bb0ddcf: refused before any page is opened."
+ }
+}

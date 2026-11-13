@@ -1,0 +1,72 @@
+{
+ "job": {
+  "job_id": "CROWDLEG_TAPE_TRIAL",
+  "owner": "MAIN",
+  "status": "active",
+  "registration": "kalshi-scalper/workers/idea_desk_c/CROWDLEG_CARD.md",
+  "purpose": "CROWDLEG recorder sizing trial (Idea Desk C, owner MAIN): page count of the public trade tape over one fixed past 30 minute window (2026-09-20 18:00 to 18:30Z, a Sunday), to size a combo trade read. The reader counts pages, rows, and rows whose ticker starts with KXMVE; no price, size or side is read.",
+  "heldout": "One fixed past window, 2026-09-20T18:00Z to 18:30Z, chosen before every held-out start found in HELDOUT_REGISTRY Table 2 (all on or after 2026-10-03). FOR AUDITOR B: the unfiltered tape holds trades of EVERY market traded in that half hour, which land on the public data branch; check that no card holds that half hour as held-out. The reader opens only the row count and the ticker prefix.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "allowed_endpoints": [
+   {
+    "name": "trades_list",
+    "method": "GET",
+    "path_pattern": "/markets/trades",
+    "params_allowed": [
+     "limit",
+     "cursor",
+     "min_ts",
+     "max_ts"
+    ]
+   }
+  ],
+  "series_allowlist": [],
+  "ticker_allowlist": [],
+  "max_requests": 55,
+  "notes": "One request, the public trade list for min_ts 1789927200 to max_ts 1789929000, 1,000 a page, at most 50 pages. If it stops at 50 pages the count is a lower bound (at least 50,000 trades in 30 minutes) and is reported as truncated. Cap 55: 5 spare for 429 retries. The runner saves RAW answers: the unfiltered tape of that half hour (up to about 50,000 trades of every market) lands on the public kalshi-pull-data branch, not only the counts. It is public Kalshi data; size about 7 to 15 MB in all (Main's estimate), under the 5 MB answer cap per page and the 200 MB run cap. The cursor parameter is listed only because the runner's own paging requires it; no request sets it.",
+  "requests": [
+   {
+    "id": "tape_20260920_1800",
+    "path": "/markets/trades",
+    "params": {
+     "limit": 1000,
+     "min_ts": 1789927200,
+     "max_ts": 1789929000
+    },
+    "max_pages": 50
+   }
+  ]
+ },
+ "status": "complete",
+ "rows": [
+  {
+   "index": 1,
+   "id": "tape_20260920_1800",
+   "page": 1,
+   "status": 200,
+   "bytes": 287,
+   "file": "0001.json.gz",
+   "sha256": "3f2c43baca95868832e0edf5d1f379cccb635c3ed4cf65cdc3696ff6f0c9ec52",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "tape_20260920_1800",
+   "page": 2,
+   "status": 200,
+   "bytes": 206,
+   "file": "0002.json.gz",
+   "sha256": "916f71cf5cf9f26012820baaf3f2813cf003fe862141248629396a378fe949e6",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
