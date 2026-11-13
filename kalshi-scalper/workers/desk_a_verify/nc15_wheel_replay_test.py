@@ -58,4 +58,11 @@ recs, rs = run_case(rows, [cov(TK, S, C, "no")], now=C + 3600); assert recs[0]["
 E = "KXEURUSD15M"; recs, rs = run_case([book("KXEURUSD15M-26NOV14A-X", E, C, D), book("KXEURUSD15M-26NOV14A-X", E, C, D + 5)], [cov("KXEURUSD15M-26NOV14A-X", E, C)]); assert not recs
 rows = [book(TK, S, C, D, recv_shift=3.0), book(TK, S, C, D + 5, recv_shift=3.0)]          # t_recv 3 s late and the header says the same: offset = -3, exchange time unchanged
 recs, rs = run_case(rows, [cov(TK, S, C)], now=C + 1000); assert recs and recs[0]["status"] == "fillable"; print("T7 withdrawn series ignored; receive clock shift handled by the offset OK")
+# 8 (audit items B and C): a final non-yes/no value is void at once; replay() itself refuses a HELDOUT_ folder
+recs, rs = run_case([book(TK, S, C, D), book(TK, S, C, D + 5)], [cov(TK, S, C, "void")], now=C + 60); assert recs[0]["result"] == "void" and abs(recs[0]["cash"] + recs[0]["fee"]) < 1e-9
+with tempfile.TemporaryDirectory() as t0:
+    d = os.path.join(t0, "HELDOUT_X"); os.makedirs(d)
+    try: N.replay(d); raise AssertionError("HELDOUT folder was read")
+    except SystemExit: pass
+print("T8 void at once; replay() refuses HELDOUT_ OK")
 print("ALL OK")

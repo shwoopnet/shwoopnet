@@ -62,6 +62,7 @@ def load_coverage(runs):
                     if old is None or (r.get("result") in ("yes", "no") and old.get("result") not in ("yes", "no")): cov[r["ticker"]] = r
     return cov
 def replay(root, series=ADMITTED, since=SHEET_COMMIT_TS, now=None):
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(str(root), "nc15 wheel replay")      # standing rule (h): on every entry point, not only the command line
     runs = sorted(os.path.dirname(f) for f in glob.glob(os.path.join(root, "*", "*", "book.csv.gz")))
     cov = load_coverage(runs); now = time.time() if now is None else now
     closes = {}; tick_runs = collections.defaultdict(set)
@@ -105,6 +106,7 @@ def replay(root, series=ADMITTED, since=SHEET_COMMIT_TS, now=None):
         p = max(walked(lad0), walked(lad1)); rec.update(status="fillable", price=p, fee=fee_up_order(p))
         res = (cov.get(tk) or {}).get("result")
         if res in ("yes", "no"): rec["win"] = 1 if res == side else 0; rec["cash"] = SIZE * (rec["win"] - p) - rec["fee"]; rec["result"] = "scored"
+        elif res not in (None, "") and res not in ("yes", "no"): rec["cash"] = -rec["fee"]; rec["win"] = 0; rec["result"] = "void"      # a final value that is neither yes nor no (for example void) is booked void AT ONCE (sheet section 0); an empty result is missing
         elif now - close >= VOID_AFTER_S: rec["cash"] = -rec["fee"]; rec["win"] = 0; rec["result"] = "void"
         else: rec["result"] = "pending"
         recs.append(rec)
