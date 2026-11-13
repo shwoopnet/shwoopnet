@@ -2,7 +2,7 @@
 
 Registered BEFORE any forward shadow row exists. Basis: cash, PF per contract (equal weight), wins and losses recomputed from avgFill and avgFee, exits corrected. N tried for deflation about 670 (121 cells in W-HUNT1) on top of about 540 earlier; Bonferroni z about 5.2 is unreachable at these n, so every candidate is a SHADOW candidate, never a pass. Shadow rows assume a fill at the touch (an upper bound): read wouldFill. Set registeredAt to the merge date.
 
-[live figure removed, ask Main] Counterparty: none named for any of the three. [live figure removed, ask Main]
+Common pass rule (from the lifecycle spec): 150 forward shadow signals, cash PF at least 1.3 per contract, second half at least 1.2, at least 14 days, no single day above 30 percent of net. Common kill: net under -1c per contract after 50 shadow signals, or under 40 signals in 30 days (retire). Counterparty: none named for any of the three. Return path after a pass: incubator ($20 cap, $5 per order), then ladder step 1, owner approves.
 
 ```js
 { id: "ETHNO6", series: ["KXETH15M"], entry: { sideRule: "no", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#ETHNO6" },
@@ -13,19 +13,19 @@ Registered BEFORE any forward shadow row exists. Basis: cash, PF per contract (e
 (readme anchors point at the sections below; GitHub lowercases them, the validator accepts \w and - in the anchor, so keep ids as written and confirm at merge that the anchor text matches your README convention.)
 
 ## ETHNO6
-[live figure removed, ask Main] [live figure removed, ask Main] No candle history to check it. [live figure removed, ask Main] Prior low to medium: best of 121 cells, selection bias likely.
+Rule: Ethereum 15 minute, buy NO when NO is priced 0.88 to 0.97 at the 6 minute look (330 to 400 s left), hold, 1 contract.  No candle history to check it. Prediction: cash PF at least 1.3 forward. Prior low to medium: best of 121 cells, selection bias likely.
 
 ## BTCHI6
-[live figure removed, ask Main] Prediction: at least 1.3. Prior low: the first half had no losses.
+Rule: Bitcoin 15 minute, buy the favourite priced 0.92 to 0.97 at the 6 minute look, hold, 1 contract. Prediction: at least 1.3. Prior low: the first half had no losses.
 
 ## XRPYES10
-[live figure removed, ask Main] Prior low.
+Rule: XRP 15 minute, buy YES priced 0.88 to 0.97 at the 10 minute look (570 to 640 s left), hold, 1 contract. Prior low.
 
 ## ETHL1 (re-shadow of L1 on Ethereum)
-[live figure removed, ask Main] The smooth gate cannot be expressed in the shadow entry; apply it offline from public candles when reading. [live figure removed, ask Main] Prior low to medium.
+Rule: Ethereum 15 minute, the L1 rule without the smooth-climb gate (favourite 0.88 to 0.97 at the 6 minute look). The smooth gate cannot be expressed in the shadow entry; apply it offline from public candles when reading.  Prior low to medium.
 
 ## Not expressible today
-[live figure removed, ask Main]
+AUD/USD resume (KXAUDUSD15M): its quotes are not held by the bot (the shadow lib allows only series the bot quotes), so it needs a quote read added first.
 
 ---
 # Batch 2 (Nov 9, 2026), found by re-running the 120-cell on-deck grids on the corrected fee model (retraction 18)
@@ -40,15 +40,18 @@ Registered before any forward row exists. Same basis, pass and kill rules as bat
 ```
 
 ## XRPFAV6
-[live figure removed, ask Main] Prior low.
+XRP favourite 0.88 to 0.92 at the 6m look, spread at most 2c. Candle PF per contract at +1c slip: 1.31 (136) / 1.34 (108), 88 signals a week; the only cell that clears the bar at +1c on the corrected fee model. Prior low.
 
 ## GOLDHI6S
-[live figure removed, ask Main] Prior low.
+Gold favourite 0.92 to 0.97 at the 6m look, spread at most 2c. +0c only: PF 1.47 (342) / 1.59 (373), 72 a week; fails the bar at +1c. Prior low.
 
 ## BTCHI10
-[live figure removed, ask Main] Prior low.
+Bitcoin favourite 0.92 to 0.97 at the 10m look. +0c only: PF 1.37 (94) / 1.82 (157), 26 a week. Prior low.
 
 ## XRPFAV10
-[live figure removed, ask Main] Prior low.
+XRP favourite 0.88 to 0.92 at the 10m look. +0c only: PF 1.64 (81) / 1.36 (95), 63 a week. Prior low.
 
-[live figure removed, ask Main]
+Not expressible: XRP F4 0.97-0.98 at 2m (a 120 s look, below the 180 to 840 s window the registry allows; entry floor is 60 s but the look is not live-lookable) ; silver (quotes not held; candle PF 1.19 at +1c with halves 1.28 / 1.11, 1.39 at +0c; already tracked by the C9 read).
+
+
+Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^; nothing re-decided. 15 markers: 11 verbatim (pass and kill rule, return path, the batch 2 candle-model lines and the final not-expressible note, which are candle history and not the live record), 4 rewritten, 4 sentences: the four section rules for batch 1 (ETHNO6, BTCHI6, XRPYES10, ETHL1) kept the rule and prediction and dropped their live-record histories (PF, n, halves, skip rates, signals a week); the two empty markers in ETHNO6 and ETHL1 held only live history and the AUD/USD note lost its live history PF.
