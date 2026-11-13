@@ -54,6 +54,8 @@ BACKOFF_MAX_S = 30.0
 DISCOVER_EVERY_S = 300
 RESULTS_EVERY_S = 600
 RESULTS_LOOKBACK_S = 7200
+RESULTS_WIDE_EVERY_S = 6 * 3600    # a wider, slower result read (Nov 12, 2026): runs at the start of every job and then every 6 hours, so a gap between jobs (dropped starts) cannot lose a result
+RESULTS_WIDE_LOOKBACK_S = 48 * 3600
 LIST_MAX_PAGES = 12
 CANDLE_DELAY_S = 120         # read a closed market's candles this long after its close
 CANDLE_CELL_CAP = 9000       # window minutes x tickers in one batched candle read: Kalshi answers HTTP 400 above 10,000 (the kalshi-pull runner learned this), so stay under
@@ -68,6 +70,7 @@ UA = {"User-Agent": "shwoopnet-research-recorder"}
 BOOK_COLS = ["poll_id", "t_send_ms", "t_recv_ms", "server_date_header", "tier", "ticker"] \
     + ["yes_bid_px_%d" % i for i in range(1, 6)] + ["yes_bid_sz_%d" % i for i in range(1, 6)] \
     + ["no_bid_px_%d" % i for i in range(1, 6)] + ["no_bid_sz_%d" % i for i in range(1, 6)]
+ASKED_COLS = ["poll_id", "tier", "chunk", "tickers"]   # polls_tickers.csv: WHICH tickers a poll asked for, written only when a (tier, chunk)'s asked set changes
 POLL_COLS = ["poll_id", "t_send_ms", "t_recv_ms", "server_date_header", "tier", "tickers_asked", "tickers_answered", "http_status"]
 COVER_COLS = ["series", "event_ticker", "ticker", "open_time", "close_time", "first_seen_ms", "seen_late", "polls", "ok_polls", "n429", "batch_fallback", "max_gap_ms", "book_rows", "tape_pages", "tape_trades", "dupes_dropped", "tape_sum_count", "volume_fp", "result", "note"]
 CLOCK_COLS = ["t_local_ms", "offset_ms"]
@@ -329,6 +332,16 @@ class ChangeFilter:
 
     def __init__(self):
         self.last = {}
+        self.asked = {}      # (tier, chunk) -> the asked set last written to polls_tickers.csv
+
+    def asked_row(self, poll_id, tier, chunk, tickers):
+        """The polls_tickers row for this poll, or None when its asked set equals the last one written for the same (tier, chunk). A poll with no row of its own was asked for the set of the
+        latest earlier row with the same tier and chunk (the poll ids of one job count up, so 'latest earlier' is well defined). Written BEFORE the read, so a failed poll is covered too."""
+        sig = "|".join(tickers)
+        if self.asked.get((tier, chunk)) == sig:
+            return None
+        self.asked[(tier, chunk)] = sig
+        return [poll_id, tier, chunk, sig]
 
     def keep(self, ticker, row):
         sig = tuple(row[6:])
@@ -491,7 +504,7 @@ class Out:
         os.makedirs(d, exist_ok=True)
         self.files, self.w = [], {}
         self.lock = threading.Lock()
-        for name, cols in (("book_fast", BOOK_COLS), ("book_slow", BOOK_COLS), ("polls", POLL_COLS), ("coverage", COVER_COLS), ("clock", CLOCK_COLS)):
+        for name, cols in (("book_fast", BOOK_COLS), ("book_slow", BOOK_COLS), ("polls", POLL_COLS), ("polls_tickers", ASKED_COLS), ("coverage", COVER_COLS), ("clock", CLOCK_COLS)):
             f = open(os.path.join(d, name + ".csv"), "a", newline="")
             w = csv.writer(f)
             if f.tell() == 0:
@@ -520,7 +533,8 @@ class State:
     def __init__(self):
         self.lock = threading.Lock()
         self.known = {}      # ticker -> dict(series, event, open, close, tally)
-        self.closed = {}     # ticker -> same dict, once it left the open list (kept for the candle read)
+        self.closed = {}     # ticker -> same dict, once it left the open list (kept for the candle read). A market is closed the moment it is no longer in the open list:
+                             # the close_time on the open listing is only the far expiry (days away for e-soccer and e-basketball, 37 to 46 hours for CS2 and Dota), never "when polling should stop"
         self.last_open = {}  # set of tickers per series seen in the last full discovery
 
     def watch(self, now):
@@ -563,8 +577,9 @@ def list_all(stream, series, status, extra=""):
 
 
 def discover(stream, state, now_ms, started_ms):
-    """One discovery round: the open markets of every series. A market new to us is registered (flagged seen_late if its window already began); one that left the open list, or is past its
-    close, moves to `closed` for its candle read."""
+    """One discovery round: the open markets of every series. A market new to us is registered (flagged seen_late if its window already began; a market with a blank open_time is recorded
+    anyway, as slow from its first sight); one that left the open list moves to `closed` for its tape and candle reads, whatever its listed close time. A series whose listing did not
+    complete changes nothing (a half read must not close markets)."""
     ready = []
     for s in SERIES:
         mk, ok, _p = list_all(stream, s, "open")
@@ -578,15 +593,28 @@ def discover(stream, state, now_ms, started_ms):
                     st = start_epoch(t)
                     late = o is not None and tier_for(s, t, o, now_ms / 1000.0) == "fast" and tier_for(s, t, o, o + 1) != "fast"   # first seen when it was already in its fast tier
                     state.known[t] = {"series": s, "event": ev, "open": o, "close": c, "tally": Tally(s, t, ev, iso(o) if o else "", iso(c) if c else "", now_ms, late)}
-            for t in [t for t, m in state.known.items() if m["series"] == s and t not in seen and (m["close"] is None or now_ms / 1000.0 >= m["close"] - 5)]:
-                state.closed[t] = state.known.pop(t)
+            for t in [t for t, m in state.known.items() if m["series"] == s and t not in seen]:
+                state.closed[t] = state.known.pop(t)     # no longer open means closed, whatever the listed close time says (the Nov 12, 2026 fault: it kept being polled to the far expiry)
+                state.closed[t]["left_ms"] = now_ms
                 ready.append(t)
     return ready
 
 
+def market_closed_at(stream, t, now):
+    """When market `t` really closed, as an epoch. Reads the market once: if it reports a status other than open and a readable close_time at or before `now`, that close_time; otherwise `now`
+    (the discovery round that saw it gone; the listing's own close_time can be the far expiry). Returns (epoch, note)."""
+    st, body, _d, _s, _r = stream.get("%s/markets/%s" % (BASE, t))
+    mk = body.get("market") if st == 200 and isinstance(body, dict) else None
+    if isinstance(mk, dict) and mk.get("status") not in (None, "open", "active"):
+        c = parse_t(mk.get("close_time"))
+        if c is not None and c <= now:
+            return c, "left open list; close_time from the market read"
+    return now, "left open list; close time taken as the discovery round (market read %s)" % (st if mk is None else "had no usable close_time")
+
+
 def run_house(stream, state, out, raw, done, stop_at):
     """Discovery every 5 minutes, results every 10, candles after each close, the clock check hourly."""
-    next_disc = next_res = next_clock = 0.0
+    next_disc = next_res = next_wide = next_clock = 0.0
     tape = {}      # ticker -> read after
     queue = {}     # ticker -> (series, start_ts, end_ts, read_after)
     while not done.is_set() and not stream.exhausted():
@@ -595,10 +623,14 @@ def run_house(stream, state, out, raw, done, stop_at):
             next_disc = now + DISCOVER_EVERY_S
             for t in discover(stream, state, int(now * 1000), int(now * 1000)):
                 m = state.closed[t]
-                c = m["close"] if m["close"] is not None else now
+                c, why = market_closed_at(stream, t, now)
+                listed = m["close"]
+                m["close"] = c
+                m["tally"].close_time = iso(c)
+                m["tally"].notes.append(why + ("" if listed is None else "; listed close_time was " + iso(listed)))
                 a = candle_start(m["series"], t, m["open"])
                 queue[t] = (m["series"], int(a if a is not None else c - 3600), int(c) + 60, c + CANDLE_DELAY_S)
-                tape[t] = c + TAPE_DELAY_S
+                tape[t] = max(now, c + TAPE_DELAY_S)
         if now >= next_res:
             next_res = now + RESULTS_EVERY_S
             for s in SERIES:
@@ -608,12 +640,21 @@ def run_house(stream, state, out, raw, done, stop_at):
                     _mk, _ok, pages = list_all(stream, s, status, "&min_close_ts=%d" % int(now - RESULTS_LOOKBACK_S))
                     for url, st, body, t_recv in pages:
                         raw.save(url, st, body, t_recv)
+        if now >= next_wide:
+            next_wide = now + RESULTS_WIDE_EVERY_S
+            for s in SERIES:
+                for status in ("settled", "closed"):
+                    if done.is_set() or stream.exhausted():
+                        break
+                    _mk, _ok, pages = list_all(stream, s, status, "&min_close_ts=%d" % int(now - RESULTS_WIDE_LOOKBACK_S))
+                    for url, st, body, t_recv in pages:
+                        raw.save(url, st, body, t_recv)
         for t in [t for t, at in tape.items() if at <= now]:
             if done.is_set() or stream.exhausted():
                 break
             m = state.closed[t]
             tl = m["tally"]
-            sweep_tape(stream, t, m["open"], m["close"] or now, tl, raw.save)
+            sweep_tape(stream, t, m["open"], m["close"], tl, raw.save)
             st, body, _d, _s, t_recv = stream.get("%s/markets/%s" % (BASE, t))     # volume and result, to set beside the summed tape size
             if st == 200 and isinstance(body, dict) and isinstance(body.get("market"), dict):
                 tl.volume, tl.result = body["market"].get("volume_fp", ""), body["market"].get("result", "")
@@ -645,12 +686,15 @@ def run_house(stream, state, out, raw, done, stop_at):
         done.wait(1.0)
 
 
-def poll_chunk(stream, state, out, flt, batching, tier, tickers, poll_ids, now):
+def poll_chunk(stream, state, out, flt, batching, tier, tickers, poll_ids, now, chunk=0):
     """One batched read of up to BATCH_MAX tickers (or one read per ticker in fallback). Every poll writes its poll row; a book row is written only if the top 5 changed."""
     name = "book_" + tier
     if not batching.fallback(now):
         poll_ids[0] += 1
         pid = "%d-%d" % (poll_ids[1], poll_ids[0])
+        ar = flt.asked_row(pid, tier, str(chunk), tickers)
+        if ar:
+            out.write("polls_tickers", [ar])
         st, body, date, t_send, t_recv = stream.get(batch_url(tickers))
         rows, answered = batch_rows(pid, t_send, t_recv, date, tier, tickers, body) if st == 200 else ({}, 0)
         kept = [rows[t] for t in tickers if t in rows and flt.keep(t, rows[t])]
@@ -668,6 +712,9 @@ def poll_chunk(stream, state, out, flt, batching, tier, tickers, poll_ids, now):
             return
         poll_ids[0] += 1
         pid = "%d-%d" % (poll_ids[1], poll_ids[0])
+        ar = flt.asked_row(pid, tier, "fb", [t])
+        if ar:
+            out.write("polls_tickers", [ar])
         st, body, date, t_send, t_recv = stream.get("%s/markets/%s/orderbook?depth=%d" % (BASE, t, DEPTH))
         row = book_row(pid, t_send, t_recv, date, tier, t, body) if st == 200 else None
         keep = bool(row) and flt.keep(t, row)
@@ -698,7 +745,7 @@ def run_book(stream, state, out, done, started):
                 for i in range(0, len(tickers), BATCH_MAX):
                     if done.is_set():
                         return
-                    poll_chunk(stream, state, out, flt, batching[tier], tier, tickers[i:i + BATCH_MAX], poll_ids, time.time())
+                    poll_chunk(stream, state, out, flt, batching[tier], tier, tickers[i:i + BATCH_MAX], poll_ids, time.time(), chunk=i // BATCH_MAX)
         done.wait(0.25)
 
 
