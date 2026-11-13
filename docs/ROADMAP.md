@@ -1,6 +1,10 @@
 # Roadmap
 
-Last updated: 2026-10-25. The live record line below is still the 2026-10-22 reading; it was not re-read this week. Written in plain words on purpose.
+Last updated: 2026-11-13 (the "Since Oct 25" block below is new; the rest is the 2026-10-25 text). The live record line below is still the 2026-10-22 reading; it was not re-read this week. Written in plain words on purpose.
+
+## Since Oct 25 (added 2026-11-13)
+
+No figures; see `CLAUDE.md` "State as of Nov 13, 2026". Done: the second slot is on with OICORE, EVENT830 and CFRTIK (deploy of CFRTIK pending); gold has a kill latch and is latched off while GOLDOFF measures it; the Strategies page, the registry and the wheel exist; Dogecoin is removed. Next: CFRTIK forward read (2026-11-20), GOLDOFF first read (2026-11-19), the wheel's first seats, and the research queue (kept by the Head of R&D). Later: any return of gold needs its written bar and a reviewed re-arm.
 
 ## The goal
 
@@ -9,7 +13,7 @@ Make money on Kalshi without having to watch it. One bot trades for you. The pla
 ## Where we are today
 
 - **One bot is live (L1), on one market (as of 2026-11-05).** It buys the side that is almost certain to win (priced 88c to 97c) and waits for the result. It trades gold only, around the clock, with its size held at 15 contracts (since 2026-11-03). Dogecoin was paused on 2026-11-03. XRP, Bitcoin, Ethereum, Dogecoin and the probe markets (AUD/USD, USD/CAD, natural gas) are paused in code. Two capped probes run in the second slot: OICORE (Bitcoin only, 10 to 30 contracts by its size ladder, limit 1c above the touch, held to settlement, forward read 2026-11-13) and EVENT830 (listed US 8:30 AM Eastern release days only, 1 contract, held to settlement, forward read 2026-12-07). The notes below are dated history; `CLAUDE.md` has the current rules.
-- **The live record so far (bot only, 2026-10-22):** [live results removed]. A win earns a few cents a contract and a loss costs many times that, so the bot needs about 93.5 wins in 100 to break even and sat just under it. The diagnosis: most of the loss came from a few big Bitcoin losses on Oct 9 to 10 (capped now) and windows where two crypto markets lost together. The 25c exit is not the leak. [live figures removed, ask Main]
+- **The live record so far (bot only, 2026-10-22):** A win earns a few cents a contract and a loss costs many times that, so the bot needs about 93.5 wins in 100 to break even and sat just under it. The diagnosis: most of the loss came from a few big Bitcoin losses on Oct 9 to 10 (capped now) and windows where two crypto markets lost together. The 25c exit is not the leak.
 - **New on 2026-10-22:** only one of Bitcoin, Ethereum, XRP and Dogecoin may place an order per 15 minute window (a test: it should roughly halve crypto profit and remove the worst clusters); a refused Kalshi read is retried once; every order also logs `rise3` and `rng5` for the research reads. None of the logging changes an order.
 - **Safety:** one combined limit per 15 minute window (5.5% of the base), a stop at **12%** of the base, a sell at 25c (a study this week found the line barely matters on Bitcoin, XRP and natural gas, so it stays), a one-click pause and flatten, phone alerts, and a rule that drops a probe market whose last 200 trades net negative.
 - **Since 2026-10-23:** series order gold, XRP, Bitcoin, Dogecoin, Ethereum; fixed sizes at that date (Dogecoin 3, natural gas 2, **XRP back to 1 on 2026-10-25**; Dogecoin moved onto gold's ladder on 2026-10-30); Bitcoin and Ethereum only on a smooth climb (kill rules registered, read 2026-11-12 and 2026-11-17); extra logging fields (flips, two-stage look) that no order reads.

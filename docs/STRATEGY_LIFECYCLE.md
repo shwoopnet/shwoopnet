@@ -4,8 +4,8 @@ Owner priority, Nov 9, 2026: full time algo trading; a goal of **at least one ne
 
 ## 1. The honest frame
 
-- **Supply, not gates, is the bottleneck.** After 1.5 million rules tried there are 0 rules above PF 1.3 with n over 200. Near misses only: NFL pair PF 1.73 (225 trades, 12 dates), tennis Monday 1.57 (116), Bitcoin ladder rule 1.43, NBA total NO 1.26 (261). A weekly launch needs 4 to 8 candidates in shadow at any time, so the pipeline is fed every week; expect 0 to 1 real edge a month and the rest to be information purchases.
-- **The record we are rotating:** all L1 on cash PF just above 1; gold the best and fading by period; OICORE positive; Ethereum modestly positive; Dogecoin about flat; Bitcoin and XRP below 1 [live figures removed, ask Main]. Of six strategies a screen would have passed, 2 were clear live winners, 2 flat, 2 losers: **false positive share 33% to 50%**.
+- **Supply, not gates, is the bottleneck.** After 1.5 million rules tried [superseded: the ledger now counts about 2.1 million tried, z 5.46 one-sided (`DEFLATION_LEDGER.md`)] there are 0 rules above PF 1.3 with n over 200. Near misses only: NFL pair PF 1.73 (225 trades, 12 dates), tennis Monday 1.57 (116), Bitcoin ladder rule 1.43, NBA total NO 1.26 (261). A weekly launch needs 4 to 8 candidates in shadow at any time, so the pipeline is fed every week; expect 0 to 1 real edge a month and the rest to be information purchases.
+- **The record we are rotating:** all L1 on cash PF just above 1; gold the best and fading by period; OICORE positive; Ethereum modestly positive; Dogecoin about flat; Bitcoin and XRP below 1. Of six strategies a screen would have passed, 2 were clear live winners, 2 flat, 2 losers: **false positive share 33% to 50%**.
 - **The cost of speed is stated, not hidden.** A shadow gate of 150 fills passes 12% (tail) to 23% (favourite) of zero edge ideas and 2% to 8% of losers, and passes only about 70% of true PF 1.5 ideas: it screens, it cannot prove. A failed incubator costs about $1.0 to $4.4 after 150 fills and $2.7 to $11.9 after 400 (a tail loss is $0.11, a favourite loss $0.94, so the $20 cap rarely binds). At one launch a week (about 13 a quarter, 8 to 10 of them failing) that is **about $30 to $70 a quarter expected, $260 worst case** (13 x $20), paid for a live, forward PF on 150 real fills per idea, the only evidence that survives decay.
 
 ## 2. Stages
@@ -38,7 +38,7 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 | Strategy or stage | Metric | Threshold | Window | Action |
 |---|---|---|---|---|
 | Gold L1 (long run PF above 1.3) | next 100 settled cash PF | under 1.0 | next 100 trades from Nov 9 | size step down PROPOSAL to the owner (the tripwire) |
-| Gold L1 | drawdown from gold's own cash peak (since the re-arm, 2026-11-10) | $58.75 fixed | any time, checked every minute | **latch gold off, no auto restart** [coded Nov 10, DRAFT until merged and deployed: `docs/GOLD_KILL_LATCH.md`] |
+| Gold L1 | drawdown from gold's own cash peak (since the re-arm, 2026-11-10) | $58.75 fixed | any time, checked every minute | **latch gold off, no auto restart** [coded Nov 10, live: `docs/GOLD_KILL_LATCH.md`] |
 | Gold L1 | cash net since the re-arm | under -$20 after 40 trades | | **latch gold off** (same code) |
 | Gold L1 | rolling 100 cash PF; 3 early sells in 40 trades | under 1.0; 3 or more | | ALERT only (event in the notification center), same code |
 | Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only, coded Nov 10 (it fired once, Nov 6, and the next 50 trades recovered strongly: a false kill as a latch) |
@@ -229,13 +229,6 @@ The owner's popup answers on how to classify strategies. Five rules.
 | OICORE book imbalance | OICORE (candidate version) | `bidSize` and `askSize` are already logged on every order |
 | Ethereum open interest confirmation | OICORE (candidate version) | A MARKET EXTENSION: see the 7g follow-up question (extend the parent or replace it); re-read Dec 3 |
 
-**Strategies page follow-up (not built).** A follow-up page PR would:
-- show a stage chip on every card, with the five stages;
-- show a candidate version under its parent's card, labelled `NAME v2` (7g), not as a second strategy;
-- add a family tag: "entry mechanism + exit style";
-- add a risk tag: win-rate class, loss shape, $ per order, $ per day, correlation group;
-- give the flow board Idea and Probe lanes, so the lanes become Idea, Shadow, Probe, Live, Retired.
-
 ## 7g. Versions, refinements and sharing a market (Nov 11, 2026, the owner)
 
 The owner's popup answers, Nov 11, 2026. They settle what is a new strategy and what is only a better version of one we already have.
@@ -301,7 +294,7 @@ V2 and Refinement each hand the chief of staff, **every Sunday at 6:41 PM Centra
 
 - **More rotation means more false positives and more fees.** At a bar of PF 1.5 and a million rules tried something clears it by chance; the 33% to 50% false positive share above is on strategies that were already chosen. The control is the deflation count, the promotion budget and the dollar caps.
 - **A fast kill can kill a good strategy on a bad draw** (gold's rolling 60 rule fired once and the next 50 trades recovered strongly); that is why the rolling rule is only an alert and the kills that act are dollar based.
-- **Fast markets judge fast and also lie fast.** Gold's profit factor fell across three periods as its loss rate rose past break-even (about 7.5%), mostly luck. [live figures removed, ask Main]
+- **Fast markets judge fast and also lie fast.** Gold's profit factor fell across three periods as its loss rate rose past break-even (about 7.5%), mostly luck.
 - **The limit is the edge, not the machinery.** A faster rotation system finds out sooner that a candidate fails; it does not create a strategy that works.
 
-**Rotation lane (Nov 12, 2026, DRAFT, not in force):** small-size live seats that enter and leave by a replayed shadow record are described in `docs/ROTATION_LANE.md`. The lane is APPROVED as v1.0 (Nov 12, 2026); section 7g is unchanged outside the wheel: only there, each market a rule runs on is its own shadow place, record, seat and kill (owner, Nov 12, 2026).
+**Rotation lane (Nov 12, 2026, approved, in force as v1.3):** small-size live seats that enter and leave by a replayed shadow record are described in `docs/ROTATION_LANE.md`. The lane is APPROVED (v1.0 on Nov 12, 2026; the current text is v1.3 of `docs/ROTATION_LANE.md`); section 7g is unchanged outside the wheel: only there, each market a rule runs on is its own shadow place, record, seat and kill (owner, Nov 12, 2026).

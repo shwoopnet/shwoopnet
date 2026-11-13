@@ -95,3 +95,13 @@ Dispatch order (Head of R&D): (1) `CFRTI_K_R6SLICE`, whose answer gates two othe
 
 `build_cfrti_k_candles.py` is an OFFLINE script (it sends nothing): it builds the CFRTI-K candle job from the `CFRTI_K_LISTS` answer (modes `all`, `live`, `hist`). It packs batches to at most 9,000 minutes x tickers (the endpoint answers HTTP 400 above 10,000), about 216 requests in live mode and about 624 in all mode. Its output is a new job file and needs its own reviewed pull request before it can run. Not included: `ECONLAG_CANDLES`, `NHLOT_CANDLES` (built later) and the candle stage itself.
 | `MAPBREAK_CANDLES` | Testing Desk | 282 (282) | under 150 MB (estimate) | `MAPBREAK_REGISTRATION.md`; one minute candles of the sampled match and placebo contracts, development window only |
+
+## Live-data probes: temperature index and relayed sports scores (Nov 13, 2026, the owner: "Both, ignore the terms")
+
+**OWNER-ACCEPTED TERMS RISK, decided by the owner Nov 13, 2026 and relayed by the EA.** Research may read Kalshi's temperature index and the sports scores Kalshi relays through Kalshi's own API (both Kalshi hosts, already covered by the Nov 12, 2026 waiver above). This is NOT a finding that the reads are allowed; it is the same treatment as the Kalshi, Yahoo, Coinbase and Bitstamp reads. They are NOT third party sites: no ESPN or other score site host is allowed (`test/noSportsScoreSitesGates.test.js` still bans them).
+
+Rules for these two sources, on top of every limit in this file:
+- Research only. Any live use needs the owner's own popup.
+- ZERO-TRY PROBES FIRST: a probe reports field names, types and counts only. No result is opened beyond that and no rule is scored from a probe.
+- A probe job is added only by a reviewed jobs pull request, carries a held-out line like every job, and is dispatched only on the Head of R&D's or the owner's go. Nothing was added or dispatched by this note.
+

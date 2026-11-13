@@ -1,4 +1,4 @@
-# The live strategies, defined in full (Nov 5, 2026)
+# The live strategies, defined in full (Nov 5, 2026; refreshed Nov 13, 2026)
 
 Each strategy below has: what it is, the exact rules as the code runs them today, its record, and what is not known. Rules are read from `functions/kalshiLiveLib.js` and `functions/kalshiSlotLib.js`; stats are dated and sourced. Nothing here changes a rule: proposed changes are in `docs/STRATEGY_RISK_SEPARATION.md`. All times US Central.
 
@@ -9,7 +9,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 
 **What it is.** About 6 minutes before a 15 minute Kalshi market closes, buy the side that is already priced 88c to 97c (the heavy favourite) and hold it to settlement, selling early only if the side's bid falls to 25c. It collects the last few cents of a nearly settled market. Wins are small, a loss is large, so it only works at a high win rate.
 
-**Markets.** Gold (`KXGOLD15M`) and Dogecoin (`KXDOGE15M`). Gold scales on the size ladder. Dogecoin is paused in code since Nov 3 (it was on the ladder Oct 30 to Nov 3; a resume would start at a fixed 5). Gold is closed Friday 17:00 to Sunday 18:00. Dogecoin runs around the clock. No quiet hours (the 8 PM to midnight block was lifted Oct 30). Paused in code and never candidates: XRP, Bitcoin, Ethereum and the three probe markets. XRP, Bitcoin and Ethereum stay in the list so quotes, names and the exit watch still work.
+**Markets.** Gold (`KXGOLD15M`) only. Gold scales on the size ladder, held at 15. Dogecoin (`KXDOGE15M`) was removed from the bot on Nov 9, 2026 (it had been paused since Nov 3). Gold is also latched off by its own kill latch (`docs/GOLD_KILL_LATCH.md`) and shows "Off, cooling down" until a reviewed re-arm. Gold is closed Friday 17:00 to Sunday 18:00. Dogecoin runs around the clock. No quiet hours (the 8 PM to midnight block was lifted Oct 30). Paused in code and never candidates: XRP, Bitcoin, Ethereum and the three probe markets. XRP, Bitcoin and Ethereum stay in the list so quotes, names and the exit watch still work.
 
 **Entry rule.**
 1. Look when 5.5 to 6.7 minutes remain (330,000 to 400,000 ms), once per market.
@@ -32,11 +32,11 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 - It is blocked from trading the opposite side of a contract another strategy holds (the direction lock).
 
 **Record (sources in brackets).**
-- Last week, all L1: positive but small [live figures removed, ask Main].
-- Last 7 days to Oct 31, by market: Dogecoin and gold were both positive, Dogecoin the larger [live figures removed, ask Main] (nightly report; the 7 day figures also include paused markets until they age out).
-- Live record of gold and Dogecoin fills: a loss rate under 5%; most of the losses were early sells at the 25c line, and they outweighed the wins' dollar share heavily [live figures removed, ask Main] (refinement chat, Nov 1).
+- Last week, all L1: positive but small.
+- Last 7 days to Oct 31, by market: Dogecoin and gold were both positive, Dogecoin the larger (nightly report; the 7 day figures also include paused markets until they age out).
+- Live record of gold and Dogecoin fills: a loss rate under 5%; most of the losses were early sells at the 25c line, and they outweighed the wins' dollar share heavily (refinement chat, Nov 1).
 - By price: fills at 90c to 92c had more losses than the rest; the gap is p 0.012 raw, about 0.12 after counting the cells searched (refinement chat). It is a lead being tested forward, not a finding. [live counts removed, ask Main]
-- Dogecoin at ladder size (since Oct 30): few fills (refinement chat) [live figures removed, ask Main]. Dogecoin's no-fill share is about 35%.
+- Dogecoin at ladder size (since Oct 30): few fills (refinement chat). Dogecoin's no-fill share is about 35%.
 - History (backtest, in-sample, upper bounds): gold profit factor 1.44 / 1.03 / 1.17 by third; Dogecoin 1.29 / 1.26 / 1.15 (research session). Holding to settlement beat every exit shape in history (EXIT1: hold 0.961 / 0.928 / 0.898, 25c line 0.921 / 0.897 / 0.869 per contract).
 
 **Not known.** The research bar (profit factor 1.5 in each of three windows after fees and after deflating for how many things were tried) has never been met by L1. The live edge comes from a 5% loss rate against a break-even rate of roughly 8% at these prices, which is thin: a few more early sells move it. Review rule (written Oct 30): Dogecoin goes back to a fixed size of 5 if its last 100 settled orders at ladder size lose more than 8% or net under +0.5c a contract. Since Nov 2 the Bot page warns when this line is crossed; it changes nothing by itself.
@@ -64,8 +64,8 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 - Kill rules (latch off, only a reviewed edit re-arms): 24 losses in a row (was 18 until Nov 7, 2026), or net below -$6 after 40 fills.
 
 **Record.**
-- Live (Oct 30 to Nov 1): [live figures removed, ask Main]
-- Research validation: held profit factor 1.85; selling at 60 seconds kept about 1.52. Day z 4.42 against a bar of about 5.2, so it did not reach the research bar (V2).
+- Live (Oct 30 to Nov 1):
+- Research validation: held profit factor 1.85; selling at 60 seconds kept about 1.52. Day z 4.42 against a bar of about 5.2 [superseded: ledger about 2.1 million tried, z 5.46 one-sided], so it did not reach the research bar (V2).
 - V2's forward reference ledger: a handful of trades, none won [counts removed] (a run like that at a 28% hit rate happens about 14% of the time). Needs 30 or more trades over 10 or more days before it means anything.
 
 **Not known.** No counterparty is named (the first guess did not hold). Ten live fills cannot separate a real edge from luck. Forward read: Nov 13. The live record is better than V2's reference ledger, which is a reason for caution as much as for hope.
@@ -97,11 +97,17 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 
 **Not known.** The slice was picked after its parent test failed, so its history is not evidence of an edge. No counterparty is named.
 
+## CFRTIK "Perp reference model" (Bitcoin, second slot; approved Nov 12, 2026, deploy pending as of Nov 13)
+
+**What it is.** One look at 120 seconds before the Bitcoin 15 minute close. If the cheaper side's ask is 0.05 to 0.30, the YES spread is 3c or less and a model on the Bitcoin perpetual's one minute candles (`KXBTCPERP`) says the side is worth at least 5c more than its ask, it buys 3 contracts with an immediate-or-cancel order at the ask seen (no slip) and holds to settlement. Code: `functions/kalshiCfrtiKLib.js` (a pure decision) and `functions/kalshiSlotLib.js`. A Trial seat: small, below the research bar, and never re-armed automatically after a kill (net below -$18 after 5 settled fills, or 30 losses in a row). Forward read 2026-11-20.
+
+**Known caveats (research facts, no live figures).** With the rows that ran at least 1 cent by the next minute dropped, the registered edge reads far below 1.0: a diagnostic, partly driven by selection, but it says the edge sits in rows a late order cannot get. An immediate-or-cancel buy at the ask seen filled about two thirds of the time at 2 to 10 seconds, while the engine waits up to 10 seconds for the perp candle. Its fills are never research evidence.
+
 ## Retired or paused (for completeness)
 | Strategy | Status | Why |
 |---|---|---|
-| XRP (L1) | paused in code Oct 28 | live profit factor below 1 [live figures removed]; forward reads Nov 12 |
-| Bitcoin (L1) | paused Oct 29 | live profit factor below 1 [live figures removed] |
+| XRP (L1) | paused in code Oct 28 | live profit factor below 1; forward reads Nov 12 |
+| Bitcoin (L1) | paused Oct 29 | live profit factor below 1 |
 | Ethereum (L1) | paused Oct 30 | the smooth-climb rule left it almost no entries |
 | AUD/USD, USD/CAD, natural gas probes | paused Oct 28, off the list Oct 30 | no edge shown; 97c entries won 3c |
 
