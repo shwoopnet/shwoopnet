@@ -122,7 +122,7 @@ gates.ST12 = () => {
 gates.ST13 = () => {
   const h = B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94, pf: 1.2 } } })]), esc, money);
   assert.ok(/>Record complete</.test(panel(h, 'live')) && !/90 of 90/.test(h), 'the row badge is short');
-  assert.ok(/Record complete · PF 1\.20, needs 1\.3 for Proven/.test(B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, rows: [], daily: [], w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94, pf: 1.2 } } })]), esc, money)), 'under the bar, the sheet says what it still needs (Nov 13, 2026)');
+  assert.ok(/Record complete · win\/loss 1\.20, needs 1\.3 to pass/.test(B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, rows: [], daily: [], w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94, pf: 1.2 } } })]), esc, money)), 'under the bar, the sheet says what it still needs (Nov 13, 2026)');
   const ok = B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.4, net: 2 }, all: { n: 94, pf: 1.42 } } })]), esc, money);
   assert.ok(/>Record complete</.test(panel(ok, 'live')), 'at or over the bar: the same short badge');
 };
@@ -137,9 +137,9 @@ gates.ST14 = () => {
   const withRows = card('OICORE', 'probation', { orders: 40, rows, daily, spark: [1, 1.1, 1.2], detail: { n: 40, winRate: 0.25, avgWin: 3, avgLoss: -1, cum: [3, 2, 1], recent: [] }, w: { d7: { n: 1, net: 1 }, d30: { n: 40, pf: 1.0, net: 0 }, all: { n: 40 } } });
   const h = B.kalshiBoardHtml(model([withRows]), esc, money);
   const r = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(h);
-  assert.ok(r && /class="sc"/.test(r[1]) && /Cumulative cash/.test(r[1]) && /Last 14 days/.test(r[1]) && /Rolling 30 trade PF/.test(r[1]) && !/data-seg=/.test(r[1]), 'B style (Nov 13, 2026): every chart stacked in labelled panels, no tabs');
-  assert.ok(/>Closest kill</.test(r[1]) && />Trial</.test(r[1]) && /class="sc-kb"/.test(r[1]) && !/sc-g\b/.test(r[1]), 'thin bars for the closest kill and the trial, no gauges');
-  assert.ok(/<dt>Kill<\/dt><dd>kill rule<\/dd><dt>Return<\/dt><dd>return rule<\/dd>/.test(r[1]) && /class="sc-rule">rule of OICORE</.test(r[1]), 'the rule, the kill and the return are in the sheet');
+  assert.ok(r && /class="sc"/.test(r[1]) && /Money made over time/.test(r[1]) && /Last 14 days/.test(r[1]) && /Win\/loss ratio, last 30 trades/.test(r[1]) && !/data-seg=/.test(r[1]), 'B style (Nov 13, 2026): every chart stacked in labelled panels, no tabs');
+  assert.ok(/>Nearest stop rule</.test(r[1]) && />Trial</.test(r[1]) && /class="sc-kb"/.test(r[1]) && !/sc-g\b/.test(r[1]), 'thin bars for the closest kill and the trial, no gauges');
+  assert.ok(/<dt>Stops when<\/dt><dd>kill rule<\/dd><dt>Comes back when<\/dt><dd>return rule<\/dd>/.test(r[1]) && /class="sc-rule">rule of OICORE</.test(r[1]), 'the rule, the kill and the return are in the sheet');
   const masked = B.kalshiBoardHtml(model([withRows]), esc, (x) => (x < 0 ? '-' : '') + '****');
   const mr = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(masked)[1];
   assert.ok(/\+\*\*\*\*/.test(mr) && !/\$\d/.test(mr), 'Privacy view masks the sheet\'s dollars');
