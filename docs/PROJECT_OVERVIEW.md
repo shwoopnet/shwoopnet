@@ -1,6 +1,6 @@
 # Shwoop project overview
 
-Last refreshed: 2026-10-25 (US Central). Refresh weekly; see `docs/README.md`. The bot rules, page and incident sections are updated for 2026-10-25. **No live record figures are kept in this repo (owner rule, Nov 12, 2026);** the 2026-10-08 research notes keep theirs.
+Last refreshed: 2026-11-13 (US Central; sections other than "Since Oct 25" are still the 2026-10-25 text). Refresh weekly; see `docs/README.md`. The bot rules, page and incident sections are updated for 2026-10-25. **No live record figures are kept in this repo (owner rule, Nov 12, 2026);** the 2026-10-08 research notes keep theirs.
 
 ## What it is
 
@@ -8,11 +8,21 @@ Shwoop (Pocket Advisor) is a personal trading app with three parts that live in 
 
 | Part | Where | What it does |
 |---|---|---|
-| Frontend | this repo, `index.html` | One file, no build step. Firebase auth and Firestore. Hosted on GitHub Pages. Three pages: the Market Brief, the admin-only Bot page (called Kalshi in the code) and Settings. The Data page lived from 2026-10-21 to 2026-10-24 and was removed. The equities pages, the broker and market-data integrations and sign-up were removed on 2026-10-12. |
+| Frontend | this repo, `index.html` | One file, no build step. Firebase auth and Firestore. Hosted on GitHub Pages. Four pages: the Market Brief, the admin-only Bot page (called Kalshi in the code), the admin-only Strategies page (added 2026-11-10) and Settings. The Data page lived from 2026-10-21 to 2026-10-24 and was removed. The equities pages, the broker and market-data integrations and sign-up were removed on 2026-10-12. |
 | Cloud Functions | this repo, `functions/` | The Kalshi bot, the order-book recorder, the account reads and the emergency controls. Deployed with `firebase deploy --only functions`. |
 | Equities trading server (retired) | separate repo `shwoop-server`, on Render | **Suspended 2026-10-26 and retired.** It used to run the equities and options cycles against Alpaca and write a market snapshot. Its reads of Firestore from outside Google were the biggest avoidable cost line (about $15 a month). Nothing on the site depends on it. |
 
 This document is mostly about the Kalshi subsystem, because it is where most of the recent work went.
+
+## Since Oct 25 (added 2026-11-13)
+
+No figures; the code and `CLAUDE.md` ("State as of Nov 13, 2026") are the truth.
+
+- **Second slot:** a reviewed, fail-closed path for more than one live strategy, ON with three: OICORE (Bitcoin open interest, a size ladder), EVENT830 (release day windows) and CFRTIK (Bitcoin perp reference model, approved, deploy pending). Each has its own stop; the account backstop stays at 12% with the 5.5% window cap.
+- **L1 is gold only**, size held at 15, and gold has a **kill latch** with a written return rule; it is currently latched off and a log-only shadow rule, GOLDOFF, keeps measuring it.
+- **Strategies page:** one Live box with Trial and Proven tags, a Shadow box and Off or Retired; a registry file (`strategies-registry.json`) lists every strategy and stage.
+- **The wheel:** the rotation lane (`docs/ROTATION_LANE.md`, v1.3), small seats that enter and leave by a replayed shadow record, with a wheel book recorder.
+- **Recorders and pulls:** the 15 minute book, non-crypto book, combo, politics, perps and in-game recorders, and a manual `kalshi-pull` for public data, all research only. A nightly order report and an hourly balance snapshot read the bot.
 
 ## The Kalshi bot (strategy L1)
 
@@ -41,7 +51,7 @@ This document is mostly about the Kalshi subsystem, because it is where most of 
 
 ## The Kalshi page (admin only)
 
-**Bot page:** the account result line with a date filter (Today to All) and real percent and date axes with a touch scrub, the Account card (balance, stake, pool, **Today** result, Running menu with Start, Pause or Resume, and Flatten all, and Stop Loss and Risk at the bottom), Bot status, open positions with a small chance chart each, and recent trades. A silent-market warning ("Needs a look") appears when a market stops sending orders for far longer than its own usual gap. Privacy (masks dollar amounts as ****, kept in this browser only) and Tools menus in the header. **Notification center (2026-10-25):** a bell in the top navigation, left of Brief, admin only, with a red unread bubble, Important and Everything tabs and Mark all as read; the worst cases (bot stopped itself, an order needing a check, no check for minutes) also raise a red banner across the Bot page. **The Data page, the Print statement and Copy all stats were removed (2026-10-24).** The Brief's charts have percent and Central hour axes and a hover scrub; gold and crude now fall back to the last session when their futures are closed. Titan One is used only for the SHWOOP wordmark; headings and every number are plain Public Sans. Times are US Central. Order exports (Copy order diagnostics, Copy all orders) carry the entry tag. Mock-ups in `docs/mockups/` are older fixture renders.
+**Bot page:** the account result line with a date filter (Today to All) and real percent and date axes with a touch scrub, the Account card (balance, stake, pool, **Today** result, Running menu with Start, Pause or Resume, and Flatten all, and Stop Loss and Risk at the bottom), Bot status, open positions with a small chance chart each, and recent trades. A silent-market warning ("Needs a look") appears when a market stops sending orders for far longer than its own usual gap. Privacy (masks dollar amounts as ****, kept in this browser only) and Tools menus in the header. **Notification center (2026-10-25):** a bell in the top navigation, left of Brief, admin only, with a red unread bubble, Important and Everything tabs and Mark all as read; the worst cases (bot stopped itself, an order needing a check, no check for minutes) also raise a red banner across the Bot page. **The Data page, the Print statement and Copy all stats were removed (2026-10-24).** The Brief's charts have percent and Central hour axes and a hover scrub; gold and crude now fall back to the last session when their futures are closed. Titan One is used only for the SHWOOP wordmark; headings and every number are plain Public Sans. Times are US Central. Order exports (Copy order diagnostics, Copy all orders) carry the entry tag. The old mock-up screenshots were deleted on 2026-11-13.
 
 ## Research method
 
@@ -50,14 +60,14 @@ Everything in `kalshi-scalper/` follows one discipline: write the hypothesis, th
 State on 2026-10-21 (information; the 2026-10-08 notes below are kept as they were):
 - About 4,640 variants tried, none passing the bar (the research README holds the exact running count). Added this week and falsified: decision trees and kNN pattern skip rules, volatility-managed ETFs (QQQ, QLD, TLT, GLD, Bitcoin), risk parity, factor ETFs, hedges and scale-outs on the L1 favourite, TP1, GAS1, CMD1 and APP1. Admission filter DL1 (drop a series after a bad stretch) passed pooled but would have hurt the five live series, so it is applied to probes only. In each commodity ladder the market's own prices scored about three times better than our models.
 - Live forward tests running (read dates in the research README): FWD5 (do the probes earn money), FWD6 (best-hour claims), FWD7 and FWD8 (the 10 minute entry on Bitcoin, XRP and natural gas), FWD2, FWD3 and GOLD1-F. All state small samples up front and may read NOT_ENOUGH_DATA.
-- **Live record, bot only, 2026-10-22:** [live figures removed, ask Main]. In outline: the record was just under break-even, gold was the only clearly positive market and the other markets were small and slightly negative. Most of the loss was two large Bitcoin losses (capped since) and windows where two crypto markets lost together. The 25c exit was not the leak. The research session found no price gradient in 69 days of history and advised against a price floor, so any live price pattern stays a lead.
-- **Live record, bot only, 2026-10-21:** [live figures removed, ask Main]. Gold was the only market clearly earning; the small markets were small samples. Live figures are never mixed with research figures.
+- **Live record, bot only, 2026-10-22:**. In outline: the record was just under break-even, gold was the only clearly positive market and the other markets were small and slightly negative. Most of the loss was two large Bitcoin losses (capped since) and windows where two crypto markets lost together. The 25c exit was not the leak. The research session found no price gradient in 69 days of history and advised against a price floor, so any live price pattern stays a lead.
+- **Live record, bot only, 2026-10-21:**. Gold was the only market clearly earning; the small markets were small samples. Live figures are never mixed with research figures.
 
 State on 2026-10-08:
 - 2,582 variants tried, none passing the bar. That includes stops, exits, price bands, resting orders, other minutes and the opposite end (the cheap side scalped early, C1 to C3, which lost 2.3c to 3.3c per contract).
 - L1 itself, on 69 days and 3,432 entries: about +0.9c per contract before fee rounding, day clustered z 1.45 against 2.1. It failed its own bar, so running it is the owner's decision and not evidence it works. Forward checks F0 to F9 accumulate until about 2026-10-23.
 - Fees were measured on the owner's own fills (21 of them): the reported fee is the order's fee rounded up to $0.0001, not to the whole cent. Earlier cost figures were a little pessimistic.
-- Live record so far: a small sample, positive; one loss costs about the same as 14 wins. [live figures removed, ask Main]
+- Live record so far: a small sample, positive; one loss costs about the same as 14 wins.
 
 ## Quality and process
 

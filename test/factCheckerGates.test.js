@@ -1,5 +1,5 @@
 'use strict';
-// The fact checker (the owner, Nov 6, 2026: "do we have an agent fact checking both research and refinement chats"): it re-derives claims and answers CONFIRMED, WRONG or CANNOT_CHECK. It must stay read only, must check "live" against the code, and must not handle secrets.
+// The fact checker (the owner, Nov 6, 2026: "do we have an agent fact checking both research and refinement chats"): it re-derives claims and answers MATCH, MISMATCH or CANNOT_CHECK per figure (vocabulary unified Nov 13, 2026). It must stay read only, must check "live" against the code, and must not handle secrets.
 // Gate names FC1 to FC4 are local to this file.
 const assert = require('assert');
 const fs = require('fs');
@@ -12,7 +12,8 @@ gates.FC1 = () => {
   assert.deepStrictEqual(tools.sort(), ['Bash', 'Glob', 'Grep', 'Read'], 'read only: no Edit, Write or messaging tool');
 };
 gates.FC2 = () => {
-  assert.ok(/CONFIRMED/.test(agent) && /WRONG/.test(agent) && /CANNOT_CHECK/.test(agent), 'the three verdict words');
+  assert.ok(/MATCH/.test(agent) && /MISMATCH/.test(agent) && /CANNOT_CHECK/.test(agent), 'the three verdict words');
+  assert.ok(!/CONFIRMED|\bWRONG\b|\bVERIFIED\b|COULD_NOT_VERIFY/.test(agent), 'one vocabulary: the old words are gone');
   assert.ok(!/\bpromote\b[^.]*\b(yes|ok|approve)/i.test(agent), 'no promote verb');
 };
 gates.FC3 = () => {
@@ -24,6 +25,14 @@ gates.FC4 = () => {
   assert.ok(/Never print a secret/.test(agent) && /KALSHI_REPORT_TOKEN/.test(agent), 'no secret handling');
   assert.ok(!/firebase deploy|deploy-sizing|deploy-push|deploy-report/.test(agent), 'no deploy command');
   assert.ok(!/—/.test(agent), 'no em dashes');
+};
+
+gates.FC5 = () => {
+  assert.ok(/Reproduction mode/.test(agent) && /never start from the author's script/i.test(agent) && /void count/.test(agent), 'reproduction mode');
+  assert.ok(/Intake scoring/.test(agent) && /Pearson/.test(agent) && /20 overlapping days/.test(agent), 'intake scoring');
+  assert.ok(/CLOSED, confirm the closing line/.test(agent), 'closed cards are not recomputed');
+  assert.ok(/Verification Analyst \(agent file fact-checker\)/.test(agent) && /Main arranges you/.test(agent) && /section 9/.test(agent), 'name and who calls you');
+  assert.ok(/code constants and `docs\/STRATEGIES.md` first/.test(agent), 'CLAUDE.md is not step 0');
 };
 
 let failed = 0;

@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/history_miner/candlegap/CANDLEGAP2_DESIGN.md",
  "purpose": "Zero-try measurement, Head approved: 1 minute candles of the 74 Liga Pro table tennis and e-basketball markets the wheel book recorder polled 2026-11-12 20:31Z to 2026-11-13 00:04Z (CANDLEGAP-2).",
- "heldout": "none: a measurement, no rule scored, no try. These markets close on Nov 12 to 13, after INPLAYJUMP's held-out windows (table tennis to before Nov 3, e-basketball to before Nov 11); PREMOVE was withdrawn unread. No e-soccer ticker (REMATCH holds out KXESOCCERGAME closes to before Nov 13) and no tennis (none recorded).",
+ "heldout": "none: a measurement, no rule scored, no try. These markets close on Nov 12 to 13, after INPLAYJUMP's held-out windows (table tennis to before Nov 3, e-basketball to before Nov 11); VIRT1 holds KXEBASKETBALLGAME and KXLIGAPROMATCH out from 2026-10-28 (read on or after 2026-11-21, unreleased); these candles overlap it. PREMOVE: closed unread, held-out to before 2026-11-13. No e-soccer ticker (REMATCH holds out KXESOCCERGAME closes to before Nov 13) and no tennis (none recorded).",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "allowed_endpoints": [

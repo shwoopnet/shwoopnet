@@ -3,7 +3,7 @@
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/CFRTI_K_REGISTRATION.md",
  "purpose": "The candle-versus-book measurement (CANDLEVSBOOK1, Forensics): 1 minute candles of the 407 KXBTC15M windows that have a full R6 book on the development days (list R6_BTC15M_WINDOWS_DEV.csv, claude/forensics-desk 86f5b64; closes 2026-10-29T22:15Z to before 2026-11-05). No outcome is read.",
- "heldout": "none: all windows close before 2026-11-05T00:00Z and the measurement reads no outcome",
+ "heldout": "none: all windows close before 2026-11-05T00:00Z and the measurement reads no outcome BOOKCH1 (forward from 2026-11-04T00:00Z, frozen unread) and BOOKIMB1 (forward from 2026-11-03T16:00Z, frozen unread) are named here; CFRTI-B and CFRTI1-BTC (from 2026-11-09) do not overlap these windows.",
  "allowed_endpoints": [
   {
    "name": "markets_candlesticks_batch",

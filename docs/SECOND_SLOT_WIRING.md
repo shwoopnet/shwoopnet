@@ -1,6 +1,6 @@
 # The second slot: wiring plan (Phase B)
 
-Written Oct 29, 2026 for the owner. Status: **B1, B2 and B3 are built and tested (Oct 29, 2026), switched off, nothing committed or deployed by the session that built them.** Originally written as a plan. It turns the inert Phase A module (`functions/kalshiSlotLib.js`, `docs/SECOND_SLOT_DESIGN.md`) into a wired but still switched-off feature. Nothing here is built, deployed or turned on by this document.
+Written Oct 29, 2026 for the owner. Status (updated Nov 13, 2026): **the slot is wired and ON with three strategies (OICORE, EVENT830, CFRTIK); the plan below is history.** Original status: **B1, B2 and B3 are built and tested (Oct 29, 2026), switched off, nothing committed or deployed by the session that built them.** Originally written as a plan. It turns the inert Phase A module (`functions/kalshiSlotLib.js`, `docs/SECOND_SLOT_DESIGN.md`) into a wired but still switched-off feature. Nothing here is built, deployed or turned on by this document.
 
 Line numbers below are for `functions/kalshiLiveLib.js` and `functions/index.js` as they stand on `main` today (Oct 29, 2026). They will drift; the anchor text next to each one is what to search for.
 

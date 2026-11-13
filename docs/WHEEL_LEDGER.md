@@ -1,5 +1,7 @@
 # The wheel: lane ledger (kept by the Head of R&D)
 
+> Stage word (Nov 13, 2026): a live second-slot seat is a **Trial** until it is **Proven**. "Probation" in this file means a Trial seat; the text below keeps its original word.
+
 Rules: `ROTATION_LANE.md` section 9.2. Every place ever admitted, every block read, cleared or failed. No live account figure is in this file; a place's own live fills are reported by message only. [design]
 
 Expected lucky clears with no edge anywhere (a fairly priced market, one fee lost an order): blocks read times about 0.04 (0.05 for a favourite at 88c or above). Checked by the Verification Analyst on Nov 12.

@@ -3,7 +3,7 @@
  "owner": "REFINEMENT",
  "registration": "kalshi-scalper/refine_tools/NO_ARM_APPROVAL_REGISTRATION.md",
  "purpose": "Rank 1, stage 2: hourly candles for the development markets (thirds 0 and 1) of W-NO-ARM1, resuming after the 302 markets already pulled; part 1 of 3 (requests 1 to 345 of the 1,034).",
- "heldout": "W-NO-ARM1: development events only (third 0 and 1 of each series); third 2 (held-out) is never requested",
+ "heldout": "W-NO-ARM1: development events only (third 0 and 1 of each series); third 2 is not requested here W-NO-ARM1 third 2 was RELEASED 2026-11-13T06:51Z and is now development; this file's requests are unchanged. Other cards on these series: W-POL-APPR1 (OPEN, thirds held by POL_APPR1_CUTS.json) and APPROVAL1 (not enough data).",
  "allowed_endpoints": [
   {
    "name": "hist_market_candlesticks",

@@ -3,7 +3,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md",
  "purpose": "WHEEL0 stage 1 (the owner's ordered premise test of the rotation lane, Head of R&D 2026-11-12): settled market lists of four 15 minute series (ticker, close_time, result) so stage 2 can name every market and the scorer can settle each paper order. No price is read here.",
- "heldout": "WHEEL0 has no held-out block of its own (one read of everything, 1 try). Rule (h): Ethereum is bounded IN THIS FILE at closes before 2026-10-29T00:00Z (max_close_ts 1793231999), because CFRTI and DEPTH1 hold Ethereum and Bitcoin out on recorded dates; Bitcoin is not requested at all (its candles before Oct 29 already landed in CFRTI_K_CANDLES). Gold, XRP and Dogecoin are held out by no card (Head of R&D, 19:53Z).",
+ "heldout": "WHEEL0 has no held-out block of its own (one read of everything, 1 try). Rule (h): Ethereum is bounded IN THIS FILE at closes before 2026-10-29T00:00Z (max_close_ts 1793231999), because CFRTI and DEPTH1 hold Ethereum and Bitcoin out on recorded dates; Bitcoin is not requested at all (its candles before Oct 29 already landed in CFRTI_K_CANDLES). Gold, XRP and Dogecoin are held out by no card (Head of R&D, 19:53Z). Unread cards by series. XRP: BOOKCH1, QSTALE1, R6T, MAKER5, L1Q1, RESIL1 and the Nov 10 shadow rules. Dogecoin: R6T and RESIL1. Ethereum: SLOTEX-ETH, RESIL1 and the shadow rules. Gold: BOOKIMB1, GF1 and GF2, MKTTIME1-F and MM1.",
  "allowed_endpoints": [
   {
    "name": "markets_list",

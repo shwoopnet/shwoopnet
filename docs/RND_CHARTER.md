@@ -1,6 +1,6 @@
-# R&D operating charter (DRAFT for the owner's review)
+# R&D operating charter (in force)
 
-**Status: DRAFT (Nov 11, 2026). It binds nobody until the owner merges it.** Once merged it binds the research chat (V2) and the live-performance chat (Refinement). It sits under `docs/CHARTER.md`, which only the owner changes; where they differ, the Charter wins. The owner made four decisions in a popup on Nov 11, 2026 (pace, concurrency, closing a family, the owner gate); they are written in below. Written at the owner's request: "i think we need to define stuff for the R&D team otherwise they're going to get carried away."
+**Status: IN FORCE (written Nov 11, 2026; the owner approved it Nov 11 to 12, 2026).** It binds the research chat (V2) and the live-performance chat (Refinement). It sits under `docs/CHARTER.md`, which only the owner changes; where they differ, the Charter wins. The owner made four decisions in a popup on Nov 11, 2026 (pace, concurrency, closing a family, the owner gate); they are written in below. Written at the owner's request: "i think we need to define stuff for the R&D team otherwise they're going to get carried away."
 
 **Politics and parlays:** the owner's Nov 11, 2026 answers (probe sizes, loss caps, kill and return rules, the 14 day cap) are in `docs/POLITICS_RULES.md`.
 
@@ -56,7 +56,7 @@ Strategies move through five stages: Idea, Shadow, Probe, Live, Retired. Family 
 
 ## 4. Limits
 
-- At most 2 concurrent tests at once (owner, Nov 11, 2026; it was 3).
+- At most 2 concurrent tests at once, or the Head of R&D's current worker rule (owner, Nov 11, 2026; it was 3).
 - At most ONE test per mechanism family at a time.
 - Shadow rules: at most 3 favourite-late and at most one per underlying (lifecycle section 7c); other mechanisms at most 8 shadow rules in total.
 - Runner minutes stay inside the Charter limit.

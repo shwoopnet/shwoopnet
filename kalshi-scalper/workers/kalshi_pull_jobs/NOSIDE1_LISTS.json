@@ -3,7 +3,7 @@
  "owner": "REFINEMENT",
  "registration": "kalshi-scalper/refine_tools/NO_ARM_APPROVAL_REGISTRATION.md",
  "purpose": "Rank 1, stage 1 of the approval NO-side pull (W-NO-ARM1): the settled market lists of the 7 approval and generic ballot series, so stage 2 can name every market. No price is scored.",
- "heldout": "W-NO-ARM1: the newest third of each series is listed here but is not requested in stage 2 and is not scored (NOSIDE1_CUTS.json)",
+ "heldout": "W-NO-ARM1: the newest third of each series is listed here but is not requested in stage 2 and is not scored (NOSIDE1_CUTS.json) W-NO-ARM1 third 2 was RELEASED 2026-11-13T06:51Z and is now development; this file's requests are unchanged. Other cards on these series: W-POL-APPR1 (OPEN, thirds held by POL_APPR1_CUTS.json) and APPROVAL1 (not enough data).",
  "allowed_endpoints": [
   {
    "name": "markets_list",

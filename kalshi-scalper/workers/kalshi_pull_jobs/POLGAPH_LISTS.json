@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/polgap/POLGAPH_REGISTRATION.md",
  "purpose": "POLGAPH development, stage 1: settled markets of 69 short-dated politics series, closes 2026-09-12 to 2026-11-12 only, for the tickers, events and close times. No candle is read here.",
- "heldout": "none: closes are bounded at 2026-11-12 23:59:59Z in every request; markets closing from 2026-11-13 are held out and are not pulled",
+ "heldout": "POLGAPH held-out 2026-11-05T00:00Z to 2026-12-17T23:59:59Z; POLI2 from 2026-11-05T00:00Z; six series are held by COUNT1, COUNT1B, COUNT1D, EXECSUM and W-CAT-POLENT1 (KXTRUTHSOCIAL, KXTRUTHSOCIALD, KXPOTUSTWEETS, KXEOWEEK, KXBILLSSIGNED, KXBILLSCOUNT); this run is listed held-out material. Closes are bounded at 2026-11-12 23:59:59Z in every request.",
  "allowed_endpoints": [
   {
    "name": "markets_list",
