@@ -1,0 +1,1 @@
+REFUSED: market KXTEMPMIAH-26NOV0615-T41 lives longer than 3600 s (5400)

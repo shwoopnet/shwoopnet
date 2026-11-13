@@ -3,15 +3,17 @@ Usage: python3 -I hourlytemp_second.py <case folder holding lists/ and optionall
 Measurement, not a rule. Zero tries. No result field is read. All arithmetic is exact (Decimal); lines carry 1e-9 where a float would."""
 import sys, os, gzip, json, calendar
 from decimal import Decimal as D, ROUND_HALF_UP, ROUND_CEILING
-from datetime import datetime
+from datetime import datetime, timezone
 
 SERIES = ["KXTEMPNYCHS", "KXTEMPMIAH", "KXTEMPLAXHS", "KXTEMPCHIHS"]
 LOOKS = (55, 30, 10)
 LO, HI = "2026-11-05T00:00:00Z", "2026-11-11T23:59:59Z"
-CAP = 110
+CAP = 140
 TOL = D("1e-9")
 
 class Refuse(Exception): pass
+
+def F(t): return datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%dT%H")
 
 def ep(s):
     return calendar.timegm(datetime.strptime(s, "%Y-%m-%dT%H:%M:%SZ").timetuple())
@@ -72,20 +74,24 @@ def sample(lists):
         for f in ("ticker", "event_ticker", "floor_strike", "open_time", "close_time"):
             if mk.get(f) in (None, ""): raise Refuse("market %s lacks %s" % (t, f))
         if not (LO <= mk["close_time"] <= HI): raise Refuse("market %s closes outside the sample dates: %s" % (t, mk["close_time"]))
-        if ep(mk["close_time"]) - ep(mk["open_time"]) != 3600: raise Refuse("market %s life is not 3600 s" % t)
+        life = ep(mk["close_time"]) - ep(mk["open_time"])
+        if life > 3600: raise Refuse("market %s lives longer than 3600 s (%d)" % (t, life))
+        if life <= 0: raise Refuse("market %s opens at or after its close" % t)
+        if ep(mk["close_time"]) % 3600 != 0: raise Refuse("market %s closes off the clock hour: %s" % (t, mk["close_time"]))
         types[mk.get("strike_type")] = types.get(mk.get("strike_type"), 0) + 1
         out.append(dict(ticker=t, event=mk["event_ticker"], series=t.split("-")[0], strike=D(str(mk["floor_strike"])),
-                        open=ep(mk["open_time"]), close=ep(mk["close_time"])))
+                        open=ep(mk["open_time"]), close=ep(mk["close_time"]), life=life))
     if len(types) > 1 or any(x not in ("greater", "greater_or_equal") for x in types):
         raise Refuse("strike types are not one ladder of above thresholds: %s" % types)
     return out, markets
 
 def job_requests(smp):
-    """Amendment 3 pin 3: one time range a request, <=100 tickers, <=9,800 candles (tickers x minutes of the range, both ends counted);
-    hours in time order; an hour joins the request only if it closes <=3,600 s after the request's last close and both limits hold.
-    Returns the number of requests, or raises Refuse if an hour breaks a limit by itself."""
+    """Amendment 3 pin 3 + Amendment 4 (a): full-life markets: one time range a request, <=100 tickers, <=9,800 candles (tickers x minutes of the range, both ends counted); hours in time order; an hour joins the request
+    only if it closes <=3,600 s after the request's last close and both limits hold. Late markets (life under 3,600 s): a request starts at the market's own open and ends at its close; late markets share a request only with the
+    same open time and the same close time (same limits). Returns the number of requests."""
+    full = [x for x in smp if x["life"] == 3600]; late = [x for x in smp if x["life"] < 3600]
     by = {}
-    for s_ in smp: by.setdefault(s_["close"], []).append(s_["ticker"])
+    for s_ in full: by.setdefault(s_["close"], []).append(s_["ticker"])
     reqs = []; cur = None   # [first_close, last_close, ntickers]
     def mins(a, b): return (b - a) // 60 + 60 + 1   # from a-60min to b, both ends counted
     for c in sorted(by):
@@ -97,7 +103,14 @@ def job_requests(smp):
             if cur: reqs.append(cur)
             cur = [c, c, n]
     if cur: reqs.append(cur)
-    return len(reqs)
+    lg = {}
+    for x in late: lg.setdefault((x["open"], x["close"]), []).append(x["ticker"])
+    nlate = 0
+    for (o, c), tk in lg.items():
+        per = max(1, min(100, 9800 // ((c - o) // 60 + 1)))
+        if per < 1: raise Refuse("a late market breaks a request limit by itself")
+        nlate += -(-len(tk) // per)
+    return len(reqs) + nlate
 
 # ---------- candles
 def load_candles(candles, smp):
@@ -155,25 +168,26 @@ def rtrip(b, a):   # cents
     mid = (a + b) / 2
     return (a - b) * 100 + 2 * D("0.07") * mid * (1 - mid) * 100
 
-def measure(smp, cdata, complete, whole, nreq, novol, markets, lists):
-    print("measurement, not a rule")
-    print("STEP ONE, settlement source as listed:")
-    for S in SERIES:
-        mk = next(markets[s["ticker"]] for s in smp if s["series"] == S) if any(s["series"] == S for s in smp) else None
-        print("  %s rules_primary=%r rules_secondary=%r" % (S, mk and mk.get("rules_primary"), mk and mk.get("rules_secondary")))
-    print("sample: %d markets, %d events, series counts %s" % (len(smp), len({s["event"] for s in smp}),
-          {S: sum(1 for s in smp if s["series"] == S) for S in SERIES}))
-    print("candle requests answered whole: %d of %d asked; candles with no volume field: %d (each a minute with no trade)" % (whole, nreq, novol))
-    verdicts = {}
+def gained_hours(smp):
+    """series-hours that gained strikes (Amendment 4 c): (series, close, event) with at least one market of life under 3,600 s -> number of strikes added."""
+    g = {}
+    for x in smp:
+        if x["life"] < 3600: g[(x["series"], x["close"], x["event"])] = g.get((x["series"], x["close"], x["event"]), 0) + 1
+    return g
+
+def figure_lines(tag, sub, cdata):
+    """Every per-city, per-look, per-reading figure line on the strikes `sub`; returns {reading: {(city, look): median one-way near the money}}."""
+    out = {}
     for reading in ("carried", "exact"):
         carried = reading == "carried"
         meds = {}
         for S in SERIES:
             for look in LOOKS:
-                strikes = [s for s in smp if s["series"] == S]
-                nq = 0; two = []   # (event, strike, bid, ask)
+                strikes = [s for s in sub if s["series"] == S]
+                nq = 0; noy = 0; two = []   # (event, strike, bid, ask)
                 for s in strikes:
                     L = s["close"] - look * 60
+                    if L <= s["open"]: noy += 1; continue        # Amendment 4 (a): not yet open at a look at or before its own open
                     if found(cdata.get(s["ticker"], {}), s, L, carried) is not None: nq += 1   # candle found, empty book included
                     q = quote(cdata.get(s["ticker"], {}), s, L, carried)
                     if q is None: continue
@@ -197,22 +211,50 @@ def measure(smp, cdata, complete, whole, nreq, novol, markets, lists):
                 mo = med(near_ow); meds[(S, look)] = mo
                 f = lambda x, n=2: "n/a" if x is None else str(rnd(x, n))
                 share = lambda a_, b_: "n/a" if b_ == 0 else str(rnd(D(a_) * 100 / b_, 1)) + "%"
-                print("[%s] %s %dmin: strikes=%d candle_found=%d twosided=%d (%s of candle-found strikes) median_spread=%s median_rt=%s | near: n=%d median_rt=%s median_oneway=%s | extreme95/5=%s of twosided | nearer-certain ask median r1=%s r2=%s r3+=%s [cents] (n %d/%d/%d)  measurement, not a rule" % (
-                    reading, S, look, len(strikes), nq, len(two), share(len(two), nq), f(med(spreads)), f(med(rts)),
+                print("[%s|%s] %s %dmin: strikes=%d not_yet_open=%d candle_found=%d twosided=%d (%s of candle-found strikes) median_spread=%s median_rt=%s | near: n=%d median_rt=%s median_oneway=%s | extreme95/5=%s of twosided | nearer-certain ask median r1=%s r2=%s r3+=%s [cents] (n %d/%d/%d)  measurement, not a rule" % (
+                    reading, tag, S, look, len(strikes), noy, nq, len(two), share(len(two), nq), f(med(spreads)), f(med(rts)),
                     len(near_ow), f(med(near_rt)), f(mo), share(ext, len(two)), f(med(cert[1])), f(med(cert[2])), f(med(cert[3])),
                     len(cert[1]), len(cert[2]), len(cert[3])))
-        vals = list(meds.values())
+        out[reading] = meds
+    return out
+
+def measure(smp, cdata, complete, whole, nreq, novol, markets, lists):
+    print("measurement, not a rule")
+    print("STEP ONE, settlement source as listed:")
+    for S in SERIES:
+        mk = next(markets[s["ticker"]] for s in smp if s["series"] == S) if any(s["series"] == S for s in smp) else None
+        print("  %s rules_primary=%r rules_secondary=%r" % (S, mk and mk.get("rules_primary"), mk and mk.get("rules_secondary")))
+    print("sample: %d markets, %d events, series counts %s" % (len(smp), len({s["event"] for s in smp}),
+          {S: sum(1 for s in smp if s["series"] == S) for S in SERIES}))
+    lives = {}
+    for x in smp: lives[(x["series"], x["life"])] = lives.get((x["series"], x["life"]), 0) + 1
+    print("table of lives (series, seconds, markets): %s" % sorted(lives.items()))
+    g = gained_hours(smp)
+    print("series-hours that gained strikes: %d: %s" % (len(g), [(sr, F(c), n) for (sr, c, ev), n in sorted(g.items())]))
+    for S in SERIES:
+        hrs = sorted({x["close"] for x in smp if x["series"] == S})
+        miss = [F(h) for h in range(hrs[0], hrs[-1], 3600) if h not in set(hrs)] if hrs else []
+        print("missing clock hours %s (printed as they are, not filled): %d %s" % (S, len(miss), miss))
+    print("candle requests answered whole: %d of %d asked; candles with no volume field: %d (each a minute with no trade)" % (whole, nreq, novol))
+    excl = [x for x in smp if (x["series"], x["close"], x["event"]) not in g]
+    allm = figure_lines("ALL", smp, cdata)
+    print("(information only) the same figures without the series-hours that gained strikes:")
+    figure_lines("EXCL", excl, cdata)
+    verdicts = {}
+    for reading in ("carried", "exact"):
+        vals = list(allm[reading].values())
         if any(v is not None and v <= 4 + TOL for v in vals): v = "not closed"
         elif all(v is not None for v in vals): v = "closed"
         else: v = "cannot say"
         verdicts[reading] = v
-        print("[%s] twelve medians: %s -> %s" % (reading, ["n/a" if x is None else str(rnd(x, 2)) for x in vals], v))
-    print("per city, share of market-minutes with a trade (volume>0 over 60 per market):")
-    for S in SERIES:
-        strikes = [s for s in smp if s["series"] == S]
-        tr = sum(1 for s in strikes for c in cdata.get(s["ticker"], {}).values()
-                 if c.get("volume_fp") not in (None, "") and D(c["volume_fp"]) > 0)
-        print("  %s %s%% (%d of %d)  measurement, not a rule" % (S, rnd(D(tr) * 100 / (60 * len(strikes)), 1) if strikes else "n/a", tr, 60 * len(strikes)))
+        print("[%s|ALL] twelve medians: %s -> %s" % (reading, ["n/a" if x is None else str(rnd(x, 2)) for x in vals], v))
+    print("per city, share of market-minutes with a trade (volume>0 over each market's own minutes of life):")
+    for tag, sub in (("ALL", smp), ("EXCL", excl)):
+        for S in SERIES:
+            strikes = [s for s in sub if s["series"] == S]
+            tr = sum(1 for s in strikes for c in cdata.get(s["ticker"], {}).values() if c.get("volume_fp") not in (None, "") and D(c["volume_fp"]) > 0)
+            den = sum(s["life"] // 60 for s in strikes)
+            print("  [%s] %s %s%% (%d of %d)  measurement, not a rule" % (tag, S, rnd(D(tr) * 100 / den, 1) if den else "n/a", tr, den))
     # size at touch from open_ answers
     m = manifest(lists)
     for S in SERIES:

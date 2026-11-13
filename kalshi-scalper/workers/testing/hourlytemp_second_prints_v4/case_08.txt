@@ -1,0 +1,2 @@
+SAMPLE OK: 48 markets; candle job would need 2 requests (cap 140) -> job written
+REFUSED: job tickers differ from the sample tickers
