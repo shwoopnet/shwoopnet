@@ -1,4 +1,4 @@
-"""DEPTH1 wrapper under AMENDMENT 1 and AMENDMENT 3 (Idea Desk A, Nov 12 and Nov 13 2026, on the Head of R&D's word; V2's depth1.py and its frozen hash are NOT touched).
+"""DEPTH1 wrapper under AMENDMENT 1, 3 and 4 (Idea Desk A, Nov 12 and Nov 13 2026, on the Head of R&D's word; V2's depth1.py and its frozen hash are NOT touched).
   THE READ:  python3 -I depth1_wrapper.py <path to the kalshi-scalper dir of V2's branch>        (refuses before 2026-11-14 00:00 UTC and on a second run, through V2's run())
 Amendment 1 (written before any R6 outcome was read; text in DEPTH1_AMENDMENT_1_DESK_A.md):
  (a) usable() may drop a window only for reasons known at or before the decision; a missing or non yes/no result is NOT a reason. (installed: usable is called with the result field set to "yes" so every other test is V2's own)
@@ -8,12 +8,13 @@ Amendment 1 (written before any R6 outcome was read; text in DEPTH1_AMENDMENT_1_
  (e) default-closed: V2's run() refuses before the date, on a second run and on a started marker; the wrapper adds nothing that bypasses it.
  (f) printed BEFORE the verdict lines, cannot change them (Head, Nov 12): V2's registered NO-LABEL NOISE DESCRIPTION (share of looks where the five-level imbalance f1 changes sign within 4 s, i.e. between the decision poll and either of the next two 2 s polls, and for each other single-poll size feature f2, f3, f8, f9, f10 the share where its sign differs between the decision poll and the next two polls; f4, f5, f6 need earlier polls and f7 the tape, so they are not in it), per market; the MEDIAN FILL DELAY (fill poll time minus decision poll time) per market; and per market how many otherwise-eligible windows each usable() condition removed (counted from the coverage row for the report only; V2's function decides). Reads no outcome.
  AMENDMENT 3 (Nov 13, text in DEPTH1_AMENDMENT_3_DESK_A.md; a fault fix and the stricter z, made after the second build's comparison on invented fixtures and before any outcome was joined; no threshold, feature definition, window or try changed): (g) for ALL ten features a value whose absolute size is at or under 1e-12 is ZERO, no trade (applied once, to the features of every window, so the trade rule, the shuffled-book control and the noise description all see the same zero); (h) the VERDICT reads the cluster-corrected z (variance x D/(D-1), D the number of date clusters in that try) against the 5.27 bar; the uncorrected z is printed beside it as information.
+ AMENDMENT 4 (Nov 13, text in DEPTH1_AMENDMENT_4_DESK_A.md; two exact-tie fixes found by the auditor's raw-float scan, after the second build's comparison on invented rows, before any outcome was joined; no threshold, feature definition, window or try changed): (i) every verdict bar in passes() is compared in INTEGERS (trade results in thousandths of a dollar, exact for the whole-cent results and for the 1.2 x fee stress results): profit factor >= 1.5 is 2 x wins >= 3 x losses, each half above 1.0 is wins > losses, net > 0, stress net > 0, stress profit factor > 1.2 is 5 x wins > 6 x losses; (j) f6_thin_depletion: if the two 5-level sizes 60 s ago differ by 1e-9 or less in absolute size they are a TIE, f6 is 0.0, no trade (V2's own test is an exact equality). V2's depth1.py and its frozen hash are untouched.
  STOP RULE: if fired windows with no yes/no result exceed 1% of fired windows, the wrapper stops BEFORE the verdict line is written and says so (on a 15 minute Bitcoin series that would be a data gap, not voids); the started marker stays, so the run is never quietly repeated; the Head decides."""
 import sys, math, collections
 from pathlib import Path
 ZERO_TOL = 1e-12
 def install(D):
-    state = {"removed": collections.Counter(), "noise": collections.defaultdict(lambda: collections.Counter()), "delay": collections.defaultdict(list), "orig_usable": D.usable, "orig_wr": D.window_record, "orig_score": D.score, "nores": collections.Counter(), "scored": None, "orig_cz": D.clustered_z, "orig_ts": D.try_stats, "last_unc": 0.0}
+    state = {"removed": collections.Counter(), "noise": collections.defaultdict(lambda: collections.Counter()), "delay": collections.defaultdict(list), "orig_usable": D.usable, "orig_wr": D.window_record, "orig_score": D.score, "nores": collections.Counter(), "scored": None, "orig_cz": D.clustered_z, "orig_ts": D.try_stats, "orig_passes": D.passes, "last_unc": 0.0}
     def clustered_z(vals, keys):                                # Amendment 3 (h): the corrected z decides; the uncorrected one is kept for printing
         n = len(vals); state["last_unc"] = state["orig_cz"](vals, keys)
         if n < 2: return 0.0
@@ -24,7 +25,21 @@ def install(D):
         var = sum(x * x for x in by.values()) * d / (d - 1) / (n * n)
         return mu / math.sqrt(var) if var > 0 else 0.0
     def try_stats(ws, name):
-        state["last_unc"] = 0.0; st = state["orig_ts"](ws, name); st["z_unc"] = state["last_unc"]; return st
+        state["last_unc"] = 0.0; st = state["orig_ts"](ws, name); st["z_unc"] = state["last_unc"]
+        tr = sorted(((w["close"], w["date"], *D.trade_of(w, name)) for w in ws if D.trade_of(w, name)), key=lambda x: x[0])   # same selection and order as V2's try_stats
+        pn = [round(t[3]["pnl"] * 1000) for t in tr]; ps = [round(t[3]["pnl_stress"] * 1000) for t in tr]; n = len(pn)
+        wl = lambda x: (sum(v for v in x if v > 0), -sum(v for v in x if v < 0))
+        st["int"] = dict(n=n, blocks=[(len(b), wl(b)) for b in ([[pn[j] for j, t in enumerate(tr) if D.block_of(t[1]) == i] for i in range(3)])], pooled=wl(pn), halves=[wl(pn[:n // 2]), wl(pn[n // 2:])], net=sum(pn), net_stress=sum(ps), stress=wl(ps))
+        return st
+    def ge(w_l, num, den):                                      # profit factor >= num/den in integers, V2's pf(): no losses with wins is infinite, nothing at all is 0
+        w, l = w_l; return (w > 0) if l == 0 else den * w >= num * l
+    def gt(w_l, num, den):
+        w, l = w_l; return (w > 0) if l == 0 else den * w > num * l
+    def passes(st, ctrl_ok, zb):                                # Amendment 4 (i): the registered bar, compared in integers
+        b = D.CONFIG["bar"]; I = st["int"]
+        assert b["pf_each_block"] == 1.5 and b["pf_pooled"] == 1.5 and b["halves_pf_above"] == 1.0 and b["stress_pf_above"] == 1.2 and b["n_trades"] == 300
+        return (st["n"] >= 300 and all(k > 0 and ge(wl_, 3, 2) for k, wl_ in I["blocks"]) and ge(I["pooled"], 3, 2) and all(gt(h, 1, 1) for h in I["halves"])
+                and I["net"] > 0 and I["net_stress"] > 0 and gt(I["stress"], 6, 5) and st["z"] >= zb and ctrl_ok)
     def usable(close, row):                                    # (a)
         r = dict(row); r["result"] = "yes"; ok = state["orig_usable"](close, r)
         if not ok:                                              # counting only: which conditions failed (V2's own function decided)
@@ -41,6 +56,11 @@ def install(D):
             w["resid"] = [k for k, v in w["feat"].items() if v is not None and v != 0 and abs(v) <= ZERO_TOL]
             for k, v in list(w["feat"].items()):
                 if v is not None and abs(v) <= ZERO_TOL: w["feat"][k] = 0.0
+            Sx = D.R6.last_at(polls, close - D.CONFIG["decision_s_before_close"], D.CONFIG["decision_poll_max_early_s"])   # Amendment 4 (j): f6 tie at 1e-9, V2's own test is exact equality
+            P60 = D.R6.last_at(polls, Sx.t - 60, D.CONFIG["lookback_poll_max_early_s"]) if Sx is not None else None
+            if P60 is not None and w["feat"].get("f6_thin_depletion") is not None:
+                y0, n0 = D._sums(P60)
+                if abs(y0 - n0) <= 1e-9: w["feat"]["f6_thin_depletion"] = 0.0
         if w is not None:                                       # (f) noise description and fill delay: book only, no outcome
             Sd = D.R6.last_at(polls, close - D.CONFIG["decision_s_before_close"], D.CONFIG["decision_poll_max_early_s"])
             if Sd is not None:
@@ -97,7 +117,7 @@ def install(D):
             ws = [w for w in scored if w["series"] == m]
             sep.append("  " + m + ": " + "; ".join("%s %d" % (nm.split("_")[0], sum(1 for w in ws if nm in w.get("resid", []))) for nm in D.NAMES))
         return v, lines + sep
-    D.usable, D.window_record, D.score, D.clustered_z, D.try_stats = usable, window_record, score, clustered_z, try_stats
+    D.usable, D.window_record, D.score, D.clustered_z, D.try_stats, D.passes = usable, window_record, score, clustered_z, try_stats, passes
     return state
 def main(root):
     sys.path.insert(0, str(Path(root).resolve() / "src")); from scalper import depth1 as D
