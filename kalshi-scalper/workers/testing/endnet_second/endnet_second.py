@@ -127,6 +127,7 @@ def run(stage, games):
     for g in games:
         if g.close_ts >= HELD_FROM: raise SystemExit("REFUSED: game %s closes on or after the held-out start 2026-12-15T00:00Z; nothing is read" % g.game_id)
     dev = [g for g in games if DEV_FROM <= g.close_ts <= DEV_TO]; outside = len(games) - len(dev)
+    if not dev: raise SystemExit("REFUSED: no in-window data (no game closes from 2026-11-17T00:00Z to 2026-12-14T23:59:59Z); %d game(s) closed before the window and are not used" % outside)          # Head ruling 15:40Z: no in-window game refuses the run; in-window games with zero states read CLOSED
     dec = [(g, decide(g)) for g in dev]
     by = {}
     for g, d in dec: by[d["status"]] = by.get(d["status"], 0) + 1
