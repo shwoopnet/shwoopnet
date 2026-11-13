@@ -1,6 +1,6 @@
 'use strict';
 // Combo trade-tape recorder (Nov 13, 2026, the owner: "Yes, nonstop recorder"; Idea Desk C's CROWDLEG and NOTAKER cards, paper only). Research only: public Kalshi market data, no key,
-// no order, no Firestore; its own combotape-data branch; stops by itself on 2027-01-31. CT1 checks the code against the hand case committed before the code (test/fixtures/comboTapeHandCase.json).
+// no order, no Firestore; its own combotape-data branch; stops by itself on 2027-01-31. CT1 checks the code against the hand case committed before the code (test/handcases/comboTapeHandCase.json).
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -10,7 +10,7 @@ const scriptPath = path.join(root, 'scripts', 'record_combo_tape.py');
 const script = fs.readFileSync(scriptPath, 'utf8');
 const wfPath = path.join(root, '.github', 'workflows', 'record-combo-tape.yml');
 const wf = fs.readFileSync(wfPath, 'utf8');
-const handPath = path.join(root, 'test', 'fixtures', 'comboTapeHandCase.json');
+const handPath = path.join(root, 'test', 'handcases', 'comboTapeHandCase.json');
 const code = script.replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
 const gates = {};
 const py = (src) => JSON.parse(execFileSync('python3', ['-I', '-c', `

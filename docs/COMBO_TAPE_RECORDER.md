@@ -46,4 +46,4 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
 
 The exact dates are written as a dated amendment to both cards the day the first rows land, before any row is read. No one reads a held-out row for price, side, size or result before then; coverage counts may be checked.
 
-**Gates.** `test/comboTapeRecorderGates.test.js` CT1 to CT12. CT1 checks the code against a hand case written and committed before the code (`test/fixtures/comboTapeHandCase.json`).
+**Gates.** `test/comboTapeRecorderGates.test.js` CT1 to CT12. CT1 checks the code against a hand case written and committed before the code (`test/handcases/comboTapeHandCase.json`).
