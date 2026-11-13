@@ -9,7 +9,7 @@ import gzip, csv, glob, math, os, sys, bisect, collections, datetime
 from statistics import NormalDist
 Phi = NormalDist().cdf
 MODE, Q = sys.argv[1], sys.argv[2]
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(Q, "cfrti_heldout")      # standing rule (h)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(Q, "cfrti_heldout")      # standing rule (h)
 DEV_END = "2026-11-05"                      # development = run folders before this day (unchanged: reproduces n 36 / n 32)
 NOTBLIND = ("2026-11-05", "2026-11-09")      # Nov 5 to Nov 8: a baseline for this side and band was printed by Forensics on Nov 12 (Head's ruling, option b): NOT blind, printed SEPARATELY, never in the verdict lines
 HELDOUT_FIRST_DAY = "2026-11-09"             # the held-out window starts here (Head, Nov 12, after Forensics' disclosure); set by this constant, before any held-out row was opened by Desk A
