@@ -142,3 +142,12 @@ The route is therefore per-event, and no held-out row is ever pulled. `jobs/FOMC
 - **`jobs/FOMCTEXT_EVENTS.json` (stage 0):** `/events` lists of the four series with `with_nested_markets=false`, returning event tickers, titles and dates only. An event object carries no market result. It exists to name the development press-conference events of KXPOWELLMENTION, KXJPOWMENTION and KXWARSHMENTION. A per-event job for those is written from its answer. 12 pages at most, cap 15.
 
 No event dated 2026-06-17 or later is requested by any FOMCTEXT job.
+
+## Candle rule (Nov 13, 2026, before any data; rnd-queue d3b5f24e and 8502a88f, from the Verification Analyst)
+
+Every read on candles follows the haircut rule and C7 to C10:
+- **Haircut:** entry at the ask + 1c, exit at the bid - 1c, taker fees rounded up to the cent, two-sided candles only.
+- **C7:** every figure is printed at a 1c AND a 2c haircut. The rule counts only at PF 1.3 or better (both halves 1.0 or better) at 1c, AND PF 1.0 or better at 2c.
+- **C8:** an entry or exit in the last 2 minutes before the close uses 2c as its primary.
+- **C9:** every result line says "upper bound, not fill-checked".
+- **C10:** the fee mode is per-order rounded. A void refunds the price, keeps the fee, and is counted as a bet.

@@ -91,3 +91,12 @@ The rule reads only the **state average path itself, from Kalshi's own settled m
   - `jobs/GASCYCLE_COUNT_LIVE.json`: two settled live lists, max_close_ts = 2026-10-15T00:00:00Z, at most 24 pages.
   - `GASCYCLE_COUNT_HIST` was drafted and then DELETED on the Head's ruling of Nov 13: the history boundary moves forward over time, so a request with no bound could later land held-out markets on the public data branch. If LIVE shows the series began before about 2026-09-13, the earlier days are fetched by per-event historical requests, each one named and bounded by its own event date, written from LIVE's earliest event backward.
   - No candles in either. The count reads only ticker, event, close time, strike fields, expiration_value and result.
+
+## Candle rule (Nov 13, 2026, before any data; rnd-queue d3b5f24e and 8502a88f, from the Verification Analyst)
+
+Every read on candles follows the haircut rule and C7 to C10:
+- **Haircut:** entry at the ask + 1c, exit at the bid - 1c, taker fees rounded up to the cent, two-sided candles only.
+- **C7:** every figure is printed at a 1c AND a 2c haircut. The rule counts only at PF 1.3 or better (both halves 1.0 or better) at 1c, AND PF 1.0 or better at 2c.
+- **C8:** an entry or exit in the last 2 minutes before the close uses 2c as its primary.
+- **C9:** every result line says "upper bound, not fill-checked".
+- **C10:** the fee mode is per-order rounded. A void refunds the price, keeps the fee, and is counted as a bet.
