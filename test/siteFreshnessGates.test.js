@@ -157,6 +157,20 @@ gates.SF12 = () => {
   assert.ok(/closed from Friday 5 PM to Sunday 6 PM Central/.test(text(menu)), 'the Rules text states gold\'s weekend close');
 };
 
+// SF13 (Nov 13, 2026): the page's OICORE net floor must be the library's minNet, so a kill edit cannot leave the page stale.
+gates.SF13 = () => {
+  const slot = require('../functions/kalshiSlotLib.js');
+  const oi = slot.SLOT_STRATEGIES.find((x) => x.id === 'OICORE').killRules.minNet;
+  assert.strictEqual(slot.validateSlotStrategy(slot.SLOT_STRATEGIES.find((x) => x.id === 'OICORE')).ok, true, 'the validator accepts the net floor');
+  const m = /var KAL_BOARD_KILL = \{ OICORE: \{ streak: \d+, afterFills: (\d+), net: (-?\d+(?:\.\d+)?)/.exec(html);
+  assert.ok(m, 'KAL_BOARD_KILL is on the page');
+  assert.strictEqual(Number(m[1]), oi.afterFills); assert.strictEqual(Number(m[2]), oi.net, 'the board kill net equals the library minNet');
+  const floor = '$' + Math.abs(oi.net);
+  assert.ok(html.includes('down more than ' + floor + ' after ' + oi.afterFills + ' trades'), 'the Strategies rule line says ' + floor);
+  const reg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies.find((x) => x.id === 'OICORE');
+  assert.ok(reg.kill.includes('down more than ' + floor + ' after ' + oi.afterFills + ' trades'), 'the registry kill text says ' + floor);
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
