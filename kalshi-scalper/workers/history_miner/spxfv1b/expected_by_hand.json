@@ -1,10 +1,30 @@
 {
- "note": "SPXFV1 second build, hand-built case, written from DESK_A_SPX_CARDS_NOV13.md at 94c4dfbc (body plus the dated lines and D1 to D8, which govern) BEFORE any scorer exists. INVENTED rows only (inv/): no Databento or Kalshi datum. Futures: F_open = 6000 at ts_event close-960, flat to close-780, then 10 one-minute log changes (-0.0006, +0.0002) x 5 ending at the bar with ts_event close-180 (F_now). sd_1m = sample sd of the 10 changes = 0.000421637; sd = sd_1m x sqrt(119/60) = 0.000593795; ln(F_now/F_open) = -0.002; z = -3.368165; P(YES) = Phi(z) = 0.000378, P(NO) = 0.999622. Decision candle YES bid 0.70, ask 0.72: NO ask 0.30, cheaper side NO, in the band 0.05 to 0.30 (inclusive), YES spread 0.02 <= 0.03, edge 0.999622 - 0.30 >= 0.05: buy NO at 0.30. Result no: win. Fee 0.07 x 0.30 x 0.70 = 0.0147 unrounded: net +0.6853; stress line fee up-rounded to 0.02: +0.68.",
+ "note": "SPXFV1 second build, hand-built case, written from DESK_A_SPX_CARDS_NOV13.md at 94c4dfbc (body plus the dated lines and D1 to D8, which govern) BEFORE any scorer exists. INVENTED rows only (inv/): no Databento or Kalshi datum. Futures: F_open = 6000 at ts_event close-960, flat to close-780, then 10 one-minute log changes (-0.0006, +0.0002) x 5 ending at the bar with ts_event close-180 (F_now). sd_1m = sample sd of the 10 changes = 0.000421637; sd = sd_1m x sqrt(119/60) = 0.000593795; ln(F_now/F_open) = -0.002; z = -3.368165; P(YES) = Phi(z) = 0.000378, P(NO) = 0.999622. Decision candle YES bid 0.70, ask 0.72: NO ask 0.30, cheaper side NO, in the band 0.05 to 0.30 (inclusive), YES spread 0.02 <= 0.03, edge 0.999622 - 0.30 >= 0.05: buy NO at 0.30. Result no: win. Fee 0.07 x 0.30 x 0.70 = 0.0147 unrounded: net +0.6853; stress line fee up-rounded to 0.02: +0.68. RULINGS S1 to S6 (Head of R&D, Nov 13, 16:47Z), applied by hand before the scorer changes: S1 the fee is 0.07 x 1 x p x (1 - p) rounded UP to the cent per order, so A's net is 1 - 0.30 - 0.02 = +0.68 (the unrounded +0.6853 is printed as information only); S4 the tie count is printed (0 here); S5 a held-out close after READ_DATE is ignored and counted.",
  "dev": {
-  "counts": {"traded": 1, "roll_skipped": 1, "no_bar": 1, "no_trade": 1, "held_out_ignored": 1},
-  "windows_A": {"side": "no", "ask": 0.30, "p_model": 0.999622, "net": 0.6853, "net_stress": 0.68},
-  "traded_n": 1, "pf": "inf", "mean_net": 0.6853, "label": "no evidence at n = 1"
+  "counts": {
+   "traded": 1,
+   "roll_skipped": 1,
+   "no_bar": 1,
+   "no_trade": 1,
+   "held_out_ignored": 1
+  },
+  "traded_n": 1,
+  "pf": "inf",
+  "mean_net": 0.68,
+  "label": "no evidence at n = 1",
+  "windows_A": {
+   "side": "no",
+   "ask": 0.3,
+   "p_model": 0.999622,
+   "net": 0.68,
+   "net_unrounded_info": 0.6853
+  },
+  "ties": 0
  },
- "refusals": ["held read before 2027-02-26T00:00:00Z", "a second held read (read-once marker)", "a listed held-out run folder via hm_guard"],
+ "refusals": [
+  "held read before 2027-02-26T00:00:00Z",
+  "a second held read (read-once marker)",
+  "a listed held-out run folder via hm_guard"
+ ],
  "held_counts_only": "a held read at or after READ_DATE with fewer than 150 traded windows prints the count only (F is 1 traded window)"
 }
