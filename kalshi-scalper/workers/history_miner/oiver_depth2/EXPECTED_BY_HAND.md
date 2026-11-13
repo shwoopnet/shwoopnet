@@ -70,3 +70,13 @@ inv/windows.csv gains r6_poll: W3 = 0 (it had a blank bid size; it is now a trad
 
 ## Dated line, 2026-11-13 21:30Z: the counter name (the Head's ruling of 21:19Z; Desk A card c356ca2d)
 A poll with a blank or unreadable touch size stays in the replay set and the version skips it. This was already built that way; the counter is renamed from no_size to size_unknown. No figure changes. The made-up set has no such row, so the count is absent there.
+
+## Dated line, 2026-11-13 21:30Z: voids (Auditor B's 16b finding of 21:28Z; Desk A's sheet v2 G5; the Head's ruling of 21:29Z), reworked by hand before the code
+- Results "yes" and "no" are scored.
+- "void" or blank on a development row is DROPPED: it is not a bet, not in n, not in the PF. It is counted as void_dropped, at the point where the parent would have traded. This means after every signal test (and, for DEPTH, after the replay-set test), before the trade is booked.
+- Any other text still STOPS.
+- Before this line a void was booked as a fee-only loss and a blank stopped the run; both are withdrawn.
+- **Base figures:** unchanged, since the made-up development rows carry no void or blank.
+- **New variant test:** the base windows plus two rows, W11 and W12, closing 1794009000 and 1794009900, both inside the range. The variant must give every base figure unchanged, plus counts void_dropped 2.
+  - W11: a copy of W1 (r6_poll 1, ask size 40), result "void".
+  - W12: a copy of W9 (r6_poll 1, NO buy, bid size 100), result blank.

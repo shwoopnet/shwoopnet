@@ -62,3 +62,13 @@ The same three changes as OIVER-SPREAD build 2's dated line:
 - weeks run over the parent's trades, at least one week, so the divisor is 1 here: parent 0.4925 per contract-week, version 1.325;
 - a development row outside [2026-09-12, 2026-11-09) stops the run.
 Everything else is unchanged (version PF 5.206349, the 0.30 ceiling inclusive, as the card's 21:13Z amendment confirms).
+
+## Dated line, 2026-11-13 21:30Z: voids (Auditor B's 16b finding of 21:28Z; Desk A's sheet v2 G5; the Head's ruling of 21:29Z), reworked by hand before the code
+- Results "yes" and "no" are scored.
+- "void" or blank on a development row is DROPPED: it is not a bet, not in n, not in the PF. It is counted as void_dropped, at the point where the parent would have traded. This means after every signal test (and, for DEPTH, after the replay-set test), before the trade is booked.
+- Any other text still STOPS.
+- Before this line a void was booked as a fee-only loss and a blank stopped the run; both are withdrawn.
+- **Base figures:** unchanged, since the made-up development rows carry no void or blank.
+- **New variant test:** the base windows plus two rows, W11 and W12, closing 1794009000 and 1794009900, both inside the range. The variant must give every base figure unchanged, plus counts void_dropped 2.
+  - W11: a copy of W1 (a signal, ask 0.22, passes the cap), result "void".
+  - W12: a copy of W3 (ask 0.12, passes), result blank.

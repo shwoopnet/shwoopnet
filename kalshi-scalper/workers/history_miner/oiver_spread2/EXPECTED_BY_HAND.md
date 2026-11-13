@@ -88,3 +88,13 @@ Reworked figures (same windows; spreads, sides and skips unchanged). Fee = ceil(
 - **Weeks** = (last close - first close) / 7 days over the PARENT's trades, at least one week, and the same divisor for both. Here the parent runs W1 to W9 = 7,200 s, under a week, so the divisor is 1 week: per contract-week parent 0.4925, version 1.315 (was 41.37 and 110.46 on the file span).
 - **Range:** a development row (close before 2026-12-01) outside [2026-09-12T00:00Z, 2026-11-09T00:00Z) STOPS the run. Held-out rows (on or after Dec 1) are still ignored and counted. Every made-up development row is inside.
 - Every other figure is unchanged: parent PF 1.429194, version PF 5.046154, the halves, removed 0.4, the takeover and kill information (net per week still not lower), and the label.
+
+## Dated line, 2026-11-13 21:30Z: voids (Auditor B's 16b finding of 21:28Z; Desk A's sheet v2 G5; the Head's ruling of 21:29Z), reworked by hand before the code
+- Results "yes" and "no" are scored.
+- "void" or blank on a development row is DROPPED: it is not a bet, not in n, not in the PF. It is counted as void_dropped, at the point where the parent would have traded. This means after every signal test (and, for DEPTH, after the replay-set test), before the trade is booked.
+- Any other text still STOPS.
+- Before this line a void was booked as a fee-only loss and a blank stopped the run; both are withdrawn.
+- **Base figures:** unchanged, since the made-up development rows carry no void or blank.
+- **New variant test:** the base windows plus two rows, W11 and W12, closing 1794009000 and 1794009900, both inside the range. The variant must give every base figure unchanged, plus counts void_dropped 2.
+  - W11: a copy of W1 (a signal that passes the spread), result "void".
+  - W12: a copy of W3 (passes), result blank.
