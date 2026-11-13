@@ -750,3 +750,8 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - LIQREV stays the only new card alive (with the VA and Auditor B).
   - OICORE proven-bar read: Refinement oicore_proven.py 0a788fb6 and Testing Desk b44bb38b, exactly the first 100 (then 150) fills, one marker per point. Auditor B diffs before the 100 read.
   - Desk A's OICORE versions (741092a7: SPREAD, CAP30, DEPTH) are queued after V1, one at a time. Ruled 7g versions, not row 190 sweeps.
+- 19:37Z, WXDAYEND, for the record. The Testing Desk's final count of Nov 13 00:27Z (all 40 city-days; existence count only, scorer wxdayend.py ad603d5d, audited by its own tests only) gave FAIL by its registered kill rule. Label: no evidence at n = 40, 0 tries.
+  - The History Miner's independent existence count is still owed.
+  - The Head asked for a re-run at 19:36Z from Desk C's sweep, which missed the earlier run. That request was CANCELLED before anything was read.
+  - Perps recorders confirmed thin by Main (GitHub drops scheduled starts); a self-chaining fix is approved at low priority.
+  - Ruled: no research scorer fetches Coinbase or Hyperliquid at run time.
