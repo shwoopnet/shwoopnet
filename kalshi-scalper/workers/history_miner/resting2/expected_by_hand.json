@@ -1,5 +1,5 @@
 {
- "note": "Worked by hand from the registrations and readings R1 to R15 BEFORE resting2.py was run on these rows (four hand slips in the first draft, three PF divisions and the V2 verdict, were corrected on a re-check, still before any run). Parent fee 0.07 p (1-p) unrounded at the ask, +1c adds 0.01; version fee 25% (and 0%, 100%) of 0.07 p (1-p) at our bid. Re-worked by hand for the dated amendments (V1 64539074, V2 5e156f3e) before the aligned scorer ran: parent +1c fee at p + 0.01; FALSIFIED OR uses the version PF; bar (2) at +0c and +1c; under 60 fills NOT_ENOUGH_DATA first; W8 added (t0 row 18 s late: no t0 row). CORRECTION after the first run of the aligned scorer: the hand figure for the parent's +0c net per week was 0.187539, copied from the old +1c net; worked again, (2 x 0.736875 - 0.335232 - 0.2112 - 0.3147) / 3 = 0.204206, as the scorer printed. Commit ee1b23de's message said '0 mismatches' although this one mismatch was open; this note and the next commit correct it.",
+ "note": "Worked by hand from the registrations and readings R1 to R15 BEFORE resting2.py was run on these rows (four hand slips in the first draft, three PF divisions and the V2 verdict, were corrected on a re-check, still before any run). Parent fee 0.07 p (1-p) unrounded at the ask, +1c adds 0.01; version fee 25% (and 0%, 100%) of 0.07 p (1-p) at our bid. Re-worked by hand for the dated amendments (V1 64539074, V2 5e156f3e) before the aligned scorer ran: parent +1c fee at p + 0.01; FALSIFIED OR uses the version PF; bar (2) at +0c and +1c; under 60 fills NOT_ENOUGH_DATA first; W8 added (t0 row 18 s late: no t0 row). CORRECTION after the first run of the aligned scorer: the hand figure for the parent's +0c net per week was 0.187539, copied from the old +1c net; worked again, (2 x 0.736875 - 0.335232 - 0.2112 - 0.3147) / 3 = 0.204206, as the scorer printed. Commit ee1b23de's message said '0 mismatches' although this one mismatch was open; this note and the next commit correct it. Re-worked by hand for D1 and D2 (9f576a29) before the aligned scorer ran: V1 halves [W1, W2] (version PF inf, parent PF inf) and [W3, W5, W7] (both 0), so the second half alone decides, finite, 0 >= 0, passes; fill rate 2 / 5 = 0.4. V2 has one signal, so the first half is empty: bar (3) fails; fill rate 1 / 1.",
  "V1_dev": {
   "counts": {
    "outside_block": 1,
@@ -53,7 +53,7 @@
    "signals": 5,
    "orders": 4,
    "fills": 2,
-   "fill_rate": 0.5,
+   "fill_rate": 0.4,
    "version_pf_25": 2.811715,
    "version_pf_0": 2.857143,
    "version_pf_100": 2.681971,
@@ -73,7 +73,8 @@
    "falsified": true,
    "verdict": "NOT_ENOUGH_DATA (FALSIFIED OR, information only: true)",
    "parent_net_per_week_p0": 0.204206,
-   "missed_parent_minus_version_pf_ge_0_10": false
+   "missed_parent_minus_version_pf_ge_0_10": false,
+   "bar3_basis": "second half alone, finite: version PF against the parent PF at +1c"
   }
  },
  "V2_dev": {
@@ -87,7 +88,9 @@
    "fills": 1,
    "version_pf_25": 0.0,
    "parent_pf_p1": 0.0,
-   "verdict": "NOT_ENOUGH_DATA (FALSIFIED OR, information only: false)"
+   "verdict": "NOT_ENOUGH_DATA (FALSIFIED OR, information only: false)",
+   "fill_rate": 1.0,
+   "bar3_basis": "an empty half (no version fills): fails"
   }
  },
  "refusals": [
