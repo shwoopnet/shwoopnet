@@ -21,6 +21,9 @@ def iso(ms): return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(ms // 1000)) 
 class T(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp(); self.root = os.path.join(self.d, "r", "2026-11-03", "1200"); os.makedirs(self.root); self.out = os.path.join(self.d, "out")
+        S.MARKER_DIR = os.path.join(self.d, "markers")
+        self.hl = os.path.join(self.d, "heldout.md"); open(self.hl, "w").write("| Run folder | why |\n|---|---|\n| `kalshi-pull-data/2026-11-01T0000Z_1` | x |\n")
+        S.HELDOUT_LIST = self.hl
     def mk(self, books, trades, result="no"):
         write_gz(os.path.join(self.root, "book.csv.gz"), BOOK_COLS, books)
         write_gz(os.path.join(self.root, "trades.csv.gz"), ["ticker", "created_time", "yes_price_dollars", "count_fp", "taker_outcome_side"], trades)
@@ -70,9 +73,62 @@ class T(unittest.TestCase):
         t0, b = self.base(); sig = self.mk(b, [])
         args = ["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]
         self.assertEqual(S.main(args), 2)
-        m = os.path.join(self.d, "marker"); open(m, "w").write("x")
+        m = os.path.join(self.d, "marker"); open(m, "w").write("DEPTH1 READ MADE: 2026-11-14\n")
         self.assertEqual(S.main(args + ["--depth1-recorded", m]), 0)
         self.assertEqual(S.main(args + ["--depth1-recorded", m]), 2)
+    def test_depth1_marker_content_checked(self):
+        t0, b = self.base(); sig = self.mk(b, [])
+        args = ["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]
+        m = os.path.join(self.d, "marker"); open(m, "w").write("anything\n")
+        self.assertEqual(S.main(args + ["--depth1-recorded", m]), 2)
+    def test_second_run_with_new_out_refused(self):
+        t0, b = self.base(); sig = self.mk(b, [])
+        m = os.path.join(self.d, "marker"); open(m, "w").write("DEPTH1 READ MADE: x\n")
+        args = ["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--depth1-recorded", m]
+        self.assertEqual(S.main(args + ["--out", self.out]), 0)
+        self.assertEqual(S.main(args + ["--out", os.path.join(self.d, "out2")]), 2)
+    def test_v2_early_read_and_hash_required(self):
+        t0, b = self.base(); sig = self.mk(b, [])
+        h = os.path.join(self.d, "h"); open(h, "w").write("NC15DEPTH1 SCORER HASH: abc\n")
+        args = ["--version", "V2", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]
+        self.assertEqual(S.main(args + ["--nc15depth1-hash", h, "--now", "2026-12-04T12:00:00Z"]), 2)   # block not closed
+        self.assertEqual(S.main(args + ["--now", "2026-12-06T00:00:00Z"]), 2)                           # no hash file
+        bad = os.path.join(self.d, "bad"); open(bad, "w").write("x\n")
+        self.assertEqual(S.main(args + ["--nc15depth1-hash", bad, "--now", "2026-12-06T00:00:00Z"]), 2)
+    def test_heldout_run_refused(self):
+        t0, b = self.base(); sig = self.mk(b, [])
+        bad = os.path.join(self.d, "kalshi-pull-data", "2026-11-01T0000Z_1"); os.makedirs(bad)
+        m = os.path.join(self.d, "marker"); open(m, "w").write("DEPTH1 READ MADE: x\n")
+        self.assertEqual(S.main(["--version", "V1", "--block", "dev", "--book-root", bad, "--signals", sig, "--out", self.out, "--depth1-recorded", m]), 2)
+        os.remove(self.hl)   # unreadable list refuses everything
+        self.assertEqual(S.main(["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out, "--depth1-recorded", m]), 2)
+    def test_fraction_parsed(self):
+        self.assertEqual(S.created_ms("2026-11-03T11:57:02.5Z") - S.created_ms("2026-11-03T11:57:02Z"), 500)
+        self.assertEqual(S.created_ms("2026-11-03T11:57:02.123456Z") - S.created_ms("2026-11-03T11:57:02Z"), 123)
+    def test_coverage_prefers_result_row(self):
+        t0, b = self.base(); self.mk(b, [])
+        write_gz(os.path.join(self.root, "coverage.csv.gz"), ["ticker", "result"], [{"ticker": "T1", "result": "no"}, {"ticker": "T1", "result": ""}])
+        _, _, cov = S.load_run_folders(os.path.join(self.d, "r"))
+        self.assertEqual(cov["T1"]["result"], "no")
+    def _sig(self, p_ask, p_bid, win, filled):
+        return {"p_ask": p_ask, "p_bid": p_bid, "win": win, "filled": filled, "ct": 0}
+    def test_falsified_by_adverse_selection_alone(self):
+        # (2) holds (version net far above the parent's) but the one missed window is a parent winner with no loss: adverse selection alone must FALSIFY
+        sig = [self._sig(0.50, 0.10, True, True) for _ in range(20)] + [self._sig(0.50, 0.10, False, True) for _ in range(40)] + [self._sig(0.20, 0.10, True, False)]
+        for i, s in enumerate(sig): s["ct"] = i
+        lines = S.evaluate(sig, 7.0, "dev")
+        self.assertTrue(any("(2) fails: no | adverse selection: yes => FALSIFIED" in l for l in lines))
+        self.assertTrue([l for l in lines if l.startswith("VERDICT")][0].startswith("VERDICT (this block): FALSIFIED on development"))
+    def test_falsified_by_net_alone(self):
+        # no missed window, but the version's net is below the parent's at +0c: (2) fails => FALSIFIED
+        sig = [self._sig(0.20, 0.90, True, True) for _ in range(3)] + [self._sig(0.20, 0.90, False, True)]
+        for i, s in enumerate(sig): s["ct"] = i
+        lines = S.evaluate(sig, 7.0, "dev")
+        self.assertTrue(any("(2) fails: yes" in l and "=> FALSIFIED" in l for l in lines))
+        self.assertIn("FALSIFIED on development", [l for l in lines if l.startswith("VERDICT")][0])
+    def test_labels_printed(self):
+        self.assertIn("DEPTH1, CFRTI-B and CFRTI1-BTC", S.LABELS["V1"])
+        self.assertEqual(S.LABELS["V2"], "not blind on EVENT830's forward windows")
     def test_forward_refused_before_date(self):
         t0, b = self.base(); sig = self.mk(b, [])
         args = ["--version", "V1", "--block", "forward", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out, "--now", "2026-12-20T00:00:00Z"]

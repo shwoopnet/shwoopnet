@@ -34,6 +34,16 @@ T0_AFTER_S = 178   # V1: first row at or after close minus 178 s; V2: 180
 CANCEL_S = 120
 BAR_PF = 0.10
 BAR_N = 60
+DEPTH1_MARKER_PREFIX = "DEPTH1 READ MADE:"
+NC15DEPTH1_HASH_PREFIX = "NC15DEPTH1 SCORER HASH:"  # first line of the file the Head names for V2 (to be confirmed by the Head)
+V2_DEV_READ_AFTER = "2026-12-05T00:00:00Z"        # the V2 development block closes 2026-12-04T23:59:59Z
+HERE = os.path.dirname(os.path.abspath(__file__))
+MARKER_DIR = os.path.join(HERE, "read_markers")    # FIXED path: a new --out cannot reopen a block that was read
+HELDOUT_LIST = os.path.join(os.path.dirname(HERE), "workers", "HELDOUT_PULL_RUNS.md")
+LABELS = {
+    "V1": "not blind on Bitcoin windows to Nov 13: DEPTH1, CFRTI-B and CFRTI1-BTC read them (DEPTH1 on 2026-11-14)",
+    "V2": "not blind on EVENT830's forward windows",
+}
 MAKER_FEE_FRAC = 0.25  # primary; sensitivities 0 and 1
 
 
@@ -50,6 +60,56 @@ def fl(x):
         return float(x)
     except (TypeError, ValueError):
         return None
+
+
+def created_ms(s):
+    """created_time like 2026-11-03T11:57:02Z, ...02.5Z or ...02.123456Z to epoch ms; the fraction is read as a fraction (.5 is 500 ms)."""
+    ms = epoch(s) * 1000
+    if len(s) > 19 and s[19] == ".":
+        digits = ""
+        for ch in s[20:]:
+            if not ch.isdigit():
+                break
+            digits += ch
+        if digits:
+            ms += int(round(float("0." + digits) * 1000))
+    return ms
+
+
+def check_marker_line(path, prefix):
+    """The marker must exist and its first non-empty line must start with the prefix (as WHEEL0 does)."""
+    try:
+        for ln in open(path, encoding="utf-8").read().splitlines():
+            if ln.strip():
+                return ln.strip().startswith(prefix)
+    except OSError:
+        return False
+    return False
+
+
+def refuse_heldout(paths, list_file):
+    """Standing held-out guard (the logic of hm_guard / deskb_guard): a part starting HELDOUT_, or equal to a run folder named in the list, is refused; an unreadable list refuses everything."""
+    try:
+        lines = open(list_file, "rb").read().decode("utf-8").splitlines()
+    except (OSError, UnicodeDecodeError):
+        return "REFUSED: %s cannot be read, so no run can be shown to be clean" % list_file
+    if not any(ln.startswith("| Run folder") for ln in lines):
+        return "REFUSED: %s has no table header" % list_file
+    import re
+    runs = set()
+    for ln in lines:
+        m = re.match(r"^\|\s*`([A-Za-z0-9_\-]+)/([A-Za-z0-9_\-]+)`\s*\|", ln)
+        if m:
+            runs.add(m.group(2))
+    for p in paths:
+        for q in (os.path.abspath(p), os.path.realpath(p)):
+            parts = q.split(os.sep)
+            if any(x.upper().startswith("HELDOUT_") for x in parts):
+                return "REFUSED: %s lies in or resolves into a HELDOUT_ folder" % p
+            hit = runs.intersection(parts)
+            if hit:
+                return "REFUSED: %s is, or lies inside, the landed run %s, listed as held-out material" % (p, sorted(hit)[0])
+    return None
 
 
 def read_csv_gz(path):
@@ -70,7 +130,9 @@ def load_run_folders(root):
         p = os.path.join(base, "coverage.csv.gz")
         if os.path.exists(p):
             for r in read_csv_gz(p):
-                cover[r["ticker"]] = r
+                old = cover.get(r["ticker"])
+                if old is None or (old.get("result") not in ("yes", "no")):
+                    cover[r["ticker"]] = r        # a yes or no row is never replaced by an empty one
     for k in book:
         book[k].sort(key=lambda r: int(float(r["t_recv_ms"])))
     return book, trades, cover
@@ -132,7 +194,7 @@ def one_window(version, tk, ct, book, trades, cover):
     end_ms = int(float(cancel_row["t_recv_ms"])) if cancel_row else cancel_ms
     for tr in trades.get(tk) or []:
         try:
-            tms = epoch(tr["created_time"]) * 1000 + (int(float(tr["created_time"][20:23])) if len(tr["created_time"]) >= 23 and tr["created_time"][19] == "." else 0)
+            tms = created_ms(tr["created_time"])
         except (ValueError, KeyError):
             continue
         if not (t0_ms < tms < end_ms):
@@ -162,7 +224,7 @@ def pf(xs):
     return (g / l) if l > 0 else (float("inf") if g > 0 else float("nan"))
 
 
-def evaluate(sig, days):
+def evaluate(sig, days, block="dev"):
     """sig: signal dicts (status signal) in close order. Returns the report lines and the bar."""
     sig = sorted(sig, key=lambda s: s["ct"])
     n = len(sig)
@@ -197,15 +259,25 @@ def evaluate(sig, days):
     h1, h2 = part(sig[:half]), part(sig[half:])
     out.append("first half: version PF %.2f parent PF %.2f (filled %d) | second half: version PF %.2f parent PF %.2f (filled %d)" % (h1[0], h1[1], h1[2], h2[0], h2[1], h2[2]))
     c1 = pf(ver) - pf(par_all) >= BAR_PF
-    c2 = sum(ver) / weeks >= sum(par_all) / weeks - 1e-12
+    par0 = res[(0.0, MAKER_FEE_FRAC)][1]
+    c2_1 = sum(ver) / weeks >= sum(par_all) / weeks - 1e-12
+    c2_0 = sum(ver) / weeks >= sum(par0) / weeks - 1e-12   # the stricter parent (+0c) governs: live fills are at or below the ask seen
+    c2 = c2_0 and c2_1
     d1, d2 = h1[0] - h1[1], h2[0] - h2[1]
     c3 = d2 >= d1 - 1e-12
     c4 = len(filled) >= BAR_N
     miss = pf(par_unf) - pf(ver) >= BAR_PF if unfilled and filled else False
-    out.append("7g BAR: (1) PF beats parent by 0.10: %s | (2) net per contract-week not lower: %s | (3) second half not worse (version minus parent, second half vs first): %s | (4) at least %d filled: %s" % (
-        "met" if c1 else "not met", "met" if c2 else "not met", "met" if c3 else "not met", BAR_N, "met" if c4 else "not met (NOT_ENOUGH_DATA)"))
-    out.append("adverse selection check (parent PF on unfilled windows exceeds the filled set's PF by 0.10 or more): %s" % ("YES, FALSIFIED on development if net also lower" if miss else "no"))
-    verdict = "NOT_ENOUGH_DATA" if not c4 else ("PASS the 7g bar (this block)" if (c1 and c2 and c3) else "does not meet the 7g bar")
+    out.append("7g BAR: (1) PF beats parent by 0.10: %s | (2) net per contract-week not lower (vs parent +0c: %s, vs +1c: %s; +0c governs): %s | (3) second half not worse (version minus parent, second half vs first): %s | (4) at least %d filled: %s" % (
+        "met" if c1 else "not met", "met" if c2_0 else "not met", "met" if c2_1 else "not met", "met" if c2 else "not met", "met" if c3 else "not met", BAR_N, "met" if c4 else "not met (NOT_ENOUGH_DATA)"))
+    falsified = (not c2) or miss
+    out.append("adverse selection check (parent PF on missed windows, no-bid windows included, exceeds the version's PF on its fills by 0.10 or more): %s" % ("YES" if miss else "no"))
+    out.append("FALSIFIED on development if (2) fails OR the missed windows' parent PF exceeds the version PF by 0.10 or more: (2) fails: %s | adverse selection: %s => %s" % ("yes" if not c2 else "no", "yes" if miss else "no", "FALSIFIED" if falsified else "not falsified"))
+    if falsified and block == "dev":
+        verdict = "FALSIFIED on development (filled %d%s)" % (len(filled), "" if c4 else ", below the 60 of bar (4)")
+    elif not c4:
+        verdict = "NOT_ENOUGH_DATA"
+    else:
+        verdict = "PASS the 7g bar (this block)" if (c1 and c2 and c3) else "does not meet the 7g bar"
     out.append("VERDICT (this block): " + verdict)
     return out
 
@@ -218,20 +290,31 @@ def main(argv=None):
     ap.add_argument("--signals", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--depth1-recorded", default=None)
+    ap.add_argument("--nc15depth1-hash", default=None, help="V2: file whose first line starts 'NC15DEPTH1 SCORER HASH:'")
+    ap.add_argument("--heldout-list", default=None, help="the standing HELDOUT_PULL_RUNS.md (default: kalshi-scalper/workers/ beside this folder; an unreadable list refuses everything)")
     ap.add_argument("--now", default=None, help="test only: ISO time used in place of the clock for the read-after guard")
     a = ap.parse_args(argv)
     lo, hi = (epoch(x) for x in BLOCKS[(a.version, a.block)])
-    marker = os.path.join(a.out, "%s_%s_READ_DONE" % (a.version, a.block))
+    marker = os.path.join(MARKER_DIR, "%s_%s_READ_DONE" % (a.version, a.block))   # fixed path, not under --out
     if os.path.exists(marker):
         print("already read: %s exists; refusing a second run" % marker)
         return 2
-    if a.version == "V1" and a.block == "dev" and not (a.depth1_recorded and os.path.exists(a.depth1_recorded)):
-        print("refused: V1 development is not scored before DEPTH1's read is recorded (pass --depth1-recorded with the marker file the Head names)")
+    msg = refuse_heldout([a.book_root, a.signals, a.out], a.heldout_list or HELDOUT_LIST)
+    if msg:
+        print(msg)
+        return 2
+    if a.version == "V1" and a.block == "dev" and not (a.depth1_recorded and check_marker_line(a.depth1_recorded, DEPTH1_MARKER_PREFIX)):
+        print("refused: V1 development is not scored before DEPTH1's read is recorded (pass --depth1-recorded with the marker file the Head names; its first line must start %r)" % DEPTH1_MARKER_PREFIX)
         return 2
     ra = READ_AFTER.get((a.version, a.block))
+    if a.version == "V2" and a.block == "dev":
+        ra = V2_DEV_READ_AFTER
     now = epoch(a.now) if a.now else time.time()
     if ra and now < epoch(ra):
         print("refused: the %s %s block is read on or after %s" % (a.version, a.block, ra))
+        return 2
+    if a.version == "V2" and not (a.nc15depth1_hash and check_marker_line(a.nc15depth1_hash, NC15DEPTH1_HASH_PREFIX)):
+        print("refused: V2 is not scored before NC15DEPTH1's scorer hash is on record (pass --nc15depth1-hash with the file the Head names; its first line must start %r)" % NC15DEPTH1_HASH_PREFIX)
         return 2
     book, trades, cover = load_run_folders(a.book_root)
     sigs, counts = [], {}
@@ -246,11 +329,12 @@ def main(argv=None):
                 sigs.append(w)
     days = (hi - lo + 1) / 86400.0
     print("%s %s block (%s to %s, constants of the registration); candidate windows by status: %s" % (a.version, a.block, BLOCKS[(a.version, a.block)][0], BLOCKS[(a.version, a.block)][1], json.dumps(counts, sort_keys=True)))
-    if a.version == "V1" and a.block == "dev":
-        print("LABEL: not blind on Bitcoin windows to Nov 13: DEPTH1 reads them on 2026-11-14")
-    for l in evaluate(sigs, days):
+    if a.version == "V2" or a.block == "dev":
+        print("LABEL: " + LABELS[a.version])
+    for l in evaluate(sigs, days, a.block):
         print(l)
     os.makedirs(a.out, exist_ok=True)
+    os.makedirs(MARKER_DIR, exist_ok=True)
     open(marker, "w").write("read done\n")
     return 0
 
