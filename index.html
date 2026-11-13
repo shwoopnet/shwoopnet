@@ -4645,7 +4645,7 @@ kalshiStatusTick();
   // ---- Stage board (Nov 12, 2026, the owner: "build it into the live page"; the approved mockup, not a redesign). A loop of four boxes, Shadow (on deck), Probation, Live and Off / Retired, each with a count and the rule for leaving it; tapping a box opens it in place and its strategies list beneath as compact rows (name, stage, cash PF, one status word, a thin bar), a row opens to its detail and More holds the deepest layer. Every lane, count and status word comes from the SAME shared state the Bot page reads (kalshiStrategyState via the card's lane and kill state), so the two pages cannot disagree. Pure builders; none reads the page, the clock or storage. ----
   var KAL_STAGES = [
     { key: 'shadow', label: 'Shadow', sub: 'on deck', head: 'shadow rules, no money at risk', then: 'passes the shadow bar (150 signals, PF 1.3), then the owner' },
-    { key: 'prob', label: 'Probation', sub: 'small size', head: 'small size, earning a seat', then: 'a good live record, then the owner' },
+    { key: 'prob', label: 'Probation', sub: 'small size', head: 'small size, earning a seat', then: 'passes the 60 + 30 record, then the owner' },
     { key: 'live', label: 'Live', sub: 'running', head: 'running now', then: 'a kill rule trips' },
     { key: 'off', label: 'Off / Retired', sub: 'cooling down', head: 'cooling down, retired', then: 'a cool off, then a fresh shadow record' }
   ];
