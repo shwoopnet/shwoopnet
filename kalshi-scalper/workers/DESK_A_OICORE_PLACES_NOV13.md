@@ -30,3 +30,12 @@ The Head's order of 21:05Z (item 1, the owner's shadow list: 15 against a target
 - **Bitcoin:** is OICORE itself (the live probe), not a place.
 - **Gold, AUD/USD, USD/CAD, natural gas:** not in the Head's list; no place written (USD/CAD and natural gas can be added by the same lines if the Head wants them).
 - A place has no research value of its own: each is shadow only, "no evidence at n = x", and none can be promoted past what OICORE's own record earns.
+
+## Dated line (Nov 13, 2026, the Head of R&D, 21:06Z): three more places, and gold stays out
+Added by the same lines as above (the shared rule, T per market, gate 0, NC15, "not seated" until 20 trading days of open interest exist, no evidence, a 7g version each):
+| Place | Series | Book source | Needs before seating |
+|---|---|---|---|
+| OICORE-AUDUSD | KXAUDUSD15M | NC15 (5 s polls) | open-interest candles; 20 trading days; the candles must carry open interest. (AUD/USD was KESTREL's market; KESTREL was favourite-late, so this is a different idea: the cheap side on an open-interest surge.) |
+| OICORE-USDCAD | KXUSDCAD15M | NC15 | same |
+| OICORE-NATGAS | KXNATGAS15M | NC15 | same |
+**Gold stays out for now:** it is L1's market, and a cheap-side place there needs an interference ruling first (a shared stop or window budget with L1). The Head asked Desk B to write the open-interest candle jobs for the places. The count is now twelve places.
