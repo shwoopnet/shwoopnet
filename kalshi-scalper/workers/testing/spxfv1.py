@@ -94,6 +94,15 @@ def futures_signal(close_ts, bars):
     return None, sd, math.log(now_b[1] / open_b[1]) / sd
 
 
+def is_tie(yes_bid, yes_ask):
+    """A tie is counted only on a two-sided quote, 0 < yes_bid < yes_ask < 1 and not crossed or locked (Head 16:53Z, Auditor B): an empty book (0.00 / 1.00) is not a tie."""
+    if yes_bid is None or yes_ask is None:
+        return False
+    if not (yes_bid > TOL and yes_ask < 1.0 - TOL and yes_bid + (1.0 - yes_ask) < 1.0 - TOL):
+        return False
+    return abs(yes_ask - (1.0 - yes_bid)) <= TOL
+
+
 def decide(yes_bid, yes_ask, p_yes):
     """-> (side, ask, model_chance) or (None, reason). Pure rule on one decision candle and the model chance of YES."""
     if yes_bid is None or yes_ask is None:
@@ -140,8 +149,8 @@ def build(mk, cs, bars, cutoff_lo=None, cutoff_hi=None):
             raise SystemExit("STOP: two ES rows share one ts_event inside the bars of window %s (Head ruling: a duplicate ts_event stops the run)" % tkr)
         if why:
             g[why] = g.get(why, 0) + 1; continue
-        if dec["bid"] is not None and dec["ask"] is not None and dec["bid"] + (1.0 - dec["ask"]) < 1.0 - TOL and abs(dec["ask"] - (1.0 - dec["bid"])) <= TOL:
-            g["ties_yes_ask_equals_no_ask"] += 1          # a valid quote whose two asks are equal: the tie goes to YES
+        if is_tie(dec["bid"], dec["ask"]):
+            g["ties_yes_ask_equals_no_ask"] += 1          # a valid two-sided quote whose two asks are equal: the tie goes to YES
         pick, reason = decide(dec["bid"], dec["ask"], phi(z))
         if pick is None:
             g[reason] = g.get(reason, 0) + 1; g["no_trade_signal"] += 1; continue

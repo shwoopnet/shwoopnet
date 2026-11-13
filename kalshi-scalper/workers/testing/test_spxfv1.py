@@ -17,6 +17,7 @@ assert s.decide(0.18, 0.21, 0.9)[0] is not None and s.decide(0.18, 0.22, 0.9)[0]
 assert s.decide(0.29, 0.30, 0.9)[0] is not None and s.decide(0.30, 0.31, 0.9)[0] is None
 assert s.decide(0.04, 0.05, 0.9)[0] is not None and s.decide(0.03, 0.04, 0.9)[0] is None
 assert s.decide(None, 0.2, 0.9)[0] is None
+assert s.is_tie(0.49, 0.51) and not s.is_tie(0.00, 1.00) and not s.is_tie(0.0, 0.5) and not s.is_tie(0.5, 1.0) and not s.is_tie(0.51, 0.49) and not s.is_tie(0.50, 0.50) and not s.is_tie(0.49, 0.52) and not s.is_tie(None, 0.5)          # empty book, one-sided, crossed, locked, unequal asks: no tie
 assert s.decide(0.91, 0.90, 0.9)[1] == "crossed or locked quote" and s.decide(0.90, 0.90, 0.9)[1] == "crossed or locked quote"          # crossed and locked
 assert s.decide(0.89, 0.91, 0.9)[0] is None and s.decide(0.89, 0.91, 0.9)[1] != "crossed or locked quote"
 # --- futures_signal: alternating changes +a / -a: sd_1m = a*sqrt(10/9), sd = sd_1m*sqrt(119/60) ---
