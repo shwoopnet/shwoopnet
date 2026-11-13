@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """NHLOT price measurement, SECOND BUILD (History Miner, Nov 13, 2026), from the text only: IDEA_DESK_B_WAVE3.md (claude/idea-desk-b 5d1ead7d, sha256 71fac71b...), the six sections named by
-nhlot/INPUT_LAYOUT.md, the later one right where they differ. Desk B's measure_prices.py, fixture_outputs/ and build_candles_job.py are NOT read. Zero tries, no outcome read, no result field.
+nhlot/INPUT_LAYOUT.md, the later one right where they differ, with the third and fourth dated amendments (WAVE3 3d03e5a5 at e3aef7be). Desk B's measure_prices.py, fixture_outputs/ and build_candles_job.py are NOT read. Zero tries, no outcome read, no result field.
 Usage: python3 -I nhlot2.py <candle run folder> <games.json>"""
 import gzip, hashlib, json, os, statistics, sys
 
@@ -53,7 +53,11 @@ def load_candles(folder):
         for mk in body.get("markets") or []:
             t = mk.get("market_ticker")
             for c in mk.get("candlesticks") or []:
-                out.setdefault(t, {})[int(c["end_period_ts"])] = (px(c.get("yes_bid")), px(c.get("yes_ask")))
+                b, a = px(c.get("yes_bid")), px(c.get("yes_ask"))
+                # fourth amendment (05:37Z, the Head's ruling seq 11): a bid of 0.00 is NO bid and an ask of 1.00 is NO ask, everywhere
+                b = b if (b is not None and b > TOL) else None
+                a = a if (a is not None and a < 1 - TOL) else None
+                out.setdefault(t, {})[int(c["end_period_ts"])] = (b, a)
     missing = [r["id"] for r in (m.get("job") or {}).get("requests", []) if r["id"] not in answered]
     if missing:
         raise SystemExit("refused: job requests with no 200 answer: %s" % missing[:5])
@@ -97,7 +101,7 @@ def detect(g, cd):
         ok = True
         for t in g["ml"]:
             q = at(cd, t, ts)
-            if q is None or q[0] is None or q[1] is None:
+            if q is None or q[0] is None or q[1] is None or q[0] > q[1] + TOL:     # a mid needs both sides, with the bid not above the ask (fourth amendment)
                 ok = False; break
             mid = (q[0] + q[1]) / 2
             if not (ML_LO - TOL <= mid <= ML_HI + TOL):

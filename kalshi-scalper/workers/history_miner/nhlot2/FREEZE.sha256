@@ -1,6 +1,6 @@
-# NHLOT second build frozen (nhlot2.py unchanged); outputs for Desk B's cases 01 to 13 (10 to 13 printed before any comparison), Nov 13, 2026
-1f769a21ed0ec2e2db0112a7083d6575ca746f2c1f048946cbc534c79ff64f14  nhlot2.py
-ffadada473e15296f241aa26dfe98d39f4f97cf57f6d17fc8af794ca026e32ca  NHLOT2_BUILD_NOTE.md
+# NHLOT second build after the fourth dated amendment; outputs for Desk B's cases 01 to 14, printed before comparison (Nov 13, 2026)
+649f8aadb1bd717823052e983c199889cbf8a5a2e29ac9f4d5aeed34d330777b  nhlot2.py
+8e3eecfdc48a710a0a496154e37f420e1cd260180f6bf7e5d02231164b107cf4  NHLOT2_BUILD_NOTE.md
 b98d3d717ac69e73d5024c2a56bd824437b7f8b82624ce0dd663bb60e756d27b  outputs/case_01.json
 1380d0f2de818c3dee66f4b0894cf438e73651eae8d225acd2ea74c436db01d2  outputs/case_02.json
 5b0bfee5c4604e5096ecc314dd1f286284f6a4aa4d8701744314c00804c3fcbb  outputs/case_03.json
@@ -14,3 +14,4 @@ af370d448383fa17b0f9ba7d9b8f99edfe4ccc7fb421b66e258814d885bd386d  outputs/case_0
 4f36c9f735a34af18554463d734b6974f6229edde0937de98f02037310eb935f  outputs/case_11.json
 2b63688d762c600e64fcda59d7d63ae9e3202f6648b6a20dbdfbccf6086669a1  outputs/case_12.json
 0f66f97267e256585758cff09643b33ecc6956a76dbe903ff341eabaa34cfd9b  outputs/case_13.json
+78838a222e171eb09807ee409eb463340326b2d00eeaf4a517e51f059ebb1d7d  outputs/case_14.json
