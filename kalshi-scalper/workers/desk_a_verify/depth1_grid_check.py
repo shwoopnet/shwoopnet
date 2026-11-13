@@ -10,7 +10,7 @@ READ = 1794614400
 if fx is None and time.time() < READ: sys.exit("REFUSED: before 2026-11-14T00:00:00Z the grid check opens no recorded file")
 if fx is not None: assert (fx / "MADE_UP_DATA").exists(), "a fixture must carry MADE_UP_DATA"
 sys.path.insert(0, str(root / "src")); sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import heldout_guard
+import heldout_guard_v2 as heldout_guard
 heldout_guard.refuse_heldout(str(root), "grid check")
 from scalper import depth1 as D
 if fx is not None:
