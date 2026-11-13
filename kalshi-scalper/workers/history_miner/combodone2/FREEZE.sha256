@@ -1,4 +1,4 @@
-# COMBODONE second build, FINAL against the card through Amendment 5 (b0cb5a9e), Nov 13, 2026
+# COMBODONE second build, FINAL against the card through Amendment 5 and its clarification (4ae639d9); outputs for Desk B's cases 01 to 13 (12 and 13 printed before any comparison), Nov 13, 2026
 4ea1e61633ddc3ea8fded72cfc118bff8a78bf53a7db4679976030e198245f35  combodone2.py
 32552d5421c195921832eff664cfc6f968c1a006410aaf9028b07bdf339124d2  combodone2_core.py
 8fbedc7cfe7097117cf5bb44aafd2b83ffaae62f87aeb9fb0c066e8d809a1468  COMBODONE2_BUILD_NOTE.md
@@ -13,3 +13,5 @@ dc907ea08f6bded7b1f6a1aa77870828641233df959f49f95d2d888ab5b66012  outputs/case_0
 35032b10cb12926d291fefccac393542f50be3c3d5c2c848e47871af4e2b2285  outputs/case_09.json
 e0b2447a4281b824a16823e34cf48009c2438ce7dbf1315050c2f82beb75008f  outputs/case_10.json
 9d721f2ed05aeb4df49b34914d2edb3a5ab57076d7c318a34950b7e78c45a80d  outputs/case_11.json
+f13ee0c3fa8e688c1c2c398d6677476cbb6d495736f58676cedb222249377ccb  outputs/case_12.json
+7eb97f7c1afe52e5f3e3bccea11ccb8a5dbb900c4a23524a5c0f92483cbf08d3  outputs/case_13.json
