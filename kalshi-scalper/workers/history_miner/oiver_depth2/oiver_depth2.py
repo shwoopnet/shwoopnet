@@ -104,7 +104,7 @@ def run(mode, path):
         closes.append(close)
         size = touch_size(r, side)                                      # a YES buy meets the YES ask; a NO buy meets the YES bid
         if size is None:
-            bump("no_size"); continue
+            bump("size_unknown"); continue
         if size < DEPTH_FACTOR * C - EPS:
             bump("depth_thin"); continue
         version.append(net)

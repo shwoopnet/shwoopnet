@@ -1,10 +1,12 @@
 """OIVER-DEPTH book-size builder (History Miner, Nov 13, 2026), from the Head of R&D's rulings of 21:10Z to 21:14Z (the R6 guard is the Head's ruling,
 being added to card 3 by Desk A). Rules and the hand case in EXPECTED_BY_HAND.md (2becf882), committed first. Adds yes_bid_size and yes_ask_size from R6
 book.csv.gz files (layout of scripts/record_15m_book.py) to the OIVER rows closing in [2026-10-29, 2026-11-09). No R6 folder dated 2026-11-09 or later is
-opened; such a path stops the build. Governing card: Desk A's 23b5bd9b (sha256 ae1f1ee6), 21:13Z amendment; the poll time is EXCHANGE time, the
-book row's HTTP Date header (dated line of 21:17Z in EXPECTED_BY_HAND.md). Adds r6_poll (1 or 0). Prints counts only.
+opened; such a path stops the build. Governing card: Desk A's 23b5bd9b (sha256 ae1f1ee6), 21:13Z amendment; the poll time is EXCHANGE time by the
+offset formula of the frozen sheet DESK_A_FROZEN_OIVER_SHADOW_DEFINITIONS_NOV13.md (61fb9854, sha256 cb45e79b, section 1 = the wheel sheet's section 0):
+offset = median over the 120 most recent readable-header rows of the same run folder at or before the poll of (Date s + 0.5 - t_recv_ms / 1000);
+exchange time = t_recv_ms / 1000 + offset (dated line of 21:30Z in EXPECTED_BY_HAND.md). Each book.csv.gz is one run folder. Adds r6_poll (1 or 0).
 Usage: python3 -I oiver_r6sizes.py <oiver rows.csv> <out.csv> <book.csv.gz> [<book.csv.gz> ...]"""
-import csv, gzip, io, json, math, os, re, sys
+import csv, gzip, io, json, math, os, re, statistics, sys
 from datetime import datetime
 from email.utils import parsedate_to_datetime
 
@@ -13,7 +15,8 @@ import hm_guard  # noqa: E402
 
 R6_START = 1793232000                # 2026-10-29T00:00:00Z
 R6_HELDOUT_FROM = 1794182400         # 2026-11-09T00:00:00Z
-LO_S, HI_S = 190, 180                # the decision poll: the exchange Date in [close - 190 s, close - 180 s], inclusive
+LO_S, HI_S = 190, 180                # the decision poll: exchange time in [close - 190 s, close - 180 s], inclusive
+OFFSET_ROWS = 120                    # the offset window (open (a): fewer rows use all there are, at least 1; open (b): an even count takes the mean of the two middle)
 DATE_DIR = re.compile(r"^(\d{4})-(\d\d)-(\d\d)$")
 
 
@@ -71,21 +74,34 @@ def build(rows_path, out_path, book_paths):
             continue
         keep.append(r)
         want[(r["ticker"], close)] = None
-    for p in book_paths:
+    for p in book_paths:                                                      # one file = one run folder
         with gzip.open(p, "rt", newline="") as f:
+            run = []
             for b in csv.DictReader(f):
                 try:
-                    key = (b["ticker"], iso(b["close_time"]))
-                    tr = int(float(b["t_recv_ms"]))
+                    run.append((int(float(b["t_recv_ms"])), b))
                 except (KeyError, TypeError, ValueError):
                     continue
-                if key not in want or key[1] >= R6_HELDOUT_FROM:
-                    continue
-                te = exch_s(b.get("server_date_header"))
-                if te is None or not (key[1] - LO_S <= te <= key[1] - HI_S):
-                    continue
-                if want[key] is None or (te, tr) >= want[key][0]:              # the latest Date, then the latest t_recv_ms, then the later file row
-                    want[key] = ((te, tr), b)
+        run.sort(key=lambda x: x[0])                                            # by receive time, stable in file order
+        terms = []                                                              # (Date s + 0.5 - t_recv s) of readable-header rows so far
+        for tr, b in run:
+            d = exch_s(b.get("server_date_header"))
+            if d is not None:
+                terms.append(d + 0.5 - tr / 1000.0)
+            if not terms:
+                continue                                                        # no readable row yet: no exchange time
+            off = statistics.median(terms[-OFFSET_ROWS:])
+            te = tr / 1000.0 + off
+            try:
+                key = (b["ticker"], iso(b["close_time"]))
+            except (KeyError, TypeError, ValueError):
+                continue
+            if key not in want or key[1] >= R6_HELDOUT_FROM:
+                continue
+            if not (key[1] - LO_S - 1e-9 <= te <= key[1] - HI_S + 1e-9):
+                continue
+            if want[key] is None or te >= want[key][0] - 1e-12:                 # the last by exchange time; a tie goes to the later row
+                want[key] = (te, b)
     out = []
     for r in keep:
         hit = want[(r["ticker"], int(r["close_ts"]))]
