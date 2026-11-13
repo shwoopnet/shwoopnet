@@ -75,3 +75,35 @@ Considered and NOT carded, plainly:
 - **Wind and football totals from the NWS forecast:** a public forecast against a market's price, which is the declined weather row's shape, and under 52 windy games a season.
 - **Cloture tallies against confirmation vote counts (Senate roll-call XML):** a real official early fact, but a handful of events a year.
 - **Fading price moves inside dead-ball windows:** a filter on INPLAYJUMP, which was that idea's last look.
+
+## 6. The Head's three conditions on the probe (seq 6), answered 02:45Z; the probe is NARROWED
+
+The Head of R&D ruled: the probe goes ahead of the card; DBLTB is NOT a version of MAPBREAK but is a CONDITIONAL card, not registered and not counted, until the doubles state is shown to be readable from Kalshi; three conditions before the probe moves.
+
+### (a) Terms: what could be read, and what could not
+
+- **Kalshi's Developer Agreement and Terms of Use could NOT be read.** One request each to three kalshi.com addresses (the developer agreement page and two guessed addresses for its file and a data terms page) was answered HTTP 429 by a security checkpoint. Nothing was retried. `docs/KALSHI_PULL.md` on main already records the same: the two pages "were NOT read (HTTP 429 to every fetch, archive copy also unreachable)", the owner "waived reading" them on Nov 12 for the pull of "Kalshi's public market data", and "This is NOT a finding that automated reads are allowed."
+- **What Kalshi's documentation pages say that bears on these endpoints** (docs.kalshi.com, read Nov 13; none of the nine pages carries a licence or terms statement):
+  - Play-by-play: "Returns null for unsupported milestone types or milestones without a Sportradar ID." So the play-by-play is tied to a named outside provider.
+  - Live data: "if the provider feed falls behind, a cached board may still be served". Scores come from a provider feed.
+  - Rate limits: "Unauthenticated public requests are subject to separate limits. Authenticate requests where supported and back off on 429." And: "Publicly cacheable responses (Cache-Control: public), which include most market data".
+  - The temperature index is described as "Kalshi-computed"; with `detailed=true` it adds "every member station's reported reading", which is station data from a source the page does not name.
+- **This desk's reading, for the Head and the owner to overrule.** Live scores and play-by-play are a third party's data that Kalshi relays. No terms covering them have been read, the owner's waiver was given for market data, and the owner stopped a scores recorder once on terms. Under the standing rule (unsure means barred) **every sports request and the per-station detail are REMOVED from the probe**: the milestone lists, the two doubles event lists and the detailed index read. Asking for sports live data or play-by-play, even once, is a question for the owner first, with the earlier NO on a scores recorder quoted to them.
+- **What stays:** the plain Kalshi-computed index for Miami (two recent hours and two hours on Nov 3), its calibration timeline, and the open Miami hourly temperature events with their milestones. These are Kalshi's own market data and settlement series, under the same owner-accepted terms risk as every kalshi-pull read. If the Head reads even these as outside that waiver, the probe stops here.
+- **Effect on DBLTB:** its stage 0 (can the doubles state be read) cannot be answered by this probe any more. DBLTB stays conditional on the owner's decision about sports live data, and is not counted.
+
+### (b) Held-out
+
+No card, open or closed, holds out an hourly temperature series: the family was never read (the family table's row says NEVER READ; WXOTHER1 was a census only), and this desk's cost measurement has a fixed sample of Nov 5 to Nov 11 with no held-out. The probe's old window was moved to Nov 3 so it lies outside that sample. The daily temperature cards (WX1, WX3, WXDEAD1, WXDAYEND, WXENS1, WXLOW1) are on other series. With the sports requests removed, no sports, esports, politics or combo series is asked, so no held-out of INPLAYJUMP, POLGAPH, WHEEL0, S3, VOIDSNAP, COMBODONE, TIE3, MAPBREAK or REMATCH is in range. The job file's `heldout` line says the same.
+
+### (c) The reader
+
+`dbltb/livedata_fields.py`, written before the run exists. It opens only the files the run's manifest lists, checks each against the manifest's sha256, and prints for every field its path, its types and its count, and for time fields the first and last time. **It never prints a value.** A key is printed only if it is a plain lowercase field name; any other key (capitals, digits inside it, a dash: an id, a ticker, a station) is printed as `<key>`, and so is every key of a map (three or more keys whose values are all objects of one shape). It refuses a HELDOUT_ path, a file outside the run, a link, a manifest with no job and a file whose sha256 does not match. Tested on five made-up cases whose every value is a sentinel (77.77, 66.61, words starting SENTINEL, ids starting ZZ9): no sentinel appears in any output (`dbltb/fixture_outputs/`). **Known limit:** if Kalshi keys a small object by a lowercase word that is itself a name (a city, say) and the object is not a map of same-shaped objects, that word is printed as if it were a field name. It is a name, not a reading. The raw answers are opened by nothing else.
+
+### What the narrowed probe can still answer
+
+1. Whether the Miami index answers at all without a key, and which fields a point carries.
+2. Whether a window ten days back still answers (is there history to measure on).
+3. What a hourly temperature event's milestone looks like, and so whether the index is tied to the event.
+4. How often the calibration changed.
+It answers nothing about sports. Section 4's other unlocks (play-by-play, the reference price series, state reads) are NOT probed and wait for the owner.

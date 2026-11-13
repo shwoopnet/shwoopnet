@@ -2,20 +2,9 @@
  "job_id": "LIVEDATA_PROBE_A",
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/dbltb/LIVEDATA_FINDING_AND_DBLTB_CARD.md",
- "purpose": "Zero-try field probe of Kalshi's own public live data endpoints (milestones, events with milestones, the Miami temperature index and its calibrations): which fields exist and how far back the index goes. No price, no result, no rule.",
- "heldout": "none (a field probe; nothing is scored)",
+ "purpose": "Zero-try field probe of Kalshi's own temperature index (Miami: two recent hours, two hours on Nov 3, the calibration timeline) and of open Miami hourly temperature events with their milestones. Field names and time stamps only; no sports data.",
+ "heldout": "none in range. No card, open or closed, holds out an hourly temperature series (the family was never read; this desk's cost measurement has a fixed sample of Nov 5 to Nov 11, no held-out, and the old window here is Nov 3). No sports, politics, esports or combo series is asked, so no held-out of INPLAYJUMP, POLGAPH, WHEEL0, S3, VOIDSNAP, COMBODONE, TIE3, MAPBREAK or REMATCH is touched. The answers are opened only by workers/dbltb/livedata_fields.py, which prints field names, types, counts and time stamps and never a value.",
  "allowed_endpoints": [
-  {
-   "name": "milestones",
-   "method": "GET",
-   "path_pattern": "/milestones",
-   "params_allowed": [
-    "limit",
-    "category",
-    "min_updated_ts",
-    "cursor"
-   ]
-  },
   {
    "name": "events",
    "method": "GET",
@@ -33,7 +22,6 @@
    "path_pattern": "/live_data/weather/miami",
    "params_allowed": [
     "last_sec",
-    "detailed",
     "from",
     "to"
    ]
@@ -46,50 +34,10 @@
   }
  ],
  "series_allowlist": [
-  "KXATPCHALLENGERDOUBLES",
-  "KXITFDOUBLES",
   "KXTEMPMIAH"
  ],
- "max_requests": 10,
+ "max_requests": 4,
  "requests": [
-  {
-   "id": "ms_sports",
-   "path": "/milestones",
-   "params": {
-    "limit": 100,
-    "category": "Sports",
-    "min_updated_ts": 1794530139
-   },
-   "max_pages": 2
-  },
-  {
-   "id": "ms_any",
-   "path": "/milestones",
-   "params": {
-    "limit": 100,
-    "min_updated_ts": 1794530139
-   }
-  },
-  {
-   "id": "ev_itf_doubles",
-   "path": "/events",
-   "params": {
-    "series_ticker": "KXITFDOUBLES",
-    "status": "open",
-    "limit": 5,
-    "with_milestones": "true"
-   }
-  },
-  {
-   "id": "ev_chall_doubles",
-   "path": "/events",
-   "params": {
-    "series_ticker": "KXATPCHALLENGERDOUBLES",
-    "status": "open",
-    "limit": 5,
-    "with_milestones": "true"
-   }
-  },
   {
    "id": "ev_temp_miami",
    "path": "/events",
@@ -108,19 +56,11 @@
    }
   },
   {
-   "id": "wx_detailed",
-   "path": "/live_data/weather/miami",
-   "params": {
-    "last_sec": 1800,
-    "detailed": "true"
-   }
-  },
-  {
    "id": "wx_old",
    "path": "/live_data/weather/miami",
    "params": {
-    "from": 1793836800000,
-    "to": 1793844000000
+    "from": 1793664000000,
+    "to": 1793671200000
    }
   },
   {
@@ -128,7 +68,7 @@
    "path": "/live_data/weather/miami/calibrations"
   }
  ],
- "notes": "Step A of two. Step B (live data and play-by-play of a handful of milestone ids, one event's live data) can only be written after step A shows the ids; it is a second job. Not dispatched; waits on the Head of R&D and the Chief of Staff.",
+ "notes": "Narrowed on Nov 13 after the Head's three conditions: every sports request (milestone lists, the doubles events) and the per-station detail were REMOVED because Kalshi's terms could not be read and that data is a third party's. Not dispatched; waits on the Head of R&D and the Chief of Staff.",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",

@@ -1,0 +1,44 @@
+LIVEDATA_PROBE_A field reader | requests asked 4 | answered whole 4 | run finished: yes [field names only, no value]
+ev_temp_miami page 1: 263 stored bytes, cut short by the runner: no, 20 distinct fields [field names only, no value]
+  $ | object x 1
+  $.cursor | string x 1
+  $.events | array x 1 | array length 1 to 1
+  $.events[] | object x 1
+  $.events[].event_ticker | string x 1
+  $.events[].strike_date | string x 1 | times from 2026-11-13T05:00:00Z to 2026-11-13T05:00:00Z
+  $.events[].title | string x 1
+  $.milestones | array x 1 | array length 1 to 1
+  $.milestones[] | object x 1
+  $.milestones[].details | object x 1
+  $.milestones[].details.away_score | number x 1
+  $.milestones[].details.home_score | number x 1
+  $.milestones[].details.status | string x 1
+  $.milestones[].end_date | string x 1 | times from 2026-11-13T05:00:00Z to 2026-11-13T05:00:00Z
+  $.milestones[].id | string x 1
+  $.milestones[].last_updated_ts | string x 1 | times from 2026-11-13T04:30:00Z to 2026-11-13T04:30:00Z
+  $.milestones[].primary_event_tickers | array x 1 | array length 1 to 1
+  $.milestones[].primary_event_tickers[] | string x 1
+  $.milestones[].start_date | string x 1 | times from 2026-11-13T04:00:00Z to 2026-11-13T04:00:00Z
+  $.milestones[].type | string x 1
+wx_recent page 1: the answer is not JSON (43 stored bytes) [field names only, no value]
+wx_old page 1: 96 stored bytes, cut short by the runner: no, 5 distinct fields [field names only, no value]
+  $ | object x 1
+  $.city | string x 1
+  $.config_version | string x 1
+  $.timeseries | array x 1 | array length 0 to 0
+  $.units | string x 1
+wx_calibrations page 1: 220 stored bytes, cut short by the runner: no, 13 distinct fields [field names only, no value]
+  $ | object x 1
+  $.calibrations | array x 1 | array length 3 to 3
+  $.calibrations[] | object x 3
+  $.calibrations[].by_city | object x 3
+  $.calibrations[].by_city.<key> | object x 9
+  $.calibrations[].by_city.<key>.w | number x 9
+  $.calibrations[].effective_ts | number x 3 | times from 2026-10-30T02:13:20Z to 2026-11-13T02:13:20Z
+  $.calibrations[].offsets_c | object x 3
+  $.calibrations[].offsets_c.<key> | number x 3
+  $.calibrations[].version | string x 3
+  $.calibrations[].weights | object x 3
+  $.calibrations[].weights.<key> | number x 6
+  $.city | string x 1
+nothing above is a value: no temperature, score or status word was printed; a key is shown only when it is a plain lowercase field name, and anything else is shown as <key> [field names only, no value]
