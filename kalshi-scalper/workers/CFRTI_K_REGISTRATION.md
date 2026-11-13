@@ -130,3 +130,5 @@ CFRTI-K is NOT frozen (no held-out reader exists), so under standing rule 17 it 
 
 
 **Dated line (2026-11-13, the Head of R&D, 17:04Z; corrects the labels in the line above, the registration's pre-registered labels govern):** the held-out read prints THREE labels at n of 50 or more: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3 (what a NO CALL means for the live seat is the owner's decision, asked through the EA); FAIL = cash PF under 1.0 (then CFRTI-K is CLOSED FOR GOOD per the owner's decision). Under 50 rows it is NOT_ENOUGH_DATA. The earlier wording "FAIL means the registered bar missed" is withdrawn.
+
+**Dated line (2026-11-13, the EA on the owner's words, relayed by the Head of R&D; the three labels are unchanged):** "2026-11-13, the EA on the owner's words ('Run it, close if test fails'): NO CALL is not a fail. CFRTI-K keeps running at 3 contracts under its normal kill rules and the automatic rotation rules (cut if its last 60 trades are under 1.0). Only FAIL closes it for good."
