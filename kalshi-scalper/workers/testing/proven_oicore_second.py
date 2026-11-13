@@ -3,24 +3,25 @@
 Independent of Refinement's build 1 (not read). Hand case: PROVEN_OICORE_HAND_CASE.md (committed first). Test: test_proven_oicore_second.py (INVENTED rows only). No live figure is stored in any file; results go by message only.
 
 TASK (Head of R&D, 19:20Z, the owner's priority): from the nightly report's slot rows for strategy OICORE (settled, filled), in fill order, split into 3 equal windows by fill count;
-cash PF per window from avgFill and avgFee on the fill-booked cash basis (fillCost, functions/kalshiLiveLib.js), unrounded; PROVEN if at least 2 of 3 windows are at 1.3 or better with n of 100 or more, otherwise NOT YET with the figures.
+cash PF per window from avgFill and avgFee on the fill-booked cash basis (fillCost, functions/kalshiLiveLib.js), unrounded; PROVEN if at least 2 of 3 windows are at 1.3 or better, otherwise NOT YET with the figures.
+RULING (Head, 19:22Z): the bar is 100 fills IN TOTAL; there is NO per-window n minimum; total n under 100 is NOT_ENOUGH_DATA; each window's n is printed beside its PF.
 
 CASH BASIS (fillCost as read from origin/main): side price = avgFill for YES, 1 - avgFill for NO; cost = (side price + avgFee) x count; valid only if 0 < avgFill < 1, 0 <= avgFee < 1 and count > 0, else the row is EXCLUDED and counted
 (fillCost would fall back to the limit booking maxCost, which the report row does not carry). Payout count x $1 when the result equals the side, else 0. A void = price refunded, fee kept (-(avgFee x count)).
 A result of 'exit' (exitProceeds is not in the report row) is EXCLUDED and counted. Rows used: strategy exactly 'OICORE', count > 0, settledPnl present. Fill order = ascending ts (stable).
-Windows: rows[i*n // 3 : (i+1)*n // 3]; n = the window's order count. A window counts when PF >= 1.3 - 1e-9 (PF unrounded) AND n >= 100. PROVEN if at least 2 of 3 windows count.
+Windows: rows[i*n // 3 : (i+1)*n // 3]. A window counts when its PF >= 1.3 - 1e-9 (unrounded), whatever its n. Total rows used under 100: NOT_ENOUGH_DATA; else PROVEN if at least 2 of 3 windows count, otherwise NOT YET.
 Usage: proven_oicore_second.py <report.json>      (the nightly report with ?orders=1 (a 'slotOrders' list), or a plain list of rows)
 """
 import json, math, os, sys
 
 STRATEGY = "OICORE"
 BAR_PF = 1.3
-MIN_N = 100
+MIN_TOTAL = 100
 NEED_WINDOWS = 2
 N_WINDOWS = 3
 TOL = 1e-9
 AMBIGUITIES = [
-    "'By fill count' is read as by the NUMBER OF FILLED ORDERS (rows), not by contracts; n in 'n of 100 or more' is the window's order count.",
+    "'By fill count' is by the NUMBER OF FILLED ORDERS (rows), not contracts (the Head's ruling 19:22Z); the 100-fill bar is a TOTAL, with no per-window minimum.",
     "Rows fillCost would book at the limit (unreadable avgFill or avgFee) cannot be reproduced from the report row (maxCost is not carried): they are excluded and counted, never guessed.",
     "A result of 'exit' (the exit watch sold some contracts) is excluded and counted: exitProceeds is not in the report row.",
     "A void is price refunded, fee kept (the standing void rule); fillCost's own cap 'cash <= worst case' cannot be applied without maxCost.",
@@ -94,7 +95,7 @@ def split(nets, k=N_WINDOWS):
 
 def window_ok(nets):
     p = pf_of(nets)
-    return len(nets) >= MIN_N and p is not None and p >= BAR_PF - TOL
+    return p is not None and p >= BAR_PF - TOL          # no per-window n minimum (Head, 19:22Z)
 
 
 def read_rows(rows):
@@ -106,9 +107,11 @@ def read_rows(rows):
         p = pf_of(w)
         wf.append({"n": len(w), "cash_pf_unrounded": p, "net": sum(w), "win_rate": (sum(1 for x in w if x > 0) / len(w) if w else None), "counts": window_ok(w)})
     ok = sum(1 for x in wf if x["counts"])
-    verdict = "PROVEN" if ok >= NEED_WINDOWS else "NOT YET"
-    return {"python": "%s at %s" % (sys.version.split()[0], sys.executable), "rule": "PROVEN if at least 2 of 3 windows have cash PF >= 1.3 (unrounded, 1e-9) with n >= 100; else NOT YET",
-            "strategy": STRATEGY, "rows_given": len(rows), "rows_used": len(used), "excluded": ex, "windows": wf, "windows_counting": ok, "VERDICT": verdict, "ambiguities": AMBIGUITIES}
+    verdict = "NOT_ENOUGH_DATA" if len(used) < MIN_TOTAL else ("PROVEN" if ok >= NEED_WINDOWS else "NOT YET")
+    return {"python": "%s at %s" % (sys.version.split()[0], sys.executable), "rule": "100 fills in total (under 100: NOT_ENOUGH_DATA); PROVEN if at least 2 of 3 windows have cash PF >= 1.3 (unrounded, 1e-9), no per-window n minimum; else NOT YET",
+            "strategy": STRATEGY, "rows_given": len(rows), "rows_used": len(used), "excluded": ex,
+            "excluded_unreadable_fill_or_fee": ex.get("avgFill unreadable", 0) + ex.get("avgFee unreadable", 0), "excluded_exit": ex.get("exit (exitProceeds not in the row)", 0),
+            "windows": wf, "windows_counting": ok, "VERDICT": verdict, "ambiguities": AMBIGUITIES}
 
 
 def read_file(path):
