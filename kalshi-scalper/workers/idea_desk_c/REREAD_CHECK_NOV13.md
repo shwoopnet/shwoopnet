@@ -2,6 +2,8 @@
 
 For the Head of R&D's 19:29Z request. Two workers read the repository and its data branches only: counts and dates, no Kalshi request. **Disclosure:** to get trade rates, the perps worker opened V2's result files, which contain development outcomes. Only counts, rates and dates were taken from them; no outcome is reported here. sha256 values are of the registration file at the branch tip (first 16 characters). [research]
 
+**Correction (Nov 13, 2026, about 19:37Z, the Head of R&D):** WXDAYEND's final count WAS run by the Testing Desk at 00:27Z on Nov 13: FAIL by its kill rule (an existence count only). It is CLOSED. **Readable now is 0**, and closed or retired is 9. The rows below are kept as first written.
+
 **Counts:** 27 items checked.
 - **Readable now: 1** (WXDAYEND's final count).
 - **Readable on a date: 9** (CXS1, CLEAD1, RV1, RO1, XS1, OVN3, EARNPERP1, EARNPERP3, ESPORTM1).
