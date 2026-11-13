@@ -1,0 +1,15 @@
+{
+ "note": "Worked out by hand from the card and the provisional readings A1 to A18, before running tempblend2.py; fee = ceil-to-cent 0.07 p (1-p) at p = ask + 1c",
+ "per_row": {
+  "C01": ["bet", "yes", 71, 0.49], "C02": ["bet", "no", 72, -0.43], "C03": ["gap under 0.5F"], "C04": ["bet", "yes", 70, -0.35],
+  "C05": ["nearest strike ask outside 20c to 80c"], "C06": ["bet", "yes", 72, 0.39], "C07": ["nearest strike spread over 4c"],
+  "C08": ["member station not ok"], "C09": ["no station reading"], "C10": ["bet", "yes", 72, -0.02, "void"],
+  "C11": ["outside windows"], "C12": ["bet", "yes", 72, 0.47], "C13": ["bet", "yes", 72, -0.33]
+ },
+ "development": {"pooled": {"n": 5, "pf": 1.1, "net": 0.08, "voids": 1},
+                 "first_half": {"n": 3, "pf": 0.628205, "net": -0.29}, "second_half": {"n": 2, "pf": 19.5, "net": 0.37},
+                 "member": {"n": 3, "pf": 1.324324, "net": 0.12}, "non_member": {"n": 2, "pf": 0.906977, "net": -0.04},
+                 "days_0_1_info": {"n": 1, "net": -0.43},
+                 "kills": {"fewer_than_200": true, "pooled_pf_under_1": false, "a_half_under_1_2": true}, "verdict": "CLOSED"},
+ "held_out": {"pooled": {"n": 2, "net": 0.14}, "day_2_on": {"n": 1, "net": 0.47}, "days_0_1": {"n": 1, "net": -0.33}, "calibration_kill": "no evidence at n = 1"}
+}
