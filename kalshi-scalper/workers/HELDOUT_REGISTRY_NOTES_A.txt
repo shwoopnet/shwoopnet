@@ -1,0 +1,26 @@
+NOTES for rows_A.tsv (slice epic_part00, branch origin/claude/epic-ptolemy-0amjd9)
+
+Rows: 170 (cards grouped from 233 files). States: READ 143, FORWARD READ SCHEDULED 15, NO HELD-OUT 6, CLOSED UNREAD 3, UNKNOWN 3.
+
+CAVEAT on READ (spent): for most cards the state is "a result file with the card's name exists in the name list" (not opened). That proves the development/first read happened; it does NOT prove a frozen third / holdout named in the registration was opened (a FALSIFIED development verdict normally leaves it closed). Those rows carry the note "result file existence does not prove frozen/holdout part was opened". Treat them as spent for safety, or open the result to refine.
+Rule text in column 5 is auto-selected from the registration (keyword lines on frozen/holdout/cut/forward/read date); a few rows pick a loosely related line (e.g. FALS2, BOXOFF1) -> check the card before relying on col 5 for those.
+
+Files NOT opened (names only): 
+- json frozen files: kalshi-scalper/studies/gen3_survivors_FROZEN_2026-10-29.json, gen4_survivors_FROZEN_2026-10-29.json, mut1_frozen_2026-10-29.json; workers/DEPTH1_frozen.json, GEN10..GEN13_frozen.json, GEN5..GEN9_frozen_btc.json and _gold.json, NHLALL1_FROZEN_EVENTS.json, PERPGEN_FROZEN_CRYPTOCTX_RUN51..61.json and their .sha256 files. (Rows list them in column 3.)
+- All *_RESULT*, *_output*, result txt/json files: never opened (only existence checked by name).
+Files read only for constants (head -60): src/scalper/{barrier1,bookch1,bookimb1,count1,count1d,count2,flowhr1,makermid1,makertail1,nowcast1,usweep1}_fwd.py and nhlast1_frozen.py.
+GEN3 and MUT1 have no registration in this slice (only the frozen json); their rows are name-based (UNKNOWN detail, state READ because result files exist by name).
+USWEEP1 has only the fwd.py in this slice; registration/result md are on another slice.
+
+Registration files where text after the held-out rule includes results or verdict lines (read only the rule lines I extracted; no figures copied):
+- ORHARVEST1_STAGE1_REGISTRATION.md: a verdict line near the end (stage-1 counts only) was seen incidentally in a grep line.
+- EARN1_REGISTRATION.md: contains a "Verdict" line (NOT_RUNNABLE, no data) seen incidentally.
+- NHLROUND1_REGISTRATION.md: a disclosure line quoting a prior finding was auto-selected then withheld from the TSV (figures); 3 rows have a "segment withheld" note.
+- BOXOFF1, GAS2, FAMWX contain short inline census/duplicate statements (counts, no performance).
+- No file had a "## Result/Verdict/Findings" heading (the stop-at-results filter never triggered).
+
+Cards outside this slice referenced by FORWARD_CALENDAR.md (calendar dated 2026-11-03, stale since; not given their own rows here): USWEEP2, REV1/REV1SPLIT, MM1, MAKER5, L1Q1, GF1, GF2, RECORD1, QUOTE2B, GEN1/GEN1S/GEN2 holdout, NEWLIST1(score), RAINCAL, WXENS1, FEDIMPL1 looks, GAS1-F, ABSORB-F, MKTTIME1-F, FWD1/E3F, PM3, FWD2, FLIP1, STRADDLE1, SPORTS-PRE, dated L1 reads (trig 2026-11-12: HOUR3-F, ENTRY2, FLIPS0-F, P6F, P6R, TS1, FWD7-10, JUMP1/1b, TIB1, DIP1, GOLD1-F, ML1, CW10, FEAT2-F, FEAT4-F, FLAT2-F, CONC2-F).
+Cards also not found by name in this slice that other slices likely hold: MMSIM1 (its held-out is protected by MMMAP1, first read allowed on/after 2026-11-24).
+Retired-by-text (Yahoo barred, Nov 12): CMD1, CMD3, CMD4 -> CLOSED UNREAD.
+MAKERMID1 / MAKERTAIL1: registered forward read date 2026-11-12 is already past (today 2026-11-13); no *_fwd result name on this branch, state kept as FORWARD READ SCHEDULED with that caveat (other branches not checked).
+Cards with UNKNOWN: INX1 (no held-out text found), LL1 and OVN2 (held-out defined in shared files LEAD_COMMON.md / OVN_COMMON.md, not in slice).

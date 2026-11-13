@@ -1,0 +1,33 @@
+NOTES, slice C (desk_all.txt). Rows: /tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/hr/rows_C.tsv
+
+FILES NOT READ OR SKIPPED
+- fonts/PermanentMarker-latin.woff2 (every branch): binary font, no registry content.
+- docs/SPREAD1_FORWARD_TEST.md: same file on every branch; read once (refine-live copy), one row under Main.
+- kalshi-scalper/refine_tools/*_RESULT*, *_OUTPUT*, CARDS_74_84_REGISTRATION_AND_RESULT.md, WEATHER_FIN_IDX_CAL_PLAN_AND_RESULT.md etc.: not in my list or on the name list; never opened.
+- Files that contain a results section, and where I stopped:
+  * refine_tools/SWEEP_EXTERNAL_SIGNAL_REGISTRATION.md: read lines 1 to 11 only; the RESULT section starts at line 12 (its heading line showed a verdict word in the heading list; not copied).
+  * refine_tools/ECON_CAL_REGISTRATION.md: line 13 is a development RESULT line that I saw in a keyword scan (figures not copied; held-out untouched per the text).
+  * refine_tools/NO_ARM_APPROVAL_REGISTRATION.md: a 'READ DONE' paragraph (lines 46 to 51) was visible in a keyword scan; no figures copied.
+  * refine_tools/SPORTS_SPREAD_CELL_REGISTRATION.md: 'READ DONE' and 'RESULT NOTE' sections (lines 43 to 47) were visible in a keyword scan; no figures copied.
+  * idea-desk-a/CFRTI1_BTC_KRAKEN_REGISTRATION.md: stopped before the 'Result' section at line 44; later amendments read for dates only.
+  * idea-desk-a/CFRTI_B_REGISTRATION.md: the 'Development figures' section (line 19 on) was not read.
+  * idea-desk-a/DESK_A_HELD_DATA_NOV12.md: it is a measurement document with tables; I displayed the top 60 lines (first two tables) by mistake of scope before realising; no figure copied, and I read nothing after section 2's header.
+  * idea-desk-a/CFRTI_K_REGISTRATION.md: a one-line 'DEVELOPMENT READ ON 2026-11-12' note (figures) was visible; not copied.
+  * idea-desk-a/PERPBIN1_REGISTRATION.md: a one-line 'DEVELOPMENT READ' note was visible; not copied.
+  * forensics/FORENSICS_REGISTRATION_NOV12.md: only the date constants and READ-ONCE marker were used.
+  * testing-desk/POLI2_COUNT_REGISTRATION.md and WXDAYEND_REGISTRATION.md: both contain dated result/state lines (a cost-screen RESULT and a 20-of-40 pulled state); seen in keyword scans, no figures copied.
+  * RND_QUEUE.md (344 KB) was NOT read in full; I grepped for held-out, release, card names and the Fixed read dates table. It contains many result lines; none were copied.
+- Result/output FILES with names on the list were never opened (e.g. NOSIDE1_READ_OUTPUT.txt, SPREADCELL1_READ_OUTPUT.txt, SWEEP_EXT1_HELDOUT_OUTPUT.txt, ESOCTIE_DEV_READ_OUTPUT_*, CANDLEGAP_RESULT*, forensics results/*).
+- *_fwd.py read only for START constants (esfeat, halfsize, hvs, oibands); cfrti_heldout.py and heldout_guard.py read to line 60 (constants only).
+- JSON series files (esoctie, inplayjump, mapbreak, socderiv, tie3 _series_frozen.json): read only keys named series, windows, blocks, held_out, titles, cells.
+- WHEEL_ADMIT_LIST.md (main and rnd-queue): read lines of both up to ~60; the rnd-queue copy is newer than main's (6 lines differ).
+- Not in my slice and therefore not recorded as cards (only mentioned): W-SPOTLEAD1, GEN4/RECORD1 rescore, DEPTH1 V2 registration itself, MMSIM1/MMHOUR1/MMPOWER1 protocols, Q2B_REGISTRATION (epic branch), CANDLEGAP2_TTEBB, COUNT1 (old research team's last third of KXTRUTHSOCIAL and KXTRUTHSOCIALD is frozen and not closed per rnd-queue), POLAPPR1 candle pull jobs, HISTCUTOFF1, FED jobs, COMBODONE, HOURLY card text.
+- Known releases recorded: NO_ARM_APPROVAL (RELEASED 2026-11-13 06:50Z, commit b6e13989), W-CAT-SPORTS1 27 series from 2026-10-30T02:53:19Z and W-CAT-CAL1 weather from 2026-10-20T06:00:00Z (RELEASED 06:51Z, commit b9e8e490). Cards stated NOT RELEASED by rnd-queue: CAL1 finance and indices (CLOSED, never tested), ECON1, POLENT1, POLI2, COUNT1. POLAPPR1's candle PULL was released to the Chief of Staff (06:51Z) but W-POL-APPR1's own held-out is not released.
+
+JUDGEMENT CALLS TO CHECK
+- Shadow rules week 1 and 2 (SHADOW_REGISTRATIONS_WEEK1.md): registration says forwardReadDate 2026-12-14; CLAUDE.md says the registry was emptied Nov 11. I set CLOSED UNREAD (retired).
+- POLGAPH: the registration says held-out 2026-11-13 to 2026-12-17; main/HELDOUT_PULL_RUNS.md (Nov 13) says development now ends 2026-11-04T23:59:59Z and held-out starts 2026-11-05T00:00Z. The row carries both; the later statement should govern. I did not see the amended registration text itself.
+- INPLAYJUMP: state taken from rnd-queue WHEEL_ADMIT_LIST (all five families withdrawn Nov 13); held-out blocks never pulled; not released.
+- MMMAP1 R6 part set to READ because it is a measurement over development days Nov 4 to 6 (no verdict held-out). W-SWEEP-EXT1 exact third dates not constants in the text read (UNKNOWN date).
+- Several forward reads on live bot orders (S-ESFEAT1, S-HALFSIZE1, S-HOLDVSSELL, S-OIBANDS1, S-OICHEAPSKIP1, SPREAD1) are count-based and read bot order records, not Kalshi price files; recorded as FORWARD READ SCHEDULED (count-based).
+- DEPTH1 reserves R6 gold and Bitcoin books 2026-10-30 to 2026-11-13 until its single read (not before 2026-11-14T00:00Z); WHEEL0 and RESIL1 point at it. Note that Forensics FILLHAIRCUT1 period B and GOLDHAIRCUT1 period B opened Nov 9 to 11 books with no outcome loaded (Head's ruling), recorded in notes.

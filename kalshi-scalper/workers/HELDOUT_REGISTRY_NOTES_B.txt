@@ -1,0 +1,19 @@
+NOTES for rows_B.tsv (slice epic_part01, branch claude/epic-ptolemy-0amjd9)
+
+Files not read as text (frozen JSON, constants/keys only, no results): 
+- PERPGEN_FROZEN_CRYPTOCTX_RUN62..90.json (+ .sha256), PERPGEN_FROZEN_CRYPTOPRICE_R01..R40.json, PERPGEN_FROZEN_NC01..NC20.json: only id, seed, counts and survivor-list length were looked at. 27 CRYPTOCTX lists empty (RUN66 and RUN69 hold 1 survivor each), all CRYPTOPRICE and NC lists empty. Their cut dates and holdout rules live in PERPGEN_PROTOCOL.md / PERPGEN_*_CUTS.json, which are NOT in my slice, so STATE is UNKNOWN for those rows.
+- SCAN_FROZEN_BINPATH_*.json (+ .sha256): header keys only (frozen_id, created, bars, hash); the cut/quantile tables and survivor rules not interpreted. BINPATH_PROTOCOL.md not in slice -> UNKNOWN.
+- .sha256 files: not opened.
+
+Files stopped before a results section:
+- RETAILFRAC1_CRONCLUSTER1_REGISTRATION.md: read only lines 1-26; "# Results (one pass, run Nov 12, 2026)" begins at line 27 and was not read.
+- TIECOND1_REGISTRATION.md: read lines 1-23; a "Result (run after the push...)" section begins at line 24 and was not read (line 27 header, a RETIRED note, was seen in a heading grep only).
+- Other registrations were read via targeted grep of held-out/frozen/read-date lines (not whole files); no results/verdict figures were copied.
+
+Result-file existence was judged only from names in epic_result_names.txt (never opened). For cards whose result file exists and whose frozen/holdout third is read only "if development passes", STATE is OPEN (conservative: holdout read status NOT verified, result unopened); if the registration gives the held-out no read path at all, STATE is CLOSED UNREAD.
+
+Calendar: FORWARD_CALENDAR.md is at kalshi-scalper/workers/FORWARD_CALENDAR.md on that branch (not in the slice list); read in full. It is dated 2026-11-03; dates before today (2026-11-13) are marked FORWARD READ SCHEDULED with note that the read status is unknown (no result file in names). Calendar rulings (Nov 3, main): USWEEP1 favourite watch items, GAS1-F, ABSORB-F and the Nov 12 L1 reads are DROPPED (never run/read) -> CLOSED UNREAD rows. Calendar-only cards got rows with file '(calendar)'.
+
+Facts taken from repo CLAUDE.md (not from the branch): ESPN SPORTS-PRE recorder deleted Nov 11 (no new data for SPORTSPRE); Open-Meteo stopped Nov 11 (affects WXENS1/WXLOW1 ensemble source); R6 recorder extended to 2026-11-20 for BTC/ETH.
+
+Not verified / judgement calls: RO1 and XS1 and WXDEAD1 (held-out rules in LEAD_COMMON.md or not stated) marked UNKNOWN; SLOTEX-ETH marked UNKNOWN (no explicit cut in its text). PPW1, STRUCT1, RISK1, VENUES1 marked NO HELD-OUT. Overlap with another slice (part00) is possible for calendar-only cards and for cards whose registration appears in both.
