@@ -7,3 +7,5 @@ HELD-OUT NOT READ as of 2026-11-12T01:11Z.
 
 
 Dated clarification Nov 13, 2026, second pass (Head of R&D ruling): from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided; 2 markers restored verbatim (sampling, basis).
+
+Reservation released by the Head of R&D, 2026-11-13 06:51Z: the held-out will never be scored under this card; a return needs a new registration on later events. (W-CAT-SPORTS1, 27 series, held-out close at or after 2026-10-30T02:53:19Z.)
