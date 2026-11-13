@@ -87,9 +87,11 @@ bad = [mk(i % 10, -0.3, 0) for i in range(60)]; S.MIN_N = 40; Lb = S.report(bad,
 S.MIN_N = 3
 assert S.fee_up(0.5) == 0.02 and S.fee_up(0.1) == 0.01 and S.fee_up(0.4) == 0.02
 # read-once marker: the second figure-printing run refuses
-mk_ = os.path.join(tempfile.mkdtemp(), "m.txt"); S.read_once(mk_)
-try: S.read_once(mk_); raise AssertionError("second read not refused")
-except SystemExit: pass
+mk_ = os.path.join(tempfile.mkdtemp(), "m.txt"); S.refuse_if_read(mk_); S.read_once(mk_)
+for fn in (S.read_once, S.refuse_if_read):
+    try: fn(mk_); raise AssertionError("later real run not refused")
+    except SystemExit: pass
+assert "NC15DEPTH1_MARKER" not in open(os.path.join(here, "nc15depth1.py")).read().split("fixed beside the script")[0].split("MARKER =")[-1]
 # a void: only a result that says void (window F above); an empty or odd result is unresolved (window P above)
 # default-closed and the guard
 import subprocess
