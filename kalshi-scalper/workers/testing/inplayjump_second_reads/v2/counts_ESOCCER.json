@@ -1,0 +1,40 @@
+{
+ "family": "ESOCCER",
+ "counts_first": {
+  "events_listed": 10957,
+  "held_out_refused": 0,
+  "outside_development_window": 0,
+  "not_two_team_contracts": 0,
+  "no_clock_in_ticker_clock_family": 0,
+  "market_with_no_close_time": 0
+ },
+ "matches_listed_in_window": 3823,
+ "matches_with_candles": 3759,
+ "start_check": {
+  "ESOCCER": {
+   "matches": 3823,
+   "closed_4_to_90_after_S": 3680,
+   "share": 0.9626,
+   "start_derivable": true
+  }
+ },
+ "report": {
+  "matches": 3823,
+  "status_counts": {
+   "entry_outside_band": 1461,
+   "no_jump": 1490,
+   "entry_minute_not_two_sided": 283,
+   "bet": 511,
+   "no_candles": 64,
+   "two_contracts_same_minute": 14
+  },
+  "qualifying_decisions_with_a_two_sided_entry_minute": 1972,
+  "passing_ask_band_and_spread": 511,
+  "share_passing": 0.2591,
+  "median_one_way_cost_all_qualifying": 0.05,
+  "median_one_way_cost_entries": 0.035,
+  "cost_over_4c": true,
+  "cost_kill_reads": "the median over EVERY qualifying decision with a two-sided entry minute (Desk A clarification Nov 13); the entries-only median is information"
+ },
+ "label": "provisional, one build; selected on development; candle freshness measured on Bitcoin 15 minute only, not on these markets; NO result read"
+}

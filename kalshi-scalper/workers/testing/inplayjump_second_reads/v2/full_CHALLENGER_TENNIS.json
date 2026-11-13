@@ -1,0 +1,82 @@
+{
+ "family": "CHALLENGER_TENNIS",
+ "counts_first": {
+  "events_listed": 10957,
+  "held_out_refused": 0,
+  "outside_development_window": 0,
+  "not_two_team_contracts": 0,
+  "no_clock_in_ticker_clock_family": 0,
+  "market_with_no_close_time": 0
+ },
+ "matches_listed_in_window": 2183,
+ "matches_with_candles": 2183,
+ "start_check": {},
+ "report": {
+  "matches": 2183,
+  "status_counts": {
+   "no_jump": 870,
+   "bet": 1140,
+   "entry_outside_band": 131,
+   "never_in_play": 35,
+   "entry_minute_not_two_sided": 7
+  },
+  "qualifying_decisions_with_a_two_sided_entry_minute": 1271,
+  "passing_ask_band_and_spread": 1140,
+  "share_passing": 0.8969,
+  "median_one_way_cost_all_qualifying": 0.025,
+  "median_one_way_cost_entries": 0.025,
+  "cost_over_4c": false,
+  "cost_kill_reads": "the median over EVERY qualifying decision with a two-sided entry minute (Desk A clarification Nov 13); the entries-only median is information"
+ },
+ "full": {
+  "matches": 2183,
+  "status_counts": {
+   "no_jump": 870,
+   "bet": 1140,
+   "entry_outside_band": 131,
+   "never_in_play": 35,
+   "entry_minute_not_two_sided": 7
+  },
+  "qualifying_decisions_with_a_two_sided_entry_minute": 1271,
+  "passing_ask_band_and_spread": 1140,
+  "share_passing": 0.8969,
+  "median_one_way_cost_all_qualifying": 0.025,
+  "median_one_way_cost_entries": 0.025,
+  "cost_over_4c": false,
+  "cost_kill_reads": "the median over EVERY qualifying decision with a two-sided entry minute (Desk A clarification Nov 13); the entries-only median is information",
+  "bets": 1140,
+  "voids": 0,
+  "placebo_bets": 358,
+  "bets_with_no_placebo": 782,
+  "wins": 649,
+  "mean_price": 0.5881,
+  "cash_pf": 0.8403998242530756,
+  "net_cents_per_contract": -3.824,
+  "halves_pf": [
+   0.7908750719631548,
+   0.8916964818127608
+  ],
+  "share_paid_70_to_85": 0.2728,
+  "largest_day_share_of_net": null,
+  "z_by_days": {
+   "z": -1.9562051466569026,
+   "clusters": 41,
+   "mean_per_cluster": -0.030476016154809216
+  },
+  "z_by_match": {
+   "z": -2.727181095994631,
+   "clusters": 1140,
+   "mean_per_cluster": -0.03823684210526317
+  },
+  "z_smaller_used": -2.727181095994631,
+  "placebo_net_cents_at_rule_mix": 8.322,
+  "difference_cents": -12.146,
+  "difference_se_cents": 2.786,
+  "rule_bets_in_buckets_with_no_placebo": 146,
+  "median_elapsed_minute_rule": 708.0,
+  "median_elapsed_minute_placebo": 45.0,
+  "verdict": "FALSIFIED",
+  "label": "selected on development (cost line, start check); candle freshness measured on Bitcoin 15 minute only, not on these markets"
+ },
+ "label": "provisional, one build; selected on development; candle freshness measured on Bitcoin 15 minute only, not on these markets"
+}
