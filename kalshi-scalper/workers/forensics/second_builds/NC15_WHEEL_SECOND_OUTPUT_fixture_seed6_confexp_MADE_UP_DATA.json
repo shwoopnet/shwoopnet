@@ -255,31 +255,31 @@
   },
   "KXNATGAS15M": {
    "fillable": 1125,
-   "before_the_start_time": 0,
+   "before_the_start_time": 4,
    "skipped_limit_88c_or_above": 120,
-   "counted": 1005,
-   "cash_not_whole_cents_rounded": 177,
+   "counted": 1001,
+   "cash_not_whole_cents_rounded": 175,
    "cash_not_whole_cents_all_final_fillable": 202,
    "blocks": [
     {
-     "first": "KXNATGAS15M-26NOV130045-00",
+     "first": "KXNATGAS15M-26NOV130245-00",
      "last": "KXNATGAS15M-26NOV190745-00",
-     "n": 163,
-     "wins": 89,
-     "losses": 72,
+     "n": 159,
+     "wins": 87,
+     "losses": 70,
      "voids": 2,
-     "net_cents": 15848,
-     "wins_cents": 38521,
-     "losses_cents": 22673,
-     "pf": 1.6989811670268602,
-     "pf_first_half": 2.093520719231167,
-     "pf_second_half": 1.4052016004924592,
+     "net_cents": 15243,
+     "wins_cents": 37463,
+     "losses_cents": 22220,
+     "pf": 1.686003600360036,
+     "pf_first_half": 2.2302688638334778,
+     "pf_second_half": 1.2997076023391814,
      "days": 7,
-     "span_days": 6.291667997685296,
-     "top_day_share_of_net": 0.5745204442200909,
+     "span_days": 6.208335468749757,
+     "top_day_share_of_net": 0.5973233615430034,
      "verdict": "FAILED",
      "fails": [
-      "one day holds 57% of the net, over 30%"
+      "one day holds 60% of the net, over 30%"
      ]
     },
     {
@@ -329,31 +329,31 @@
   },
   "KXBNB15M": {
    "fillable": 191,
-   "before_the_start_time": 0,
+   "before_the_start_time": 1,
    "skipped_limit_88c_or_above": 20,
-   "counted": 171,
+   "counted": 170,
    "cash_not_whole_cents_rounded": 30,
    "cash_not_whole_cents_all_final_fillable": 34,
    "blocks": [
     {
-     "first": "KXBNB15M-26NOV130130-00",
-     "last": "KXBNB15M-26NOV261500-00",
+     "first": "KXBNB15M-26NOV131030-00",
+     "last": "KXBNB15M-26NOV262245-00",
      "n": 60,
      "wins": 49,
      "losses": 11,
      "voids": 0,
-     "net_cents": 22788,
-     "wins_cents": 26867,
+     "net_cents": 23228,
+     "wins_cents": 27307,
      "losses_cents": 4079,
-     "pf": 6.58666339789164,
-     "pf_first_half": 7.512654819601508,
-     "pf_second_half": 5.8127812781278125,
-     "days": 15,
-     "span_days": 13.562496163193826,
-     "top_day_share_of_net": 0.1583728278041074,
+     "pf": 6.69453297376808,
+     "pf_first_half": 7.74744211093161,
+     "pf_second_half": 5.814581458145814,
+     "days": 14,
+     "span_days": 13.51041367477013,
+     "top_day_share_of_net": 0.15537282589977613,
      "verdict": "CLEARED",
      "fails": [],
-     "confirmation_pf": 15.05011655011655,
+     "confirmation_pf": 14.653846153846153,
      "confirmation": "QUALIFIED"
     }
    ],
@@ -362,27 +362,27 @@
   },
   "KXSILVER15M": {
    "fillable": 153,
-   "before_the_start_time": 0,
+   "before_the_start_time": 1,
    "skipped_limit_88c_or_above": 15,
-   "counted": 138,
-   "cash_not_whole_cents_rounded": 28,
+   "counted": 137,
+   "cash_not_whole_cents_rounded": 27,
    "cash_not_whole_cents_all_final_fillable": 29,
    "blocks": [
     {
-     "first": "KXSILVER15M-26NOV130230-00",
-     "last": "KXSILVER15M-26NOV271430-00",
+     "first": "KXSILVER15M-26NOV130945-00",
+     "last": "KXSILVER15M-26NOV271745-00",
      "n": 60,
      "wins": 11,
      "losses": 49,
      "voids": 0,
-     "net_cents": -18879,
+     "net_cents": -18869,
      "wins_cents": 3305,
-     "losses_cents": 22184,
-     "pf": 0.14898124774612334,
-     "pf_first_half": 0.07579338284942606,
-     "pf_second_half": 0.23287538699690402,
-     "days": 14,
-     "span_days": 14.500002708332959,
+     "losses_cents": 22174,
+     "pf": 0.14904843510417606,
+     "pf_first_half": 0.09472295514511873,
+     "pf_second_half": 0.20621991854868568,
+     "days": 13,
+     "span_days": 14.333331261572463,
      "top_day_share_of_net": null,
      "verdict": "FAILED",
      "fails": [
@@ -391,20 +391,20 @@
      ]
     },
     {
-     "first": "KXSILVER15M-26NOV271745-00",
-     "last": "KXSILVER15M-26DEC170745-00",
+     "first": "KXSILVER15M-26NOV300045-00",
+     "last": "KXSILVER15M-26DEC171245-00",
      "n": 60,
      "wins": 25,
      "losses": 34,
      "voids": 1,
-     "net_cents": -2361,
+     "net_cents": -2310,
      "wins_cents": 10126,
-     "losses_cents": 12487,
-     "pf": 0.8109233602947065,
-     "pf_first_half": 0.7147180630774131,
+     "losses_cents": 12436,
+     "pf": 0.8142489546477967,
+     "pf_first_half": 0.7205717038702425,
      "pf_second_half": 0.9081977774198744,
-     "days": 18,
-     "span_days": 19.583337517361397,
+     "days": 17,
+     "span_days": 17.500002829860207,
      "top_day_share_of_net": null,
      "verdict": "FAILED",
      "fails": [
@@ -413,7 +413,7 @@
      ]
     }
    ],
-   "state": "WAITS: waiting for results, expiry not yet decided (block holds 14 before the open result)",
+   "state": "WAITS: waiting for results, expiry not yet decided (block holds 13 before the open result)",
    "qualified": false
   },
   "KXUSDCAD15M": {
@@ -448,5 +448,6 @@
    "state": "block in progress: 0 signals, 0 days, 0 wins, 0 losses",
    "qualified": false
   }
- }
+ },
+ "start": 1794536640.0
 }

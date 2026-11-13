@@ -28,6 +28,8 @@ def parse(path):
                 elif "confirmation_in_progress" in d: state[g.group(1)] = ("confirmation in progress", d["confirmation_in_progress"])
                 elif d.get("waiting") and "confirmation_n" in d: state[g.group(1)] = ("confirmation waits",)
                 elif d.get("waiting"): state[g.group(1)] = ("waits", d.get("block_n", 0) - 1) if "block_n" in d else ("waits", t)
+                elif d.get("expired_by_clock"): state[g.group(1)] = ("in progress", 0, 0, 0, 0)       # the last block expired and no counted signal has come since: mine prints a block in progress with 0 signals
+                elif d.get("waiting") and "expiry" in str(d.get("why", "")): state[g.group(1)] = ("waits, expiry not yet decided",)
                 elif "block_in_progress" in d: state[g.group(1)] = ("in progress", d["block_in_progress"], d.get("days"), d.get("wins"), d.get("losses"))
                 else: state[g.group(1)] = ("other", t)
             else:

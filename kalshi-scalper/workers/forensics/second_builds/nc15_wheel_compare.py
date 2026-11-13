@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compares the first build's printed records (Desk A, nc15_wheel_replay_records.py, a text file) with this second scorer's records file (--records), record by record:
 status and result, then side, ask, limit, imb5 and, for a fillable signal, fill price, fee and cash; then the first build's per-series report lines against the same totals
-taken from my records. usage: python3 -I nc15_wheel_compare.py <their printed lines .txt> <my records .csv>     It reads printed output only, never the first build's code."""
+taken from my records; with a third argument (the first build's records csv) also each signal poll's exchange time. usage: python3 -I nc15_wheel_compare.py <their printed lines .txt> <my records .csv> [<their records .csv>]     It reads printed output only, never the first build's code."""
 import sys, re, csv, collections
 theirs = {}
 for l in open(sys.argv[1]):
@@ -50,5 +50,9 @@ for l in open(sys.argv[1]):
         tot += 1
         if a != b and not (name == "net" and abs(float(a) - float(b)) < 0.005 + 1e-9): totbad += 1; print("SERIES TOTAL DIFFERS", g.group(1), name, "mine", a, "theirs", b)
 print("per-series report figures compared: %d, differ: %d" % (tot, totbad))
+if len(sys.argv) > 3:          # optional third argument: the first build's records csv (signal_t), to compare each signal poll's estimated exchange time
+    tt = {r["ticker"]: r for r in csv.DictReader(open(sys.argv[3]))}
+    x = [abs(float(r["signal_t"]) - float(mine[tk]["signal_exchange"])) for tk, r in tt.items() if mine.get(tk) and mine[tk]["signal_exchange"]]
+    print("signal poll exchange times compared: %d, differ by more than a microsecond: %d, largest difference %.4f s" % (len(x), sum(1 for v in x if v > 1e-6), max(x) if x else 0.0))
 print("records the same in status: %d; status differs: %d; figures compared on matching records: %d, differ: %d" % (same, sum(diff.values()), fig, figbad))
 for k, v in diff.most_common(): print("  theirs %-28s mine %-40s %5d   e.g. %s" % (k[0], k[1], v, ", ".join(ex[k])))

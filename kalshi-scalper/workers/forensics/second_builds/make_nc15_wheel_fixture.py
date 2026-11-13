@@ -3,14 +3,12 @@
 <out>/<date>/<HHMM>/{book,coverage,clock}.csv.gz plus the marker file MADE_UP_DATA. Nothing here is real: books, clocks and results are invented so two independent
 scorers can be run on the same rows. usage: python3 -I make_nc15_wheel_fixture.py <out dir> [seed] [confexp]      read it with --now 2026-12-23T00:00:00Z
 With the word confexp as third argument, USD/CAD's signals nearly stop on Dec 1, so a block that cleared just before then cannot collect its 30 confirmation signals within
-21 days: the confirmation EXPIRES, unread (the lane's section 4, items (j) and (k)). Signals with a limit of 88c or above (asks of 0.88 and 0.90) are in every variant, for item (i).
-Runs are 4 hours long from 2026-11-12T20:00Z to 2026-12-22T20:00Z, so some windows decide before the sheet's commit time (2026-11-13T00:23:49Z) and must not count.
-Each series has its own rate and its own made-up edge, so the places end differently: a block that clears and confirms, one that clears and fails its confirmation, blocks
-that fail on the profit factor, a dense place whose 60 signals fall on fewer than 7 days, a sparse place whose 60 signals span more than 21 days, a place still in progress.
-Planted on purpose: runs with different clock offsets, a run with no Date header (no clock), a ticker recorded in two run folders, windows with no poll in the 10 s before
-the decision, a next poll later than 6 s (and one exactly 6.000 s, one 6.001 s), a missing side, an empty book, |imb5| exactly 0.50 and just under, asks exactly 0.10 and
-0.90 and just outside, exactly 10 contracts at or under the limit and 9.99, fractional sizes, a second poll one cent worse (the worse of the two is paid), a second poll
-two cents worse or drained (a miss), results that are empty and recent (open), empty and older than 7 days (void), "void" and "scalar", the four withdrawn series, weekends."""
+21 days: the confirmation EXPIRES, unread (the lane's section 4, items (j) and (k)).
+With the word ties, every third WTI and BNB window gets a twin market (ticker ending -01) with the same polls and book and the OPPOSITE result, so two counted signals of one
+place share a decision time and the order of item (p) (time, then ticker) decides which lands in which half or block.
+With the word openexp, every HYPE market closing from 2026-12-20T00:00Z on has no result yet. Read it at --now 2026-12-26T12:00:00Z: HYPE's second block is past its
+21 days and still holds open results, so it must print "waiting for results, expiry not yet decided" (item (q)); read it again at --now 2026-12-30T00:00:00Z: those
+results are 7 days old, so voids, and the block is EXPIRED."""
 import sys, os, csv, gzip, random
 from datetime import datetime, timezone, timedelta
 from email.utils import format_datetime
@@ -26,7 +24,7 @@ PROFILE = {"KXCOPPER15M": (0.10, 0.22, False), "KXWTI15M": (0.10, 0.00, False), 
 NOW = datetime(2026, 12, 23, tzinfo=timezone.utc)
 
 
-def main(out, seed, confexp=False):
+def main(out, seed, confexp=False, ties=False, openexp=False):
     rng = random.Random(seed); os.makedirs(out); open(os.path.join(out, "MADE_UP_DATA"), "w").write("invented rows for a build comparison; nothing here is real\n")
     run_start = datetime(2026, 11, 12, 20, 0, tzinfo=timezone.utc); end = datetime(2026, 12, 22, 20, 0, tzinfo=timezone.utc); nrun = 0; nwin = 0; special = 0; carry = []
     while run_start < end:
@@ -83,21 +81,25 @@ def main(out, seed, confexp=False):
                     recv = ex - off; hdr = "" if no_clock else format_datetime(datetime.fromtimestamp(ex // 1000, timezone.utc), usegmt=True)
                     line = [recv - 120, recv, hdr, tk, series, iso] + [p for p, _ in y] + [s for _, s in y] + [p for p, _ in nn] + [s for _, s in nn]
                     if plant == "two_runs" and left <= 590: carry.append(line)   # the later polls of this window are in the NEXT run folder (its clock differs)
-                    else: B.append(line)
+                    else:
+                        B.append(line)
+                        if ties and series in ("KXWTI15M", "KXBNB15M") and (T // 900000) % 3 == 0: B.append(line[:3] + [tk[:-2] + "01"] + line[4:])     # the twin market: same polls, same book
                     first = recv if first is None else first; last = recv; n += 1
                 age_days = (NOW - t).total_seconds() / 86400.0; r = rng.random()
                 p_win = min(0.97, max(0.03, ask + (-0.25 if (series == "KXUSDCAD15M" and t >= datetime(2026, 12, 1, tzinfo=timezone.utc)) else edge))); res = side if rng.random() < p_win else ("no" if side == "yes" else "yes")
-                if age_days < 1.0: res = ""                                      # closed in the last day before the read: still open
+                if age_days < 1.0 or (openexp and series == "KXHYPE15M" and t >= datetime(2026, 12, 20, tzinfo=timezone.utc)): res = ""      # closed in the last day before the read (or planted): still open
                 elif r < 0.004: res = ""                                         # never given a result: a void once 7 days old, open before that
                 elif r < 0.007: res = rng.choice(["void", "scalar"])
                 CV.append([iso, series, tk, n, n, 0, 0, 5300, first, last, n, 1, 0, 0, "0", "100.00", res, ""])
+                if ties and series in ("KXWTI15M", "KXBNB15M") and (T // 900000) % 3 == 0:
+                    CV.append([iso, series, tk[:-2] + "01", n, n, 0, 0, 5300, first, last, n, 1, 0, 0, "0", "100.00", {"yes": "no", "no": "yes"}.get(res, res), ""])
         B.sort(key=lambda x: x[1])
         for name, cols, data in (("book", BOOK_COLS, B), ("coverage", COVER_COLS, CV), ("clock", ["t_local_ms", "offset_ms"], [[int(run_start.timestamp() * 1000), off]])):
             with gzip.open(os.path.join(d, name + ".csv.gz"), "wt", newline="") as f:
                 w = csv.writer(f); w.writerow(cols); w.writerows(data)
         run_start += timedelta(hours=4)
-    print("made-up NC15 wheel fixture written to %s: %d run folders, %d windows over 11 series, %d planted cases, seed %d; read it with --now 2026-12-23T00:00:00Z" % (out, nrun, nwin, special, seed) + (" (variant confexp)" if confexp else ""))
+    print("made-up NC15 wheel fixture written to %s: %d run folders, %d windows over 11 series, %d planted cases, seed %d; read it with --now 2026-12-23T00:00:00Z" % (out, nrun, nwin, special, seed) + (" (variant confexp)" if confexp else "") + (" (variant ties)" if ties else "") + (" (variant openexp)" if openexp else ""))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 5, len(sys.argv) > 3 and sys.argv[3] == "confexp")
+    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 5, "confexp" in sys.argv[3:], "ties" in sys.argv[3:], "openexp" in sys.argv[3:])

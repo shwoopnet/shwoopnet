@@ -13,7 +13,7 @@ Nothing here is a read of the registered NC15DEPTH1 cell, and no block data has 
 | `nc15_wheel_compare.py` | compares Desk A's printed records and per-series lines with my records file; reads printed output only |
 | `nc15_wheel_block_compare.py` | compares Desk A's printed block lines with mine, block by block and state by state |
 | `make_nc15_wheel_fixture.py` | invented NC15 book and coverage rows for all 11 series over 40 days, with the awkward cases listed in its header |
-| `NC15_WHEEL_SECOND_OUTPUT_fixture_{seed6,seed7,seed6_confexp}_MADE_UP_DATA.{txt,json}` | my figures on three fixtures |
+| `NC15_WHEEL_SECOND_OUTPUT_fixture_<name>_MADE_UP_DATA.{txt,json}` | my figures on six fixture reads (seed6, seed7, seed6_confexp, seed6_ties, seed6_openexp read on Dec 26 and on Dec 30) |
 | `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_2921a03a_run_by_forensics.txt` | Desk A's block reader output on the same fixtures, as run by me |
 
 Commands:
@@ -150,6 +150,43 @@ Builds compared at 02:24Z: mine `nc15_wheel_second.py` sha256 `ade91e30...`; Des
 - **Not exercised by these fixtures, so agreed by reading only:** two signals of one place at the same decision time (the side tie of item (p)); a block past its 21 days
   that holds an open result (item (q)'s "expiry not yet decided" for a block); a rule in the favourites class (150 signals).
 - The files `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_2921a03a_run_by_forensics.txt` are Desk A's block output from these runs.
+
+## Nov 13, 02:40Z: the two plants the Head asked for, and A DIFFERENCE the ties plant found (the offset of polls received at the same instant)
+
+The Head recorded the comparison above, wrote the places' start time (2026-11-13T02:24:00Z, `rnd-queue` `fb978196`), and asked for two more cases before any block is
+read. Both builds are now run with `--start 2026-11-13T02:24:00Z`. Builds: mine `nc15_wheel_second.py` sha256 `ab3343b9...` plus the switch below; Desk A's unchanged
+(`8d1055df`, `38ec4c46`, reader `2921a03a` at `4774933b`).
+
+1. **A block past its 21 days that still holds an open result: SAME.** Fixture `make_nc15_wheel_fixture.py <dir> 6 openexp`. Read at `--now 2026-12-26T12:00:00Z`
+   both builds print the slow place's second block as "waiting for results, expiry not yet decided"; read at `--now 2026-12-30T00:00:00Z`, when those results are 7 days
+   old and so voids, both print it EXPIRED with the same 20 signals.
+2. **Two counted signals at the same decision time: ONE DIFFERENCE.** Fixture `... 6 ties` gives two places a twin market in every third window, with the same polls.
+   The two builds start one block with different members of a tied pair (first ticker `...-00` in mine, `...-01` in Desk A's); every other figure of that block is equal.
+
+**The cause is not the order rule; it is the clock.** For two rows received at the same instant, Desk A's scorer gives DIFFERENT offsets: a poll's offset window is the
+rows up to and including that poll's own row in the run's order, so the second row of an instant sees one more row than the first. Mine gives every row received at one
+instant the same offset: all header rows with a receive time at or before the poll's. The sheet says "the 120 most recent rows of the same run folder (any ticker,
+ordered by receive time, at or before that poll, rows with a readable header only)". Both readings fit those words.
+
+| Read | Signal polls | Exchange time differs between the builds | Largest | Records or figures that differ | Blocks that differ |
+|---|---|---|---|---|---|
+| seed 6 | 3,099 | 18 | 0.011 s | 0 | 0 |
+| seed 7 | 3,121 | 9 | 0.012 s | 0 | 0 |
+| seed 6 confexp | 3,011 | 15 | 0.011 s | 0 | 0 |
+| seed 6 ties | 3,262 | 122 | 0.040 s | 0 | 1 (the tied pair's order) |
+| seed 6 openexp, read Dec 26 | 3,099 | 18 | 0.011 s | 0 | 0 |
+| seed 6 openexp, read Dec 30 | 3,099 | 18 | 0.011 s | 0 | 0 |
+
+With my build's switch set to Desk A's reading (`NC15_OFFSET_WINDOW=row`), all six reads are identical to Desk A's in every exchange time, record, figure, block and state.
+So this one reading is the whole difference.
+
+**Why it matters on the real log:** NC15 reads all 11 tickers in one batched poll, so every poll row shares its receive time with ten others; the choice touches every
+poll. The size is hundredths of a second, which can move a poll across the decision instant, across the 6 second second-look limit or across a Central midnight, and it
+decides the order of signals of one place decided at the same time (which the real places cannot have: one market a window).
+
+**An honest note on my earlier "same":** my comparison tool did not compare exchange times until now, so the "same" of 02:24Z was true of every status, figure, block
+and state, and silent about those hundredths of a second. The tool now compares them (`nc15_wheel_compare.py` with the first build's records file as third argument).
+Put to the Head for a ruling at 02:40Z; my default stays the per-instant reading until then.
 
 ## Places where the sheet or the lane leaves a choice
 

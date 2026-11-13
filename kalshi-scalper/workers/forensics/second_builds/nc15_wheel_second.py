@@ -6,7 +6,7 @@ ROTATION_LANE.md v1.2 section 4 on rnd-queue. Desk A's nc15_wheel_replay.py was 
 DEFAULT CLOSED: it runs only on a folder that holds the marker file MADE_UP_DATA (invented rows), or with --block-read, which is for a block read the Head has ordered.
 Any path in or resolving into a HELDOUT_ folder is refused.
 
-usage: python3 -I nc15_wheel_second.py <NC15 root> --now <ISO time of the read> [--records <out.csv>] [--block-read]
+usage: python3 -I nc15_wheel_second.py <NC15 root> --now <ISO time of the read> [--start <ISO start time, default 2026-11-13T02:24:00Z>] [--records <out.csv>] [--block-read]
   <NC15 root> is the recorder's shape: <root>/<date>/<HHMM>/{book,coverage}.csv.gz (scripts/record_nc_book.py on main).
 
 Places where the sheet or the lane leaves a choice (READINGS, printed with the output):
@@ -35,7 +35,9 @@ def iso(s): return datetime.fromisoformat(str(s).replace("Z", "+00:00")).timesta
 PLACES = ["KXCOPPER15M", "KXWTI15M", "KXNATGAS15M", "KXHYPE15M", "KXBNB15M", "KXSILVER15M", "KXUSDCAD15M"]
 WITHDRAWN = ["KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXAUDUSD15M"]
 COUNT_FROM = iso("2026-11-13T00:23:49Z"); STOP = iso("2026-12-31T23:59:59Z")
+START = iso("2026-11-13T02:24:00Z")      # the start time of the seven NC15 places' forward count, written in WHEEL_ADMIT_LIST.md at rnd-queue fb978196 (item (l)); --start overrides it for a fixture
 SECOND_CLOCK = os.environ.get("NC15_SECOND_CLOCK", "exchange")      # "exchange": the 6 s to the second poll are measured on exchange time (each poll's own offset); "recorder": on t_recv_ms
+OFFSET_WINDOW = os.environ.get("NC15_OFFSET_WINDOW", "instant")     # "instant": a poll's offset uses every header row of its run received at or before the poll's receive time, so rows of one instant share one offset; "row": only rows up to and including the poll's own row in the run's order (what the first build does)
 HEADERLESS_POLL = os.environ.get("NC15_HEADERLESS_POLL", "yes") == "yes"   # "yes": a row with no readable Date header can be a poll if earlier rows of its run give an offset (the sheet's text); "no": it is never a poll
 SIZE = 10; SLIP = 0.01; CELL = 0.50; BAND = (0.10, 0.90); LOOK = 600.0; EARLY = 10.0; SECOND_MAX = 6.0; OFFSET_ROWS = 120; VOID_DAYS = 7
 FAV_CENTS = 88; BLOCK = 60; RARE = 10; SPAN_DAYS = 21; MIN_DAYS = 7; DAY_SHARE = 0.30; PF_BLOCK = 1.3; PF_HALF = 1.0; CONFIRM = 30; PF_CONFIRM = 1.0
@@ -104,8 +106,8 @@ def read_root(root):
             hr, hv = [], []
             for r in rows:
                 try: h = parsedate_to_datetime(r.get("server_date_header") or "").timestamp()
-                except (TypeError, ValueError, IndexError): continue
-                r["_hdr"] = True; hr.append(r["_recv"]); hv.append(h + 0.5 - r["_recv"] / 1000.0)
+                except (TypeError, ValueError, IndexError): r["_hpos"] = len(hr); continue
+                r["_hdr"] = True; hr.append(r["_recv"]); hv.append(h + 0.5 - r["_recv"] / 1000.0); r["_hpos"] = len(hr)
             runs.append({"path": run, "rows": rows, "hr": hr, "hv": hv})
             if os.path.exists(cp):
                 with gzip.open(cp, "rt", newline="") as f:
@@ -120,12 +122,12 @@ def read_root(root):
     return runs, cover
 
 
-def offset_of(run, recv):
-    i = bisect.bisect_right(run["hr"], recv); v = run["hv"][max(0, i - OFFSET_ROWS):i]
+def offset_of(run, recv, row=None):
+    i = row["_hpos"] if (OFFSET_WINDOW == "row" and row is not None) else bisect.bisect_right(run["hr"], recv); v = run["hv"][max(0, i - OFFSET_ROWS):i]
     return statistics.median(v) if v else None
 
 
-def measure(root, now, made_up=False, block_read=False):
+def measure(root, now, made_up=False, block_read=False, start=None):
     if not (made_up and os.path.exists(os.path.join(root, "MADE_UP_DATA"))) and not block_read:
         raise SystemExit("REFUSED: this scorer runs on a folder of invented rows (marker file MADE_UP_DATA) or, on real NC15 rows, only at a block read the Head has ordered (--block-read)")
     runs, cover = read_root(root)
@@ -148,7 +150,7 @@ def measure(root, now, made_up=False, block_read=False):
         best = None; no_clock = 0
         for j, (recv, ri, r) in enumerate(ps):
             if abs(recv / 1000.0 - D) > 120: continue
-            off = offset_of(runs[ri], recv)
+            off = offset_of(runs[ri], recv, r)
             if off is None: no_clock += 1; continue
             ex = recv / 1000.0 + off
             if D - EARLY - EPS <= ex <= D + EPS and (best is None or (ex, recv) >= (best[0], best[1])): best = (ex, recv, j, off)
@@ -167,7 +169,7 @@ def measure(root, now, made_up=False, block_read=False):
         if j2 is not None:
             gap = (ps[j2][0] - recv) / 1000.0
             if SECOND_CLOCK == "exchange":
-                off2 = offset_of(runs[ps[j2][1]], ps[j2][0]); gap = None if off2 is None else gap + off2 - off
+                off2 = offset_of(runs[ps[j2][1]], ps[j2][0], ps[j2][2]); gap = None if off2 is None else gap + off2 - off
         if gap is None or gap > SECOND_MAX + EPS:
             rec["status"] = "not fill-checked"; rec["second_gap_s"] = gap; c[rec["status"]] += 1; recs.append(rec); continue
         r2 = ps[j2][2]; rec.update(second_recv_ms=ps[j2][0], second_gap_s=gap)
@@ -184,7 +186,8 @@ def measure(root, now, made_up=False, block_read=False):
     out = {"build": "Forensics second scorer of the NC15 depth-cell wheel replay", "sheet": "DESK_A_FROZEN_WHEEL_DEFINITIONS_NOV13.md v4 (8679f760, sha256 c53d2b9f...)", "now": now,
            "counts": {s: dict(C[s]) for s in PLACES + WITHDRAWN}, "readings": READINGS, "places": {}}
     for s in PLACES:
-        out["places"][s] = blocks([r for r in recs if r["series"] == s and r["status"].startswith("fillable")], now)
+        out["places"][s] = blocks([r for r in recs if r["series"] == s and r["status"].startswith("fillable")], now, START if start is None else start)
+    out["start"] = START if start is None else start
     return out, recs
 
 
@@ -205,7 +208,7 @@ def ratio(c): W, L = WL(c); return None if (W == 0 and L == 0) else (float("inf"
 def blocks(sig, now, start=None):
     """ROTATION_LANE.md section 4, items (a) to (t), as it stands at rnd-queue dbd2f4da (the Head of R&D's rulings of Nov 13, 2026 02:05Z, 02:09Z and 02:15Z).
     sig: a place's fillable signals. Counted signals are those at or after the start time (l) whose limit in whole cents is under 88 (i), in order of signal poll time, then ticker."""
-    start = COUNT_FROM if start is None else start; span = SPAN_DAYS * 86400
+    start = START if start is None else start; span = SPAN_DAYS * 86400
     sig = sorted(sig, key=lambda r: (r["signal_exchange"], r["ticker"], 0 if r["side"] == "yes" else 1))       # (p): decision time, then ticker, then side (yes before no)
     cnt = [r for r in sig if r["signal_exchange"] >= start - EPS and int(round(r["limit"] * 100)) < FAV_CENTS]
     res = {"fillable": len(sig), "before_the_start_time": sum(1 for r in sig if r["signal_exchange"] < start - EPS),
@@ -261,7 +264,8 @@ REC_COLS = ["series", "ticker", "close", "D", "status", "signal_recv_ms", "signa
 
 def lines(out):
     f = lambda x, d=2: "n/a" if x is None else ("inf" if x == float("inf") else ("%." + str(d) + "f") % x)
-    L = ["NC15 depth-cell wheel replay, second scorer | sheet v4 (8679f760) | read at %s" % datetime.fromtimestamp(out["now"], timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")]
+    z = lambda t: datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    L = ["NC15 depth-cell wheel replay, second scorer | sheet v4 (8679f760), lane section 4 at rnd-queue dbd2f4da | read at %s | blocks count signals from %s" % (z(out["now"]), z(out["start"]))]
     order = ["windows", "decision before the sheet's commit time, not counted", "close after the log's stop, not counted", "no signal: no poll in the window", "no signal: no clock", "no signal: a missing side of the book",
              "not in the cell", "in the cell", "in the cell, ask outside 0.10 to 0.90", "entering", "not fill-checked", "miss", "fillable", "fillable, booked as a void", "fillable, result still open"]
     for s in PLACES:
@@ -285,7 +289,7 @@ if __name__ == "__main__":
     if len(a) < 3 or "--now" not in a: raise SystemExit(__doc__)
     import json
     root = a[0]; now = iso(a[a.index("--now") + 1])
-    out, recs = measure(root, now, made_up=True, block_read="--block-read" in a)
+    out, recs = measure(root, now, made_up=True, block_read="--block-read" in a, start=iso(a[a.index("--start") + 1]) if "--start" in a else None)
     if "--records" in a:
         with open(a[a.index("--records") + 1], "w", newline="") as fh:
             w = csv.writer(fh); w.writerow(REC_COLS)
