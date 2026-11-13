@@ -1,0 +1,1 @@
+REFUSED: 0002.json.gz does not match the sha256 or the length the manifest records for its unpacked body

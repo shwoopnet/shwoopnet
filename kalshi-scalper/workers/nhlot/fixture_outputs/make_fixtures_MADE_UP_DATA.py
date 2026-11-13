@@ -17,8 +17,16 @@ then two strikes decided YES and three decided NO. The cheaper moneyline side th
   fire_high   80 games, 30 detected: 37.5%.
   edges       150 games; 37 would-be detections, 17 of them carrying one boundary each (see EDGES below); four of
               those must NOT detect (a mid off the band, three strikes quoted, an ask of 8c, no moneyline candles).
+Added after the third amendment (their manifests carry the sha256 and length of each UNPACKED answer, as the runner does):
+  equal_asks  150 games, 33 detected; in 12 both moneylines ask 50c at the detection minute and only the ticker that
+              sorts first is buyable a minute later; the other 21 are not buyable. 36% if the tie goes the right way.
+  one_sided   150 games, 33 detected, 12 buyable; in every detected game the cheaper moneyline shows no ask for two
+              minutes, so the state is first readable two minutes later (18 minutes before the close, not 20).
+  not_whole   as survive, with a third request that was refused: the reader must refuse.
+  bad_sha     as survive, one answer altered after the manifest was written: the reader must refuse.
 """
 import gzip
+import hashlib
 import json
 import os
 import sys
@@ -43,6 +51,7 @@ def game(i, kind, d=20, edge=None):
     tot = ["KXNHLTOTAL-%s-%d" % (name, k) for k in (2, 3, 4, 5, 6)]
     ot = "KXNHLOT-%s-1" % name
     out = {t: [] for t in ml + tot + [ot]}
+    dd = d - 2 if edge == "ml_one_sided" else d   # the minute the state is first readable
     for back in range(50, -2, -1):                 # the candle ending `back` minutes before the close
         t = close - 60 * back
         det = kind != "none" and back <= d
@@ -51,8 +60,14 @@ def game(i, kind, d=20, edge=None):
             a, b = (69, 71), (29, 31)
         if edge == "mid_off_band":
             a, b = (70, 71), (28, 31)
-        if kind != "none" and back == d - 1:      # one minute after detection
-            b = (41, 43) if kind == "buy" else (44, 46)
+        if edge == "equal_asks":
+            a, b = (48, 50), (48, 50)
+            if back == d - 1:
+                a = (41, 43)
+        if edge == "ml_one_sided" and back in (d, d - 1):
+            b = (42, None)
+        if kind != "none" and back == dd - 1:     # one minute after detection
+            b = (41, 43) if kind == "buy" and edge != "equal_asks" else (44, 46)
             if edge == "spread_3":
                 b = (40, 43)
             if edge == "spread_4":
@@ -95,7 +110,7 @@ EDGES = [("buy", 20, "mid_on_band"), ("buy", 20, "mid_off_band"), ("buy", 20, "f
          ("buy", 20, "no_ml"), ("buy", 41, None), ("buy", 40, None)]
 
 
-def build(out, name, n_games, n_buy, n_nobuy, edges=()):
+def build(out, name, n_games, n_buy, n_nobuy, edges=(), with_sha=False, spoil=None):
     rows, body = [], []
     plan = list(edges) + [("buy", 20, None)] * n_buy + [("nobuy", 20, None)] * n_nobuy
     plan += [("none", 20, None)] * (n_games - len(plan))
@@ -111,10 +126,17 @@ def build(out, name, n_games, n_buy, n_nobuy, edges=()):
     reqs, mrows = [], []
     for k, part in enumerate((body[:half], body[half:]), 1):
         fn = "%04d.json.gz" % k
-        with gzip.open(os.path.join(folder, "candles", fn), "wt") as f:
-            json.dump({"markets": part}, f)
+        raw = json.dumps({"markets": part}).encode()
+        with open(os.path.join(folder, "candles", fn), "wb") as f:
+            f.write(gzip.compress(raw if not (spoil == "bad_sha" and k == 2) else raw + b" "))
         reqs.append({"id": "c%03d" % k, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(m["market_ticker"] for m in part), "period_interval": 1}})
-        mrows.append({"index": k, "id": "c%03d" % k, "page": 1, "status": 200, "file": fn})
+        row = {"index": k, "id": "c%03d" % k, "page": 1, "status": 200, "file": fn}
+        if with_sha:
+            row.update({"bytes": len(raw), "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False})
+        mrows.append(row)
+    if spoil == "not_whole":
+        reqs.append({"id": "c003", "path": "/markets/candlesticks", "params": {"market_tickers": "KXNHLGAME-MADEUP-AAA", "period_interval": 1}})
+        mrows.append({"index": 3, "id": "c003", "page": 1, "status": 429, "file": None})
     json.dump({"status": "complete", "job": {"job_id": "MADE_UP", "requests": reqs}, "rows": mrows}, open(os.path.join(folder, "candles", "manifest.json"), "w"))
 
 
@@ -129,6 +151,10 @@ def main():
     build(out, "fire_35", 100, 15, 20)
     build(out, "fire_high", 80, 15, 15)
     build(out, "edges", 150, 10, 10, EDGES)
+    build(out, "equal_asks", 150, 0, 21, [("buy", 20, "equal_asks")] * 12, with_sha=True)
+    build(out, "one_sided", 150, 0, 0, [("buy", 20, "ml_one_sided")] * 12 + [("nobuy", 20, "ml_one_sided")] * 21, with_sha=True)
+    build(out, "not_whole", 150, 12, 21, with_sha=True, spoil="not_whole")
+    build(out, "bad_sha", 150, 12, 21, with_sha=True, spoil="bad_sha")
 
 
 if __name__ == "__main__":

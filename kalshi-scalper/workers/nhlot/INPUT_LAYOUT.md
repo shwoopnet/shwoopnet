@@ -11,11 +11,12 @@ There is no separate note. The measurement is defined inside `IDEA_DESK_B_WAVE3.
 3. the amendment inside that section dated Nov 12 at 17:30Z (the "game goes to overtime" market as a cross-check only);
 4. "NHLOT: dated amendment, Nov 13, 2026, 00:09Z";
 5. "NHLOT: second dated amendment, Nov 13, 2026, 00:10Z" (it replaces point 2 of the one before: one price, one chance);
-6. "NHLOT: clarifying line, Nov 13, 2026, 00:16Z" (the 1e-9 tolerance and which side of each line an exact value falls).
+6. "NHLOT: clarifying line, Nov 13, 2026, 00:16Z" (the 1e-9 tolerance and which side of each line an exact value falls);
+7. "NHLOT: third dated amendment, Nov 13, 2026" (the second build's readings, taken into the text: the 45 candle minutes, the cross-check, the quartiles, the manifest).
 
 ## A case
 
-`case_NN.tar.gz` holds `case_NN/games.json` and `case_NN/candles/`. Unpack each archive into its own empty folder.
+`case_NN.tar.gz` (01 to 13) holds `case_NN/games.json` and `case_NN/candles/`. Unpack each archive into its own empty folder.
 
 - `games.json`: a list with one object a game: `game` (a name), `ml` (the two moneyline tickers), `total` (the game's total-goals strike tickers), `close_ts` (epoch seconds: when the game market closed), `ot` (the ticker of the "game goes to overtime" market, for the cross-check only). On the real data this file is built from the settled lists by `nhlot/build_candles_job.py`; here it is given.
 - `candles/`: shaped like a kalshi-pull run. `manifest.json` has `status`, `job` (with `requests`, each `{id, path, params}`; `params.market_tickers` is the comma-joined tickers asked for) and `rows` (`id`, `page`, `status`, `file`). Each answer file is gzipped JSON: `{"markets": [{"market_ticker": "...", "candlesticks": [...]}]}`.

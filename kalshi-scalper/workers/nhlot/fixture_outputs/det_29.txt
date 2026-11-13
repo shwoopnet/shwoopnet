@@ -1,6 +1,6 @@
 candle freshness measured on Bitcoin 15 minute only, not on sports; one-minute resolution, no seconds-level claim  [hindsight window: detection uses the close time; upper bound, not a live rule]
 games in the list 150 | with moneyline candles 150 | detections 29 (19.3% of usable games)  [hindsight window: detection uses the close time; upper bound, not a live rule]
-cross-check, the game-goes-to-overtime market in games detected by the rule: says overtime 29 | says no overtime 0 | undecided 0 | no quote 0  [hindsight window: detection uses the close time; upper bound, not a live rule]
+cross-check, the game-goes-to-overtime market in games detected by the rule: says overtime 0 | says no overtime 0 | undecided 29 | no quote 0  [hindsight window: detection uses the close time; upper bound, not a live rule]
 cross-check, the game-goes-to-overtime market in games not detected by the rule: says overtime 0 | says no overtime 121 | undecided 0 | no quote 0  [hindsight window: detection uses the close time; upper bound, not a live rule]
 cheaper side's ask at the detection minute: median 0.44 | quartiles 0.44 to 0.44 | lowest 0.44  [hindsight window: detection uses the close time; upper bound, not a live rule]
   at 0.40 or lower: 0 of 29  [hindsight window: detection uses the close time; upper bound, not a live rule]

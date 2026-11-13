@@ -18,9 +18,10 @@ Kill rules for the card (as written in the card):
 Usage: python3 measure_prices.py <folder of the candle pull run> <games.json>
 games.json: [{"game": ..., "ml": [t1, t2], "total": [strike tickers...], "close_ts": ...}, ...]
 """
-import glob
 import gzip
+import hashlib
 import json
+import statistics
 import os
 import sys
 import os as _os, sys as _sys
@@ -32,7 +33,9 @@ _refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first
 LOW, HIGH = 0.07, 0.93      # a total strike is decided NO if its YES ask is at or under LOW, decided YES if its YES bid is at or over HIGH
 MIN_STRIKES = 4             # at least this many total strikes must have a quote that minute
 ML_BAND = (0.30, 0.70)      # both moneyline mids must be inside
-LAST_MIN = 45               # only the last 45 minutes before the game market closed are searched
+LAST_MIN = 45               # the 45 one-minute candles ending after the close minus 2,700 s and at or before the close (third amendment)
+EDGE_MIN = 5                # "the first 5 minutes of the window": a candle ending at or before the close minus 2,400 s
+OT_YES, OT_NO = 0.93, 0.07  # the overtime market cross-check (third amendment, point 3)
 ASK_BAR = 0.43              # the cheaper side's ask
 SPREAD_BAR = 0.03
 SHARE_BAR = 0.30            # under this share of detections at ASK_BAR or lower closes the card
@@ -83,7 +86,7 @@ def detect(g, cand):
     if len(ml) != 2 or not ml[0] or not ml[1]:
         return None, False
     last = int(g["close_ts"]) // 60
-    for m in range(last - LAST_MIN, last + 1):
+    for m in range(last - LAST_MIN + 1, last + 1):
         sides = []
         for q in ml:
             b, a = q.get(m, (None, None))
@@ -106,7 +109,7 @@ def detect(g, cand):
             else:
                 open_ += 1
         if known >= MIN_STRIKES and open_ == 0 and hi >= 1 and lo >= 1:
-            k = min(range(2), key=lambda i: sides[i][1])       # the cheaper side at the detection minute
+            k = min(range(2), key=lambda i: (round(sides[i][1], 9), g["ml"][i]))   # the cheaper side; equal asks: the ticker that sorts first
             cheap = sides[k]
             b, a = ml[k].get(m + 1, (None, None))             # the SAME contract one minute later (amendment of Nov 13)
             same_next = (b, a) if (b is not None and a is not None and b > 0 and a <= 1 and a >= b) else None
@@ -117,23 +120,54 @@ def detect(g, cand):
                     nxt.append((b, a))
             cheap_next = min(nxt, key=lambda s: s[1]) if len(nxt) == 2 else None
             return {"game": g["game"], "minute": m, "minutes_before_close": last - m, "ask": cheap[1], "spread": cheap[1] - cheap[0],
-                    "same_ask_next": same_next[1] if same_next else None, "same_spread_next": (same_next[1] - same_next[0]) if same_next else None, "window_edge": (m - (last - LAST_MIN)) < 5,
+                    "same_ask_next": same_next[1] if same_next else None, "same_spread_next": (same_next[1] - same_next[0]) if same_next else None, "window_edge": m <= last - LAST_MIN + EDGE_MIN,
                     "ask_next": cheap_next[1] if cheap_next else None, "spread_next": (cheap_next[1] - cheap_next[0]) if cheap_next else None}, True
     return None, True
 
 
-def ot_state(g, cand, minutes):
-    """Cross-check only (added Nov 12 before any NHL pull): what the 'game goes to overtime' market showed in those minutes.
-    'yes' = its YES bid was 0.90 or more in one of them, 'no' = its YES ask was 0.10 or less in all quoted ones, 'open' = neither, 'none' = no quote."""
+def ot_state(g, cand, minute=None):
+    """Cross-check only (third amendment, point 3): the 'game goes to overtime' market at one candle: the detection
+    minute if given, else its last candle inside the window. 'yes' = YES bid 0.93 or more, 'no' = YES ask 0.07 or less,
+    'open' = a quote that is neither, 'none' = no candle, or a candle showing neither side."""
     q = quotes(cand.get(g.get("ot", ""), []))
-    seen = [q[m] for m in minutes if m in q and (q[m][0] is not None or q[m][1] is not None)]
-    if not seen:
+    if minute is None:
+        last = int(g["close_ts"]) // 60
+        inside_window = [m for m in q if last - LAST_MIN + 1 <= m <= last]
+        if not inside_window:
+            return "none"
+        minute = max(inside_window)
+    b, a = q.get(minute, (None, None))
+    if b is None and a is None:
         return "none"
-    if any(b is not None and b >= 0.90 for b, a in seen):
+    if b is not None and b >= OT_YES - 1e-9:
         return "yes"
-    if all(a is not None and a <= 0.10 for b, a in seen):
+    if a is not None and a <= OT_NO + 1e-9:
         return "no"
     return "open"
+
+
+def read_run(run):
+    """Third amendment, point 8: the run is read by its manifest, whole or refused."""
+    root = os.path.realpath(run)
+    man = json.load(open(os.path.join(run, "manifest.json")))
+    reqs = (man.get("job") or {}).get("requests")
+    rows = man.get("rows", [])
+    if man.get("status") != "complete" or not isinstance(reqs, list) or not reqs:
+        sys.exit("REFUSED: the candle run did not finish, or its manifest does not carry its job")
+    good = {r.get("id") for r in rows if r.get("status") == 200 and not r.get("truncated") and r.get("file")}
+    if any(r.get("status") != 200 or r.get("truncated") or not r.get("file") for r in rows) or not {r.get("id") for r in reqs} <= good:
+        sys.exit("REFUSED: the candle run is not whole (a request was refused, cut short or not answered)")
+    cand = {}
+    for r in rows:
+        path = os.path.join(run, str(r["file"]))
+        if os.path.islink(path) or not (os.path.realpath(path) + os.sep).startswith(root + os.sep):
+            sys.exit("REFUSED: %s is not a plain file of the run" % r["file"])
+        _refuse_all([path])
+        raw = gzip.decompress(open(path, "rb").read())
+        if (r.get("sha256") and hashlib.sha256(raw).hexdigest() != r["sha256"]) or (r.get("bytes") is not None and r["bytes"] != len(raw)):
+            sys.exit("REFUSED: %s does not match the sha256 or the length the manifest records for its unpacked body" % r["file"])
+        walk(json.loads(raw.decode("utf-8")), cand)
+    return cand
 
 
 HINDSIGHT = "  [hindsight window: detection uses the close time; upper bound, not a live rule]"
@@ -144,12 +178,7 @@ def main():
     def print(*a, **k):                      # every figure carries the label (Head of R&D, Nov 13, 00:09Z)
         builtins.print(" ".join(str(x) for x in a) + HINDSIGHT, **k)
     run, games = sys.argv[1], json.load(open(sys.argv[2]))
-    cand = {}
-    for f in sorted(glob.glob(os.path.join(run, "[0-9]*.json.gz"))):
-        try:
-            walk(json.load(gzip.open(f, "rt")), cand)
-        except (ValueError, OSError):
-            continue
+    cand = read_run(run)
     usable, hits = 0, []
     cross = {"detected": {"yes": 0, "no": 0, "open": 0, "none": 0}, "not detected": {"yes": 0, "no": 0, "open": 0, "none": 0}}
     for g in games:
@@ -157,10 +186,9 @@ def main():
         usable += 1 if ok else 0
         if d:
             hits.append(d)
-            cross["detected"][ot_state(g, cand, [d["minute"], d["minute"] + 1])] += 1
+            cross["detected"][ot_state(g, cand, d["minute"])] += 1
         elif ok:
-            last = int(g["close_ts"]) // 60
-            cross["not detected"][ot_state(g, cand, range(last - LAST_MIN, last + 1))] += 1
+            cross["not detected"][ot_state(g, cand)] += 1
     n = len(hits)
     print("candle freshness measured on Bitcoin 15 minute only, not on sports; one-minute resolution, no seconds-level claim")
     print(f"games in the list {len(games)} | with moneyline candles {usable} | detections {n}" + (f" ({n / usable:.1%} of usable games)" if usable else ""))
@@ -169,11 +197,12 @@ def main():
         print(f"cross-check, the game-goes-to-overtime market in games {k} by the rule: says overtime {c['yes']} | says no overtime {c['no']} | undecided {c['open']} | no quote {c['none']}")
     if n:
         asks = sorted(h["ask"] for h in hits)
-        print(f"cheaper side's ask at the detection minute: median {asks[n // 2]:.2f} | quartiles {asks[n // 4]:.2f} to {asks[(3 * n) // 4]:.2f} | lowest {asks[0]:.2f}")
+        q1, q3 = (asks[0], asks[0]) if n == 1 else (lambda q: (q[0], q[2]))(statistics.quantiles(asks, n=4, method="inclusive"))
+        print(f"cheaper side's ask at the detection minute: median {statistics.median(asks) + 1e-9:.2f} | quartiles {q1 + 1e-9:.2f} to {q3 + 1e-9:.2f} | lowest {asks[0]:.2f}")
         for cut in (0.40, 0.43, 0.45, 0.47):
             print(f"  at {cut:.2f} or lower: {sum(1 for a in asks if a <= cut + 1e-9)} of {n}")
         mins = sorted(h["minutes_before_close"] for h in hits)
-        print(f"detection minute, minutes before the game market closed: median {mins[n // 2]} | range {mins[0]} to {mins[-1]}")
+        print(f"detection minute, minutes before the game market closed: median {statistics.median(mins):g} | range {mins[0]} to {mins[-1]}")
     print("HINDSIGHT LABEL: the search is bounded to the last 45 minutes before the game market closed, a time known only afterwards. "
           "Inside that window the scan runs forward and takes the FIRST qualifying minute. This is a price measurement with no bet and no outcome; "
           "a rule would need candles anchored on the scheduled start.")
