@@ -3,8 +3,9 @@
 
 Kalshi's combo (multivariate) markets live on exchange_index 1 and number in the tens of thousands, so they are sampled, not recorded in full. Each run does ONE poll:
 list the open combos (mve_filter=only, at most MAX_LIST_PAGES pages), keep every combo with a posted bid or ask at ANY price on the yes or the no side, or any traded volume (widened Nov 12, 2026 so the cheap side and the house side are both testable),
-rank them tightest yes spread first (then volume, then ticker), write the quotes of the first MAX_QUOTE_ROWS, then read the order book (best DEPTH YES and NO bids with sizes) of the first MAX_BOOKS
-and the public trades of the MAX_TRADES most traded.
+rank them tightest yes spread first (then volume, then ticker), write the quotes of the first MAX_QUOTE_ROWS (every one with its leg tickers since Nov 13, 2026), then read the order book
+(best DEPTH YES and NO bids with sizes) of the first MAX_BOOKS. Combo trades are no longer read here (Nov 13, 2026): record_combo_tape.py reads the whole public combo tape every minute,
+so the 15 per-combo trade reads were removed and trades_read in the coverage row is always 0.
 Once a day (the 00 UTC hour) it also reads settled combos with volume, so a paper test of buying either side of a combo has the outcomes next to the depth.
 
 PUBLIC Kalshi market data only: no key, no signing, no auth header, no account path, no order, no Firestore. One request stream, at least GAP_S seconds between calls (at most 10 a
@@ -34,8 +35,7 @@ PAGE_LIMIT = 1000
 MAX_LIST_PAGES = 5                 # at most 5,000 open combos listed per run
 MAX_QUOTE_ROWS = 400
 MAX_BOOKS = 40
-MAX_TRADES = 15
-MAX_LEG_ROWS = 100                 # leg_tickers is filled for the first 100 quote rows only (the tightest spreads, which also get the books); later rows leave it empty so a day stays under 1 MB gzipped
+MAX_LEG_ROWS = 400                 # leg_tickers is filled on every quote row (Nov 13, 2026, for CROWDLEG and NOTAKER: a bet is a listed combo containing a crowded leg; it was the first 100)
 LEGS_MAX_CHARS = 600               # cap on the leg_tickers string of one quote row; the true leg count stays in `legs`
 LEGS_MARKER = "|..."               # ends a truncated leg_tickers string
 DEPTH = 5
@@ -47,7 +47,6 @@ QUOTE_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "event_t
               "yes_bid_size", "yes_ask_size", "last_price", "volume", "open_interest", "legs", "leg_tickers"]
 BOOK_COLS = ["t_recv_ms", "server_date_header", "ticker", "close_time"] + ["yes_bid_px_%d" % i for i in range(1, 6)] + ["yes_bid_sz_%d" % i for i in range(1, 6)] \
     + ["no_bid_px_%d" % i for i in range(1, 6)] + ["no_bid_sz_%d" % i for i in range(1, 6)]
-TRADE_COLS = ["t_recv_ms", "ticker", "created_time", "yes_price_dollars", "count_fp", "taker_outcome_side", "trade_id"]
 RESULT_COLS = ["t_recv_ms", "ticker", "event_ticker", "close_time", "result", "last_price", "volume"]
 COVER_COLS = ["t_recv_ms", "listed", "pages", "list_complete", "selected", "quote_rows", "books", "trades_read", "requests", "n429", "stopped_early"]
 
@@ -236,14 +235,6 @@ def book_row(t_recv, date, m, resp):
     return [t_recv, date, m.get("ticker"), m.get("close_time", "")] + pad(yes, 0) + pad(yes, 1) + pad(no, 0) + pad(no, 1)
 
 
-def trade_rows(t_recv, trades):
-    rows = []
-    for t in (trades or []):
-        if isinstance(t, dict) and t.get("trade_id") is not None:
-            rows.append([t_recv, t.get("ticker"), t.get("created_time"), t.get("yes_price_dollars"), t.get("count_fp"), t.get("taker_outcome_side"), t.get("trade_id")])
-    return rows
-
-
 def result_row(t_recv, m):
     if not isinstance(m, dict) or not m.get("ticker") or m.get("result") in (None, "") or (num(m.get("volume_fp")) or 0) <= 0:
         return None
@@ -266,7 +257,7 @@ def poll(stream, now, out_dir):
     chosen = pick(markets)
     qrows = [r for r in (quote_row(tr, date, m, i < MAX_LEG_ROWS) for i, m in enumerate(chosen[:MAX_QUOTE_ROWS])) if r]
     write_csv(os.path.join(out_dir, "quotes.csv"), QUOTE_COLS, qrows)
-    brows, trows, nbooks, ntrades = [], [], 0, 0
+    brows, nbooks = [], 0
     for m in chosen[:MAX_BOOKS]:
         st, body, d, r = stream.get("%s/markets/%s/orderbook?depth=%d" % (BASE, m["ticker"], DEPTH))
         if st in (-1, -2):
@@ -276,20 +267,10 @@ def poll(stream, now, out_dir):
         if row:
             brows.append(row)
     write_csv(os.path.join(out_dir, "books.csv"), BOOK_COLS, brows)
-    # trades go to the MOST traded combos (volume, then ticker), not to the tightest spreads: a trade read is the scarce one
-    traded = sorted([m for m in chosen if (num(m.get("volume_fp")) or 0) > 0], key=lambda m: (-(num(m.get("volume_fp")) or 0), m["ticker"]))[:MAX_TRADES]
-    for m in traded:
-        st, body, d, r = stream.get("%s/markets/trades?ticker=%s&limit=100" % (BASE, m["ticker"]))
-        if st in (-1, -2):
-            break
-        ntrades += 1
-        if st == 200 and isinstance(body, dict) and isinstance(body.get("trades"), list):
-            trows += trade_rows(r, body["trades"])
-    write_csv(os.path.join(out_dir, "trades.csv"), TRADE_COLS, trows)
     if time.gmtime(now).tm_hour == 0 and not stream.stopped:
         sm, _d, str_, _p, _c = list_combos(stream, "settled", SETTLED_PAGES, int(now) - SETTLED_LOOKBACK_S)
         write_csv(os.path.join(out_dir, "results.csv"), RESULT_COLS, [r for r in (result_row(str_, m) for m in sm) if r])
-    return [tr, len(markets), pages, int(complete), len(chosen), len(qrows), nbooks, ntrades, stream.calls, stream.n429, int(stream.stopped)]
+    return [tr, len(markets), pages, int(complete), len(chosen), len(qrows), nbooks, 0, stream.calls, stream.n429, int(stream.stopped)]
 
 
 def main(argv):

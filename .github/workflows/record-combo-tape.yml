@@ -1,0 +1,73 @@
+# Nov 13, 2026 (the owner: "Yes, nonstop recorder"). Combo trade-tape recorder for Idea Desk C's CROWDLEG and NOTAKER cards (paper only). Research data only: public Kalshi market data, no key,
+# no secret, no order, no Firestore. Every minute it reads the public trade tape since its last good read (newest first, at most 10 pages a minute), keeps combo trades only (each once a
+# job) and looks up the legs of combos it sees for the first time (at most 2 requests a minute). A trial read (Nov 13) found at least 50,000 trades in one Sunday half hour, about a fifth
+# of them combos, so a 30 minute poll could not read the tape whole; record-combo.yml keeps the quotes, books and leg tickers.
+# The built-in GITHUB_TOKEN pushes gzipped files to its OWN `combotape-data` branch (under tape/), never to main and never to the other data branches. The first run creates it as an orphan branch.
+# Rate: at least 6 seconds between requests, so at most 10 a minute (14,400 a day); about 3 to 5 a minute expected at the trial's rate (3 tape pages and up to 2 legs look-ups).
+# Scheduled starts run late or are dropped, so it is triggered every 15 minutes (two cron pairs) under one concurrency group that never cancels a running job: jobs never overlap, a
+# dropped trigger costs at most 15 minutes, and each job starts its tape where the previous job's last good read ended (mark.txt, digits only, at most 2 hours back).
+# Each job records up to the next 4 hour boundary and stops. Continuous like R6: about 1,440 runner minutes a day (about 43,000 a month), free on a public repo, far over the Charter's
+# 250 a month guideline: the owner approved it ("Yes, nonstop recorder", Nov 13, 2026).
+# It stops by itself: from 2027-01-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+name: record-combo-tape
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+    - cron: "22,52 * * * *"   # a second pair 15 minutes after the first: GitHub sometimes drops scheduled starts for hours. Extra triggers queue behind a running job and never overlap it.
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-combo-tape
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Stop for good after the end date (2027-01-31 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin combotape-data; then git checkout -q -b combotape-data FETCH_HEAD; else git checkout -q --orphan combotape-data; fi
+      - name: Find where the previous job's tape ended
+        id: mark
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          LAST="$(ls -d data/tape/*/* 2>/dev/null | sort | tail -1)"
+          M=""
+          if [ -n "$LAST" ] && [ -f "$LAST/mark.txt" ]; then M="$(head -c 20 "$LAST/mark.txt" | tr -cd '0-9')"; fi
+          echo "since=${M:-0}" >> "$GITHUB_OUTPUT"
+      - name: Record the combo tape up to the next 4 hour boundary
+        if: steps.gate.outputs.go == 'true'
+        env:
+          SINCE: ${{ steps.mark.outputs.since }}
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/tape/$STAMP"
+          case "$SINCE" in ''|*[!0-9]*) SINCE=0 ;; esac   # digits only, else the script's 5 minute default
+          python3 code/scripts/record_combo_tape.py "data/tape/$STAMP" --since "$SINCE" --cycle-hours 4
+          gzip -9 -f data/tape/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "combotape-recorder"
+          git config user.email "combotape-recorder@users.noreply.github.com"
+          gzip -9 -f tape/*/*/*.csv 2>/dev/null || true
+          git add tape
+          git commit -q -m "combotape $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin combotape-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin combotape-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
+          exit 1

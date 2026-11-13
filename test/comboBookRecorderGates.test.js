@@ -112,8 +112,8 @@ print(json.dumps({"sts": sts, "stopped": s.stopped, "calls": s.calls, "r2": r2, 
 
 // CB6: bounded requests per run: the constants cap one run at 90 requests, 6 seconds apart (at most 10 a minute), and a run can never ask for more than its caps.
 gates.CB6 = () => {
-  const c = py('print(json.dumps({"budget": m.BUDGET, "pages": m.MAX_LIST_PAGES, "books": m.MAX_BOOKS, "trades": m.MAX_TRADES, "settled": m.SETTLED_PAGES, "gap": m.GAP_S, "rows": m.MAX_QUOTE_ROWS}))');
-  assert.ok(c.pages + c.books + c.trades + c.settled <= c.budget, 'the caps add up to no more than the budget');
+  const c = py('print(json.dumps({"budget": m.BUDGET, "pages": m.MAX_LIST_PAGES, "books": m.MAX_BOOKS, "settled": m.SETTLED_PAGES, "gap": m.GAP_S, "rows": m.MAX_QUOTE_ROWS}))');
+  assert.ok(c.pages + c.books + c.settled <= c.budget, 'the caps add up to no more than the budget (Nov 13: no trade reads here any more, record_combo_tape.py reads the combo tape)');
   assert.ok(c.budget <= 100 && 60 / c.gap <= 10);
   const perDay = 48 * c.budget;
   assert.ok(perDay <= 4320, 'at most 4,320 requests a day');
@@ -137,9 +137,9 @@ print(json.dumps({"calls": s.calls, "cov": cov, "books": sum("/orderbook" in u f
   assert.ok(out.calls <= c.budget);
   assert.strictEqual(out.lists, c.pages);
   assert.strictEqual(out.books, c.books);
-  assert.strictEqual(out.trades, c.trades);
+  assert.strictEqual(out.trades, 0, 'no trade reads (Nov 13, 2026)');
   assert.strictEqual(out.q - 1, c.rows, 'quote rows are capped');
-  assert.deepStrictEqual(out.files, ['books.csv', 'quotes.csv', 'trades.csv']);
+  assert.deepStrictEqual(out.files, ['books.csv', 'quotes.csv']);
 };
 
 // CB7: any combo with a posted bid or ask at any price on the yes or the no side, or any volume, is kept (widened Nov 12, 2026); an empty side (bid 0, ask 1.0000) is not a price; the order is
@@ -178,9 +178,9 @@ def fake(u):
 s = m.Stream(m.BUDGET, fetch=fake, clock=lambda: 0.0, sleep=lambda d: None)
 m.poll(s, 1.0e9 + 3600, tempfile.mkdtemp())
 books = [u.split("/markets/")[1].split("/")[0] for u in urls if "/orderbook" in u]
-print(json.dumps({"books": books, "calls": s.calls, "trades": [u.split("ticker=")[1].split("&")[0] for u in urls if "/trades" in u]}))`);
+print(json.dumps({"books": books, "calls": s.calls, "trades": [u for u in urls if "/trades" in u]}))`);
   assert.deepStrictEqual(out.books, Array.from({ length: 40 }, (_, i) => 'T' + String(i).padStart(3, '0')), 'tightest spreads first');
-  assert.strictEqual(out.trades.length, 15);
+  assert.strictEqual(out.trades.length, 0, 'no trade reads here (Nov 13, 2026)');
   assert.ok(out.calls <= 90);
 };
 
@@ -214,9 +214,10 @@ print(json.dumps({"cols": cols, "short": short[-2:], "n": len(short), "long": ln
   assert.ok(/^(KXLONGLEGTICKER-\d{3}:yes\|)+\.\.\.$/.test(out.long[1].replace(/\|\.\.\.$/, '|...')) || /:yes\|\.\.\.$/.test(out.long[1]), 'cut at a whole leg');
   assert.deepStrictEqual(out.nolegs, ['', ''], 'no legs list: both empty, never zero');
   assert.strictEqual(out.off[1], '');
-  assert.strictEqual(out.filled, out.legrows, 'only the first rows carry leg tickers');
+  assert.strictEqual(out.filled, out.rows, 'every quote row carries its leg tickers (Nov 13, 2026; it was the first 100)');
+  assert.strictEqual(out.legrows, 400);
   assert.deepStrictEqual(out.hdr, ['legs', 'leg_tickers']);
-  assert.ok(out.cap <= 600 && out.legrows <= 100);
+  assert.ok(out.cap <= 600 && out.legrows <= 400);
   assert.strictEqual(out.calls, 1 + 40 + 0, 'no request was added for the legs: one list page and the 40 books');
   assert.ok(!/mve_selected_legs[^\n]*(Stream|\.get\()/.test(code), 'the legs are read from the listing, never asked for');
 };
