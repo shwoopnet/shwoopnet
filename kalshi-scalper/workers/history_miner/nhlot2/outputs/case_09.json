@@ -1,0 +1,40 @@
+{
+ "label": "hindsight window: detection uses the close time; upper bound, not a live rule",
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on these markets",
+ "games": 250,
+ "games_with_moneyline_candles": 250,
+ "detections": 30,
+ "fire_rate": 0.12,
+ "cross_check": {
+  "detected": {
+   "undecided": 30
+  },
+  "not_detected": {
+   "says no overtime": 220
+  }
+ },
+ "cheaper_ask": {
+  "median": 0.44,
+  "quartiles": [
+   0.44,
+   0.44,
+   0.44
+  ],
+  "lowest": 0.44,
+  "at_or_under": {
+   "40c": 0,
+   "43c": 0,
+   "45c": 30,
+   "47c": 30
+  }
+ },
+ "detection_minutes_before_close": {
+  "median": 20.0,
+  "min": 20.0,
+  "max": 20.0
+ },
+ "detections_in_first_5_minutes": 0,
+ "buyable_share_registered": 0.5,
+ "best_of_two_share_optimistic": 0.5,
+ "verdict": "survives the price measurement (0.5000 buyable)"
+}
