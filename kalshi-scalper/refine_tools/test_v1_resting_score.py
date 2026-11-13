@@ -119,13 +119,15 @@ class T(unittest.TestCase):
         lines = S.evaluate(sig, 7.0, "dev")
         self.assertTrue(any("(2) fails: no | adverse selection: yes => FALSIFIED" in l for l in lines))
         self.assertTrue([l for l in lines if l.startswith("VERDICT")][0].startswith("VERDICT (this block): FALSIFIED on development"))
+        thin = S.evaluate(sig[:3] + sig[-1:], 7.0, "dev")
+        self.assertTrue([l for l in thin if l.startswith("VERDICT")][0].startswith("VERDICT (this block): NOT_ENOUGH_DATA"))
     def test_falsified_by_net_alone(self):
         # no missed window, but the version's net is below the parent's at +0c: (2) fails => FALSIFIED
         sig = [self._sig(0.20, 0.90, True, True) for _ in range(3)] + [self._sig(0.20, 0.90, False, True)]
         for i, s in enumerate(sig): s["ct"] = i
         lines = S.evaluate(sig, 7.0, "dev")
         self.assertTrue(any("(2) fails: yes" in l and "=> FALSIFIED" in l for l in lines))
-        self.assertIn("FALSIFIED on development", [l for l in lines if l.startswith("VERDICT")][0])
+        self.assertTrue([l for l in lines if l.startswith("VERDICT")][0].startswith("VERDICT (this block): NOT_ENOUGH_DATA"))   # thin sample: information only
     def test_labels_printed(self):
         self.assertIn("DEPTH1, CFRTI-B and CFRTI1-BTC", S.LABELS["V1"])
         self.assertEqual(S.LABELS["V2"], "not blind on EVENT830's forward windows")

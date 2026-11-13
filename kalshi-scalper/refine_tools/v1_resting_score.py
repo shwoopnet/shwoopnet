@@ -272,10 +272,10 @@ def evaluate(sig, days, block="dev"):
     falsified = (not c2) or miss
     out.append("adverse selection check (parent PF on missed windows, no-bid windows included, exceeds the version's PF on its fills by 0.10 or more): %s" % ("YES" if miss else "no"))
     out.append("FALSIFIED on development if (2) fails OR the missed windows' parent PF exceeds the version PF by 0.10 or more: (2) fails: %s | adverse selection: %s => %s" % ("yes" if not c2 else "no", "yes" if miss else "no", "FALSIFIED" if falsified else "not falsified"))
-    if falsified and block == "dev":
-        verdict = "FALSIFIED on development (filled %d%s)" % (len(filled), "" if c4 else ", below the 60 of bar (4)")
-    elif not c4:
-        verdict = "NOT_ENOUGH_DATA"
+    if not c4:
+        verdict = "NOT_ENOUGH_DATA" + (" (the FALSIFIED test above is information only on a thin sample)" if falsified else "")
+    elif falsified and block == "dev":
+        verdict = "FALSIFIED on development (filled %d)" % len(filled)
     else:
         verdict = "PASS the 7g bar (this block)" if (c1 and c2 and c3) else "does not meet the 7g bar"
     out.append("VERDICT (this block): " + verdict)
