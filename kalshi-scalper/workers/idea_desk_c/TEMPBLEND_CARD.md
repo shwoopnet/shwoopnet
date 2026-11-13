@@ -33,6 +33,22 @@ For each city, the station named by Kalshi's DAILY high temperature market for t
   - Only the strike nearest the midpoint (v + s) / 2, with its ask (for the side bought) at 20c to 80c and a spread of 4c or less. At most one strike per city-hour, ask plus 1c, 1 contract, hold to settlement.
 - **No fitted parameter.** The only numbers are the 0.5F gap, the 20c to 80c band, the 4c spread and the 15 minute look, all fixed here.
 
+## When the watched station is one of the five (answered Nov 13, before any data, at the Head's question)
+
+**Rule written now: such cities are KEPT, under the same rule.** The reasons:
+
+- **What the trader acts on is unchanged.** The trader sees s and the contract pays on v, so the mispricing the card claims is v minus s whatever the index is made of.
+- **Membership only shrinks the gap; it does not cancel it.** With five equal weights of 0.2:
+  - g = v minus s = 0.8 x (the mean of the other four stations, offset-adjusted, minus s) + 0.2 x (the station's own offset);
+  - so the gap is 80% of the difference between the other four stations and the watched one, plus a fifth of its offset.
+- **Fewer bets, same threshold.** A city where it is a member will clear the fixed 0.5F threshold less often. That is accepted, and the threshold is not changed for it.
+- **The offset part is a constant within a calibration week.** If the gap in a city is mostly that constant, makers can learn it within days, which is the honest counter for those cities.
+
+Two additions, fixed now:
+
+1. **Skip rule.** When the watched station is a member and its own `code` at minute t is anything but `ok`, the city-hour is skipped. In that case the blend is running without it, or on a late value.
+2. **Report rule.** The development read reports member cities and non-member cities as two descriptive rows, with the PF and n of each. This is NOT a second try: the verdict is the pooled rule, and no city is dropped after any data is seen.
+
 ## Numeric prediction, kill lines, windows
 
 - **Prediction:** gaps of 0.5F or more with a strike between the two numbers occur in about 5% to 15% of city-hours, and the development cash PF of the bets is 0.9 to 1.2. The market mostly prices the index.
