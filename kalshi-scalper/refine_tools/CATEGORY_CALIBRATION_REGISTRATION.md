@@ -15,3 +15,5 @@ Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from 
 
 
 Dated clarification Nov 13, 2026, second pass (Head of R&D ruling): from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided; all remaining markers restored verbatim (split with V2, closest existing, data held, report lead).
+
+Dated line Nov 13, 2026 (Head of R&D request): the markets of KXTRUTHSOCIALD-26NOV10, an event in the HELD-OUT third of W-CAT-POLENT1 Politics (close at or after 2026-11-10T19:14Z), exist with their result fields in another card's landed file (pull/POLGAPH_LISTS/2026-11-13T0627Z_43378777252, Desk B's POLGAPH lists). Nobody has read or printed a result or a price of that event; the structure check and the job builder read tickers and times only. This does not count as a read of this test's held-out.
