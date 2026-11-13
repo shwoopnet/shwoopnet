@@ -77,11 +77,12 @@ const SLOT_LADDER_MAX_CONTRACTS = 30;
 const SLOT_LADDERS = Object.freeze({
   OICORE: Object.freeze({
     // Nov 13, 2026, the Risk Analyst under the owner's grant ("you have full control over risk parameters"; goals: $10,000+ in a year, a 40% fall from the high stops
-    // everything, "bigger now, accept the swings"): the bottom step is 15 (was 10, then 12), steps 20 and 30 need a base of $1,000 and $1,350. At 15 contracts the
-    // daily cap is $37.50 and the drawdown stop $75, about a quarter of the owner's 40% loss budget. Bigger size does not add edge: it scales results and swings alike.
-    steps: Object.freeze([15, 20, 30]),
+    // everything, "bigger now", then "this doesnt seem aggressive enough"): the bottom step is 20 (was 10), steps 25 and 30 need a base of $1,000 and $1,350. 20 is the
+    // most whose normal swings fit its own drawdown stop (12% of base, about $99): the worst drop on record at 10 contracts doubled is about $73, at 30 it would pass the stop
+    // and trip it on noise. Bigger size does not add edge: it scales results and swings alike.
+    steps: Object.freeze([20, 25, 30]),
     minBase: Object.freeze([0, 1000, 1350]),
-    upFills: 20, upDays: 7,   // faster steps (Nov 3, 2026, the owner: "maybe be more aggressive", chose faster steps over lower floors or bigger jumps; was 40 fills and 14 days)
+    upFills: 15, upDays: 5,   // Nov 13, 2026: 15 fills and 5 days (were 20 and 7; the owner asked for a faster climb for winners). Earlier: faster steps (Nov 3, 2026, the owner: "maybe be more aggressive", chose faster steps over lower floors or bigger jumps; was 40 fills and 14 days)
     // Win rate lines matched to OICORE's shape (Nov 13, 2026): at a 12.8c average entry plus fees it breaks even near a 14% win rate, so a 20% bar to step up could never
     // be met by a profitable OICORE and a 15% line to step down sat on its live 16%; profit factor, net and drawdown still do the real gating. (Were 0.20 and 0.15.)
     upWinRate: 0.14, upNetPerContract: 1.0, upPf: 1.3, upMaxDrawdownPerContract: 3,
@@ -165,7 +166,7 @@ const SLOT_STRATEGIES = Object.freeze([
     entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 }),
     exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 10,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
-    killRules: Object.freeze({ maxConsecutiveLosses: 24, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 24, minNet: Object.freeze({ afterFills: 40, net: -50 }) }),
     forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",
   }),
   // EVENT830 (Nov 3, 2026, a held, capped live probe; pre-registration kalshi-scalper/README.md#SLOT-EVENT830, research record workers/EVENT830_REGISTRATION.md). On a listed US 8:30 AM ET release day only
@@ -697,7 +698,7 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 }
 
 module.exports = {
-  validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
+  validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord, accountOrder,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
   SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor, SLOT_SKIP_BELOW, SLOT_SKIP_BELOW_MAX, slotSkipsPrice,
   EVENT830_SERIES, SLOT_SERIES_RESERVED, SLOT_CALENDARS, slotCalendarRow, slotCalendarSeriesDue, SLOT_CALENDAR_LEAD_MS,

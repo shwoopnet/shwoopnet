@@ -132,6 +132,16 @@ gates.SF10 = () => {
   assert.ok(/at least 10 losses/.test(reg.goesLive + ' ' + reg.return), 'the registry return rule carries the 10 losses guard');
 };
 
+gates.SF12 = () => {
+  // Nov 13, 2026: the hard account stop. The Rules text states the line from the code's constant, so a change to it fails here.
+  const { HARD_STOP_FRACTION } = require('../functions/kalshiHardStopLib.js');
+  const rules = text(menu);
+  const pct = Math.round(HARD_STOP_FRACTION * 100) + '%';
+  assert.ok(html.includes('<span id="kalRulesHardStop">' + pct + '</span>'), 'the Rules text names the hard stop line ' + pct);
+  assert.ok(/all new buys stop and stay stopped until the owner restarts them with a reviewed change/.test(rules), 'the Rules text says it is a latch');
+  assert.ok(/not the account balance, so a deposit or a withdrawal never counts/.test(rules), 'and that deposits and withdrawals do not count');
+};
+
 gates.SF11 = () => {
   // Consequence: while gold's latch is tripped the Rules line follows the shared state and says off, cooling down; the old label stays when the state is unknown.
   assert.ok(/stNow\.L1 === 'off' \? 'Gold is off, cooling down/.test(html), 'the Rules line is driven by the shared L1 state');
@@ -145,6 +155,20 @@ gates.SF12 = () => {
   const exitLine = html.slice(html.indexOf('<b>Exit at 25c (fixed, always on).</b>'), html.indexOf('</div>', html.indexOf('<b>Exit at 25c (fixed, always on).</b>')));
   held.forEach((id) => assert.ok(exitLine.includes(id), 'the 25c exit line says ' + id + ' holds to settlement'));
   assert.ok(/closed from Friday 5 PM to Sunday 6 PM Central/.test(text(menu)), 'the Rules text states gold\'s weekend close');
+};
+
+// SF13 (Nov 13, 2026): the page's OICORE net floor must be the library's minNet, so a kill edit cannot leave the page stale.
+gates.SF13 = () => {
+  const slot = require('../functions/kalshiSlotLib.js');
+  const oi = slot.SLOT_STRATEGIES.find((x) => x.id === 'OICORE').killRules.minNet;
+  assert.strictEqual(slot.validateSlotStrategy(slot.SLOT_STRATEGIES.find((x) => x.id === 'OICORE')).ok, true, 'the validator accepts the net floor');
+  const m = /var KAL_BOARD_KILL = \{ OICORE: \{ streak: \d+, afterFills: (\d+), net: (-?\d+(?:\.\d+)?)/.exec(html);
+  assert.ok(m, 'KAL_BOARD_KILL is on the page');
+  assert.strictEqual(Number(m[1]), oi.afterFills); assert.strictEqual(Number(m[2]), oi.net, 'the board kill net equals the library minNet');
+  const floor = '$' + Math.abs(oi.net);
+  assert.ok(html.includes('down more than ' + floor + ' after ' + oi.afterFills + ' trades'), 'the Strategies rule line says ' + floor);
+  const reg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies.find((x) => x.id === 'OICORE');
+  assert.ok(reg.kill.includes('down more than ' + floor + ' after ' + oi.afterFills + ' trades'), 'the registry kill text says ' + floor);
 };
 
 let failed = 0;

@@ -61,7 +61,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 **Risk rules.**
 - Dollar caps scale with the sizing base: one order 1% (at most $20), one window 2% ($40), all open orders 3% ($60), one day 2% ($20), lifetime 6% ($60).
 - Shares the 5.5% window limit with L1. Has its own 12% loss stop on its own orders (since Nov 2, 2026), plus the combined account stop at the same 12%.
-- Kill rules (latch off, only a reviewed edit re-arms): 24 losses in a row (was 18 until Nov 7, 2026), or net below -$6 after 40 fills.
+- Kill rules (latch off, only a reviewed edit re-arms): 24 losses in a row (was 18 until Nov 7, 2026), or net below -$50 after 40 fills (was -$6 until Nov 13, 2026).
 
 **Record.**
 - Live (Oct 30 to Nov 1):

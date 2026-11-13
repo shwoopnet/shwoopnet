@@ -21,6 +21,7 @@
 const crypto = require("crypto");
 const bot = require("./kalshiSignalLib");
 const slotLib = require("./kalshiSlotLib");
+const hardStop = require("./kalshiHardStopLib");   // the hard account stop (Nov 13, 2026): like the gold latch, runL1Tick only LOOKS at the value it already receives
 const goldKill = require("./kalshiGoldKillLib");   // gold's kill latch (Nov 10, 2026): runL1Tick only LOOKS at the value it already receives
 
 // The second strategy slot (docs/SECOND_SLOT_WIRING.md). Every line below that mentions it sits behind slotOn(...). Two locks on one door: a caller must pass a `slot` hook bag AND the slot library's own
@@ -1022,6 +1023,11 @@ async function runL1Tick(args) {
   if (slotLive && args.shareOut && typeof args.shareOut === "object") {
     Object.assign(args.shareOut, { sizeBase, balanceBody: bal.body, risk, floor, stopAt, cash, peak, allowance, recentList, slotOrders, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart });
   }
+
+  // Hard account stop (docs/HARD_ACCOUNT_STOP.md): a ceiling over the 12% stop. A tripped, unreadable or silent record on the sizing document the tick ALREADY read means no new order of any strategy; the
+  // exit watch never looks at it. Written by kalshiHardStopCheck, never by this function; an absent field (never evaluated) does not block, so the recorded replays are unchanged.
+  const hs = hardStop.hardStopBlocks(args.sizingState, now);
+  if (hs.blocked) { await note("The hard account stop is holding every new buy (" + hs.why + "). It stays off until a reviewed edit re-arms it; open positions are still sold at the 25c line."); return { skipped: "hard stop" }; }
 
   // Probe drop rule (see PROBE_DROP_WINDOW). Only probes can be removed. A record that cannot be read or saved removes ALL probes this minute; the other series trade as usual.
   let dropped = [];

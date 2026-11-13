@@ -78,7 +78,9 @@ gates.SR4 = () => {
   assert.ok(!OWNER.test(P.KAL_BOARD_RETIRED.back) && P.KAL_BOARD_RETIRED.rows.every((r) => !OWNER.test(r.note || '')), 'the retired lines depend on nobody');
   assert.ok(/restarts by itself 24 hours later \(at most once in 7 days\)/.test(P.KAL_ACCOUNT_STOP) && /a second 12% stop within 7 days stays off until the owner restarts it/.test(P.KAL_ACCOUNT_STOP) && /12% of the account/.test(P.KAL_ACCOUNT_STOP) && live.L1_SIZED_STOP_FRACTION === 0.12, 'the one owner step, the account safety stop, is said plainly and matches the code');
   // the 40% hard stop (Main's pull request): once a code constant names it, the page must say it (the Risk Analyst, Nov 13, 2026)
-  const hard = [live, slot, gold].map((m) => m.HARD_STOP_FRACTION).find((x) => typeof x === 'number');
+  const hardLib = fs.existsSync(path.join(root, 'functions/kalshiHardStopLib.js')) ? require('../functions/kalshiHardStopLib.js') : {};
+  const hard = [live, slot, gold, hardLib].map((m) => m.HARD_STOP_FRACTION).find((x) => typeof x === 'number');
+  assert.ok(hard !== undefined || !fs.existsSync(path.join(root, 'functions/kalshiHardStopLib.js')), 'the hard stop constant is found where the code keeps it');
   if (hard !== undefined) assert.ok(new RegExp(Math.round(hard * 100) + '%').test(P.KAL_ACCOUNT_STOP), 'the account stop line names the ' + Math.round(hard * 100) + '% hard stop now that the code has it');
   assert.ok(/being built/.test(P.KAL_RULES_BUILDING), 'until the rotation code is live the page says these are the written rules being built');
   for (const r of reg) {

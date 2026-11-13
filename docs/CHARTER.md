@@ -15,6 +15,7 @@ Build a small, systematic trading business that runs on rules written in advance
 | Decision | Who decides | Notes |
 |---|---|---|
 | Anything goes live, changes a live rule, size, stop or market | **Owner** | Arrives as a promotion packet (below). No agent changes trading code. |
+| Move an already-merged strategy between shadow, trial, full and off | **The bot, by the written automatic criteria** | Owner's amendment, Nov 13, 2026 ("Rotation amendment" below). New strategies and rules still enter only by a code merge the owner makes. |
 | Merge a pull request, run a deploy command | **Owner** | The main session builds, tests and gives the command. |
 | Spend money, change a plan, pay, cancel | **Owner** | The Controller only drafts. |
 | Change this Charter, the research bar or the bans | **Owner** | |
@@ -127,6 +128,14 @@ Once a week the COO reports to the owner in under 20 lines: what it decided and 
 
 A level moves up only when the owner raises it, and down at once after a decision the owner vetoes twice.
 
+## Rotation amendment (the owner, Nov 13, 2026, typed in the Chief of Staff chat: "Amend the Charter as described: the bot moves already-merged strategies between shadow, trial, full and off by the written automatic criteria. New strategies still need my merge. I restart only after the 40% stop, or after a second 12% stop within 7 days.")
+
+1. The bot moves strategies that are ALREADY MERGED in code between shadow, trial, full size and off by written, numeric criteria for each move (going live, sizing up, stopping, coming back, retiring), replayed from the strategy's own recorded results, never from a stored or typed value. The criteria live in `docs/ROTATION_LANE.md` (v1.4) and in code constants that the site's text reads.
+2. Inside the seat caps and the account stops: no move loosens a size, a cap, the shared 12 percent stop, the window cap or the 40 percent account stop, and every return starts at trial size.
+3. **Still the owner's:** every code merge and every deploy (a new strategy, a new shadow rule, any change to a criterion or number and any new market all enter only by a reviewed pull request the owner merges); this Charter and the research bar; the **restart after the 40 percent account stop**; and the **restart after a second 12 percent daily stop within 7 days**. The first 12 percent stop restarts by itself 24 hours after the trip, at most once in 7 days.
+4. Sizes above 10 contracts need the proven bar on live fills (100 fills, cash profit factor 1.3 or better in 2 of 3 windows). The Risk Analyst may rule an exception in writing under the owner's grant of the risk parameters, stated at the top of the pull request so the owner merges it knowingly (OICORE's 15, 20 and 30 contract steps are the first).
+5. The research bar for a strategy as a research result is unchanged. An automatic move through the stages is a risk-controlled trial of a strategy that cleared the lane's lower bar, and is labelled that way wherever it is shown; the lane's count of rules tried is printed beside every move.
+
 ## Never
 
-No agent trades, deploys, merges, pays, cancels, touches an account, holds a card or account number, prints a secret, changes this Charter or promotes a strategy.
+No agent trades, deploys, merges, pays, cancels, touches an account, holds a card or account number, prints a secret, changes this Charter or promotes a strategy. (The bot's own stage moves under the Rotation amendment are not an agent promoting a strategy: they follow written criteria in reviewed code.)

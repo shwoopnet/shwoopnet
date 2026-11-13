@@ -78,11 +78,11 @@ gates.SP3 = () => {
   assert.strictEqual(R('0.00').frac, 0); assert.strictEqual(R('n/a').frac, 0); assert.strictEqual(R('1.00').frac, 0.5, 'a profit factor of 1.0 is half the ring on the 0 to 2 scale');
   assert.strictEqual(R('2.40').frac, 1, 'clamped to a full ring'); assert.strictEqual(R('no losses').frac, 1);
   assert.deepStrictEqual(R('1.30').tick, { x1: 50, y1: 84, x2: 50, y2: 96 }, 'the 1.0 tick is at the bottom of the ring, where half way ends');
-  const oi = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, money);
-  assert.ok(Math.abs(oi.frac - 0.75) < 1e-9 && oi.big === '$1.50' && oi.cap === 'left before its loss limit', 'OICORE: the net floor binds, 4.5 of 6 used: ' + JSON.stringify(oi));
-  const oi2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, money);
-  assert.ok(oi2.frac === 0.5 && oi2.big === '12 losses of 24' && /loss limit: \$9\.00 of room/.test(oi2.cap), 'the streak binds: ' + JSON.stringify(oi2));
-  assert.strictEqual(P.kalshiStratGauge('OICORE', { streak: 0, net: -5, floorOn: false, floorRoom: 1 }, money).frac, 0, 'the net floor is not counted before 40 fills');
+  const oi = P.kalshiStratGauge('OICORE', { streak: 2, net: -37.5, floorOn: true, floorRoom: 12.5 }, money);
+  assert.ok(Math.abs(oi.frac - 0.75) < 1e-9 && oi.big === '$12.50' && oi.cap === 'left before its loss limit', 'OICORE: the net floor binds, 37.5 of 50 used: ' + JSON.stringify(oi));
+  const oi2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 75 }, money);
+  assert.ok(oi2.frac === 0.5 && oi2.big === '12 losses of 24' && /loss limit: \$75\.00 of room/.test(oi2.cap), 'the streak binds: ' + JSON.stringify(oi2));
+  assert.strictEqual(P.kalshiStratGauge('OICORE', { streak: 0, net: -45, floorOn: false, floorRoom: 5 }, money).frac, 0, 'the net floor is not counted before 40 fills');
   const l1 = P.kalshiStratGauge('L1', { count: 18 }, money);
   assert.ok(l1.frac === 0.18 && l1.big === '18 of 100', 'the gold tripwire is n of 100 trades');
   assert.strictEqual(P.kalshiStratGauge('L1', { count: 250 }, money).frac, 1, 'never past full');
@@ -92,9 +92,9 @@ gates.SP3 = () => {
   assert.strictEqual(P.kalshiStratGauge('GOLDALL', { streak: 1 }, money), null, 'a shadow rule has no kill gauge');
   assert.strictEqual(P.kalshiStratGauge('XRPYES10', { streak: 1 }, money), null, 'XRPYES10 and KESTREL were retired Nov 11, 2026: no live card, so no kill gauge');
   assert.strictEqual(P.kalshiStratGauge('KESTREL', { streak: 1 }, money), null);
-  const m = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, mask);
+  const m = P.kalshiStratGauge('OICORE', { streak: 2, net: -37.5, floorOn: true, floorRoom: 12.5 }, mask);
   assert.ok(m.big === '****' && !/\d/.test(m.cap), 'Privacy view masks the dollar figure of the gauge');
-  const m2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, mask);
+  const m2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 75 }, mask);
   assert.ok(m2.cap === 'losses in a row; loss limit: **** of room', 'and the dollar figure in the caption');
 };
 const panel = (h, k) => new RegExp('<section class="lp-p" id="lp-p-' + k + '"[\\s\\S]*?</section>').exec(h)[0];
@@ -142,7 +142,7 @@ const now = Date.UTC(2026, 10, 10, 18, 0);
 // the first sharing its id with a live strategy (OICORE) to cover the twin chips. These ids are fixtures, not registered rules.
 const SHADOW_FIX = [{ id: 'OICORE', rule: 'fixture: a shadow rule that is also live' }, { id: 'SHA', rule: 'fixture shadow rule A' }, { id: 'SHB', rule: 'fixture shadow rule B' }, { id: 'SHC', rule: 'fixture shadow rule C' }];
 const liveModel = (kmoney) => P.KAL_BOARD_LIVE.map((s, i) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: { d7: { n: 1 }, d30: { n: 24, pf: 1.34 + i / 10 }, all: { n: 30 } },
-  kill: { count: 18, streak: 2, net: -1, floorOn: true, floorRoom: 5, lines: ['status for ' + s.id + ' ' + kmoney(10.67)] }, spark: [1, 1.1, 1.3, 1.2, 1.4] }));
+  kill: { count: 18, streak: 2, net: -8, floorOn: true, floorRoom: 42, lines: ['status for ' + s.id + ' ' + kmoney(10.67)] }, spark: [1, 1.1, 1.3, 1.2, 1.4] }));
 const deckModel = (state) => ({ state, rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, spark: [1, 1.2, 1.1],
   rep: { fillable: 41, pfFillable: 1.25, netFillableDollars: 1, days: 6.4, status: 'collecting' } })) });
 gates.SP5 = () => {
@@ -151,11 +151,11 @@ gates.SP5 = () => {
   const noRules = (x) => x.replace(/<ul class="kal-bd-rules">[\s\S]*?<\/ul>/g, '').replace(/<span class="bd-w"[^>]*>[^<]*<\/span>/g, '').replace(/<dd>[^<]*<\/dd>/g, '').replace(/ title="[^"]*"/g, '');
   assert.ok(!/\$\d/.test(noRules(h)) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.ok(/\$5\.00/.test(plain) && /left before its loss limit/.test(plain) && !/drawdown room/.test(plain), 'and with it off the room is shown, with no fixed drawdown badge');
+  assert.ok(/\$42\.00/.test(plain) && /left before its loss limit/.test(plain) && !/drawdown room/.test(plain), 'and with it off the room is shown, with no fixed drawdown badge');
   const n = P.KAL_BOARD_LIVE.length + SHADOW_FIX.length;
   assert.strictEqual((plain.match(/class="rw(?: open)?(?: near)?"/g) || []).length, n, 'one row per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/<dt>Sizing<\/dt>/g) || []).length, n, 'every row keeps the Sizing line in More');
-  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 15 (15, 20, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
+  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 20 (20, 25, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
   assert.strictEqual((plain.match(/<dd>Next: 3 contracts as a probe<\/dd>/g) || []).length, 4, 'all four fixture shadow rules say next 3 contracts');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 3 && (plain.match(/class="lp-p"/g) || []).length === 3 && /id="lp"/.test(plain), 'three boxes and three panels in one loop');
@@ -485,12 +485,12 @@ gates.GK8 = () => {
 gates.OK1 = () => {
   // OICORE's badge is room left against the kill that binds first (Nov 12, 2026, the owner); the fixed $50 drawdown is no longer a badge or gauge figure.
   const g = (kill) => P.kalshiStratGauge('OICORE', kill, money);
-  assert.strictEqual(g({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).big, '20 losses of 24', 'the streak is closer');
-  assert.strictEqual(g({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).big, '$1.00', 'the net floor is closer');
+  assert.strictEqual(g({ streak: 20, net: 1, floorOn: true, floorRoom: 51 }).big, '20 losses of 24', 'the streak is closer');
+  assert.strictEqual(g({ streak: 1, net: -42, floorOn: true, floorRoom: 8 }).big, '$8.00', 'the net floor is closer');
   const b = (kill) => P.kalshiStratBadge('live', { n: 40, pf: 1.4, frac: g(kill).frac, useFrac: true, killState: undefined });
-  assert.strictEqual(b({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).text, 'NEAR STOP', '20 of 24 is over 80% of the streak kill');
-  assert.strictEqual(b({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).text, 'NEAR STOP', '5 of 6 of the net floor used');
-  assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 6 }).text, 'NEAR STOP');
+  assert.strictEqual(b({ streak: 20, net: 1, floorOn: true, floorRoom: 51 }).text, 'NEAR STOP', '20 of 24 is over 80% of the streak kill');
+  assert.strictEqual(b({ streak: 1, net: -42, floorOn: true, floorRoom: 8 }).text, 'NEAR STOP', '42 of 50 of the net floor used');
+  assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 50 }).text, 'NEAR STOP');
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(!/ddStop|drawdown room/i.test(src.replace(/<li>[\s\S]*?<\/li>/g, '')), 'no fixed drawdown gauge code is left on the page');
 };
