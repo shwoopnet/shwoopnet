@@ -28,7 +28,7 @@ gates.SC2 = () => {
   const Q = 900000, base = Math.floor(TUE / Q) * Q;
   const at = (offsetMs) => lib(base + offsetMs).kalshiNextEntry(base + offsetMs);
   let n = at(60000); assert.strictEqual(n.name, 'Closing buy'); assert.strictEqual(n.inMs, 480000); assert.ok(/^Gold, /.test(n.what) && /then Open interest jump \(Bitcoin\)/.test(n.then));
-  n = at(600000); assert.strictEqual(n.name, 'Open interest jump', 'after the 9 minute look the next one is the Bitcoin strategy'); assert.strictEqual(n.inMs, 120000); assert.ok(/Bitcoin/.test(n.what) && /then Closing buy/.test(n.then));
+  n = at(600000); assert.strictEqual(n.name, 'Open interest jump', 'after the 9 minute look the next one is the Bitcoin strategy'); assert.strictEqual(n.inMs, 120000); assert.ok(/Bitcoin/.test(n.what) && /then Perp-model longshot/.test(n.then), "CFRTIK (2 minutes before the close) now follows the open interest jump");
   n = at(800000); assert.strictEqual(n.name, 'Closing buy', 'after the 12 minute look it wraps to the next quarter hour'); assert.strictEqual(n.inMs, 640000);
   assert.ok(n.frac > 0 && n.frac < 1, 'the ring fills between the previous look and the next');
   assert.ok(!/10 minute look/.test(JSON.stringify(n)), 'no 10 minute look unless a market with one can trade');
