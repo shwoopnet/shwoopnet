@@ -1,0 +1,69 @@
+{
+ "job_id": "OIFIELD_CHECK",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/forensics/inventory/WHEEL_PLACES_COVERAGE_NOV13.md",
+ "purpose": "Field presence check (Head of R&D order 21:12Z, Main approved): does the candlesticks answer for the 11 NC15 non-crypto 15 minute markets carry open_interest_fp, populated? One batched GET, one recent window (close 2026-11-13T19:00Z). Only open_interest_fp is read; no price, book, trade or result column.",
+ "heldout": "None held out by this job. It is a field-presence check, not a test: no outcome is joined, no rule is scored, zero tries. The window (close 2026-11-13T19:00Z) lies inside NC15's recorded period, but no recorder file, result or price of it is read; no card's held-out window is touched (NC15DEPTH1's scoring window opens 2026-11-19; the wheel replay reads recorder files, not these candles).",
+ "allowed_endpoints": [
+  {
+   "name": "markets_candlesticks_batch",
+   "method": "GET",
+   "path_pattern": "/markets/candlesticks",
+   "params_allowed": [
+    "market_tickers",
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXAUDUSD15M",
+  "KXBNB15M",
+  "KXCOPPER15M",
+  "KXEURUSD15M",
+  "KXGBPUSD15M",
+  "KXHYPE15M",
+  "KXNATGAS15M",
+  "KXSILVER15M",
+  "KXUSDCAD15M",
+  "KXUSDJPY15M",
+  "KXWTI15M"
+ ],
+ "ticker_allowlist": [
+  "KXAUDUSD15M-26NOV131400-30",
+  "KXBNB15M-26NOV131400-00",
+  "KXCOPPER15M-26NOV131400-00",
+  "KXEURUSD15M-26NOV131400-30",
+  "KXGBPUSD15M-26NOV131400-30",
+  "KXHYPE15M-26NOV131400-00",
+  "KXNATGAS15M-26NOV131400-00",
+  "KXSILVER15M-26NOV131400-00",
+  "KXUSDCAD15M-26NOV131400-30",
+  "KXUSDJPY15M-26NOV131400-30",
+  "KXWTI15M-26NOV131400-00"
+ ],
+ "max_requests": 1,
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "notes": "Written by the Forensics desk for the Head of R&D's order; owner is MAIN because the runner's owner list has no Forensics entry. One batched request of 11 tickers (the batched endpoint took 24 in CFRTI_K_CANDLES and the WHEEL0 jobs). If the batched endpoint refuses the 11 tickers, the fallback is 11 single GETs one second apart, which needs a second job file (OIFIELD_CHECK_SINGLE) written only if this one fails; none is pre-written. The tickers are the names recorded by NC15 for that window (read from its coverage file: names and close times only). The answer is about 11 markets times 8 candles, well under 1 MB.",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "oi0",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXAUDUSD15M-26NOV131400-30,KXBNB15M-26NOV131400-00,KXCOPPER15M-26NOV131400-00,KXEURUSD15M-26NOV131400-30,KXGBPUSD15M-26NOV131400-30,KXHYPE15M-26NOV131400-00,KXNATGAS15M-26NOV131400-00,KXSILVER15M-26NOV131400-00,KXUSDCAD15M-26NOV131400-30,KXUSDJPY15M-26NOV131400-30,KXWTI15M-26NOV131400-00",
+    "start_ts": 1794595920,
+    "end_ts": 1794596340,
+    "period_interval": 1
+   }
+  }
+ ]
+}
