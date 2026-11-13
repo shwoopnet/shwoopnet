@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # W-SWEEP-EXT1 PLAN (written Nov 11 2026 BEFORE any outcome-conditioned number was computed)
 
 Registration: kalshi-scalper/refine_tools/SWEEP_EXTERNAL_SIGNAL_REGISTRATION.md (with Amendment 1, 2, CFRTI note). Nothing live changes. Python files in this dir only. No held-out result is computed or read.

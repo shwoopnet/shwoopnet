@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Audit of Nov 11 refinement FAILs (offline, read only)
 
 Scope: the 8 files in refine_tools plus the five scratch dirs. Reran only local scorers on existing local files (w_sweep summary.py on a copy of cells.csv, w_pol_census cnt.py and score.py). No held-out file touched, no heldout.py run, no network.

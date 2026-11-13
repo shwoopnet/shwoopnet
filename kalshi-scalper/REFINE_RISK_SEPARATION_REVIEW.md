@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Review of docs/STRATEGY_RISK_SEPARATION.md (PR 689), with the SCALE_STEP review folded in (Nov 1, 2026, 7: [live figure removed, ask Main]
 
 Requested by main at the owner's direction. [live figure removed, ask Main] Dollars are after fees. [live figure removed, ask Main]

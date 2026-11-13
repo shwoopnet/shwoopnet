@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Size ladder review: [live figure removed, ask Main]
 
 [live figure removed, ask Main] Dollars are after fees.

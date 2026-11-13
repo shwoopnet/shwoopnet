@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Sunday supply draft (for Sun Nov 15, 7:17 PM CT), DRAFT from verified results only, 2026-11-10
 
 [live figure removed, ask Main] The four below are the already registered shadow rules (PR 753) and are the only ones with an independent-window pass at both +0c and +1c. None is a pass: Bonferroni z about 5.2 is out of reach at these n.

@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Gold L1: kill and return conditions (PROPOSAL, owner approves the numbers before anything is built)
 Date 2026-11-10. Registered first: scratch `w_goldkill/REGISTRATION.md` (grid fixed before scoring); results `w_goldkill/out.txt`, script `w_goldkill/run.py`. Read only, descriptive, no pass bar.
 

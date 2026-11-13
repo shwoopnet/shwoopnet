@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 DRAFT for the owner to approve. Main places it in kalshi-scalper/README.md under SLOT-OICORE BEFORE any re-arm edit. Nothing below changes a live rule.
 
 ### SLOT-OICORE update and pre-committed re-arm rule (dated 2026-11-10, written before the drawdown stop has fired)

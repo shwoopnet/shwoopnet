@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Forward-logger packet: six public-data recorders for owner approval (backlog rows 52, 54, 55, 56, 57, 60)
 
 Date 2026-11-10. Research only. Nothing here changes an order, size, limit or exit, and nothing is built until the owner says yes. Each is a GitHub Actions recorder like `record-quotes.yml` (public data, no key, no secret, no order, built-in token pushes CSV to the `quote-data` branch under its own folder, never main, not published with the site). Same pattern as R6, so a stop is deleting one workflow. A "yes" per row (or a subset) is the decision requested. Sources: refine_tools ROW54_60 spec, ROW55_56 feasibility, w_feas rows 52 and 57, row 49 registration.

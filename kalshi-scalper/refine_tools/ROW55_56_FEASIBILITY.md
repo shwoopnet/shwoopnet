@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Feasibility, rows 55 and 56 (Nov 10, 2026). No strategy scored. About 25 public GETs, 2 to 4 s apart, no 429.
 Repeat check: REFINE_RETRACTIONS.md has nothing on liquidations or sports lines; REFINE_STATUS.md mentions only flow/OI work, no OKX liquidation or sportsbook line test.
 

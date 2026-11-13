@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Refinement tools (read only)
 
 Copied from the refinement session scratchpad on Nov 9, 2026 so a fresh session can rebuild. They only read the nightly order report JSON (fetched with the report token by a local dash script that is NOT in the repo); they place no order and call no Kalshi endpoint except the public market GETs in the trackers that score against settlements.

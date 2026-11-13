@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # R6 extension, gold only (backlog row 36): decision needed before 2026-11-13 23:59 UTC
 
 ## What it does now

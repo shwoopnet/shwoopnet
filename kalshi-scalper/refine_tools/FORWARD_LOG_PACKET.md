@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Forward log packet: four log-only items for owner approval (backlog rows 32 to 35)
 
 Date 2026-11-10. Nothing here changes an order, a size, a limit or an exit. Each item only records numbers the bot already holds, or one public read, AFTER the orders of that minute are sent. Research writes the spec and tests; the owner approves; a separate reviewed pull request builds it. Nothing was edited to write this.

@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Sunday supply next (for Sun Nov 15, 7:17 PM CT), DRAFT from verified results only, 2026-11-10
 
 [live figure removed, ask Main] Nothing is at the bar. Honest summary: 0 new rules, 0 new candidates this week. No idea passed an independent window except the already registered shadow rules (section 2). Basis: cash, PF per contract, unrounded fee, hold to settlement.

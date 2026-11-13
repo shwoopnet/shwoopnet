@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # OKX liquidation logger (backlog row 55), DRAFT, NOT ACTIVE (Nov 10, 2026)
 Files: `scripts/record_oklq.py`, `.github/workflows/record-oklq.yml`, `test/oklqRecorderGates.test.js` (OL1 to OL7, all pass). They live on `claude/refine-live` only. GitHub runs schedules only from the default branch, so nothing runs until the owner merges it after a security review. [live figure removed, ask Main]
 

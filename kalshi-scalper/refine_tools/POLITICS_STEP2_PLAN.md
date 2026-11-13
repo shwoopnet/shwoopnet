@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # P1 STEP 2 PLAN (Nov 11, 2026, written before any price was scored)
 Rules applied: Kalshi's own prices and settlements only; no Yahoo, no Open-Meteo; MAX HOLD 14 DAYS (entry look is 14 days before the market's close_time, hold to settlement, so a market listed less than 14 days before its close has no entry and is dropped); scheduled events first (POL-c1, POL-c2 incl. [live figure removed, ask Main] Held-out third frozen, NOT run. Deflation about 7,950 tries plus the cells here (about 12), Bonferroni z about 5.2 stated for the record; anything read here is a screen.
 

@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Five different mechanisms (owner hard rule, Nov 11). Proposals only, nothing live changes.
 Each: ENTRY / MANAGEMENT-EXIT / closest existing / why it differs / data and cost / prior / first read.
 

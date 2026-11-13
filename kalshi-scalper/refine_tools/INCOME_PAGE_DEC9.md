@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # DEC 9 income checkpoint page (2026-11-10, data to 18:59Z; registration in REGISTRATION.md, script calc.py)
 [live figure removed, ask Main] Days are US Central.
 

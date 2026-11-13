@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Plan: [live figure removed, ask Main]
 
 Builds on `REFINE_TIMING_NOTES.md`. No code changed. Line numbers are from `functions/kalshiLiveLib.js` and `functions/index.js` on this branch; `origin/main` has them about 6 lines later in `runL1Tick` since #672 added the send timing. The main session's pull request must re-find them.

@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # OICORE drawdown stop and re-arm: mechanics (facts, Nov 9, 2026; no recommendation)
 
 Source: origin/main cadae52e. Authority: docs/CHARTER.md lines 17 and 126, the owner decides, merges and deploys; an agent may only draft text.

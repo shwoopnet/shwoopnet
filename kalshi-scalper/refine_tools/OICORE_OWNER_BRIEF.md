@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # OICORE decision brief for the owner (Nov 10, 2026, 09:27 UTC; drafted by the refinement chat, read only)
 
 This is your decision. No agent changes the live rule. Nothing below was deployed or edited in code.

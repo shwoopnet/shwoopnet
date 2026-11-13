@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # W-RETRACT1: claims in REFINE_STATUS.md corrected, withdrawn or tempered by a later entry (Nov 5 to Nov 6, 2026)
 
 Source: /home/user/shwoopnet/kalshi-scalper/REFINE_STATUS.md (read only). Times CT. Format: original entry (date) -> correcting entry -> truth now.

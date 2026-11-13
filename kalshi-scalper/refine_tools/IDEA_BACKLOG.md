@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Refinement idea backlog (live side), one ranked list. Nov 10, 2026
 
 Rules: every idea is registered before it is scored (rule, universe, pass bar PF 1.3 on the unrounded fee in both halves, n 40 per half), no favourite-and-hold as a NEW live strategy, universe fixed before entry, N counted (about 780 tried). Topped up whenever fewer than 10 untested items. "Prior" is judgment, not a measurement. Columns: rank, idea, cost to test, who loses, prior, next step, status.

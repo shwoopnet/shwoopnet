@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Why Dogecoin orders go out late in the minute, and what a fix would touch (read only; Oct 30, 2026, 8:15 PM CT)
 
 Requested by the owner via the main session. I read `functions/index.js` (`kalshiLiveArmed`, line 585 on) and `functions/kalshiLiveLib.js` (`runL1Tick`, line 842 on). I changed nothing. A trading change is its own pull request from the main session after the owner approves.

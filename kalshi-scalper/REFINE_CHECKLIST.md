@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # W-CALENDAR1: what is due next (written Nov 6, 2026 11:10 AM CT, 17:10Z; CT = UTC minus 6 since Nov 1)
 Read only. Sources: kalshi-scalper/REFINE_STATUS.md (top entries, newest first), scratchpad interim_40.md, TOOLBOX.md. [live figure removed, ask Main] Log with logentry.py. Always python3 -I. Trigger ids are listed under "Scheduled triggers" near the end of this file. Items below say "wake.sh flag/tracker" or "note" where no trigger exists.
 

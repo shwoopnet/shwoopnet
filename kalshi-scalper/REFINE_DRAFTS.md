@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Refinement pre-registration DRAFTS, all six (2026-11-06)
 
 Status: DRAFTS ONLY for main and the owner to approve. Nothing is scored, built, registered or live. Combined from two worker files (OICORE drafts first, gold drafts second); every figure is quoted from REFINE_STATUS.md except where a draft says counts were added (fill shares, feasibility). None changes an order, a size, a stop or the exit watch. Adopting any of them is a separate reviewed pull request.

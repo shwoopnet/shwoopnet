@@ -16,3 +16,5 @@ Assumptions I could not verify (the Head to correct): (a) "Kalshi's temperature 
 - Numeric prediction: the median move of the mid in the 30 seconds after a relayed score change is at least 2c in the direction of the score, and the fillable first-ask share is at least 50 percent; cash PF 1.5 after fee at +1c slip in each of three windows by close date.
 - Kill: median move under the fee plus 1c; or fill rate under 40 percent at +1c; or the feed arrives after the quote has moved (lag under zero) in more than half of the events.
 - Needs: score events with timestamps and a one second quote path around them (not hourly candles, so a recorder), which the project does not have today; development data cannot exist before the feed is recorded.
+
+Dated line Nov 13, 2026 (Head of R&D): merged into Desk A's SCORELAG1 (same mechanism; stays at gate 0: field probe, a fast enough quote source, correlation with INPLAYJUMP under 0.3; not counted). TEMPNOW1 was not taken further (favourite-and-hold ban; the mechanism of the closed WXDAYEND card on an intraday reading).

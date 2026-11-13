@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Gold replacement table (Nov 12, 2026, for the Monday Nov 16 rotation memo)
 
 Offline desk analysis. No network, no Kalshi read, no held-out script read or run, no live account figure. Every number below is copied from a file in `kalshi-scalper/refine_tools/` (IDEA_BACKLOG, FIVE_MECHANISMS_NOV11, CARDS_NOV11_ROWS_74_93, POLITICS_CARDS_NOV11, POWER_TABLE_NOV12 and the registrations and results committed today) or from `kalshi-scalper/REFINE_HANDOFF.md`. A "[live figure removed]" placeholder was ignored. Nothing here changes a registration, a bar or a trading rule.

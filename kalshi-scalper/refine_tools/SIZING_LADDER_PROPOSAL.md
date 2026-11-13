@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Sizing ladder proposal (2026-11-10, a proposal only: no rule, cap or Charter text changed by this file)
 [live figure removed, ask Main] Registration and script: scratchpad w_ladderprop (REGISTRATION.md, an.py).
 

@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Review: [live figure removed, ask Main]
 
 Requested by main at the owner's direction. [live figure removed, ask Main] I changed no code. OICORE scaling is not part of this review.

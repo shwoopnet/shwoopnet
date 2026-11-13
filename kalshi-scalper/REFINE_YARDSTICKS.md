@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # W-YARDSTICKS1: [live figure removed, ask Main]
 Descriptive only. [live figure removed, ask Main] No new rule. Everything below the live rows is information only and cannot change an order.
 

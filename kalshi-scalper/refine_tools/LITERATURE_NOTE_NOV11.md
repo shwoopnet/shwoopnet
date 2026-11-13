@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # Literature note: published edges on prediction markets (2026-11-11)
 Method: 6 web searches, search summaries only. No page was opened, so every figure is second hand and must be checked against the primary paper. Nothing here is a finding for our bot.
 

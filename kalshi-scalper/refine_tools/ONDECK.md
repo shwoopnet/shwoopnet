@@ -1,3 +1,5 @@
+HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; lines marked "[live figure removed, ask Main]" are blank on purpose. Read it as history, not as a current rule.
+
 # On-deck shadow candidates (live side), current as of 2026-11-10
 
 Basis: cash, PF per contract, fee unrounded (matches live avgFee), hold to settlement. N tried for deflation about 770. Bonferroni z about 5.2 is unreachable at these n, so every rule below is a SHADOW candidate, never a pass. Shadow rows assume a fill at the touch (upper bound): read wouldFill. Sources: REFINE_STATUS.md Nov 9 to Nov 10 entries, SHADOW_REGISTRATIONS_WEEK1.md.
