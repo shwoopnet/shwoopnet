@@ -1,6 +1,6 @@
 # Shadow packet: TIE3 (Idea Desk B, written Nov 12, 2026; due Nov 13, 16:00Z)
 
-**MEASUREMENT RESULT (top line, filled in the hour it lands): prices not landed yet.** Lists landed Nov 12 (counts as given by the Head of R&D at 18:58Z, not re-counted by this desk): 821 priced events in the price block (NHL periods 1, 2, 3 and level-after-regulation 114 each, NFL quarters 120, soccer first halves 245); base block 2,036 events; the ticker-suffix assumption held. The candle stage (50 requests) has the Head's go and is with the Testing Desk. Amended before the candles: the start check's lower bound is 30 minutes (was 20).
+**MEASUREMENT RESULT (top line, written Nov 13, 00:51Z): CLOSED, "efficient, move on".** Two builds, the same figure on all 117 compared. No cell has a median (base rate minus the Tie's ask) of 8c or more: the best is the NFL quarters at +0.8c, and in the three NHL period cells the Tie is priced ABOVE its base rate (-3.7c, -4.9c, -4.7c). No rule is registered, no try was spent, and this packet asks for no shadow place. Detail: the closing section of `tie3/TIE3_REGISTRATION.md`.
 
 For the Verification Analyst to score. Registration: `tie3/TIE3_REGISTRATION.md`; frozen cells and series: `tie3/TIE3_SERIES.json`; card 18 in `CENSUS_CARDS_NOV12.md`.
 

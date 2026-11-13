@@ -257,6 +257,28 @@ Forensics' second build to Amendment 10 and the Testing Desk's build printed the
 
 1. **The cost line the KILL reads (corrects the cost phrase in Amendment 10, line 8, and Amendment 9, point 5; the author's two lines disagreed).** The one-way cost of a look is **(the look candle's ASK minus its mid) plus the fee as charged at the limit** (the limit is the ask plus 1c; the fee is 0.07 x limit x (1 minus limit), rounded up to the next cent). This is the standing template of rule (d), the same for every hold rule (INPLAYJUMP, SOCDERIV, REMATCH), and the 4c line was set against it. The limit-based figure, (limit minus mid) plus the same fee, is printed BESIDE it and labelled "cost as paid at the limit, information only". The extra 1c is not lost: every scored bet pays the limit, so it is charged in full in any profit factor. The looks the median is taken over are unchanged (Amendment 10, line 2).
 2. **The placebo share at the second look.** "Per title and per look" means the second look's OWN looks: the same matches the gap share at the second look is taken over, not all of the title's first-look matches. Both denominators are printed.
-3. **Known limit of the landed data, second look (the Head's sentence, with the direction added).** The TEXT stands: a second look belongs to a match by OBSERVED winners (the observed winner of map 2 is the observed loser of map 1). But second-look windows were pulled only for matches whose POSTED map results say one map each; the second-look sample is therefore planned from results posted after the look, and each build prints the count of second looks where the observed and posted winners disagree. Direction, said plainly: the restriction drops looks a live trader would have made on a wrong observation, so it can only flatter the second look; the first look's count of observed-against-posted disagreements bounds its size. No extra pull is made (the second look cannot reach 150 filled bets on any projection).
+3. **Known limit of the landed data, second look (the Head's sentence, with the direction added).** The TEXT stands: a second look belongs to a match by OBSERVED winners (the observed winner of map 2 is the observed loser of map 1). But second-look windows were pulled only for matches whose POSTED map results say one map each; the second-look sample is therefore planned from results posted after the look, and each build prints the count of second looks where the observed and posted winners disagree. Direction (wording changed at 00:37Z with the Head of R&D's say, on the auditor's caution; the first wording, "can only flatter", claimed more than anyone had shown): the restriction probably flatters the second look (the dropped looks are ones a live trader would have taken on a wrong observation); the direction is not shown until the observed-against-posted counts are seen. No extra pull is made (the second look cannot reach 150 filled bets on any projection).
 
 Nothing else moves: the looks, the state, the fill, the model, the 150 minimum, the 10% line, the samples, the tries (2), CS2 pending recount.
+
+## CLOSED at step 1, at both looks, both tries unspent (recorded by the Head of R&D, Nov 13, 2026, 00:49Z; written here 00:51Z)
+
+**Not falsified. Closed because it cannot reach a verdict on Kalshi's history.** No match result was scored and neither try was spent.
+
+Two builds printed the same 212 figures on all 347 landed requests: the Testing Desk's final build (`mapbreak.py` at 0794063a on `claude/testing-desk`, audited CLEAN) and the Forensics desk's independent build to this text (note at 4cfea4f8 on `claude/forensics-desk`). Development window, counts and quotes only.
+
+| | CS2 | Dota 2 | Valorant | League of Legends |
+|---|---|---|---|---|
+| First look: looks left | 874 | 219 | 49 | 35 |
+| First look: fired / filled at the next minute | 62 / 45 | 3 / 0 | 3 / 3 | 2 / 2 |
+| First look: gap share against the placebo share | 7.1% against 0.6% | 1.4% against 1.8% | 6.1% against 2.0% | 5.7% against 0 |
+| Second look: looks left | 363 | 101 | 19 | 13 |
+| Second look: fired / filled at the next minute | 34 / 27 | 5 / 4 | 1 / 0 | 0 / 0 |
+| Second look: gap share against its own placebo share | 9.4% against 0.8% | 5.0% against 1.0% | 5.3% against 0 | 0 against 0 |
+
+- Every title at both looks reads "no evidence at n = x" against the minimum of 150 fired and filled bets.
+- **In plain words (the Head's):** the gap is real but rare, and about a quarter of orders do not fill a minute later, so the largest title yields about 70 filled bets in six weeks. The card cannot reach a verdict on Kalshi's history.
+- **The known limit of Amendment 11, line 3, measured at nil:** on the landed candles the observed-winner reading and the posted-results plan give the same looks left in every title, and the observed map-2 winner differs from the posted one in 0 second looks.
+- **With it fall:** the resting-target variant approved in principle (`PARKED_NOTES_NOV12.md`), which waited on this read, and both wheel places. The shadow packet's MAPBREAK half stands at "no evidence".
+- **What would reopen it:** a book and a tape for map and match markets (the wheel book recorder's phase 1 covers CS2 and Dota 2), and then only as a new registration counted forward. It is not to be re-read on history with a lower minimum or a wider gap.
+- **The author's errors on this card, for the record:** the state was first taken from a result posted after the look; the fill was first booked in the candle that showed the gap; no age limit was set on the candle that names the winner; "at or before the look" let in a candle after the close; and two of my own lines disagreed on the cost by 1c. Each was found by the auditor or the second builder before any result was read.

@@ -96,3 +96,12 @@ Lists result, as given by the Head (not counted by this desk): 821 priced events
 ## Dated note, Nov 12, 2026, 19:26Z: published evidence and odds
 
 Idea Desk C's reading of the published work (`idea_desk_c/DIRECTION_EVIDENCE_NOV12.md`, commit 338ebbde on `claude/idea-desk-c`; 26 sources, 9 verified from full text): the full-time soccer draw is fair on average on exchanges and books (three large samples), with weak evidence of a small underpricing; UK books' NHL regulation-tie prices imply 22% to 33% against 22.4% observed, so the tie is if anything overpriced there; nothing published exists for periods, quarters or halves. No size near the 8c line was found. **My odds that TIE3 reaches the research bar are revised from 4% to about 2%;** that a cell survives the measurement, from about 20% to about 15%. Nothing in the registration changes. The held-out (closes from 2026-11-13) starts after the census day and falls under standing rule (h) like every other card.
+
+## CLOSED: "efficient, move on" (recorded by the Head of R&D, Nov 13, 2026, 00:49Z; written here 00:51Z)
+
+A zero-try price measurement; no rule was registered and no try was spent. Two builds printed the same figure on all 117 compared, on the landed lists and candles: the Testing Desk's `tie3.py` (audited CLEAN) and the Forensics desk's independent build from this registration (note at 8bcf5423 on `claude/forensics-desk`).
+
+- **No cell has a median (base rate minus the Tie's ask) of 8c or more,** the line fixed before data. The best cell is the NFL quarters at +0.8c. In the three NHL period cells the Tie is priced ABOVE its base rate: -3.7c, -4.9c and -4.7c.
+- **Two cautions from the second build, kept with the result.** Most prices came from stepping back to an earlier candle, not from the exact minute: only 8 to 24 a cell in the NHL and NFL cells, and 96 of 243 in soccer, were priced at the minute itself. And the 28 soccer games that would have fired rest on per-series base rates from 40 to 122 events, so their 10c gap is one to two standard errors of the base rate.
+- **Reading:** the Tie in periods, quarters and first halves is priced at or above its base rate on Kalshi. This agrees with the published record noted above (the regulation tie is if anything overpriced at books). No rule registration follows.
+- **Not to be written:** the other side (selling the Tie in NHL periods at about 4c to 5c over its base rate) is a buy of the favourite side of a three-way market at a small measured gap inside its own cost; it is not a card.

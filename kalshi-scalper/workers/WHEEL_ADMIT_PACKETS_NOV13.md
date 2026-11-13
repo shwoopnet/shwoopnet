@@ -39,18 +39,23 @@ Lists, pilot and validation have not landed. **What it would need:** the cost pi
 - **Why a pooled place is not honest now:** a place needs a rule, and there is no politics rule with a mechanism behind it. The one direction with published support near resolution is buying the favourite, which is the banned shape and read flat on our own data (Idea Desk C's page). Pooling families that share no mechanism would pool noise and call it a record.
 - **What it would need:** one mechanism that applies to one family with enough events. The only family that looks large enough is mention markets (nightly news shows and speeches: 4 political events with 51 word markets on the one census day), and the politics recorder does not record it. The full answer, with the re-check of every closed politics idea, is due Friday 18:00Z.
 
-## What is left on this desk that could still become a candidate (asked by the Head of R&D, added 00:19Z)
+## What is left on this desk that could still become a candidate (asked by the Head of R&D; rewritten Nov 13, 00:51Z, after the night's reads)
 
-Said plainly: **nothing on this desk has evidence today.** In the order each could next produce a read:
+Said plainly: **nothing on this desk has evidence today, and three cards closed overnight.**
+
+**Closed, each recorded by the Head of R&D on two builds printing the same figures:**
+- **REMATCH:** closed at stage 1 on tradeability and count, no try spent (of 2,404 eligible pairs only 85 were two-sided at the reference minute and none of the 85 had a spread of 4c or less; 6 projected bets against a floor of 300). Its resting-entry variant falls with it.
+- **MAPBREAK:** closed at step 1 at both looks, both tries unspent. The gap is real but rare and about a quarter of orders do not fill a minute later, so the largest title yields about 70 filled bets in six weeks; the card cannot reach a verdict on Kalshi's history and is closed, not falsified. Its resting-target variant and both wheel places fall with it.
+- **TIE3:** closed, "efficient, move on". No cell shows the Tie 8c or more under its base rate; the best is +0.8c, and in NHL periods the Tie is priced above its base rate.
+- **PREMOVE:** withdrawn unread by its author. **NHLOT:** cannot produce a candidate as built (hindsight window, no live detector); its price measurement is still owed when its candles land.
+
+**Still open, in the order each could next produce a read:**
 
 | Item | What is pending | When | My odds |
 |---|---|---|---|
-| **TIE3** (the Tie in hockey periods, football quarters, soccer first halves) | A price measurement, zero tries: 50 candle requests with the Head's go, scorer with the Testing Desk and Auditor B. If a cell shows the Tie 8c or more under its base rate at a spread of 4c or less, a rule is registered the same hour; it would be the simplest rule on this desk (one quote, one table, a fixed time before a listed start). | Tonight or Friday, when PR 834's pull lands and the scorer is clean | About 15% that a cell survives; about 2% for the research bar |
-| **MAPBREAK** (esports map break) | CS2's recount with the 4c comparison fixed; the remaining candles; then the development read under Amendments 7 to 10. With the minimum now on filled bets, Dota 2, League of Legends and Valorant will most likely read "no evidence at n = x". | Tonight or Friday | About 2%; it cannot reach the bar without history |
+| **POLGAPH** (politics: follow an overnight gap, hold to settlement) | Registered Nov 13 before data. Needs the Head's ruling on whether it is a version of INPLAYJUMP, then a scorer, an audit and at most 380 requests. | After Friday's queue | About 3% |
 | **INPLAYJUMP** (five families) | Lists, the 5 request cost pilot, the tennis validation pull, then up to 1,800 candle requests. The third and last look at this idea. | Friday at the earliest | About 1% a family |
 | **S3** (combo house side, paper) | Forward snapshots; development read Nov 26, held-out Dec 12. | Nov 26 | Low |
 | **Hourly temperature** | A cost and settlement-source measurement, zero tries, last in the pull queue. A card only after it. | Next week | Low; everyone can see the thermometer |
 | **SOCDERIV** (soccer legs against each other) | A measurement, paused behind the rest. | Not scheduled | Low |
-| **Politics** | The count says no family fills 60 signals in 45 days; the answer with one rule or "none" is due Friday 18:00Z. | Friday 18:00Z | "None" is likely |
-
-**Closed or falling:** REMATCH (stage 1, provisional) and with it its resting-entry variant; PREMOVE (withdrawn unread); NHLOT cannot produce a candidate as built (hindsight window, no live detector). MAPBREAK's resting-target variant waits on MAPBREAK's own read.
+| **Politics lane** | Answered Nov 13 (`POLITICS_LANE_ANSWER_NOV13.md`): about 43 events and 250 markets a week in the cadence series; everything that closed stays closed except POL-i2 under a hold exit, which is POLGAPH. | Done | Politics is slow and nothing in it has evidence |
