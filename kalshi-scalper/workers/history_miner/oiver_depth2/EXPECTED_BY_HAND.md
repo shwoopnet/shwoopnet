@@ -67,3 +67,6 @@ inv/windows.csv gains r6_poll: W3 = 0 (it had a blank bid size; it is now a trad
 - **Kills (info):** removed more than half no; PF below the parent's no.
 - **Label:** "no evidence at n = 3".
 - The full parent (with W3) is not this comparison and is not printed for DEPTH.
+
+## Dated line, 2026-11-13 21:30Z: the counter name (the Head's ruling of 21:19Z; Desk A card c356ca2d)
+A poll with a blank or unreadable touch size stays in the replay set and the version skips it. This was already built that way; the counter is renamed from no_size to size_unknown. No figure changes. The made-up set has no such row, so the count is absent there.
