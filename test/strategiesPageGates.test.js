@@ -129,7 +129,8 @@ gates.SP4 = () => {
   assert.strictEqual((panel(h, 'live').match(/>Trial \d+ of 90</g) || []).length, 2, 'each trial seat carries its Trial tag with its fills of 90');
   assert.strictEqual((panel(h, 'live').match(/>Under review</g) || []).length, 1, 'a strategy that is not a seat is Under review (nothing has met the proven bar)');
   for (const k of ['shadow', 'live']) assert.strictEqual(rows(k), cnt(k), 'the ' + k + ' count equals the rows in its panel');
-  assert.strictEqual(cnt('off'), rows('off') + (panel(h, 'off').match(/class="sp-rrow"/g) || []).length, 'Off / Retired counts its cooling strategies plus the retired list');
+  assert.strictEqual(cnt('off'), rows('off'), 'Off, coming back counts only its cooling strategies (cleanup, Nov 13, 2026: no retired history on the page)');
+  assert.ok(!/class="sp-rrow"|class="sp-rgrp/.test(panel(h, 'off')), 'no retired-for-good list in the Off box');
   assert.strictEqual(rows('off'), 1);
   assert.ok(/data-row="L1"/.test(panel(h, 'off')) && !/data-row="L1"/.test(panel(h, 'live')), 'a killed strategy is in Off / Retired, never in Live');
   assert.ok(/>COOLING</.test(panel(h, 'off')) && !/>HEALTHY</.test(panel(h, 'off')), 'and reads cooling down');
@@ -174,7 +175,7 @@ gates.SP6 = () => {
     retired: { asOf: '<a>', back: '<p>', rows: [{ name: '<e>', pf: 1, n: 1 }] } }, esc, money);
   assert.ok(!/<img|<script|<svg onload|<i>|<u>|<b>|<s>|<a>|<p>|<e>/.test(evil.replace(/<(?:\/)?(?:article|div|span|svg|path|line|b|details|summary|i)\b[^>]*>/g, (t) => (/^<(?:i|b)>$/.test(t) ? t : ''))) || true, 'markup is checked below');
   for (const bad of ['<img', '<script', 'onerror=1>', '<svg onload']) assert.ok(!evil.includes(bad), 'raw ' + bad + ' is not in the page');
-  assert.ok(evil.includes('&#60;img') && evil.includes('&#60;u&#62;') && evil.includes('&#60;e&#62;'), 'every value is escaped');
+  assert.ok(evil.includes('&#60;img') && evil.includes('&#60;u&#62;') && !evil.includes('<e>'), 'every value is escaped (retired rows are no longer drawn on the page, Nov 13, 2026)');
 };
 gates.SP7 = () => {
   // reads only: no timer, no storage, no write, no new host; money only through the masking function
@@ -333,7 +334,7 @@ gates.SP14 = () => {
   const evil = Q.kalshiStratDetailHtml(Q.kalshiStratDetail([W(NOW)], () => '<b onmouseover=1>', CT, 8), esc, money, () => '<i>');
   assert.ok(!/<b onmouseover|<i>/.test(evil), 'market name and time are escaped');
   const open = Q.kalshiBoardHtml({ live: [{ id: 'L1', name: 'n', rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 0, pf: null }, all: { n: 0 } }, kill: { lines: [] }, spark: [], detail: Q.kalshiStratDetail(orders, () => 'Gold', CT, 8) }], deck: { state: 'ok', rows: [] }, retired: { rows: [{ name: 'Q', cause: 'superseded', note: 'n' }], back: 'b', asOf: 'a' }, open: { 'ret:superseded': true } }, esc, money);
-  assert.ok(/<details class="sp-rgrp rw" data-k="ret:superseded" open>/.test(open), 'an open Retired group stays open across a redraw');
+  assert.ok(!/class="sp-rgrp/.test(open) && /Nothing is off right now/.test(open), 'the Off box holds no retired groups and says so plainly when empty (cleanup, Nov 13, 2026)');
   assert.ok(/data-row="L1"/.test(open) && !/data-reg-details="L1"/.test(open), 'a Live strategy is a row that opens its chart sheet (option A, Nov 13, 2026), not the registry popup');
   const body = html.slice(html.indexOf('// ---- Summary bar, detail panels'), html.indexOf('  // ---- Stage board')) + fn('kalshiBoardHtml') + fn('renderStrategiesPage');
   assert.ok(!/setInterval|setTimeout|fetch\(|XMLHttpRequest|https?:\/\/|\.set\(|setDoc|addDoc/.test(body), 'no timer, write or host');
@@ -373,7 +374,7 @@ gates.FB2b = () => {
   assert.strictEqual(O('short rule', 64), 'short rule', 'a rule that fits is untouched');
   const c = O(long, 40); assert.ok(c.length <= 40 && c.endsWith('\u2026') && !/\s\u2026$/.test(c) && long.startsWith(c.slice(0, -1)), 'cut at a word with an ellipsis, never longer than max: ' + c);
   assert.ok(O(long, 64).length <= 64 && O(null, 64) === '' && O('a  b\n c', 64) === 'a b c', 'bounded, null safe, whitespace folded');
-  assert.ok(/\.sp-wrap\{[^}]*max-width:1280px[^}]*margin:0 auto/.test(html), 'the board is centred and capped at about 1280px');
+  assert.ok(/\.sp-wrap\{ container-type:inline-size; container-name:sp; \}/.test(html) && !/\.sp-wrap\{[^}]*max-width/.test(html), 'the board spans the page width like the header, lede and stage bar (cleanup, Nov 13, 2026: the top card was narrower than the bar)');
   assert.ok(/@media \(max-width:700px\)\{ \.lp\{ padding:10px 8px; \} \.lp-row\{ display:grid; grid-template-columns:1fr 1fr;/.test(html), 'on a phone the loop is a 2 by 2 grid');
   assert.ok(/body:has\(#page-strategies:not\(\[hidden\]\)\) \.bg-slogan\{ opacity:\.3; \}/.test(html) && /#page-strategies \.kal-card\{ background:var\(--panel\); \}/.test(html), 'the watermark is quieter on this page and cards are opaque');
 };
@@ -391,7 +392,7 @@ gates.FB4 = () => {
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
   const n = P.KAL_BOARD_LIVE.length + SHADOW_FIX.length;
   assert.strictEqual((plain.match(/<span class="sp-badge sp-b-(?:live|prob|off|deck)">/g) || []).length, n, 'a stage badge on every live and shadow row');
-  assert.strictEqual((plain.match(/class="sp-rrow"/g) || []).length, P.KAL_BOARD_RETIRED.rows.length, 'one compact line per retired strategy');
+  assert.strictEqual((plain.match(/class="sp-rrow"/g) || []).length, 0, 'no retired-for-good lines on the page (cleanup, Nov 13, 2026)');
   assert.strictEqual((plain.match(/<button type="button" class="rw-h"/g) || []).length, n, 'every row is a button that opens it');
   assert.ok((plain.match(/aria-expanded="false" aria-controls="rwd-/g) || []).length === n, 'closed by default and wired to its detail for the keyboard');
   const mask = P.kalshiBoardHtml({ live: liveModel((x) => '****'), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, (x) => '****');
@@ -559,6 +560,41 @@ gates.SP16 = () => {
   assert.ok(/No settled trades in the last 7 days/.test(none), 'an empty range says so instead of drawing a line');
   assert.ok(/data-strng="7D"[^>]*aria-pressed="true"/.test(wk), 'the sheet shows the same buttons, the chosen one pressed');
 };
+gates.SP18 = () => {
+  // The cleanup after the Nov 13, 2026 merges (the owner: "what the hell are we doing"): a conflict merge kept both sides and drew a second chart, a stray caption and full-width tiles. One chart, no middle caption, three tiles in one row inside the card, the Privacy button on the right, and no changelog line twice.
+  const orders = [W(NOW - HR), L(NOW - 2 * HR), W(NOW - 3 * HR)];
+  const sum = Q.kalshiStratSummaryHtml(Q.kalshiStratSummary(orders, NOW, 12, CT), esc, money);
+  assert.strictEqual((sum.match(/class="sp-sum-plot/g) || []).length, 1, 'exactly one chart in the top card');
+  assert.strictEqual((sum.match(/class="sp-sum-cap"/g) || []).length, 1, 'one caption row');
+  assert.ok(!/dashed line is zero<\/span>/.test(sum) && !/<span>Now<\/span>/.test(sum), 'no middle caption and no stray Now caption');
+  assert.ok(/<div class="sp-sum-grid">(?:<div class="sp-sum-c"[\s\S]*?){3}<\/div><\/div>$/.test(sum), 'the three tiles are the last child of the card');
+  assert.ok(/\.sp-sum > \.sp-sum-grid\{ grid-column:1 \/ -1; grid-template-columns:repeat\(3,minmax\(0,1fr\)\); \}/.test(html), 'and sit in one row of three across the card');
+  assert.ok(/#page-strategies \.kal-header-bare\{ justify-content:flex-end;/.test(html), 'the Privacy button sits on the right');
+  const items = [...html.matchAll(/<li>([^\n]{40,})<\/li>/g)].map((m) => m[1]).filter((t) => /^(Trading|Strategies page|Research|Bot page|Brief|Settings)/.test(t));
+  const dup = items.filter((t, i) => items.indexOf(t) !== i);
+  assert.deepStrictEqual(dup, [], 'no changelog line appears twice');
+};
+gates.SP17 = () => {
+  // YTD (and any range) reaches back past the live listener's newest 1,000 gold orders (Nov 13, 2026, the owner: "the ytd strategies thing should go back to oct 7th right?")
+  const src = varLine('KAL_STRAT_RANGES') + varLine('kalshiStratRange') + fn('kalshiStratRangeOf') + fn('kalshiPnlSource') + 'var kalshiStratOlder = {}, kalshiStratOlderOut = {};' + fn('kalshiStratHistory') +
+    '; return { run: kalshiStratHistory, set: function(r){ kalshiStratRange = r; } };';
+  const NOWY = Date.UTC(2026, 10, 13, 18, 0), DAY = 86400000;
+  let asked = null, resolve = null, redraws = 0;
+  const live = Array.from({ length: 1000 }, (_, i) => ({ ts: NOWY - i * 3600000 / 2, clientOrderId: 'n' + i }));   // the newest 1,000: about 21 days back
+  const win = { __shwoopAPI: { kalshiOrdersSince: (ms) => { asked = ms; return { then: (ok) => { resolve = ok; } }; } } };
+  const H = new Function('Math', 'Number', 'Array', 'Intl', 'Date', 'Infinity', 'window', 'kalshiLiveOrders', 'kalshiSlotOrders', 'renderStrategiesPage', src)(Math, Number, Array, Intl, Date, Infinity, win, live, [], () => { redraws++; });
+  H.set('7D');
+  assert.ok(!H.run(NOWY).loading && asked === null, '7D is inside the live list: no older read');
+  H.set('YTD');
+  const first = H.run(NOWY);
+  assert.ok(first.loading && asked === Date.UTC(2026, 0, 1, 6, 0), 'YTD asks for every order since Jan 1 (Central) and says it is reading');
+  resolve([{ ts: Date.UTC(2026, 9, 7, 15, 0), clientOrderId: 'oct7' }].concat(live.slice(-3)));
+  const after = H.run(NOWY);
+  assert.ok(Array.isArray(after.orders) && after.orders.some((o) => o.clientOrderId === 'oct7') && after.orders.length === 1001 && redraws === 1, 'the Oct 7 order joins the live list once, and the page redraws');
+  const rp = fn('renderStrategiesPage');
+  assert.ok(/hist = kalshiStratHistory\(now\)/.test(rp) && /if\(hist\.orders\)\{ all = hist\.orders; \}/.test(rp) && /Older trades could not be read, so this starts at/.test(rp) && /Reading older trades/.test(rp), 'the page uses the full history and says so on the chart when part of it is missing');
+};
+
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
 if (failed) process.exit(1);

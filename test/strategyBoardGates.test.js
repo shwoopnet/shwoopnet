@@ -161,8 +161,8 @@ gates.SB11 = () => {
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
   assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
-  assert.ok(/Comes back when: 14 days after a slow-down stop/.test(masked) && !/owner/i.test(/class="sp-sub sp-back">[^<]*/.exec(masked)[0]) && !/As of Nov/.test(masked) && /class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(P.kalshiBoardHtml(model('ok'), esc, money))[0]) && !/class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(masked)[0]), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
-  assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
+  assert.ok(/Nothing is off right now/.test(/id="lp-p-off"[\s\S]*?<\/section>/.exec(masked)[0]) && !/class="sp-rgrp/.test(masked) && !/As of Nov/.test(masked) && /class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(P.kalshiBoardHtml(model('ok'), esc, money))[0]) && !/class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(masked)[0]), 'the Off box lists no retired history and says so when nothing is off (cleanup, Nov 13, 2026); ON DECK rows with a log carry a progress bar');
+  assert.ok(!/Natural gas/.test(/id="lp-p-off"[\s\S]*?<\/section>/.exec(masked)[0]), 'retired-for-good strategies are not on the page (the owner, Nov 13, 2026: only what ran live and is coming back)');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
   const evil = P.kalshiBoardHtml({ live: [{ id: 'X', name: '<img src=x onerror=1>', rule: '"><script>', w: P.kalshiBoardWindows([], now), kill: { lines: ['<b>'] } }], deck: { state: 'unreadable', rows: [] }, retired: { asOf: '<i>', back: '<u>', rows: [{ name: 'n', pf: 1, n: 1 }] } }, esc, money);
   assert.ok(!/<img|<script/.test(evil), 'every value is escaped (the retired as-of and back fields are no longer drawn: the footer is fixed plain text, Nov 13, 2026)');

@@ -87,7 +87,7 @@ gates.RG5 = () => {
   assert.strictEqual((html.match(/strategies-registry\.json/g) || []).length >= 1, true);
   const card = html.slice(html.indexOf('regSplit.pipeline.forEach'), html.indexOf('// ---- The nearest kill'));
   assert.ok(!/innerHTML/.test(card));
-  assert.ok(/name: x\.name/.test(card) && /<b class="rw-n">' \+ esc\(o\.name\)/.test(html) && /kalshiRegistrySheetHtml\(x, d, esc\)/.test(card), 'a registry row draws its escaped name and the escaped sheet (rule, kill, return, room left, chart)');
+  assert.ok(/name: x\.name/.test(card) && /<b class="rw-n">' \+ esc\(o\.name\)/.test(html) && /kalshiStratPaperCharts\(x, d, now, model\.range/.test(card) && /detail: '', more: ''/.test(card), 'a registry row draws its escaped name and the SAME sheet as a live strategy (one template for every stage, Nov 13, 2026), with no inner card');
   assert.ok(/data-reg-details=/.test(html.slice(html.indexOf('var quietHtml'), html.indexOf('var shadowEmpty'))) && /Details<\/button>/.test(html.slice(html.indexOf('var quietHtml'), html.indexOf('var shadowEmpty'))), 'Paper and idea rows keep the Details button (option A, the owner: "i like. A")');
   assert.ok(/id = 'spPop'/.test(html) && /pop\.hidden = true/.test(html) && /e\.key === 'Escape'/.test(html), 'the popup closes by Close, outside tap and Escape, and lives outside #stratBody so a redraw never closes it');
   // Behaviour: lift the pure helpers and render the seeded registry.
@@ -126,7 +126,7 @@ gates.RG6 = () => {
   const mask = (x) => (x < 0 ? '-' : '') + '****', money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // the card side: the computed Live tile renders the button, and the click handler finds a row for every live id
   assert.ok(/data-row="' \+ esc\(o\.key\)/.test(html) && /key: s\.id, name: s\.name, stage: bk === 'off'/.test(html), 'every computed Live or Probe strategy is a row that opens its chart sheet (L1, OICORE, EVENT830 and any added to the list); the popup now serves the Retired list and the Paper and Ideas rows');
-  assert.ok(/kalshiStratSheets\[openId\] \|\| kalshiStratSheetRow\(openId, kalshiRegistry\.list, KAL_BOARD_LIVE\)/.test(html) && /kalshiRegistrySheetHtml\(x, kalshiStratSheetData\(/.test(html), 'the popup reuses the one sheet builder, with its data built when it opens');
+  assert.ok(/kalshiStratSheets\[openId\] \|\| kalshiStratSheetRow\(openId, kalshiRegistry\.list, KAL_BOARD_LIVE\)/.test(html) && /kalshiStratPaperCharts\(row, kalshiRegData\[openId\] \|\| null, Date\.now\(\)/.test(html) && /sp-pop-sheet sp-csheet/.test(html), 'the Details popup (Retired, Paper and Ideas) uses the same template and sheet look as every strategy, with its data built when it opens');
   assert.ok(/kalshiStratPop\.refresh\(\)/.test(fn('renderStrategiesPage')), 'a redraw or the Privacy switch re-masks an open popup');
   const list = reg.strategies;
   for (const id of ['L1', 'OICORE', 'EVENT830', 'CFRTIK']) {
@@ -157,7 +157,7 @@ gates.RG6 = () => {
       assert.ok(/not measured yet/.test(h) && !/<svg/.test(h), id + ': no private read means "not measured yet" and no chart');
     }
   }
-  assert.ok(/KAL_BOARD_LIVE\.some\(function\(r\)\{ return r\.id === openId; \}\) \? \{ live: true \} : null/.test(html), 'a live id the page has no read for yet opens as not measured, never as a made-up chart');
+  assert.ok(/kalshiStratPaperCharts\(row, kalshiRegData\[openId\] \|\| null/.test(html), 'a row the page has no read for opens with n/a and no chart, never a made-up one');
   // escaping
   const evil = P.kalshiRegistrySheetHtml({ id: 'X', name: '<img onerror=1>', stage: 'Probe', label: '<b>', rule: '"><script>', kill: '<i>k', 'return': '<u>r', roomTarget: null }, P.kalshiStratSheetData('X', { live: true, spark: [1, 2] }, money), esc);
   assert.ok(!/<img|<script|<i>k|<u>r|<b><\/|<b>Q/.test(evil) && evil.includes('&lt;b&gt;') && evil.includes('&lt;i&gt;k'), 'registry text is escaped in the popup');
