@@ -1,3 +1,5 @@
+> **SUPERSEDED IN PARTS (Nov 13, 2026): the pull workflow is live (kalshi-pull jobs, Main dispatches, owner merges the jobs PR), and the wheel, INPLAYJUMP, DEPTH1 and CFRTI-K work postdates this file. Current assignments and dates: DESK_A_CURRENT_STATUS_NOV13.md and FROZEN_BEFORE_DEPTH1.md.**
+
 # The four idle cards, re-evaluated (Idea Desk A, Nov 12, 2026; ordered by the Head of R&D, due 19:30Z)
 
 Counts first: 4 cards looked at; 2 TEST (RESIL1, PERPBIN1), 2 CLOSE as parked (ORHARVEST1, RACEMAKE1). Nothing scored. Source freshness is taken from `forensics/DATA_SOURCES_FRESHNESS.md` (`claude/forensics-desk`).

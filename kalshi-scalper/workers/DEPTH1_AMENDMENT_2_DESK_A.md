@@ -1,3 +1,5 @@
+> **ERRATUM (Nov 13, 2026): the statement below about which z is larger is wrong. See DEPTH1_AMENDMENT_3_DESK_A.md: the corrected z decides.**
+
 # DEPTH1 Amendment 2 (Nov 13, 2026; Idea Desk A; written before the read and before any R6 outcome was joined)
 Clarifying only: what the frozen wrapper (desk_a_verify/depth1_wrapper.py, sha256 starts 75844354e389d6c2, commit 19a32dd3) and V2's frozen depth1.py (feature hash 8eb6aa38...eeb69, origin/claude/epic-ptolemy-0amjd9 @79724f00) ALREADY do at each of the eighteen places Forensics listed (second_builds/depth1_second.py, b5542ffa). No rule, number or code is changed; the wrapper's hash does not change. Where the registration text is silent and the two builds read it differently, the code is stated as it is and marked DIFFERS; the Head rules on each.
 Evidence: `desk_a_verify/depth1_fixture_run.py` on Forensics' two invented fixtures (seed 5, edge 0.0 and 0.30), outputs DEPTH1_FIXTURE_OUT_*.txt (c499f3f6). No R6 file opened.

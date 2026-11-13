@@ -1,3 +1,5 @@
+> **READER VERSIONS (Nov 13, 2026): current scorer v2 and block reader v6; older lane-text hashes named below are superseded. See DESK_A_CURRENT_STATUS_NOV13.md.**
+
 # NC15 depth-cell wheel replay scorer: build notes (Idea Desk A, Nov 13, 2026; frozen before any block data is looked at)
 Built to the frozen definition sheet v4 (DESK_A_FROZEN_WHEEL_DEFINITIONS_NOV13.md, commit 8679f760, 2026-11-13T00:23:49Z), sections 0 and 2. File: desk_a_verify/nc15_wheel_replay.py, **sha256 8d1055df5fe73d712bd954127b9f05d8b03a8536b73a3cd9f07c9ed9a6efaca9** (v2, frozen after Auditor B's items B and C; v1 was b44c1d8f...; any edit is a new hash and goes to Auditor B first). Tests on invented rows only: desk_a_verify/nc15_wheel_replay_test.py (T1 to T7, ALL OK). No NC15 file, price or outcome was opened to build or test it. Default-closed: the command line refuses a folder without MADE_UP_DATA unless WHEEL_BLOCK_READ=1 is set (a block read on the Head's word); HELDOUT_ paths refused.
 ## What the sheet fixes (the code is exactly this)

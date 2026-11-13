@@ -1,3 +1,5 @@
+> **SUPERSEDED IN PARTS (Nov 13, 2026): the pull workflow is live (kalshi-pull jobs, Main dispatches, owner merges the jobs PR), and the wheel, INPLAYJUMP, DEPTH1 and CFRTI-K work postdates this file. Current assignments and dates: DESK_A_CURRENT_STATUS_NOV13.md and FROZEN_BEFORE_DEPTH1.md.**
+
 # Idea Desk A: power analysis of the queue, and which cards can reach a verdict (Nov 12, 2026)
 
 Asked for by the Chief of Staff (owner directive): spend scarce Kalshi reads only on tests that can reach a verdict; retire the ones that cannot. No Kalshi read was made for this file. Scripts: `workers/desk_a_held/power.py`, `power2.py`. Desk B's cards are covered in its own file (`IDEA_DESK_B_POWER.md` on `claude/idea-desk-b`); the two tables agree where they overlap (this one uses z 5.34, that one 5.3). **Recommendations only: the queue is Main's and every retire is Main's call.**

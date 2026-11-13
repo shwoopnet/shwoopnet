@@ -1,3 +1,5 @@
+> **SUPERSEDED IN PARTS (Nov 13, 2026): the pull workflow is live (kalshi-pull jobs, Main dispatches, owner merges the jobs PR), and the wheel, INPLAYJUMP, DEPTH1 and CFRTI-K work postdates this file. Current assignments and dates: DESK_A_CURRENT_STATUS_NOV13.md and FROZEN_BEFORE_DEPTH1.md.**
+
 # Probation-seat spec sheets, Idea Desk A (Nov 12, 2026, for the Head of R&D; 3 contracts, $18 drawdown kill). Research view only; probation fills are never research evidence. No held-out outcome was opened for this.
 
 ## A. CFRTI-K (Bitcoin 15 minute): the honest line first

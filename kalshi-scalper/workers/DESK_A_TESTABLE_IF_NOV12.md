@@ -1,3 +1,5 @@
+> **SUPERSEDED IN PARTS (Nov 13, 2026): the pull workflow is live (kalshi-pull jobs, Main dispatches, owner merges the jobs PR), and the wheel, INPLAYJUMP, DEPTH1 and CFRTI-K work postdates this file. Current assignments and dates: DESK_A_CURRENT_STATUS_NOV13.md and FROZEN_BEFORE_DEPTH1.md.**
+
 # Idea Desk A: three structural ideas that cannot be tested today, and exactly what would make each testable (Nov 12, 2026; answering the Head's 19:27Z standing rule; no card registered tonight)
 Checked first: the declined list (docs/STRATEGY_LIFECYCLE.md 7e), tonight's scorer rules (4b: no cut over the sample, no haircut from a later value, void = fee-only loss counted, held-out windows shared, standing rule h), the closed families (favourite-late, cheap-side sweeps, taker order flow, market making, lock and parity, in-game lag at one minute, 15 minute grammar sweeps). The History Miner's GAP_AUDIT_NOV12.md is not on claude/history-miner as of 19:30Z; I did not read it. Nothing below was run; no price was read for these ideas.
 

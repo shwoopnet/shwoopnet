@@ -1,3 +1,5 @@
+> **SUPERSEDED IN PARTS (Nov 13, 2026): the pull workflow is live (kalshi-pull jobs, Main dispatches, owner merges the jobs PR), and the wheel, INPLAYJUMP, DEPTH1 and CFRTI-K work postdates this file. Current assignments and dates: DESK_A_CURRENT_STATUS_NOV13.md and FROZEN_BEFORE_DEPTH1.md.**
+
 # Idea Desk A handoff (written Nov 12, 2026, about 16:20Z, for a fresh Desk A session)
 
 **READ SECTION 11 FIRST: rulings made after this file was first written change task 3 (no design pass; QUOTE2B instead) and add CFRTI1 Kraken-only and CFRTI-K.**
