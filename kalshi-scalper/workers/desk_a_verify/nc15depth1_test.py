@@ -82,7 +82,7 @@ import datetime
 def mk(day, cash, win=1): return dict(day=datetime.date(2026, 11, 19) + datetime.timedelta(days=day), cash=cash, cash12=cash - 0.004, win=win, result="scored")
 good = [mk(i % 10, 0.30 if j % 4 else -0.20, 1 if j % 4 else 0) for i in range(10) for j in range(4)] + [mk(i % 10, 0.05) for i in range(10)]
 assert [len(g) for g in S.groups(good, 3)] == [20, 20, 10] and [len(g) for g in S.groups(good, 2)] == [25, 25]
-S.MIN_N = 40; Lg = S.report(good, {}); assert any(x.startswith("LABEL: SURVIVES") or x.startswith("LABEL: FALSIFIED") for x in Lg), Lg
+S.MIN_N = 40; Lg = S.report(good, {}); assert any(x.startswith("LABEL: SURVIVES") or x.startswith("LABEL: FALSIFIED") or x.startswith("LABEL: BAR NOT MET") for x in Lg), Lg
 bad = [mk(i % 10, -0.3, 0) for i in range(60)]; S.MIN_N = 40; Lb = S.report(bad, {}); assert any(x.startswith("LABEL: FALSIFIED") for x in Lb), Lb
 S.MIN_N = 3
 assert S.fee_up(0.5) == 0.02 and S.fee_up(0.1) == 0.01 and S.fee_up(0.4) == 0.02
@@ -90,7 +90,7 @@ assert S.fee_up(0.5) == 0.02 and S.fee_up(0.1) == 0.01 and S.fee_up(0.4) == 0.02
 mk_ = os.path.join(tempfile.mkdtemp(), "m.txt"); S.read_once(mk_)
 try: S.read_once(mk_); raise AssertionError("second read not refused")
 except SystemExit: pass
-# a void: a present result that is neither yes nor no (window F above); an empty result is unresolved (window P above)
+# a void: only a result that says void (window F above); an empty or odd result is unresolved (window P above)
 # default-closed and the guard
 import subprocess
 r = subprocess.run([sys.executable, "-I", os.path.join(here, "nc15depth1.py"), tempfile.mkdtemp()], capture_output=True, text=True); assert r.returncode != 0 and "REFUSED" in (r.stderr + r.stdout)
