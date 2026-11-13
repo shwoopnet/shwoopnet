@@ -67,7 +67,7 @@ assert refused(lambda: W.read_place(seq(70), now=T0 - DAY))
 assert refused(lambda: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", ""]])))
 assert refused(lambda: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "3.0"], ["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "3.0"]])))
 assert W.read_place([dict(x, limit=None) for x in seq(70)], fav=True, now=NOW)                  # a favourites place may run without a limit column
-import heldout_guard as G
+import heldout_guard_v2 as G
 assert refused(lambda: G.refuse_heldout("/tmp/heldout_x/y", "t")) and refused(lambda: G.refuse_heldout("/tmp/HeldOut_x", "t"))
 print("T10 blank limit, early --now, blank cash, duplicate, lower-case heldout refused OK")
 # T11 (77eeb93b): cents round DOWN; (q) a pending result keeps the expiry undecided; (p) order yes before no
