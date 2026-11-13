@@ -53,6 +53,7 @@ Two additions, fixed now:
 
 - **Prediction:** gaps of 0.5F or more with a strike between the two numbers occur in about 5% to 15% of city-hours, and the development cash PF of the bets is 0.9 to 1.2. The market mostly prices the index.
 - **Kill (development read):** closed if fewer than 200 bets, or a cash PF under 1.0, or a PF under 1.2 in either half.
+- **Kill (the makers-learn-the-offset counter, Head of R&D, Nov 13):** in the held-out read, split the bets by time since the latest calibration change (the `effective_at_ms` of the city's `config_version`): days 0 to 1, against day 2 onward. If the day 2 onward bets have a cash PF under 1.0, it is a FAIL, not noise, whatever the pooled PF. The same split is reported, for information only, in the development read.
 - **Bar:** cash PF 1.5 in each of three windows after fees, z 5.46, one try.
 - **Windows (date constants, per the Head's ruling (b) of Nov 13):**
   - development = settlement times 2026-09-13T00:00:00Z to before 2026-11-05T00:00:00Z, halves split at 2026-10-09T00:00:00Z;
