@@ -695,3 +695,7 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - No held-out reader exists yet. Desk A writes and commits it, ideally before 00:00Z Nov 14; Auditor B audits; the Testing Desk writes the second build.
   - functions/ has no CFRTI-K model, so live running needs a new reviewed build by Main and the owner's merge. Told to Main and the EA.
   - The owner's exit line is in the card (Desk A 57e2b153; registration f42574fb).
+- 17:05Z, CFRTI-K.
+  - Main: it is ALREADY on main (kalshiCfrtiKLib.js, the CFRTIK slot entry: 3 contracts, -$18). The Head's "no live code" was wrong, from Desk A's stale fact, and is corrected with the EA. The parity gate PV1 already runs Desk A's 20 vectors. The VA checks that those vectors came from cfrti_k.py 79966ef8; this does not block the deploy.
+  - Held-out reader committed before 00:00Z Nov 14 (Desk A 433001b8, cfrti_k_heldout.py 72c0a841). The three registered labels govern: PASS (PF 1.3 or more), NO CALL (1.0 to 1.3), FAIL (under 1.0); n of 50 or more; read on or after Nov 20. The Testing Desk writes the second build; Auditor B audits.
+  - The EA on the owner's words: NO CALL keeps it running under its normal and rotation kills; only FAIL closes it for good. Written into the card.
