@@ -3,7 +3,7 @@
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md",
  "purpose": "INPLAYJUMP dev candles 1 min, part 1 of 5, 123 requests, about 120 MB raw expected (cap 120). Measured in pilot run 43338597423: ATPCHALLENGER 103 B per ticker-minute, WTACHALLENGER 129 B per ticker-minute. No result read.",
- "heldout": "rule (h) checked: every ticker is a development match of its family (close inside the family's development window from the series file, from the lists; no Tie contract) and no request ends after its batch's last close; the held-out window is never requested",
+ "heldout": "rule (h) checked: every ticker is a development match of its family (close inside the family's development window from the series file, from the lists; no Tie contract) and no request ends after its batch's last close; the held-out window is never requested. Cards that name or share these series: INPLAYJUMP, PREMOVE, VIRT1, TENNISBREAK, TENNIS1, W-CAT-SPORTS1. INPLAYJUMP and PREMOVE are closed unread; VIRT1 is unreleased, with its forward read on or after 2026-11-21, frozen at 79724f00; W-CAT-SPORTS1 is released.",
  "allowed_endpoints": [
   {
    "name": "markets_candlesticks_batch",
