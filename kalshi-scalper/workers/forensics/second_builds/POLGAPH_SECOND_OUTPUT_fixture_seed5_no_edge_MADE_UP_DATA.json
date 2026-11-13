@@ -38,7 +38,7 @@
   "span contains the minute ending 07:01. Otherwise \"no fill data\".",
   "6. In the 07:01 candle the bought side's ask is the YES ask for YES and 1 minus the YES bid for NO; a missing or zero YES bid is \"no ask\" for NO, a missing ask or an ask of 1 is \"no ask\" for YES.",
   "7. A void is any result that is neither yes nor no. The figure \"with the settlement value paid instead\" uses the list's settlement_value_dollars when it is a number (YES value; NO gets 1 minus it), and is left out otherwise.",
-  "8. The optimistic, same-candle figure books every pick that was not blocked (filled, not filled and no fill data alike) at its limit.",
+  "8. SETTLED by Amendment 3, item 3: the optimistic, same-candle figure books EVERY decision (the event's pick) at its limit, with no block and no fill test. (This build first booked fired decisions only.)",
   "9. The largest number open at once is taken at each filled bet's look (bets with look at or before it and close after it).",
   "10. Profit factor with no losses is infinite and passes a \"1.5 or more\" line; with no wins it is 0. The lines are tested with a 1e-9 tolerance on the float figure.",
   "11. Family rule (Amendment 1, point 2): if the pooled read would survive and one family's net is more than half of the pooled net, the verdict is that family's own read.",
@@ -65,7 +65,41 @@
  "one_way_cost": {
   "market_mornings": 3999,
   "median_ask_minus_mid_plus_fee_at_the_limit": 0.03500000000000002,
-  "cost_as_paid_at_the_limit_information_only": 0.045000000000000026
+  "cost_as_paid_at_the_limit_information_only": 0.045000000000000026,
+  "by_family": {
+   "activity counts": {
+    "market_mornings": 3200,
+    "median": 0.03500000000000002
+   },
+   "shipping counts": {
+    "market_mornings": 439,
+    "median": 0.03500000000000002
+   },
+   "single questions": {
+    "market_mornings": 360,
+    "median": 0.03500000000000002
+   }
+  }
+ },
+ "decide_counts_by_family": {
+  "activity counts": {
+   "three two-sided candles": 7752,
+   "gap of 5c or more": 3200,
+   "qualifying market-mornings": 501,
+   "decisions": 466
+  },
+  "shipping counts": {
+   "three two-sided candles": 1092,
+   "gap of 5c or more": 439,
+   "qualifying market-mornings": 74,
+   "decisions": 66
+  },
+  "single questions": {
+   "three two-sided candles": 897,
+   "gap of 5c or more": 360,
+   "qualifying market-mornings": 70,
+   "decisions": 69
+  }
  },
  "filled": {
   "development": {
@@ -127,31 +161,31 @@
  },
  "optimistic_same_candle_fill_information_only": {
   "development": {
-   "n": 439,
-   "wins": 154,
-   "voids": 8,
-   "pf": 0.6020132580407562,
-   "mean": -0.11077448747152621,
-   "net": -48.63000000000001,
-   "z_event_clustered": -4.886001244954858
+   "n": 601,
+   "wins": 217,
+   "voids": 10,
+   "pf": 0.6316357100059916,
+   "mean": -0.10229617304492514,
+   "net": -61.48000000000001,
+   "z_event_clustered": -4.960332928966269
   },
   "first_half": {
-   "n": 243,
-   "wins": 75,
+   "n": 344,
+   "wins": 120,
    "voids": 4,
-   "pf": 0.489011768041968,
-   "mean": -0.1483127572016461,
-   "net": -36.040000000000006,
-   "z_event_clustered": -4.971029754076206
+   "pf": 0.5942584723805575,
+   "mean": -0.11380813953488374,
+   "net": -39.150000000000006,
+   "z_event_clustered": -4.39730839770121
   },
   "second_half": {
-   "n": 196,
-   "wins": 79,
-   "voids": 4,
-   "pf": 0.7562911343399148,
-   "mean": -0.06423469387755104,
-   "net": -12.590000000000003,
-   "z_event_clustered": -1.8559573619535417
+   "n": 257,
+   "wins": 97,
+   "voids": 6,
+   "pf": 0.6828575486436586,
+   "mean": -0.08688715953307395,
+   "net": -22.330000000000005,
+   "z_event_clustered": -2.6330112373843515
   }
  },
  "voids_among_filled": 7,
@@ -224,13 +258,13 @@
    },
    "fired": 351,
    "optimistic": {
-    "n": 351,
-    "wins": 118,
-    "voids": 7,
-    "pf": 0.5701701701701701,
-    "mean": -0.12233618233618235,
-    "net": -42.940000000000005,
-    "z_event_clustered": -4.850036474505573
+    "n": 466,
+    "wins": 162,
+    "voids": 9,
+    "pf": 0.599237514296607,
+    "mean": -0.11278969957081547,
+    "net": -52.56000000000001,
+    "z_event_clustered": -5.001922881340429
    }
   },
   "shipping counts": {
@@ -263,13 +297,13 @@
    },
    "fired": 51,
    "optimistic": {
-    "n": 51,
-    "wins": 20,
+    "n": 66,
+    "wins": 29,
     "voids": 1,
-    "pf": 0.6911764705882353,
-    "mean": -0.07823529411764707,
-    "net": -3.9900000000000007,
-    "z_event_clustered": -1.161863804930816
+    "pf": 0.841614906832298,
+    "mean": -0.038636363636363656,
+    "net": -2.550000000000001,
+    "z_event_clustered": -0.6757652581070782
    }
   },
   "single questions": {
@@ -302,13 +336,13 @@
    },
    "fired": 37,
    "optimistic": {
-    "n": 37,
-    "wins": 16,
+    "n": 69,
+    "wins": 26,
     "voids": 0,
-    "pf": 0.8185699039487726,
-    "mean": -0.04594594594594596,
-    "net": -1.7000000000000006,
-    "z_event_clustered": -0.5704119921646161
+    "pf": 0.675826972010178,
+    "mean": -0.09231884057971015,
+    "net": -6.370000000000001,
+    "z_event_clustered": -1.18363666580602
    }
   }
  },

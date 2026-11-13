@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """POLGAPH, an INDEPENDENT SECOND BUILD (Forensics desk, 2026-11-13, on the Head of R&D's order: a second build from the text by another desk BEFORE the lists job is
 dispatched). Written from Desk B's registration with Amendments 1 and 2 (claude/idea-desk-b, kalshi-scalper/workers/polgap/POLGAPH_REGISTRATION.md at 0d043306, sha256
-69eec8d6...) and POLGAPH_SERIES.json ALONE. Desk B's polgaph.py was not read. Nothing of this card has been requested or read by anyone: invented rows only.
+69eec8d6...) and POLGAPH_SERIES.json ALONE, then aligned to Amendment 3 (registration sha256 b1ac127d...): the optimistic figure books every decision, and a listed market
+closing after 2026-11-12 23:59:59Z stops the whole run. Desk B's polgaph.py was not read. Nothing of this card has been requested or read by anyone: invented rows only.
 
-Development only: a market closing on or after 2026-11-13T00:00:00Z is refused, and any path in or resolving into a HELDOUT_ folder is refused.
+Development only: a listed market closing on or after 2026-11-13T00:00:00Z STOPS THE RUN (Amendment 3, item 4), and any path in or resolving into a HELDOUT_ folder is refused.
 NO RESULT IS READ BEFORE THE COST LINE: the result fields are kept in a separate table that is opened only after the cost line has passed.
 
 usage: python3 -I polgaph_second.py <POLGAPH_SERIES.json> --lists <run ...> --hourly <run ...> --minute <run ...>
@@ -19,7 +20,7 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
     span contains the minute ending 07:01. Otherwise "no fill data".
  6. In the 07:01 candle the bought side's ask is the YES ask for YES and 1 minus the YES bid for NO; a missing or zero YES bid is "no ask" for NO, a missing ask or an ask of 1 is "no ask" for YES.
  7. A void is any result that is neither yes nor no. The figure "with the settlement value paid instead" uses the list's settlement_value_dollars when it is a number (YES value; NO gets 1 minus it), and is left out otherwise.
- 8. The optimistic, same-candle figure books every pick that was not blocked (filled, not filled and no fill data alike) at its limit.
+ 8. SETTLED by Amendment 3, item 3: the optimistic, same-candle figure books EVERY decision (the event's pick) at its limit, with no block and no fill test. (This build first booked fired decisions only.)
  9. The largest number open at once is taken at each filled bet's look (bets with look at or before it and close after it).
 10. Profit factor with no losses is infinite and passes a "1.5 or more" line; with no wins it is 0. The lines are tested with a 1e-9 tolerance on the float figure.
 11. Family rule (Amendment 1, point 2): if the pooled read would survive and one family's net is more than half of the pooled net, the verdict is that family's own read.
@@ -80,7 +81,7 @@ def read_lists(folders, series):
                 if ser not in series: continue
                 try: op, cl = iso(m["open_time"]), iso(m["close_time"])
                 except Exception: C["markets with no open or close time, dropped"] += 1; continue
-                if cl >= HELD_FROM: C["markets refused as held-out (close on or after 2026-11-13)"] += 1; continue
+                if cl >= HELD_FROM: raise SystemExit("REFUSED: the lists hold a market closing on or after 2026-11-13T00:00:00Z (%s); the whole run stops (standing rule (h), Amendment 3 item 4)" % t)
                 if cl < DEV_FROM: C["markets closing before 2026-09-12, not in the window"] += 1; continue
                 mk[t] = {"ticker": t, "series": ser, "event": m.get("event_ticker") or t.rsplit("-", 1)[0], "open": op, "close": cl}
                 res[t] = (str(m.get("result") or "").lower(), num(m.get("settlement_value_dollars")))
@@ -117,7 +118,8 @@ def stats(bets, key="net"):
     by = collections.defaultdict(float)
     for b in bets: by[b["event"]] += b[key]
     den = math.sqrt(sum(s * s for s in by.values()))
-    return {"n": n, "wins": sum(1 for b in bets if b["win"] is True), "voids": sum(1 for b in bets if b["win"] is None), "pf": pf(v), "mean": (sum(v) / n) if n else None, "net": sum(v),
+    wins = sum(1 for b in bets if b["win"] is True) if key == "net" else sum(1 for x in v if x > EPS)      # with the settlement value paid, a void that pays more than it cost is a win
+    return {"n": n, "wins": wins, "voids": sum(1 for b in bets if b["win"] is None), "pf": pf(v), "mean": (sum(v) / n) if n else None, "net": sum(v),
             "z_event_clustered": (sum(v) / den) if den > 0 else 0.0}
 
 
@@ -135,7 +137,7 @@ def measure(spec, list_folders, hourly_folders, minute_folders):
     mk, results, C = read_lists(list_folders, series)
     hourly, _ = read_candles(hourly_folders, set(mk), 60)
     C["markets with any hourly candle"] = sum(1 for t in mk if hourly.get(t))
-    cand = []; quiet = []; cost = []
+    cand = []; quiet = []; cost = []; FC = {f: collections.Counter() for f in spec["families"]}
     for t, m in sorted(mk.items()):
         h = hourly.get(t) or {}
         d = datetime.fromtimestamp(m["open"], ET).date(); last = datetime.fromtimestamp(m["close"], ET).date()
@@ -148,7 +150,7 @@ def measure(spec, list_folders, hourly_folders, minute_folders):
                 if q22 is None or q06 is None or q07 is None: C["no look (an hourly candle missing)"] += 1
                 elif not (two(q22) and two(q06) and two(q07)): C["not two-sided at one of the three candles"] += 1
                 else:
-                    C["1. three two-sided candles"] += 1
+                    C["1. three two-sided candles"] += 1; FC[fam[m["series"]]]["three two-sided candles"] += 1
                     gap = (q07[0] + q07[1]) / 2 - (q22[0] + q22[1]) / 2
                     vol = sum(v[2] for ts, v in h.items() if t22 - 7 * 86400 < ts <= t22)
                     def passes(side):
@@ -160,9 +162,9 @@ def measure(spec, list_folders, hourly_folders, minute_folders):
                         return None, (b7, a7)
                     base = {"ticker": t, "event": m["event"], "series": m["series"], "family": fam[m["series"]], "date": d.isoformat(), "look": look, "close": m["close"]}
                     if abs(gap) >= GAP - EPS:
-                        side = "yes" if gap > 0 else "no"; C["2. gap of 5c or more"] += 1
+                        side = "yes" if gap > 0 else "no"; C["2. gap of 5c or more"] += 1; FC[fam[m["series"]]]["gap of 5c or more"] += 1
                         b7, a7 = side_quote(q07, side); lim = round(a7 + SLIP, 6)
-                        cost.append(((a7 - (a7 + b7) / 2) + fee_up(lim), (lim - (a7 + b7) / 2) + fee_up(lim)))
+                        cost.append(((a7 - (a7 + b7) / 2) + fee_up(lim), (lim - (a7 + b7) / 2) + fee_up(lim), fam[m["series"]]))
                         why, q = passes(side)
                         if why:
                             for step in ("3. steady", "4. band", "5. spread", "6. liquid"):
@@ -183,6 +185,8 @@ def measure(spec, list_folders, hourly_folders, minute_folders):
         for r in rows: g[(r["event"], r["date"])].append(r)
         return sorted((nearest(v) for v in g.values()), key=lambda r: (r["look"], r["ticker"]))
     picks = one_per_event(cand); C["left after 7. one per event and morning (the event's pick)"] = len(picks); C["not the event's pick"] = len(cand) - len(picks)
+    for r in cand: FC[r["family"]]["qualifying market-mornings"] += 1
+    for r in picks: FC[r["family"]]["decisions"] += 1
     minute, spans = read_candles(minute_folders, {p["ticker"] for p in picks}, 1)
     answered = lambda tk, ts: any(tk in s and (a is None or a < ts) and (b is None or ts <= b) for s, a, b in spans)
     open_bets = collections.defaultdict(list); fired = []
@@ -205,20 +209,22 @@ def measure(spec, list_folders, hourly_folders, minute_folders):
     out["distinct_among_filled"] = {("first half", "second half")[k]: {"events": len({b["event"] for b in half(filled, k)}), "series": len({b["series"] for b in half(filled, k)}), "mornings": len({b["date"] for b in half(filled, k)})} for k in (0, 1)}
     out["largest_number_open_at_once"] = max((sum(1 for o in filled if o["look"] <= b["look"] < o["close"]) for b in filled), default=0)
     med = (statistics.median(c[0] for c in cost), statistics.median(c[1] for c in cost)) if cost else (None, None)
-    out["one_way_cost"] = {"market_mornings": len(cost), "median_ask_minus_mid_plus_fee_at_the_limit": med[0], "cost_as_paid_at_the_limit_information_only": med[1]}
+    out["one_way_cost"] = {"market_mornings": len(cost), "median_ask_minus_mid_plus_fee_at_the_limit": med[0], "cost_as_paid_at_the_limit_information_only": med[1],
+                           "by_family": {f: {"market_mornings": sum(1 for c in cost if c[2] == f), "median": (statistics.median(c[0] for c in cost if c[2] == f) if any(c[2] == f for c in cost) else None)} for f in spec["families"]}}
+    out["decide_counts_by_family"] = {f: dict(FC[f]) for f in spec["families"]}
     if med[0] is not None and med[0] > COST_LINE + EPS:
         out["verdict"] = "CLOSED on cost: median one-way cost %.4f above 0.04; no result is read" % med[0]; return out
     # ---- only now are results opened
-    for b in fired: book(b, results)
+    for b in picks: book(b, results)
     def block(rows): return {"development": stats(rows), "first_half": stats(half(rows, 0)), "second_half": stats(half(rows, 1))}
-    out["filled"] = block(filled); out["filled_on_a_present_candle_only"] = block([b for b in filled if b["fill"] == "present candle"]); out["optimistic_same_candle_fill_information_only"] = block(fired)
+    out["filled"] = block(filled); out["filled_on_a_present_candle_only"] = block([b for b in filled if b["fill"] == "present candle"]); out["optimistic_same_candle_fill_information_only"] = block(picks)
     out["voids_among_filled"] = sum(1 for b in filled if b["win"] is None)
     out["filled_with_the_settlement_value_paid_for_voids_information_only"] = stats(filled, "net_with_settlement_value")
     base = [book(dict(b), results) for b in one_per_event(quiet)]
     out["baseline_gap_under_2c_information_only"] = block(base)
     fams = {}
     for f in spec["families"]:
-        rows = [b for b in filled if b["family"] == f]; fams[f] = dict(block(rows), fired=sum(1 for b in fired if b["family"] == f), optimistic=stats([b for b in fired if b["family"] == f]))
+        rows = [b for b in filled if b["family"] == f]; fams[f] = dict(block(rows), fired=sum(1 for b in fired if b["family"] == f), optimistic=stats([b for b in picks if b["family"] == f]))
     out["by_family"] = fams
     def read(rows, name):
         s = block(rows); n, n0, n1 = s["development"]["n"], s["first_half"]["n"], s["second_half"]["n"]
