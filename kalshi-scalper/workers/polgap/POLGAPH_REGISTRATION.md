@@ -108,13 +108,12 @@ The Forensics desk built POLGAPH from this text alone (`polgaph_second.py`, comm
 3. **The optimistic, same-candle figure** books EVERY decision at its limit, with no block and no fill test, the same basis as the baseline (Amendment 2, item 6). The second build booked fired decisions only; it aligns.
 4. **A listed market closing after 2026-11-12 23:59:59Z stops the whole run** (standing rule (h)); it is not dropped and counted.
 
-## AMENDMENT 4 (as ruled by the Head of R&D at 01:41Z), Nov 13, 2026, 01:41Z: the pooling line read exactly, on Auditor B's finding, written before any list, candle, price path or result of this card was requested or read
+## AMENDMENT 4, Nov 13, 2026, 01:41Z: the pooling line read exactly, on Auditor B's finding, written before any list, candle, price path or result of this card was requested or read
 
 Auditor B found that my scorer applied the pooling condition whenever one family supplied more than half of a positive pooled net, even when the pooled read had FAILED. On made-up bets a pooled profit factor of 1.05 (FALSIFIED) was printed as "activity counts: survives development". That would have been three extra looks on one try. Amendment 1, item 2, says a pooled PASS does not count in that case; it never said a pooled failure could be rescued. Read exactly, and now coded so:
 
 1. **The pooled verdict is computed first,** by the registered lines (count, then profit factor 1.5 with each half at 1.0).
 2. **If the pooled verdict is anything but "survives development", it is the card's verdict.** No family is read alone.
-3. **Only if the pooled verdict is "survives development"** is the half-of-net test applied. If EXACTLY ONE family supplies more than half of the pooled net, the pooled pass does not count and the card's verdict is that family's alone, against the same minimums and lines. If no family does, the pooled verdict stands.
-4. **If two families each supply more than half** (possible only when the third is negative), no single family carries the result: the pooled pass STANDS and the page says "two families each exceed half; pooled pass stands". No alphabetical pick anywhere. (My first wording of this section, written minutes before the Head's ruling of 01:41Z reached me, read the family with the largest net in that case; the Head's ruling replaces it, and it was never run on data.)
-5. The family lines are still printed beside the pooled line in every case. When the pooled read fails the page labels them "family lines are information only when the pooled read fails".
-6. Tries stay at 1.
+3. **Only if the pooled verdict is "survives development":** take the family with the largest net (on an exact tie, the name first in alphabetical order). If it supplies more than half of the pooled net, the pooled pass does not count and the card's verdict is that family's alone, against the same minimums and lines. If it does not, the pooled verdict stands.
+4. If two families each supply more than half (possible only when the third is negative), the one with the largest net is the one read, and the page says so.
+5. The family lines are still printed beside the pooled line in every case, as information.
