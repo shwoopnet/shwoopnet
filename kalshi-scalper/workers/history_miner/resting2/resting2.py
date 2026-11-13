@@ -1,6 +1,6 @@
 """V1 (OICORE resting bid) and V2 (EVENT830 resting entry) SECOND BUILD (History Miner, Nov 13, 2026), written from the two registrations alone:
 kalshi-scalper/refine_tools/V1_OICORE_RESTING_BID_REGISTRATION.md (fc528cd3) and V2_EVENT830_RESTING_ENTRY_REGISTRATION.md (4221ab37) on claude/refine-live
-(at 96ab50c7: V1 abd8430f, V2 b33b1962, with the dated amendments and lines of Nov 13, including G1 to G3, D1, D2, H1 to H4 and standing rule 18), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
+(with the dated amendments and lines of Nov 13, including G1 to G3, D1, D2, H1 to H4, standing rule 18 and its scope line: every book row), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
 Invented rows only. Every reading below is now RULED by the registrations' dated amendments (R1 to R14, C1 to C4, the NOT_ENOUGH_DATA order).
 
 Input:
@@ -148,7 +148,10 @@ def window(sig, book, trades, result, cfg):
             filled = True
     for r in rows:                                                                    # R7
         if t0 < int(r["t_recv_ms"]) < cancel:
-            a = quotes(r)[side]["ask"]
+            qr = quotes(r)
+            if qr["yes"]["bid"] is not None and qr["no"]["bid"] is not None and qr["yes"]["bid"] + qr["no"]["bid"] >= 1 - EPS:
+                continue                                                              # rule 18 on every row: a crossed or locked later row never fills
+            a = qr[side]["ask"]
             if a is not None and a <= bid + EPS:
                 filled = True
     out["filled"] = filled

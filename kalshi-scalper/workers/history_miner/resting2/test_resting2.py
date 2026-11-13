@@ -69,5 +69,8 @@ for k, v in E["V2_fwd"]["counts"].items():
 for k, v in E["V2_fwd"]["report"].items():
     if not eq(o3["report"][k], v): bad.append(("V2 fwd report", k, o3["report"][k], v))
 refused(lambda: R.run("V2", "fwd", os.path.join(inv, "v2run_signals.csv"), [os.path.join(inv, "v2run")], None, tempfile.mkdtemp(), FWD, None), "V2 fwd without the NC15DEPTH1 record")
+o4 = R.run("V1", "dev", os.path.join(inv, "v1cross_signals.csv"), [os.path.join(inv, "v1cross")], dm, tempfile.mkdtemp(), NOW)
+for k, v in E["V1_cross"]["counts"].items():
+    if o4["counts"].get(k, 0) != v: bad.append(("V1 cross count", k, o4["counts"].get(k), v))
 print("MISMATCHES", bad)
 sys.exit(1 if bad else 0)
