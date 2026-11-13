@@ -41,3 +41,52 @@ Every "or less" and "or more" on a registered line uses a tolerance of 1e-9 (as 
 | Desk B `voidsnap/voidsnap.py` (`c176146b...`) | CLEAN. Every registered comparison carries 1e-9: frozen within 2c (line 272), under 10 contracts (274), 10c under (278, 293), spread 4c (293), the 15c to 64c band (294), within 1c and 3c (354, 355), the 70% and 30% lines (380). Raw comparisons left are on parsed quotes (`0 < bid < ask < 1`, line 231), whole counts and times. |
 | Desk B `polgap/polgaph.py` (`9186c8b5...`) | CLEAN on every registered line: steady 1c (231), band (233), spread (235), 200 contracts (238), the 2c and 5c gaps (269, 281), nearest 50c and its tie (274, 279, 297), the fill test (444, 445), the cost kill (419), the profit factor lines (393), the half-of-net test (489). TWO NOTES, neither on a verdict line: (1) lines 360 and 365 count a win or a loss as a cash result above or below zero with no tolerance; this is the known information-only difference on the "voids paid at settlement value" line (the Head's ruling of 01:48Z: a sentence, no hash change); no registered booking can produce a zero result. (2) line 352 counts a minute request as holding the 07:01 minute when `start <= 07:01:00 <= end`; my build needs `start < 07:01:00`. They differ only for a request that STARTS exactly at 07:01:00, which neither Desk B's job shape (start 07:00:00) nor any fixture has. |
 | History Miner `candlegap/candlegap.py` (`a7178688...`) | CLEAN. The candle-against-book test is `abs(difference) <= 0.0101`, a tolerance by design (lines 139). The YES ask is `round(1 - NO bid, 4)`, so the "top of book changed" test (119) and "bid under ask" (122) compare rounded values. The rest are times and counts. |
+
+## The Testing Desk's INPLAYJUMP second scorer (scan on Nov 13 at about 08:25Z, on the Head's order of 01:49Z, when the Testing Desk said it was frozen)
+
+Files, from `claude/testing-desk` at `968d6830` (the desk named `b39596b6`; the hashes are the same): `testing/inplayjump_second.py` sha256 `fb9bca51de40b7c1...`,
+the wrapper `testing/inplayjump_read.py` `6df28ad7bea0d1d5...`, `testing/scorekit.py` `02728f2afdfe62a9...`. Parsed with `cmpscan.py`, every listed line read by eye, edge
+cases checked on invented whole-cent quotes only. Nothing was run on a landed file and no result was opened. This is a float scan, not a check of the rule against the
+registration (Auditor B did that).
+
+**Finding: CLEAN on every registered threshold. One point on a verdict input (rounding before a bar, not a float error), four notes.**
+
+| Line | What it compares | Result |
+|---|---|---|
+| 107 | jump of 10c on mids; pre-jump mid 15c to 75c | 1e-9 both. Of 150,444 whole-cent quote pairs whose mids differ by exactly 10c, 0 are judged under (94,817 would be with no tolerance); 0 of 151,240 pairs 9.5c apart are let through. Mids of exactly 0.15 and 0.75 are kept, 0.145 and 0.755 dropped. |
+| 117, 311 | tennis 2c step | 1e-9. 0 of 158,912 exact-2c pairs judged under (44,583 with no tolerance); 0 of 159,056 pairs 1.5c apart let through. |
+| 152, 178 | ask 20c to 85c; spread 4c or less | 1e-9. 0 of 95 exact-4c spreads judged wider (53 with no tolerance). |
+| 173 | quiet range of 5c | 1e-9. 0 of 156,959 exact-5c pairs misjudged; 0 of 157,370 pairs 4.5c apart misjudged. |
+| 176 | the higher mid, tie within 1e-9 | tolerance, then the ticker order. |
+| 200 (and the wrapper's stop) | cost kill, median over 4c | 1e-9; a median of exactly 4c is not "over". |
+| 220 | share paid 70c or more | 1e-9 on a price already rounded to four decimals. |
+| 237, 238 | profit factor under 1.0, 1.5 or more, halves above 1.0 | 1e-9 on the unrounded figure (`scorekit.pf` does not round). |
+| 262 | screen: bid range plus ask range under 4c | 3e-9 on a sum of four subtractions. 0 of 17,405 exact-4c cases judged under. |
+| 276, 277 | minute close inside the hour's low to high | 1e-9. |
+| 43 | fee rounded up | `ceil(round(x, 6))`: equal to the exact ceiling for every price on the whole-cent, tenth-of-a-cent and hundredth-of-a-cent grids (99, 999 and 9,999 prices), and equal to `ceil(x - 1e-9)` on all of them. |
+| 59 | price bucket `round(p * 100)` | Right for every whole-cent price from 21c to 86c. Same formula as Desk A's engine. |
+| 53, 76, 77, 91, 92 | parsed quotes, times, whole counts (`g * 100 >= 80 * n`) | exact by construction. |
+
+**The one point, line 238: the placebo bar is tested on figures already rounded.** Line 235 rounds the difference and its standard error to 3 decimals of a cent, and
+line 238 then tests `difference >= 2 * se - 1e-9` on those rounded figures. Desk A's engine (`desk_a_verify/inplayjump.py` at `6e356373...`, line 183) tests the same bar
+on the unrounded figures. The two can give opposite answers when the difference is within 0.0015c of twice the standard error (the difference's rounding moves it by up
+to 0.0005c and twice the standard error by up to 0.001c). Example on invented numbers: difference 2.0004c and standard error 1.0004c is under the bar unrounded
+(2.0004 against 2.0008) and at the bar rounded (2.000 against 2.000). In 2,000,000 invented draws within 0.004c of the bar, 7.8% flipped, none farther than 0.0015c from
+it. The two builds agree on every figure printed so far, so no read has been near it. The Head's standing rule (a verdict figure within 0.001 of its bar is recomputed
+exactly) catches most of this window but not all of it: the window here is 0.0015c. Suggested, with no hash change: at any read where the printed difference is within
+0.002c of twice the printed standard error, both builds decide that bar on the unrounded figures. It is the Head's call.
+
+**Notes, none on a verdict line:**
+
+1. **Bucket off the whole-cent grid.** For a price on tenths of a cent, x9.5c to x9.9c (29.5c to 29.9c, 39.5c to 39.9c and so on, 30 prices between 21c and 86c) goes
+   to the bucket ABOVE the 10c step it lies in, because the cents are rounded, not cut. Both builds use the same formula, so they cannot disagree; it only matters if a
+   price paid is ever off the whole-cent grid, and then it moves a few placebo weights.
+2. **Wins and the profit factor's sums use raw `> 0` and `< 0`** (line 211; `scorekit.pf`). No cash result here can be exactly zero: a win is at least 1 minus 86c minus
+   the fee, and a loss or a void costs at least the 1c fee. So the POLGAPH case (a void paid at its value netting exactly zero) cannot arise.
+3. **Line 223, `tot <= 0`, is raw.** The largest-day share prints nothing when the total net is zero or less; a total that is only float residue would print an absurd
+   share. Information line.
+4. **`scorekit.cluster_z`, `sd > 0`, is raw.** If every cluster mean is equal up to float residue, z prints as a huge number, not as "none". z is printed and not on
+   this scorer's verdict line (lines 237 to 239 read n, profit factor, the halves and the placebo bar). The Head's DEPTH1 wording (a z over 1,000 in size is recomputed
+   exactly) would cover it if applied here.
+
+Not in the scan's reach: `scorekit.py` functions this scorer does not call (the fill, stop and resting-order helpers, which carry 1e-12).
