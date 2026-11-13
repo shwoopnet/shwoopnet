@@ -14,7 +14,7 @@ def fl(x): return float(x) if x not in (None, "") else None
 # ---- R6 books: ticker -> sorted [(t_exchange_s, yb, ybs, nb, nbs)]
 book = collections.defaultdict(list)
 def load_book(R6, before=None):
-  sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(R6, "cfrti_b.load_book")      # standing rule (h)
+  sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(R6, "cfrti_b.load_book")      # standing rule (h)
   book.clear()
   for f in sorted(glob.glob(R6 + "/book15r6/*/*/book.csv.gz")):
       if before and f.split("/")[-3] >= before: continue                                  # folders dated at or after `before` are never opened
