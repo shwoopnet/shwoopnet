@@ -1,0 +1,2 @@
+# Scorers of unread Refinement reads, committed (frozen) Nov 13, 2026 before DEPTH1 (2026-11-14T00:00Z) and WHEEL0
+Copied unchanged from the scratch folder, no edit. The commit and sha256 below are the freeze record (standing rule 17, frozen-read clause). Registrations: R6_FINAL_READ_NOTE.md, SPOTLEAD1_REGISTRATION_AND_RESULT.md, REFINE_STATUS.md entries for S-OIRLOW1 (registered 2026-11-04 13:33Z). No live figure, no key.
