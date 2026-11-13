@@ -739,3 +739,8 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - Testing Desk: second build of the proven-bar read.
   - Refinement: build 1 at 100 fills, plus the S-OICHEAPSKIP1 status.
   - Desks B and C: stand by.
+- 19:22Z, the owner's correction ("wait we still need new research"): OICORE stays first, and new research continues on at least two desks.
+  - Desk B: Kalshi-native fields no card has read.
+  - Desk C: LIQREV unpaused, plus untouched market families from the census.
+  - Forensics: keeps the ranking current.
+  - Refinement runs OICORE's proven-bar read when it reaches 100 settled fills (the count is in messages only). S-OICHEAPSKIP1's first read is expected around Nov 28 to Dec 1.
