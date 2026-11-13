@@ -101,7 +101,7 @@ def _iso(s): return calendar.timegm(time.strptime(re.sub(r"\.\d+Z$", "Z", s), "%
 if __name__ == "__main__":
     a = [x for x in sys.argv[1:] if not x.startswith("--")]
     if not a: sys.exit(__doc__)
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(os.path.abspath(a[0]), "wheel block reader")
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(os.path.abspath(a[0]), "wheel block reader")
     opt = {x.split("=", 1)[0]: (x.split("=", 1)[1] if "=" in x else True) for x in sys.argv[1:] if x.startswith("--")}
     if "--now" not in opt: sys.exit("REFUSED: a stated --now=<ISO> is required (EXPIRED is decided by the clock, (k))")
     band = tuple(int(v) for v in opt.get("--band", "11,91").split(","))
