@@ -101,3 +101,29 @@ Desk B raised nine readings that could go two ways. All nine are adopted as Desk
 - The leg pull needs the runner to allow `/markets` with a `tickers` parameter (the Chief of Staff's change).
 - Desk B counts the distinct legs exactly from the files only after Auditor B's CLEAN.
 - **This count reads leg RESULTS to classify snapshots.** It scores nothing, but it is not blind to leg outcomes. Any stage 2 registration must say so and must fix its own held-out block by a date constant before the gap is priced.
+
+## Amendment 2 (Nov 13, 2026, 02:25Z, before the counter is frozen and before any combo-data file is opened for this card)
+
+Desk B's nine further choices, made while building the counter, are adopted as built:
+
+10. **A day counts only once it is over:** a run folder exists on a later UTC day.
+11. **Snapshots** are every quotes row whose receive time falls on one of the seven days, from any run folder, completed or not.
+    - The 80% run test uses folder dates.
+    - A snapshot's UTC day is the day of its receive time.
+12. **Leg count mismatch.** A row whose `legs` count differs from the number of legs in its string is "leg unknown".
+13. **Each row is counted once,** under the FIRST of these that applies:
+    - leg unknown;
+    - a leg settled with a result other than yes or no;
+    - a leg settled against the combo;
+    - no leg settled for the combo 60 seconds or more before t;
+    - every leg settled;
+    - combo closed (close_time at or before t, or unreadable).
+14. **Settled or not.**
+    - A leg with a settlement time at or before t and an EMPTY result counts as "other result".
+    - A leg is unsettled at t when its settlement time is after t, or when it has neither a settlement time nor a result.
+15. **The median** uses the ask as listed, not the rounded-up ask.
+16. **The leg pull must be whole:** the run finished, every request was answered, and no answer was left on a cursor. Otherwise the verdict is "the leg pull is not whole: not decided", whatever the count. A leg run whose job did not ask for every leg the week names is refused outright.
+17. **The book test** also needs 1 minus `no_bid_px_1` above zero.
+18. **Leg job cap:** at most 100 requests of 100 tickers. Over that it writes nothing, and Desk B sends the Head the count. No leg is dropped to fit.
+
+**Correction to the card:** the main pull runner already accepts a `tickers` parameter (Desk B ran its check on the builder's job with made-up tickers). The runner change named in Amendment 1 is therefore not needed.
