@@ -41,6 +41,18 @@ print(json.dumps([len(m.COLUMNS), len(r[0]), r[0][m.COLUMNS.index("reference_pri
   assert.deepStrictEqual(JSON.parse(out), [17, 17, '1.4', '', 0.02]);
 };
 
+// R5 (Nov 13, 2026): the hourly recorder chains itself, still at most 24 samples a day, never past the end date, with the same start-time and permission rules.
+gates.R5 = () => {
+  assert.ok(/echo "start=\$\(date -u \+%s\)" >> "\$GITHUB_OUTPUT"/.test(wf), 'start time is a step output');
+  const chain = wf.slice(wf.indexOf('- name: Chain the next run'));
+  assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true' && steps\.rec\.outcome != 'failure'"/.test(chain), 'chains after a sample or a freshness skip, not after a failed sample or past the end date');
+  assert.ok(/gh workflow run record-perps\.yml --ref main/.test(chain), 'it re-dispatches only itself, on main');
+  assert.ok(/START \+ 3300/.test(chain) && /1800 \* 1800/.test(chain), 'next :00 or :30 at least 55 minutes after the start');
+  assert.ok(/2027-02-26T23:59:00Z/.test(chain) && (chain.match(/past the end date|pass the end date/g) || []).length >= 2, 'end date checked before and after the sleep');
+  assert.ok(/permissions:\s*\n\s*contents: write\s*\n\s*actions: write\s*\n/.test(wf), 'contents and actions write, nothing wider');
+  assert.ok(/under 45 minutes old/.test(wf) && /cron: "7,37 \* \* \* \*"/.test(wf) && /cancel-in-progress: false/.test(wf), 'freshness skip, cron restart path and queueing kept');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

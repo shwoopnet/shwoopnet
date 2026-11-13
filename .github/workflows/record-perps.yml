@@ -3,6 +3,10 @@
 # Why: FUND1 (README, kalshi-scalper) needs Kalshi's own funding premium history, which the Perps API does not provide, so it has to be recorded from now on.
 # Nov 12, 2026: GitHub dropped most hourly starts (commits at 02:49Z and 10:52Z with nothing between), so a start now comes at minutes 7 and 37. A freshness step skips the sample when the newest row on the data branch is under 45 minutes old,
 # so a full set of starts still gives about one sample an hour (at most 24 a day) and a dropped start is covered by the next one 30 minutes later. One request per sample, no more than before.
+# Self-chaining (Nov 13, 2026): GitHub still logged only about 4 samples a day, so the workflow chains itself like record-politics.yml. The first step records the run's own start time as a step output;
+# a last step (not after a failed sample) sleeps to the next :00 or :30 UTC at least 55 minutes after the start, then re-dispatches THIS workflow on main with the built-in token. A freshness skip chains too (so a duplicate start never kills the chain);
+# a run past the end date (2027-02-26 23:59 UTC) does not. Still at most 24 samples a day (the 45 minute freshness skip is kept). The cron stays as the restart path; the concurrency group never cancels. Needs `actions: write`; nothing else was widened.
+# Runner minutes: a chain keeps one runner busy around the clock, about 43,000 billed minutes a month; free on a public repo, far over the Charter's 250 a month guideline, flagged for the owner.
 name: record-perps
 on:
   schedule:
@@ -10,20 +14,28 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: record-perps
   cancel-in-progress: false
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 90
     steps:
+      - name: Stop for good after the end date (2027-02-26 23:59 UTC)
+        id: gate
+        run: |
+          echo "start=$(date -u +%s)" >> "$GITHUB_OUTPUT"   # the run's own start time (github.run_started_at is not a context value)
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-26T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: main
           path: code
       - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
         run: |
           mkdir data && cd data
           git init -q
@@ -31,6 +43,7 @@ jobs:
           if git fetch -q --depth 1 origin perp-data; then git checkout -q -b perp-data FETCH_HEAD; else git checkout -q --orphan perp-data; fi
       - name: Skip when the newest sample is under 45 minutes old (a start the schedule did not drop)
         id: fresh
+        if: steps.gate.outputs.go == 'true'
         run: |
           F="data/perps/perps-$(date -u +%Y-%m-%d).csv"
           LAST="$( [ -f "$F" ] && tail -1 "$F" | cut -d, -f1 || true )"
@@ -38,9 +51,11 @@ jobs:
           if [ $(( $(date -u +%s) - THEN )) -lt 2700 ]; then echo "newest sample $LAST is under 45 minutes old: skipping"; echo "sample=false" >> "$GITHUB_OUTPUT"; exit 0; fi
           echo "sample=true" >> "$GITHUB_OUTPUT"
       - name: Record one sample
-        if: steps.fresh.outputs.sample == 'true'
+        id: rec
+        if: steps.gate.outputs.go == 'true' && steps.fresh.outputs.sample == 'true'
         run: python3 code/scripts/record_perps.py data/perps
       - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
         run: |
           cd data
           git config user.name "perp-recorder"
@@ -48,3 +63,21 @@ jobs:
           git add perps
           git commit -q -m "perps sample $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           git push -q origin perp-data
+      - name: Chain the next run (sleep to the next :00 or :30, then re-dispatch on main)
+        if: "!cancelled() && steps.gate.outputs.go == 'true' && steps.rec.outcome != 'failure'"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_START: ${{ steps.gate.outputs.start }}
+        run: |
+          END="$(date -u -d '2027-02-26T23:59:00Z' +%s)"
+          NOW="$(date -u +%s)"
+          START="${RUN_START:-$NOW}"
+          EARLIEST=$(( START + 3300 ))   # 55 minutes after the start, so a chain gives about one sample an hour
+          [ "$EARLIEST" -lt "$NOW" ] && EARLIEST="$NOW"
+          TARGET=$(( (EARLIEST + 1799) / 1800 * 1800 ))
+          if [ "$TARGET" -ge "$END" ]; then echo "next run would pass the end date: not chaining"; exit 0; fi
+          echo "sleeping $(( TARGET - NOW )) s to the next half hour"
+          sleep $(( TARGET - NOW ))
+          if [ "$(date -u +%s)" -ge "$END" ]; then echo "past the end date: not chaining"; exit 0; fi
+          gh workflow run record-perps.yml --ref main

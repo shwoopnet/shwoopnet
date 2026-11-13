@@ -62,6 +62,38 @@ def current_window(now_utc):
     return None
 
 
+CHAIN_LEAD_S = 300        # a chained run wakes this long before the next window opens, so a late dispatch still catches it
+CHAIN_MAX_SLEEP_S = 14400  # never sleep past 4 hours in one link (the job timeout is under GitHub's 6 hour cap); the next link recomputes
+
+
+def next_window_start(now_utc):
+    """The next weekday window start strictly after now_utc, as a UTC datetime (New York time, so it follows daylight saving)."""
+    ny = now_utc.astimezone(NY)
+    for add in range(0, 10):
+        day = (ny + dt.timedelta(days=add)).date()
+        if day.weekday() >= 5:
+            continue
+        for _name, (h1, m1), _end in WINDOWS:
+            start = dt.datetime(day.year, day.month, day.day, h1, m1, tzinfo=NY).astimezone(dt.timezone.utc)
+            if start > now_utc:
+                return start
+    return None
+
+
+def chain_wait_seconds(now_utc):
+    """How long a chained run should sleep before dispatching its successor, or -1 for 'do not chain' (the next window is past STOP_DATE).
+    Inside a window: until its end (a recorded window must not spin). Outside: until CHAIN_LEAD_S before the next window opens, or the open itself when it is closer than that. Capped at CHAIN_MAX_SLEEP_S."""
+    win = current_window(now_utc)
+    if win:
+        return int(min(max(0, (win[2] - now_utc).total_seconds()), CHAIN_MAX_SLEEP_S))
+    nxt = next_window_start(now_utc)
+    if nxt is None or nxt.astimezone(NY).date() > STOP_DATE:
+        return -1
+    gap = (nxt - now_utc).total_seconds()
+    wait = gap - CHAIN_LEAD_S if gap > CHAIN_LEAD_S else gap
+    return int(min(max(0, wait), CHAIN_MAX_SLEEP_S))
+
+
 def fetch():
     req = urllib.request.Request(base.URL, headers={"User-Agent": "shwoopnet-research-recorder"})
     return json.load(urllib.request.urlopen(req, timeout=20)).get("markets") or []
@@ -107,4 +139,7 @@ def main(out_dir, now_fn=lambda: dt.datetime.now(dt.timezone.utc), fetch_fn=fetc
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "--chain-wait":   # prints the seconds the workflow's chain step should sleep (-1: do not chain); no network, no write
+        print(chain_wait_seconds(dt.datetime.now(dt.timezone.utc)))
+        sys.exit(0)
     sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else "perps30"))

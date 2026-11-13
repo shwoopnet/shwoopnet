@@ -3,6 +3,11 @@
 # Nov 12, 2026: in its first week GitHub ran 9 of the roughly 165 scheduled starts (the old "*/20 12-22" cron) and none landed inside a window, so only one close file exists. Starts are now packed into the windows:
 # every 10 minutes from 13:02 to 15:22 UTC (the 09:10 to 10:30 New York open, both daylight saving offsets) and 19:42 to 21:52 UTC (the 15:40 to 17:00 close), 29 starts a day against 33 before, so a dropped start is covered by the next.
 # The script records only inside the two New York windows (to the window end, so a late start only records less) and exits at once otherwise; one group never cancels, so a later start queues behind a running one and finds the window already recorded or over.
+# Self-chaining (Nov 13, 2026): packing the crons did not help (GitHub still ran about one start in 17). The workflow now chains itself like record-politics.yml: the first step records the run's own start time as a step output,
+# a last step (not skipped on a failed run, but not after a failed record step) re-dispatches THIS workflow on main with the built-in token (`gh workflow run record-perps-fast.yml --ref main`), so a dropped cron costs at most one link.
+# A run outside both windows records nothing (the script exits at once), then the chain step asks the script (`--chain-wait`, no network) how long to sleep: until 5 minutes before the next window opens (computed in New York time, so it follows daylight saving),
+# at most 4 hours in one link, never dispatching sooner than 5 minutes after the run started. A run inside a window records to the window end (the existing script), then chains. Past the stop date nothing chains. The cron stays as the restart path; the concurrency group never cancels.
+# Needs `actions: write` for the dispatch; nothing else was widened. Runner minutes: a chain keeps one runner busy around the clock, about 43,000 billed minutes a month (weekends included, because the next link sleeps to Monday's window); free on a public repo, far over the Charter's 250 a month guideline, flagged for the owner.
 # Stops by itself after 2027-02-26.
 name: record-perps-fast
 on:
@@ -14,28 +19,39 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: record-perps-fast
   cancel-in-progress: false
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 95
+    timeout-minutes: 345
     steps:
+      - name: Stop for good after the end date (2027-02-26 23:59 UTC)
+        id: gate
+        run: |
+          echo "start=$(date -u +%s)" >> "$GITHUB_OUTPUT"   # the run's own start time (github.run_started_at is not a context value)
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-26T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the recorder scripts from main
+        if: steps.gate.outputs.go == 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: main
           path: code
       - name: Open the data branch
+        if: steps.gate.outputs.go == 'true'
         run: |
           mkdir data && cd data
           git init -q
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           if git fetch -q --depth 1 origin perp-data; then git checkout -q -b perp-data FETCH_HEAD; else git checkout -q --orphan perp-data; fi
       - name: Record the current window
+        id: rec
+        if: steps.gate.outputs.go == 'true'
         run: python3 code/scripts/record_perps_fast.py data/perps30
       - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
         run: |
           cd data
           git config user.name "perp-recorder"
@@ -44,3 +60,22 @@ jobs:
           git commit -q -m "perps 30s window $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           for i in 1 2 3 4 5 6; do git push -q origin perp-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin perp-data || true; done
           exit 1
+      - name: Chain the next run (sleep to just before the next window, then re-dispatch on main)
+        if: "!cancelled() && steps.gate.outputs.go == 'true' && steps.rec.outcome != 'failure'"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_START: ${{ steps.gate.outputs.start }}
+        run: |
+          END="$(date -u -d '2027-02-26T23:59:00Z' +%s)"
+          NOW="$(date -u +%s)"
+          START="${RUN_START:-$NOW}"
+          WAIT="$(python3 code/scripts/record_perps_fast.py --chain-wait)"
+          if [ "$WAIT" -lt 0 ]; then echo "the next window is past the stop date: not chaining"; exit 0; fi
+          TARGET=$(( NOW + WAIT ))
+          [ "$TARGET" -lt $(( START + 300 )) ] && TARGET=$(( START + 300 ))   # never chain faster than every 5 minutes
+          if [ "$TARGET" -ge "$END" ]; then echo "next run would pass the end date: not chaining"; exit 0; fi
+          echo "sleeping $(( TARGET - NOW )) s before the next link"
+          sleep $(( TARGET - NOW ))
+          if [ "$(date -u +%s)" -ge "$END" ]; then echo "past the end date: not chaining"; exit 0; fi
+          gh workflow run record-perps-fast.yml --ref main
