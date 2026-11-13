@@ -29,7 +29,7 @@
  "series_allowlist": [],
  "ticker_allowlist": [],
  "max_requests": 55,
- "notes": "One request, the public trade list for min_ts 1789927200 to max_ts 1789929000, 1,000 a page, at most 50 pages. If it stops at 50 pages the count is a lower bound (at least 50,000 trades in 30 minutes) and is reported as truncated. Cap 55: 5 spare for 429 retries.",
+ "notes": "One request, the public trade list for min_ts 1789927200 to max_ts 1789929000, 1,000 a page, at most 50 pages. If it stops at 50 pages the count is a lower bound (at least 50,000 trades in 30 minutes) and is reported as truncated. Cap 55: 5 spare for 429 retries. The runner saves RAW answers: the unfiltered tape of that half hour (up to about 50,000 trades of every market) lands on the public kalshi-pull-data branch, not only the counts. It is public Kalshi data; size about 7 to 15 MB in all (Main's estimate), under the 5 MB answer cap per page and the 200 MB run cap. The cursor parameter is listed only because the runner's own paging requires it; no request sets it.",
  "requests": [
   {
    "id": "tape_20260920_1800",
