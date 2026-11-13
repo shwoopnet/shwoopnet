@@ -21,3 +21,13 @@ Fifteen are listed in `mapbreak_second.py` (`AMBIGUITIES`) and printed with ever
 ## Not done yet
 
 Amendment 7 (state observed from the map contracts' last candle) is built here (`measure observed`) and runs on the fixture; it cannot be compared until the Testing Desk has coded it.
+
+## Rebuilt to the final text, Amendments 1 to 10 (2026-11-13, after the note above)
+
+The Head of R&D approved Desk B's clarifying Amendment 10 (final text at 6872b365 on `claude/idea-desk-b`), which settles the open places listed above: map markets 1 AND 2 are required; the cost line is over every look left, on the cheaper side's contract, as (limit minus mid) plus the fee at the limit; observability is counted per look reached; equal gaps are no bet; a quote candle carries a bid or an ask; every "or less" and "or more" carries a 1e-9 tolerance; the candle that names the winner must end no earlier than 10 minutes before the map market's close. Amendments 8 and 9 changed the rule itself: the winner is named only by its OWN map contract's best bid of 0.90 or more while the other's does not show it, and a decision is a bet only if the NEXT minute's candle shows an ask at or under the limit (the look candle's ask plus 1c).
+
+`mapbreak_second.py` now follows that text only (sha256 `ffa557fa...`; the Amendment 7 version is at commit db1c0354). Fourteen places where the text still leaves a choice are listed in the file and printed with every run; the ones most likely to differ between two builds are 2 (an empty-book candle is not a quote), 3 (the age limit applies to both teams' candles), 4 (what "look reached" means when no winner can be named), 6 (an equal-gap look stays in the gap share's denominator) and 7 (no candle in the next minute is "not filled").
+
+`make_mapbreak_fixture.py` is version 2 (sha256 `650e513b...`): 4,820 invented matches at seed 7, with planted cases for the new rules: only quotes 12 to 15 minutes old, both teams at 0.90, the loser's contract with no quote, empty-book candles last, quotes that name the wrong team, a quote that usually stands for the next minute, and cheap map-1 contracts in one match of nine so the placebo share is not zero. My output on it is `MAPBREAK_SECOND_OUTPUT_fixture_v2_seed7_MADE_UP_DATA.json`. On it one title and look passes the 150 minimum and reads "IN", the rest read "no evidence at n = x", so the comparison exercises the counts, the shares, the cost line and both kinds of verdict line.
+
+To compare: `python3 -I make_mapbreak_fixture.py <dir> 7`, then both builds on `<dir>/lists` and `<dir>/candles`. Not yet compared: the Testing Desk's build for Amendments 8 to 10 had not been pushed when this was written.

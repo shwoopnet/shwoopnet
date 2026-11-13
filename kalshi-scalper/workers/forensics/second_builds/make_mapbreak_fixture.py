@@ -3,7 +3,7 @@
 Nothing here is real. It exists so two independent builds can be run on the same rows and compared figure by figure.
 usage: python3 -I make_mapbreak_fixture.py <out dir> [seed]      writes <out>/lists and <out>/candles
 The rows follow the registration's ticker shape: <match_series>-<key>-<TEAM>, <map_series>-<key>-<n>-<TEAM>, <total_maps_series>-<key>-<k> with floor_strike 2.5 for a best-of-three;
-the key starts with the date and a four-digit US Eastern clock time. Awkward cases are planted on purpose: not best-of-three, a start that cannot be derived, a pre-match minute
+the key starts with the date and a four-digit US Eastern clock time. Version 2 (2026-11-13, for Amendments 8 to 10; version 1 is at commit db1c0354). Awkward cases are planted on purpose: not best-of-three, a start that cannot be derived, a pre-match minute
 that needs stepping back or never fills, a look that needs stepping forward or never fills, wide spreads, a map with no single winner, a match in the held-out window,
 a map result not yet visible in the quotes, and missing candles."""
 import sys, os, json, gzip, random
@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 TITLES = {"CS2": ("KXCS2GAME", "KXCS2MAP", "KXCS2TOTALMAPS"), "DOTA2": ("KXDOTA2GAME", "KXDOTA2MAP", "KXDOTA2TOTALMAPS"),
           "VALORANT": ("KXVALORANTGAME", "KXVALORANTMAP", "KXVALORANTTOTALMAPS"), "LOL": ("KXLOLGAME", "KXLOLMAP", "KXLOLTOTALMAPS")}
-PER_TITLE = {"CS2": 420, "DOTA2": 380, "VALORANT": 90, "LOL": 230}
+PER_TITLE = {"CS2": 3000, "DOTA2": 1500, "VALORANT": 90, "LOL": 230}      # version 2: CS2 and Dota 2 are large enough to pass the 150 minimum
 NY = ZoneInfo("America/New_York")
 F = lambda x: datetime.fromtimestamp(x, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -35,7 +35,7 @@ def main(out, seed):
             if local.month == 9 and local.day < 14: local = local.replace(day=14)
             kind = rng.random()
             if kind < 0.03: local = local.replace(month=10, day=rng.randint(24, 30))           # held-out window: must be refused
-            S = int(local.timestamp()); a, b = "T%03dA" % (n % 997), "T%03dB" % (n % 991)
+            S = int(local.timestamp()); a, b = "T%04dA" % n, "T%04dB" % n
             key = local.strftime("%y%b%d%H%M").upper() + a + b
             q_true = rng.uniform(0.30, 0.70); p_pre = q_true * q_true * (3 - 2 * q_true)
             up = a if rng.random() < q_true else b; down = b if up == a else a
@@ -71,10 +71,13 @@ def main(out, seed):
                     pm = (p_pre if t == up else 1 - p_pre) + jit * (1 if t == up else -1)
                     if show_match: candles[mt[t]][ts] = quote(min(0.97, max(0.03, pm)), sp())
                     if show_maps:
-                        qm = (q_true if t == up else 1 - q_true) + rng.uniform(-0.05, 0.05)
+                        qm = (q_true if t == up else 1 - q_true) + rng.uniform(-0.05, 0.05) - (0.10 if n % 9 == 0 else 0.0)      # version 2: one match in nine has cheap map-1 contracts, so the placebo share is not zero
                         candles[m1[t]][ts] = quote(min(0.97, max(0.03, qm)), sp())
             def map_tail(mp, close, win, visible):
-                """the map contracts around their close: the winner's bid shows 0.90 or more before the close only when 'visible'; after the close it does."""
+                """the map contracts around their close: the winner's bid shows 0.90 or more before the close only when 'visible'; after the close it does.
+                Awkward cases for Amendments 8 to 10 (drawn AFTER the old draws so earlier rows keep their values where they can): the only quotes are 12 to 15 minutes
+                old (age limit), both teams show a 0.90 bid, the loser's contract has no quote at all, an empty-book candle (bid 0, ask 1) is the last one."""
+                mode = rng.random()
                 for k in range(-6, 6):
                     ts = (close // 60) * 60 + k * 60
                     for t in (a, b):
@@ -83,6 +86,27 @@ def main(out, seed):
                         if rng.random() < 0.06: continue
                         bq = quote(mid, 0.02)
                         candles[mp[t]][ts] = (bq[0], None) if (rng.random() < 0.05) else bq
+                c0 = (close // 60) * 60; late = lambda t: [x for x in candles[mp[t]] if x > c0 - 660]      # the pre-match candles are kept in every case
+                if mode < 0.05:                                                       # only old quotes: nothing in the last 10 minutes before the close or after it
+                    for t in (a, b):
+                        for x in late(t): del candles[mp[t]][x]
+                        for k in (12, 13, 15): candles[mp[t]][c0 - 60 * k] = quote(0.94 if t == win else 0.06, 0.02)
+                elif mode < 0.08:                                                     # both teams' contracts show a bid of 0.90 or more from the close on
+                    for t in (a, b):
+                        for x in late(t):
+                            if x > c0: candles[mp[t]][x] = (0.92, 0.95)
+                        candles[mp[t]][c0 + 60] = (0.92, 0.95)
+                elif mode < 0.10:                                                     # the loser's contract has no quote near the close or after it
+                    lo_ = b if win == a else a
+                    for x in late(lo_): del candles[mp[lo_]][x]
+                elif mode < 0.15 and mode >= 0.13:                                    # the quotes name the WRONG team after the close (the posted result disagrees): still a bet as observed
+                    lo_ = b if win == a else a
+                    for x in late(win):
+                        if x > c0: candles[mp[win]][x], candles[mp[lo_]][x] = (0.04, 0.07), (0.93, 0.96)
+                    candles[mp[win]][c0 + 60], candles[mp[lo_]][c0 + 60] = (0.04, 0.07), (0.93, 0.96)
+                elif mode < 0.13:                                                     # empty books (bid 0, ask 1) are the winner's last candles: not quotes, the one before them stands
+                    for x in late(win):
+                        if x >= c0 + 120: candles[mp[win]][x] = (0.0, 1.0)
             map_tail(m1, c1, up, rng.random() < 0.55)
             if not no_map2: map_tail(m2, c2, w2, rng.random() < 0.55)
             def look(close, value_up, mode):
@@ -95,6 +119,7 @@ def main(out, seed):
                     for t in (a, b):
                         v = value_up if t == up else 1 - value_up
                         candles[mt[t]][ts] = quote(min(0.97, max(0.03, v - edge * (1 if rng.random() < 0.6 else -0.3))), sp())
+                        if ts - 60 in candles[mt[t]] and rng.random() < 0.7: candles[mt[t]][ts] = candles[mt[t]][ts - 60]     # version 2: a quote usually stands for the next minute, so some limits fill
             V = 1 - (1 - q_true) ** 2
             look(c1, V, rng.random())
             if three: look(c2, q_true, rng.random())
