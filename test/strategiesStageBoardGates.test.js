@@ -33,8 +33,8 @@ gates.ST2 = () => {
   const h = B.kalshiBoardHtml(model(live), esc, money);
   const cnt = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*><b data-count="(\\d+)"').exec(h)[1]);
   const rows = (k) => (panel(h, k).match(/class="rw(?: open)?(?: near)?"/g) || []).length;
-  for (const k of ['shadow', 'prob', 'live']) assert.strictEqual(cnt(k), rows(k), k);
-  assert.ok(new RegExp('<b>' + cnt('shadow') + '</b> shadow &middot; <b>' + cnt('prob') + '</b> probation &middot; <b>' + cnt('live') + '</b> live').test(h));
+  for (const k of ['shadow', 'live']) assert.strictEqual(cnt(k), rows(k), k);
+  assert.ok(new RegExp('<b>' + cnt('shadow') + '</b> shadow &middot; <b>' + cnt('live') + '</b> live \\(1 on trial\\)').test(h), 'one Live box (Nov 13, 2026): the header counts the trial seats inside it');
 };
 // ST3: a strategy whose kill state is unknown or still loading never reads HEALTHY and says the state is not readable; a known healthy one still can.
 gates.ST3 = () => {
@@ -81,10 +81,10 @@ gates.ST7 = () => {
 // ST8: keyboard. Every box and row is a button with aria-expanded and aria-controls; a redraw keeps the focused control; the closed panels are hidden.
 gates.ST8 = () => {
   const h = B.kalshiBoardHtml(model([card('A', 'live')]), esc, money);
-  assert.strictEqual((h.match(/<button type="button" class="lp-t[^"]*"[^>]*aria-expanded="false" aria-controls="lp-p-/g) || []).length, 4);
+  assert.strictEqual((h.match(/<button type="button" class="lp-t[^"]*"[^>]*aria-expanded="false" aria-controls="lp-p-/g) || []).length, 3);
   assert.ok(/<button type="button" class="rw-h"[^>]*aria-expanded="false" aria-controls="rwd-live-0"/.test(h) && /id="rwd-live-0"/.test(h));
   assert.ok(/<button type="button" class="mo-b"[^>]*aria-expanded="false"/.test(h));
-  assert.strictEqual((h.match(/<section class="lp-p"[^>]* hidden>/g) || []).length, 4, 'nothing open: every panel hidden');
+  assert.strictEqual((h.match(/<section class="lp-p"[^>]* hidden>/g) || []).length, 3, 'nothing open: every panel hidden');
   const render = html.slice(html.indexOf('  function renderStrategiesPage('), html.indexOf('  // The Details popup lives outside'));
   assert.ok(/getAttribute\('data-f'\)/.test(render) && /\.focus\(\)/.test(render), 'a redraw puts focus back on the same control');
   assert.ok(!/<(?:div|span|b) [^>]*onclick/.test(h));

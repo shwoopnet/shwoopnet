@@ -1060,8 +1060,8 @@
   @media (max-width:760px){ .rw-h{ grid-template-columns:20px 44px minmax(0,1fr) auto; gap:4px 10px; padding:8px 10px 8px 6px; } .rw-h .chev{ grid-column:1; grid-row:1 / 3; } .rw-ring{ grid-column:2; grid-row:1 / 3; } .rw-n{ grid-column:3; grid-row:1; } .rw-h .sp-badge{ grid-column:4; grid-row:1; justify-self:end; } .rw-w{ grid-column:4; grid-row:2; justify-self:end; } .rw-k{ grid-column:3; grid-row:2; } .rw-d, .mo-body{ grid-template-columns:1fr; } .bd-l{ grid-template-columns:52px minmax(0,1fr); } .bd-b{ grid-column:2; } }
   @media (max-width:700px){ .lp{ padding:10px 8px; } .lp-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; } .lp-c, .lp-ret{ display:none; }
     .lp-t{ display:block; padding:6px 10px; } .lp-t b{ display:inline; margin-right:6px; } .lp-t em{ display:block; } .lp-then{ display:block; margin-top:2px; } .lp-t .chev{ position:absolute; right:8px; top:14px; margin:0; }
-    .lp-t[data-i="0"]{ order:1; } .lp-t[data-i="1"]{ order:2; } .lp-t[data-i="3"]{ order:3; } .lp-t[data-i="2"]{ order:4; }
-    .lp-t::after{ position:absolute; color:var(--muted); font-size:13px; } .lp-t[data-i="0"]::after{ content:'\25B6'; right:-21px; top:40%; } .lp-t[data-i="1"]::after{ content:'\25BC'; bottom:-17px; right:46%; } .lp-t[data-i="2"]::after{ content:'\25C0'; left:-21px; top:40%; } .lp-t[data-i="3"]::after{ content:'\25B2'; top:-17px; left:46%; } }
+    .lp-t[data-i="2"]{ grid-column:1 / -1; }   /* three boxes (Nov 13, 2026): Shadow and Live side by side, Off / Retired across the row below */
+    .lp-t::after{ position:absolute; color:var(--muted); font-size:13px; } .lp-t[data-i="0"]::after{ content:'\25B6'; right:-21px; top:40%; } .lp-t[data-i="1"]::after{ content:'\25BC'; bottom:-17px; right:22%; } .lp-t[data-i="2"]::after{ content:'\25B2'; top:-17px; left:22%; } }
   @media (min-width:700px){ .sp-det-body .sp-sum-grid2{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
   @media (max-width:420px){ .sp-ringw{ --rd:72px; } }
   /* Strategies page animation (Nov 10, 2026, the owner: animated visuals). One shot, only while #page-strategies carries sp-play (JS adds it for about 1.9 s when the page is shown, never under reduced motion): the gauges and lines draw by stroke-dashoffset, the bars and chips move by transform and opacity. No layout property is animated. */
@@ -1825,6 +1825,7 @@
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
                   <li>Research: a 79 request kalshi-pull job, VOIDSNAP_CANDLES, reads 1 minute candles of CS2 markets in the development window (closes Sep 12 to Oct 22) for a zero-try measurement of voided matches. Job file and tests only.</li>
+                  <li>Strategies page, one Live box: the loop is now Shadow, Live and Off / Retired (the Probation box is gone). Every strategy trading real money sits in Live with a tag: Trial (small size, with its fills of 90 toward the 60 + 30 record) or Proven. Page only.</li>
                   <li>Strategy list kept in step with research (Nov 13): the Shadow lane now lists every wheel place the Head of R&amp;D has admitted, with whether it is counting yet, and the Retired list gains the rules closed on Nov 12 and 13 (the esports break rule, rematch, period ties, weather after the day ends, perp against binary, the stock test and others), each with its cause. A scheduled job refreshes these rows into a pull request for the owner to merge. No figures, no bot change.</li>
                   <li>Strategies page, new top bar and a calmer open state: the All strategies bar is a profit factor ring beside net cash and a 30 day cash curve, with Today, Last 7 days and Open now as chips; opening a stage box no longer shrinks the loop into pills (the other boxes dim, the opened box flips and its list flips down, each row with a small ring and its closest kill); Recent activity is removed (the bell and the trade log carry it). Page only.</li>
                 </ul>
@@ -4681,12 +4682,11 @@ kalshiStatusTick();
   // ---- Stage board (Nov 12, 2026, the owner: "build it into the live page"; the approved mockup, not a redesign). A loop of four boxes, Shadow (on deck), Probation, Live and Off / Retired, each with a count and the rule for leaving it; tapping a box opens it in place and its strategies list beneath as compact rows (name, stage, cash PF, one status word, a thin bar), a row opens to its detail and More holds the deepest layer. Every lane, count and status word comes from the SAME shared state the Bot page reads (kalshiStrategyState via the card's lane and kill state), so the two pages cannot disagree. Pure builders; none reads the page, the clock or storage. ----
   var KAL_STAGES = [
     { key: 'shadow', label: 'Shadow', sub: 'on deck', head: 'shadow rules, no money at risk', then: 'passes the shadow bar (150 signals, PF 1.3), then the owner' },
-    { key: 'prob', label: 'Probation', sub: 'small size', head: 'small size, earning a seat', then: 'passes the 60 + 30 record, then the owner' },
-    { key: 'live', label: 'Live', sub: 'running', head: 'running now', then: 'a kill rule trips' },
+    { key: 'live', label: 'Live', sub: 'real money', head: 'real money: a Trial seat is small and earning its 60 + 30 record, a Proven one has earned it', then: 'a kill rule trips' },
     { key: 'off', label: 'Off / Retired', sub: 'cooling down', head: 'cooling down, retired', then: 'a cool off, then a fresh shadow record' }
   ];
   // The box a live card belongs in, from its lane (kalshiStratLaneOf): a killed strategy is in Off / Retired, never in Live.
-  function kalshiStageBoxOf(lane){ return lane === 'probation' ? 'prob' : lane === 'off' ? 'off' : 'live'; }
+  function kalshiStageBoxOf(lane){ return lane === 'off' ? 'off' : 'live'; }   // a trial seat is Live with a Trial tag (Nov 13, 2026, the owner: "Merge into one Live box")
   // The card nearest its kill: the largest used fraction above zero among cards { id, frac }; null when none has a distance to show. Pure.
   function kalshiClosestKill(cards){
     var best = null;
@@ -4753,7 +4753,9 @@ kalshiStatusTick();
     };
     var regOf = function(id){ return (model.registryList || []).filter(function(x){ return x.id === id; })[0] || null; };
     var shadowRep = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowRep[r.id] = r.rep; }); }
-    var box = { shadow: [], prob: [], live: [], off: [] }, kills = { prob: [], live: [] };
+    var box = { shadow: [], live: [], off: [] }, kills = { live: [] }, trials = 0;
+    // The trial-to-proven step shown inside Live: a trial seat counts its settled fills toward the 60 + 30 record (docs/ROTATION_LANE.md section 5a: 60 fills at 1.3, then 30 more at 1.0); a strategy that is not a seat is Proven. The count is progress only, never a pass: the record's profit factor bars are judged by the review, not here.
+    var trialTag = function(lane, fills){ if(lane !== 'probation'){ return { text: 'Proven', trial: false }; } var n = Math.max(0, Math.floor(Number(fills) || 0)); return { text: 'Trial ' + Math.min(n, 90) + ' of 90', trial: true }; };
     // ---- Live, Probation and Off rows: the cards the page computes from the bot's own orders and kill state ----
     (model.live || []).forEach(function(s){
       var lane = s.lane || 'live', bk = kalshiStageBoxOf(lane), g = kalshiStratGauge(s.id, s.kill, money);
@@ -4774,7 +4776,8 @@ kalshiStatusTick();
       var rd = reg && reg.nextReadText ? reg.nextReadText : 'Not written yet', shadowTwin = shadowRep[s.id];
       var mo = more(s.id, '<div class="mo-sp"><span class="bd-lab">Recent results</span>' + sparkHtml(s.spark || [], 'Rolling 30 trade cash PF') + '</div>' +
         ladderDl('Sizing', KAL_BOARD_LADDER[s.id] || KAL_BOARD_LADDER.shadow, '<dt>Thresholds</dt><dd>' + esc(killWords) + '</dd><dt>Record</dt><dd>' + esc('Live record: ' + s.w.d30.n + ' settled trades in 30 days, ' + s.w.all.n + ' in all. Shadow record: ' + (shadowTwin ? 'cash PF ' + (shadowTwin.fillable === 0 ? 'n/a' : shadowTwin.pfFillable === null ? 'n/a' : shadowTwin.pfFillable.toFixed(2)) + ' over ' + shadowTwin.fillable + ' signals' : 'n/a')) + '</dd><dt>Read date</dt><dd>' + esc(rd) + '</dd>') + rulesHtml(s.rules) + (s.detail ? kalshiStratDetailHtml(s.detail, esc, money, tt) : ''));
-      box[bk].push({ key: s.id, name: s.name, stage: bk === 'off' ? 'Off' : bk === 'prob' ? 'Probation' : 'Live', stCls: bk === 'off' ? 'off' : bk === 'prob' ? 'prob' : 'live', pf: pf, word: word, frac: frac, cap: bk === 'off' ? (ret ? 'return: ' + ret.trades + ' of 60 trades' : '') : (g && !unreadable && !loading ? g.big + ' · ' + g.cap : unreadable ? 'kill state not readable' : ''), detail: detail, more: mo, g: g });
+      var tg = trialTag(lane, s.w.all.n); if(bk === 'live' && tg.trial){ trials++; }
+      box[bk].push({ key: s.id, name: s.name, stage: bk === 'off' ? 'Off' : tg.text, stCls: bk === 'off' ? 'off' : tg.trial ? 'prob' : 'live', pf: pf, word: word, frac: frac, cap: bk === 'off' ? (ret ? 'return: ' + ret.trades + ' of 60 trades' : '') : (g && !unreadable && !loading ? g.big + ' · ' + g.cap : unreadable ? 'kill state not readable' : ''), detail: detail, more: mo, g: g });
     });
     function n30(s){ return s.w.d30.n > 0; }
     // ---- Shadow rows: the rules the bot logs without money ----
@@ -4800,42 +4803,40 @@ kalshiStatusTick();
     var regSplit = model.registry || { pipeline: [], retired: [] }, regData = model.regData || {}, quiet = [];
     var regLane = function(x){ return kalshiStratLaneOf({ stage: x.stage, codeLive: Boolean(x.code && x.code.live), slot: Boolean(x.code && x.code.slot) }); };
     regSplit.pipeline.forEach(function(x){
-      var d = regData[x.id] || {}, have = typeof d.n === 'number' ? d.n : null, tgt = x.roomTarget, bkey = regLane(x) === 'probation' ? 'prob' : (x.stage === 'Paper' || x.stage === 'Idea' ? 'quiet' : 'shadow');
+      var d = regData[x.id] || {}, have = typeof d.n === 'number' ? d.n : null, tgt = x.roomTarget, bkey = regLane(x) === 'probation' ? 'live' : (x.stage === 'Paper' || x.stage === 'Idea' ? 'quiet' : 'shadow');
       if(bkey === 'quiet'){ quiet.push(x); return; }
       var building = kalshiRegBuilding(x);
-      box[bkey].push({ key: 'R:' + x.id, name: x.name, stage: building ? 'Building' : x.stage, stCls: bkey === 'prob' ? 'prob' : 'deck', pf: 'n/a', word: building ? 'BUILDING' : bkey === 'prob' ? 'ON TRIAL' : 'COLLECTING', frac: tgt && have !== null ? Math.min(1, have / tgt) : 0,
+      box[bkey].push({ key: 'R:' + x.id, name: x.name, stage: building ? 'Building' : x.stage, stCls: bkey === 'live' ? 'prob' : 'deck', pf: 'n/a', word: building ? 'BUILDING' : bkey === 'live' ? 'ON TRIAL' : 'COLLECTING', frac: tgt && have !== null ? Math.min(1, have / tgt) : 0,
         detail: '<div class="rw-c1 rw-reg">' + kalshiRegistrySheetHtml(x, d, esc) + '</div><div class="rw-c2"></div>', more: '' });
     });
     // ---- The nearest kill: one strategy, marked with a pulse ----
-    var allKills = kills.prob.concat(kills.live), nearest = kalshiClosestKill(allKills);
-    ['prob', 'live'].forEach(function(k){ box[k].forEach(function(o){ if(nearest && o.key === nearest.id){ o.near = true; } }); });
+    var allKills = kills.live, nearest = kalshiClosestKill(allKills);
+    ['live'].forEach(function(k){ box[k].forEach(function(o){ if(nearest && o.key === nearest.id){ o.near = true; } }); });
     // ---- Off / Retired: the killed cards first, then the retired list grouped by cause (closed by default) ----
     var retEntries = kalshiRetiredEntries(model.retired.rows, model.regRetired || []);
-    var counts = { shadow: box.shadow.length, prob: box.prob.length, live: box.live.length, off: box.off.length + retEntries.length };
+    var counts = { shadow: box.shadow.length, live: box.live.length, off: box.off.length + retEntries.length };
     var goldRet = null; (model.live || []).forEach(function(s){ if(s.ret){ goldRet = s.ret; } });
     var unreadableGold = (model.live || []).some(function(s){ return s.killState === 'unknown'; });
     // ---- The header line and each box's progress line ----
     var killTxt = nearest ? 'Closest to a kill: ' + nearest.name + ', ' + Math.round(nearest.frac * 100) + '% used.' : (unreadableGold ? 'Gold\'s kill state is not readable.' : 'No kill distance to show yet.');
     var info = {
       shadow: counts.shadow + ' collecting.' + (shadowBest ? ' Closest to promotion: ' + shadowBest.id + ', ' + shadowBest.n + ' of 150 signals.' : ''),
-      prob: counts.prob + ' on trial. ' + killTxt,
-      live: counts.live + ' running. ' + killTxt,
+      live: counts.live + ' trading real money' + (trials ? ', ' + trials + ' on trial' : '') + '. ' + killTxt,
       off: box.off.length + ' off, ' + retEntries.length + ' retired.' + (goldRet ? ' Gold return record: ' + goldRet.trades + ' of 60 trades.' : '')
     };
     var prog = {
       shadow: shadowBest ? [shadowBest.n / 150, 'closest: ' + shadowBest.n + ' of 150 signals'] : [0, 'no shadow rule counting yet'],
-      prob: nearest && kills.prob.indexOf(nearest) >= 0 ? [nearest.frac, 'closest kill: ' + Math.round(nearest.frac * 100) + '% used'] : [0, 'no kill distance to show'],
       live: nearest && kills.live.indexOf(nearest) >= 0 ? [nearest.frac, 'closest kill: ' + Math.round(nearest.frac * 100) + '% used'] : [0, unreadableGold ? 'kill state not readable' : 'no kill distance to show'],
       off: goldRet ? [goldRet.frac, 'return: ' + goldRet.trades + ' of 60 trades'] : [0, 'nothing to return yet']
     };
     var openKey = model.open && KAL_STAGES.some(function(s){ return s.key === model.open.stage; }) ? model.open.stage : null;
-    var defSum = '<b>' + counts.shadow + '</b> shadow &middot; <b>' + counts.prob + '</b> probation &middot; <b>' + counts.live + '</b> live &middot; <b>' + counts.off + '</b> off or retired. ' + esc(killTxt) + ' Tap a box to open it.';
+    var defSum = '<b>' + counts.shadow + '</b> shadow &middot; <b>' + counts.live + '</b> live' + (trials ? ' (' + trials + ' on trial)' : '') + ' &middot; <b>' + counts.off + '</b> off or retired. ' + esc(killTxt) + ' Tap a box to open it.';
     var sumHtml = openKey ? '<b>' + esc(KAL_STAGES.filter(function(s){ return s.key === openKey; })[0].label) + ' open.</b> ' + esc(info[openKey]) : defSum;
     var promo = kalshiPromotedAgo(model.registryList, now);
     var tiles = KAL_STAGES.map(function(s, i){
-      var tag = s.key === 'prob' && promo ? '<u class="lp-tag">Promoted ' + (promo.days === 0 ? 'today' : promo.days === 1 ? '1 day ago' : promo.days + ' days ago') + ': ' + esc(promo.name) + '</u>' : '';
+      var tag = s.key === 'live' && promo ? '<u class="lp-tag">Promoted ' + (promo.days === 0 ? 'today' : promo.days === 1 ? '1 day ago' : promo.days + ' days ago') + ': ' + esc(promo.name) + '</u>' : '';
       return '<button type="button" class="lp-t' + (tag ? ' latest' : '') + '" data-f="t:' + s.key + '" data-stage="' + s.key + '" data-fk="tile:' + s.key + '" data-i="' + i + '" style="--i:' + i + '" aria-expanded="' + (openKey === s.key) + '" aria-controls="lp-p-' + s.key + '">' + tag + '<b data-count="' + counts[s.key] + '">' + counts[s.key] + '</b><span class="lp-tt">' + esc(s.label) + '</span><em>' + esc(s.sub) + '</em><small class="lp-then">then: ' + esc(s.then) + '</small><i class="chev"></i></button>' +
-        (i < 3 ? '<div class="lp-c" data-c="' + i + '"><span class="lp-ln"><u></u><u></u><u></u></span><span class="lp-lab">' + esc(s.then) + '</span></div>' : '');
+        (i < KAL_STAGES.length - 1 ? '<div class="lp-c" data-c="' + i + '"><span class="lp-ln"><u></u><u></u><u></u></span><span class="lp-lab">' + esc(s.then) + '</span></div>' : '');
     }).join('');
     var empty = function(t){ return '<div class="sp-sub sp-none">' + esc(t) + '</div>'; };
     var rowsOf = function(k){ return box[k].map(function(o, i){ return rowHtml(o, k, i); }).join(''); };
@@ -4844,15 +4845,14 @@ kalshiStatusTick();
     var shadowEmpty = !box.shadow.length ? empty(model.registryState === 'loading' ? 'Reading the strategy list...' : 'None running. The owner retired every shadow rule on Nov 11, 2026 (each repeated gold L1). A new shadow rule must be a different mechanism.' + (model.registryState === 'unreadable' ? ' The strategy list could not be read.' : '')) : '';
     var bodies = {
       shadow: rowsOf('shadow') + shadowEmpty + quietHtml,
-      prob: box.prob.length ? rowsOf('prob') : empty('No strategy on probation.'),
-      live: box.live.length ? rowsOf('live') : empty('No strategy is live.'),
+      live: box.live.length ? rowsOf('live') : empty('No strategy is trading real money.'),
       off: rowsOf('off') + kalshiRetiredGroupsHtml(retEntries, model.open, esc) + '<div class="sp-sub sp-back">Comes back when: ' + esc(model.retired.back) + '. As of ' + esc(model.retired.asOf) + '.</div>'
     };
     var panels = KAL_STAGES.map(function(s){
       var isOpen = openKey === s.key;
       return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '><div class="lp-prog" aria-hidden="true"><i style="--w:' + pct(prog[s.key][0]).toFixed(1) + '%"></i><span>' + esc(prog[s.key][1]) + ' &rarr; ' + esc(s.then) + '</span></div><div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
     }).join('');
-    var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[3].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
+    var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[KAL_STAGES.length - 1].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
     return '<div class="sp-wrap">' + summary + pipe + '</div>';
   }
