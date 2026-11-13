@@ -90,6 +90,13 @@ function maxContractsFor(series) {
   if (PROBE_SERIES.includes(series) || CAPPED_SERIES.includes(series)) return 1;
   return L1_ORDER_CEILING;
 }
+// The lock as the tick applies it: maxContractsFor, lowered to the gold trial seat's size while that trial is active (Nov 13, 2026). Code constants and the tick's own clock only. maxContractsFor itself
+// is unchanged (the nightly report and the long-run ceiling read it), so a gold order from before the trial is never called oversize by the report.
+function maxContractsAt(series, now) {
+  const base = maxContractsFor(series);
+  const t = goldKill.goldTrialMax(series, now);
+  return t === null ? base : Math.min(base, t);
+}
 // SERIES ORDER (2026-10-23, the owner: "reorder so XRP comes before Bitcoin and Dogecoin before Ethereum, gold stays first"). Markets are tried in this order within a tick, and only ONE capped crypto order is placed per 15 minute window, so the order decides which
 // crypto market gets the window when several qualify at once. XRP and Dogecoin trade 3 contracts (FIXED_CONTRACTS) and Bitcoin and Ethereum one, so a 1 contract order no longer takes the slot from a 3 contract one in the same tick. The research session raised it: Bitcoin and XRP are both
 // looked at about 10 minutes before the close, Ethereum and Dogecoin about 6, so the pairs that tie within a tick are exactly these. Nothing else moves: sizes, stops, window limit, entry times and the one crypto order per window rule are unchanged.
@@ -1043,7 +1050,8 @@ async function runL1Tick(args) {
   const paused = Array.isArray(args.pausedSeries) ? args.pausedSeries : PAUSED_SERIES;
   // Gold's kill latch (docs/GOLD_KILL_LATCH.md): a value cached on the sizing document the tick ALREADY read, written by kalshiGoldKillCheck, never by this function. It only removes gold from
   // the list; the exit watch does not look at it and still sells an open gold position.
-  const goldLatched = goldKill.goldKillActive(args.sizingState, goldKill.GOLD_SERIES);
+  // GOLD TRIAL SEAT (Nov 13, 2026): before the trial starts gold is held off, and during it gold is at most GOLD_TRIAL.contracts with no add-on (see goldTrialMax below). Code constants and `now` only.
+  const goldLatched = goldKill.goldKillActive(args.sizingState, goldKill.GOLD_SERIES) || goldKill.goldNotStarted(goldKill.GOLD_SERIES, now);
   const tradable = L1_SERIES.filter((x) => !dropped.includes(x) && !paused.includes(x) && !inQuietHours(x, now) && !(goldLatched && x === goldKill.GOLD_SERIES));
   // In list order (Bitcoin, gold, Ethereum): when the window's room runs short it is the later series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
@@ -1095,6 +1103,10 @@ async function runL1Tick(args) {
     // After a RE-ARM of gold's kill latch (a reviewed edit that sets rearmIsReturn), the first gold trades go out at half size. It can only lower the count, and the add-on is zeroed
     // so the loss stop counts the whole order against the account (fails closed). Off (and a no-op) until such an edit.
     if (sizing && goldKill.goldHalfSize(args.sizingState, c.series) && count > 1) { count = Math.max(1, Math.floor(count / 2)); addonUsed = 0; }
+    // Gold trial seat: at most GOLD_TRIAL.contracts and no profit add-on while the trial is active (it can only lower a count; the 25c exit is not touched). Not active before the start date,
+    // for another series, or when the trial's start is not this generation's re-arm time.
+    const trialMax = goldKill.goldTrialMax(c.series, now);
+    if (trialMax !== null) { count = Math.min(count, trialMax); addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
     // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.
@@ -1118,9 +1130,9 @@ async function runL1Tick(args) {
       count = allowed + addonUsed;
     }
     // Second lock on the size (see maxContractsFor): checked BEFORE the order is recorded, so a refused count leaves no "sending" document behind and the market is simply tried again next minute.
-    if (!Number.isInteger(count) || count < 1 || count > maxContractsFor(c.series)) {
-      results.push(ticker + ": refused " + count + " contracts, the most " + c.series + " may have is " + maxContractsFor(c.series));
-      await log("order size refused", ticker + ": the size worked out to " + count + " contracts, above the " + maxContractsFor(c.series) + " this market may ever have, so nothing was sent for it.");
+    if (!Number.isInteger(count) || count < 1 || count > maxContractsAt(c.series, now)) {
+      results.push(ticker + ": refused " + count + " contracts, the most " + c.series + " may have is " + maxContractsAt(c.series, now));
+      await log("order size refused", ticker + ": the size worked out to " + count + " contracts, above the " + maxContractsAt(c.series, now) + " this market may ever have, so nothing was sent for it.");
       continue;
     }
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
@@ -1435,5 +1447,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, QUIET_HOURS_CT, inQuietHours, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, RISK_PROFILES, settleOpenOrders, settledFields, fillCost, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, RISK_PROFILES, settleOpenOrders, settledFields, fillCost, closedByHand, l1Count, maxContractsFor, maxContractsAt, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };
