@@ -14,7 +14,7 @@ Nothing here is a read of the registered NC15DEPTH1 cell, and no block data has 
 | `nc15_wheel_block_compare.py` | compares Desk A's printed block lines with mine, block by block and state by state |
 | `make_nc15_wheel_fixture.py` | invented NC15 book and coverage rows for all 11 series over 40 days, with the awkward cases listed in its header |
 | `NC15_WHEEL_SECOND_OUTPUT_fixture_<name>_MADE_UP_DATA.{txt,json}` | my figures on six fixture reads (seed6, seed7, seed6_confexp, seed6_ties, seed6_openexp read on Dec 26 and on Dec 30) |
-| `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_2921a03a_run_by_forensics.txt` | Desk A's block reader output on the same fixtures, as run by me |
+| `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_5525cbbb_run_by_forensics.txt` | Desk A's block reader output on the same fixtures, as run by me |
 
 Commands:
 
@@ -127,7 +127,7 @@ on seeds 6 and 7 its block output reproduces its committed files byte for byte.
 - **Outcomes exercised across the three fixtures:** FAILED (18 blocks), CLEARED and QUALIFIED (7), CLEARED with a failed confirmation (2), CLEARED with the confirmation
   in progress, waiting on an open result, and EXPIRED (1 each), EXPIRED blocks (3), blocks grown to more than 160 signals to reach 7 days.
 
-## Nov 13, 02:24Z: the third round of rulings (items p to t), and SAME on three fixtures. THIS is the standing comparison.
+## Nov 13, 02:24Z: the third round of rulings (items p to t), and same on three fixtures (superseded by the 02:43Z section)
 
 The lane text moved once more while the comparison above ran: items (p) to (t) and the round-down rule for cash that is not a whole cent (`rnd-queue` `77eeb93b`, with a
 pointer added at `dbd2f4da`, which is the text I built to and the head of that file when I compared). Desk A's reader moved with it.
@@ -187,6 +187,28 @@ decides the order of signals of one place decided at the same time (which the re
 **An honest note on my earlier "same":** my comparison tool did not compare exchange times until now, so the "same" of 02:24Z was true of every status, figure, block
 and state, and silent about those hundredths of a second. The tool now compares them (`nc15_wheel_compare.py` with the first build's records file as third argument).
 Put to the Head for a ruling at 02:39Z; my default stays the per-instant reading until then.
+
+## Nov 13, 02:43Z: the offset ruled row by row, the single-day limit dropped by the owner, and SAME on all six reads. THIS is the standing comparison.
+
+Two changes reached me together. **The Head ruled the offset question** (lane section 4 item (u), `rnd-queue` `cfe33762`): row by row, the frozen scorer's reading, so
+no hash moves; my build now defaults to it. **The owner dropped the single-day limit** from the wheel's bar ("Drop the line"; lane v1.3 at `5225eff1`, item (h) removed):
+no day-concentration test is applied; the top day's share is still printed, for reading only.
+
+Builds compared at 02:42:40Z, both with `--start 2026-11-13T02:24:00Z`: mine `nc15_wheel_second.py` sha256 `02ad0237...`; Desk A's signal scorer `8d1055df...`, records
+writer `38ec4c46...` and block reader v6 `5525cbbb...` at `claude/idea-desk-a` `387a6449`, run by me, unread. Lane text: v1.3, section 4 at `rnd-queue` `cfe33762`.
+
+| Read | Records the same | Differ | Signal poll exchange times | Differ | Record figures | Differ | Per-series figures | Differ | Blocks | Block figures | Differ | Place states | Differ |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| seed 6 | 20,994 | 0 | 3,099 | 0 | 18,343 | 0 | 63 | 0 | 10 | 158 | 0 | 7 | 0 |
+| seed 7 | 20,994 | 0 | 3,121 | 0 | 18,390 | 0 | 63 | 0 | 10 | 158 | 0 | 7 | 0 |
+| seed 6 confexp | 20,994 | 0 | 3,011 | 0 | 17,731 | 0 | 63 | 0 | 9 | 141 | 0 | 7 | 0 |
+| seed 6 ties | 23,158 | 0 | 3,262 | 0 | 19,320 | 0 | 63 | 0 | 10 | 158 | 0 | 7 | 0 |
+| seed 6 openexp, read Dec 26 12:00Z | 20,994 | 0 | 3,099 | 0 | 18,341 | 0 | 63 | 0 | 10 | 158 | 0 | 7 | 0 |
+| seed 6 openexp, read Dec 30 | 20,994 | 0 | 3,099 | 0 | 18,399 | 0 | 63 | 0 | 11 | 163 | 0 | 7 | 0 |
+
+The fixture blocks that used to fail on the day line now read on the remaining tests in both builds (for example copper's first block on seed 6 clears and qualifies).
+The files `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_5525cbbb_run_by_forensics.txt` are Desk A's block output from these runs.
+Still agreed by reading only: a favourites-class rule (150 signals); the Head has said that case can wait until a favourite is registered.
 
 ## Places where the sheet or the lane leaves a choice
 

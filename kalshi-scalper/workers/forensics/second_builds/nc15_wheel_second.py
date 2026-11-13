@@ -10,7 +10,7 @@ usage: python3 -I nc15_wheel_second.py <NC15 root> --now <ISO time of the read> 
   <NC15 root> is the recorder's shape: <root>/<date>/<HHMM>/{book,coverage}.csv.gz (scripts/record_nc_book.py on main).
 
 Places where the sheet or the lane leaves a choice (READINGS, printed with the output):
- a. A poll is one book row of a ticker. A row with no readable Date header can still be a poll if earlier header-readable rows of its run give it an offset (the sheet's text, and what the first build does; Desk A's note 3 says "never a poll"; set NC15_HEADERLESS_POLL=no for that reading). Rows of a run are ordered by t_recv_ms, then file order. The offset of a poll uses the last 120 header-readable rows of its own run folder with t_recv_ms at or before the poll's (rows of the same instant all count); the median of an even number is the mean of the two middle values. No such row: "no clock", no signal.
+ a. A poll is one book row of a ticker. A row with no readable Date header can still be a poll if earlier header-readable rows of its run give it an offset (the sheet's text, and what the first build does; set NC15_HEADERLESS_POLL=no for the other reading). Rows of a run are ordered by t_recv_ms, then file order. The offset of a poll uses the last 120 header-readable rows of its own run folder UP TO AND INCLUDING THE POLL'S OWN ROW in that order (the Head's ruling, lane item (u): row by row, the frozen scorer's reading; so two rows received at the same instant can have slightly different offsets; this build first gave every row of an instant the same offset, NC15_OFFSET_WINDOW=instant); the median of an even number is the mean of the two middle values. No such row: "no clock", no signal.
  b. A ticker's polls are pooled over every run folder that holds it, each with its own run's offset. The signal poll is the one with the greatest exchange time at or before D and at most 10 s before it (1e-9 tolerance on both edges); on an exact tie, the later by receive time (Desk A's choice 1 says "ties by run path"). The close time is the close_time of the ticker's first row that has a readable one (choice 2).
  c. A level is present if its price and its size both parse as numbers and the size is above zero. A side with no readable top-level price (yes_bid_px_1, no_bid_px_1), or with no level at all, is "a missing side": no signal. The band test's ask is 1 minus the met side's top-level price (Desk A's choices 4 and 5).
  d. "In the cell" is |imb5| at or above 0.50 with the 1e-9 tolerance; imb5 above zero buys YES, below zero buys NO.
@@ -18,9 +18,9 @@ Places where the sheet or the lane leaves a choice (READINGS, printed with the o
  f. The ladder is the met side's present levels as asks (1 minus the bid price), cheapest first. "Offers 10" is the sizes at or under limit + 1e-9 summing to 10 - 1e-9 or more. The walked price takes the first 10 contracts of the levels at or under the limit.
  g. A decision instant before the sheet's commit time (2026-11-13T00:23:49Z) does not count; a close after 2026-12-31T23:59:59Z is past the log's stop. Both are counted and left out.
  h. Result: a coverage row's result of yes or no, from any run folder that holds the ticker (two runs that disagree stop this build's run; Desk A's choice 6 takes the first found). Any other non-empty value is a void. An empty result is OPEN until 7 days after the close (by --now), then a void. A void is a fee-only loss, counted.
- i. BLOCKS follow ROTATION_LANE.md section 4, items (a) to (t), at rnd-queue dbd2f4da. Counted signals: fillable, signal poll time at or after the start time (l), limit in whole cents under 88 (i); misses, not fill-checked and skipped signals are in no count (m). Order (p): signal poll time, then ticker, then side. A day is the US Central date of the signal poll's exchange time (d).
+ i. BLOCKS follow ROTATION_LANE.md section 4, v1.3, items (a) to (u) with (h) removed, at rnd-queue cfe33762. Counted signals: fillable, signal poll time at or after the start time (l), limit in whole cents under 88 (i); misses, not fill-checked and skipped signals are in no count (m). Order (p): signal poll time, then ticker, then side. A day is the US Central date of the signal poll's exchange time (d).
  j. A block grows in order and ends, to be read once, at the first signal where it holds 60 signals, 7 days, 10 wins and 10 losses (a, c, i); a void is in n and its fee in the losses, but it is neither a win nor a loss for that count (n). An open result stops the search (r): the block WAITS, "expiry not yet decided" (q). A block whose counted signals up to its first signal's time plus 21 x 24 hours are all final and still do not hold the counts is EXPIRED, unread, once the stated read time is past that expiry time (b, k, q); the next block starts at the first counted signal after the expiry time (t).
- k. Money in whole cents (g): a cash result that is not a whole cent is rounded DOWN, floor(100 x cash + 1e-6); 1.3 or better is 10 x W >= 13 x L, 1.0 or better is W >= L, L = 0 with W > 0 passes, W = 0 fails. The 30 percent rule (h): 100 x a day's net over 30 x the block's net fails the block (listed only for a positive block net; a block with a net of zero or less already fails (g)). Halves: the first n // 2 signals and the rest (e).
+ k. Money in whole cents (g): a cash result that is not a whole cent is rounded DOWN, floor(100 x cash + 1e-6); 1.3 or better is 10 x W >= 13 x L, 1.0 or better is W >= L, L = 0 with W > 0 passes, W = 0 fails. There is NO single-day limit: item (h) was removed by the owner on Nov 13, 2026 ("Drop the line"); the top day's share is printed for reading only. Halves: the first n // 2 signals and the rest (e).
  l. Confirmation (j): the next 30 counted signals, complete within 21 x 24 hours of the cleared block's last signal; W >= L is QUALIFIED, and then no further block is read (t); else failed, and the next block starts after its 30 signals. Fewer than 30 within its 21 days, all of them final, and the read time past that limit: EXPIRED, unread, and the next block starts at the first counted signal after the expiry time. Its signals belong to no block.
  m. The profit factors printed are W / L from the whole cents, for reading only; every bar is tested on the integers.
  n. Only the seven series the sheet keeps (copper, WTI, natural gas, HYPE, BNB, silver, USD/CAD) are places; the four withdrawn series are counted and not scored.
@@ -37,7 +37,7 @@ WITHDRAWN = ["KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXAUDUSD15M"]
 COUNT_FROM = iso("2026-11-13T00:23:49Z"); STOP = iso("2026-12-31T23:59:59Z")
 START = iso("2026-11-13T02:24:00Z")      # the start time of the seven NC15 places' forward count, written in WHEEL_ADMIT_LIST.md at rnd-queue fb978196 (item (l)); --start overrides it for a fixture
 SECOND_CLOCK = os.environ.get("NC15_SECOND_CLOCK", "exchange")      # "exchange": the 6 s to the second poll are measured on exchange time (each poll's own offset); "recorder": on t_recv_ms
-OFFSET_WINDOW = os.environ.get("NC15_OFFSET_WINDOW", "instant")     # "instant": a poll's offset uses every header row of its run received at or before the poll's receive time, so rows of one instant share one offset; "row": only rows up to and including the poll's own row in the run's order (what the first build does)
+OFFSET_WINDOW = os.environ.get("NC15_OFFSET_WINDOW", "row")         # the Head's ruling, lane section 4 item (u) at rnd-queue cfe33762: row by row, the frozen scorer's reading (this build first used "instant")     # "instant": a poll's offset uses every header row of its run received at or before the poll's receive time, so rows of one instant share one offset; "row": only rows up to and including the poll's own row in the run's order (what the first build does)
 HEADERLESS_POLL = os.environ.get("NC15_HEADERLESS_POLL", "yes") == "yes"   # "yes": a row with no readable Date header can be a poll if earlier rows of its run give an offset (the sheet's text); "no": it is never a poll
 SIZE = 10; SLIP = 0.01; CELL = 0.50; BAND = (0.10, 0.90); LOOK = 600.0; EARLY = 10.0; SECOND_MAX = 6.0; OFFSET_ROWS = 120; VOID_DAYS = 7
 FAV_CENTS = 88; BLOCK = 60; RARE = 10; SPAN_DAYS = 21; MIN_DAYS = 7; DAY_SHARE = 0.30; PF_BLOCK = 1.3; PF_HALF = 1.0; CONFIRM = 30; PF_CONFIRM = 1.0
@@ -206,7 +206,7 @@ def ratio(c): W, L = WL(c); return None if (W == 0 and L == 0) else (float("inf"
 
 
 def blocks(sig, now, start=None):
-    """ROTATION_LANE.md section 4, items (a) to (t), as it stands at rnd-queue dbd2f4da (the Head of R&D's rulings of Nov 13, 2026 02:05Z, 02:09Z and 02:15Z).
+    """ROTATION_LANE.md v1.3 section 4, items (a) to (u) with (h) removed, as it stands at rnd-queue cfe33762 (the Head of R&D's rulings of Nov 13, 2026, and the owner's decision to drop the single-day limit).
     sig: a place's fillable signals. Counted signals are those at or after the start time (l) whose limit in whole cents is under 88 (i), in order of signal poll time, then ticker."""
     start = START if start is None else start; span = SPAN_DAYS * 86400
     sig = sorted(sig, key=lambda r: (r["signal_exchange"], r["ticker"], 0 if r["side"] == "yes" else 1))       # (p): decision time, then ticker, then side (yes before no)
@@ -232,7 +232,7 @@ def blocks(sig, now, start=None):
         b = cnt[i:j]; n = len(b); c = [cents(r["cash"]) for r in b]; net = sum(c); h = n // 2; dn = collections.defaultdict(int)
         for r, x in zip(b, c): dn[day(r)] += x
         top = max(dn.values()); fails = []
-        if net > 0 and any(100 * d > 30 * net for d in dn.values()): fails.append("one day holds %.0f%% of the net, over 30%%" % (100.0 * top / net))     # (h), in whole cents; listed only for a positive block net (a block with a net of zero or less already fails (g))
+        # item (h), the single-day limit, was REMOVED by the owner on Nov 13, 2026 (lane v1.3, rnd-queue 5225eff1): no day-concentration test is applied. The top day's share is printed for reading only.
         if not holds_13(c): fails.append("profit factor under 1.3")
         if not holds_10(c[:h]) or not holds_10(c[h:]): fails.append("a half under 1.0")
         W, L = WL(c)
@@ -265,7 +265,7 @@ REC_COLS = ["series", "ticker", "close", "D", "status", "signal_recv_ms", "signa
 def lines(out):
     f = lambda x, d=2: "n/a" if x is None else ("inf" if x == float("inf") else ("%." + str(d) + "f") % x)
     z = lambda t: datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    L = ["NC15 depth-cell wheel replay, second scorer | sheet v4 (8679f760), lane section 4 at rnd-queue dbd2f4da | read at %s | blocks count signals from %s" % (z(out["now"]), z(out["start"]))]
+    L = ["NC15 depth-cell wheel replay, second scorer | sheet v4 (8679f760), lane v1.3 section 4 at rnd-queue cfe33762 | read at %s | blocks count signals from %s" % (z(out["now"]), z(out["start"]))]
     order = ["windows", "decision before the sheet's commit time, not counted", "close after the log's stop, not counted", "no signal: no poll in the window", "no signal: no clock", "no signal: a missing side of the book",
              "not in the cell", "in the cell", "in the cell, ask outside 0.10 to 0.90", "entering", "not fill-checked", "miss", "fillable", "fillable, booked as a void", "fillable, result still open"]
     for s in PLACES:

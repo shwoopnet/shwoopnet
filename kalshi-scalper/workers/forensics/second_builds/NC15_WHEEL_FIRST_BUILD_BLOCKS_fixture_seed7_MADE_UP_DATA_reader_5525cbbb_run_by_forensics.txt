@@ -4,7 +4,7 @@ KXCOPPER15M BLOCK 1: CLEARED | n 60 (KXCOPPER15M-26NOV130745-00 to KXCOPPER15M-2
 KXCOPPER15M STATE: {'waiting': False, 'qualified': True}
 KXHYPE15M BLOCK 1: EXPIRED (unread; too slow for the wheel) | n 30 span 20.1 days | KXHYPE15M-26NOV132230-00 to KXHYPE15M-26DEC040145-00
 KXHYPE15M STATE: {'waiting': True, 'why': 'a signal in the block has no final result yet', 'block_n': 24}
-KXNATGAS15M BLOCK 1: FAILED | n 154 (KXNATGAS15M-26NOV130400-00 to KXNATGAS15M-26NOV190630-00) wins 70 losses 82 voids 2 | net 19.84 PF 1.06 halves 1.12 / 1.01 | days 7 span 6.1 top day 250% | fails: profit factor under 1.3; one day holds 250% of the net, over 30%
+KXNATGAS15M BLOCK 1: FAILED | n 154 (KXNATGAS15M-26NOV130400-00 to KXNATGAS15M-26NOV190630-00) wins 70 losses 82 voids 2 | net 19.84 PF 1.06 halves 1.12 / 1.01 | days 7 span 6.1 top day 250% | fails: profit factor under 1.3
 KXNATGAS15M BLOCK 2: CLEARED | n 172 (KXNATGAS15M-26NOV190645-00 to KXNATGAS15M-26NOV260645-00) wins 100 losses 71 voids 1 | net 198.71 PF 1.76 halves 1.56 / 1.96 | days 7 span 7.0 top day 26% | confirmation: QUALIFIED (PF 1.22)
 KXNATGAS15M STATE: {'waiting': False, 'qualified': True}
 KXSILVER15M BLOCK 1: FAILED | n 60 (KXSILVER15M-26NOV130430-00 to KXSILVER15M-26DEC010200-00) wins 21 losses 38 voids 1 | net -60.83 PF 0.62 halves 0.61 / 0.62 | days 14 span 17.9 top day n/a | fails: profit factor under 1.3; a half under 1.0
