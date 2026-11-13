@@ -119,3 +119,13 @@ The History Miner built a second reader from this card's text alone (commit 25e1
 9. **Order of the verdict:** fewer than 30 detections is NOT_ENOUGH_DATA first; then the fire rate (12% and 35% inclusive); then the buyable share (exactly 30% is not closed). The shares are printed only with 30 detections or more and the fire rate in range.
 
 No kill number changed. The measurement is still a hindsight measurement with zero tries, and as built it cannot produce a candidate (second amendment, point 4).
+
+## NHLOT: fourth dated amendment, Nov 13, 2026, 05:37Z, before any NHL candle was read (Auditor B's finding; the Head of R&D's ruling, seq 11, 05:40Z)
+
+Kalshi's candles do not leave an empty side out: they show a bid of 0.00 or an ask of 1.00. The reader and the third amendment's words "a candle with neither side" took those numbers as sides that are present. **Ruling: a bid of 0.00 is NO bid and an ask of 1.00 is NO ask, everywhere in this measurement. A side exists only when its bid is above 0 or its ask is below 1; a mid needs both sides, with the bid not above the ask.** This is the same reading the other texts of this desk use for a two-sided quote (0 < bid < ask < 1). Comparisons carry the 1e-9 tolerance. Points 3 and 6 of the third amendment are read with it. The auditor's three worked cases:
+
+1. **A total strike whose candle shows 0.00 and 1.00** has no quote that minute. It is not an undecided strike and does not block the detection; it also does not count toward the four. (Before: it counted as undecided, and a detection due 44 minutes before the close moved to 43.)
+2. **A moneyline side showing a bid of 0.30 and an ask of 1.00** has no ask, so no mid, and the moneyline condition fails at that minute. (Before: its "mid" of 0.65 sat inside the band and the game was detected on a side nobody was offering.)
+3. **The overtime market's candle showing 0.00 and 1.00** reads "no quote", not "undecided".
+
+"Buyable" needs a bid above 0 and an ask below 1 at the candle one minute after the detection minute, as before. Also said here, not a change: the pull runner writes the sha256 and the length of every stored answer, the reader checks them when the manifest carries them, and Auditor B's structure check of the landed run checks them in any case. No kill number changed.

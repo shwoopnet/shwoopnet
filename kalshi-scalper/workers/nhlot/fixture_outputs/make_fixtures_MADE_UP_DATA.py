@@ -24,6 +24,13 @@ Added after the third amendment (their manifests carry the sha256 and length of 
               minutes, so the state is first readable two minutes later (18 minutes before the close, not 20).
   not_whole   as survive, with a third request that was refused: the reader must refuse.
   bad_sha     as survive, one answer altered after the manifest was written: the reader must refuse.
+Added after the fourth amendment (an empty side written the way Kalshi writes it: a bid of 0.00, an ask of 1.00):
+  empty_sides 150 games, 33 detected. 6 have one total strike showing 0.00 and 1.00 at the first minute of the state
+              (no quote, so the state is read that minute and the game is buyable); 6 have the cheaper moneyline at
+              a bid of 30c and an ask of 1.00 for two minutes (no mid, so the state is read two minutes later; buyable);
+              3 have the overtime market at 0.00 and 1.00 at the detection minute (buyable; the cross-check reads no
+              quote); 3 have the cheaper side at a bid of 0.00 and an ask of 43c a minute later (not buyable); 15 are
+              plain and not buyable. 15 of 33 buyable.
 """
 import gzip
 import hashlib
@@ -51,7 +58,7 @@ def game(i, kind, d=20, edge=None):
     tot = ["KXNHLTOTAL-%s-%d" % (name, k) for k in (2, 3, 4, 5, 6)]
     ot = "KXNHLOT-%s-1" % name
     out = {t: [] for t in ml + tot + [ot]}
-    dd = d - 2 if edge == "ml_one_sided" else d   # the minute the state is first readable
+    dd = d - 2 if edge in ("ml_one_sided", "empty_ml") else d   # the minute the state is first readable
     for back in range(50, -2, -1):                 # the candle ending `back` minutes before the close
         t = close - 60 * back
         det = kind != "none" and back <= d
@@ -66,8 +73,12 @@ def game(i, kind, d=20, edge=None):
                 a = (41, 43)
         if edge == "ml_one_sided" and back in (d, d - 1):
             b = (42, None)
+        if edge == "empty_ml" and back in (d, d - 1):
+            b = (30, 100)
         if kind != "none" and back == dd - 1:     # one minute after detection
             b = (41, 43) if kind == "buy" and edge != "equal_asks" else (44, 46)
+            if edge == "empty_next":
+                b = (0, 43)
             if edge == "spread_3":
                 b = (40, 43)
             if edge == "spread_4":
@@ -95,12 +106,14 @@ def game(i, kind, d=20, edge=None):
                     q = (None, 3)
                 if edge in ("four_quoted", "three_quoted") and k == 2:
                     continue
+                if edge == "empty_strike" and k == 3 and back == d:
+                    q = (0, 100)
                 if edge == "three_quoted" and k == 3:
                     continue
             else:
                 q = (40, 45) if k == 2 else ((95, 97) if k < 2 else (2, 5))
             out[tk].append(cd(t, *q))
-        out[ot].append(cd(t, *((92, 95) if det else (3, 5))))
+        out[ot].append(cd(t, *((0, 100) if (edge == "empty_ot" and back == d) else (92, 95) if det else (3, 5))))
     return {"game": name, "ml": ml, "total": tot, "close_ts": close, "ot": ot}, out
 
 
@@ -155,6 +168,7 @@ def main():
     build(out, "one_sided", 150, 0, 0, [("buy", 20, "ml_one_sided")] * 12 + [("nobuy", 20, "ml_one_sided")] * 21, with_sha=True)
     build(out, "not_whole", 150, 12, 21, with_sha=True, spoil="not_whole")
     build(out, "bad_sha", 150, 12, 21, with_sha=True, spoil="bad_sha")
+    build(out, "empty_sides", 150, 0, 15, [("buy", 20, "empty_strike")] * 6 + [("buy", 20, "empty_ml")] * 6 + [("buy", 20, "empty_ot")] * 3 + [("buy", 20, "empty_next")] * 3, with_sha=True)
 
 
 if __name__ == "__main__":

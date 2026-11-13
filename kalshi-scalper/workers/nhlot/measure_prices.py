@@ -73,10 +73,12 @@ def walk(node, found, hint=None):
 
 
 def quotes(candles):
-    """minute -> (yes bid, yes ask); a missing side is None."""
+    """minute -> (yes bid, yes ask); a missing side is None. Fourth amendment: a bid of 0.00 is NO bid and an ask of
+    1.00 is NO ask (Kalshi's candles show an empty side that way), so both become None here, once, for every use."""
     out = {}
     for c in candles:
-        out[int(c["end_period_ts"]) // 60] = (price(c.get("yes_bid")), price(c.get("yes_ask")))
+        b, a = price(c.get("yes_bid")), price(c.get("yes_ask"))
+        out[int(c["end_period_ts"]) // 60] = (b if b is not None and b > 1e-9 else None, a if a is not None and a < 1 - 1e-9 else None)
     return out
 
 

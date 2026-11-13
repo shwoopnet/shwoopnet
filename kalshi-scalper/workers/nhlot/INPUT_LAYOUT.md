@@ -12,15 +12,16 @@ There is no separate note. The measurement is defined inside `IDEA_DESK_B_WAVE3.
 4. "NHLOT: dated amendment, Nov 13, 2026, 00:09Z";
 5. "NHLOT: second dated amendment, Nov 13, 2026, 00:10Z" (it replaces point 2 of the one before: one price, one chance);
 6. "NHLOT: clarifying line, Nov 13, 2026, 00:16Z" (the 1e-9 tolerance and which side of each line an exact value falls);
-7. "NHLOT: third dated amendment, Nov 13, 2026" (the second build's readings, taken into the text: the 45 candle minutes, the cross-check, the quartiles, the manifest).
+7. "NHLOT: third dated amendment, Nov 13, 2026" (the second build's readings, taken into the text: the 45 candle minutes, the cross-check, the quartiles, the manifest);
+8. "NHLOT: fourth dated amendment, Nov 13, 2026" (a bid of 0.00 is no bid and an ask of 1.00 is no ask).
 
 ## A case
 
-`case_NN.tar.gz` (01 to 13) holds `case_NN/games.json` and `case_NN/candles/`. Unpack each archive into its own empty folder.
+`case_NN.tar.gz` (01 to 14) holds `case_NN/games.json` and `case_NN/candles/`. Unpack each archive into its own empty folder.
 
 - `games.json`: a list with one object a game: `game` (a name), `ml` (the two moneyline tickers), `total` (the game's total-goals strike tickers), `close_ts` (epoch seconds: when the game market closed), `ot` (the ticker of the "game goes to overtime" market, for the cross-check only). On the real data this file is built from the settled lists by `nhlot/build_candles_job.py`; here it is given.
 - `candles/`: shaped like a kalshi-pull run. `manifest.json` has `status`, `job` (with `requests`, each `{id, path, params}`; `params.market_tickers` is the comma-joined tickers asked for) and `rows` (`id`, `page`, `status`, `file`). Each answer file is gzipped JSON: `{"markets": [{"market_ticker": "...", "candlesticks": [...]}]}`.
-- A candle: `end_period_ts` (epoch seconds, the END of the minute), `yes_bid` and `yes_ask` objects each with `close_dollars` (a string such as `"0.4400"`). **A side may be absent** (a market that shows only a bid or only an ask). A minute may have no candle.
+- A candle: `end_period_ts` (epoch seconds, the END of the minute), `yes_bid` and `yes_ask` objects each with `close_dollars` (a string such as `"0.4400"`). **A side may be absent, or be written as `"0.0000"` for a bid or `"1.0000"` for an ask (the way Kalshi writes an empty side)** (a market that shows only a bid or only an ask). A minute may have no candle.
 
 ## How my reader is called
 
