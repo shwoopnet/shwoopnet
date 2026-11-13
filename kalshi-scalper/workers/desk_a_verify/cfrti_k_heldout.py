@@ -1,13 +1,15 @@
 """CFRTI-K HELD-OUT reader (Desk A, Nov 13 2026), written BEFORE 2026-11-14T00:00:00Z on the Head of R&D's order, same rules as `cfrti_k.py` (the development scorer, sha256 79966ef8..., imported unchanged for decide(), the loaders and pf()).
   python3 -I cfrti_k_heldout.py <lists dir> <binary candles dir> <perp candles run folder>
-Reads ONLY closes on or after HELD_FROM = 2026-11-14T00:00:00Z (a date constant). REFUSES before READ_NOT_BEFORE = 2026-11-20T00:00:00Z (the registered read date) unless the lists folder carries MADE_UP_DATA (a test fixture). READ-ONCE: the marker file beside this script is checked BEFORE any data is read; a second real run refuses. Below 50 held-out trades (registered minimum, CFRTI_K_REGISTRATION section 4) it prints ONLY 'NOT_ENOUGH_DATA, n trades = x' and writes no marker, so the read stays unspent (the Head: under 50 is NOT_ENOUGH_DATA, not a fail; read once on the first day that has 50 rows, no peeking).
+Reads ONLY closes on or after HELD_FROM = 2026-11-14T00:00:00Z (a date constant). REFUSES before READ_NOT_BEFORE = 2026-11-20T00:00:00Z (the registered read date) unless the lists folder carries MADE_UP_DATA (a test fixture). READ-ONCE: the marker file beside this script is checked BEFORE any data is read; a second real run refuses. Registered thresholds (CFRTI_K_REGISTRATION section 4; the Head, 17:09Z: the registration text governs): n under 30 = NOT_ENOUGH_DATA; n 30 to 49 = FAIL if cash PF is under 1.0 (marker written, final), otherwise NOT_ENOUGH_DATA; n of 50 or more = the three labels. NOT_ENOUGH_DATA prints ONLY 'NOT_ENOUGH_DATA, n trades = x', writes no marker (the read stays unspent) and appends the run with its date and n to cfrti_k_heldout_run_log.txt beside this script.
 At 50 or more it writes the marker, then prints the registered line and ONE of three labels (the registration's labels govern, the Head 17:04Z): PASS = cash PF 1.3 or better, a mean above 0, n of 50 or more (a re-test lead into the shadow gate, never a research-bar pass); NO CALL = cash PF from 1.0 up to 1.3 at n of 50 or more (what it means for the live seat is the owner's decision); FAIL = cash PF under 1.0 at n of 50 or more (the owner's decision of 2026-11-13: CFRTI-K is then CLOSED FOR GOOD). No other figure, no thirds are labels. Prints the heldout_guard_v2 list-hash line first. HELDOUT_ folders and listed pull runs are refused by the guard."""
 import sys, os, calendar, time, json, collections, datetime, math
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import cfrti_k as K
 HELD_FROM = calendar.timegm(time.strptime("2026-11-14", "%Y-%m-%d"))
 READ_NOT_BEFORE = calendar.timegm(time.strptime("2026-11-20", "%Y-%m-%d"))
-MIN_TRADES = 50
+MIN_TRADES = 50      # PASS and NO CALL need 50 (registration section 4); FAIL needs only MIN_FAIL
+MIN_FAIL = 30        # "cash PF under 1.0 at n of about 30 or more = falsified" (registration section 4; the Head, 17:09Z: the registration text governs)
+LOG = os.path.join(here, "cfrti_k_heldout_run_log.txt")
 MARKER = os.path.join(here, "cfrti_k_heldout_read_marker.txt")
 def refuse_if_read(marker=None):
     m = marker or MARKER
@@ -31,25 +33,29 @@ def trades_of(markets, binary, perp):
 def label(trades):
     """the registered held-out call (CFRTI_K_REGISTRATION section 4). n under 50: NOT_ENOUGH_DATA; at n of 50 or more: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0"""
     n = len(trades)
-    if n < MIN_TRADES: return "NOT_ENOUGH_DATA"
+    if n < MIN_FAIL: return "NOT_ENOUGH_DATA"
     pn = [t["pnl"] for t in trades]; p = K.pf(pn)
+    if n < MIN_TRADES: return "FAIL" if p < 1.0 else "NOT_ENOUGH_DATA"      # n 30 to 49: only a PF under 1.0 is a call (FAIL, final); anything else is no call and no marker
     if p >= 1.3 and sum(pn) > 0: return "PASS"
     return "FAIL" if p < 1.0 else "NO CALL"      # the registration's labels govern (the Head, 17:04Z): PF from 1.0 up to 1.3 is its own "no call at n = x"
 def lines(trades):
     pn = [t["pnl"] for t in trades]; n = len(trades); p = K.pf(pn)
     L = ["CFRTI-K HELD-OUT (closes from 2026-11-14T00:00:00Z) | n %d | cash PF %s | mean %+.2fc | win %.1f%% | days %d" % (n, "inf" if p == float("inf") else "%.2f" % p, 100 * sum(pn) / n, 100 * sum(t["win"] for t in trades) / n, len({t["day"] for t in trades}))]
     lab = label(trades)
-    L.append("LABEL: " + ("PASS: cleared its registered bar (cash PF 1.3 or better, positive mean, n >= 50); a re-test lead, never a research-bar pass" if lab == "PASS" else ("NO CALL: cash PF from 1.0 up to 1.3 at n >= 50 (the registration's own 'no call'); what it means for the live seat is the owner's decision" if lab == "NO CALL" else "FAIL: cash PF under 1.0 at n >= 50 (the owner's decision of 2026-11-13: CLOSED FOR GOOD)")))
+    L.append("LABEL: " + ("PASS: cleared its registered bar (cash PF 1.3 or better, positive mean, n >= 50); a re-test lead, never a research-bar pass" if lab == "PASS" else ("NO CALL: cash PF from 1.0 up to 1.3 at n >= 50 (the registration's own 'no call'); what it means for the live seat is the owner's decision" if lab == "NO CALL" else "FAIL: cash PF under 1.0 at n >= 30 (the owner's decision of 2026-11-13: CLOSED FOR GOOD)")))
     return L
-def run(lists, cands, perp_path, now=None, marker=None, fixture=False):
+def run(lists, cands, perp_path, now=None, marker=None, fixture=False, log=None):
     sys.path.insert(0, here); import heldout_guard_v2 as G
     print(G.list_line())
     now = time.time() if now is None else now
     if not fixture and now < READ_NOT_BEFORE: sys.exit("REFUSED: before 2026-11-20T00:00:00Z the held-out read does not run (registered read date)")
     if not fixture: refuse_if_read(marker)
     mk = load_markets_ho(lists); tr, why = trades_of(mk, K.load_binary(cands), K.load_perp(perp_path))
-    if len(tr) < MIN_TRADES:
-        print("NOT_ENOUGH_DATA, n trades = %d (needs %d); nothing else is printed and the read is not spent" % (len(tr), MIN_TRADES)); return tr
+    if label(tr) == "NOT_ENOUGH_DATA":
+        print("NOT_ENOUGH_DATA, n trades = %d (a call needs 30 with PF under 1.0, or 50); nothing else is printed and the read is not spent" % len(tr))
+        if not fixture:      # every run that writes no marker is logged with its date and n
+            with open(log or LOG, "a") as f: f.write("%s n=%d NOT_ENOUGH_DATA no marker\n" % (time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)), len(tr)))
+        return tr
     if not fixture:
         with open(marker or MARKER, "x") as f: f.write("read at %s UTC\n" % time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)))
     print("\n".join(lines(tr))); print("held-out windows %d | decisions: %s" % (len(mk), dict(why))); return tr
