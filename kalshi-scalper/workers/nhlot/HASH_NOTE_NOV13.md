@@ -19,3 +19,5 @@ Dead hashes of the reader: ff3e4811 (46 candle minutes, a folder walk), d325d328
 ## Held-out line added to the card (Nov 13, 2026, 07:07Z)
 
 On the Head of R&D's order of 06:53Z, card 17 in `IDEA_DESK_B_WAVE3.md` gained one dated held-out line (text only; no rule, figure or reading changed). The file's sha256 is now 7d17795221691d66e4ac95ec572a8a2bb0ede2b9eb0aa7bbe68b876deca77d80 (it was 3d03e5a57a0528f08a522acbc9077ad787d7273d36e803cd0bcd3ebab9cf1820). The reader `nhlot/measure_prices.py` is unchanged at 7d3b67310ba1e05653b0f725451abf55f106e475f6e1d3ba0c7f5a8266918e31. The shared guard `deskb_guard.py` is now 14f969bc8983bff2a0696b3dcab745d748119de28fc4c5692370933cad0b1df9. W-CAT-SPORTS1 is released, so the sample stays the 150 games of `games.json`.
+
+**07:10Z:** a registry cross-check paragraph was added under the held-out line (text only). The card file's sha256 is now efdecec293971b91c7f8e24e86c0a8af786cafe11d23f73517db136ad2d248d0. The shared guard's docstring was reworded on Auditor B's gate (code unchanged); its sha256 is now a199f946cca9da8e0a3c56f0524109629b420ef91b20e77d54fa3b6b6b0f9dcd. The reader is unchanged.
