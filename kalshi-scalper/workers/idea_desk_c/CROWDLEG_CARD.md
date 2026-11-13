@@ -66,3 +66,4 @@
 - Trades are read from `trades.csv` and joined to `legs.csv` by combo ticker; a combo in `legs_missing` is dropped and counted, never guessed.
 - Successive polls read overlapping tape windows on purpose, so trades are de-duplicated by `trade_id` across polls before any count.
 - A poll whose coverage row has `tape_complete` 0 (tape cut at the page cap, a failed read or a stopped run) is counted and reported; its window is a lower bound, never a quiet hour.
+- Every result states the share of traded combos dropped for want of legs (`legs_missing` over `combos_traded`, summed over the polls read) and the share of polls with `tape_complete` 0 (Auditor B, Nov 13).
