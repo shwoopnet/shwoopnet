@@ -14,7 +14,7 @@ Nothing here is a read of the registered NC15DEPTH1 cell, and no block data has 
 | `nc15_wheel_block_compare.py` | compares Desk A's printed block lines with mine, block by block and state by state |
 | `make_nc15_wheel_fixture.py` | invented NC15 book and coverage rows for all 11 series over 40 days, with the awkward cases listed in its header |
 | `NC15_WHEEL_SECOND_OUTPUT_fixture_{seed6,seed7,seed6_confexp}_MADE_UP_DATA.{txt,json}` | my figures on three fixtures |
-| `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_66e729c8_run_by_forensics.txt` | Desk A's block reader output on the same fixtures, as run by me |
+| `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_2921a03a_run_by_forensics.txt` | Desk A's block reader output on the same fixtures, as run by me |
 
 Commands:
 
@@ -99,7 +99,7 @@ I rewrote my block layer to the rulings and ran Desk A's three commands myself, 
   blocks that grew to 191 and 206 signals to reach 7 days, an EXPIRED block, FAILED on the profit factor, on a half and on the 30 percent day rule, and places waiting on
   an open result.
 
-## Nov 13, 02:21Z: the second round of rulings (items g to o), and SAME again on three fixtures
+## Nov 13, 02:21Z: the second round of rulings (items g to o), and same on three fixtures (SUPERSEDED by the next section)
 
 **The block comparison in the section above is superseded.** It was made against the lane text at `7c4c71d2` and Desk A's first reader. While it ran, the Head ruled ten
 more places (items (g) to (o), `ROTATION_LANE.md` section 4 at `rnd-queue` `bd7007cb`) and Desk A rebuilt its reader. I rebuilt my block layer from that text and compared again.
@@ -126,6 +126,30 @@ on seeds 6 and 7 its block output reproduces its committed files byte for byte.
   place is QUALIFIED no further block is read.
 - **Outcomes exercised across the three fixtures:** FAILED (18 blocks), CLEARED and QUALIFIED (7), CLEARED with a failed confirmation (2), CLEARED with the confirmation
   in progress, waiting on an open result, and EXPIRED (1 each), EXPIRED blocks (3), blocks grown to more than 160 signals to reach 7 days.
+
+## Nov 13, 02:24Z: the third round of rulings (items p to t), and SAME on three fixtures. THIS is the standing comparison.
+
+The lane text moved once more while the comparison above ran: items (p) to (t) and the round-down rule for cash that is not a whole cent (`rnd-queue` `77eeb93b`, with a
+pointer added at `dbd2f4da`, which is the text I built to and the head of that file when I compared). Desk A's reader moved with it.
+
+Builds compared at 02:24Z: mine `nc15_wheel_second.py` sha256 `ade91e30...`; Desk A's signal scorer `nc15_wheel_replay.py` `8d1055df...`, records writer
+`nc15_wheel_records_csv.py` `38ec4c46...` and block reader `wheel_block_reader.py` `2921a03a...` at `claude/idea-desk-a` `4774933b`, run by me, unread, with
+`--now=2026-12-23T00:00:00Z --start=2026-11-13T00:23:49Z`.
+
+| Fixture | Records the same | Differ | Record figures | Differ | Per-series figures | Differ | Blocks (both builds) | Block figures | Differ | Place states | Differ |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| seed 6 | 20,994 | 0 | 18,343 | 0 | 63 | 0 | 12 | 192 | 0 | 7 | 0 |
+| seed 7 | 20,994 | 0 | 18,390 | 0 | 63 | 0 | 10 | 158 | 0 | 7 | 0 |
+| seed 6, variant `confexp` | 20,994 | 0 | 17,731 | 0 | 63 | 0 | 11 | 175 | 0 | 7 | 0 |
+
+- **What changed for items (p) to (t):** cash that is not a whole cent is rounded DOWN (`floor(100 x cash + 1e-6)`), where the round before had it to the nearest cent;
+  an open result inside a block makes it wait with its expiry not yet decided, where Desk A's earlier choice had expired it first; the order of signals is decision time,
+  then ticker, then side; nothing is read after QUALIFIED (now in the text).
+- **One state I first had differently and fixed:** a confirmation still collecting inside its 21 days, with one result open, is "in progress" in both builds (I had
+  printed it as waiting). It waits only once the read time is past its 21 days and a result is still open.
+- **Not exercised by these fixtures, so agreed by reading only:** two signals of one place at the same decision time (the side tie of item (p)); a block past its 21 days
+  that holds an open result (item (q)'s "expiry not yet decided" for a block); a rule in the favourites class (150 signals).
+- The files `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_2921a03a_run_by_forensics.txt` are Desk A's block output from these runs.
 
 ## Places where the sheet or the lane leaves a choice
 

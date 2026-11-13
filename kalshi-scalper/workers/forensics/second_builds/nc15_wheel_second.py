@@ -18,10 +18,10 @@ Places where the sheet or the lane leaves a choice (READINGS, printed with the o
  f. The ladder is the met side's present levels as asks (1 minus the bid price), cheapest first. "Offers 10" is the sizes at or under limit + 1e-9 summing to 10 - 1e-9 or more. The walked price takes the first 10 contracts of the levels at or under the limit.
  g. A decision instant before the sheet's commit time (2026-11-13T00:23:49Z) does not count; a close after 2026-12-31T23:59:59Z is past the log's stop. Both are counted and left out.
  h. Result: a coverage row's result of yes or no, from any run folder that holds the ticker (two runs that disagree stop this build's run; Desk A's choice 6 takes the first found). Any other non-empty value is a void. An empty result is OPEN until 7 days after the close (by --now), then a void. A void is a fee-only loss, counted.
- i. BLOCKS follow ROTATION_LANE.md section 4, items (a) to (o), at rnd-queue bd7007cb. Counted signals: fillable, signal poll time at or after the start time (l), limit in whole cents under 88 (i); misses, not fill-checked and skipped signals are in no count (m). A day is the US Central date of the signal poll's exchange time (d).
- j. A block grows in order and ends, to be read once, at the first signal where it holds 60 signals, 7 days, 10 wins and 10 losses (a, c, i); a void is in n and its fee in the losses, but it is neither a win nor a loss for that count (n). A block not complete by its first signal's time plus 21 x 24 hours is EXPIRED, unread, decided by the clock with the stated now (b, k); the next block starts at the first counted signal after the expiry time.
- k. Where the text is silent (Desk A's choices, taken): an open result met inside a block makes it WAIT, unless the clock is already past the block's 21 days, when it is EXPIRED before any wait; cash that is not whole cents is rounded to the nearest cent, half up, and the count of such signals is printed; once a place is QUALIFIED no further block is read.
- l. Money in whole cents (g): 1.3 or better is 10 x W >= 13 x L, 1.0 or better is W >= L, L = 0 with W > 0 passes, W = 0 fails. The 30 percent rule (h): a day with a net of zero or more fails the block if 100 x its net is over 30 x the block's net. Halves: the first n // 2 signals and the rest (e). Confirmation (j): the next 30 counted signals, complete within 21 x 24 hours of the cleared block's last signal, else EXPIRED and unread; W >= L is QUALIFIED, else failed; its signals belong to no block.
+ i. BLOCKS follow ROTATION_LANE.md section 4, items (a) to (t), at rnd-queue dbd2f4da. Counted signals: fillable, signal poll time at or after the start time (l), limit in whole cents under 88 (i); misses, not fill-checked and skipped signals are in no count (m). Order (p): signal poll time, then ticker, then side. A day is the US Central date of the signal poll's exchange time (d).
+ j. A block grows in order and ends, to be read once, at the first signal where it holds 60 signals, 7 days, 10 wins and 10 losses (a, c, i); a void is in n and its fee in the losses, but it is neither a win nor a loss for that count (n). An open result stops the search (r): the block WAITS, "expiry not yet decided" (q). A block whose counted signals up to its first signal's time plus 21 x 24 hours are all final and still do not hold the counts is EXPIRED, unread, once the stated read time is past that expiry time (b, k, q); the next block starts at the first counted signal after the expiry time (t).
+ k. Money in whole cents (g): a cash result that is not a whole cent is rounded DOWN, floor(100 x cash + 1e-6); 1.3 or better is 10 x W >= 13 x L, 1.0 or better is W >= L, L = 0 with W > 0 passes, W = 0 fails. The 30 percent rule (h): 100 x a day's net over 30 x the block's net fails the block (listed only for a positive block net; a block with a net of zero or less already fails (g)). Halves: the first n // 2 signals and the rest (e).
+ l. Confirmation (j): the next 30 counted signals, complete within 21 x 24 hours of the cleared block's last signal; W >= L is QUALIFIED, and then no further block is read (t); else failed, and the next block starts after its 30 signals. Fewer than 30 within its 21 days, all of them final, and the read time past that limit: EXPIRED, unread, and the next block starts at the first counted signal after the expiry time. Its signals belong to no block.
  m. The profit factors printed are W / L from the whole cents, for reading only; every bar is tested on the integers.
  n. Only the seven series the sheet keeps (copper, WTI, natural gas, HYPE, BNB, silver, USD/CAD) are places; the four withdrawn series are counted and not scored.
 """
@@ -193,7 +193,7 @@ def pf(v):
     return None if (w == 0 and l == 0) else (float("inf") if l == 0 else w / l)
 
 
-def cents(x): return int(math.floor(100 * x + 0.5 + EPS))          # (g): whole cents; a cash result that is not whole cents (a size-weighted fill price) goes to the nearest cent, half up
+def cents(x): return int(math.floor(100 * x + 1e-6))               # (g), as ruled 02:15Z: cash that is not a whole cent is rounded DOWN, toward the worse result: floor(100 x cash + 1e-6)
 
 
 def WL(c): return sum(x for x in c if x > 0), -sum(x for x in c if x < 0)
@@ -203,10 +203,10 @@ def ratio(c): W, L = WL(c); return None if (W == 0 and L == 0) else (float("inf"
 
 
 def blocks(sig, now, start=None):
-    """ROTATION_LANE.md section 4, items (a) to (o), as it stands at rnd-queue bd7007cb (the Head of R&D's rulings of Nov 13, 2026 02:05Z and 02:09Z).
+    """ROTATION_LANE.md section 4, items (a) to (t), as it stands at rnd-queue dbd2f4da (the Head of R&D's rulings of Nov 13, 2026 02:05Z, 02:09Z and 02:15Z).
     sig: a place's fillable signals. Counted signals are those at or after the start time (l) whose limit in whole cents is under 88 (i), in order of signal poll time, then ticker."""
     start = COUNT_FROM if start is None else start; span = SPAN_DAYS * 86400
-    sig = sorted(sig, key=lambda r: (r["signal_exchange"], r["ticker"]))
+    sig = sorted(sig, key=lambda r: (r["signal_exchange"], r["ticker"], 0 if r["side"] == "yes" else 1))       # (p): decision time, then ticker, then side (yes before no)
     cnt = [r for r in sig if r["signal_exchange"] >= start - EPS and int(round(r["limit"] * 100)) < FAV_CENTS]
     res = {"fillable": len(sig), "before_the_start_time": sum(1 for r in sig if r["signal_exchange"] < start - EPS),
            "skipped_limit_88c_or_above": sum(1 for r in sig if r["signal_exchange"] >= start - EPS and int(round(r["limit"] * 100)) >= FAV_CENTS), "counted": len(cnt),
@@ -217,11 +217,11 @@ def blocks(sig, now, start=None):
         t0 = T(cnt[i]); exp = t0 + span; j = i; wins = losses = 0; days = set(); end = None
         while j < len(cnt) and T(cnt[j]) <= exp + EPS:
             r = cnt[j]
-            if r["cash"] is None: end = "EXPIRED" if now > exp + EPS else "WAITS"; break       # an open result: past the 21 days by the clock the block is EXPIRED before any wait (Desk A's choice 1)
+            if r["cash"] is None: end = "WAITS"; break                                     # (q), (r): an open result stops the search; EXPIRED is written only when every counted signal up to the expiry time is final
             wins += r["win"] is True; losses += r["win"] is False; days.add(day(r)); j += 1    # (n): a void is in n, neither a win nor a loss
             if j - i >= BLOCK and len(days) >= MIN_DAYS and wins >= RARE and losses >= RARE: end = "COMPLETE"; break
         if end is None: end = "EXPIRED" if (now > exp + EPS or j < len(cnt)) else "IN PROGRESS"
-        if end == "WAITS": res["state"] = "WAITS: a signal in the block has no final result yet (block holds %d before it)" % (j - i); break
+        if end == "WAITS": res["state"] = "WAITS: waiting for results, expiry not yet decided (block holds %d before the open result)" % (j - i); break
         if end == "IN PROGRESS": res["state"] = "block in progress: %d signals, %d days, %d wins, %d losses" % (j - i, len(days), wins, losses); break
         if end == "EXPIRED":
             nxt = next((k for k in range(i, len(cnt)) if T(cnt[k]) > exp + EPS), len(cnt)); b = cnt[i:nxt]      # (k): the next block starts at the first counted signal after the expiry time
@@ -239,8 +239,11 @@ def blocks(sig, now, start=None):
         i = j; res["blocks"].append(blk)
         if fails: continue
         cexp = T(b[-1]) + span; cf = [r for r in cnt[i:i + CONFIRM] if T(r) <= cexp + EPS]      # (j): the next 30 counted signals, complete within 21 x 24 hours of the cleared block's last signal
+        past = now > cexp + EPS or i + len(cf) < len(cnt)
+        if len(cf) < CONFIRM and past and any(r["cash"] is None for r in cf):               # (q) holds for a confirmation too: no EXPIRED while a counted signal up to its expiry time is open
+            blk["confirmation"] = "WAITS: waiting for results, expiry not yet decided (%d of 30)" % len(cf); res["state"] = "cleared block, confirmation waits on an open result"; break
         if len(cf) < CONFIRM:
-            if now > cexp + EPS or i + len(cf) < len(cnt):
+            if past:
                 blk["confirmation"] = "EXPIRED (unread; %d of 30 within 21 days)" % len(cf); i = next((k for k in range(i, len(cnt)) if T(cnt[k]) > cexp + EPS), len(cnt)); continue
             k = next((x for x, r in enumerate(cf) if r["cash"] is None), None)
             blk["confirmation"] = "in progress: %d of 30" % len(cf); res["state"] = "cleared block, confirmation in progress: %d of 30" % len(cf); break
