@@ -46,11 +46,11 @@ gates.SR2 = () => {
       assert.ok(param(c, 'Contracts').includes(L.steps.join(', ')) && param(c, 'Contracts').startsWith(L.steps[0] + ' '), s.id + ' ladder ' + param(c, 'Contracts'));
       assert.ok(param(c, 'Daily loss cap').startsWith('$' + L.dailyPerContract.toFixed(2) + ' a contract') && param(c, 'Daily loss cap').includes(Math.round(L.dailyMaxFraction * 100) + '%'), s.id + ' daily cap');
       assert.ok(param(c, 'Drawdown stop').startsWith('$' + L.stopPerContract + ' a contract') && param(c, 'Drawdown stop').includes('($' + L.stopPerContract * L.steps[0] + ' at ' + L.steps[0] + ')') && param(c, 'Drawdown stop').includes(Math.round(L.stopMaxFraction * 100) + '%'), s.id + ' drawdown stop');
-      assert.ok(c.rules[0].includes('Live now at ' + L.steps[0] + ' contracts') && c.rules[0].includes(L.steps.slice(1, -1).join(', ') + ' and ' + L.steps[L.steps.length - 1]), s.id + ' goes live line follows the ladder');
+      assert.ok(c.rules[0].includes('Starts at ' + L.steps[0] + ' contracts') && c.rules[0].includes(L.steps.slice(1, -1).join(', ') + ' and ' + L.steps[L.steps.length - 1]), s.id + ' goes live line follows the ladder');
     } else {
       assert.ok(param(c, 'Contracts').startsWith(String(s.contractsPerOrder)), s.id + ' contracts');
-      assert.ok(param(c, 'Daily loss cap') === (slot.SLOT_CAP_FRACTIONS.daily * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.daily, s.id + ' daily cap ' + param(c, 'Daily loss cap'));
-      assert.ok(param(c, 'Lifetime loss cap') === (slot.SLOT_CAP_FRACTIONS.lifetime * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.lifetime, s.id + ' lifetime cap');
+      assert.ok(param(c, 'Daily loss cap') === 'Its own: ' + (slot.SLOT_CAP_FRACTIONS.daily * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.daily, s.id + ' daily cap ' + param(c, 'Daily loss cap'));
+      assert.ok(param(c, 'Lifetime loss cap') === 'Its own: ' + (slot.SLOT_CAP_FRACTIONS.lifetime * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.lifetime, s.id + ' lifetime cap');
     }
     assert.strictEqual(param(c, 'Streak stop'), k.maxConsecutiveLosses + ' losses in a row', s.id + ' streak');
     const floor = (k.minNet.net < 0 ? '-$' + Math.abs(k.minNet.net) : '$' + k.minNet.net) + ' after ' + k.minNet.afterFills + ' trades';
@@ -77,6 +77,9 @@ gates.SR4 = () => {
   assert.ok(!P.KAL_STAGES.some((s) => OWNER.test(s.then) || OWNER.test(s.head)), 'the stage flow says no owner approves');
   assert.ok(!OWNER.test(P.KAL_BOARD_RETIRED.back) && P.KAL_BOARD_RETIRED.rows.every((r) => !OWNER.test(r.note || '')), 'the retired lines depend on nobody');
   assert.ok(/restarts by itself 24 hours later \(at most once in 7 days\)/.test(P.KAL_ACCOUNT_STOP) && /a second 12% stop within 7 days stays off until the owner restarts it/.test(P.KAL_ACCOUNT_STOP) && /12% of the account/.test(P.KAL_ACCOUNT_STOP) && live.L1_SIZED_STOP_FRACTION === 0.12, 'the one owner step, the account safety stop, is said plainly and matches the code');
+  // the 40% hard stop (Main's pull request): once a code constant names it, the page must say it (the Risk Analyst, Nov 13, 2026)
+  const hard = [live, slot, gold].map((m) => m.HARD_STOP_FRACTION).find((x) => typeof x === 'number');
+  if (hard !== undefined) assert.ok(new RegExp(Math.round(hard * 100) + '%').test(P.KAL_ACCOUNT_STOP), 'the account stop line names the ' + Math.round(hard * 100) + '% hard stop now that the code has it');
   assert.ok(/being built/.test(P.KAL_RULES_BUILDING), 'until the rotation code is live the page says these are the written rules being built');
   for (const r of reg) {
     if (r.stage === 'Retired') { assert.ok(!OWNER.test(r['return'] || ''), r.id + ': a retired row\'s comeback line depends on nobody'); continue; }

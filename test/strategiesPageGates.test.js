@@ -532,14 +532,14 @@ gates.AL3 = () => {
   assert.ok(/<b data-count="1">1<\/b><span class="lp-tt">Live/.test(out), 'the Live count is what trades');
 };
 gates.SP15 = () => {
-  // timeframes (Nov 13, 2026, the owner: "i cant select timeframes on it"): 1D, 7D, 30D and All change the curve, the profit factor and the trade count together; 30D is the default
+  // timeframes (Nov 13, 2026, the owner: "i cant select timeframes on it"): 7D, 30D and YTD change the curve, the profit factor and the trade count together; 30D is the default
   const orders = [W(NOW - 2 * HR), W(NOW - 30 * HR), L(NOW - 3 * 86400000), W(NOW - 40 * 86400000)];
   const n = (k) => Q.kalshiStratSummary(orders, NOW, 0, CT, k).w30.n;
-  assert.deepStrictEqual([n('1D'), n('7D'), n('30D'), n('All'), n(undefined)], [1, 3, 3, 4, 3], 'each range counts its own trades; no range means 30 days');
-  assert.strictEqual(Q.kalshiStratSummary(orders, NOW, 0, CT, 'All').curve.length, 5, 'All draws every settled trade from zero');
+  assert.deepStrictEqual([n('7D'), n('30D'), n('YTD'), n(undefined), n('All')], [3, 3, 4, 3, 3], 'each range counts its own trades; no range, or an old key, means 30 days (the owner: "it should go 7D, 30D, YTD")');
+  assert.strictEqual(Q.kalshiStratSummary(orders, NOW, 0, CT, 'YTD').curve.length, 5, 'YTD draws every settled trade since Jan 1 (US Central) from zero');
   const h = Q.kalshiStratSummaryHtml(Q.kalshiStratSummary(orders, NOW, 0, CT, '7D'), esc, money);
   assert.ok(/All strategies &middot; last 7 days &middot; 3 trades/.test(h), 'the header names the range and its count');
-  assert.deepStrictEqual([...h.matchAll(/data-strng="([^"]+)"/g)].map((m) => m[1]), ['1D', '7D', '30D', 'All'], 'four buttons, in order');
+  assert.deepStrictEqual([...h.matchAll(/data-strng="([^"]+)"/g)].map((m) => m[1]), ['7D', '30D', 'YTD'], 'three buttons, in order');
   assert.ok(/aria-pressed="true">7D</.test(h) && (h.match(/aria-pressed="true"/g) || []).length === 1, 'exactly the chosen one is pressed');
   const rp = fn('renderStrategiesPage');
   assert.ok(/kalshiStratSummary\([^;]*kalshiStratRange\)/.test(rp) && /range: kalshiStratRange/.test(rp), 'the page passes its one choice to the summary and the sheets');
@@ -550,13 +550,13 @@ gates.SP16 = () => {
   const R = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', varLine('KAL_STRAT_RANGES') + fn('kalshiStratRangeOf') + fn('kalshiStratRangeHtml') + fn('kalshiStratR') + fn('kalshiHoverAttr') + fn('kalshiHoverWhen') + fn('kalshiStratCumLine') + varLine('kalshiStratDayText') + fn('kalshiStratChartsHtml') + '; return kalshiStratChartsHtml;')(Math, Number, Array, isFinite, Intl, Date);
   const base = { now: NOW, cum: [0, 5, 3, 4], times: [null, NOW - 10 * 86400000, NOW - 3 * 86400000, NOW - 2 * HR], n: 3 };
   const pts = (h) => JSON.parse(/class="hv" data-hv="([^"]+)"/.exec(h)[1].replace(/&#34;|&quot;/g, '"'));
-  const all = R(Object.assign({ range: 'All' }, base), esc, money), wk = R(Object.assign({ range: '7D' }, base), esc, money), day = R(Object.assign({ range: '1D' }, base), esc, money);
-  assert.strictEqual(pts(all).length, 4, 'All: every point');
+  const all = R(Object.assign({ range: 'YTD' }, base), esc, money), wk = R(Object.assign({ range: '7D' }, base), esc, money), whole = R(Object.assign({}, base), esc, money);
+  assert.strictEqual(pts(all).length, 4, 'YTD: every point this year'); assert.strictEqual(pts(whole).length, 4, 'no range (an old call): the whole record');
   assert.strictEqual(pts(wk).length, 3, '7D: a zero start and the two trades inside the week');
   assert.ok(/3 trades/.test(all) && /2 trades &middot; last 7 days|2 trades · last 7 days/.test(wk), 'the note counts the trades in the range');
-  assert.strictEqual(pts(day).length, 2, '1D: the zero start and the one trade in the last 24 hours');
-  const none = R(Object.assign({ range: '1D' }, base, { times: [null, NOW - 10 * 86400000, NOW - 9 * 86400000, NOW - 8 * 86400000] }), esc, money);
-  assert.ok(/No settled trades in the last 24 hours/.test(none), 'an empty range says so instead of drawing a line');
+  
+  const none = R(Object.assign({ range: '7D' }, base, { times: [null, NOW - 10 * 86400000, NOW - 9 * 86400000, NOW - 8 * 86400000] }), esc, money);
+  assert.ok(/No settled trades in the last 7 days/.test(none), 'an empty range says so instead of drawing a line');
   assert.ok(/data-strng="7D"[^>]*aria-pressed="true"/.test(wk), 'the sheet shows the same buttons, the chosen one pressed');
 };
 let failed = 0;

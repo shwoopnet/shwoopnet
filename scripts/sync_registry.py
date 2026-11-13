@@ -22,7 +22,8 @@ SHADOW_KILL = ("Shadow only: no order, nothing to lose. The place is dropped if 
 # The three plain lines every shadow place shows (Nov 13, 2026, the owner: "nothing should be dependent on me with rotating strategies"; the Risk Analyst's wording via Main).
 SHADOW_LIVE = ("Its paper record wins at least 1.3 times what it loses over 60 checked trades on at least 7 days (150 trades and 10 losses for favourites at 88c or more), "
                "holds up for 30 more, and its worst-case loss still fits the account's risk budget. It starts at 3 contracts")
-SHADOW_RETURN = ("14 days after a slow-down stop, or 30 days after a hard stop, a fresh paper record clears the same bar. It returns at 3 contracts")
+SHADOW_RETURN = ("14 days after a slow-down stop, or 30 days after a hard stop, a fresh paper record clears the same bar. It returns at 3 contracts."
+                 " It can come back by itself at most twice; a third stop retires it for good")
 NC15_RULE = "Top-5 size skew between the two sides of 0.50 or more at the last poll at or before 600 seconds to the close; buy at the ask between 10c and 90c, hold to settlement"
 NC15_BASIS = "Public NC15 book recorder; the count is read from the private log, not stored here"
 
