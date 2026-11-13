@@ -1,0 +1,971 @@
+{
+ "build": "Forensics second build of DEPTH1",
+ "label": "blind as to its own features; not blind as to cheap-side and favourite-side baselines on the same windows",
+ "made_up_data": true,
+ "counts": {
+  "usable windows (Amendment 1: never dropped for a missing result)": 1267,
+  "windows not usable": 221,
+  "windows with no clock": 49
+ },
+ "usable_conditions_that_removed_a_coverage_row": {
+  "ok polls under 80%": 117,
+  "tape missing or incomplete": 15,
+  "largest gap over 20 s": 9,
+  "no clock in the run": 49,
+  "window opened at or after the recorder end (2026-11-13T23:59Z)": 24,
+  "dated after 2026-11-13, excluded": 10,
+  "dated before 2026-10-30 (US Central close date), excluded": 35
+ },
+ "ambiguities": [
+  "1. Poll time: t_recv_ms plus the run's clock offset (median over the run's book rows of Date header + 0.5 s minus t_recv_ms). The close T is the coverage row's close_time.",
+  "2. Coverage times (first_recv_ms, last_recv_ms) are compared with T after adding the same run offset.",
+  "3. A ticker with coverage rows in two runs: the usable row with the most ok_polls is the window; its book rows are that run's only. One window counts once.",
+  "4. The decision poll: the last poll with time at or before T-480 s and no earlier than T-490 s. A window with such a poll is a scored window even if that poll's book is one-sided or empty (aligned to the first build on Nov 13; every imbalance feature is then undefined, but f7 can still fire from the tape).",
+  "5. The 30 s and 60 s lookbacks are measured from the DECISION POLL's own time: the last poll at or before (decision poll time minus 30 s or 60 s) and no more than 6 s before that.",
+  "6. f7's tape window: trades with created_time in [decision poll time minus 60 s, decision poll time). A sweep: same taker side, same whole second (of created_time), two or more distinct prices.",
+  "7. The fill poll: the first poll at or after (decision poll time + 1.0 s) and no later than 20 s after that instant. The other reading (from T-480 s itself) is not built.",
+  "8. f3: weighted YES bid = sum(px x sz)/sum(sz) over the YES levels; weighted YES ask = 1 minus the same over the NO levels; plain mid = (YES bid 1 + (1 - NO bid 1))/2.",
+  "9. f6: thin side = the smaller 5 level size 60 s ago; value = (then - now)/then for that side, positive when the thin side is NO, negated when it is YES; equal sizes then = 0; thin size then of 0 = undefined.",
+  "10. f8: gap = level 1 price minus level 2 price; a missing level 2 gives a gap of the whole level 1 price. f9 needs two levels a side; slope = (level 1 price - last level price)/sum of sizes.",
+  "11. f10: levels whose price is within 0.03 of the side's level 1 price (inclusive, tolerance 1e-9).",
+  "12. A feature whose absolute value is at or under 1e-12 is zero (no trade): the registered sign rule says \"0 or undefined: no trade\", and a zero computed in floating point can come out as a residue near 1e-17. The first build trades on any non-zero float; setting ZERO_TOL to 0.0 reproduces it.",
+  "13. Halves: the try's trades in close-time order, first floor(n/2) and the rest. Blocks by US Central close date.",
+  "14. Date-clustered z, as the first build prints it (aligned Nov 13): sum of nets over sqrt(sum over US Central close dates of (date sum - date n x mean)^2), with NO small-sample factor. The same with the usual D/(D-1) factor on the variance is printed beside it; it is smaller by sqrt((D-1)/D), 3.4% at 15 dates. Direction accuracy is wins over ALL trades (a fee-only no-result trade counts as a miss); wins over settled trades is printed beside it.",
+  "15. Shuffled-book control: one permutation of the windows a market and round; a window's whole vector of 10 feature values moves together; the window keeps its own fill quotes and result. random.Random(20261114), markets in the order gold, Bitcoin, 1,000 rounds. A try with under 30 trades in a round is not counted in that round's best. An independent build cannot reproduce another build's random draws: the 99th percentile is compared approximately.",
+  "16. Overlap: gold \"held\" = exactly one side's ask 0.88 to 0.97 at the last poll at or before T-360 s (within 10 s). Bitcoin needs candles this build does not read: every Bitcoin window is \"unknown\".",
+  "17. The history check (candles, weaker evidence, not part of the verdict) is not built here.",
+  "18. Stop rule (Amendment 1, point 6): fired windows with no yes or no result over 1% of fired windows, counted per try and on distinct windows; the stop uses distinct fired windows over both markets."
+ ],
+ "windows_with_a_decision_poll": {
+  "KXBTC15M": 520,
+  "KXGOLD15M": 539
+ },
+ "usable_windows_without_one": {
+  "KXBTC15M: no decision poll": 114,
+  "KXGOLD15M: no decision poll": 94
+ },
+ "no_label_description": {
+  "KXGOLD15M": {
+   "noise": {
+    "f1_imb5": {
+     "looks": 504,
+     "share_sign_changes_within_two_polls": 0.3412698412698413
+    },
+    "f2_imb1": {
+     "looks": 440,
+     "share_sign_changes_within_two_polls": 0.11818181818181818
+    },
+    "f3_dwmid_minus_mid": {
+     "looks": 428,
+     "share_sign_changes_within_two_polls": 0.4135514018691589
+    },
+    "f8_hole_asymmetry": {
+     "looks": 296,
+     "share_sign_changes_within_two_polls": 0.1554054054054054
+    },
+    "f9_book_slope": {
+     "looks": 417,
+     "share_sign_changes_within_two_polls": 0.34292565947242204
+    },
+    "f10_imb_3c": {
+     "looks": 504,
+     "share_sign_changes_within_two_polls": 0.38095238095238093
+    }
+   },
+   "median_fill_delay_s": 2.084,
+   "windows_with_no_fill_poll": 0
+  },
+  "KXBTC15M": {
+   "noise": {
+    "f1_imb5": {
+     "looks": 497,
+     "share_sign_changes_within_two_polls": 0.3762575452716298
+    },
+    "f2_imb1": {
+     "looks": 440,
+     "share_sign_changes_within_two_polls": 0.11136363636363636
+    },
+    "f3_dwmid_minus_mid": {
+     "looks": 424,
+     "share_sign_changes_within_two_polls": 0.39858490566037735
+    },
+    "f8_hole_asymmetry": {
+     "looks": 318,
+     "share_sign_changes_within_two_polls": 0.1761006289308176
+    },
+    "f9_book_slope": {
+     "looks": 416,
+     "share_sign_changes_within_two_polls": 0.36538461538461536
+    },
+    "f10_imb_3c": {
+     "looks": 498,
+     "share_sign_changes_within_two_polls": 0.41365461847389556
+    }
+   },
+   "median_fill_delay_s": 2.0915,
+   "windows_with_no_fill_poll": 0
+  }
+ },
+ "AMENDMENT 1 COUNT": {
+  "fired_windows": 797,
+  "fired_windows_with_no_yes_or_no_result": 3,
+  "raw_result_values_of_those_windows": {
+   "void": 1,
+   "(empty)": 2
+  }
+ },
+ "no_trade_reasons": {
+  "KXGOLD15M f1_imb5: no signal": 35,
+  "KXGOLD15M f1_imb5: under 1 contract at the ask": 107,
+  "KXGOLD15M f1_imb5: ask outside 0.10 to 0.90": 79,
+  "KXGOLD15M f1_imb5: no fill poll or no ask": 9,
+  "KXGOLD15M f2_imb1: no signal": 99,
+  "KXGOLD15M f2_imb1: under 1 contract at the ask": 121,
+  "KXGOLD15M f2_imb1: ask outside 0.10 to 0.90": 74,
+  "KXGOLD15M f2_imb1: no fill poll or no ask": 6,
+  "KXGOLD15M f3_dwmid_minus_mid: no signal": 111,
+  "KXGOLD15M f3_dwmid_minus_mid: under 1 contract at the ask": 81,
+  "KXGOLD15M f3_dwmid_minus_mid: ask outside 0.10 to 0.90": 70,
+  "KXGOLD15M f3_dwmid_minus_mid: no fill poll or no ask": 8,
+  "KXGOLD15M f4_d_imb30: no signal": 124,
+  "KXGOLD15M f4_d_imb30: under 1 contract at the ask": 86,
+  "KXGOLD15M f4_d_imb30: ask outside 0.10 to 0.90": 61,
+  "KXGOLD15M f4_d_imb30: no fill poll or no ask": 7,
+  "KXGOLD15M f5_d_imb60: under 1 contract at the ask": 82,
+  "KXGOLD15M f5_d_imb60: no signal": 122,
+  "KXGOLD15M f5_d_imb60: ask outside 0.10 to 0.90": 64,
+  "KXGOLD15M f5_d_imb60: no fill poll or no ask": 9,
+  "KXGOLD15M f6_thin_depletion: under 1 contract at the ask": 77,
+  "KXGOLD15M f6_thin_depletion: no signal": 140,
+  "KXGOLD15M f6_thin_depletion: ask outside 0.10 to 0.90": 60,
+  "KXGOLD15M f6_thin_depletion: no fill poll or no ask": 8,
+  "KXGOLD15M f7_sweep_net: no signal": 268,
+  "KXGOLD15M f7_sweep_net: under 1 contract at the ask": 41,
+  "KXGOLD15M f7_sweep_net: ask outside 0.10 to 0.90": 38,
+  "KXGOLD15M f7_sweep_net: no fill poll or no ask": 2,
+  "KXGOLD15M f8_hole_asymmetry: no signal": 243,
+  "KXGOLD15M f8_hole_asymmetry: ask outside 0.10 to 0.90": 50,
+  "KXGOLD15M f8_hole_asymmetry: under 1 contract at the ask": 41,
+  "KXGOLD15M f8_hole_asymmetry: no fill poll or no ask": 3,
+  "KXGOLD15M f9_book_slope: no signal": 122,
+  "KXGOLD15M f9_book_slope: under 1 contract at the ask": 89,
+  "KXGOLD15M f9_book_slope: ask outside 0.10 to 0.90": 58,
+  "KXGOLD15M f9_book_slope: no fill poll or no ask": 7,
+  "KXGOLD15M f10_imb_3c: no signal": 35,
+  "KXGOLD15M f10_imb_3c: under 1 contract at the ask": 101,
+  "KXGOLD15M f10_imb_3c: ask outside 0.10 to 0.90": 78,
+  "KXGOLD15M f10_imb_3c: no fill poll or no ask": 9,
+  "KXBTC15M f1_imb5: under 1 contract at the ask": 85,
+  "KXBTC15M f1_imb5: no signal": 22,
+  "KXBTC15M f1_imb5: no fill poll or no ask": 9,
+  "KXBTC15M f1_imb5: ask outside 0.10 to 0.90": 93,
+  "KXBTC15M f2_imb1: no signal": 80,
+  "KXBTC15M f2_imb1: under 1 contract at the ask": 112,
+  "KXBTC15M f2_imb1: no fill poll or no ask": 7,
+  "KXBTC15M f2_imb1: ask outside 0.10 to 0.90": 86,
+  "KXBTC15M f3_dwmid_minus_mid: no signal": 95,
+  "KXBTC15M f3_dwmid_minus_mid: ask outside 0.10 to 0.90": 84,
+  "KXBTC15M f3_dwmid_minus_mid: under 1 contract at the ask": 71,
+  "KXBTC15M f3_dwmid_minus_mid: no fill poll or no ask": 7,
+  "KXBTC15M f4_d_imb30: under 1 contract at the ask": 71,
+  "KXBTC15M f4_d_imb30: no signal": 97,
+  "KXBTC15M f4_d_imb30: no fill poll or no ask": 6,
+  "KXBTC15M f4_d_imb30: ask outside 0.10 to 0.90": 76,
+  "KXBTC15M f5_d_imb60: no signal": 123,
+  "KXBTC15M f5_d_imb60: no fill poll or no ask": 7,
+  "KXBTC15M f5_d_imb60: under 1 contract at the ask": 65,
+  "KXBTC15M f5_d_imb60: ask outside 0.10 to 0.90": 78,
+  "KXBTC15M f6_thin_depletion: no signal": 151,
+  "KXBTC15M f6_thin_depletion: no fill poll or no ask": 5,
+  "KXBTC15M f6_thin_depletion: under 1 contract at the ask": 47,
+  "KXBTC15M f6_thin_depletion: ask outside 0.10 to 0.90": 71,
+  "KXBTC15M f7_sweep_net: no signal": 261,
+  "KXBTC15M f7_sweep_net: no fill poll or no ask": 6,
+  "KXBTC15M f7_sweep_net: ask outside 0.10 to 0.90": 54,
+  "KXBTC15M f7_sweep_net: under 1 contract at the ask": 26,
+  "KXBTC15M f8_hole_asymmetry: no signal": 202,
+  "KXBTC15M f8_hole_asymmetry: no fill poll or no ask": 7,
+  "KXBTC15M f8_hole_asymmetry: ask outside 0.10 to 0.90": 52,
+  "KXBTC15M f8_hole_asymmetry: under 1 contract at the ask": 48,
+  "KXBTC15M f9_book_slope: under 1 contract at the ask": 66,
+  "KXBTC15M f9_book_slope: no signal": 104,
+  "KXBTC15M f9_book_slope: no fill poll or no ask": 8,
+  "KXBTC15M f9_book_slope: ask outside 0.10 to 0.90": 72,
+  "KXBTC15M f10_imb_3c: under 1 contract at the ask": 88,
+  "KXBTC15M f10_imb_3c: no signal": 21,
+  "KXBTC15M f10_imb_3c: no fill poll or no ask": 10,
+  "KXBTC15M f10_imb_3c: ask outside 0.10 to 0.90": 93
+ },
+ "shuffled_book_control": {
+  "rounds_counted": 1000,
+  "p99_of_best_of_20_mean_net": 0.06643979057591624,
+  "median_of_best_of_20": 0.022658838211935546,
+  "note": "an independent build cannot reproduce another build's random draws; compare this figure approximately"
+ },
+ "tries": {
+  "KXGOLD15M f1_imb5": {
+   "n": 309,
+   "wins": 162,
+   "no_result_fee_only": 2,
+   "direction_accuracy": 0.5242718446601942,
+   "direction_accuracy_over_settled_trades_only": 0.5276872964169381,
+   "mean_ask": 0.5157281553398059,
+   "pf": 0.9643419733638838,
+   "pf_blocks": {
+    "A": 1.2441176470588233,
+    "B": 1.1089577950043066,
+    "C": 0.6184662342617321
+   },
+   "block_n": {
+    "A": 107,
+    "B": 111,
+    "C": 91
+   },
+   "pf_halves": [
+    1.2904005524861877,
+    0.7333007095669194
+   ],
+   "net_per_trade": -0.008058252427184484,
+   "net_per_trade_fee_x1.2": -0.011928802588996786,
+   "pf_fee_x1.2": 0.947640557970397,
+   "z_date_clustered": -0.2355654923584024,
+   "z_with_the_D_over_D_minus_1_factor": -0.22757788654448122,
+   "control_passed": false,
+   "marginal_p": 0.34565434565434566,
+   "control_p_best_of_20": 0.967032967032967,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 293,
+    "pf": 0.9613025700934579
+   }
+  },
+  "KXGOLD15M f2_imb1": {
+   "n": 239,
+   "wins": 122,
+   "no_result_fee_only": 2,
+   "direction_accuracy": 0.5104602510460251,
+   "direction_accuracy_over_settled_trades_only": 0.5147679324894515,
+   "mean_ask": 0.5126778242677824,
+   "pf": 0.9207048458149778,
+   "pf_blocks": {
+    "A": 0.8100531657805702,
+    "B": 1.4405753217259651,
+    "C": 0.6982507288629737
+   },
+   "block_n": {
+    "A": 87,
+    "B": 76,
+    "C": 76
+   },
+   "pf_halves": [
+    0.8510638297872339,
+    0.9928971962616822
+   ],
+   "net_per_trade": -0.0180753138075314,
+   "net_per_trade_fee_x1.2": -0.021958158995815918,
+   "pf_fee_x1.2": 0.9044671787963737,
+   "z_date_clustered": -0.48423818233941957,
+   "z_with_the_D_over_D_minus_1_factor": -0.46781852901136706,
+   "control_passed": false,
+   "marginal_p": 0.4995004995004995,
+   "control_p_best_of_20": 0.996003996003996,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 228,
+    "pf": 0.9183177570093457
+   }
+  },
+  "KXGOLD15M f3_dwmid_minus_mid": {
+   "n": 269,
+   "wins": 133,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.4944237918215613,
+   "direction_accuracy_over_settled_trades_only": 0.4962686567164179,
+   "mean_ask": 0.49750929368029745,
+   "pf": 0.9139423076923077,
+   "pf_blocks": {
+    "A": 0.8159564823209428,
+    "B": 1.1983254840397697,
+    "C": 0.759773904851625
+   },
+   "block_n": {
+    "A": 94,
+    "B": 96,
+    "C": 79
+   },
+   "pf_halves": [
+    0.8462772785622592,
+    0.9814340588988476
+   ],
+   "net_per_trade": -0.019962825278810426,
+   "net_per_trade_fee_x1.2": -0.02385130111524166,
+   "pf_fee_x1.2": 0.8980422069666919,
+   "z_date_clustered": -0.760135496447093,
+   "z_with_the_D_over_D_minus_1_factor": -0.7343606571444379,
+   "control_passed": false,
+   "marginal_p": 0.6033966033966034,
+   "control_p_best_of_20": 0.997002997002997,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 260,
+    "pf": 0.9198051948051947
+   }
+  },
+  "KXGOLD15M f4_d_imb30": {
+   "n": 261,
+   "wins": 137,
+   "no_result_fee_only": 2,
+   "direction_accuracy": 0.524904214559387,
+   "direction_accuracy_over_settled_trades_only": 0.528957528957529,
+   "mean_ask": 0.5082375478927204,
+   "pf": 1.002399725745629,
+   "pf_blocks": {
+    "A": 1.8092986603624903,
+    "B": 1.0416281221091581,
+    "C": 0.5409904286308781
+   },
+   "block_n": {
+    "A": 86,
+    "B": 98,
+    "C": 77
+   },
+   "pf_halves": [
+    1.3995670995670995,
+    0.7420544835414301
+   ],
+   "net_per_trade": 0.0005363984674329343,
+   "net_per_trade_fee_x1.2": -0.0033409961685823947,
+   "pf_fee_x1.2": 0.9851756145659786,
+   "z_date_clustered": 0.015224730707555848,
+   "z_with_the_D_over_D_minus_1_factor": 0.01470848723616474,
+   "control_passed": false,
+   "marginal_p": 0.25874125874125875,
+   "control_p_best_of_20": 0.9050949050949051,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 248,
+    "pf": 0.9912541542767185
+   }
+  },
+  "KXGOLD15M f5_d_imb60": {
+   "n": 262,
+   "wins": 144,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.549618320610687,
+   "direction_accuracy_over_settled_trades_only": 0.5517241379310345,
+   "mean_ask": 0.5161068702290076,
+   "pf": 1.0785465222976691,
+   "pf_blocks": {
+    "A": 1.2787692307692307,
+    "B": 1.1922651933701656,
+    "C": 0.8147964250248262
+   },
+   "block_n": {
+    "A": 90,
+    "B": 93,
+    "C": 79
+   },
+   "pf_halves": [
+    1.36858407079646,
+    0.8730009407337723
+   ],
+   "net_per_trade": 0.016335877862595403,
+   "net_per_trade_fee_x1.2": 0.01249618320610685,
+   "pf_fee_x1.2": 1.0595879440885263,
+   "z_date_clustered": 0.48728686812285593,
+   "z_with_the_D_over_D_minus_1_factor": 0.47076383929593557,
+   "control_passed": false,
+   "marginal_p": 0.09290709290709291,
+   "control_p_best_of_20": 0.6343656343656343,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 248,
+    "pf": 1.069776119402985
+   }
+  },
+  "KXGOLD15M f8_hole_asymmetry": {
+   "n": 202,
+   "wins": 99,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.4900990099009901,
+   "direction_accuracy_over_settled_trades_only": 0.4925373134328358,
+   "mean_ask": 0.4427227722772278,
+   "pf": 1.152463054187192,
+   "pf_blocks": {
+    "A": 1.1373937677053823,
+    "B": 1.530543933054393,
+    "C": 0.8561596696490019
+   },
+   "block_n": {
+    "A": 71,
+    "B": 70,
+    "C": 61
+   },
+   "pf_halves": [
+    1.1877510040160641,
+    1.1184719535783365
+   ],
+   "net_per_trade": 0.03064356435643563,
+   "net_per_trade_fee_x1.2": 0.026821782178217804,
+   "pf_fee_x1.2": 1.1322108345534405,
+   "z_date_clustered": 0.874803525729554,
+   "z_with_the_D_over_D_minus_1_factor": 0.8451404980161196,
+   "control_passed": false,
+   "marginal_p": 0.11588411588411589,
+   "control_p_best_of_20": 0.34465534465534464,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 191,
+    "pf": 1.1825620046024035
+   }
+  },
+  "KXGOLD15M f9_book_slope": {
+   "n": 263,
+   "wins": 130,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.49429657794676807,
+   "direction_accuracy_over_settled_trades_only": 0.4961832061068702,
+   "mean_ask": 0.5053231939163498,
+   "pf": 0.8781459063395985,
+   "pf_blocks": {
+    "A": 1.092552026286966,
+    "B": 0.9710344827586206,
+    "C": 0.6174791392182696
+   },
+   "block_n": {
+    "A": 90,
+    "B": 96,
+    "C": 77
+   },
+   "pf_halves": [
+    1.1972656249999998,
+    0.6584185045723507
+   ],
+   "net_per_trade": -0.029087452471482905,
+   "net_per_trade_fee_x1.2": -0.032942965779467696,
+   "pf_fee_x1.2": 0.8631020098596889,
+   "z_date_clustered": -0.7061612916584166,
+   "z_with_the_D_over_D_minus_1_factor": -0.6822166213998584,
+   "control_passed": false,
+   "marginal_p": 0.6893106893106893,
+   "control_p_best_of_20": 1.0,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 253,
+    "pf": 0.8947796389656854
+   }
+  },
+  "KXGOLD15M f10_imb_3c": {
+   "n": 316,
+   "wins": 155,
+   "no_result_fee_only": 2,
+   "direction_accuracy": 0.49050632911392406,
+   "direction_accuracy_over_settled_trades_only": 0.49363057324840764,
+   "mean_ask": 0.5075000000000001,
+   "pf": 0.8597995251912423,
+   "pf_blocks": {
+    "A": 0.9404362416107381,
+    "B": 1.0886899918633033,
+    "C": 0.5843065693430656
+   },
+   "block_n": {
+    "A": 107,
+    "B": 116,
+    "C": 93
+   },
+   "pf_halves": [
+    0.9696796338672768,
+    0.7657856093979442
+   ],
+   "net_per_trade": -0.03363924050632913,
+   "net_per_trade_fee_x1.2": -0.03750632911392407,
+   "pf_fee_x1.2": 0.8449462309322587,
+   "z_date_clustered": -0.9440473359149236,
+   "z_with_the_D_over_D_minus_1_factor": -0.9120363740653076,
+   "control_passed": false,
+   "marginal_p": 0.7932067932067932,
+   "control_p_best_of_20": 1.0,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 301,
+    "pf": 0.8633916554508747
+   }
+  },
+  "KXBTC15M f1_imb5": {
+   "n": 311,
+   "wins": 190,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.6109324758842444,
+   "direction_accuracy_over_settled_trades_only": 0.6129032258064516,
+   "mean_ask": 0.5016720257234727,
+   "pf": 1.5254988913525498,
+   "pf_blocks": {
+    "A": 1.2706630336058127,
+    "B": 1.434890656063618,
+    "C": 2.146076794657763
+   },
+   "block_n": {
+    "A": 112,
+    "B": 112,
+    "C": 87
+   },
+   "pf_halves": [
+    1.0914043583535107,
+    2.205882352941176
+   ],
+   "net_per_trade": 0.09144694533762056,
+   "net_per_trade_fee_x1.2": 0.08765273311897104,
+   "pf_fee_x1.2": 1.499486953972442,
+   "z_date_clustered": 3.2876768688102387,
+   "z_with_the_D_over_D_minus_1_factor": 3.1761976083774397,
+   "control_passed": true,
+   "marginal_p": 0.000999000999000999,
+   "control_p_best_of_20": 0.000999000999000999,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": true,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f2_imb1": {
+   "n": 235,
+   "wins": 179,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.7617021276595745,
+   "direction_accuracy_over_settled_trades_only": 0.7649572649572649,
+   "mean_ask": 0.5037872340425532,
+   "pf": 3.425751072961373,
+   "pf_blocks": {
+    "A": 3.5934343434343425,
+    "B": 3.4613583138173296,
+    "C": 3.1871345029239766
+   },
+   "block_n": {
+    "A": 80,
+    "B": 88,
+    "C": 67
+   },
+   "pf_halves": [
+    2.780028943560058,
+    4.367088607594936
+   ],
+   "net_per_trade": 0.24051063829787234,
+   "net_per_trade_fee_x1.2": 0.23672340425531913,
+   "pf_fee_x1.2": 3.3664284498893986,
+   "z_date_clustered": 7.892530170522333,
+   "z_with_the_D_over_D_minus_1_factor": 7.6249085454470595,
+   "control_passed": true,
+   "marginal_p": 0.000999000999000999,
+   "control_p_best_of_20": 0.000999000999000999,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": true,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f3_dwmid_minus_mid": {
+   "n": 263,
+   "wins": 138,
+   "no_result_fee_only": 0,
+   "direction_accuracy": 0.5247148288973384,
+   "direction_accuracy_over_settled_trades_only": 0.5247148288973384,
+   "mean_ask": 0.4825855513307985,
+   "pf": 1.11078875793291,
+   "pf_blocks": {
+    "A": 1.0775375939849623,
+    "B": 1.3157290470723304,
+    "C": 0.9367781155015197
+   },
+   "block_n": {
+    "A": 99,
+    "B": 92,
+    "C": 72
+   },
+   "pf_halves": [
+    1.1836657884832518,
+    1.0430370888733378
+   ],
+   "net_per_trade": 0.02323193916349808,
+   "net_per_trade_fee_x1.2": 0.019452471482889713,
+   "pf_fee_x1.2": 1.0919846092991476,
+   "z_date_clustered": 0.6666211663096611,
+   "z_with_the_D_over_D_minus_1_factor": 0.6440172311985003,
+   "control_passed": false,
+   "marginal_p": 0.000999000999000999,
+   "control_p_best_of_20": 0.4865134865134865,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f4_d_imb30": {
+   "n": 270,
+   "wins": 147,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.5444444444444444,
+   "direction_accuracy_over_settled_trades_only": 0.5464684014869888,
+   "mean_ask": 0.48148148148148145,
+   "pf": 1.2302198834805487,
+   "pf_blocks": {
+    "A": 1.1903042805569881,
+    "B": 1.3228346456692912,
+    "C": 1.1758104738154613
+   },
+   "block_n": {
+    "A": 98,
+    "B": 91,
+    "C": 81
+   },
+   "pf_halves": [
+    1.1978430643361844,
+    1.2632978723404256
+   ],
+   "net_per_trade": 0.04537037037037036,
+   "net_per_trade_fee_x1.2": 0.04158518518518516,
+   "pf_fee_x1.2": 1.2092277877161597,
+   "z_date_clustered": 1.6644601923671818,
+   "z_with_the_D_over_D_minus_1_factor": 1.6080213151085185,
+   "control_passed": false,
+   "marginal_p": 0.000999000999000999,
+   "control_p_best_of_20": 0.11188811188811189,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f5_d_imb60": {
+   "n": 247,
+   "wins": 141,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.5708502024291497,
+   "direction_accuracy_over_settled_trades_only": 0.573170731707317,
+   "mean_ask": 0.500080971659919,
+   "pf": 1.2694512694512694,
+   "pf_blocks": {
+    "A": 1.5636363636363635,
+    "B": 1.0625,
+    "C": 1.2389146260754464
+   },
+   "block_n": {
+    "A": 83,
+    "B": 87,
+    "C": 77
+   },
+   "pf_halves": [
+    1.4334911752044768,
+    1.1206559937524405
+   ],
+   "net_per_trade": 0.05327935222672064,
+   "net_per_trade_fee_x1.2": 0.0494898785425101,
+   "pf_fee_x1.2": 1.248263536293107,
+   "z_date_clustered": 1.647210256493453,
+   "z_with_the_D_over_D_minus_1_factor": 1.5913562938022643,
+   "control_passed": false,
+   "marginal_p": 0.000999000999000999,
+   "control_p_best_of_20": 0.056943056943056944,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f8_hole_asymmetry": {
+   "n": 211,
+   "wins": 86,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.4075829383886256,
+   "direction_accuracy_over_settled_trades_only": 0.4095238095238095,
+   "mean_ask": 0.44061611374407583,
+   "pf": 0.7960867063111452,
+   "pf_blocks": {
+    "A": 0.691712204007286,
+    "B": 0.9312668463611861,
+    "C": 0.8147423352902805
+   },
+   "block_n": {
+    "A": 83,
+    "B": 64,
+    "C": 64
+   },
+   "pf_halves": [
+    0.770949720670391,
+    0.8227848101265822
+   ],
+   "net_per_trade": -0.0503791469194313,
+   "net_per_trade_fee_x1.2": -0.05418957345971566,
+   "pf_fee_x1.2": 0.7826483671064136,
+   "z_date_clustered": -1.7540627808286475,
+   "z_with_the_D_over_D_minus_1_factor": -1.6945856395637762,
+   "control_passed": false,
+   "marginal_p": 0.4145854145854146,
+   "control_p_best_of_20": 1.0,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f9_book_slope": {
+   "n": 270,
+   "wins": 153,
+   "no_result_fee_only": 0,
+   "direction_accuracy": 0.5666666666666667,
+   "direction_accuracy_over_settled_trades_only": 0.5666666666666667,
+   "mean_ask": 0.4895925925925926,
+   "pf": 1.3026214340786428,
+   "pf_blocks": {
+    "A": 0.9782903663500678,
+    "B": 1.4055587067498583,
+    "C": 1.743822075782537
+   },
+   "block_n": {
+    "A": 97,
+    "B": 95,
+    "C": 78
+   },
+   "pf_halves": [
+    0.9389168765743072,
+    1.8767395626242542
+   ],
+   "net_per_trade": 0.05814814814814813,
+   "net_per_trade_fee_x1.2": 0.054362962962962946,
+   "pf_fee_x1.2": 1.2805428134556573,
+   "z_date_clustered": 2.324183696335033,
+   "z_with_the_D_over_D_minus_1_factor": 2.2453747713961407,
+   "control_passed": false,
+   "marginal_p": 0.000999000999000999,
+   "control_p_best_of_20": 0.030969030969030968,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f10_imb_3c": {
+   "n": 308,
+   "wins": 193,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.6266233766233766,
+   "direction_accuracy_over_settled_trades_only": 0.6286644951140065,
+   "mean_ask": 0.48948051948051946,
+   "pf": 1.7481677524429964,
+   "pf_blocks": {
+    "A": 1.4862765406525114,
+    "B": 1.659412404787813,
+    "C": 2.333333333333333
+   },
+   "block_n": {
+    "A": 107,
+    "B": 112,
+    "C": 89
+   },
+   "pf_halves": [
+    1.3572159672466735,
+    2.3266027258960116
+   ],
+   "net_per_trade": 0.1193181818181818,
+   "net_per_trade_fee_x1.2": 0.1155194805194805,
+   "pf_fee_x1.2": 1.7180625630676083,
+   "z_date_clustered": 5.308559310882046,
+   "z_with_the_D_over_D_minus_1_factor": 5.1285555302322345,
+   "control_passed": true,
+   "marginal_p": 0.000999000999000999,
+   "control_p_best_of_20": 0.000999000999000999,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": true,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  }
+ },
+ "CLOSED-FAMILY FEATURES, REPORTED SEPARATELY": {
+  "KXGOLD15M f6_thin_depletion": {
+   "n": 254,
+   "wins": 143,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.562992125984252,
+   "direction_accuracy_over_settled_trades_only": 0.5652173913043478,
+   "mean_ask": 0.5236614173228346,
+   "pf": 1.1070266130576296,
+   "pf_blocks": {
+    "A": 1.2334515366430256,
+    "B": 1.0208891269416174,
+    "C": 1.075120192307692
+   },
+   "block_n": {
+    "A": 91,
+    "B": 86,
+    "C": 77
+   },
+   "pf_halves": [
+    1.2066805845511481,
+    1.0226308345120225
+   ],
+   "net_per_trade": 0.022007874015748014,
+   "net_per_trade_fee_x1.2": 0.01816535433070864,
+   "pf_fee_x1.2": 1.0876286701865003,
+   "z_date_clustered": 0.6264306583632392,
+   "z_with_the_D_over_D_minus_1_factor": 0.605189511713679,
+   "control_passed": false,
+   "marginal_p": 0.056943056943056944,
+   "control_p_best_of_20": 0.5164835164835165,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 240,
+    "pf": 1.106267029972752
+   }
+  },
+  "KXGOLD15M f7_sweep_net": {
+   "n": 190,
+   "wins": 91,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.4789473684210526,
+   "direction_accuracy_over_settled_trades_only": 0.48148148148148145,
+   "mean_ask": 0.5078421052631579,
+   "pf": 0.810159276797245,
+   "pf_blocks": {
+    "A": 1.2767295597484274,
+    "B": 0.6891464699683878,
+    "C": 0.6330275229357797
+   },
+   "block_n": {
+    "A": 61,
+    "B": 73,
+    "C": 56
+   },
+   "pf_halves": [
+    0.8848886783514922,
+    0.7479289940828401
+   ],
+   "net_per_trade": -0.04642105263157897,
+   "net_per_trade_fee_x1.2": -0.050263157894736864,
+   "pf_fee_x1.2": 0.7960883119101506,
+   "z_date_clustered": -1.2398833895276187,
+   "z_with_the_D_over_D_minus_1_factor": -1.1978411545991383,
+   "control_passed": false,
+   "marginal_p": 0.7682317682317682,
+   "control_p_best_of_20": 1.0,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 179,
+    "pf": 0.8295227524972252
+   }
+  },
+  "KXBTC15M f6_thin_depletion": {
+   "n": 246,
+   "wins": 121,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.491869918699187,
+   "direction_accuracy_over_settled_trades_only": 0.49387755102040815,
+   "mean_ask": 0.492479674796748,
+   "pf": 0.9282280219780219,
+   "pf_blocks": {
+    "A": 1.3170289855072461,
+    "B": 0.7026785714285714,
+    "C": 0.8563278008298754
+   },
+   "block_n": {
+    "A": 83,
+    "B": 83,
+    "C": 80
+   },
+   "pf_halves": [
+    1.1785168195718654,
+    0.7241271820448878
+   ],
+   "net_per_trade": -0.0169918699186992,
+   "net_per_trade_fee_x1.2": -0.02079674796747969,
+   "pf_fee_x1.2": 0.9128627878457555,
+   "z_date_clustered": -0.5571677308711737,
+   "z_with_the_D_over_D_minus_1_factor": -0.5382751665915774,
+   "control_passed": false,
+   "marginal_p": 0.03696303696303696,
+   "control_p_best_of_20": 0.996003996003996,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  },
+  "KXBTC15M f7_sweep_net": {
+   "n": 173,
+   "wins": 68,
+   "no_result_fee_only": 0,
+   "direction_accuracy": 0.3930635838150289,
+   "direction_accuracy_over_settled_trades_only": 0.3930635838150289,
+   "mean_ask": 0.4804624277456648,
+   "pf": 0.6118836915297092,
+   "pf_blocks": {
+    "A": 0.5225,
+    "B": 0.9136577708006278,
+    "C": 0.47214673913043476
+   },
+   "block_n": {
+    "A": 66,
+    "B": 56,
+    "C": 51
+   },
+   "pf_halves": [
+    0.5464328417696293,
+    0.6852928028609745
+   ],
+   "net_per_trade": -0.10647398843930637,
+   "net_per_trade_fee_x1.2": -0.11028901734104049,
+   "pf_fee_x1.2": 0.601320573362865,
+   "z_date_clustered": -3.3282231894154433,
+   "z_with_the_D_over_D_minus_1_factor": -3.2153690755482267,
+   "control_passed": false,
+   "marginal_p": 0.8621378621378621,
+   "control_p_best_of_20": 1.0,
+   "meets_the_whole_bar": false,
+   "z_against_5.46": false,
+   "second_look_flag_55pct_at_300": false,
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  }
+ },
+ "verdict": "FALSIFIED: none of the 20 tries meets the whole bar",
+ "zero_tolerance_used": 1e-12
+}

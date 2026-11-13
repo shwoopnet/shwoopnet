@@ -29,6 +29,36 @@ They are listed at the top of `depth1_second.py` and printed with every run. The
 7. **f6 (9), f8 (10), f10 (11)**: the exact reading of the thin side, the missing second level and "within 0.03".
 8. **Not built here (16, 17):** Bitcoin's OICORE overlap mark needs candles (every Bitcoin window is "unknown" in this build) and the history check on candles is not part of the verdict.
 
-## Next
+## First comparison with the wrapper (2026-11-13): 18 of 20 tries identical on every figure; one FAULT found
 
-Desk A runs the wrapper on the same fixture (or says how to, without this desk reading the wrapper) and the two outputs are compared figure by figure: windows per market, the usable-condition counts, per try n, wins, no-result count, profit factor pooled and by block and half, net per trade at both fees, z, the control and the verdict.
+Desk A ran the wrapper on both fixtures (its output: `desk_a_verify/DEPTH1_FIXTURE_OUT_edge0.txt` and `..._edge030.txt` at c499f3f6 on `claude/idea-desk-a`) and said, as readings, where V2's code differs from this build. The wrapper and `depth1.py` were still not read here; the differences below were found from the two outputs and from variants of this build only.
+
+### Readings where the first build differs from the text as this build first read it (now aligned; none looks like a fault, each wants a line in Desk A's clarifying amendment)
+
+1. The coverage row's `first_recv_ms` and `last_recv_ms` are compared with T-545 s and T-470 s raw, with no clock offset.
+2. A window that opened (close minus 900 s) at or after the recorder's end, 2026-11-13T23:59Z, is dropped. Not in the registration's usable-window sentence; the date is a CONFIG constant. (It matters on real data: R6 was extended for Bitcoin to Nov 20, so Bitcoin windows after that instant exist.)
+3. A window with a decision poll is a scored window even if that poll's book is one-sided or empty.
+4. The imbalance features need BOTH sides quoted at every poll they use (the decision poll and the lookback poll).
+5. Direction accuracy is wins over all trades (a fee-only no-result trade is a miss).
+6. **The date-clustered z has no small-sample factor:** sum of nets over sqrt(sum over dates of (date sum minus date n x mean)^2). With the usual D/(D-1) factor on the variance it is smaller by sqrt((D-1)/D): 3.4% at 15 dates, so the first build's 5.27 is 5.09 on the corrected scale. A choice the registration does not state; for the Head to rule, since it moves the bar's meaning by 3.4%. This build prints both.
+7. The no-result count's raw values are counted per window.
+
+### With those aligned and this build told to trade on ANY non-zero float (`ZERO_TOL = 0.0`)
+
+On both fixtures, **18 of the 20 tries agree on all 15 figures each (270 of 270): n, profit factor pooled and in each block with the block's n, both halves, net in cents, stress profit factor, accuracy, mean ask and z.** Scored windows 539 gold and 520 Bitcoin, 3 no-result fired windows (2 empty, 1 void), verdict FALSIFIED on both fixtures: identical. The shuffled-book control's 99th percentile is 6.59c here against 6.70c there on the no-edge fixture (different random draws; Desk A is to write the exact procedure and generator so it can be reproduced digit for digit).
+
+The two tries that differ are `f3_dwmid_minus_mid` in both markets (276 against 296 trades, 269 against 289). See the fault.
+
+### FAULT: three features place trades on floating point residue when the registered feature is exactly zero
+
+The registered sign rule: "feature > 0 buys YES, < 0 buys NO, 0 or undefined: no trade". Several features are differences of two quantities that are often EQUAL: the two second-level gaps (f8), the two slopes (f9), the weighted mid and the plain mid (f3). Computed in floating point, an exact zero comes out as a residue near 1e-17 for many prices, and the first build then trades on its sign.
+
+- **Proof from the outputs.** With a zero tolerance of 1e-12 this build has 202 gold and 211 Bitcoin f8 trades on the no-edge fixture; with the tolerance off it has 251 and 259, which are exactly the wrapper's counts, with every other figure of those tries identical. So 49 of gold's 251 f8 trades and 48 of Bitcoin's 259 (19%) exist only because of residue. f9: 3 of 266 and 1 of 271. f3: this build has 7 and 6 residue trades and the wrapper 20 more than that in each market; five equivalent ways of writing f3's arithmetic give this build anything from 269 to 281 trades, so f3's count depends on the order of the arithmetic.
+- **Why it matters on real books.** A liquid 1c-tick book usually has its second level 1c behind the touch on BOTH sides, so f8's two gaps are equal and the registered feature is zero: no trade. On invented whole-cent books of that shape (spread 1c to 4c, every price pair), the raw float value is non-zero for 154 of 378 pairs (41%), and its sign is tied to the price: when YES is the favourite it buys NO 61 times of 77, and when NO is the favourite it buys YES 61 times of 77. So the residue trades are a bet on the CHEAPER side four times in five. The registration says of this card "It is never scored as cheap side late". An f8 result on real data would be partly that bet.
+- **What it is not.** Not look-ahead: nothing after the decision is used. It cannot be told from the fixture whether it would help or hurt f8; it is a trade the registered rule does not make.
+- **Fix, for the Head and Auditor B to rule (a new audited hash before the read):** every feature whose absolute value is at or under a stated tolerance (1e-12 here) is zero, in the wrapper's patch or in the features; or f8 and f9 are computed in whole ticks. After that fix the two builds should agree on f3, f8 and f9 as well (this build's figures under the registered rule are in the `..._registered_zero_rule_...` files).
+
+## Files added
+
+`DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_registered_zero_rule_MADE_UP_DATA.{json,txt}` (zero tolerance 1e-12, the registered sign rule) and `..._like_for_like_any_nonzero_float_MADE_UP_DATA.{json,txt}` (tolerance off, to compare with the first build as it stands). `depth1_second.py` sha256 `0872493a...`.
+

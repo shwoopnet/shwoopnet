@@ -13,7 +13,7 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
  1. Poll time: t_recv_ms plus the run's clock offset (median over the run's book rows of Date header + 0.5 s minus t_recv_ms). The close T is the coverage row's close_time.
  2. Coverage times (first_recv_ms, last_recv_ms) are compared with T after adding the same run offset.
  3. A ticker with coverage rows in two runs: the usable row with the most ok_polls is the window; its book rows are that run's only. One window counts once.
- 4. The decision poll: the last poll with time at or before T-480 s and no earlier than T-490 s. It must carry a YES bid and a NO bid at level 1 ("no quote" otherwise, counted).
+ 4. The decision poll: the last poll with time at or before T-480 s and no earlier than T-490 s. A window with such a poll is a scored window even if that poll's book is one-sided or empty (aligned to the first build on Nov 13; every imbalance feature is then undefined, but f7 can still fire from the tape).
  5. The 30 s and 60 s lookbacks are measured from the DECISION POLL's own time: the last poll at or before (decision poll time minus 30 s or 60 s) and no more than 6 s before that.
  6. f7's tape window: trades with created_time in [decision poll time minus 60 s, decision poll time). A sweep: same taker side, same whole second (of created_time), two or more distinct prices.
  7. The fill poll: the first poll at or after (decision poll time + 1.0 s) and no later than 20 s after that instant. The other reading (from T-480 s itself) is not built.
@@ -21,9 +21,9 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
  9. f6: thin side = the smaller 5 level size 60 s ago; value = (then - now)/then for that side, positive when the thin side is NO, negated when it is YES; equal sizes then = 0; thin size then of 0 = undefined.
 10. f8: gap = level 1 price minus level 2 price; a missing level 2 gives a gap of the whole level 1 price. f9 needs two levels a side; slope = (level 1 price - last level price)/sum of sizes.
 11. f10: levels whose price is within 0.03 of the side's level 1 price (inclusive, tolerance 1e-9).
-12. A feature with absolute value under 1e-12 is zero (no trade).
+12. A feature whose absolute value is at or under 1e-12 is zero (no trade): the registered sign rule says "0 or undefined: no trade", and a zero computed in floating point can come out as a residue near 1e-17. The first build trades on any non-zero float; setting ZERO_TOL to 0.0 reproduces it.
 13. Halves: the try's trades in close-time order, first floor(n/2) and the rest. Blocks by US Central close date.
-14. Date-clustered z: mean net per trade over its cluster-robust standard error, clusters = US Central close dates: se = sqrt(D/(D-1) x sum over dates of (date sum - date n x mean)^2) / n. The plain t of daily sums is printed beside it.
+14. Date-clustered z, as the first build prints it (aligned Nov 13): sum of nets over sqrt(sum over US Central close dates of (date sum - date n x mean)^2), with NO small-sample factor. The same with the usual D/(D-1) factor on the variance is printed beside it; it is smaller by sqrt((D-1)/D), 3.4% at 15 dates. Direction accuracy is wins over ALL trades (a fee-only no-result trade counts as a miss); wins over settled trades is printed beside it.
 15. Shuffled-book control: one permutation of the windows a market and round; a window's whole vector of 10 feature values moves together; the window keeps its own fill quotes and result. random.Random(20261114), markets in the order gold, Bitcoin, 1,000 rounds. A try with under 30 trades in a round is not counted in that round's best. An independent build cannot reproduce another build's random draws: the 99th percentile is compared approximately.
 16. Overlap: gold "held" = exactly one side's ask 0.88 to 0.97 at the last poll at or before T-360 s (within 10 s). Bitcoin needs candles this build does not read: every Bitcoin window is "unknown".
 17. The history check (candles, weaker evidence, not part of the verdict) is not built here.
@@ -43,6 +43,9 @@ USABLE = {"min_ok": 0.80, "max_gap_ms": 20000, "first_s": 545, "last_s": 470, "b
 BAR = {"n": 300, "pf": 1.5, "halves": 1.0, "stress_pf": 1.2, "z": 5.27, "z_shared": 5.46}
 NEED_WINDOWS, SHUFFLES, SEED, CONTROL_P, MIN_SHUFFLE_TRADES = 300, 1000, 20261114, 0.01, 30
 READ_NOT_BEFORE = 1794614400            # 2026-11-14T00:00:00Z
+RECORDER_END_MS = (READ_NOT_BEFORE - 60) * 1000      # CONFIG recorder_end_utc 2026-11-13T23:59:00Z; the first build drops a window that opened (close minus 900 s) at or after it (Desk A, Nov 13)
+COVERAGE_OFFSET = 0                     # the first build compares the coverage row's raw receive times with T (no clock offset); 1 would add the run's offset
+ZERO_TOL = 1e-12                        # a feature this close to zero is "zero: no trade" (AMBIGUITY 12); 0.0 reproduces a build that trades on any non-zero float
 EPS = 1e-9
 FEATURES = ("f1_imb5", "f2_imb1", "f3_dwmid_minus_mid", "f4_d_imb30", "f5_d_imb60", "f6_thin_depletion", "f7_sweep_net", "f8_hole_asymmetry", "f9_book_slope", "f10_imb_3c")
 CLOSED_FAMILY = ("f6_thin_depletion", "f7_sweep_net")
@@ -83,14 +86,14 @@ def book(r):
 
 def _imb(a, b): return None if a + b <= 0 else (a - b) / (a + b)
 def _tot(lv): return sum(s for _, s in lv)
-def f1(b): return _imb(_tot(b["y"]), _tot(b["n"]))
+def f1(b): return None if (not b["y"] or not b["n"]) else _imb(_tot(b["y"]), _tot(b["n"]))      # both sides must be quoted at that poll (aligned to the first build, Nov 13)
 def f2(b): return None if not b["y"] or not b["n"] else _imb(b["y"][0][1], b["n"][0][1])
 def f3(b):
     if not b["y"] or not b["n"]: return None
     wy = sum(p * s for p, s in b["y"]) / _tot(b["y"]); wn = sum(p * s for p, s in b["n"]) / _tot(b["n"])
     return (wy + (1 - wn)) / 2 - (b["y"][0][0] + (1 - b["n"][0][0])) / 2
 def f6(now, then):
-    if then is None: return None
+    if then is None or not now["y"] or not now["n"] or not then["y"] or not then["n"]: return None      # both sides quoted at both polls (aligned to the first build, Nov 13)
     ty, tn = _tot(then["y"]), _tot(then["n"])
     if abs(ty - tn) < EPS: return 0.0
     if tn < ty: return None if tn <= 0 else (tn - _tot(now["n"])) / tn
@@ -162,8 +165,9 @@ def load(root):
             if (num(r.get("max_gap_ms")) or 0) > USABLE["max_gap_ms"]: fails.append("largest gap over 20 s")
             if (num(r.get("tape_pages")) or 0) < 1 or any(b in str(r.get("note") or "") for b in USABLE["bad"]): fails.append("tape missing or incomplete")
             fr, lr = num(r.get("first_recv_ms")), num(r.get("last_recv_ms"))
-            if fr is None or fr + off > T - USABLE["first_s"] * 1000: fails.append("first poll after T-545 s")
-            if lr is None or lr + off < T - USABLE["last_s"] * 1000: fails.append("last poll before T-470 s")
+            if fr is None or fr + COVERAGE_OFFSET * off > T - USABLE["first_s"] * 1000: fails.append("first poll after T-545 s")
+            if lr is None or lr + COVERAGE_OFFSET * off < T - USABLE["last_s"] * 1000: fails.append("last poll before T-470 s")
+            if T - 900 * 1000 >= RECORDER_END_MS: fails.append("window opened at or after the recorder end (2026-11-13T23:59Z)")
             for f_ in fails: why[f_] += 1
             if fails: continue
             if best is None or ok > best["ok"]:
@@ -195,7 +199,6 @@ def prepare(w):
     T = w["T"]; dec = last_at_or_before(w["polls"], T - LOOK_S * 1000, DEC_EARLY_S * 1000)
     if dec is None: return "no decision poll"
     t0, b0 = dec
-    if not b0["y"] or not b0["n"]: return "no quote at the decision poll"
     p30 = last_at_or_before(w["polls"], t0 - 30000, LOOKBACK_EARLY_S * 1000); p60 = last_at_or_before(w["polls"], t0 - 60000, LOOKBACK_EARLY_S * 1000)
     a = f1(b0)
     feats = {"f1_imb5": a, "f2_imb1": f2(b0), "f3_dwmid_minus_mid": f3(b0),
@@ -220,7 +223,7 @@ def prepare(w):
 
 def trade(value, q, result):
     """-> None (no trade) or a string reason, or (net, stress net, ask, win or None)."""
-    if value is None or abs(value) < 1e-12: return "no signal"
+    if value is None or abs(value) <= ZERO_TOL: return "no signal"
     side = "yes" if value > 0 else "no"; quote = q[side]
     if quote is None: return "no fill poll or no ask"
     ask, size = quote
@@ -244,19 +247,19 @@ def zstats(tr):
     for t in tr: by[t["date"]][0] += t["net"]; by[t["date"]][1] += 1
     D = len(by)
     if D < 2: return None, None
-    v = sum((s - k * m) ** 2 for s, k in by.values()) * D / (D - 1)
-    z = None if v <= 0 else m * n / math.sqrt(v)
-    sums = [s for s, _ in by.values()]; sd = statistics.stdev(sums)
-    return z, (None if sd == 0 else statistics.mean(sums) / (sd / math.sqrt(D)))
+    v = sum((s - k * m) ** 2 for s, k in by.values())
+    z = None if v <= 0 else m * n / math.sqrt(v)                                    # as the first build prints it: no small-sample factor
+    zc = None if z is None else z * math.sqrt((D - 1) / D)                           # with the usual D/(D-1) factor on the variance: smaller by sqrt((D-1)/D), 3.4% at 15 dates
+    return z, zc
 
 
 def score(trs):
     trs = sorted(trs, key=lambda t: (t["T"], t["ticker"])); n = len(trs); nets = [t["net"] for t in trs]; st = [t["stress"] for t in trs]
     blocks = {name: pf([t["net"] for t in trs if lo <= t["date"] <= hi]) for name, lo, hi in BLOCKS}
     h = n // 2; z, tday = zstats(trs); wins = sum(1 for t in trs if t["win"]); settled = sum(1 for t in trs if t["win"] is not None)
-    return {"n": n, "wins": wins, "no_result_fee_only": n - settled, "direction_accuracy": (wins / settled) if settled else None, "mean_ask": (sum(t["ask"] for t in trs) / n) if n else None,
+    return {"n": n, "wins": wins, "no_result_fee_only": n - settled, "direction_accuracy": (wins / n) if n else None, "direction_accuracy_over_settled_trades_only": (wins / settled) if settled else None, "mean_ask": (sum(t["ask"] for t in trs) / n) if n else None,
             "pf": pf(nets), "pf_blocks": blocks, "block_n": {name: sum(1 for t in trs if lo <= t["date"] <= hi) for name, lo, hi in BLOCKS}, "pf_halves": [pf(nets[:h]), pf(nets[h:])],
-            "net_per_trade": (sum(nets) / n) if n else None, "net_per_trade_fee_x1.2": (sum(st) / n) if n else None, "pf_fee_x1.2": pf(st), "z_date_clustered": z, "t_of_daily_sums": tday}
+            "net_per_trade": (sum(nets) / n) if n else None, "net_per_trade_fee_x1.2": (sum(st) / n) if n else None, "pf_fee_x1.2": pf(st), "z_date_clustered": z, "z_with_the_D_over_D_minus_1_factor": tday}
 
 
 def meets_bar(s, control_ok):
@@ -306,9 +309,9 @@ def measure(root, made_up=False, now=None):
                 if isinstance(r, str): reasons["%s %s: %s" % (m, f, r)] += 1; continue
                 trs.append({"ticker": tk, "T": w["T"], "date": w["date"], "net": r[0], "stress": r[1], "ask": r[2], "win": r[3], "held": p["held"]})
                 fired_windows.add(tk)
-                if r[3] is None: fired_noresult.add(tk); raw_noresult[w["result"] or "(empty)"] += 1
+                if r[3] is None and tk not in fired_noresult: fired_noresult.add(tk); raw_noresult[w["result"] or "(empty)"] += 1
             tries[(m, f)] = trs
-    out["AMENDMENT 1 COUNT"] = {"fired_windows": len(fired_windows), "fired_windows_with_no_yes_or_no_result": len(fired_noresult), "raw_result_values_of_those_trades": dict(raw_noresult)}
+    out["AMENDMENT 1 COUNT"] = {"fired_windows": len(fired_windows), "fired_windows_with_no_yes_or_no_result": len(fired_noresult), "raw_result_values_of_those_windows": dict(raw_noresult)}
     out["no_trade_reasons"] = dict(reasons)
     if fired_windows and len(fired_noresult) > 0.01 * len(fired_windows):
         out["verdict"] = "STOPPED before any verdict line (Amendment 1, point 6): %d of %d fired windows have no yes or no result, over 1%%; the Head decides" % (len(fired_noresult), len(fired_windows)); return out
