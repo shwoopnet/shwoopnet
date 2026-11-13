@@ -84,3 +84,26 @@ The independent uniqueness score is for the Verification Analyst.
 3. How far back `/live_data/weather/{city}` serves `detailed=true` points (development needs 2026-09-13).
 4. `/calibrations`: whether earlier `config_version` rows with `effective_at_ms` are served.
 5. Only if the climate station is not one of the five: whether api.weather.gov serves that station's observations back to 2026-09-13 (it usually keeps about a week, which would make Source B forward only).
+
+## Amendment 1 (Nov 13, 2026, before any data): readings A1 to A18
+
+The History Miner built a second scorer from this card alone (claude/history-miner, 9c112b9f, `history_miner/tempblend2/`) and listed 18 ambiguities. The Head of R&D ruled A5, A6, A7, A10 and A12 and accepted the readings below for the rest, on Nov 13, 2026. Where this amendment and the text above differ, this amendment is right.
+
+- **A1, the index point:** v is the latest canonical point with t at or before the decision time (S minus 15 minutes) minus 300 s, so the last point published by the decision; normally t = S minus 20 minutes.
+- **A2, quotes:** strike quotes are the close of the 1 minute candle ending at S minus 900 s. A strike with no bid or no ask in that candle is not eligible.
+- **A3, the station reading:** Source A is the watched station's `temp_f` in the `stations[]` of point t itself. Source B is the latest report with obs_time at or before t. Either is used only if t minus obs_time is 600 s or less (inclusive); otherwise skip.
+- **A4, the gap:** bet when |g| is 0.5F or more, with a 1e-9 tolerance.
+- **A5, comparison (Head's ruling):** v and s are compared as raw published decimals, with no rounding to whole degrees, in the gap and in the strike conditions. Whether the index is rounded at settlement is a KNOWN GAP in this card. It is not resolved from data.
+- **A6, order of filters (Head's ruling):** among the strikes between s and v, keep those whose ask is 20c to 80c and whose spread is 4c or less FIRST. Then take the strike nearest (v + s) / 2.
+- **A7, ties (Head's ruling):** two strikes equally near the midpoint (within 1e-9): the lower K.
+- **A8, quotes per side:** YES ask = yes_ask; NO ask = 1 minus yes_bid; spread = yes_ask minus yes_bid for both sides. A quote is usable only if 0 < yes_bid < yes_ask < 1.
+- **A9, band and spread:** on the ask seen, inclusive at both ends, with a 1e-9 tolerance. There is no slip.
+- **A10, fill and fee (Head's ruling):** the fill is at the ask seen, with NO +1c. The fee per contract is 0.07 x p x (1 - p) at that ask, rounded up to the cent. A win pays 1 minus ask minus fee; a loss costs ask plus fee. (The "ask plus 1c" in the rule above is the order's limit, not the booked price.)
+- **A11, PF:** gross gain over gross loss, in dollars per contract after the fee; "inf" when there is no loss; n is printed with every PF.
+- **A12, void (Head's ruling):** the standing one-void rule. The price is refunded, the fee is kept, it counts as a fee-only loss, and it is counted as a bet.
+- **A13, windows:** by S. Development is [2026-09-13, 2026-11-05) with the halves split at 2026-10-09; held-out is [2026-11-12, 2026-12-10). Any other S is ignored and counted.
+- **A14, development kill:** a half with no bet fails the 1.2 line; a half with no loss passes it.
+- **A15, the calibration split:** measured at the decision time (S minus 15 minutes). Under 2 x 86400 s since the latest `effective_at_ms` is days 0 to 1. A calibration change after the decision but before S is ignored.
+- **A16, member skip:** for a member station, a code other than "ok" skips, and so does a missing code. Rows from Source B carry no code and are never skipped on it.
+- **A17, no index point:** no canonical point within 10 minutes before the decision time means a skip, counted as "no index point". The index `status` field is NOT filtered (a degraded point still settles contracts).
+- **A18, membership:** decided per row, from the `stations[]` of point t at the decision, so it can change with a calibration. The member and non-member rows are descriptive only; the verdict is pooled.
