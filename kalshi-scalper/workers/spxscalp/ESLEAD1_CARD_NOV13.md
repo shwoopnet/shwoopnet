@@ -26,3 +26,8 @@ Desk A sent the exact format (text only, from `lead_lag` in `desk_a_verify/cfrti
 
 ## Amendment 2 (Nov 13, 2026, before any data is opened): licensed-data handling
 The ES bars are Databento licensed data. They are never sent to any other session and never land in a public repo. Desk B's build 1 is NOT run on them in Desk B's session. The Testing Desk, which holds the file, runs BOTH builds (Desk B's and its own) on the same file; code goes to it, and only the aggregate figures come back. Auditor B compares the printed figures and the input file's sha256 (named by the Testing Desk), never the bars, and is never sent the ES file. Each scorer prints aggregates only (no bar value, no per-bar line, no per-window line that would reveal a bar) and writes no file derived from the ES bars.
+
+## Amendment 3 (2026-11-13, before any data is opened): the Head's three lines
+1. **Rule 18.** A candle's mid exists only when 0 < yes_bid < yes_ask < 1. An empty, locked or crossed candle gives no mid and no pair, and is counted as "not two-sided".
+2. **Prediction reading.** The prediction (peak at lag 0, no lead) passes only if lag 0 has at least 30 pairs AND the largest correlation, AND no lag from +1 to +3 exceeds it. If lag 0 is "n/a" the result is "untestable at n = x", not a pass.
+3. **ES instrument.** A minute whose instrument_id differs from the file's single instrument is dropped and counted (no roll is expected Nov 5 to 12). No row is dropped silently: every drop has a reason count, printed as aggregates.

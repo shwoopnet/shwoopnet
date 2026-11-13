@@ -48,3 +48,9 @@ Raised by the Testing Desk's blind read of the card; Desk B adopts them all.
 
 ## Amendment 2 (Nov 13, 2026, before any data is opened): licensed-data handling
 The ES bars are Databento licensed data. They are never sent to any other session and never land in a public repo. Desk B's build 1 is NOT run on them in Desk B's session. The Testing Desk, which holds the file, runs BOTH builds (Desk B's and its own) on the same file; code goes to it, and only the aggregate figures come back. Auditor B compares the printed figures and the input file's sha256 (named by the Testing Desk), never the bars, and is never sent the ES file. Each scorer prints aggregates only (no bar value, no per-bar line, no per-window line that would reveal a bar) and writes no file derived from the ES bars.
+
+## Amendment 3 (2026-11-13, before any data is opened): the Head's three lines
+1. **Rule 18 and C1.** A candle's mid and its prices exist only when 0 < yes_bid < yes_ask < 1. An empty, locked or crossed candle is "not two-sided" and is counted: it gives no entry price and no exit price. An exit minute that is not two-sided moves to the next two-sided minute (the target-exit scan is unaffected); if there is none through the close, the position is held to the close and settled.
+2. (Prediction reading is ESLEAD1's; no strategy prediction changes here.)
+3. **ES instrument.** A minute whose instrument_id differs from the file's single instrument is dropped and counted; no roll is expected Nov 5 to 12. No row is dropped silently: every drop has a reason count, printed as aggregates.
+Note on the earlier Amendment 1: "no candle or no bid at the exit: the entry is DROPPED and counted" is replaced by this rule for a not-two-sided exit minute (next two-sided minute, else hold to the close). A missing candle with no later two-sided minute is therefore held to the close.
