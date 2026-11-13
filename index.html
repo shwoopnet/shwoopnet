@@ -1824,8 +1824,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
-                  <li>Research: HISTCUTOFF1, a one request kalshi-pull job that reads Kalshi's public historical cutoff (the date that separates the live and historical market lists), joins the jobs bundle. No market data. Job file and tests only.</li>
-                  <li>Research: Idea Desk C's FOMCTEXT_LISTS (four Fed mention series, 4 live list requests, 8 pages at most, closes ending before 2026-06-17) joins the jobs bundle as a zero-try count for a slow family. Job file and tests only.</li>
+                  <li>Research: HISTCUTOFF1, a two request kalshi-pull job that reads Kalshi's public historical cutoff (the date that separates the live and historical market lists) and probes whether the historical list honours an event filter on one development Fed meeting, joins the jobs bundle. Job file and tests only.</li>
                   <li>Research: three more kalshi-pull job files are on main and nothing has run: POLGAPH_LISTS (69 short-dated politics series, settled lists only), CANDLEGAP2_TTEBB (3 batched candle requests for table tennis and e-basketball markets) and RULESREAD_LISTS (26 golf, motorsport and combat sport series, rules text census). Public Kalshi data only, same runner and limits. Docs and job files only.</li>
                   <li>Research: a 79 request kalshi-pull job, VOIDSNAP_CANDLES, reads 1 minute candles of CS2 markets in the development window (closes Sep 12 to Oct 22) for a zero-try measurement of voided matches. Job file and tests only.</li>
                   <li>Strategies page, one Live box: the loop is now Shadow, Live and Off / Retired (the Probation box is gone). Every strategy trading real money sits in Live with a tag: Trial (small size, with its fills of 90 toward the 60 + 30 record) or Proven. Page only.</li>

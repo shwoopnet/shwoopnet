@@ -3,8 +3,8 @@
  "status": "active",
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/main/HISTCUTOFF1.md",
- "purpose": "One public read of Kalshi's historical cutoff, to learn the date that separates /markets from /historical/markets, which every lists job needs. A measurement: no market, price or outcome is read and no rule is scored.",
- "heldout": "none: the answer is three cutoff timestamps, no market data, no candle and no result.",
+ "purpose": "Read Kalshi's historical cutoff and probe whether /historical/markets honours event_ticker on one development event; no rule scored.",
+ "heldout": "none for the cutoff (three timestamps). The probe asks for one market row of a development Fed meeting (March 2026, before the card's 2026-06-17 held-out cut); a development row is allowed to land, no held-out meeting is requested.",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "allowed_endpoints": [
@@ -13,12 +13,21 @@
    "method": "GET",
    "path_pattern": "/historical/cutoff",
    "params_allowed": []
+  },
+  {
+   "name": "historical_markets_probe",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "event_ticker",
+    "limit"
+   ]
   }
  ],
  "series_allowlist": [],
  "ticker_allowlist": [],
  "pacing_seconds": 1.0,
- "max_requests": 1,
+ "max_requests": 2,
  "stop_rules": {
   "pause_seconds_on_429": "5, doubling to 60",
   "stop_after_consecutive_429": 3,
@@ -29,6 +38,14 @@
    "id": "cutoff",
    "path": "/historical/cutoff",
    "params": {}
+  },
+  {
+   "id": "probe_event_filter",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26MAR",
+    "limit": 1
+   }
   }
  ]
 }
