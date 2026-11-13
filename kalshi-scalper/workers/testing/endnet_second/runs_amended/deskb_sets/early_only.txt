@@ -1,0 +1,11 @@
+HELDOUT_PULL_RUNS.md copy read by the guard: sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d
+COUNTS: games 0 (outside the development window 1); games with a qualifying state 0; entries made 0; states not entered 0: {}
+MEDIAN ASK (stage 1 KILL: every state with a strike and a two-sided quote, before the filters) None (asks []); entries made (information) None (asks [])
+ENTRIES BY US CENTRAL CLOSE DATE: {}
+ENTRIES BY US CENTRAL WEEK (Monday): {}
+WEEK TESTS: mean over the 4 weeks of the development window 0.0 (DECIDES: under 6 is True); information: every week with an entry under 6 is False; mean over the weeks with entries 0
+STAGE 1 VERDICT: CLOSED: fewer than 6 qualifying entries a week (the mean over the 4-week window)
+STAGE 2 (development only): n = 0 settled (unsettled 0); wins 0, losses 0 (a void is a fee-only loss counted); net +0.0 c, +0.00 c a contract; cash PF None; halves by 2026-12-01T00:00Z: first n 0 PF None, second n 0 PF None
+Z (one-sided, day-clustered by US Central game day, 0 clusters): None against the bar 5.46
+STAGE 2 VERDICT: NOT_ENOUGH_DATA at n = 0
+label: provisional, one build; invented rows

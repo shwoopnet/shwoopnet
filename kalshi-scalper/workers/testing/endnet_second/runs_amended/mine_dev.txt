@@ -1,0 +1,11 @@
+HELDOUT_PULL_RUNS.md copy read by the guard: sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d
+COUNTS: games 14 (outside the development window 0); games with a qualifying state 12; entries made 6; states not entered 6: {'ask_outside_band': 1, 'no_strike': 1, 'no_usable_quote': 2, 'not_two_sided': 1, 'spread_too_wide': 1}
+MEDIAN ASK (stage 1 KILL: every state with a strike and a two-sided quote, before the filters) 31.5 (asks [15, 20, 28, 29, 34, 35, 45, 46]); entries made (information) 28.5 (asks [15, 20, 28, 29, 34, 45])
+ENTRIES BY US CENTRAL CLOSE DATE: {'2026-11-17': 2, '2026-11-18': 1, '2026-11-21': 1, '2026-11-23': 1, '2026-11-25': 1}
+ENTRIES BY US CENTRAL WEEK (Monday): {'2026-11-16': 4, '2026-11-23': 2}
+WEEK TESTS: mean over the 4 weeks of the development window 1.5 (DECIDES: under 6 is True); information: every week with an entry under 6 is True; mean over the weeks with entries 3.0
+STAGE 1 VERDICT: CLOSED: fewer than 6 qualifying entries a week (the mean over the 4-week window)
+STAGE 2 (development only): n = 6 settled (unsettled 0); wins 3, losses 3 (a void is a fee-only loss counted); net +143.4 c, +23.90 c a contract; cash PF 3.0056; halves by 2026-12-01T00:00Z: first n 6 PF 3.0056, second n 0 PF None
+Z (one-sided, day-clustered by US Central game day, 5 clusters): 1.03 against the bar 5.46
+STAGE 2 VERDICT: NOT_ENOUGH_DATA at n = 6
+label: provisional, one build; invented rows

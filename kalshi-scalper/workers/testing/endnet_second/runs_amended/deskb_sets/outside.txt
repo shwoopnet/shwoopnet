@@ -1,0 +1,2 @@
+HELDOUT_PULL_RUNS.md copy read by the guard: sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d
+REFUSED: game o1 closes on or after the held-out start 2026-12-15T00:00Z; nothing is read
