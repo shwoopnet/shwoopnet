@@ -74,7 +74,7 @@ def events(spec, list_folders):
     by = {}
     for t, m in ms.items():
         by.setdefault((m["series"], game_key(m["event"])), []).append(m)
-    counts = {"events_listed": 0, "held_out_dropped": 0, "dropped_not_all_settled": 0, "dropped_no_tie_market": 0, "start_not_derivable": 0, "no_such_series": 0, "note_not_all_settled": "dropped_not_all_settled tests only whether each market has a yes or no result field (presence), for base-block AND price-block games; the VALUE of a price-block result is never read (Auditor B minor note, Nov 13)"}
+    counts = {"events_listed": 0, "held_out_dropped": 0, "dropped_not_all_settled": 0, "dropped_wrong_market_count": 0, "price_block_games_not_all_settled_COUNTED_NOT_FILTERED": 0, "dropped_no_tie_market": 0, "start_not_derivable": 0, "no_such_series": 0, "limit_base_block_boundary": "a base game settling within about 2.5 hours after a pricing instant near 2026-10-27T00:00Z can be in the base block for its closing, a stated limit (Auditor B, Nov 13); price-block games are kept whatever their result field says"}
     listed = {m["series"] for m in ms.values()}
     counts["no_such_series"] = sum(1 for s in all_series(spec) if s not in listed)
     out = {}
@@ -88,7 +88,11 @@ def events(spec, list_folders):
                 counts["events_listed"] += 1
                 close = max(m["close"] for m in mk if m["close"])
                 if close >= HELD_OUT_FROM: counts["held_out_dropped"] += 1; continue
-                if len(mk) != need or any(m["result"] not in ("yes", "no") for m in mk): counts["dropped_not_all_settled"] += 1; continue
+                if len(mk) != need: counts["dropped_wrong_market_count"] += 1; continue
+                unsettled = any(m["result"] not in ("yes", "no") for m in mk)
+                if close < BASE_END:
+                    if unsettled: counts["dropped_not_all_settled"] += 1; continue                       # the BASE block needs the result
+                elif unsettled: counts["price_block_games_not_all_settled_COUNTED_NOT_FILTERED"] += 1       # price block: nothing is filtered on a result field (Head's ruling Nov 13): a family-level count only
                 tie = [m for m in mk if (m["ticker"].endswith("-1") if reg else m["ticker"].endswith("-TIE"))]
                 if len(tie) != 1: counts["dropped_no_tie_market"] += 1; continue
                 tie = tie[0]

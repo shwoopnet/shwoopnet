@@ -60,7 +60,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     mkrun(dl, jl, lists)
     ev, counts = t.events(spec, [dl])
     assert len(ev["NHL_P1"]["base"]) == NB and len(ev["NFL_Q"]["base"]) == NB and len(ev["NHL_REG"]["base"]) == NB, [len(v["base"]) for v in ev.values()]
-    assert counts["held_out_dropped"] >= 1 and counts["dropped_not_all_settled"] >= 1 and counts["start_not_derivable"] >= 1, counts
+    assert counts["held_out_dropped"] >= 1 and counts["dropped_wrong_market_count"] >= 1 and counts["start_not_derivable"] >= 1, counts
     assert len(ev["NHL_P1"]["price"]) == NP, len(ev["NHL_P1"]["price"])
     assert all(set(e) == {"event", "key", "tie_ticker", "T"} for v in ev.values() for e in v["price"])           # the price block carries no result and no level
     e0 = ev["NHL_P1"]["price"][0]; assert e0["T"] == starts[0] - 1800
@@ -91,4 +91,10 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     dc4 = os.path.join(dc, "d"); os.mkdir(dc4); mkrun(dc4, jc, body(candles(lambda tk: 0.28, 0.14))); assert t.measure(spec, [dl], [dc4])["cells"]["NHL_P1"]["two_sided"] == 0
     # efficient: ask at the base rate
     dc5 = os.path.join(dc, "e"); os.mkdir(dc5); mkrun(dc5, jc, body(candles(lambda tk: 0.40 if "NHL1P" in tk else 0.2, 0.015))); assert t.measure(spec, [dl], [dc5])["verdict"].startswith("CLOSED: efficient")
+    # Head's ruling Nov 13: a price-block game with a market that carries no yes/no result is KEPT and counted (family-level), nothing is filtered on a result field
+    ntot = len(ev["NHL_P1"]["price"]); lists["live_KXNHL1P"]["markets"][-4]["result"] = ""
+    for mk_ in lists["live_KXNHL1P"]["markets"]:
+        if mk_["ticker"].split("-")[1] == ev["NHL_P1"]["price"][0]["event"]: mk_["result"] = ""
+    dl3 = os.path.join(dc, "unset"); os.mkdir(dl3); mkrun(dl3, jl, lists); ev3, c3 = t.events(spec, [dl3])
+    assert len(ev3["NHL_P1"]["price"]) == ntot and c3["price_block_games_not_all_settled_COUNTED_NOT_FILTERED"] >= 1, c3
 print("tie3 synthetic tests passed")

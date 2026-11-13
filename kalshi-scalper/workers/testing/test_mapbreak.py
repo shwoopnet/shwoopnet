@@ -59,20 +59,21 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in jc["requests"]) and len(jc["ticker_allowlist"]) == 4 * len(mt) + 2 * sum(1 for x in mt if x.get("state_close2"))
     assert max(r["params"]["end_ts"] for r in jc["requests"]) >= max(x.get("state_close2", 0) for x in mt) + 300      # the window of a third-map match runs to map-2 close + 5 minutes
     def state_candle(ts, mid): return {"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % (mid - 0.01)}, "yes_ask": {"close_dollars": "%.4f" % (mid + 0.01)}, "volume_fp": "1"}
-    def candles(look_edge, half, thin_pre=False, thin_look=0, q=0.55):
+    def candles(look_edge, half, thin_pre=False, thin_look=0, q=0.55, bump=0.0):
         cm = {}
         for x in mt:
             x = dict(x, up=x["posted_up"], down=[tm for tm in x["match"] if tm != x["posted_up"]][0])
             p = q * q * (3 - 2 * q); V = 1 - (1 - q) ** 2
-            def series(t, mid, window):
-                return [{"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % max(0.02, mid - half)}, "yes_ask": {"close_dollars": "%.4f" % min(0.98, mid + half)}, "volume_fp": "1"} for ts in window]
+            def series(t, mid, window, bump=0.0):
+                window = list(window)
+                return [{"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % max(0.02, mid - half + (bump if ts != window[0] else 0))}, "yes_ask": {"close_dollars": "%.4f" % min(0.98, mid + half + (bump if ts != window[0] else 0))}, "volume_fp": "1"} for ts in window]          # bump: the asks AFTER the first look minute move up
             pre = range(x["S"] - 2400, x["S"] - 599, 60); look = range(x["state_close"] + 120 + 60 * thin_look, x["state_close"] + 301, 60)
             up_pre = p; dn_pre = 1 - p
-            cm[x["match"][x["up"]]] = series("", up_pre, pre) + series("", V - look_edge, [ts for ts in look])
+            cm[x["match"][x["up"]]] = series("", up_pre, pre) + series("", V - look_edge, [ts for ts in look], bump if int(x["key"][-1]) % 2 == 0 else 0.0)
             cm[x["match"][x["down"]]] = series("", dn_pre, pre) + series("", (1 - V) + 0.01, [ts for ts in look])
             if x.get("state_close2"):
                 look2 = range(x["state_close2"] + 120 + 60 * thin_look, x["state_close2"] + 301, 60)
-                cm[x["match"][x["up"]]] += series("", q - look_edge, list(look2)); cm[x["match"][x["down"]]] += series("", (1 - q) + 0.01, list(look2))
+                cm[x["match"][x["up"]]] += series("", q - look_edge, list(look2), bump if int(x["key"][-1]) % 2 == 0 else 0.0); cm[x["match"][x["down"]]] += series("", (1 - q) + 0.01, list(look2))
             cm[x["placebo"][x["up"]]] = series("", q, pre) + [state_candle(x["state_close"] - 60, 0.95)]; cm[x["placebo"][x["down"]]] = series("", 1 - q, pre) + [state_candle(x["state_close"] - 60, 0.04)]      # the map-1 contracts show the state (Amendment 7)
             if x.get("state_close2"):
                 cm[x["map2"][x["down"]]] = [state_candle(x["state_close2"] - 60, 0.95)]; cm[x["map2"][x["up"]]] = [state_candle(x["state_close2"] - 60, 0.04)]          # map 2 won by the map-1 loser
@@ -96,9 +97,9 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     dn = os.path.join(dc, "nm"); os.mkdir(dn); mkrun(dn, jc, nomap1(look_edge=0.12, half=0.005)); nm = m.measure(spec, [dl], [dn])["titles"]["DOTA2"]
     assert nm["filled_pre_match"] == 0 and nm["dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute"] == NM + 4, nm
     # efficient: ask at the value (gap 0 on the cheaper side but the other team 1c under)
-    eff = run("e", look_edge=0.0, half=0.005); assert eff["titles"]["DOTA2"]["verdict"].startswith("CLOSED: efficient"), eff["titles"]["DOTA2"]["verdict"]
+    eff = run("e", look_edge=0.0, half=0.005); assert eff["titles"]["DOTA2"]["verdict"].startswith("no evidence at n = 0 filled bets"), eff["titles"]["DOTA2"]["verdict"]          # nothing fires: under 150 filled bets is "no evidence" (Amendment 9)
     # cost: spread 12c
-    cost = run("c", look_edge=0.12, half=0.06); assert cost["titles"]["DOTA2"]["verdict"].startswith("CLOSED on cost"), cost["titles"]["DOTA2"]["verdict"]
+    cost = run("c", look_edge=0.12, half=0.06); assert cost["titles"]["DOTA2"]["fired_signals_at_the_look"] == 0 and cost["titles"]["DOTA2"]["verdict"].startswith("no evidence"), cost["titles"]["DOTA2"]["verdict"]          # a 12c spread never fires (spread line 4c)
     # step forward: the first two minutes after close + 120 are thin -> the look moves later; 5 minutes max
     late = run("l", look_edge=0.12, half=0.005, thin_look=2); assert late["titles"]["DOTA2"]["median_minutes_state_close_to_look"] == 4.0
     nolook = run("n", look_edge=0.12, half=0.005, thin_look=4); assert nolook["titles"]["DOTA2"]["filled_at_the_look"] == 0
@@ -182,13 +183,24 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     ix7 = {"MA": {100: cdl(0.93, 0.97), 160: cdl(0.20, None)}, "MB": {100: cdl(0.05, 0.08)}, "MC": {100: cdl(None, 0.12)}, "MD": {100: cdl(0.91, None)}, "ME": {100: cdl(0.5, 0.6)}}
     ow = bp.observe_winner
     assert ow(ix7, {"A": "MA", "B": "MB"}, 100) == "A"                                   # A's bid .93, B's ask .08
-    assert ow(ix7, {"A": "MB", "B": "MC"}, 100) == "B"                                    # A's ask .08 <= .10 says B won; B's ask .12 says nothing about A: exactly one
+    assert ow(ix7, {"A": "MB", "B": "MC"}, 100) is None                                   # Amendment 9: only a best bid of 0.90 or more counts; the other's low ask no longer does
     assert ow(ix7, {"A": "MD", "B": "ME"}, 100) == "A" and ow(ix7, {"A": "ME", "B": "ME"}, 100) is None            # a one-sided bid counts; neither: none
     assert ow(ix7, {"A": "MD", "B": "MD"}, 100) is None                                   # both teams observed: not observable
     assert ow(ix7, {"A": "MA", "B": "NOCANDLES"}, 100) is None and ow(ix7, {"A": "MA", "B": "MB"}, 99) is None          # a contract with no candle at or before the look
-    assert ow(ix7, {"A": "MA", "B": "ME"}, 130) == "A" and ow(ix7, {"A": "MA", "B": "ME"}, 170) is None                  # the LAST candle at or before the look decides (MA at 160 has bid .20)
+    assert ow(ix7, {"A": "MA", "B": "ME"}, 130) == "A" and ow(ix7, {"A": "MA", "B": "ME"}, 170) is None and ow(ix7, {"A": "MA", "B": "MB"}, 170) is None                  # the LAST candle at or before the look decides (MA at 160 has bid .20)
     # the bet's state ignores the posted result: flip posted_up on every record, nothing changes in the engine's resolved up
     ms_f, _c = m.matches(spec, [dl]); flipped = [dict(r, posted_up=[tm for tm in r["match"] if tm != r["posted_up"]][0]) for r in ms_f]
     a_ = bp.measure(ms_f, [dsr], m.CFG)["titles"]; b_ = bp.measure(flipped, [dsr], m.CFG)["titles"]
     assert a_["DOTA2"]["filled_at_the_look"] == b_["DOTA2"]["filled_at_the_look"] and b_["DOTA2"]["observed_winner_differs_from_posted_result"] == a_["DOTA2"]["sampled"] and a_["DOTA2"]["observed_winner_differs_from_posted_result"] == 0
+    # AMENDMENT 9 fill: a LIMIT at the look ask + 1c, filled only if the NEXT minute shows an ask at or under it, paying the limit; the same-candle figure is printed beside it
+    fl = run("fill", look_edge=0.12, half=0.005); assert fl["titles"]["DOTA2"]["fired_and_filled_next_minute"] == fl["titles"]["DOTA2"]["fired_signals_at_the_look"] == NM + 4
+    nf = run("nofill", look_edge=0.12, half=0.005, bump=0.05); tn = nf["titles"]["DOTA2"]; assert tn["fired_signals_at_the_look"] == NM + 4 and 0 < tn["fired_and_filled_next_minute"] < NM + 4 and tn["fired_not_filled"] + tn["fired_and_filled_next_minute"] == NM + 4, tn          # half the matches see the ask run away at the next minute
+    dnf = os.path.join(dc, "nf2"); os.mkdir(dnf); mkrun(dnf, jc, candles(look_edge=0.12, half=0.005, bump=0.05)); set_results(True); dlw2 = os.path.join(dc, "lw2"); os.mkdir(dlw2); mkrun(dlw2, jl, lists)
+    msx, _c = m.matches(spec, [dlw2]); m.CFG.min_filled = 10                                    # the 150 line is for real data; a small fixture needs a small line to reach the scoring step
+    try:
+        calls_ = []; o_nf = bp.score_rule2(msx, [dnf], m.CFG, lambda rec: calls_.append(1) or True)
+        o_ok = bp.score_rule2(msx, [dsr], m.CFG, lambda rec: True)
+    finally: m.CFG.min_filled = 150
+    assert 0 < o_nf["bets"] < o_nf["optimistic_same_candle_fill"]["bets"] and o_nf["counts"]["not_filled"] == o_nf["optimistic_same_candle_fill"]["bets"] - o_nf["bets"] and "optimistic" in o_nf["optimistic_same_candle_fill"]["label"], (o_nf.get("counts"), o_nf.get("verdict"))
+    assert o_ok["bets"] == o_ok["optimistic_same_candle_fill"]["bets"] and o_ok["counts"]["not_filled"] == 0
 print("mapbreak synthetic tests passed")
