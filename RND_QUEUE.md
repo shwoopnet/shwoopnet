@@ -744,3 +744,9 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - Desk C: LIQREV unpaused, plus untouched market families from the census.
   - Forensics: keeps the ranking current.
   - Refinement runs OICORE's proven-bar read when it reaches 100 settled fills (the count is in messages only). S-OICHEAPSKIP1's first read is expected around Nov 28 to Dec 1.
+- 19:30Z, new research (owner: it continues alongside OICORE). Every lead tonight closed, honestly, with no padding:
+  - Desk B: Kalshi-native fields (3b94e498); late-added strikes, frequent but no counterparty (f83e0bac); close-time drift, 0 of 277; government-source hunt (69c8915c), every source a GOVSER1 version; open-after-release check (370e662e), 0 of 157 CPI and 0 of 15 TSA (all close before the release).
+  - Desk C: literature (ANOMALY_LIT_NOV13.md), 0 clear; ROUNDCOUNT (7b630ef9), a 10c pile only, which is price-level under row 190, and no weekend staleness at 2 s.
+  - LIQREV stays the only new card alive (with the VA and Auditor B).
+  - OICORE proven-bar read: Refinement oicore_proven.py 0a788fb6 and Testing Desk b44bb38b, exactly the first 100 (then 150) fills, one marker per point. Auditor B diffs before the 100 read.
+  - Desk A's OICORE versions (741092a7: SPREAD, CAP30, DEPTH) are queued after V1, one at a time. Ruled 7g versions, not row 190 sweeps.
