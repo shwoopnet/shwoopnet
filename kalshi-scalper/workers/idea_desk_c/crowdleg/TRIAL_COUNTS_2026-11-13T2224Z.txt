@@ -1,0 +1,18 @@
+guard: HELDOUT_PULL_RUNS list read, sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d
+{
+ "kxmve_rows": 9334,
+ "kxmve_share": 0.1867,
+ "labels": [
+  "truncated: the last page still carries a cursor"
+ ],
+ "note": "rows are counted per answer row, not de-duplicated across pages",
+ "pages_in_manifest": 50,
+ "rows": 50000,
+ "status": "complete",
+ "unreadable": []
+}
+
+Run: pull/CROWDLEG_TAPE_TRIAL/2026-11-13T2224Z_43518960004 on kalshi-pull-data (dispatched by Main 22:24Z Nov 13, 2026).
+Reader: tape_count.py sha256 f328c4ad66d6d46f14f465df848301b2a742e13c9333b7f1a5f7c6f61b281d36 (Auditor B CLEAN), run Nov 13, 2026.
+Counts only: pages, rows and rows whose ticker starts KXMVE. No price, size, side, time or result was read.
+Window asked: 2026-09-20 18:00 to 18:30Z (a Sunday). The 50 page cap was reached with a cursor left, so 50,000 rows and 9,334 combo rows are lower bounds for that half hour.
