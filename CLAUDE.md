@@ -1336,7 +1336,7 @@ Six candle job files, job files and gates only (runner and workflow unchanged): 
 
 The first run of `MAPBREAK_CANDLES` (2026-11-12T1954Z) answered 166 of its 282 requests (c0000 to c0165, about 199 MB, about 1.2 MB an answer) and stopped cleanly at the 200 MB cap (`stopped_size`, the Pull step exits red but the data is pushed). `MAPBREAK_CANDLES_REST` carries only the remaining 116 requests (c0166 to c0281) byte for byte, cap 116, with the ticker allowlist cut to the tickers it uses; the converter merges the two runs by request id and `MAPBREAK_CANDLES` must not be run again (same pattern as `SPREADCELL1_REST`). Job file and gate only; runner and workflow unchanged.
 
-## MAPBREAK_CANDLES_REST corrected to start at c0165 (Nov 13, 2026, the Testing Desk's check)
+## MAPBREAK_CANDLES_REST corrected to start at c0165 (Nov 12, 2026, the Testing Desk's check, found just after midnight UTC)
 
 The first `MAPBREAK_CANDLES` run stored 165 answers (c0000 to c0164, files 0001 to 0165); the 166th request, c0165, tripped the 200 MB cap and was not stored. The note above that says c0165 was answered is wrong. `MAPBREAK_CANDLES_REST` now carries c0165 to c0281 (117 requests, cap 117, ticker allowlist cut to what it uses), byte for byte from the original job. It must not be run before this correction is merged. Job file only.
 
