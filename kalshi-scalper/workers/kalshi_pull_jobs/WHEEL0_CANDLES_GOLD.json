@@ -3,7 +3,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md",
  "purpose": "WHEEL0 stage 2 (the owner's ordered premise test of the rotation lane): 1 minute candles of the settled KXGOLD15M markets closing 2026-09-12 to before 2026-11-13, from 15 minutes before each batch's first close to 2 minutes before its last.",
- "heldout": "WHEEL0 has no held-out block (one read, 1 try). Rule (h): gold's recorded windows of 2026-10-30 to 2026-11-13 are DEPTH1's, read once from 2026-11-14T00:00Z. By the Head of R&D's ruling of 2026-11-12 20:21Z gold is pulled whole, to before 2026-11-13 (rule (h) point 7: the recorder branches already carry these results), and the protection is in the scorer: wheel0.py refuses to read before 2026-11-14T00:00Z and until DEPTH1's read is marked as made. Nobody joins an outcome to these candles before that.",
+ "heldout": "WHEEL0 has no held-out block (one read, 1 try). Rule (h): gold's recorded windows of 2026-10-30 to 2026-11-13 are DEPTH1's, read once from 2026-11-14T00:00Z. By the Head of R&D's ruling of 2026-11-12 20:21Z gold is pulled whole, to before 2026-11-13 (rule (h) point 7: the recorder branches already carry these results), and the protection is in the scorer: wheel0.py refuses to read before 2026-11-14T00:00Z and until DEPTH1's read is marked as made. Nobody joins an outcome to these candles before that. Unread cards on gold: BOOKIMB1, GF1 and GF2, MKTTIME1-F and MM1.",
  "allowed_endpoints": [
   {
    "name": "markets_candlesticks_batch",

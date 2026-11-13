@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/README.md",
  "purpose": "Kalshi's own Bitcoin perpetual KXBTCPERP: public 1 minute candles (bid, ask, price, open interest, volume), one UTC day per request, 2026-06-03 to 2026-11-12. Data pull only.",
- "heldout": "none (a raw history pull; any test that uses it registers its own held-out block before it reads this)",
+ "heldout": "none (a raw history pull; any test that uses it registers its own held-out block before it reads this) Cards on KXBTCPERP: CFRTI-K and PERPBIN1 (held-out from 2026-11-14T00:00Z); PERPOI1 and SNAPBACK1 (OPEN).",
  "route": "perps",
  "allowed_endpoints": [
   {

@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/IDEA_DESK_B_INGAME_CARD.md",
  "purpose": "In-game lag card, step 1, part A of 2: a MEASUREMENT with zero tries. One minute candles of one moneyline market and four low spread strikes for each NBA, NHL and NFL game of a fixed list (closes 2026-10-20 to 2026-11-11). No trade is scored.",
- "heldout": "none (a measurement of quote timing; no settlement result is read and no rule is scored). The spread markets are also the unread sample of W-SPREAD-CELL1: the reader uses in-play candles only and prints no pre-game price and no outcome.",
+ "heldout": "none (a measurement of quote timing; no settlement result is read and no rule is scored). The spread markets are also the unread sample of W-SPREAD-CELL1: the reader uses in-play candles only and prints no pre-game price and no outcome. Other cards: SPORTS-PRE (forward only, read 2027-01-01) and NHLOT (closed on two builds).",
  "allowed_endpoints": [
   {
    "name": "batch_candles",
