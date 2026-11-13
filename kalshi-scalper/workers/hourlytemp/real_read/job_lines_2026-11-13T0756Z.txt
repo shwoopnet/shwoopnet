@@ -1,0 +1,2 @@
+settled markets in the sample 6720 | clock hours 166 | requests 102 (cap 110)
+140 MARKETS DID NOT LIVE EXACTLY 60 MINUTES: no job written. The sample is never cut and no pin is bent; this goes to the Head of R&D.

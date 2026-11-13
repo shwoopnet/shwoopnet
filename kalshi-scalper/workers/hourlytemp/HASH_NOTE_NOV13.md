@@ -54,3 +54,12 @@ After Amendment 3 the Testing Desk re-ran its reader (commit 728766dd on `claude
 On the Head of R&D's order of 06:53Z, `HOURLYTEMP_MEASUREMENT_NOTE.md` gained one dated held-out line (text only; no pin, figure or reading changed). The note's sha256 is now f7176b1c05804db85cd108eb80e5302177e42128f4c7a62780301e2be2d7bb3b (it was 3e496e1266d41551afe3710eb98a927bd0c5b45eadd5e771d81297518dca2091). The reader `hourlytemp.py` is unchanged at f443ae6016209dffd2113c552d67fa3dd3750d9ec0e5a7abb39ca224a24c9970. The shared guard `deskb_guard.py` is now 14f969bc8983bff2a0696b3dcab745d748119de28fc4c5692370933cad0b1df9 (it also refuses runs listed in `HELDOUT_PULL_RUNS.md`); the nine measure fixtures print byte-identical lines under it. W-CAT-CAL1 weather is released, so the sample stays 2026-11-05 to 2026-11-11.
 
 **07:10Z:** a registry cross-check paragraph was added under the held-out line (text only). The note's sha256 is now f83c67858db66ddcf2c61ebf69256dcf04339e61f05ea981f6bd480f0752a154. The shared guard's docstring was reworded on Auditor B's gate (code unchanged); its sha256 is now a199f946cca9da8e0a3c56f0524109629b420ef91b20e77d54fa3b6b6b0f9dcd. The reader is unchanged.
+
+## The lists landed; the builder STOPPED on its own rule (Nov 13, 2026, 08:04Z)
+
+Run `pull/HOURLYTEMP_LISTS/2026-11-13T0756Z_43389350994/` (13 answers; the job on main byte-equal to the committed one, sha256 015a0b46). Auditor B's structure check PASSED before the run was opened (08:03Z: manifest, hashes, lengths, cursors, tickers, every settled close inside 2026-11-05 to 2026-11-11, strike fields present). Then one command on the audited reader (f443ae60), `job`, which reads tickers, strikes and times only. It printed (kept in `hourlytemp/real_read/job_lines_2026-11-13T0756Z.txt`):
+
+- settled markets in the sample 6,720 | clock hours 166 | requests 102 (cap 110)
+- 140 MARKETS DID NOT LIVE EXACTLY 60 MINUTES: no job written.
+
+This is Amendment 2, item 3 working as written: a sampled market whose close minus open is not exactly 3,600 seconds stops the builder, because the carried quote and the job's time ranges assume the 60 minute life. No candle job exists, nothing was cut, no pin was bent. No price and no result has been read. The stop is with the Head of R&D. I have run nothing else on the run: which markets, which series and what lives they had is not known to me, because the reader prints only the count.
