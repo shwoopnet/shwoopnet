@@ -171,7 +171,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -205,7 +206,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -239,7 +241,8 @@
     "longest_loss_streak": 3,
     "max_open": 1,
     "net_after_20_dollars": 10.28,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -267,7 +270,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -301,7 +305,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -335,7 +340,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -369,7 +375,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -403,7 +410,8 @@
     "longest_loss_streak": 4,
     "max_open": 1,
     "net_after_20_dollars": -17.91,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -437,7 +445,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -471,7 +480,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -499,7 +509,8 @@
     "longest_loss_streak": 0,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -533,7 +544,8 @@
     "longest_loss_streak": 0,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -567,7 +579,8 @@
     "longest_loss_streak": 3,
     "max_open": 3,
     "net_after_20_dollars": 12.06,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -601,7 +614,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -629,7 +643,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -657,7 +672,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -691,7 +707,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -725,7 +742,8 @@
     "longest_loss_streak": 4,
     "max_open": 3,
     "net_after_20_dollars": -18.03,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -759,7 +777,8 @@
     "longest_loss_streak": 4,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -793,7 +812,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -827,7 +847,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -861,7 +882,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -895,7 +917,8 @@
     "longest_loss_streak": 3,
     "max_open": 1,
     "net_after_20_dollars": 12.42,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -923,7 +946,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -957,7 +981,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -991,7 +1016,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -1025,7 +1051,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -1059,7 +1086,8 @@
     "longest_loss_streak": 4,
     "max_open": 1,
     "net_after_20_dollars": -16.0,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -1087,7 +1115,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -1121,7 +1150,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -1155,7 +1185,8 @@
     "longest_loss_streak": 0,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -1189,7 +1220,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "APPR_DAILY",
@@ -1223,7 +1255,8 @@
     "longest_loss_streak": 3,
     "max_open": 7,
     "net_after_20_dollars": 14.32,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -1257,7 +1290,8 @@
     "longest_loss_streak": 0,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "APPR_DAILY",
@@ -1291,7 +1325,8 @@
     "longest_loss_streak": 0,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -1325,7 +1360,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_DAILY",
@@ -1359,7 +1395,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -1387,7 +1424,8 @@
     "longest_loss_streak": 4,
     "max_open": 7,
     "net_after_20_dollars": -20.18,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "APPR_DAILY",
@@ -1421,7 +1459,8 @@
     "longest_loss_streak": 4,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -1455,7 +1494,8 @@
     "longest_loss_streak": 4,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "APPR_DAILY",
@@ -1489,7 +1529,8 @@
     "longest_loss_streak": 10,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1517,7 +1558,8 @@
     "longest_loss_streak": 5,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1545,7 +1587,8 @@
     "longest_loss_streak": 10,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1573,7 +1616,8 @@
     "longest_loss_streak": 5,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1601,7 +1645,8 @@
     "longest_loss_streak": 10,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1629,7 +1674,8 @@
     "longest_loss_streak": 5,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1657,7 +1703,8 @@
     "longest_loss_streak": 10,
     "max_open": 7,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1685,7 +1732,8 @@
     "longest_loss_streak": 5,
     "max_open": 7,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "APPR_RCP",
@@ -1713,7 +1761,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "GCB",
@@ -1741,7 +1790,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "GCB",
@@ -1769,7 +1819,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -1797,7 +1848,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -1825,7 +1877,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "GCB",
@@ -1853,7 +1906,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "GCB",
@@ -1881,7 +1935,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "GCB",
@@ -1909,7 +1964,8 @@
     "longest_loss_streak": 2,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "GCB",
@@ -1937,7 +1993,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -1965,7 +2022,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -1993,7 +2051,8 @@
     "longest_loss_streak": 0,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "GCB",
@@ -2021,7 +2080,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "GCB",
@@ -2049,7 +2109,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "GCB",
@@ -2077,7 +2138,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "GCB",
@@ -2105,7 +2167,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -2133,7 +2196,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -2161,7 +2225,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "GCB",
@@ -2189,7 +2254,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "GCB",
@@ -2217,7 +2283,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "GCB",
@@ -2245,7 +2312,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "GCB",
@@ -2273,7 +2341,8 @@
     "longest_loss_streak": 2,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -2301,7 +2370,8 @@
     "longest_loss_streak": 0,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "GCB",
@@ -2329,7 +2399,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "GCB",
@@ -2357,7 +2428,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "GCB",
@@ -2385,7 +2457,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -2419,7 +2492,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -2453,7 +2527,8 @@
     "longest_loss_streak": 3,
     "max_open": 1,
     "net_after_20_dollars": 10.28,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -2481,7 +2556,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -2515,7 +2591,8 @@
     "longest_loss_streak": 10,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -2549,7 +2626,8 @@
     "longest_loss_streak": 5,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -2583,7 +2661,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -2617,7 +2696,8 @@
     "longest_loss_streak": 4,
     "max_open": 1,
     "net_after_20_dollars": -17.91,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -2651,7 +2731,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -2685,7 +2766,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -2713,7 +2795,8 @@
     "longest_loss_streak": 0,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -2747,7 +2830,8 @@
     "longest_loss_streak": 0,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -2781,7 +2865,8 @@
     "longest_loss_streak": 3,
     "max_open": 3,
     "net_after_20_dollars": 12.06,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -2815,7 +2900,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -2843,7 +2929,8 @@
     "longest_loss_streak": 10,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -2871,7 +2958,8 @@
     "longest_loss_streak": 5,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -2905,7 +2993,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -2939,7 +3028,8 @@
     "longest_loss_streak": 4,
     "max_open": 3,
     "net_after_20_dollars": -18.03,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -2973,7 +3063,8 @@
     "longest_loss_streak": 4,
     "max_open": 2,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -3007,7 +3098,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -3041,7 +3133,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -3075,7 +3168,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -3109,7 +3203,8 @@
     "longest_loss_streak": 3,
     "max_open": 1,
     "net_after_20_dollars": 12.42,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -3137,7 +3232,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -3171,7 +3267,8 @@
     "longest_loss_streak": 10,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -3205,7 +3302,8 @@
     "longest_loss_streak": 5,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -3239,7 +3337,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -3273,7 +3372,8 @@
     "longest_loss_streak": 4,
     "max_open": 1,
     "net_after_20_dollars": -16.0,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -3301,7 +3401,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -3335,7 +3436,8 @@
     "longest_loss_streak": 2,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -3369,7 +3471,8 @@
     "longest_loss_streak": 0,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -3403,7 +3506,8 @@
     "longest_loss_streak": 0,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.10-0.25",
    "family": "ALL_APPR",
@@ -3437,7 +3541,8 @@
     "longest_loss_streak": 3,
     "max_open": 7,
     "net_after_20_dollars": 14.32,
-    "net_at_fill_20_dollars": 8.6
+    "net_at_fill_20_dollars": 8.6,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -3471,7 +3576,8 @@
     "longest_loss_streak": 0,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.25-0.40",
    "family": "ALL_APPR",
@@ -3505,7 +3611,8 @@
     "longest_loss_streak": 10,
     "max_open": 7,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -3539,7 +3646,8 @@
     "longest_loss_streak": 5,
     "max_open": 7,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.40-0.60",
    "family": "ALL_APPR",
@@ -3573,7 +3681,8 @@
     "longest_loss_streak": 1,
     "max_open": 1,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -3601,7 +3710,8 @@
     "longest_loss_streak": 4,
     "max_open": 7,
     "net_after_20_dollars": -20.18,
-    "net_at_fill_20_dollars": -13.0
+    "net_at_fill_20_dollars": -13.0,
+    "skipped_by_cap": 0
    },
    "bucket": "0.60-0.75",
    "family": "ALL_APPR",
@@ -3635,7 +3745,8 @@
     "longest_loss_streak": 4,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -3669,7 +3780,8 @@
     "longest_loss_streak": 4,
     "max_open": 3,
     "net_after_20_dollars": null,
-    "net_at_fill_20_dollars": null
+    "net_at_fill_20_dollars": null,
+    "skipped_by_cap": 0
    },
    "bucket": "0.75-0.90",
    "family": "ALL_APPR",
@@ -3702,7 +3814,10 @@
   "rows_no_family": 1,
   "series_no_family": [
    "KXAPRPOTUSD"
-  ]
+  ],
+  "unlisted_not_scored_events": {
+   "KXAPRPOTUSD": 1
+  }
  },
  "event_thirds": {
   "ALL_APPR": {
@@ -3736,7 +3851,15 @@
    "VALIDATE": 0
   }
  },
+ "events_held_out_in_any_family": 0,
+ "events_no_valid_mid_by_look": {
+  "1d": 0,
+  "3d": 0,
+  "6h": 0,
+  "7d": 0
+ },
  "readings": [
+  "A6 (Amendment 6, ff415eb7): G1 a YES mid exists only when 0 < bid < ask < 1, a market without one makes no observation either side and is not a candidate, events with no valid-mid market per look are printed, calibration only over valid-mid markets; G2 cap of 10 open, fills offered by entry quote time then ticker, the 11th skipped and counted, net, streak and kill over accepted fills in close order; G3 an event held out in any family is in no cell of any family and not in calibration",
   "R1 family by the row's series s; KXGENERICBALLOT (named under GCB, one event) is GCB; a series outside the list (e.g. KXAPRPOTUSD, pulled by Amendment 3 but in no family) is counted and left out",
   "R2 event close = latest ct among its markets in the file; third = the listed third if the event is in the family's cut-file list, else by its close against the family's cut constants",
   "R3 ALL_APPR = the four approval families pooled; its third uses ALL_APPR's own cuts (and its own list)",

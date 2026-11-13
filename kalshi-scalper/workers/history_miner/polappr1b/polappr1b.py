@@ -23,6 +23,7 @@ LOOKS = [("7d", 7 * 86400, 6 * 3600), ("3d", 3 * 86400, 6 * 3600), ("1d", 86400,
 BUCKETS = [(0.10, 0.25), (0.25, 0.40), (0.40, 0.60), (0.60, 0.75), (0.75, 0.90)]
 B, SEED = 2000, 1
 READINGS = [
+    "A6 (Amendment 6, ff415eb7): G1 a YES mid exists only when 0 < bid < ask < 1, a market without one makes no observation either side and is not a candidate, events with no valid-mid market per look are printed, calibration only over valid-mid markets; G2 cap of 10 open, fills offered by entry quote time then ticker, the 11th skipped and counted, net, streak and kill over accepted fills in close order; G3 an event held out in any family is in no cell of any family and not in calibration",
     "R1 family by the row's series s; KXGENERICBALLOT (named under GCB, one event) is GCB; a series outside the list (e.g. KXAPRPOTUSD, pulled by Amendment 3 but in no family) is counted and left out",
     "R2 event close = latest ct among its markets in the file; third = the listed third if the event is in the family's cut-file list, else by its close against the family's cut constants",
     "R3 ALL_APPR = the four approval families pooled; its third uses ALL_APPR's own cuts (and its own list)",
@@ -117,9 +118,12 @@ def run(cand, cutf, cutf3, compare):
     for r in rows:
         if r["s"] in FAMILY:
             by_ev.setdefault(r["e"], []).append(r)
-    counts = {"rows": len(rows), "rows_no_family": sum(1 for r in rows if r["s"] not in FAMILY), "series_no_family": no_family}
+    counts = {"rows": len(rows), "rows_no_family": sum(1 for r in rows if r["s"] not in FAMILY), "series_no_family": no_family,
+              "unlisted_not_scored_events": {s: len({r["e"] for r in rows if r["s"] == s}) for s in no_family}}
     # thirds per (family incl. ALL_APPR, event); held-out events are dropped here, before any price is read
     evinfo = {}
+    held_any = 0
+    no_valid_mid = {lk: 0 for lk, _, _ in LOOKS}
     third_counts = {fm: {"TRAIN": 0, "VALIDATE": 0, "HELD-OUT": 0} for fm in FAMILIES}
     for ev, mks in by_ev.items():
         fam = FAMILY[mks[0]["s"]]
@@ -127,11 +131,13 @@ def run(cand, cutf, cutf3, compare):
             raise SystemExit("event %s spans families" % ev)
         close = max(m["ct"] for m in mks)
         fams = [fam] + (["ALL_APPR"] if fam in APPROVAL else [])
-        for fm in fams:
-            th = third_of(fm, ev, close, cuts, lists)
+        ths = {fm: third_of(fm, ev, close, cuts, lists) for fm in fams}
+        for fm, th in ths.items():
             third_counts[fm][th] += 1
-            if th != "HELD-OUT":
-                evinfo.setdefault(ev, {})[fm] = (th, close)
+        if any(th == "HELD-OUT" for th in ths.values()):
+            held_any += 1                     # Amendment 6 G3: held out in ANY family it belongs to = in no cell of any family
+            continue
+        evinfo[ev] = {fm: (th, close) for fm, th in ths.items()}
     cells = {}
     calib = {}
     live_fills = {}
@@ -139,12 +145,16 @@ def run(cand, cutf, cutf3, compare):
         mks = sorted(by_ev[ev], key=lambda m: m["t"])
         for lk, look, tol in LOOKS:
             cand_obs = {}
+            any_valid = False
             for m in mks:
                 q = quote(m["c"], m["ct"], look, tol)
                 if q is None:
                     continue
                 ask, bid = f(q[1]), f(q[2])
-                mid = (ask + bid) / 2 if ask is not None and bid is not None else None
+                if ask is None or bid is None or not (0 < bid < ask < 1):
+                    continue                      # Amendment 6 G1: no valid YES mid, so no observation either side and not a candidate
+                any_valid = True
+                mid = (ask + bid) / 2
                 for side in ("YES", "NO"):
                     if side == "YES":
                         if ask is None or not (0 < ask < 1):
@@ -159,7 +169,7 @@ def run(cand, cutf, cutf3, compare):
                     bi = next(i for i, (a, b) in enumerate(BUCKETS) if (a - EPS <= p < b - EPS) or (i == 4 and p <= b + EPS))
                     won = (m["res"] == "yes") if side == "YES" else (m["res"] == "no")
                     key = (bi, side)
-                    dist = abs(mid - 0.5) if mid is not None else float("inf")
+                    dist = abs(mid - 0.5)
                     cur = cand_obs.get(key)
                     if cur is None or dist < cur[0] - EPS:
                         cand_obs[key] = (dist, m["t"], p, won, q[0], m["ct"])
@@ -167,8 +177,9 @@ def run(cand, cutf, cutf3, compare):
                     bi = next(i for i, (a, b) in enumerate(BUCKETS) if (a - EPS <= ask < b - EPS) or (i == 4 and ask <= b + EPS))
                     cb = calib.setdefault("%s|%s" % (lk, bi), {"n": 0, "yes": 0, "ask": 0.0, "mid_n": 0, "mid": 0.0})
                     cb["n"] += 1; cb["yes"] += m["res"] == "yes"; cb["ask"] += ask
-                    if mid is not None:
-                        cb["mid_n"] += 1; cb["mid"] += mid
+                    cb["mid_n"] += 1; cb["mid"] += mid
+            if not any_valid:
+                no_valid_mid[lk] += 1
             for (bi, side), (_, t, p, won, qts, ct) in cand_obs.items():
                 for fm, (th, close) in fmth.items():
                     k = (fm, lk, bi, side)
@@ -191,7 +202,14 @@ def run(cand, cutf, cutf3, compare):
             vx = [pnl(o["p"], o["won"], 0.01) for o in c["VALIDATE"]]
             row["validate_boot90_c"] = boot(vx)
             row["validate_weekblock90_c"] = boot(vx, [o["wk"] for o in c["VALIDATE"]])
-            fills = sorted(c["TRAIN"] + c["VALIDATE"], key=lambda o: (o["ct"], o["t"]))
+            # Amendment 6 G2: the cap of 10 open (entry quote time to close), fills offered by entry quote time, ties by ticker
+            accepted, skipped = [], 0
+            for o in sorted(c["TRAIN"] + c["VALIDATE"], key=lambda o: (o["q"], o["t"])):
+                if sum(1 for x in accepted if x["q"] <= o["q"] < x["ct"]) >= 10:
+                    skipped += 1
+                else:
+                    accepted.append(o)
+            fills = sorted(accepted, key=lambda o: (o["ct"], o["t"]))
             net, streak, longest, fired, open_max = 0.0, 0, 0, False, 0
             net20, first_kill = None, None
             for i, o in enumerate(fills):
@@ -206,7 +224,7 @@ def run(cand, cutf, cutf3, compare):
                 open_max = max(open_max, sum(1 for x in fills if x["q"] <= o["q"] < x["ct"]))
             row["as_if_live"] = {"fills": len(fills), "net_after_20_dollars": round(net, 6) if len(fills) >= 20 else None,
                                  "longest_loss_streak": longest, "kill_fired": fired, "kill_first_fill": first_kill,
-                                 "net_at_fill_20_dollars": round(net20, 6) if net20 is not None else None, "max_open": open_max}
+                                 "net_at_fill_20_dollars": round(net20, 6) if net20 is not None else None, "max_open": open_max, "skipped_by_cap": skipped}
         out.append(row)
     cal = []
     for k, v in sorted(calib.items()):
@@ -214,7 +232,7 @@ def run(cand, cutf, cutf3, compare):
         cal.append({"look": lk, "bucket": "%.2f-%.2f" % BUCKETS[int(bi)], "n": v["n"], "yes_share": round(v["yes"] / v["n"], 6),
                     "mean_ask": round(v["ask"] / v["n"], 6), "mean_mid": round(v["mid"] / v["mid_n"], 6) if v["mid_n"] else None})
     return {"build": "History Miner second build, registration text only", "compare_mode": compare, "counts": counts,
-            "event_thirds": third_counts, "cells": out, "calibration": cal, "readings": READINGS}
+            "event_thirds": third_counts, "events_held_out_in_any_family": held_any, "events_no_valid_mid_by_look": no_valid_mid, "cells": out, "calibration": cal, "readings": READINGS}
 
 
 if __name__ == "__main__":
