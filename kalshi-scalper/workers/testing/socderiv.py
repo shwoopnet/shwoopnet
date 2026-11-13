@@ -27,6 +27,8 @@ GUARD_LO, GUARD_HI = 100 * 60, 135 * 60
 GAP, SPREAD_MAX, MIN_FILLED, EDGE_SHARE, COST_MAX, PACK_LIMIT, PACK_SPAN_S = 0.08, 0.04, 150, 0.10, 0.04, 9000, 3 * 3600
 SUFFIXES = {"winner": "GAME", "total": "TOTAL", "btts": "BTTS", "teamtotal": "TEAMTOTAL"}
 REG = "kalshi-scalper/workers/testing/SOCDERIV_MEASUREMENT.md"
+HELDOUT_LINE = ("none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try. Cards found that ever held out these series (Desk B dated line, registration 03c50460 and later): W-CAT-SPORTS1 (five series, released 06:51Z), "
+               "SOCCER1 and SOCCERELO1 (matches from 2026-10-03T16:00Z, eight leagues, 24 series; released 07:09Z), USWEEP2 (22 series; released 07:09Z), SHARP1 (open; kickoffs March to September 2026, before this window, untouched). To be checked against HELDOUT_REGISTRY.md on rnd-queue by the Head.")
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on sports"
 
 
@@ -119,7 +121,9 @@ def build_candles(spec, list_folders):
     eps = [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}]
     j = tie3.job("SOCDERIV_CANDLES", "SOCDERIV measurement stage 2: one minute candles of every leg of the sampled games, the 61 minutes ending at kickoff minus 30.", eps, reqs, {t.split("-")[0] for _, t in items}, [t for _, t in items])
     j["notes"] = "SOCDERIV zero-try gap measurement stage 2: candles of every leg of the sampled games"
-    j["registration"] = REG; return j, counts
+    j["registration"] = REG; j["max_requests"] = len(reqs) + 20          # slack for a retry or a second page (Auditor B, point b)
+    j["heldout"] = HELDOUT_LINE
+    return j, counts
 
 
 def pois(l, n): return math.exp(-l) * l ** n / math.factorial(n)
@@ -140,10 +144,10 @@ def p_winner(l1, l2, N=12):
 def fit(win_mid, total_mid):
     """Least squares by a coarse-to-fine grid over the two rates (step 0.2, then 0.04, 0.01, 0.0025, 0.0006, 0.00015, 0.00004). win_mid = (team1, draw, team2); total_mid = {strike: mid of 'over strike'}. Returns (l1, l2, rmse over the fitted legs)."""
     wm = list(win_mid)          # not renormalised: the fit absorbs the winner overround (registration, stated weakness)
-    tm = list(total_mid.items())
+    tm = list(total_mid.items()); NMAX = max([8] + [int(kk) for kk, _ in tm])          # cdf up to the largest strike (a 10.5 line exists on the real lists)
     def err(a, b):
         h, d, c = p_winner(a, b); lam = a + b; e = math.exp(-lam); cdf, run, ov = {}, 0.0, {}
-        for n in range(0, 9): run += e * lam ** n / math.factorial(n); cdf[n] = run
+        for n in range(0, NMAX + 1): run += e * lam ** n / math.factorial(n); cdf[n] = run
         return (h - wm[0]) ** 2 + (d - wm[1]) ** 2 + (c - wm[2]) ** 2 + sum((1 - cdf[int(kk)] - v) ** 2 for kk, v in tm)
     best = (1e9, 1.0, 1.0)
     for step, span, lo in ((0.2, 20, 0.1), (0.04, 5, None), (0.01, 4, None), (0.0025, 4, None), (0.0006, 4, None), (0.00015, 4, None), (0.00004, 4, None)):
@@ -164,25 +168,46 @@ def fee_up(p): return math.ceil(round(0.07 * p * (1 - p) * 100, 6)) / 100
 
 def one_way(value, b, a):
     """Desk B dated amendment (Nov 12): the cost line is ONE-WAY: (ask minus mid) of the side taken plus the entry fee at its price plus 1c, rounded up. The side taken is the cheaper one, as for the gap."""
-    price = a if a <= 1 - b else 1 - b
+    price = a if a <= 1 - b + 1e-9 else 1 - b
     return (a - b) / 2 + fee_up(round(price + 0.01, 4))
 
 
 def gap(value, b, a):
     """The cheaper side = the side with the LOWER ask (YES ask a, or NO ask 1 - bid; a tie takes YES); gap = the model value of that side minus its ask."""
-    return (value - a) if a <= 1 - b else ((1 - value) - (1 - b))
+    return (value - a) if a <= 1 - b + 1e-9 else ((1 - value) - (1 - b))          # whole cents: a + b = 1.00 is a tie (float residue) and takes YES
+
+
+def near_strike(totm):
+    """The total strike whose mid is nearest 50c; an exact tie (mids 0.45 and 0.55) takes the lower strike (Auditor B F5; a dated line is to be written)."""
+    return min(totm, key=lambda kk: (round(abs(totm[kk] - 0.5), 9), kk))
 
 
 def stats(rows):
     if not rows: return None
-    gs = [r["gap"] for r in rows]; sp = [r["spread"] for r in rows]; fire = sum(1 for r in rows if r["gap"] >= GAP and r["spread"] <= SPREAD_MAX)
+    gs = [r["gap"] for r in rows]; sp = [r["spread"] for r in rows]; fire = sum(1 for r in rows if r["gap"] >= GAP - 1e-9 and r["spread"] <= SPREAD_MAX + 1e-9)          # 1e-9: a 4c spread written as 0.54 - 0.50 is 0.04000000000000004
     qs = st.quantiles(gs, n=10, method="inclusive") if len(gs) > 2 else None
     q4 = st.quantiles(gs, n=4, method="inclusive") if len(gs) > 2 else None
     return {"n": len(rows), "median_spread": round(st.median(sp), 4), "median_round_trip_information_only": round(st.median([r["round_trip"] for r in rows]), 4), "median_one_way_entry_cost": round(st.median([r["one_way"] for r in rows]), 4),
-            "gap_quartiles_p90": None if not q4 else [round(q4[0], 4), round(st.median(gs), 4), round(q4[2], 4), round(qs[8], 4)], "share_gap_ge_8c_spread_le_4c": round(fire / len(rows), 3)}
+            "gap_quartiles_p90": None if not q4 else [round(q4[0], 4), round(st.median(gs), 4), round(q4[2], 4), round(qs[8], 4)], "share_gap_ge_8c_spread_le_4c": round(fire / len(rows), 3), "fires": fire}
+
+
+def check_candle_runs(spec, list_folders, candle_folders):
+    """Auditor B F4: refuse unless every candle folder is a COMPLETE run whose embedded job requests equal the ones built from these lists, the folders together cover every request, and every request was answered whole (status 200, not truncated, a file).
+    -> (answered, asked)."""
+    jc, _ = build_candles(spec, list_folders); want = {r["id"]: (r["path"], r["params"]) for r in jc["requests"]}; seen = {}
+    for f in candle_folders:
+        m = json.load(open(os.path.join(f, "manifest.json")))
+        if m.get("status") != "complete" or not isinstance(m.get("job"), dict): raise SystemExit("refused: %s is not a complete candle run with its job" % f)
+        for r in m["job"].get("requests", []):
+            if r["id"] not in want or (r["path"], r["params"]) != want[r["id"]]: raise SystemExit("refused: request %s of %s is not one of the requests built from these lists" % (r["id"], f))
+            rows = [x for x in m.get("rows", []) if x.get("id") == r["id"]]
+            seen[r["id"]] = seen.get(r["id"], False) or (bool(rows) and all(x.get("status") == 200 and not x.get("truncated") and x.get("file") for x in rows))
+    if set(seen) != set(want) or not all(seen.values()): raise SystemExit("refused: the candle pull is not whole (%d of %d requests answered whole)" % (sum(seen.values()), len(want)))
+    return sum(seen.values()), len(want)
 
 
 def measure(spec, list_folders, candle_folders):
+    answered, asked = check_candle_runs(spec, list_folders, candle_folders)
     gs, counts = games(spec, list_folders)
     idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
     rows = {}              # (group, type) -> list of target rows ; placebo rows kept alongside
@@ -221,7 +246,7 @@ def measure(spec, list_folders, candle_folders):
             row = {"gap": gap(val, b, a), "spread": a - b, "round_trip": (a - b) + 2 * 0.07 * mid * (1 - mid), "one_way": one_way(val, b, a)}
             rows.setdefault((g["group"], typ), {"targets": [], "placebo": []})["targets"].append(row)
             # placebo: refit with the total strike nearest 50c left out, compare its model value with its own quote
-            near = min(totm, key=lambda kk: abs(totm[kk] - 0.5)); rest = {kk: v for kk, v in totm.items() if kk != near}
+            near = near_strike(totm); rest = {kk: v for kk, v in totm.items() if kk != near}
             if len(rest) >= 2 and (g["league"], g["game"], ts, typ) not in seen_pl:
                 seen_pl.add((g["league"], g["game"], ts, typ))
                 pk = ck + (near,)
@@ -232,7 +257,7 @@ def measure(spec, list_folders, candle_folders):
             got[typ] = True
         for typ in ("btts", "teamtotal"):
             if got[typ]: G[typ]["filled"] += 1
-    out = {"counts_first": counts, "fit_residual_rmse_median": None if not resid else round(st.median(resid), 4), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
+    out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "fit_residual_rmse_median": None if not resid else round(st.median(resid), 4), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
            "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"}
     for grp, G in games_by_group.items():
         out["groups"][grp] = {"games_with_derivable_kickoff": G["derivable"]}
@@ -242,8 +267,8 @@ def measure(spec, list_folders, candle_folders):
             share_filled = None if not der else round(filled / der, 3)
             if filled < MIN_FILLED: verdict = "no evidence at n = %d filled games" % filled
             elif s_t["median_one_way_entry_cost"] > COST_MAX: verdict = "CLOSED on cost: median one-way entry cost %.1fc is above 4c (hold to settlement; Desk B dated amendment)" % (100 * s_t["median_one_way_entry_cost"])
-            elif share_filled is not None and share_filled < 0.5: verdict = "CLOSED: not tradable (under half of the derivable-kickoff games are filled)"
-            elif s_t["share_gap_ge_8c_spread_le_4c"] >= EDGE_SHARE and s_t["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): verdict = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration, tries = surviving cells"
+            elif der and filled * 2 < der: verdict = "CLOSED: not tradable (under half of the derivable-kickoff games are filled)"
+            elif s_t["fires"] * 10 >= s_t["n"] and s_t["fires"] * (s_p["n"] if s_p else 1) >= 2 * (s_p["fires"] if s_p else 0) * s_t["n"]: verdict = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration, tries = surviving cells"
             else: verdict = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % (s_t["gap_quartiles_p90"] and s_t["gap_quartiles_p90"][3])
             out["groups"][grp][typ] = {"games_with_a_target": der, "filled": filled, "share_filled": share_filled, "targets": s_t, "placebo": s_p, "verdict": verdict}
     return out

@@ -73,6 +73,16 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     nse = run("noise", edge_btts=0.09, half=0.005, placebo_noise=0.25)              # a noisy ladder makes the placebo as large as the target: model error, not the market
     assert not nse["groups"]["A_big"]["btts"]["verdict"].startswith("SURVIVES"), nse["groups"]["A_big"]["btts"]
     cost = run("cost", edge_btts=0.0, half=0.04); assert cost["groups"]["A_big"]["btts"]["verdict"].startswith("CLOSED on cost"), cost["groups"]["A_big"]["btts"]["verdict"]
+    bad = os.path.join(dc, "incomplete"); os.mkdir(bad); bb = build(edge_btts=0.0, half=0.005); drop = jc["requests"][0]["id"]; bb.pop(drop); mkrun(bad, jc, bb)
+    try: s.measure(spec, [dl], [bad]); raise AssertionError("incomplete candle run not refused")
+    except SystemExit as ex: assert "not whole" in str(ex), ex
     thin = run("thin", edge_btts=0.0, half=0.005, thin=True); assert thin["groups"]["A_big"]["btts"]["filled"] == 0 and thin["groups"]["A_big"]["btts"]["verdict"].startswith("no evidence at n = 0")
 assert abs(s.one_way(0.5, 0.40, 0.45) - (0.025 + 0.02)) < 1e-9 and s.COST_MAX == 0.04
+# ---- Auditor B F1 to F5 ----
+assert abs(s.gap(0.7, 0.46, 0.54) - (0.7 - 0.54)) < 1e-9 and abs(s.gap(0.3, 0.46, 0.54) - (0.3 - 0.54)) < 1e-9          # ask + bid = 1.00 (a tie) takes YES
+assert abs(s.one_way(0.7, 0.46, 0.54) - (0.04 + s.fee_up(0.55))) < 1e-9
+rows4 = [{"gap": 0.15, "spread": 0.54 - 0.50, "round_trip": 0.1, "one_way": 0.04} for _ in range(10)] + [{"gap": 0.0, "spread": 0.02, "round_trip": 0.1, "one_way": 0.04} for _ in range(90)]
+assert s.stats(rows4)["fires"] == 10 and abs(s.stats(rows4)["share_gap_ge_8c_spread_le_4c"] - 0.1) < 1e-9          # a 4c spread written 0.54 - 0.50 counts
+f1, f2, rr = s.fit((0.40, 0.30, 0.30), {1.5: 0.80, 10.5: 0.001}); assert f1 > 0 and f2 > 0                                  # a 10.5 strike does not crash the fit
+assert s.near_strike({3.5: 0.55, 2.5: 0.45}) == 2.5 and s.near_strike({2.5: 0.45, 3.5: 0.55}) == 2.5 and s.near_strike({1.5: 0.9, 2.5: 0.52, 3.5: 0.2}) == 2.5
 print("socderiv synthetic tests passed")
