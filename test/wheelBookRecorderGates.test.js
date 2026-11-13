@@ -249,7 +249,7 @@ print(json.dumps({"ok": ok, "pages": t.pages, "dupes": t.dupes, "trades": t.trad
   assert.strictEqual(out.cov.tape_sum_count, 3751);
   assert.deepStrictEqual([out.cov.volume_fp, out.cov.result, out.cov.tape_pages], ['3751', 'yes', 3]);
   assert.deepStrictEqual(out.cap, [false, 4, ['tape page cap']], 'an endless cursor is stopped and marked');
-  assert.ok(/TAPE_DELAY_S = 60/.test(code) && /tape\[t\] = c \+ TAPE_DELAY_S/.test(code), 'read about 60 seconds after the close, once');
+  assert.ok(/TAPE_DELAY_S = 60/.test(code) && /tape\[t\] = max\(now, c \+ TAPE_DELAY_S\)/.test(code), 'read about 60 seconds after the close, once');
 };
 
 // WB12: the standing rule: recorder files are a FORWARD record, nothing is read back, tuned or scored in the script.
@@ -262,6 +262,98 @@ gates.WB12 = () => {
 gates.WB13 = () => {
   const r6 = fs.readFileSync(path.join(root, 'scripts', 'record_15m_book.py'), 'utf8');
   assert.ok(/^END_UTC = "2026-12-31T23:59:00Z"/m.test(r6) && /^ETH_END_UTC = "2026-12-31T23:59:00Z"/m.test(r6));
+};
+
+// WB14: a market that is no longer open is never polled again (the Nov 12, 2026 fault: the listed close was the far expiry, so settled markets were polled to it), and it is queued
+// for its tape and candle reads; a half-read listing closes nothing.
+gates.WB14 = () => {
+  const out = py(`
+S = "KXESOCCERGAME"
+def mkt(t): return {"ticker": t, "event_ticker": "E", "open_time": "2026-11-12T10:00:00Z", "close_time": "2026-11-26T10:00:00Z"}
+A, B = "KXESOCCERGAME-26NOV121000AAABBB", "KXESOCCERGAME-26NOV121000CCCDDD"
+state = m.State()
+now = m.parse_t("2026-11-12T11:00:00Z")
+pages = {"open": [{"markets": [mkt(A), mkt(B)], "cursor": ""}, {"markets": [mkt(B)], "cursor": ""}, None]}
+def fake(url):
+    if "/markets?series_ticker=" in url and "status=open" in url:
+        if "KXESOCCERGAME" in url:
+            b = pages["open"].pop(0)
+            return (200, b, "") if b is not None else (500, None, "")
+        return 200, {"markets": [], "cursor": ""}, ""
+    return 200, {"markets": []}, ""
+clock = [0.0]
+s = m.Stream(0.5, fetch=fake, clock=lambda: clock[0], sleep=lambda d: None)
+r1 = m.discover(s, state, now * 1000, now * 1000)
+w1 = sorted(state.watch(now + 3 * 3600))
+r2 = m.discover(s, state, (now + 300) * 1000, (now + 300) * 1000)      # A has left the open list; its listed close is 14 days away
+w2 = sorted(state.watch(now + 3 * 3600))
+r3 = m.discover(s, state, (now + 600) * 1000, (now + 600) * 1000)      # a failed listing closes nothing
+print(json.dumps({"r1": r1, "w1": w1, "r2": r2, "w2": w2, "r3": r3, "known": sorted(state.known), "closed": sorted(state.closed), "A": A, "B": B}))`);
+  assert.deepStrictEqual(out.r1, []);
+  assert.deepStrictEqual(out.w1, [out.A, out.B].sort(), 'both open markets are watched');
+  assert.deepStrictEqual(out.r2, [out.A], 'a market gone from the open list is closed at once, with 14 days left on its listed close');
+  assert.deepStrictEqual(out.w2, [out.B], 'a market no longer open is never polled again');
+  assert.deepStrictEqual(out.r3, [], 'a listing that failed does not close anything');
+  assert.deepStrictEqual(out.known, [out.B]);
+  assert.deepStrictEqual(out.closed, [out.A]);
+  assert.ok(!/state\.closed\[t\] = state\.known\.pop\(t\)[\s\S]{0,40}and now/.test(code) && !/t not in seen and \(m\["close"\]/.test(code), 'closing no longer waits for the listed close time');
+};
+
+// WB15: after a market leaves the open list its real close time is set (the market read's close_time if it is in the past, else the round that saw it gone), so its tape and candles are read.
+gates.WB15 = () => {
+  const out = py(`
+now = m.parse_t("2026-11-12T11:00:00Z")
+rd = lambda body, st=200: m.market_closed_at(m.Stream(0.5, fetch=lambda u: (st, body, ""), sleep=lambda d: None), "T", now)
+a = rd({"market": {"status": "finalized", "close_time": "2026-11-12T10:41:00Z"}})
+b = rd({"market": {"status": "finalized", "close_time": "2026-11-26T10:00:00Z"}})
+c = rd(None, 500)
+d = rd({"market": {"status": "open", "close_time": "2026-11-12T10:41:00Z"}})
+print(json.dumps({"a": a[0] - now, "b": b[0] - now, "c": c[0] - now, "d": d[0] - now, "note": a[1]}))`);
+  assert.strictEqual(out.a, -19 * 60, 'a past close_time on a not-open market is used');
+  assert.strictEqual(out.b, 0, 'a future close_time is the far expiry: use the round that saw it gone');
+  assert.strictEqual(out.c, 0, 'an unreadable market read falls back to the round that saw it gone');
+  assert.strictEqual(out.d, 0, 'a market the read still calls open takes the discovery round');
+  assert.ok(/market_closed_at\(stream, t, now\)/.test(code) && /sweep_tape\(stream, t, m\["open"\], m\["close"\], tl, raw\.save\)/.test(code), 'the tape is swept to the real close');
+  assert.ok(/\[\^\\n\]*stream\.get\("%s\/markets\/%s" % \(BASE, t\)\)/.test(code) || /markets\/%s" % \(BASE, t\)/.test(code));
+};
+
+// WB16: the second look is provable per market: every poll's asked tickers are recoverable from polls_tickers.csv (the latest earlier row of the same tier and chunk).
+gates.WB16 = () => {
+  const out = py(`
+class O:
+    def __init__(s): s.w = {}
+    def write(s, n, rows): s.w.setdefault(n, []).extend(rows)
+state = m.State()
+for t in ("A", "B", "C"): state.known[t] = {"series": "KXLIGAPROMATCH", "event": "E", "open": 0, "close": None, "tally": m.Tally("KXLIGAPROMATCH", t, "E", "", "", 0, False)}
+ob = lambda t: {"ticker": t, "orderbook_fp": {"yes_dollars": [["0.4000", "5.00"]], "no_dollars": [["0.5000", "9.00"]]}}
+def reply(asked): return (200, {"orderbooks": [ob(t) for t in asked]}, "d")
+seq = [["A", "B"], ["A", "B"], ["A", "B"], ["B"], ["B"], ["B", "C"], ["A", "B"]]
+cur = []
+s = m.Stream(0.5, fetch=lambda u: reply(cur[0]), clock=lambda: 1.0, sleep=lambda d: None)
+o = O(); flt = m.ChangeFilter(); b = m.Batching(); ids = [0, 7]; pids = []
+for a in seq:
+    cur[:] = [a]; m.poll_chunk(s, state, o, flt, b, "fast", a, ids, 100.0); pids.append("7-%d" % ids[0])
+# a second chunk of a different tier does not disturb the first
+cur[:] = [["C"]]; m.poll_chunk(s, state, o, flt, b, "slow", ["C"], ids, 100.0)
+rows = o.w["polls_tickers"]
+def asked_at(pid, tier, chunk="0"):
+    n = int(pid.split("-")[1]); best = None
+    for r in rows:
+        if r[1] == tier and r[2] == chunk and int(r[0].split("-")[1]) <= n: best = r[3]
+    return best
+print(json.dumps({"rows": rows, "recovered": [asked_at(p, "fast") for p in pids], "seq": ["|".join(a) for a in seq], "cols": m.ASKED_COLS, "files": [f.name.split("/")[-1] for f in []]}))`);
+  assert.deepStrictEqual(out.recovered, out.seq, 'the asked tickers of every poll are recoverable');
+  assert.strictEqual(out.rows.filter((r) => r[1] === 'fast').length, 4, 'a row is written only when the asked set changes (A|B, B, B|C, A|B)');
+  assert.deepStrictEqual(out.cols, ['poll_id', 'tier', 'chunk', 'tickers']);
+  assert.ok(/\("polls_tickers", ASKED_COLS\)/.test(code) && /chunk=i \/\/ BATCH_MAX/.test(code), 'the file is created and each batch has its own chunk');
+};
+
+// WB17: results are also read over 48 hours at a low rate (first thing in each job, then every 6 hours), beside the 2 hour read every 10 minutes.
+gates.WB17 = () => {
+  const out = py(`print(json.dumps([m.RESULTS_LOOKBACK_S, m.RESULTS_EVERY_S, m.RESULTS_WIDE_LOOKBACK_S, m.RESULTS_WIDE_EVERY_S]))`);
+  assert.deepStrictEqual(out, [7200, 600, 172800, 21600]);
+  assert.ok(/now >= next_wide/.test(code) && /next_res = next_wide = next_clock = 0\.0|next_disc = next_res = next_wide = next_clock = 0\.0/.test(code), 'the wide read runs when the job starts');
+  assert.ok(/min_close_ts=%d" % int\(now - RESULTS_WIDE_LOOKBACK_S\)/.test(code));
 };
 
 let failed = 0;
