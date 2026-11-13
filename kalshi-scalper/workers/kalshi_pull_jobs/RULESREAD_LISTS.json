@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/idea_desk_c/RULES_CLAUSE_CENSUS_NOV13.md",
  "purpose": "Settlement-rules read (Idea Desk C): settled markets of 26 golf, motorsport and combat-sport series closing Aug 1 to Nov 12, 2026, for their rules text and counts of non-0/1 settlements, plus 3 fee-field reads. Owner MAIN: the runner lists no Desk C.",
- "heldout": "none (a rules-text and count listing: no candle, no price path, no rule scored; results are read only as a count of non-0/1 settlements)",
+ "heldout": "none (a rules-text and count listing: no candle, no price path, no rule scored; results are read only as a count of non-0/1 settlements). GOLF1 holds KXPGA3BALL, KXPGAH2H and KXPGATOP10; no card holds the other 22 series.",
  "allowed_endpoints": [
   {
    "name": "markets_list",

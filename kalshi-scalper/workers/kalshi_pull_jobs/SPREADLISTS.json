@@ -3,7 +3,7 @@
  "owner": "REFINEMENT",
  "registration": "kalshi-scalper/refine_tools/SPORTS_SPREAD_CELL_REGISTRATION.md",
  "purpose": "W-SPREAD-CELL1 Line 2 (registration section 'Which close the look uses'): explicit GET /markets requests of up to 100 tickers, the first market ticker (sorted) of each of the 1041 events. Only the time fields close_time, expected_expiration_time and occurrence_datetime are used; no price and no result is read.",
- "heldout": "none (time fields only; used by the SPREADCELL1 scorer as Line 2, read once with it)",
+ "heldout": "none (time fields only; used by the SPREADCELL1 scorer as Line 2, read once with it). BOOKS2 holds the MLB, NCAAF and NFL spreads; no card holds the NBA, NCAAMB or NHL spreads.",
  "allowed_endpoints": [
   {
    "name": "markets_by_tickers",

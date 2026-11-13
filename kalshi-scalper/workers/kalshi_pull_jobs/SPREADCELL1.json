@@ -3,7 +3,7 @@
  "owner": "REFINEMENT",
  "registration": "kalshi-scalper/refine_tools/SPORTS_SPREAD_CELL_REGISTRATION.md",
  "purpose": "Rank 2, W-SPREAD-CELL1: batched hourly candle requests (up to 55 tickers each) over the 1041 SPREAD events never scored.",
- "heldout": "W-SPREAD-CELL1: one pooled out-of-sample block read once after the pull is complete; the 360 events of W-CAT-SPORTS1 are excluded and its newest third stays unread",
+ "heldout": "W-SPREAD-CELL1: one pooled out-of-sample block read once after the pull is complete; the 360 events of W-CAT-SPORTS1 are excluded and its newest third stays unread. BOOKS2 holds the MLB, NCAAF and NFL spreads; no card holds the NBA, NCAAMB or NHL spreads.",
  "allowed_endpoints": [
   {
    "name": "markets_candlesticks_batch",

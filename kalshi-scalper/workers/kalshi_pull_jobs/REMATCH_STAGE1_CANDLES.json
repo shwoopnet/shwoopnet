@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/rematch/REMATCH_REGISTRATION.md",
  "purpose": "REMATCH stage 1 (zero tries): one minute candles of the two team contracts of each later e-soccer match, from before the earlier meeting to five minutes before its own start. Counts and cost only; no bet is scored.",
- "heldout": "none (counts and cost on the Oct 15 to Oct 23 development slice; no bet is scored and the held-out block from 2026-10-23 is not listed or pulled)",
+ "heldout": "none (counts and cost on the Oct 15 to Oct 23 development slice; no bet is scored and the held-out block from 2026-10-23 is not listed or pulled). Cards that name or share these series: ESOCTIE, the ESOCTIE forward wheel sheet, INPLAYJUMP, PREMOVE, REMATCH, VIRT1. ESOCTIE, INPLAYJUMP, PREMOVE and REMATCH are closed unread; VIRT1 is unreleased, with its forward read on or after 2026-11-21, frozen at 79724f00.",
  "allowed_endpoints": [
   {
    "name": "batch_candles",

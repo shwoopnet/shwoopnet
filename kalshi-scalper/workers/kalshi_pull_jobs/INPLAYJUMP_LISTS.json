@@ -3,7 +3,7 @@
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md",
  "purpose": "INPLAYJUMP stage 1: settled match-winner markets of seven in-play series inside each family's DEVELOPMENT window only (close-time floor and ceiling on every call), plus the series fee fields. No price is read.",
- "heldout": "none requested: every list call carries max_close_ts at the end of the family's development window, so no held-out market is listed",
+ "heldout": "none requested: every list call carries max_close_ts at the end of the family's development window, so no held-out market is listed. Cards that name or share these series: INPLAYJUMP, PREMOVE, VIRT1, TENNISBREAK, TENNIS1, W-CAT-SPORTS1. INPLAYJUMP and PREMOVE are closed unread; VIRT1 is unreleased, with its forward read on or after 2026-11-21, frozen at 79724f00; W-CAT-SPORTS1 is released.",
  "allowed_endpoints": [
   {
    "name": "markets_list",

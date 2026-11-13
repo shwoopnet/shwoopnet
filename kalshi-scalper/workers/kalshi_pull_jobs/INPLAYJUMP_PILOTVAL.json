@@ -3,7 +3,7 @@
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md",
  "purpose": "INPLAYJUMP pilot (cost and tradeability, one batch per family) plus tennis screen validation (10 md5-first matches per tennis family: minute and hourly candles). No result read; development matches only.",
- "heldout": "none: development windows only",
+ "heldout": "none: development windows only. Cards that name or share these series: INPLAYJUMP, PREMOVE, VIRT1, TENNISBREAK, TENNIS1, W-CAT-SPORTS1. INPLAYJUMP and PREMOVE are closed unread; VIRT1 is unreleased, with its forward read on or after 2026-11-21, frozen at 79724f00; W-CAT-SPORTS1 is released.",
  "allowed_endpoints": [
   {
    "name": "markets_candlesticks_batch",
