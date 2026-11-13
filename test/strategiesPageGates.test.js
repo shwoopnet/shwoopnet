@@ -559,6 +559,27 @@ gates.SP16 = () => {
   assert.ok(/No settled trades in the last 7 days/.test(none), 'an empty range says so instead of drawing a line');
   assert.ok(/data-strng="7D"[^>]*aria-pressed="true"/.test(wk), 'the sheet shows the same buttons, the chosen one pressed');
 };
+gates.SP17 = () => {
+  // YTD (and any range) reaches back past the live listener's newest 1,000 gold orders (Nov 13, 2026, the owner: "the ytd strategies thing should go back to oct 7th right?")
+  const src = varLine('KAL_STRAT_RANGES') + varLine('kalshiStratRange') + fn('kalshiStratRangeOf') + fn('kalshiPnlSource') + 'var kalshiStratOlder = {}, kalshiStratOlderOut = {};' + fn('kalshiStratHistory') +
+    '; return { run: kalshiStratHistory, set: function(r){ kalshiStratRange = r; } };';
+  const NOWY = Date.UTC(2026, 10, 13, 18, 0), DAY = 86400000;
+  let asked = null, resolve = null, redraws = 0;
+  const live = Array.from({ length: 1000 }, (_, i) => ({ ts: NOWY - i * 3600000 / 2, clientOrderId: 'n' + i }));   // the newest 1,000: about 21 days back
+  const win = { __shwoopAPI: { kalshiOrdersSince: (ms) => { asked = ms; return { then: (ok) => { resolve = ok; } }; } } };
+  const H = new Function('Math', 'Number', 'Array', 'Intl', 'Date', 'Infinity', 'window', 'kalshiLiveOrders', 'kalshiSlotOrders', 'renderStrategiesPage', src)(Math, Number, Array, Intl, Date, Infinity, win, live, [], () => { redraws++; });
+  H.set('7D');
+  assert.ok(!H.run(NOWY).loading && asked === null, '7D is inside the live list: no older read');
+  H.set('YTD');
+  const first = H.run(NOWY);
+  assert.ok(first.loading && asked === Date.UTC(2026, 0, 1, 6, 0), 'YTD asks for every order since Jan 1 (Central) and says it is reading');
+  resolve([{ ts: Date.UTC(2026, 9, 7, 15, 0), clientOrderId: 'oct7' }].concat(live.slice(-3)));
+  const after = H.run(NOWY);
+  assert.ok(Array.isArray(after.orders) && after.orders.some((o) => o.clientOrderId === 'oct7') && after.orders.length === 1001 && redraws === 1, 'the Oct 7 order joins the live list once, and the page redraws');
+  const rp = fn('renderStrategiesPage');
+  assert.ok(/hist = kalshiStratHistory\(now\)/.test(rp) && /if\(hist\.orders\)\{ all = hist\.orders; \}/.test(rp) && /Older trades could not be read, so this starts at/.test(rp) && /Reading older trades/.test(rp), 'the page uses the full history and says so on the chart when part of it is missing');
+};
+
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
 if (failed) process.exit(1);
