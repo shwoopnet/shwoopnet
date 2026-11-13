@@ -23,9 +23,9 @@ The crypto three and RV1 say "rerun with a new (frozen) cut". A new cut turns th
 | CXS1 (perps, crypto) | About 2026-11-28 by the worker's arithmetic (the result file says about 2027-01) | "with a new cut" | epic-ptolemy: CXS1_REGISTRATION.md 01278431d885031d | Dev 2026-10-21 to 10-31; held out 11-01 to 11-06; READ (spent) |
 | CLEAD1 (perps, crypto) | About 2026-12-03 | "about 2026-11-20 with a new cut" | b211ca7e567ef627 | Same as CXS1 |
 | RV1 (stock-perp spreads) | About 2026-12-20 (about 2027-01-15 with a third held out) | "rerun then with a new frozen cut" | b9bd3276ad6d327d | Cut from 2026-11-01; OPEN |
-| RO1 (gold and Tech 100 perps) | About 2027-01-20 for development | Not stated; cut fixed at Nov 1 | f448bd6d8768facaea | LEAD_COMMON rules; UNKNOWN |
+| RO1 (gold and Tech 100 perps) | About 2027-01-20 for development | Not stated; cut fixed at Nov 1 | f448bd6d8768faca | LEAD_COMMON rules; UNKNOWN |
 | XS1 (perps cross-section) | About 2027-01-28 for development | Not stated | 6a9b699e90926f32 | LEAD_COMMON rules; UNKNOWN |
-| OVN3 (perps weekends) | About 2027-05 (30 weekends) | Not stated | 48be30bae86274439 | Last third held out; READ (spent) |
+| OVN3 (perps weekends) | About 2027-05 (30 weekends) | Not stated | 48be30bae8627443 | Last third held out; READ (spent) |
 | EARNPERP1 | Scheduled development read 2027-03-01, likely still short of n (bar about 2027-05-15) | One read, no re-read | 39e26637f214022b | Cutoff constant 2027-03-01 |
 | EARNPERP3 | Same date; arm (b) likely cannot reach 30 | Same | df6c7fba111aa927 | Same |
 | ESPORTM1 remainder | About 2027-01-13 (the worker's projection from the treated share); only FALSIFIED is reachable; the Head ruled it not re-opened | Yes: one read at 150 post-cut treated trades | epic-ptolemy: ESPORTM1_REGISTRATION.md fdaf79a9c2a0ba1b | Cut 2026-10-03T16:00Z; READ (spent) |
