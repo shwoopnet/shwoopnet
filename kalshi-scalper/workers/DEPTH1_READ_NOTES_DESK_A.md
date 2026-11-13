@@ -8,3 +8,6 @@ READ-ONCE MARKER: not yet read.
 - **One condition, written into the result before the read:** the two features that sit in the closed taker order-flow family, **f7 (net tape sweeps) and f6 (thin-side depletion over 60 s, if it is a flow measure)**, are reported as their own lines, and **nothing that rests on either alone can become a lead.** The headline is judged on the registered whole (the 20 tries and the registered bar).
 - **NC15DEPTH1** is ruled OUTSIDE the closed family (resting book state only, no tape) and keeps its normal labels.
 - For the owner's count: CFRTI-B and the Kraken-only version are versions of the same mechanism as CFRTI-K and count as ONE candidate with it. From this lane the Friday candidates are CFRTI-K and PERPBIN1, with NC15DEPTH1 as a registered spare whose data starts Nov 19.
+
+## Dated line (Nov 13, 2026): shared Bitcoin windows with the CFRTI family
+DEPTH1's result will print: "shares Bitcoin windows Nov 9 to 13 with the CFRTI family's unread held-out (read Nov 20), frozen at cfrti_heldout.py c16248cc7cd3fe05..., cfrti_b.py f19b472ef02fc587..., registrations as listed in FROZEN_BEFORE_DEPTH1.md (CFRTI-K and PERPBIN1 are not frozen and carry the not-blind label)". (A notes file; the wrapper and its hash do not change.)

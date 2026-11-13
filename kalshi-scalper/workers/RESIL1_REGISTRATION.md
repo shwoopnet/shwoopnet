@@ -14,3 +14,6 @@ Order-book resilience after a sweep. Idea Desk A, on the Head of R&D's order (No
 - **Development:** windows closing from 2026-10-29T22:15Z to before 2026-11-05T00:00Z with an R6 book and tape. **Held-out:** closes on or after 2026-11-05T00:00Z; the folders with closes of Nov 9 to Nov 13 stay unopened until DEPTH1's single read has been committed (not before 2026-11-14); the held-out is read ONCE, after that, by this script. Marker: NOT READ.
 - **Labels:** development cash PF under 1.0 with n of 100 or more = FALSIFIED on development; n under 100 = "no evidence at n = x"; anything else carried to the held-out. Held-out: cash PF 1.3 or better with a positive mean on 100 or more trades = RE-TEST lead; under 1.0 on 100 or more = FALSIFIED; else "no evidence at n = x". The research bar (cash PF 1.5 in each third, z 5.46 on the shared strict N of about 2,113,000) is reported beside it; a clear is never called a research-bar pass.
 - **Tries: N +1** (one rule, one pooled figure). Script: `desk_a_verify/resil1.py`, committed and self-tested before any event is scored.
+
+## Dated line (Nov 13, 2026)
+RESIL1 was FALSIFIED on development (independently re-run by the Verification Analyst, Nov 12, 2026). It holds nothing: no forward window and no held-out read remain for this card; the held-out window named above is void.
