@@ -65,7 +65,7 @@ gates.WB3 = () => {
   assert.ok(/for i in 1 2 3 4 5 6; do git push/.test(wf), 'six-try push loop');
   assert.deepStrictEqual([...wf.matchAll(/git add ([^\n]+)/g)].map((x) => x[1].trim()), ['wheelbook'], 'adds its own folder only');
   assert.ok(/wheelbook\/\$STAMP/.test(wf) && /ref: main/.test(wf));
-  assert.ok(/^permissions:\s*\n\s*contents: write\s*\n(?!\s+\w)/m.test(wf));
+  assert.ok(/^permissions:\s*\n\s*contents: write\s*\n\s*actions: write\s*\n(?!\s+\w)/m.test(wf), 'contents write and actions write only');
   assert.ok(/concurrency:\s*\n\s*group: record-wheelbook\s*\n\s*cancel-in-progress: false/.test(wf), 'a running job is never cancelled');
   const uses = [...wf.matchAll(/uses:\s*([^\s#]+)/g)].map((x) => x[1]);
   assert.ok(uses.length && uses.every((u) => /@[0-9a-f]{40}$/.test(u)), 'actions pinned by SHA');
@@ -80,7 +80,7 @@ gates.WB4 = () => {
   assert.deepStrictEqual(out, ['2027-01-31T23:59:00Z', false, true]);
   assert.ok(/date -u -d '2027-01-31T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf));
   const steps = wf.split(/\n      - name: /).slice(2);
-  assert.ok(steps.length === 5 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
+  assert.ok(steps.length === 6 && steps.every((s) => /if: "?(always\(\) && |!cancelled\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
   assert.ok(/if past_end\(now\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code), 'the script exits at once after the end date');
 };
 
@@ -354,6 +354,20 @@ gates.WB17 = () => {
   assert.deepStrictEqual(out, [7200, 600, 172800, 21600]);
   assert.ok(/now >= next_wide/.test(code) && /next_res = next_wide = next_clock = 0\.0|next_disc = next_res = next_wide = next_clock = 0\.0/.test(code), 'the wide read runs when the job starts');
   assert.ok(/min_close_ts=%d" % int\(now - RESULTS_WIDE_LOOKBACK_S\)/.test(code));
+};
+
+// WB14: self-chaining (Nov 12, 2026): dispatches this workflow only, on main, after the push, with no sleep; no chain for a past-end, under 2 minute or empty run; cron stays; timeout covers the longest job.
+gates.WB14 = () => {
+  const chain = wf.split(/\n      - name: /).pop();
+  assert.ok(/^Chain the next job/.test(chain));
+  assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true'"/.test(chain));
+  assert.ok(!/sleep /.test(chain), 'no gap: dispatched at once');
+  assert.ok(/2027-01-31T23:59:00Z/.test(chain) && /-lt 120/.test(chain) && /nothing was recorded: not chaining/.test(chain), 'end date, 2 minute and empty-run guards');
+  assert.ok(/RUN_START: \$\{\{ steps\.gate\.outputs\.start \}\}/.test(chain) && !/github\.run_started_at/.test(wfCode));
+  assert.ok(wf.indexOf('Commit and push the data branch') < wf.indexOf('Chain the next job'), 'after the data push');
+  assert.deepStrictEqual([...wf.matchAll(/gh workflow run ([^\n]+)/g)].map((x) => x[1].trim()), ['record-wheelbook.yml --ref main']);
+  assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf));
+  assert.ok(/timeout-minutes: 330/.test(wf));
 };
 
 let failed = 0;

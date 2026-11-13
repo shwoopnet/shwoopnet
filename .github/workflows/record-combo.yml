@@ -3,6 +3,10 @@
 # The built-in GITHUB_TOKEN pushes gzipped files to its OWN `combo-data` branch (under combo/), never to main. The first run creates `combo-data` as an orphan branch.
 # Rate: at most 90 requests a run, 6 seconds apart (at most 10 a minute), 48 runs a day: at most 4,320 requests a day, about 3 a minute on average. A trial run of the widened filter measured 60 requests and about 15 KB gzipped, so about 0.7 MB a day, under 1 MB at the caps. A run took 6 minutes in the trial and at most 9 at the budget, so about 310 to 430 runner minutes a day (9,400 to 13,000 a month), free on a public repo.
 # One concurrency group that never cancels: jobs never overlap, and a dropped start costs one poll.
+# Self-chaining (Nov 12, 2026): GitHub dropped most scheduled starts (1 in about 21 slots), so the combo-data branch held 2 snapshots. A freshness step skips a poll when the newest folder on the data branch is under 25 minutes old,
+# and after the poll and the push a final step (if: !cancelled(), so a failed poll still chains) sleeps to the next :11 or :41 UTC at least 25 minutes after this run started, then re-dispatches this same workflow on main with the built-in token.
+# A skipped run or a run past the end date does NOT chain. The cron stays as the restart path. Needs `actions: write` for the dispatch; nothing else was widened.
+# Runner minutes: about 48 chained runs a day, each about 6 to 9 minutes of polling plus a sleep of up to about 30 minutes, so roughly 1,000 to 1,900 billed minutes a day (it was 310 to 430); free on a public repo, far over the Charter's 250 a month guideline: flagged for the owner.
 # It stops by itself: from 2027-01-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-combo
 on:
@@ -11,17 +15,19 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: record-combo
   cancel-in-progress: false
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 75
     steps:
       - name: Stop for good after the end date (2027-01-31 23:59 UTC)
         id: gate
         run: |
+          echo "start=$(date -u +%s)" >> "$GITHUB_OUTPUT"   # the run's own start time (github.run_started_at is not a context value)
           if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the recorder script from main
         if: steps.gate.outputs.go == 'true'
@@ -36,8 +42,19 @@ jobs:
           git init -q
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           if git fetch -q --depth 1 origin combo-data; then git checkout -q -b combo-data FETCH_HEAD; else git checkout -q --orphan combo-data; fi
-      - name: One poll
+      - name: Skip when a poll is under 25 minutes old (a start the schedule did not drop)
+        id: fresh
         if: steps.gate.outputs.go == 'true'
+        run: |
+          LAST="$(ls -d data/combo/*/* 2>/dev/null | sort | tail -1)"
+          if [ -n "$LAST" ]; then
+            D="$(basename "$(dirname "$LAST")")"; T="$(basename "$LAST" | cut -c1-4)"
+            THEN="$(date -u -d "$D ${T:0:2}:${T:2:2}" +%s 2>/dev/null || echo 0)"
+            if [ $(( $(date -u +%s) - THEN )) -lt 1500 ]; then echo "last poll $LAST is under 25 minutes old: skipping"; echo "poll=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          fi
+          echo "poll=true" >> "$GITHUB_OUTPUT"
+      - name: One poll
+        if: steps.gate.outputs.go == 'true' && steps.fresh.outputs.poll == 'true'
         run: |
           STAMP="$(date -u +%Y-%m-%d/%H%M)"
           mkdir -p "data/combo/$STAMP"
@@ -54,3 +71,21 @@ jobs:
           git commit -q -m "combo $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           for i in 1 2 3 4 5 6; do git push -q origin combo-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin combo-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
           exit 1
+      - name: Chain the next run (sleep to the next :11 or :41, then re-dispatch on main)
+        if: "!cancelled() && steps.gate.outputs.go == 'true' && steps.fresh.outputs.poll == 'true'"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_START: ${{ steps.gate.outputs.start }}
+        run: |
+          END="$(date -u -d '2027-01-31T23:59:00Z' +%s)"
+          NOW="$(date -u +%s)"
+          START="${RUN_START:-$NOW}"
+          EARLIEST=$(( START + 1500 ))   # 25 minutes after the start, so the successor is never under the 25 minute freshness line
+          [ "$EARLIEST" -lt "$NOW" ] && EARLIEST="$NOW"
+          TARGET=$(( (EARLIEST - 660 + 1799) / 1800 * 1800 + 660 ))   # the next :11 or :41 UTC
+          if [ "$TARGET" -ge "$END" ]; then echo "next run would pass the end date: not chaining"; exit 0; fi
+          echo "sleeping $(( TARGET - NOW )) s to the next :11 or :41"
+          sleep $(( TARGET - NOW ))
+          if [ "$(date -u +%s)" -ge "$END" ]; then echo "past the end date: not chaining"; exit 0; fi
+          gh workflow run record-combo.yml --ref main
