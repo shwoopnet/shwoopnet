@@ -87,3 +87,41 @@ Desk B found the same for ruled-out players.
 ## What would make lane (e) produce a candidate
 
 A clause whose trigger is visible on Kalshi's own screen before settlement, and where the lists show traded prices away from the rule's payout. The landed lists show that only for esports "fair market price" voids (VOIDSNAP, with Desk B). The next places to read are series that are not yet in any landed list: golf, motorsport, combat sports and award shows. Their clause types (withdrawal, disqualification, a tie for a placing, dead heat rules) are where sportsbooks themselves differ most. A one-page lists job for those series is the cheapest next step; this desk does not request it.
+
+## Addendum (Nov 13, 2026): golf tie rule, and how others settle voids
+
+### Golf: Kalshi pays boundary ties in full; sportsbooks apply a dead heat
+
+**The clause.** Kalshi's GOLFFINISH contract terms (https://kalshi-public-docs.s3.amazonaws.com/contract_terms/GOLFFINISH.pdf, read in full):
+- "If <player> is tied for a position at the boundary of <count>, the market resolves to Yes", with a settlement value of $1.00.
+- GOLFCUT counts "top 65 and ties" as made the cut.
+- A withdrawal before tee-off settles at the last fair price; after tee-off it is a No.
+
+**The sportsbook rule.** Sportsbooks apply a dead heat. Caesars' FAQ: stake x (places available / players tied), so four tied for 10th pay a quarter (https://www.caesars.com/sportsbook-and-casino/ks/support/dead-heat-faq). Some books pay ties in full at worse odds.
+
+**The arithmetic, if Kalshi's price copied a dead-heat price exactly.** The tie inputs are my estimates, not measured:
+
+| Player | Chance of a top-N finish | Chance of finishing tied at the cut-off place | Kalshi price under a dead heat | PF |
+|---|---|---|---|---|
+| Top-10 contender | 15% | 3.5% | about 12.9c | 1.07 |
+| Top-20 contender | 40% | 8% | about 34.4c | 1.16 |
+| Top-20 contender, more ties | 40% | 12% | about 31c | 1.35 |
+
+**Dropped.** It does not reach 1.5 even if the market ignored the rule entirely. It is a slow family (about 45 tournaments a year), and no forward log records golf. One public article reportedly says a tie for 10th paid all eleven tied players on Kalshi (search summary only), so traders may already know.
+
+### How exchanges and books settle a cancelled or walked-over match (evidence for VOIDSNAP)
+
+- **Pinnacle:** forfeits and walkovers are void "regardless of how the governing body ... scores it". An esports match not started within 30 hours is void.
+- **DraftKings table tennis** (MA house rules 8.1.24): void on retirement, disqualification, walkover or cancellation unless already decided.
+- **Betfair and Bet365:** not verified (403 and nothing found).
+- **The norm:** stakes are returned. No house found pays a pre-play walkover as a win.
+- **Price moves on forfeit or walkover news:** no published measurement found. The nearest is a fixing investigation noting pre-match drift when a player is injured warming up (one 2010 match moved from about 69% to 47%).
+- **Possible source of confusion:** a third-party guide says an ATP walkover on Kalshi "will resolve to 50-50". Kalshi's tennis set-score terms say "last fair price". Our own landed rules text says $0.50 for ITF and fair price for ATP and WTA challengers. So the rule differs by series, which itself could confuse traders.
+- **How Kalshi sets a "fair price":** not published.
+  - ESPORTSMAPS.pdf: "may resolve to the last fair price as determined in the sole discretion of the Exchange".
+  - The help center says only "fair market value" or "a non-standard value such as 50-50".
+  - NCAAB terms allow Kalshi to reject the last trade as unfair.
+  - The Rulebook's definitions chapter is the next place to read.
+- **Cancellation rates for tier 2 and 3 esports and Russian table tennis:** none published. Single cases only. Our own list counts (Desk B's and this page's) are the only rates we have.
+
+**For VOIDSNAP:** sportsbooks return stakes, Kalshi pays a discretionary price. A trader who carries the book convention ("void, money back") onto Kalshi has no reason to sell a team rumoured not to show. A trader who thinks a no-show is a loss does have reason to sell. Nothing published says which is more common, so the card's own measurement remains the only evidence.
