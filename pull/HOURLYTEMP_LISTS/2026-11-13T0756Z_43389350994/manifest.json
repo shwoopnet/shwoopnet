@@ -1,0 +1,423 @@
+{
+ "job": {
+  "job_id": "HOURLYTEMP_LISTS",
+  "owner": "DESK_B",
+  "registration": "kalshi-scalper/workers/HOURLYTEMP_MEASUREMENT_NOTE.md",
+  "purpose": "Hourly city temperature, cost and timing measurement (zero tries), stage 1: the settled markets of the four hourly temperature series for seven fixed UTC days (tickers, strikes and times only; the reader never reads a result), one list of their open markets for the size at the touch, and one fee-field read.",
+  "heldout": "none (a cost measurement; no result is read and no rule is scored)",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "min_close_ts",
+     "max_close_ts",
+     "limit",
+     "cursor"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXTEMPNYCHS",
+   "KXTEMPMIAH",
+   "KXTEMPLAXHS",
+   "KXTEMPCHIHS"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 20,
+  "requests": [
+   {
+    "id": "settled_KXTEMPNYCHS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPNYCHS",
+     "status": "settled",
+     "min_close_ts": 1793836800,
+     "max_close_ts": 1794441599,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXTEMPMIAH",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPMIAH",
+     "status": "settled",
+     "min_close_ts": 1793836800,
+     "max_close_ts": 1794441599,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXTEMPLAXHS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPLAXHS",
+     "status": "settled",
+     "min_close_ts": 1793836800,
+     "max_close_ts": 1794441599,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXTEMPCHIHS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPCHIHS",
+     "status": "settled",
+     "min_close_ts": 1793836800,
+     "max_close_ts": 1794441599,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "open_KXTEMPNYCHS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPNYCHS",
+     "status": "open",
+     "limit": 1000
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "open_KXTEMPMIAH",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPMIAH",
+     "status": "open",
+     "limit": 1000
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "open_KXTEMPLAXHS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPLAXHS",
+     "status": "open",
+     "limit": 1000
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "open_KXTEMPCHIHS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTEMPCHIHS",
+     "status": "open",
+     "limit": 1000
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "series_KXTEMPNYCHS",
+    "path": "/series/KXTEMPNYCHS",
+    "params": {}
+   }
+  ],
+  "notes": "DISPATCH ORDER (Head of R&D, Nov 12): LAST, behind TIE3, POL-i2 and SOCDERIV. Seven fixed days, Nov 5 to Nov 11, 2026 UTC, never extended. The candle job is built from these answers by workers/hourlytemp/build_candles_job.py.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-13T0756Z",
+ "finished": "2026-11-13T0756Z",
+ "status": "complete",
+ "requests_sent": 13,
+ "bytes_stored": 13171573,
+ "rows": [
+  {
+   "index": 1,
+   "id": "settled_KXTEMPNYCHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPNYCHS",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1940221,
+   "t_send_ms": 1794556601221,
+   "t_recv_ms": 1794556601410,
+   "server_date": "Fri, 13 Nov 2026 07:56:41 GMT",
+   "file": "0001.json.gz",
+   "sha256": "ecd814a2f447c66ea1ae13eb53eb1844ecc81ed74aec2877728a661aa6c9bfe1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "settled_KXTEMPNYCHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPNYCHS",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1181118,
+   "t_send_ms": 1794556602222,
+   "t_recv_ms": 1794556602368,
+   "server_date": "Fri, 13 Nov 2026 07:56:42 GMT",
+   "file": "0002.json.gz",
+   "sha256": "c8fd2ad03618ce6a640df5ea63337985b32c9ec7d97c5f6dca32ba3feb33f9db",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "settled_KXTEMPMIAH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1953587,
+   "t_send_ms": 1794556603222,
+   "t_recv_ms": 1794556603394,
+   "server_date": "Fri, 13 Nov 2026 07:56:43 GMT",
+   "file": "0003.json.gz",
+   "sha256": "4194109a63bee86f5489caf097a4fa8801f420dc7046b5231e844e91fd5c3a37",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "settled_KXTEMPMIAH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1318085,
+   "t_send_ms": 1794556604222,
+   "t_recv_ms": 1794556604356,
+   "server_date": "Fri, 13 Nov 2026 07:56:44 GMT",
+   "file": "0004.json.gz",
+   "sha256": "f97a356cbf52addfbe4f07c04fca99015164bb3ae35d6dba9a2f784eae6223e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "settled_KXTEMPLAXHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPLAXHS",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1952241,
+   "t_send_ms": 1794556605222,
+   "t_recv_ms": 1794556605354,
+   "server_date": "Fri, 13 Nov 2026 07:56:45 GMT",
+   "file": "0005.json.gz",
+   "sha256": "dc316cfcf9f14f13ea353623bc8c5f13695bde20a63fa1d58642623168fe58e6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "settled_KXTEMPLAXHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPLAXHS",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1420607,
+   "t_send_ms": 1794556606222,
+   "t_recv_ms": 1794556606364,
+   "server_date": "Fri, 13 Nov 2026 07:56:46 GMT",
+   "file": "0006.json.gz",
+   "sha256": "e844e56b9b84a905591cf5ac4154bb5a5d5f71358c72286b4396449051abe3e4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "settled_KXTEMPCHIHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPCHIHS",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1950339,
+   "t_send_ms": 1794556607222,
+   "t_recv_ms": 1794556607380,
+   "server_date": "Fri, 13 Nov 2026 07:56:47 GMT",
+   "file": "0007.json.gz",
+   "sha256": "b3aedfa17199ff3c9db764dd117bd8346149c8b80d0cb71c63089dc08e7d9527",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "settled_KXTEMPCHIHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPCHIHS",
+    "status": "settled",
+    "min_close_ts": 1793836800,
+    "max_close_ts": 1794441599,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1380060,
+   "t_send_ms": 1794556608222,
+   "t_recv_ms": 1794556608367,
+   "server_date": "Fri, 13 Nov 2026 07:56:48 GMT",
+   "file": "0008.json.gz",
+   "sha256": "4a143d2c54a3ed51ea54c06e95d6ad6eb2b9faf5778bc19ace5976ddb596a493",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "open_KXTEMPNYCHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPNYCHS",
+    "status": "open",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 18548,
+   "t_send_ms": 1794556609222,
+   "t_recv_ms": 1794556609276,
+   "server_date": "Fri, 13 Nov 2026 07:56:37 GMT",
+   "file": "0009.json.gz",
+   "sha256": "f7eaf9cdc987139171f9411f5153f29be7408846fa286174df16f526d9d70aab",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "open_KXTEMPMIAH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "open",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 18669,
+   "t_send_ms": 1794556610222,
+   "t_recv_ms": 1794556610317,
+   "server_date": "Fri, 13 Nov 2026 07:56:38 GMT",
+   "file": "0010.json.gz",
+   "sha256": "8e19090063e99968833025389c97c563894ff41a380e4a9e1fca24e01ac61066",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "open_KXTEMPLAXHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPLAXHS",
+    "status": "open",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 18668,
+   "t_send_ms": 1794556611223,
+   "t_recv_ms": 1794556611291,
+   "server_date": "Fri, 13 Nov 2026 07:56:38 GMT",
+   "file": "0011.json.gz",
+   "sha256": "06267e3b353d95c2f608ef7639454032b4dee5ac9e467b6aa522cfe2192724f6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "open_KXTEMPCHIHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPCHIHS",
+    "status": "open",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 18621,
+   "t_send_ms": 1794556612223,
+   "t_recv_ms": 1794556612303,
+   "server_date": "Fri, 13 Nov 2026 07:56:45 GMT",
+   "file": "0012.json.gz",
+   "sha256": "ce024a2df7c3b9a138d12863a5634fb01a9e8dc10271eea93440216e292e864d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "series_KXTEMPNYCHS",
+   "path": "/series/KXTEMPNYCHS",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 809,
+   "t_send_ms": 1794556613223,
+   "t_recv_ms": 1794556613288,
+   "server_date": "Fri, 13 Nov 2026 07:56:53 GMT",
+   "file": "0013.json.gz",
+   "sha256": "50bee63e91bff111fe7d64d0859a69ec32d829f0275dbc34e605963ab83cf871",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
