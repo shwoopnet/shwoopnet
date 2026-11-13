@@ -91,7 +91,7 @@ def detect(g, cand):
                 sides = None
                 break
             sides.append((b, a))
-        if not sides or not all(ML_BAND[0] <= (b + a) / 2 <= ML_BAND[1] for b, a in sides):
+        if not sides or not all(ML_BAND[0] - 1e-9 <= (b + a) / 2 <= ML_BAND[1] + 1e-9 for b, a in sides):
             continue
         known = hi = lo = open_ = 0
         for q in tot:
@@ -99,9 +99,9 @@ def detect(g, cand):
             if b is None and a is None:
                 continue
             known += 1
-            if b is not None and b >= HIGH:
+            if b is not None and b >= HIGH - 1e-9:
                 hi += 1
-            elif a is not None and a <= LOW:
+            elif a is not None and a <= LOW + 1e-9:
                 lo += 1
             else:
                 open_ += 1
@@ -182,7 +182,7 @@ def main():
         print(f"VERDICT: NOT_ENOUGH_DATA ({n} detections, need {MIN_DETECTIONS})")
         return
     fire = n / usable
-    if not (FIRE_RANGE[0] <= fire <= FIRE_RANGE[1]):
+    if not (FIRE_RANGE[0] - 1e-9 <= fire <= FIRE_RANGE[1] + 1e-9):
         print(f"VERDICT: CARD CLOSED (the rule fires in {fire:.0%} of games; overtime is about 20% to 23%, so it is not detecting overtime)")
         return
     def optimistic(h):
@@ -196,7 +196,7 @@ def main():
     share = sum(1 for h in hits if buyable(h)) / n
     print(f"detections where the cheaper side's own contract was at {ASK_BAR:.2f} or lower (spread {SPREAD_BAR:.2f} or less) ONE MINUTE AFTER the detection minute, one price, one chance: {share:.0%}  [the registered verdict]")
     print(f"  optimistic, best of the detection minute or the next, as first written: {sum(1 for h in hits if optimistic(h)) / n:.0%}  [information only]")
-    print("VERDICT: " + ("CARD CLOSED (the market already prices overtime as close to even)" if share < SHARE_BAR else "SURVIVES the price measurement (nothing beyond it is approved)"))
+    print("VERDICT: " + ("CARD CLOSED (the market already prices overtime as close to even)" if share < SHARE_BAR - 1e-9 else "SURVIVES the price measurement (nothing beyond it is approved)"))
 
 
 if __name__ == "__main__":

@@ -99,3 +99,7 @@ So a mid-priced bet needs about 9 to 12 points of error in the market's price, e
 4. Its pull is moved behind the WHEEL0 files and the INPLAYJUMP candles (the Head's order), because as built it cannot produce a candidate.
 5. **Said plainly for the owner's count:** NHLOT and MAPBREAK are one candidate. MAPBREAK is out on CS2 and short of its minimum elsewhere until the rest of its candles are read; NHLOT has no live detector. That candidate stands at "no evidence".
 
+## NHLOT: clarifying line, Nov 13, 2026, 00:16Z, before any NHL candle was read (Auditor B's grep; Head of R&D's order)
+
+Every comparison against a registered line in the reader carries a tolerance of 1e-9, with a value exactly on the line kept on the registered side: the moneyline band edges are inclusive, a strike at exactly 0.93 or 0.07 counts as decided, the 12% and 35% fire-rate edges are inclusive, and a share of exactly 30% is NOT closed. No number and no rule changed.
+
