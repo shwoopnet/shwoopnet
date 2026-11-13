@@ -212,6 +212,17 @@ Still agreed by reading only: a favourites-class rule (150 signals); the Head ha
 After this comparison the lane gained three details under item (u) (`rnd-queue` `b25284ef`): the 120 rows are header-readable rows, a row with no readable receive
 time is dropped before the sort, and a run's rows come from `book.csv.gz` in file order. They describe what both builds already do, so nothing was changed or re-run for them.
 
+## Nov 13, 02:47Z (committed 05:35Z after a worker restart): the ruled readings fixed as constants, the start time 02:40:00Z, same again
+
+The Head asked that the row-by-row offset be the build's fixed reading and not a switch, and moved the places' start time to 2026-11-13T02:40:00Z (`rnd-queue` `e28bcef2`).
+My build now holds the three ruled readings as constants (exchange-time clock for the second look, row-by-row offset, a header-less row can be a poll), defaults its block
+start to 02:40:00Z and names the lane text at `b25284ef`. Its hash is `d1494fe5...` (the Head's record names the earlier `02ad0237...`; the two print the same figures).
+**The offset takes the last 120 rows that have a readable Date header**, up to and including the poll's own row; it is not "120 rows, then the readable ones".
+
+Re-run at 02:47:16Z with `--start 2026-11-13T02:40:00Z` in both builds (Desk A's files unchanged: `8d1055df`, `38ec4c46`, reader `5525cbbb` at `387a6449`): all six reads
+the same again, with 0 differing records, exchange times, record figures, per-series figures, block figures and place states. Blocks per read: 10, 10, 9, 10, 10, 11.
+The session's worker restarted before this was committed; the figures above were re-checked from the saved outputs before this commit.
+
 ## Places where the sheet or the lane leaves a choice
 
 The scorer prints its readings with its output. The ones most likely to move a figure:

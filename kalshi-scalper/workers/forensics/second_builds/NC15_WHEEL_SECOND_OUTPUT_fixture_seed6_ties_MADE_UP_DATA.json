@@ -128,15 +128,15 @@
   }
  },
  "readings": [
-  "a. A poll is one book row of a ticker. A row with no readable Date header can still be a poll if earlier header-readable rows of its run give it an offset (the sheet's text, and what the first build does; set NC15_HEADERLESS_POLL=no for the other reading). Rows of a run are ordered by t_recv_ms, then file order. The offset of a poll uses the last 120 header-readable rows of its own run folder UP TO AND INCLUDING THE POLL'S OWN ROW in that order (the Head's ruling, lane item (u): row by row, the frozen scorer's reading; so two rows received at the same instant can have slightly different offsets; this build first gave every row of an instant the same offset, NC15_OFFSET_WINDOW=instant); the median of an even number is the mean of the two middle values. No such row: \"no clock\", no signal.",
+  "a. A poll is one book row of a ticker. A row with no readable Date header can still be a poll if earlier header-readable rows of its run give it an offset (item (u)). Rows of a run are ordered by t_recv_ms, then file order. The offset of a poll uses the last 120 header-readable rows of its own run folder UP TO AND INCLUDING THE POLL'S OWN ROW in that order (the Head's ruling, lane item (u): row by row, the frozen scorer's reading; so two rows received at the same instant can have slightly different offsets; this build first gave every row of an instant the same offset; that reading is not used); the median of an even number is the mean of the two middle values. No such row: \"no clock\", no signal.",
   "b. A ticker's polls are pooled over every run folder that holds it, each with its own run's offset. The signal poll is the one with the greatest exchange time at or before D and at most 10 s before it (1e-9 tolerance on both edges); on an exact tie, the later by receive time (Desk A's choice 1 says \"ties by run path\"). The close time is the close_time of the ticker's first row that has a readable one (choice 2).",
   "c. A level is present if its price and its size both parse as numbers and the size is above zero. A side with no readable top-level price (yes_bid_px_1, no_bid_px_1), or with no level at all, is \"a missing side\": no signal. The band test's ask is 1 minus the met side's top-level price (Desk A's choices 4 and 5).",
   "d. \"In the cell\" is |imb5| at or above 0.50 with the 1e-9 tolerance; imb5 above zero buys YES, below zero buys NO.",
-  "e. The second poll is the ticker's next poll by receive time IN THE SAME RUN FOLDER as the signal poll (Desk A's choice 1; this build first took the next poll over all run folders). Its distance from the signal poll is measured on EXCHANGE time, each poll with its own offset (what the first build does; this build first used the recorder's clock, t_recv_ms; set NC15_SECOND_CLOCK=recorder for that reading), at most 6 s with the 1e-9 tolerance; later, or no later poll in that run: \"not fill-checked\".",
+  "e. The second poll is the ticker's next poll by receive time IN THE SAME RUN FOLDER as the signal poll (Desk A's choice 1; this build first took the next poll over all run folders). Its distance from the signal poll is measured on EXCHANGE time, each poll with its own offset (item (f); this build first used the recorder's clock, t_recv_ms), at most 6 s with the 1e-9 tolerance; later, or no later poll in that run: \"not fill-checked\".",
   "f. The ladder is the met side's present levels as asks (1 minus the bid price), cheapest first. \"Offers 10\" is the sizes at or under limit + 1e-9 summing to 10 - 1e-9 or more. The walked price takes the first 10 contracts of the levels at or under the limit.",
   "g. A decision instant before the sheet's commit time (2026-11-13T00:23:49Z) does not count; a close after 2026-12-31T23:59:59Z is past the log's stop. Both are counted and left out.",
   "h. Result: a coverage row's result of yes or no, from any run folder that holds the ticker (two runs that disagree stop this build's run; Desk A's choice 6 takes the first found). Any other non-empty value is a void. An empty result is OPEN until 7 days after the close (by --now), then a void. A void is a fee-only loss, counted.",
-  "i. BLOCKS follow ROTATION_LANE.md section 4, v1.3, items (a) to (u) with (h) removed, at rnd-queue cfe33762. Counted signals: fillable, signal poll time at or after the start time (l), limit in whole cents under 88 (i); misses, not fill-checked and skipped signals are in no count (m). Order (p): signal poll time, then ticker, then side. A day is the US Central date of the signal poll's exchange time (d).",
+  "i. BLOCKS follow ROTATION_LANE.md section 4, v1.3, items (a) to (u) with (h) removed, at rnd-queue b25284ef. Counted signals: fillable, signal poll time at or after the start time (l), limit in whole cents under 88 (i); misses, not fill-checked and skipped signals are in no count (m). Order (p): signal poll time, then ticker, then side. A day is the US Central date of the signal poll's exchange time (d).",
   "j. A block grows in order and ends, to be read once, at the first signal where it holds 60 signals, 7 days, 10 wins and 10 losses (a, c, i); a void is in n and its fee in the losses, but it is neither a win nor a loss for that count (n). An open result stops the search (r): the block WAITS, \"expiry not yet decided\" (q). A block whose counted signals up to its first signal's time plus 21 x 24 hours are all final and still do not hold the counts is EXPIRED, unread, once the stated read time is past that expiry time (b, k, q); the next block starts at the first counted signal after the expiry time (t).",
   "k. Money in whole cents (g): a cash result that is not a whole cent is rounded DOWN, floor(100 x cash + 1e-6); 1.3 or better is 10 x W >= 13 x L, 1.0 or better is W >= L, L = 0 with W > 0 passes, W = 0 fails. There is NO single-day limit: item (h) was removed by the owner on Nov 13, 2026 (\"Drop the line\"); the top day's share is printed for reading only. Halves: the first n // 2 signals and the rest (e).",
   "l. Confirmation (j): the next 30 counted signals, complete within 21 x 24 hours of the cleared block's last signal; W >= L is QUALIFIED, and then no further block is read (t); else failed, and the next block starts after its 30 signals. Fewer than 30 within its 21 days, all of them final, and the read time past that limit: EXPIRED, unread, and the next block starts at the first counted signal after the expiry time. Its signals belong to no block.",
@@ -234,28 +234,28 @@
   },
   "KXNATGAS15M": {
    "fillable": 1124,
-   "before_the_start_time": 4,
+   "before_the_start_time": 5,
    "skipped_limit_88c_or_above": 131,
-   "counted": 989,
+   "counted": 988,
    "cash_not_whole_cents_rounded": 168,
    "cash_not_whole_cents_all_final_fillable": 199,
    "blocks": [
     {
-     "first": "KXNATGAS15M-26NOV130245-00",
+     "first": "KXNATGAS15M-26NOV130400-00",
      "last": "KXNATGAS15M-26NOV190745-00",
-     "n": 161,
-     "wins": 88,
+     "n": 160,
+     "wins": 87,
      "losses": 71,
      "voids": 2,
-     "net_cents": 15455,
-     "wins_cents": 37891,
+     "net_cents": 15174,
+     "wins_cents": 37610,
      "losses_cents": 22436,
-     "pf": 1.688848279550722,
-     "pf_first_half": 2.276669557675629,
-     "pf_second_half": 1.2784589766878596,
+     "pf": 1.6763237653770726,
+     "pf_first_half": 2.3305507372072856,
+     "pf_second_half": 1.219573115349682,
      "days": 7,
-     "span_days": 6.208335868053966,
-     "top_day_share_of_net": 0.5891297314784859,
+     "span_days": 6.156252436339855,
+     "top_day_share_of_net": 0.6000395413206802,
      "verdict": "CLEARED",
      "fails": [],
      "confirmation_pf": 1.571055753262159,
@@ -430,5 +430,5 @@
    "qualified": false
   }
  },
- "start": 1794536640.0
+ "start": 1794537600.0
 }
