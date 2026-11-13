@@ -1,0 +1,3 @@
+close_time,series,ticker,polls,ok_polls,n429,batch_fallback,max_gap_ms,first_recv_ms,last_recv_ms,book_rows,tape_pages,tape_trades,dupes_dropped,tape_sum_count,volume_fp,result,note
+2026-11-12T13:30:00Z,KXSILVER15M,KXSILVER15M-A,,,,,,,,,,,,,,no,
+2026-11-13T13:30:00Z,KXSILVER15M,KXSILVER15M-B,,,,,,,,,,,,,,yes,

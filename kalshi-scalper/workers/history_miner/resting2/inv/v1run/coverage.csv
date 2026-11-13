@@ -1,0 +1,8 @@
+close_time,series,ticker,polls,ok_polls,n429,batch_fallback,max_gap_ms,first_recv_ms,last_recv_ms,book_rows,tape_pages,tape_trades,dupes_dropped,tape_sum_count,volume_fp,result,note
+2026-11-01T12:00:00Z,KXBTC15M,KXBTC15M-W1,,,,,,,,,,,,,,yes,
+2026-11-02T12:00:00Z,KXBTC15M,KXBTC15M-W2,,,,,,,,,,,,,,yes,
+2026-11-03T12:00:00Z,KXBTC15M,KXBTC15M-W3,,,,,,,,,,,,,,yes,
+2026-11-04T12:00:00Z,KXBTC15M,KXBTC15M-W4,,,,,,,,,,,,,,no,
+2026-11-05T12:00:00Z,KXBTC15M,KXBTC15M-W5,,,,,,,,,,,,,,no,
+2026-11-20T12:00:00Z,KXBTC15M,KXBTC15M-W6,,,,,,,,,,,,,,yes,
+2026-11-07T12:00:00Z,KXBTC15M,KXBTC15M-W7,,,,,,,,,,,,,,no,

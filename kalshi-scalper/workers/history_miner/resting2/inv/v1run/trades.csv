@@ -1,0 +1,4 @@
+ticker,created_time,yes_price_dollars,count_fp,taker_outcome_side
+KXBTC15M-W1,2026-11-01T11:57:30Z,0.19,1.00,no
+KXBTC15M-W2,2026-11-02T11:57:30Z,0.2,1.00,no
+KXBTC15M-W7,2026-11-07T11:58:20Z,0.2,1.00,no
