@@ -18,7 +18,7 @@ def iso_ts(s):
     try: return calendar.timegm(time.strptime(re.sub(r"\.\d+Z$", "Z", s), "%Y-%m-%dT%H:%M:%SZ"))
     except Exception: return None
 def read_lists(folder):
-    import heldout_guard; heldout_guard.refuse_heldout(folder, "read_lists")
+    import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(folder, "read_lists")
     man = json.load(open(os.path.join(folder, "manifest.json"))); mk = {}
     for row in man["rows"]:
         if row.get("status") != 200 or "file" not in row: continue
@@ -85,7 +85,7 @@ def families(S, mk, want_clock):
         lo, hi = iso_ts(f["development"]["closes_from"]), iso_ts(f["development"]["closes_before"])
         yield f, [(t, m) for t, m in mk.items() if m["series"] in f["series"] and lo <= m["close"] < hi and not t.endswith("-TIE")]
 def main(mode, series_path, folder, outdir, hourly=None, scorekit_dir=None):
-    import heldout_guard; heldout_guard.refuse_heldout(folder, "candles builder")
+    import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(folder, "candles builder")
     if hourly: heldout_guard.refuse_heldout(hourly, "candles builder hourly")
     S = json.load(open(series_path)); mk = read_lists(folder); reqs, per, alltk = [], collections.Counter(), set()
     if mode == "clock":
