@@ -773,3 +773,25 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - FALSIFIED is recorded ONLY after both independent builds (Desk A's port and Desk B's build 2) print the same unrounded development figures, under 1.0 after fees, and Auditor B is CLEAN on both. If so, the Nov 24 held-out read is not run and stays unread.
   - The EA is told plainly that the protocol's own stated verdict was the held-out read, so the owner can ask for it.
   - Auditor B: the original reader is NOT CLEAN as a held-out reader (F1 marker filter, F2 load order, F3 outputs, F4 date conflict, F5 crash). The port's diff is accepted for development.
+
+## 2026-11-13 20:13Z: MMSIM1 FALSIFIED ON DEVELOPMENT (the Head's recorded reading) [research]
+Two independent builds, both CLEAN (Auditor B): Desk A mmsim1_rulep.py 8c571af4 at 3fa3abf0 (a port of the audited original, b2210301) and Desk B mmsim_build2.py dd1516e9 (written from the text and Amendment 4 only).
+
+Input identity: both read quote-data with the same 106 book and trades files to 2026-11-07 (list hash 260ae70bc0c9e1df at 84883562 and at fca0a71e). The rows are unchanged between the two commits.
+
+Development figures (168 events, 1,113 strikes, 1 contract, fees unrounded), identical to 1e-15:
+
+| Rule | Basis | PF | Net |
+|---|---|---|---|
+| Rule Q (the registered reproduction) | maker 0 | 1.4072 | +8.5133 |
+| Rule Q | bound | 1.2845 | |
+| Rule P (Amendment 3's verdict rule) | maker 0 | 0.1834 | -29.4641 |
+| Rule P | bound | 0.0718 | -34.9252 |
+
+For Rule P, 1 of 10 days was positive.
+
+The reading: RND_CHARTER section 4 counts a cash PF under 1.0 on the development read after fees as FALSIFIED, and Amendment 3 made Rule P the rule MMSIM1 is judged by. This is the Head's reading, not a stated rule of the card. The card's own stated verdict was the Nov 24 held-out read (Amendments 2 and 3). That read is NOT run: the held-out stays unread, and the owner may ask for it. If it is ever run, both builds must first be re-frozen with G15 and re-audited.
+
+- Tries: no new try for this reading (MMSIM1's tries are in the ledger from its registration).
+- Family: liquidity provision, 1 FALSIFIED of 3 (the effort-stop count).
+- The held-out reader work (F1 to F4) is cancelled.
