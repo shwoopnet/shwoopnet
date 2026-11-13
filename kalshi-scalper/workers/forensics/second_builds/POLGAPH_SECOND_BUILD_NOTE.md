@@ -77,6 +77,14 @@ The Head's last word (01:44Z): align to Desk B's `94ff7fa7` (scorer `9186c8b5...
   entry point (it always decides from the candles), so those three were not run here. The two whole-pipeline fixtures above cover the same two cases.
 - The three earlier fixtures are unchanged in content under the changed generator (checked by hashing the decompressed answers).
 
+## Nov 13, 01:48Z: the Head's ruling on the one difference, and where POLGAPH stands
+
+- **Ruling: a sentence, no hash change.** Desk B's scorer stays frozen at `9186c8b5...` (branch head `cfb1eec0` holds it and registration `a13693f3...`, checked by
+  hash). The Head's sentence: "On the information-only line for voids paid at settlement value, the first build's wins count uses a raw comparison and may count a cash
+  result of exactly zero as a win; the second build applies 1e-9 and does not; the difference is at most the number of exactly-zero voids, and no verdict reads that count."
+- **At the read:** if that count differs by more than the number of exactly-zero voids, it goes to the Head.
+- **Standing:** text closed, scorer frozen, auditor clean, second build matched. This desk's POLGAPH work is closed until the lists land; nothing has been requested.
+
 ## Places where the registration leaves a choice
 
 The build prints its readings with the output (`ambiguities`). The ones most likely to move a figure:
