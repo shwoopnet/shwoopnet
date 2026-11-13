@@ -17,7 +17,7 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
  5. The 30 s and 60 s lookbacks are measured from the DECISION POLL's own time: the last poll at or before (decision poll time minus 30 s or 60 s) and no more than 6 s before that.
  6. f7's tape window: trades with created_time in [decision poll time minus 60 s, decision poll time). A sweep: same taker side, same whole second (of created_time), two or more distinct prices.
  7. The fill poll: the first poll at or after (decision poll time + 1.0 s) and no later than 20 s after that instant. The other reading (from T-480 s itself) is not built.
- 8. f3: weighted YES bid = sum(px x sz)/sum(sz) over the YES levels; weighted YES ask = 1 minus the same over the NO levels; plain mid = (YES bid 1 + (1 - NO bid 1))/2.
+ 8. f3: weighted YES bid = sum(px x sz)/sum(sz) over the YES levels; weighted YES ask = 1 minus the same over the NO levels; plain mid = (YES bid 1 + (1 - NO bid 1))/2. HOW the sums are added decides trades: when the true value is zero the floating point residue differs between a numpy array sum and a plain running sum, and with the exact-zero rule that changes which windows trade (F3_SUM).
  9. f6: thin side = the smaller 5 level size 60 s ago; value = (then - now)/then for that side, positive when the thin side is NO, negated when it is YES; equal sizes then = 0; thin size then of 0 = undefined.
 10. f8: gap = level 1 price minus level 2 price; a missing level 2 gives a gap of the whole level 1 price. f9 needs two levels a side; slope = (level 1 price - last level price)/sum of sizes.
 11. f10: levels whose price is within 0.03 of the side's level 1 price (inclusive, tolerance 1e-9).
@@ -45,7 +45,8 @@ NEED_WINDOWS, SHUFFLES, SEED, CONTROL_P, MIN_SHUFFLE_TRADES = 300, 1000, 2026111
 READ_NOT_BEFORE = 1794614400            # 2026-11-14T00:00:00Z
 RECORDER_END_MS = (READ_NOT_BEFORE - 60) * 1000      # CONFIG recorder_end_utc 2026-11-13T23:59:00Z; the first build drops a window that opened (close minus 900 s) at or after it (Desk A, Nov 13)
 COVERAGE_OFFSET = 0                     # the first build compares the coverage row's raw receive times with T (no clock offset); 1 would add the run's offset
-ZERO_TOL = 1e-12                        # a feature this close to zero is "zero: no trade" (AMBIGUITY 12); 0.0 reproduces a build that trades on any non-zero float
+ZERO_TOL = 0.0                          # Amendment 2, point 12 (ruled Nov 13): only None, NaN or EXACTLY 0 is "no trade"; any other float trades. Set to 1e-12 for the other reading.
+RESIDUE = 1e-12                         # a fired trade whose feature is within this of zero but not exactly zero is counted for each try (the Head, Nov 13): information, never part of the verdict
 EPS = 1e-9
 FEATURES = ("f1_imb5", "f2_imb1", "f3_dwmid_minus_mid", "f4_d_imb30", "f5_d_imb60", "f6_thin_depletion", "f7_sweep_net", "f8_hole_asymmetry", "f9_book_slope", "f10_imb_3c")
 CLOSED_FAMILY = ("f6_thin_depletion", "f7_sweep_net")
@@ -88,10 +89,18 @@ def _imb(a, b): return None if a + b <= 0 else (a - b) / (a + b)
 def _tot(lv): return sum(s for _, s in lv)
 def f1(b): return None if (not b["y"] or not b["n"]) else _imb(_tot(b["y"]), _tot(b["n"]))      # both sides must be quoted at that poll (aligned to the first build, Nov 13)
 def f2(b): return None if not b["y"] or not b["n"] else _imb(b["y"][0][1], b["n"][0][1])
+F3_SUM = "numpy"          # "numpy": weighted prices by numpy array sums, which reproduces the first build's f3 to the trade; "python": a plain running sum of the SAME formula.
+                          # The two differ only in floating point residue, and that residue alone moves f3's trade count (296 against 276 on the no-edge fixture).
+
+
 def f3(b):
     if not b["y"] or not b["n"]: return None
-    wy = sum(p * s for p, s in b["y"]) / _tot(b["y"]); wn = sum(p * s for p, s in b["n"]) / _tot(b["n"])
-    return (wy + (1 - wn)) / 2 - (b["y"][0][0] + (1 - b["n"][0][0])) / 2
+    if F3_SUM == "numpy":
+        import numpy as np
+        w = lambda lv: float((np.array([p for p, _ in lv]) * np.array([s for _, s in lv])).sum() / np.array([s for _, s in lv]).sum())
+    else:
+        w = lambda lv: sum(p * s for p, s in lv) / _tot(lv)
+    return (w(b["y"]) + (1 - w(b["n"]))) / 2 - (b["y"][0][0] + 1 - b["n"][0][0]) / 2
 def f6(now, then):
     if then is None or not now["y"] or not now["n"] or not then["y"] or not then["n"]: return None      # both sides quoted at both polls (aligned to the first build, Nov 13)
     ty, tn = _tot(then["y"]), _tot(then["n"])
@@ -111,10 +120,10 @@ def f10(b):
     near = lambda lv: sum(s for p, s in lv if lv[0][0] - p <= 0.03 + EPS)
     return _imb(near(b["y"]), near(b["n"]))
 def f7(trades, t_ms):
-    """trades: [(created_ms, price, taker side)] of the window's ticker. Sweeps in [t - 60 s, t)."""
+    """trades: [(created_ms, price, taker side)] of the window's ticker. Sweeps in (t - 60 s, t]: open at the start, closed at the end (Amendment 2, (a))."""
     groups = collections.defaultdict(set)
     for ms, px, side in trades:
-        if t_ms - TAPE_S * 1000 <= ms < t_ms and side in ("yes", "no") and px is not None: groups[(side, ms // 1000)].add(round(px, 6))
+        if t_ms - TAPE_S * 1000 < ms <= t_ms and side in ("yes", "no") and px is not None: groups[(side, ms // 1000)].add(round(px, 6))
     sw = collections.Counter(side for (side, _), pxs in groups.items() if len(pxs) >= 2)
     return float(sw["yes"] - sw["no"])
 
@@ -126,11 +135,11 @@ def fee_up(p): return math.ceil(0.07 * p * (1 - p) * 100 - EPS) / 100.0
 def load(root):
     """-> windows: {ticker: {...}}, counts. One coverage row a ticker (AMBIGUITY 3)."""
     refuse_heldout(root)
-    C = collections.Counter(); cand = collections.defaultdict(list); runs = {}
+    C = collections.Counter(); cand = collections.defaultdict(list); runs = {}; order = {}
     for cov in sorted(glob.glob(os.path.join(root, "*", "*", "coverage.csv.gz"))):
         run = os.path.dirname(cov); refuse_heldout(run)
         for r in rows(cov):
-            if r.get("series") in MARKETS and r.get("ticker"): cand[r["ticker"]].append((run, r))
+            if r.get("series") in MARKETS and r.get("ticker"): order[(run, r["ticker"])] = len(order); cand[r["ticker"]].append((run, r))
             elif r.get("series") in MARKETS: C["coverage rows with no ticker"] += 1
     need_runs = {run for v in cand.values() for run, _ in v}
     polls = collections.defaultdict(lambda: collections.defaultdict(list)); tape = collections.defaultdict(lambda: collections.defaultdict(list))
@@ -165,18 +174,19 @@ def load(root):
             if (num(r.get("max_gap_ms")) or 0) > USABLE["max_gap_ms"]: fails.append("largest gap over 20 s")
             if (num(r.get("tape_pages")) or 0) < 1 or any(b in str(r.get("note") or "") for b in USABLE["bad"]): fails.append("tape missing or incomplete")
             fr, lr = num(r.get("first_recv_ms")), num(r.get("last_recv_ms"))
-            if fr is None or fr + COVERAGE_OFFSET * off > T - USABLE["first_s"] * 1000: fails.append("first poll after T-545 s")
+            if fr is None or fr <= 0 or fr + COVERAGE_OFFSET * off > T - USABLE["first_s"] * 1000: fails.append("first poll after T-545 s")
             if lr is None or lr + COVERAGE_OFFSET * off < T - USABLE["last_s"] * 1000: fails.append("last poll before T-470 s")
             if T - 900 * 1000 >= RECORDER_END_MS: fails.append("window opened at or after the recorder end (2026-11-13T23:59Z)")
             for f_ in fails: why[f_] += 1
             if fails: continue
             if best is None or ok > best["ok"]:
                 res = str(r.get("result") or "").strip().lower()
-                best = {"ticker": tk, "series": r["series"], "T": T, "date": date, "run": run, "off": off, "ok": ok, "result": res}
+                best = {"ticker": tk, "series": r["series"], "T": T, "date": date, "run": run, "off": off, "ok": ok, "result": res, "order": order[(run, tk)]}
         if best is None: C["windows not usable"] += 1; continue
         best["polls"] = sorted(((t + best["off"], b) for t, b in polls[best["run"]].get(tk, [])), key=lambda x: x[0])
         best["tape"] = tape[best["run"]].get(tk, [])
         windows[tk] = best; C["usable windows (Amendment 1: never dropped for a missing result)"] += 1
+    windows = dict(sorted(windows.items(), key=lambda kv: kv[1]["order"]))            # the scored order: runs in sorted run-path order, coverage order within a run (Amendment 2, (e))
     return windows, C, why
 
 
@@ -212,12 +222,13 @@ def prepare(w):
         bf = fill[1]
         if bf["n"]: q["yes"] = (1 - bf["n"][0][0], bf["n"][0][1])          # buying YES lifts the NO bid
         if bf["y"]: q["no"] = (1 - bf["y"][0][0], bf["y"][0][1])
-    held = None
+    held = None                                                               # Bitcoin: unknown (no candle file at the read, the Head's ruling of Nov 13)
     if w["series"] == "KXGOLD15M":
+        held = False                                                          # gold with no usable poll at T-360 s is "not held" (aligned to the first build, which reports no unknown gold window)
         l1 = last_at_or_before(w["polls"], T - 360000, DEC_EARLY_S * 1000)
         if l1 is not None and l1[1]["y"] and l1[1]["n"]:
             asks = (1 - l1[1]["n"][0][0], 1 - l1[1]["y"][0][0]); held = sum(1 for x in asks if 0.88 - EPS <= x <= 0.97 + EPS) == 1
-    nxt = [b for pt, b in w["polls"] if t0 < pt <= t0 + 4500][:2]            # the next two 2 s polls, for the noise description only
+    nxt = [b for pt, b in w["polls"] if pt > t0][:2]                           # the next two polls after the decision poll, by order (no time limit), for the noise description only
     return {"feats": feats, "q": q, "fill_delay": None if fill is None else (fill[0] - t0) / 1000.0, "held": held, "noise": [{"f1": f1(b), "f2": f2(b), "f3": f3(b), "f8": f8(b), "f9": f9(b), "f10": f10(b)} for b in nxt]}
 
 
@@ -242,14 +253,14 @@ def pf(v):
 
 def zstats(tr):
     n = len(tr)
-    if n < 2: return None, None
+    if n < 2: return 0.0, 0.0
     m = sum(t["net"] for t in tr) / n; by = collections.defaultdict(lambda: [0.0, 0])
     for t in tr: by[t["date"]][0] += t["net"]; by[t["date"]][1] += 1
     D = len(by)
-    if D < 2: return None, None
+    if D < 2: return 0.0, 0.0
     v = sum((s - k * m) ** 2 for s, k in by.values())
-    z = None if v <= 0 else m * n / math.sqrt(v)                                    # as the first build prints it: no small-sample factor
-    zc = None if z is None else z * math.sqrt((D - 1) / D)                           # with the usual D/(D-1) factor on the variance: smaller by sqrt((D-1)/D), 3.4% at 15 dates
+    z = 0.0 if v <= 0 else m * n / math.sqrt(v)                                     # Amendment 2, (d): mu / sqrt(sum over dates of (S_d - k_d mu)^2 / n^2), no small-sample factor
+    zc = z * math.sqrt((D - 1) / D)                                                   # with the usual D/(D-1) factor on the variance: SMALLER by sqrt((D-1)/D), 3.4% at 15 dates
     return z, zc
 
 
@@ -291,8 +302,10 @@ def measure(root, made_up=False, now=None):
     for m in MARKETS:
         ps = [p for tk, p in prep.items() if windows[tk]["series"] == m]; d = {}
         for short, full in (("f1", "f1_imb5"), ("f2", "f2_imb1"), ("f3", "f3_dwmid_minus_mid"), ("f8", "f8_hole_asymmetry"), ("f9", "f9_book_slope"), ("f10", "f10_imb_3c")):
-            looks = [p for p in ps if p["feats"][full] is not None and abs(p["feats"][full]) >= 1e-12 and p["noise"]]
-            flips = sum(1 for p in looks if any(nx[short] is not None and abs(nx[short]) >= 1e-12 and (nx[short] > 0) != (p["feats"][full] > 0) for nx in p["noise"]))
+            nz = lambda v: v is not None and v == v and abs(v) > ZERO_TOL
+            sgn = lambda v: 0 if not nz(v) else (1 if v > 0 else -1)
+            looks = [p for p in ps if nz(p["feats"][full])]                      # a look = a window whose feature is defined and not zero at the decision poll
+            flips = sum(1 for p in looks if any(nz(nx[short]) and sgn(nx[short]) != sgn(p["feats"][full]) for nx in p["noise"]))      # a change = the OPPOSITE non-zero sign at either of the next two polls
             d[full] = {"looks": len(looks), "share_sign_changes_within_two_polls": (flips / len(looks)) if looks else None}
         delays = [p["fill_delay"] for p in ps if p["fill_delay"] is not None]
         desc[m] = {"noise": d, "median_fill_delay_s": statistics.median(delays) if delays else None, "windows_with_no_fill_poll": sum(1 for p in ps if p["fill_delay"] is None)}
@@ -307,7 +320,8 @@ def measure(root, made_up=False, now=None):
                 if w["series"] != m: continue
                 r = trade(p["feats"][f], p["q"], w["result"])
                 if isinstance(r, str): reasons["%s %s: %s" % (m, f, r)] += 1; continue
-                trs.append({"ticker": tk, "T": w["T"], "date": w["date"], "net": r[0], "stress": r[1], "ask": r[2], "win": r[3], "held": p["held"]})
+                trs.append({"ticker": tk, "T": w["T"], "date": w["date"], "net": r[0], "stress": r[1], "ask": r[2], "win": r[3], "held": p["held"], "value": p["feats"][f],
+                            "cheap": (r[2] < 0.5 - EPS) if abs(r[2] - 0.5) > EPS else None})
                 fired_windows.add(tk)
                 if r[3] is None and tk not in fired_noresult: fired_noresult.add(tk); raw_noresult[w["result"] or "(empty)"] += 1
             tries[(m, f)] = trs
@@ -315,32 +329,45 @@ def measure(root, made_up=False, now=None):
     out["no_trade_reasons"] = dict(reasons)
     if fired_windows and len(fired_noresult) > 0.01 * len(fired_windows):
         out["verdict"] = "STOPPED before any verdict line (Amendment 1, point 6): %d of %d fired windows have no yes or no result, over 1%%; the Head decides" % (len(fired_noresult), len(fired_windows)); return out
-    # ---- shuffled-book control
-    rng = random.Random(SEED); real_mean = {k: (sum(t["net"] for t in v) / len(v)) if v else None for k, v in tries.items()}
-    by_m = {m: [tk for tk in sorted(prep) if windows[tk]["series"] == m] for m in MARKETS}
-    best_of_20 = []; ge = collections.Counter(); counted = collections.Counter()
-    for _ in range(SHUFFLES):
-        best = None
+    # ---- shuffled-book control, the registered procedure (Amendment 2, (e)): numpy default_rng(20261114), one generator; per market the scored windows in scored order;
+    #      each round draws ONE permutation PER TRY, gold f1..f10 then Bitcoin f1..f10 (20 a round, independent); 1,000 rounds; a try under 30 trades scores -1e9;
+    #      the round's best is the maximum over the 20; the threshold is the 99th percentile (linear) of the 1,000 bests.
+    import numpy as np
+    rng = np.random.default_rng(SEED); order_m = {m: [tk for tk in prep if windows[tk]["series"] == m] for m in MARKETS}; vec = {}
+    for m in MARKETS:
+        tks = order_m[m]; ypnl = np.full(len(tks), np.nan); npnl = np.full(len(tks), np.nan)
+        for i_, tk in enumerate(tks):
+            for side, arr in (("yes", ypnl), ("no", npnl)):
+                r = trade(1.0 if side == "yes" else -1.0, prep[tk]["q"], windows[tk]["result"])
+                if not isinstance(r, str): arr[i_] = r[0]
+        for f in FEATURES:
+            sg = np.zeros(len(tks))
+            for i_, tk in enumerate(tks):
+                v = prep[tk]["feats"][f]
+                if v is not None and v == v and abs(v) > ZERO_TOL: sg[i_] = 1.0 if v > 0 else -1.0
+            vec[(m, f)] = (sg, ypnl, npnl)
+    def mean_net(sg, ypnl, npnl):
+        val = np.where(sg > 0, ypnl, np.where(sg < 0, npnl, np.nan)); ok = ~np.isnan(val)
+        return float(val[ok].mean()) if int(ok.sum()) >= MIN_SHUFFLE_TRADES else -1e9
+    real_mean = {k: mean_net(*v) for k, v in vec.items()}
+    bests = np.empty(SHUFFLES)
+    for r_ in range(SHUFFLES):
+        best = -1e9
         for m in MARKETS:
-            tks = by_m[m]; perm = tks[:]; rng.shuffle(perm)
             for f in FEATURES:
-                s = 0.0; k = 0
-                for dst, src in zip(tks, perm):
-                    r = trade(prep[src]["feats"][f], prep[dst]["q"], windows[dst]["result"])
-                    if not isinstance(r, str): s += r[0]; k += 1
-                if k < MIN_SHUFFLE_TRADES: continue
-                mean = s / k; counted[(m, f)] += 1
-                if real_mean[(m, f)] is not None and mean >= real_mean[(m, f)] - EPS: ge[(m, f)] += 1
-                if best is None or mean > best: best = mean
-        if best is not None: best_of_20.append(best)
-    best_of_20.sort(); p99 = best_of_20[min(len(best_of_20) - 1, int(math.ceil(0.99 * len(best_of_20))) - 1)] if best_of_20 else None
-    out["shuffled_book_control"] = {"rounds_counted": len(best_of_20), "p99_of_best_of_20_mean_net": p99, "median_of_best_of_20": statistics.median(best_of_20) if best_of_20 else None,
-                                    "note": "an independent build cannot reproduce another build's random draws; compare this figure approximately"}
+                sg, ypnl, npnl = vec[(m, f)]; x = mean_net(sg[rng.permutation(len(sg))], ypnl, npnl)
+                if x > best: best = x
+        bests[r_] = best
+    p99 = float(np.percentile(bests, 99)) if SHUFFLES else None
+    out["shuffled_book_control"] = {"rounds": SHUFFLES, "p99_of_best_of_20_mean_net": p99, "median_of_best_of_20": float(np.median(bests)) if SHUFFLES else None,
+                                    "procedure": "numpy default_rng(20261114); one permutation a try, gold f1..f10 then Bitcoin f1..f10; percentile 99 linear (Amendment 2, (e))"}
     res = {}; passed = []
     for (m, f), trs in tries.items():
-        s = score(trs); ctl = p99 is not None and real_mean[(m, f)] is not None and real_mean[(m, f)] > p99 + EPS
-        s["control_passed"] = ctl; s["marginal_p"] = ((1 + ge[(m, f)]) / (1 + counted[(m, f)])) if counted[(m, f)] else None
-        s["control_p_best_of_20"] = ((1 + sum(1 for b in best_of_20 if real_mean[(m, f)] is not None and b >= real_mean[(m, f)] - EPS)) / (1 + len(best_of_20))) if (best_of_20 and real_mean[(m, f)] is not None) else None
+        s = score(trs); ctl = p99 is not None and real_mean[(m, f)] > p99
+        s["control_passed"] = ctl; s["control_p_best_of_20"] = (1 + int((bests >= real_mean[(m, f)]).sum())) / (SHUFFLES + 1)
+        rz = [t for t in trs if 0 < abs(t["value"]) <= RESIDUE]
+        s["residue_trades_feature_within_1e-12_of_zero_but_not_zero"] = {"n": len(rz), "bought_the_cheaper_side": sum(1 for t in rz if t["cheap"] is True), "bought_the_dearer_side": sum(1 for t in rz if t["cheap"] is False),
+                                                                       "net_per_trade": (sum(t["net"] for t in rz) / len(rz)) if rz else None}
         s["meets_the_whole_bar"] = meets_bar(s, ctl); s["z_against_5.46"] = s["z_date_clustered"] is not None and s["z_date_clustered"] >= BAR["z_shared"] - EPS
         s["second_look_flag_55pct_at_300"] = s["n"] >= 300 and s["direction_accuracy"] is not None and s["direction_accuracy"] >= 0.55 - EPS
         nh = [t for t in trs if t["held"] is False]
@@ -360,7 +387,7 @@ def lines(out):
     f = lambda x, d=2: "n/a" if x is None else ("inf" if x == float("inf") else ("%." + str(d) + "f") % x)
     c = out.get("shuffled_book_control") or {}; L = ["verdict: " + str(out.get("verdict"))]
     if "tries" not in out: return L
-    L.append("z bar 5.27 (5.46 beside it); shuffled-book control: %s rounds, best-of-20 mean net 99th percentile %sc, median %sc" % (c.get("rounds_counted"), f(100 * c["p99_of_best_of_20_mean_net"]), f(100 * c["median_of_best_of_20"])))
+    L.append("z bar 5.27 (5.46 beside it); shuffled-book control: %s rounds, best-of-20 mean net 99th percentile %sc, median %sc" % (c.get("rounds"), f(100 * c["p99_of_best_of_20_mean_net"]), f(100 * c["median_of_best_of_20"])))
     allt = dict(out["tries"]); allt.update(out["CLOSED-FAMILY FEATURES, REPORTED SEPARATELY"])
     for m in MARKETS:
         L.append("-- %s: %s scored windows" % (m, out["windows_with_a_decision_poll"].get(m)))
@@ -369,7 +396,8 @@ def lines(out):
             L.append("%s%s n %d PF %s blocks %s (n %d) / %s (n %d) / %s (n %d) halves %s / %s net %sc stress PF %s acc %s vs mean ask %s z %s control p(best of 20) %s %s; no-result fee-only %d; without windows L1 / OICORE holds: n %d PF %s%s" % (
                 "[closed family] " if ft in CLOSED_FAMILY else "", ft, v["n"], f(v["pf"]), f(b["A"]), bn["A"], f(b["B"]), bn["B"], f(b["C"]), bn["C"], f(v["pf_halves"][0]), f(v["pf_halves"][1]),
                 f(None if v["net_per_trade"] is None else 100 * v["net_per_trade"]), f(v["pf_fee_x1.2"]), f(v["direction_accuracy"], 3), f(v["mean_ask"], 3), f(v["z_date_clustered"]), f(v["control_p_best_of_20"], 3),
-                "PASS" if v["control_passed"] else "fail", v["no_result_fee_only"], nh["n"], f(nh["pf"]), " <- BAR MET" if v["meets_the_whole_bar"] else ""))
+                "PASS" if v["control_passed"] else "fail", v["no_result_fee_only"], nh["n"], f(nh["pf"]), " <- BAR MET" if v["meets_the_whole_bar"] else "")
+                     + "; residue trades (feature within 1e-12 of zero, not zero): %d (cheaper side %d, dearer side %d)" % (v["residue_trades_feature_within_1e-12_of_zero_but_not_zero"]["n"], v["residue_trades_feature_within_1e-12_of_zero_but_not_zero"]["bought_the_cheaper_side"], v["residue_trades_feature_within_1e-12_of_zero_but_not_zero"]["bought_the_dearer_side"]))
     flags = [k for k, v in allt.items() if v["second_look_flag_55pct_at_300"]]
     L.append("second look flags (accuracy >= 55% with n >= 300; not a verdict): " + (", ".join(flags) if flags else "none"))
     return L

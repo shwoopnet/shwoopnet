@@ -58,7 +58,42 @@ The registered sign rule: "feature > 0 buys YES, < 0 buys NO, 0 or undefined: no
 - **What it is not.** Not look-ahead: nothing after the decision is used. It cannot be told from the fixture whether it would help or hurt f8; it is a trade the registered rule does not make.
 - **Fix, for the Head and Auditor B to rule (a new audited hash before the read):** every feature whose absolute value is at or under a stated tolerance (1e-12 here) is zero, in the wrapper's patch or in the features; or f8 and f9 are computed in whole ticks. After that fix the two builds should agree on f3, f8 and f9 as well (this build's figures under the registered rule are in the `..._registered_zero_rule_...` files).
 
+## Second comparison, after Desk A's Amendment 2 and the Head's rulings (2026-11-13): the same output on both fixtures
+
+Amendment 2 (`DEPTH1_AMENDMENT_2_DESK_A.md`, 61a1258d on `claude/idea-desk-a`) states what the frozen first build does at each open place, and the Head ruled that those choices stand as coded. This build (sha256 `607ed616...`) now follows it: raw coverage receive times; the recorder-end condition; a decision poll counts without a level-1 quote; both sides needed for the imbalance features; the tape window open at the start and closed at the end; accuracy over all trades; the z with no small-sample factor (the corrected one printed beside it); only an exact 0 is "no trade"; gold with no poll at T-360 s is "not held"; and the registered shuffle (numpy `default_rng(20261114)`, one permutation a try in the order gold f1 to f10 then Bitcoin f1 to f10, 1,000 rounds, 99th percentile linear).
+
+**Against the wrapper's output (c499f3f6) on the no-edge and the planted-edge fixture:**
+
+- **300 of 300 per-try figures identical on each fixture** (20 tries x n, profit factor pooled, profit factor and n in each block, both halves, net, stress profit factor, accuracy, mean ask, z).
+- **The control p and PASS or fail identical for all 20 tries on each fixture**; gold's without-held n and profit factor identical.
+- Scored windows 539 and 520, fired windows 802, no-result fired windows 3 (2 empty, 1 void), the noise description (all six features, both markets, shares and looks), the median fill delay, and the verdict FALSIFIED: identical.
+- **The control's 99th percentile: 6.7010c here against the wrapper's printed +6.70c; 6.6833c against +6.68c.** Its median: 2.4722c against +2.47c on the no-edge fixture, and **2.2933c against a printed +2.30c on the planted-edge fixture**: the one figure not yet confirmed. Desk A is asked to print the control to four decimals; if the bests of a round or two differ, that is a reading still to find.
+
+Two things had to be found from the numbers because the text could not tell them:
+
+1. **f3's summation.** Written as a plain running sum, f3 gives 276 gold and 269 Bitcoin trades on the no-edge fixture; written with numpy array sums (the same formula) it gives the wrapper's 296 and 289 exactly. The 20 extra trades a market are floating point residue from the order of addition, turned into trades by the exact-zero rule.
+2. **The noise description**: a look is any window whose feature is defined and not zero; a change is the opposite non-zero sign at either of the next two polls by order.
+
+### The residue trades, counted (the Head's request; information, never part of the verdict)
+
+Fired trades whose feature is within 1e-12 of zero but not exactly zero, on the invented fixture (the same on both fixtures):
+
+| Try | Trades | Of which residue | Residue trades that bought the cheaper side / the dearer side (ask not 50c) |
+|---|---|---|---|
+| Gold f8 | 251 | 49 (20%) | 36 / 11 |
+| Bitcoin f8 | 259 | 48 (19%) | 38 / 10 |
+| Gold f3 | 296 | 27 (9%) | 14 / 13 |
+| Bitcoin f3 | 289 | 26 (9%) | 7 / 19 |
+| Gold f9 | 266 | 3 | 3 / 0 |
+| Bitcoin f9 | 271 | 1 | 0 / 1 |
+
+All other tries: 0. On f8 the residue side is not a coin flip: 74 of 95 on the cheaper side (78%), as the whole-cent arithmetic above predicts. On f3 it leans the other way in Bitcoin. The fixture's books are invented (random level counts and sizes), so the SHARE of residue trades on real books is not known from this; on a real 1c book with full levels on both sides f8's two gaps are equal most of the time, so the share could be far higher than 20%. This build prints the count for each try at the read.
+
+### (d) is the looser reading, not the stricter one
+
+Amendment 2 and the ruling say the first build's z, with no D/(D-1) factor, is the smaller and stricter of the two. It is the larger: z_corrected = z_first_build x sqrt((D-1)/D), 0.966 at 15 dates. On the no-edge fixture this build with the factor printed -1.17, +1.45 and -3.64 where the first build prints -1.21, +1.50 and -3.77. A first-build z of 5.27 is 5.09 corrected. Reported to the Head on Nov 13; this build prints both.
+
 ## Files added
 
-`DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_registered_zero_rule_MADE_UP_DATA.{json,txt}` (zero tolerance 1e-12, the registered sign rule) and `..._like_for_like_any_nonzero_float_MADE_UP_DATA.{json,txt}` (tolerance off, to compare with the first build as it stands). `depth1_second.py` sha256 `0872493a...`.
+`DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_as_coded_MADE_UP_DATA.{json,txt}` (the first build's readings, Amendment 2: what is compared with the wrapper) and `..._registered_zero_rule_MADE_UP_DATA.{json,txt}` (a feature at or under 1e-12 is zero and f3 by a plain sum: what the figures would be without residue trades). `depth1_second.py` sha256 `607ed616...`.
 

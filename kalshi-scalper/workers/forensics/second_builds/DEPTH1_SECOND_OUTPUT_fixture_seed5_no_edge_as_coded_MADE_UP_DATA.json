@@ -24,7 +24,7 @@
   "5. The 30 s and 60 s lookbacks are measured from the DECISION POLL's own time: the last poll at or before (decision poll time minus 30 s or 60 s) and no more than 6 s before that.",
   "6. f7's tape window: trades with created_time in [decision poll time minus 60 s, decision poll time). A sweep: same taker side, same whole second (of created_time), two or more distinct prices.",
   "7. The fill poll: the first poll at or after (decision poll time + 1.0 s) and no later than 20 s after that instant. The other reading (from T-480 s itself) is not built.",
-  "8. f3: weighted YES bid = sum(px x sz)/sum(sz) over the YES levels; weighted YES ask = 1 minus the same over the NO levels; plain mid = (YES bid 1 + (1 - NO bid 1))/2.",
+  "8. f3: weighted YES bid = sum(px x sz)/sum(sz) over the YES levels; weighted YES ask = 1 minus the same over the NO levels; plain mid = (YES bid 1 + (1 - NO bid 1))/2. HOW the sums are added decides trades: when the true value is zero the floating point residue differs between a numpy array sum and a plain running sum, and with the exact-zero rule that changes which windows trade (F3_SUM).",
   "9. f6: thin side = the smaller 5 level size 60 s ago; value = (then - now)/then for that side, positive when the thin side is NO, negated when it is YES; equal sizes then = 0; thin size then of 0 = undefined.",
   "10. f8: gap = level 1 price minus level 2 price; a missing level 2 gives a gap of the whole level 1 price. f9 needs two levels a side; slope = (level 1 price - last level price)/sum of sizes.",
   "11. f10: levels whose price is within 0.03 of the side's level 1 price (inclusive, tolerance 1e-9).",
@@ -41,35 +41,35 @@
   "KXGOLD15M": 539
  },
  "usable_windows_without_one": {
-  "KXBTC15M: no decision poll": 114,
-  "KXGOLD15M: no decision poll": 94
+  "KXGOLD15M: no decision poll": 94,
+  "KXBTC15M: no decision poll": 114
  },
  "no_label_description": {
   "KXGOLD15M": {
    "noise": {
     "f1_imb5": {
      "looks": 504,
-     "share_sign_changes_within_two_polls": 0.3412698412698413
+     "share_sign_changes_within_two_polls": 0.3472222222222222
     },
     "f2_imb1": {
      "looks": 440,
-     "share_sign_changes_within_two_polls": 0.11818181818181818
+     "share_sign_changes_within_two_polls": 0.12045454545454545
     },
     "f3_dwmid_minus_mid": {
-     "looks": 428,
-     "share_sign_changes_within_two_polls": 0.4135514018691589
+     "looks": 474,
+     "share_sign_changes_within_two_polls": 0.5021097046413502
     },
     "f8_hole_asymmetry": {
-     "looks": 296,
-     "share_sign_changes_within_two_polls": 0.1554054054054054
+     "looks": 385,
+     "share_sign_changes_within_two_polls": 0.2779220779220779
     },
     "f9_book_slope": {
-     "looks": 417,
-     "share_sign_changes_within_two_polls": 0.34292565947242204
+     "looks": 421,
+     "share_sign_changes_within_two_polls": 0.35391923990498814
     },
     "f10_imb_3c": {
      "looks": 504,
-     "share_sign_changes_within_two_polls": 0.38095238095238093
+     "share_sign_changes_within_two_polls": 0.39087301587301587
     }
    },
    "median_fill_delay_s": 2.084,
@@ -78,28 +78,28 @@
   "KXBTC15M": {
    "noise": {
     "f1_imb5": {
-     "looks": 497,
-     "share_sign_changes_within_two_polls": 0.3762575452716298
+     "looks": 498,
+     "share_sign_changes_within_two_polls": 0.3815261044176707
     },
     "f2_imb1": {
      "looks": 440,
-     "share_sign_changes_within_two_polls": 0.11136363636363636
+     "share_sign_changes_within_two_polls": 0.11363636363636363
     },
     "f3_dwmid_minus_mid": {
-     "looks": 424,
-     "share_sign_changes_within_two_polls": 0.39858490566037735
+     "looks": 465,
+     "share_sign_changes_within_two_polls": 0.4817204301075269
     },
     "f8_hole_asymmetry": {
-     "looks": 318,
-     "share_sign_changes_within_two_polls": 0.1761006289308176
+     "looks": 408,
+     "share_sign_changes_within_two_polls": 0.32107843137254904
     },
     "f9_book_slope": {
-     "looks": 416,
-     "share_sign_changes_within_two_polls": 0.36538461538461536
+     "looks": 418,
+     "share_sign_changes_within_two_polls": 0.37799043062200954
     },
     "f10_imb_3c": {
-     "looks": 498,
-     "share_sign_changes_within_two_polls": 0.41365461847389556
+     "looks": 499,
+     "share_sign_changes_within_two_polls": 0.4188376753507014
     }
    },
    "median_fill_delay_s": 2.0915,
@@ -107,7 +107,7 @@
   }
  },
  "AMENDMENT 1 COUNT": {
-  "fired_windows": 801,
+  "fired_windows": 802,
   "fired_windows_with_no_yes_or_no_result": 3,
   "raw_result_values_of_those_windows": {
    "void": 1,
@@ -115,92 +115,92 @@
   }
  },
  "no_trade_reasons": {
-  "KXGOLD15M f1_imb5: no signal": 35,
-  "KXGOLD15M f1_imb5: under 1 contract at the ask": 107,
   "KXGOLD15M f1_imb5: ask outside 0.10 to 0.90": 79,
+  "KXGOLD15M f1_imb5: under 1 contract at the ask": 107,
+  "KXGOLD15M f1_imb5: no signal": 35,
   "KXGOLD15M f1_imb5: no fill poll or no ask": 9,
+  "KXGOLD15M f2_imb1: ask outside 0.10 to 0.90": 74,
   "KXGOLD15M f2_imb1: no signal": 99,
   "KXGOLD15M f2_imb1: under 1 contract at the ask": 121,
-  "KXGOLD15M f2_imb1: ask outside 0.10 to 0.90": 74,
   "KXGOLD15M f2_imb1: no fill poll or no ask": 6,
-  "KXGOLD15M f3_dwmid_minus_mid: no signal": 99,
-  "KXGOLD15M f3_dwmid_minus_mid: under 1 contract at the ask": 83,
-  "KXGOLD15M f3_dwmid_minus_mid: ask outside 0.10 to 0.90": 73,
-  "KXGOLD15M f3_dwmid_minus_mid: no fill poll or no ask": 8,
+  "KXGOLD15M f3_dwmid_minus_mid: ask outside 0.10 to 0.90": 82,
+  "KXGOLD15M f3_dwmid_minus_mid: no signal": 65,
+  "KXGOLD15M f3_dwmid_minus_mid: under 1 contract at the ask": 87,
+  "KXGOLD15M f3_dwmid_minus_mid: no fill poll or no ask": 9,
   "KXGOLD15M f4_d_imb30: no signal": 124,
   "KXGOLD15M f4_d_imb30: under 1 contract at the ask": 86,
   "KXGOLD15M f4_d_imb30: ask outside 0.10 to 0.90": 61,
   "KXGOLD15M f4_d_imb30: no fill poll or no ask": 7,
-  "KXGOLD15M f5_d_imb60: under 1 contract at the ask": 82,
-  "KXGOLD15M f5_d_imb60: no signal": 122,
   "KXGOLD15M f5_d_imb60: ask outside 0.10 to 0.90": 64,
+  "KXGOLD15M f5_d_imb60: no signal": 122,
+  "KXGOLD15M f5_d_imb60: under 1 contract at the ask": 82,
   "KXGOLD15M f5_d_imb60: no fill poll or no ask": 9,
-  "KXGOLD15M f6_thin_depletion: under 1 contract at the ask": 77,
-  "KXGOLD15M f6_thin_depletion: no signal": 140,
   "KXGOLD15M f6_thin_depletion: ask outside 0.10 to 0.90": 60,
+  "KXGOLD15M f6_thin_depletion: no signal": 140,
+  "KXGOLD15M f6_thin_depletion: under 1 contract at the ask": 77,
   "KXGOLD15M f6_thin_depletion: no fill poll or no ask": 8,
   "KXGOLD15M f7_sweep_net: no signal": 268,
-  "KXGOLD15M f7_sweep_net: under 1 contract at the ask": 41,
   "KXGOLD15M f7_sweep_net: ask outside 0.10 to 0.90": 38,
+  "KXGOLD15M f7_sweep_net: under 1 contract at the ask": 41,
   "KXGOLD15M f7_sweep_net: no fill poll or no ask": 2,
+  "KXGOLD15M f8_hole_asymmetry: ask outside 0.10 to 0.90": 78,
   "KXGOLD15M f8_hole_asymmetry: no signal": 154,
   "KXGOLD15M f8_hole_asymmetry: under 1 contract at the ask": 51,
-  "KXGOLD15M f8_hole_asymmetry: ask outside 0.10 to 0.90": 78,
   "KXGOLD15M f8_hole_asymmetry: no fill poll or no ask": 5,
   "KXGOLD15M f9_book_slope: no signal": 118,
-  "KXGOLD15M f9_book_slope: under 1 contract at the ask": 89,
   "KXGOLD15M f9_book_slope: ask outside 0.10 to 0.90": 59,
+  "KXGOLD15M f9_book_slope: under 1 contract at the ask": 89,
   "KXGOLD15M f9_book_slope: no fill poll or no ask": 7,
-  "KXGOLD15M f10_imb_3c: no signal": 35,
-  "KXGOLD15M f10_imb_3c: under 1 contract at the ask": 101,
   "KXGOLD15M f10_imb_3c: ask outside 0.10 to 0.90": 78,
+  "KXGOLD15M f10_imb_3c: under 1 contract at the ask": 101,
+  "KXGOLD15M f10_imb_3c: no signal": 35,
   "KXGOLD15M f10_imb_3c: no fill poll or no ask": 9,
   "KXBTC15M f1_imb5: under 1 contract at the ask": 85,
+  "KXBTC15M f1_imb5: ask outside 0.10 to 0.90": 93,
   "KXBTC15M f1_imb5: no signal": 22,
   "KXBTC15M f1_imb5: no fill poll or no ask": 9,
-  "KXBTC15M f1_imb5: ask outside 0.10 to 0.90": 93,
-  "KXBTC15M f2_imb1: no signal": 80,
   "KXBTC15M f2_imb1: under 1 contract at the ask": 112,
-  "KXBTC15M f2_imb1: no fill poll or no ask": 7,
+  "KXBTC15M f2_imb1: no signal": 80,
   "KXBTC15M f2_imb1: ask outside 0.10 to 0.90": 86,
-  "KXBTC15M f3_dwmid_minus_mid: no signal": 86,
-  "KXBTC15M f3_dwmid_minus_mid: ask outside 0.10 to 0.90": 87,
-  "KXBTC15M f3_dwmid_minus_mid: under 1 contract at the ask": 71,
-  "KXBTC15M f3_dwmid_minus_mid: no fill poll or no ask": 7,
+  "KXBTC15M f2_imb1: no fill poll or no ask": 7,
+  "KXBTC15M f3_dwmid_minus_mid: no signal": 55,
+  "KXBTC15M f3_dwmid_minus_mid: under 1 contract at the ask": 73,
+  "KXBTC15M f3_dwmid_minus_mid: ask outside 0.10 to 0.90": 95,
+  "KXBTC15M f3_dwmid_minus_mid: no fill poll or no ask": 8,
   "KXBTC15M f4_d_imb30: under 1 contract at the ask": 71,
   "KXBTC15M f4_d_imb30: no signal": 97,
-  "KXBTC15M f4_d_imb30: no fill poll or no ask": 6,
   "KXBTC15M f4_d_imb30: ask outside 0.10 to 0.90": 76,
+  "KXBTC15M f4_d_imb30: no fill poll or no ask": 6,
   "KXBTC15M f5_d_imb60: no signal": 123,
-  "KXBTC15M f5_d_imb60: no fill poll or no ask": 7,
   "KXBTC15M f5_d_imb60: under 1 contract at the ask": 65,
   "KXBTC15M f5_d_imb60: ask outside 0.10 to 0.90": 78,
+  "KXBTC15M f5_d_imb60: no fill poll or no ask": 7,
   "KXBTC15M f6_thin_depletion: no signal": 151,
-  "KXBTC15M f6_thin_depletion: no fill poll or no ask": 5,
-  "KXBTC15M f6_thin_depletion: under 1 contract at the ask": 47,
   "KXBTC15M f6_thin_depletion: ask outside 0.10 to 0.90": 71,
+  "KXBTC15M f6_thin_depletion: under 1 contract at the ask": 47,
+  "KXBTC15M f6_thin_depletion: no fill poll or no ask": 5,
   "KXBTC15M f7_sweep_net: no signal": 261,
-  "KXBTC15M f7_sweep_net: no fill poll or no ask": 6,
-  "KXBTC15M f7_sweep_net: ask outside 0.10 to 0.90": 54,
   "KXBTC15M f7_sweep_net: under 1 contract at the ask": 26,
-  "KXBTC15M f8_hole_asymmetry: no signal": 112,
-  "KXBTC15M f8_hole_asymmetry: no fill poll or no ask": 7,
-  "KXBTC15M f8_hole_asymmetry: ask outside 0.10 to 0.90": 89,
+  "KXBTC15M f7_sweep_net: ask outside 0.10 to 0.90": 54,
+  "KXBTC15M f7_sweep_net: no fill poll or no ask": 6,
   "KXBTC15M f8_hole_asymmetry: under 1 contract at the ask": 53,
-  "KXBTC15M f9_book_slope: under 1 contract at the ask": 66,
+  "KXBTC15M f8_hole_asymmetry: no signal": 112,
+  "KXBTC15M f8_hole_asymmetry: ask outside 0.10 to 0.90": 89,
+  "KXBTC15M f8_hole_asymmetry: no fill poll or no ask": 7,
   "KXBTC15M f9_book_slope: no signal": 102,
-  "KXBTC15M f9_book_slope: no fill poll or no ask": 8,
+  "KXBTC15M f9_book_slope: under 1 contract at the ask": 66,
   "KXBTC15M f9_book_slope: ask outside 0.10 to 0.90": 73,
+  "KXBTC15M f9_book_slope: no fill poll or no ask": 8,
   "KXBTC15M f10_imb_3c: under 1 contract at the ask": 88,
   "KXBTC15M f10_imb_3c: no signal": 21,
-  "KXBTC15M f10_imb_3c: no fill poll or no ask": 10,
-  "KXBTC15M f10_imb_3c: ask outside 0.10 to 0.90": 93
+  "KXBTC15M f10_imb_3c: ask outside 0.10 to 0.90": 93,
+  "KXBTC15M f10_imb_3c: no fill poll or no ask": 10
  },
  "shuffled_book_control": {
-  "rounds_counted": 1000,
-  "p99_of_best_of_20_mean_net": 0.06589147286821702,
-  "median_of_best_of_20": 0.0235219588434488,
-  "note": "an independent build cannot reproduce another build's random draws; compare this figure approximately"
+  "rounds": 1000,
+  "p99_of_best_of_20_mean_net": 0.06700957868986136,
+  "median_of_best_of_20": 0.024722148774898624,
+  "procedure": "numpy default_rng(20261114); one permutation a try, gold f1..f10 then Bitcoin f1..f10; percentile 99 linear (Amendment 2, (e))"
  },
  "tries": {
   "KXGOLD15M f1_imb5": {
@@ -231,14 +231,19 @@
    "z_date_clustered": -0.2355654923584024,
    "z_with_the_D_over_D_minus_1_factor": -0.22757788654448122,
    "control_passed": false,
-   "marginal_p": 0.34565434565434566,
-   "control_p_best_of_20": 0.986013986013986,
+   "control_p_best_of_20": 0.999000999000999,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 293,
-    "pf": 0.9613025700934579
+    "n": 297,
+    "pf": 0.9723596159441372
    }
   },
   "KXGOLD15M f2_imb1": {
@@ -269,52 +274,62 @@
    "z_date_clustered": -0.48423818233941957,
    "z_with_the_D_over_D_minus_1_factor": -0.46781852901136706,
    "control_passed": false,
-   "marginal_p": 0.4995004995004995,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 228,
-    "pf": 0.9183177570093457
+    "n": 230,
+    "pf": 0.9239211309523809
    }
   },
   "KXGOLD15M f3_dwmid_minus_mid": {
-   "n": 276,
-   "wins": 137,
+   "n": 296,
+   "wins": 148,
    "no_result_fee_only": 2,
-   "direction_accuracy": 0.4963768115942029,
-   "direction_accuracy_over_settled_trades_only": 0.5,
-   "mean_ask": 0.4954710144927536,
-   "pf": 0.937529728872681,
+   "direction_accuracy": 0.5,
+   "direction_accuracy_over_settled_trades_only": 0.5034013605442177,
+   "mean_ask": 0.49986486486486487,
+   "pf": 0.933490635599469,
    "pf_blocks": {
-    "A": 0.857207615593835,
-    "B": 1.1928137651821862,
-    "C": 0.7835294117647058
+    "A": 0.8127816468660385,
+    "B": 1.1160270880361174,
+    "C": 0.8818823529411765
    },
    "block_n": {
-    "A": 96,
-    "B": 99,
-    "C": 81
+    "A": 104,
+    "B": 107,
+    "C": 85
    },
    "pf_halves": [
-    0.8490507314036725,
-    1.0294117647058822
+    0.8485380116959064,
+    1.0199345432906874
    ],
-   "net_per_trade": -0.014275362318840598,
-   "net_per_trade_fee_x1.2": -0.018159420289855094,
-   "pf_fee_x1.2": 0.921204879889322,
-   "z_date_clustered": -0.5298555829724575,
-   "z_with_the_D_over_D_minus_1_factor": -0.5118891249283812,
+   "net_per_trade": -0.015236486486486504,
+   "net_per_trade_fee_x1.2": -0.01910135135135137,
+   "pf_fee_x1.2": 0.9173150043872478,
+   "z_date_clustered": -0.6590333078898012,
+   "z_with_the_D_over_D_minus_1_factor": -0.6366866635279046,
    "control_passed": false,
-   "marginal_p": 0.4995004995004995,
-   "control_p_best_of_20": 0.996003996003996,
+   "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 27,
+    "bought_the_cheaper_side": 14,
+    "bought_the_dearer_side": 13,
+    "net_per_trade": 0.031851851851851846
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 267,
-    "pf": 0.9436325678496867
+    "n": 286,
+    "pf": 0.9371923019543487
    }
   },
   "KXGOLD15M f4_d_imb30": {
@@ -345,14 +360,19 @@
    "z_date_clustered": 0.015224730707555848,
    "z_with_the_D_over_D_minus_1_factor": 0.01470848723616474,
    "control_passed": false,
-   "marginal_p": 0.25874125874125875,
-   "control_p_best_of_20": 0.942057942057942,
+   "control_p_best_of_20": 0.98001998001998,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 248,
-    "pf": 0.9912541542767185
+    "n": 253,
+    "pf": 1.0139300017412503
    }
   },
   "KXGOLD15M f5_d_imb60": {
@@ -383,14 +403,19 @@
    "z_date_clustered": 0.48728686812285593,
    "z_with_the_D_over_D_minus_1_factor": 0.47076383929593557,
    "control_passed": false,
-   "marginal_p": 0.09290709290709291,
-   "control_p_best_of_20": 0.6743256743256744,
+   "control_p_best_of_20": 0.7412587412587412,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 248,
-    "pf": 1.069776119402985
+    "n": 251,
+    "pf": 1.0768659487560341
    }
   },
   "KXGOLD15M f8_hole_asymmetry": {
@@ -421,14 +446,19 @@
    "z_date_clustered": 0.3363831110924356,
    "z_with_the_D_over_D_minus_1_factor": 0.324976959593052,
    "control_passed": false,
-   "marginal_p": 0.26073926073926074,
-   "control_p_best_of_20": 0.8291708291708292,
+   "control_p_best_of_20": 0.8731268731268731,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 49,
+    "bought_the_cheaper_side": 36,
+    "bought_the_dearer_side": 11,
+    "net_per_trade": -0.07775510204081634
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 237,
-    "pf": 1.0714285714285714
+    "n": 240,
+    "pf": 1.0729506623152236
    }
   },
   "KXGOLD15M f9_book_slope": {
@@ -459,14 +489,19 @@
    "z_date_clustered": -0.6224201512982476,
    "z_with_the_D_over_D_minus_1_factor": -0.6013149937922091,
    "control_passed": false,
-   "marginal_p": 0.6353646353646354,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 3,
+    "bought_the_cheaper_side": 3,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": 0.2633333333333333
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 256,
-    "pf": 0.9080310880829014
+    "n": 257,
+    "pf": 0.9055385112223477
    }
   },
   "KXGOLD15M f10_imb_3c": {
@@ -497,14 +532,19 @@
    "z_date_clustered": -0.9440473359149236,
    "z_with_the_D_over_D_minus_1_factor": -0.9120363740653076,
    "control_passed": false,
-   "marginal_p": 0.7932067932067932,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 301,
-    "pf": 0.8633916554508747
+    "n": 304,
+    "pf": 0.8656496721530844
    }
   },
   "KXBTC15M f1_imb5": {
@@ -535,8 +575,13 @@
    "z_date_clustered": -1.2139658394382857,
    "z_with_the_D_over_D_minus_1_factor": -1.1728024224202878,
    "control_passed": false,
-   "marginal_p": 0.2677322677322677,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -573,8 +618,13 @@
    "z_date_clustered": -0.7411555537379482,
    "z_with_the_D_over_D_minus_1_factor": -0.7160242904498173,
    "control_passed": false,
-   "marginal_p": 0.33766233766233766,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -584,35 +634,40 @@
    }
   },
   "KXBTC15M f3_dwmid_minus_mid": {
-   "n": 269,
-   "wins": 124,
-   "no_result_fee_only": 0,
-   "direction_accuracy": 0.46096654275092935,
-   "direction_accuracy_over_settled_trades_only": 0.46096654275092935,
-   "mean_ask": 0.4818959107806691,
-   "pf": 0.8272639381243957,
+   "n": 289,
+   "wins": 140,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.4844290657439446,
+   "direction_accuracy_over_settled_trades_only": 0.4861111111111111,
+   "mean_ask": 0.4927681660899654,
+   "pf": 0.8875233354075918,
    "pf_blocks": {
-    "A": 0.6855828220858895,
-    "B": 1.0099268547544409,
-    "C": 0.8390736342042755
+    "A": 0.8078987730061349,
+    "B": 1.007070707070707,
+    "C": 0.8717391304347825
    },
    "block_n": {
-    "A": 101,
-    "B": 93,
-    "C": 75
+    "A": 109,
+    "B": 97,
+    "C": 83
    },
    "pf_halves": [
-    0.7786561264822134,
-    0.8820706205005142
+    0.8721174004192871,
+    0.9041761087730656
    ],
-   "net_per_trade": -0.03985130111524165,
-   "net_per_trade_fee_x1.2": -0.043635687732342034,
-   "pf_fee_x1.2": 0.8124920127795526,
-   "z_date_clustered": -1.1918171667130304,
-   "z_with_the_D_over_D_minus_1_factor": -1.1514047716943059,
+   "net_per_trade": -0.025017301038062302,
+   "net_per_trade_fee_x1.2": -0.028802768166089985,
+   "pf_fee_x1.2": 0.8716105746984606,
+   "z_date_clustered": -0.8067614514500746,
+   "z_with_the_D_over_D_minus_1_factor": -0.7794056091510434,
    "control_passed": false,
-   "marginal_p": 0.46553446553446554,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 26,
+    "bought_the_cheaper_side": 7,
+    "bought_the_dearer_side": 19,
+    "net_per_trade": 0.14076923076923076
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -649,8 +704,13 @@
    "z_date_clustered": -0.38557989685342886,
    "z_with_the_D_over_D_minus_1_factor": -0.3725055700706601,
    "control_passed": false,
-   "marginal_p": 0.13886113886113885,
-   "control_p_best_of_20": 0.986013986013986,
+   "control_p_best_of_20": 0.999000999000999,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -687,8 +747,13 @@
    "z_date_clustered": 1.5026478865142219,
    "z_with_the_D_over_D_minus_1_factor": 1.4516957760228602,
    "control_passed": false,
-   "marginal_p": 0.001998001998001998,
-   "control_p_best_of_20": 0.10789210789210789,
+   "control_p_best_of_20": 0.12287712287712288,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -725,8 +790,13 @@
    "z_date_clustered": -1.3065474050703674,
    "z_with_the_D_over_D_minus_1_factor": -1.2622447122420584,
    "control_passed": false,
-   "marginal_p": 0.30569430569430567,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 48,
+    "bought_the_cheaper_side": 38,
+    "bought_the_dearer_side": 10,
+    "net_per_trade": -0.006666666666666679
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -763,8 +833,13 @@
    "z_date_clustered": -1.2167699983223375,
    "z_with_the_D_over_D_minus_1_factor": -1.1755114972766187,
    "control_passed": false,
-   "marginal_p": 0.2917082917082917,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 1,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 1,
+    "net_per_trade": -0.62
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -801,8 +876,13 @@
    "z_date_clustered": -0.515212370874097,
    "z_with_the_D_over_D_minus_1_factor": -0.49774243804226787,
    "control_passed": false,
-   "marginal_p": 0.0899100899100899,
-   "control_p_best_of_20": 0.986013986013986,
+   "control_p_best_of_20": 0.999000999000999,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -841,14 +921,19 @@
    "z_date_clustered": 0.6264306583632392,
    "z_with_the_D_over_D_minus_1_factor": 0.605189511713679,
    "control_passed": false,
-   "marginal_p": 0.056943056943056944,
-   "control_p_best_of_20": 0.5414585414585414,
+   "control_p_best_of_20": 0.5774225774225774,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 240,
-    "pf": 1.106267029972752
+    "n": 242,
+    "pf": 1.1124951342934992
    }
   },
   "KXGOLD15M f7_sweep_net": {
@@ -879,14 +964,19 @@
    "z_date_clustered": -1.2398833895276187,
    "z_with_the_D_over_D_minus_1_factor": -1.1978411545991383,
    "control_passed": false,
-   "marginal_p": 0.7682317682317682,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
    "without_held_and_unknown_windows": {
-    "n": 179,
-    "pf": 0.8295227524972252
+    "n": 181,
+    "pf": 0.8216798592788037
    }
   },
   "KXBTC15M f6_thin_depletion": {
@@ -917,8 +1007,13 @@
    "z_date_clustered": 0.13190725871959783,
    "z_with_the_D_over_D_minus_1_factor": 0.12743451877751827,
    "control_passed": false,
-   "marginal_p": 0.08691308691308691,
-   "control_p_best_of_20": 0.9210789210789211,
+   "control_p_best_of_20": 0.952047952047952,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -955,8 +1050,13 @@
    "z_date_clustered": -3.771843833655957,
    "z_with_the_D_over_D_minus_1_factor": -3.6439473347533307,
    "control_passed": false,
-   "marginal_p": 0.964035964035964,
    "control_p_best_of_20": 1.0,
+   "residue_trades_feature_within_1e-12_of_zero_but_not_zero": {
+    "n": 0,
+    "bought_the_cheaper_side": 0,
+    "bought_the_dearer_side": 0,
+    "net_per_trade": null
+   },
    "meets_the_whole_bar": false,
    "z_against_5.46": false,
    "second_look_flag_55pct_at_300": false,
@@ -967,5 +1067,5 @@
   }
  },
  "verdict": "FALSIFIED: none of the 20 tries meets the whole bar",
- "zero_tolerance_used": 0.0
+ "zero_rule": "as coded in the first build: only an exact 0 is no trade (Amendment 2, point 12)"
 }
