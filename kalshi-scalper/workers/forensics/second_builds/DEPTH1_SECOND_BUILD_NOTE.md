@@ -93,7 +93,25 @@ All other tries: 0. On f8 the residue side is not a coin flip: 74 of 95 on the c
 
 Amendment 2 and the ruling say the first build's z, with no D/(D-1) factor, is the smaller and stricter of the two. It is the larger: z_corrected = z_first_build x sqrt((D-1)/D), 0.966 at 15 dates. On the no-edge fixture this build with the factor printed -1.17, +1.45 and -3.64 where the first build prints -1.21, +1.50 and -3.77. A first-build z of 5.27 is 5.09 corrected. Reported to the Head on Nov 13; this build prints both.
 
+## Third comparison, after the fault fix (Amendments 3 and 4): the same output on three fixtures
+
+The Head ruled both points raised above: the zero rule was a fault and the uncorrected z the looser reading. Desk A fixed them in a new audited wrapper (Amendment 3: an absolute feature value at or under 1e-12 is zero for all ten features; the verdict reads the corrected z, variance times D/(D-1), with the uncorrected one printed beside it), and Auditor B's scan of the frozen code then found two exact-tie cases fixed in Amendment 4 (the profit factor and net bars are tested in whole thousandths of a dollar; f6's thin-side comparison treats sums within 1e-9 as a tie). Wrapper sha256 `75385906...`. This build (sha256 `3db8b6df...`) was changed to the same text, from the amendments only.
+
+| Fixture (invented rows) | Per-try figures | Z BESIDE | Zero-rule counts | Control 99th percentile / median | Noise lines, scored windows, fired and no-result counts | Verdict |
+|---|---|---|---|---|---|---|
+| No edge, seed 5 | 360 of 360 | 80 of 80 | 20 of 20 | 7.0468c / 2.5972c here; +7.05c / +2.60c there | identical | FALSIFIED both |
+| Planted edge 0.30, seed 5 | 360 of 360 | 80 of 80 | 20 of 20 | 7.0265c / 2.4768c; +7.03c / +2.48c | identical | FALSIFIED both |
+| Tie fixture, seed 5 (run through Desk A's harness by this desk, wrapper not read) | 360 of 360 | 39 of 40 | 20 of 20 | 1.1746c / -0.9294c; +1.17c / -0.93c | identical | NOT_YET_FALSIFIED both |
+
+"Per-try figures" are, for each of the 20 tries: n, profit factor pooled, profit factor and n in each block, both halves, net, stress profit factor, accuracy, mean ask, the corrected z, the control p, PASS or fail and (gold) the without-held n and profit factor.
+
+**The tie fixture** (`make_depth1_tie_fixture.py`) plants the two cases Amendment 4 fixes. Bitcoin f7 has a profit factor of exactly 1.5 in whole cents, pooled and in every block (260 wins of +0.48 and 160 losses of -0.52 a block); in floating point the pooled figure reads 1.4999999999999998. Both builds print `BAR MET` for it, with identical lines (n 1260, 1.50 in every block, net +9.90c, z 70.28, control p 0.001). Five gold windows have 60-second-old size sums of 0.10 + 0.20 against 0.30; both builds give f6 no trade there (gold f6 n 1367 in both).
+
+**One figure differs, information only:** on the tie fixture the wrapper prints an uncorrected z of -4053239664633446.00 for gold f8, a try with five trades that all fall on one date; this build prints 0.00. With one date the cluster variance is zero, and the wrapper's "variance 0 gives 0" test on the uncorrected figure is an exact comparison that a floating point residue slips past. The corrected z, which the verdict reads, is 0.00 in both builds there (D under 2 gives 0). It cannot arise on a try with 300 trades over 15 dates, so it changes no verdict; it is the same class of exact-zero test and wants one line of text or a guard.
+
+The earlier open point (the control's median on the planted-edge fixture) is closed: under Amendment 4 both control figures agree at printed precision on all three fixtures.
+
 ## Files added
 
-`DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_as_coded_MADE_UP_DATA.{json,txt}` (the first build's readings, Amendment 2: what is compared with the wrapper) and `..._registered_zero_rule_MADE_UP_DATA.{json,txt}` (a feature at or under 1e-12 is zero and f3 by a plain sum: what the figures would be without residue trades). `depth1_second.py` sha256 `607ed616...`.
+`DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_A4_MADE_UP_DATA.{json,txt}` and `DEPTH1_SECOND_OUTPUT_tie_fixture_seed5_MADE_UP_DATA.{json,txt}` (this build under Amendments 1 to 4); `DEPTH1_WRAPPER_OUTPUT_tie_fixture_seed5_MADE_UP_DATA_run_by_forensics.txt` (Desk A's harness run on the tie fixture); `make_depth1_tie_fixture.py`. `depth1_second.py` sha256 `3db8b6df...`.
 

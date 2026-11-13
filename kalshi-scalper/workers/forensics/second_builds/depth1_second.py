@@ -21,9 +21,9 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
  9. f6: thin side = the smaller 5 level size 60 s ago; value = (then - now)/then for that side, positive when the thin side is NO, negated when it is YES; equal sizes then = 0; thin size then of 0 = undefined.
 10. f8: gap = level 1 price minus level 2 price; a missing level 2 gives a gap of the whole level 1 price. f9 needs two levels a side; slope = (level 1 price - last level price)/sum of sizes.
 11. f10: levels whose price is within 0.03 of the side's level 1 price (inclusive, tolerance 1e-9).
-12. A feature whose absolute value is at or under 1e-12 is zero (no trade): the registered sign rule says "0 or undefined: no trade", and a zero computed in floating point can come out as a residue near 1e-17. The first build trades on any non-zero float; setting ZERO_TOL to 0.0 reproduces it.
+12. The zero rule (Amendment 3 (g), a fault fix found by this build): for all ten features an absolute value at or under 1e-12 is zero, no trade, in the trade rule, the shuffled-book control and the noise description alike. Before the fix the first build traded on floating point residue near 1e-17 in f3, f8 and f9.
 13. Halves: the try's trades in close-time order, first floor(n/2) and the rest. Blocks by US Central close date.
-14. Date-clustered z, as the first build prints it (aligned Nov 13): sum of nets over sqrt(sum over US Central close dates of (date sum - date n x mean)^2), with NO small-sample factor. The same with the usual D/(D-1) factor on the variance is printed beside it; it is smaller by sqrt((D-1)/D), 3.4% at 15 dates. Direction accuracy is wins over ALL trades (a fee-only no-result trade counts as a miss); wins over settled trades is printed beside it.
+14. Date-clustered z (Amendment 3 (h)): mu / sqrt((D/(D-1)) x sum over US Central close dates of (date sum - date n x mu)^2 / n^2); D under 2 or a zero variance gives 0. The verdict reads this corrected z against 5.27; the uncorrected one (larger by sqrt(D/(D-1))) is printed beside it. Direction accuracy is wins over ALL trades. The profit factor and net bars are tested in whole thousandths of a dollar (Amendment 4).
 15. Shuffled-book control: one permutation of the windows a market and round; a window's whole vector of 10 feature values moves together; the window keeps its own fill quotes and result. random.Random(20261114), markets in the order gold, Bitcoin, 1,000 rounds. A try with under 30 trades in a round is not counted in that round's best. An independent build cannot reproduce another build's random draws: the 99th percentile is compared approximately.
 16. Overlap: gold "held" = exactly one side's ask 0.88 to 0.97 at the last poll at or before T-360 s (within 10 s). Bitcoin needs candles this build does not read: every Bitcoin window is "unknown".
 17. The history check (candles, weaker evidence, not part of the verdict) is not built here.
@@ -45,7 +45,7 @@ NEED_WINDOWS, SHUFFLES, SEED, CONTROL_P, MIN_SHUFFLE_TRADES = 300, 1000, 2026111
 READ_NOT_BEFORE = 1794614400            # 2026-11-14T00:00:00Z
 RECORDER_END_MS = (READ_NOT_BEFORE - 60) * 1000      # CONFIG recorder_end_utc 2026-11-13T23:59:00Z; the first build drops a window that opened (close minus 900 s) at or after it (Desk A, Nov 13)
 COVERAGE_OFFSET = 0                     # the first build compares the coverage row's raw receive times with T (no clock offset); 1 would add the run's offset
-ZERO_TOL = 0.0                          # Amendment 2, point 12 (ruled Nov 13): only None, NaN or EXACTLY 0 is "no trade"; any other float trades. Set to 1e-12 for the other reading.
+ZERO_TOL = 1e-12                        # Amendment 3 (g), the fault fix: for ALL TEN features an absolute value at or under 1e-12 is zero, no trade. (0.0 reproduces the first build before the fix.)
 RESIDUE = 1e-12                         # a fired trade whose feature is within this of zero but not exactly zero is counted for each try (the Head, Nov 13): information, never part of the verdict
 EPS = 1e-9
 FEATURES = ("f1_imb5", "f2_imb1", "f3_dwmid_minus_mid", "f4_d_imb30", "f5_d_imb60", "f6_thin_depletion", "f7_sweep_net", "f8_hole_asymmetry", "f9_book_slope", "f10_imb_3c")
@@ -104,7 +104,7 @@ def f3(b):
 def f6(now, then):
     if then is None or not now["y"] or not now["n"] or not then["y"] or not then["n"]: return None      # both sides quoted at both polls (aligned to the first build, Nov 13)
     ty, tn = _tot(then["y"]), _tot(then["n"])
-    if abs(ty - tn) < EPS: return 0.0
+    if abs(ty - tn) <= EPS: return 0.0                                        # Amendment 4, hit 2: sums within 1e-9 are a tie (sizes are fractional), no trade
     if tn < ty: return None if tn <= 0 else (tn - _tot(now["n"])) / tn
     return None if ty <= 0 else -((ty - _tot(now["y"])) / ty)
 def f8(b):
@@ -259,9 +259,25 @@ def zstats(tr):
     D = len(by)
     if D < 2: return 0.0, 0.0
     v = sum((s - k * m) ** 2 for s, k in by.values())
-    z = 0.0 if v <= 0 else m * n / math.sqrt(v)                                     # Amendment 2, (d): mu / sqrt(sum over dates of (S_d - k_d mu)^2 / n^2), no small-sample factor
-    zc = z * math.sqrt((D - 1) / D)                                                   # with the usual D/(D-1) factor on the variance: SMALLER by sqrt((D-1)/D), 3.4% at 15 dates
-    return z, zc
+    zu = 0.0 if v <= 0 else m * n / math.sqrt(v)                                    # uncorrected, printed beside: mu / sqrt(sum over dates of (S_d - k_d mu)^2 / n^2)
+    zc = zu * math.sqrt((D - 1) / D)                                                  # Amendment 3 (h): the VERDICT reads this one, the variance times D/(D-1); smaller by sqrt((D-1)/D), 3.4% at 15 dates
+    return zc, zu
+
+
+def _wl(vals):
+    """winning and losing sums in whole thousandths of a dollar (exact for whole-cent results and for a 1.2 x whole-cent fee)"""
+    k = [int(round(v * 1000)) for v in vals]
+    return sum(x for x in k if x > 0), -sum(x for x in k if x < 0)
+
+
+def bars(trs, h):
+    """Amendment 4, hit 1. PF >= 1.5 is 2W >= 3L; a half above 1.0 is W > L; stress PF above 1.2 is 5W > 6L; with no losses any win passes and no wins fails."""
+    ge15 = lambda W, L: (W > 0) if L == 0 else (2 * W >= 3 * L)
+    nets = [t["net"] for t in trs]; st = [t["stress"] for t in trs]; W, L = _wl(nets); Ws, Ls = _wl(st)
+    blk = [[t["net"] for t in trs if lo <= t["date"] <= hi] for _, lo, hi in BLOCKS]
+    return {"one_trade_in_each_block": all(len(b) > 0 for b in blk), "pf_pooled_at_least_1.5": ge15(W, L), "pf_each_block_at_least_1.5": all(ge15(*_wl(b)) for b in blk),
+            "both_halves_above_1.0": all((w > l) for w, l in (_wl(nets[:h]), _wl(nets[h:]))), "net_above_0": W - L > 0, "stress_net_above_0": Ws - Ls > 0,
+            "stress_pf_above_1.2": (Ws > 0) if Ls == 0 else (5 * Ws > 6 * Ls)}
 
 
 def score(trs):
@@ -270,14 +286,14 @@ def score(trs):
     h = n // 2; z, tday = zstats(trs); wins = sum(1 for t in trs if t["win"]); settled = sum(1 for t in trs if t["win"] is not None)
     return {"n": n, "wins": wins, "no_result_fee_only": n - settled, "direction_accuracy": (wins / n) if n else None, "direction_accuracy_over_settled_trades_only": (wins / settled) if settled else None, "mean_ask": (sum(t["ask"] for t in trs) / n) if n else None,
             "pf": pf(nets), "pf_blocks": blocks, "block_n": {name: sum(1 for t in trs if lo <= t["date"] <= hi) for name, lo, hi in BLOCKS}, "pf_halves": [pf(nets[:h]), pf(nets[h:])],
-            "net_per_trade": (sum(nets) / n) if n else None, "net_per_trade_fee_x1.2": (sum(st) / n) if n else None, "pf_fee_x1.2": pf(st), "z_date_clustered": z, "z_with_the_D_over_D_minus_1_factor": tday}
+            "net_per_trade": (sum(nets) / n) if n else None, "net_per_trade_fee_x1.2": (sum(st) / n) if n else None, "pf_fee_x1.2": pf(st), "z_date_clustered": z, "z_uncorrected_beside": tday, "bars": bars(trs, h)}
 
 
 def meets_bar(s, control_ok):
-    g = lambda x, bar: x is not None and x >= bar - EPS
-    gt = lambda x, bar: x is not None and x > bar + EPS
-    return (s["n"] >= BAR["n"] and g(s["pf"], BAR["pf"]) and all(g(v, BAR["pf"]) for v in s["pf_blocks"].values()) and all(gt(v, BAR["halves"]) for v in s["pf_halves"])
-            and gt(s["net_per_trade"], 0) and gt(s["net_per_trade_fee_x1.2"], 0) and gt(s["pf_fee_x1.2"], BAR["stress_pf"]) and g(s["z_date_clustered"], BAR["z"]) and control_ok)
+    """Amendment 4, hit 1: every profit factor and net bar is tested on whole thousandths of a dollar, never on float sums. The z against 5.27 is the corrected z (Amendment 3)."""
+    b = s["bars"]
+    return bool(s["n"] >= BAR["n"] and b["one_trade_in_each_block"] and b["pf_pooled_at_least_1.5"] and b["pf_each_block_at_least_1.5"] and b["both_halves_above_1.0"]
+                and b["net_above_0"] and b["stress_net_above_0"] and b["stress_pf_above_1.2"] and s["z_date_clustered"] >= BAR["z"] and control_ok)
 
 
 def measure(root, made_up=False, now=None):
@@ -365,10 +381,12 @@ def measure(root, made_up=False, now=None):
     for (m, f), trs in tries.items():
         s = score(trs); ctl = p99 is not None and real_mean[(m, f)] > p99
         s["control_passed"] = ctl; s["control_p_best_of_20"] = (1 + int((bests >= real_mean[(m, f)]).sum())) / (SHUFFLES + 1)
+        raw = [prep[tk]["feats"][f] for tk in prep if windows[tk]["series"] == m]
+        s["scored_windows_with_a_raw_feature_within_1e-12_of_zero_but_not_zero"] = sum(1 for v in raw if v is not None and v == v and 0 < abs(v) <= RESIDUE)
         rz = [t for t in trs if 0 < abs(t["value"]) <= RESIDUE]
         s["residue_trades_feature_within_1e-12_of_zero_but_not_zero"] = {"n": len(rz), "bought_the_cheaper_side": sum(1 for t in rz if t["cheap"] is True), "bought_the_dearer_side": sum(1 for t in rz if t["cheap"] is False),
                                                                        "net_per_trade": (sum(t["net"] for t in rz) / len(rz)) if rz else None}
-        s["meets_the_whole_bar"] = meets_bar(s, ctl); s["z_against_5.46"] = s["z_date_clustered"] is not None and s["z_date_clustered"] >= BAR["z_shared"] - EPS
+        s["meets_the_whole_bar"] = meets_bar(s, ctl); s["z_against_5.46"] = s["z_date_clustered"] >= BAR["z_shared"]
         s["second_look_flag_55pct_at_300"] = s["n"] >= 300 and s["direction_accuracy"] is not None and s["direction_accuracy"] >= 0.55 - EPS
         nh = [t for t in trs if t["held"] is False]
         s["without_held_and_unknown_windows"] = {"n": len(nh), "pf": pf([t["net"] for t in nh])}
@@ -397,7 +415,7 @@ def lines(out):
                 "[closed family] " if ft in CLOSED_FAMILY else "", ft, v["n"], f(v["pf"]), f(b["A"]), bn["A"], f(b["B"]), bn["B"], f(b["C"]), bn["C"], f(v["pf_halves"][0]), f(v["pf_halves"][1]),
                 f(None if v["net_per_trade"] is None else 100 * v["net_per_trade"]), f(v["pf_fee_x1.2"]), f(v["direction_accuracy"], 3), f(v["mean_ask"], 3), f(v["z_date_clustered"]), f(v["control_p_best_of_20"], 3),
                 "PASS" if v["control_passed"] else "fail", v["no_result_fee_only"], nh["n"], f(nh["pf"]), " <- BAR MET" if v["meets_the_whole_bar"] else "")
-                     + "; residue trades (feature within 1e-12 of zero, not zero): %d (cheaper side %d, dearer side %d)" % (v["residue_trades_feature_within_1e-12_of_zero_but_not_zero"]["n"], v["residue_trades_feature_within_1e-12_of_zero_but_not_zero"]["bought_the_cheaper_side"], v["residue_trades_feature_within_1e-12_of_zero_but_not_zero"]["bought_the_dearer_side"]))
+                     + "; z uncorrected %s; scored windows with a raw feature within 1e-12 of zero, not zero (set to zero, no trade): %d" % (f(v["z_uncorrected_beside"]), v["scored_windows_with_a_raw_feature_within_1e-12_of_zero_but_not_zero"]))
     flags = [k for k, v in allt.items() if v["second_look_flag_55pct_at_300"]]
     L.append("second look flags (accuracy >= 55% with n >= 300; not a verdict): " + (", ".join(flags) if flags else "none"))
     return L
