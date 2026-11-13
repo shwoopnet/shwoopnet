@@ -60,7 +60,7 @@ supplies more than half of the pooled net.
   `POLGAPH_FIRST_BUILD_OUTPUT_fixture_seed5_edge032_others_minus05_MADE_UP_DATA_run_by_forensics.txt`.
 - The two earlier fixtures still agree against Desk B's refreshed lines at `94ff7fa7`: 155 of 155 and 156 of 156.
 
-## Nov 13, about 01:50Z: the two-families fixture, and one information-only difference
+## Nov 13, about 01:47Z: the two-families fixture, and one information-only difference
 
 The Head's last word (01:44Z): align to Desk B's `94ff7fa7` (scorer `9186c8b5...`, registration `a13693f3...`, restored byte for byte at `5a7de18e`); the later hashes
 `331711cd` and `2e48e8c8` are dead. This build was already on that text. Fixtures asked for: pooled fail with a dominant family (above), and two families over half:
