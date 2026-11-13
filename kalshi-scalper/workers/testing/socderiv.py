@@ -178,8 +178,8 @@ def gap(value, b, a):
 
 
 def near_strike(tot):
-    """The total-goals strike whose mid is nearest 50c, measured exactly on whole-cent quotes (mid in half-cent units: round((bid + ask) * 100) against 100); an exact tie takes the LOWER strike (Head, Desk B dated line 26ae3495). tot = {strike: (bid, ask)}."""
-    return min(tot, key=lambda kk: (abs(round((tot[kk][0] + tot[kk][1]) * 100) - 100), kk))
+    """The total-goals strike whose mid is nearest 50c, measured EXACTLY: bid and ask in hundredths of a cent (Kalshi quotes carry four decimals), so a sub-cent quote cannot create or hide a tie; an exact tie takes the LOWER strike (Head, Desk B dated line 26ae3495). tot = {strike: (bid, ask)}."""
+    return min(tot, key=lambda kk: (abs(round(tot[kk][0] * 10000) + round(tot[kk][1] * 10000) - 10000), kk))
 
 
 def stats(rows):
@@ -196,6 +196,7 @@ def check_candle_runs(spec, list_folders, candle_folders):
     -> (answered, asked)."""
     jc, _ = build_candles(spec, list_folders); want = {r["id"]: (r["path"], r["params"]) for r in jc["requests"]}; seen = {}
     for f in candle_folders:
+        k.refuse_heldout(f)          # standing rule (h): the guard before any file of the folder is opened
         m = json.load(open(os.path.join(f, "manifest.json")))
         if m.get("status") != "complete" or not isinstance(m.get("job"), dict): raise SystemExit("refused: %s is not a complete candle run with its job" % f)
         for r in m["job"].get("requests", []):
@@ -257,6 +258,7 @@ def measure(spec, list_folders, candle_folders):
             got[typ] = True
         for typ in ("btts", "teamtotal"):
             if got[typ]: G[typ]["filled"] += 1
+    series_listed = {m["series"] for m in k.markets(list_folders).values()}
     out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "fit_residual_rmse_median": None if not resid else round(st.median(resid), 4), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
            "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"}
     for grp, G in games_by_group.items():
@@ -270,7 +272,7 @@ def measure(spec, list_folders, candle_folders):
             elif der and filled * 2 < der: verdict = "CLOSED: not tradable (under half of the games with a derivable kickoff are filled: %d of %d)" % (filled, der)
             elif s_t["fires"] * 10 >= s_t["n"] and s_t["fires"] * (s_p["n"] if s_p else 1) >= 2 * (s_p["fires"] if s_p else 0) * s_t["n"]: verdict = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration, tries = surviving cells"
             else: verdict = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % (s_t["gap_quartiles_p90"] and s_t["gap_quartiles_p90"][3])
-            out["groups"][grp][typ] = {"games_with_a_derivable_kickoff_in_the_group": der, "games_with_a_target_of_this_type": with_target, "no_such_market_in_this_group": (with_target == 0), "filled": filled, "share_filled_of_all_derivable_games": share_filled, "targets": s_t, "placebo": s_p, "verdict": verdict}
+            out["groups"][grp][typ] = {"games_with_a_derivable_kickoff_in_the_group": der, "games_with_a_target_of_this_type": with_target, "no_such_market_in_this_group": not any(("KX" + lg + SUFFIXES[typ.replace("teamtotal", "teamtotal")]) in series_listed for lg in spec["groups"][grp]), "no_game_of_the_group_has_a_target_of_this_type": (with_target == 0), "filled": filled, "share_filled_of_all_derivable_games": share_filled, "targets": s_t, "placebo": s_p, "verdict": verdict}
     return out
 
 

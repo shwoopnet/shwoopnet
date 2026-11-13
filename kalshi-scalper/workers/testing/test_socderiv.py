@@ -89,4 +89,7 @@ rows4 = [{"gap": 0.15, "spread": 0.54 - 0.50, "round_trip": 0.1, "one_way": 0.04
 assert s.stats(rows4)["fires"] == 10 and abs(s.stats(rows4)["share_gap_ge_8c_spread_le_4c"] - 0.1) < 1e-9          # a 4c spread written 0.54 - 0.50 counts
 f1, f2, rr = s.fit((0.40, 0.30, 0.30), {1.5: 0.80, 10.5: 0.001}); assert f1 > 0 and f2 > 0                                  # a 10.5 strike does not crash the fit
 assert s.near_strike({3.5: (0.54, 0.56), 2.5: (0.44, 0.46)}) == 2.5 and s.near_strike({2.5: (0.44, 0.46), 3.5: (0.54, 0.56)}) == 2.5 and s.near_strike({1.5: (0.89, 0.91), 2.5: (0.51, 0.53), 3.5: (0.19, 0.21)}) == 2.5
+assert s.near_strike({2.5: (0.495, 0.500), 3.5: (0.500, 0.505)}) == 2.5 and s.near_strike({3.5: (0.495, 0.500), 2.5: (0.4951, 0.5000)}) == 2.5          # sub-cent quotes: exact tie to the lower strike, no false tie
+try: s.check_candle_runs(spec, [dl], ["/tmp/HELDOUT_X"]); raise AssertionError("held-out candle folder not refused")
+except SystemExit as ex: assert "HELDOUT" in str(ex) or "held" in str(ex).lower(), ex
 print("socderiv synthetic tests passed")
