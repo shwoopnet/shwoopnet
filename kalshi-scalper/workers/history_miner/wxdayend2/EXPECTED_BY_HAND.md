@@ -16,3 +16,7 @@ A list run with a DAL Nov 10 list (one yes market, B78.5, closing 2026-11-11T07:
 - DAL Nov 10 (B78.5, day_end 06:00Z Nov 11): only a candle ending 05:30Z. **No post-day candle; does not show.**
 Expected: covered 3, shows_close 1, shows_low 2, no_post_day_candle 1, not_recounted 37, verdict FAIL by the letter only when all 40 are read, so it prints "incomplete: 37 city-days not recounted".
 Refusals: a Nov 10 list with two yes markets (unresolved, reported, not counted as covered); a Nov 1 request whose end_ts is an hour off standard midnight + 1 h (stop); a HELDOUT_ path.
+
+## Two fixes found by the first test run (not changes to the expected figures)
+- The made-up DAL Nov 1 candle at 06:30Z lacked a `low` field, so the low basis could not show it; a candle's low is never above its close, so the input now carries low 0.96. The expected figures are unchanged.
+- A Nov 10 list with two yes markets stopped the run (its candle was not the list winner); as written above it is reported as unresolved and stays unread. Expected for that case: unresolved [KXHIGHTDAL-26NOV10], covered 2.
