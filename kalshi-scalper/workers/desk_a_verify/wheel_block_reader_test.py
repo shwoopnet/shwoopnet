@@ -30,8 +30,8 @@ def block_with(cw, cl, n=60):
 b, _ = rp(block_with(1300, 1000)); assert b[0]["status"] == "CLEARED", b[0]          # 10 x 1300 = 13 x 1000: exactly 1.3 passes
 b, _ = rp(block_with(1299, 1000)); assert "profit factor under 1.3" in b[0]["fails"], b[0]
 s = block_with(3000, 1000); h = [dict(x, cents=(-500 if x["win"] else 0)) for x in s[:30]]; s[:30] = h; b, _ = rp(s); assert "a half under 1.0" in b[0]["fails"], b[0]
-s = seq(60, hours=8); net = sum(x["cents"] for x in s); s[10] = dict(s[10], cents=s[10]["cents"] + 5000); b, _ = rp(s); assert any("one day holds" in f for f in b[0]["fails"]), b[0]
-print("T5 integer bars: 1.3 exactly passes, 1299/1000 fails, a half under 1.0, a day over 30% fails OK")
+s = seq(60, hours=8); net = sum(x["cents"] for x in s); s[10] = dict(s[10], cents=s[10]["cents"] + 5000); b, _ = rp(s); assert b[0]["status"] == "CLEARED" and not any("one day" in f for f in b[0]["fails"]), b[0]      # v1.3: no day test
+print("T5 integer bars: 1.3 exactly passes, 1299/1000 fails, a half under 1.0, a day over 30% no longer fails (v1.3) OK")
 # T6 (i), (m): a limit of 88c or above is SKIPPED for a rule not registered as a favourite; with fav the block is at least 150
 s = seq(80, limit=90); b, st = rp(s); assert not b and st["block_in_progress"] == 0, st
 s = seq(100, hours=3, limit=90); b, st = rp(s, fav=True, now=T0 + 13 * DAY); assert not b and st["block_in_progress"] == 100; s = seq(160, hours=3, limit=90); b, st = rp(s, fav=True, now=T0 + 20 * DAY); assert b and b[0]["n"] >= 150; print("T6 limit 88c or above skipped; favourite class needs 150 OK")
