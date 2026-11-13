@@ -73,7 +73,7 @@ longer than the sheet says. (On both fixtures, every such signal older than 7 da
   (60 fillable signals, 1.3, halves, days, confirmation) "is the lane's" and is not built there. So the block lines in my output have nothing to be compared with yet,
   and three of their readings are open (below, 3 to 5).
 
-## Nov 13, about 02:20Z: the Head's rulings applied, and the block layer compared (SAME on both fixtures)
+## Nov 13, about 02:12Z: the Head's rulings applied, and the block layer compared (SAME on both fixtures)
 
 The Head of R&D ruled the open readings at 02:05Z and wrote them into `ROTATION_LANE.md` section 4 (`rnd-queue` 7c4c71d2): a block keeps growing until it holds 60
 signals, 7 different days and 10 wins and 10 losses; a block not complete within 21 x 24 hours ends unread and is EXPIRED; a day is US Central from the signal poll's time;
