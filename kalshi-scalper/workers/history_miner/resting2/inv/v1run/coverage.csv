@@ -7,3 +7,5 @@ close_time,series,ticker,polls,ok_polls,n429,batch_fallback,max_gap_ms,first_rec
 2026-11-20T12:00:00Z,KXBTC15M,KXBTC15M-W6,,,,,,,,,,,,,,yes,
 2026-11-07T12:00:00Z,KXBTC15M,KXBTC15M-W7,,,,,,,,,,,,,,no,
 2026-11-08T12:00:00Z,KXBTC15M,KXBTC15M-W8,,,,,,,,,,,,,,yes,
+2026-11-09T12:00:00Z,KXBTC15M,KXBTC15M-W9,,,,,,,,,,,,,,yes,
+2026-11-10T12:00:00Z,KXBTC15M,KXBTC15M-W10,,,,,,,,,,,,,,yes,
