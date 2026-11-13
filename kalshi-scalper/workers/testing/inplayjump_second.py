@@ -15,6 +15,7 @@ TOL = 1e-9
 SERIES_SHA256 = "34f708687df24f5a6243c710eb2d1f6b8d7559c965b8c18a97e27248c2ed06e8"
 JUMP, PRE_LO, PRE_HI, ASK_LO, ASK_HI, SPREAD_MAX, SLIP = 0.10, 0.15, 0.75, 0.20, 0.85, 0.04, 0.01
 AMBIGUITIES = [
+    "00. DATED Nov 13 06:33Z (Head ruling after the first comparison with Desk A): the placebo search order is (start or open, the event's first ticker ascending); 'up to 20' is the next 20 POSITIONS in that order (a used match is among them and is skipped, it does not extend the search); the family's matches are ALL matches listed in the development window, with or without candles.",
     "0. DATED Nov 13 06:28Z (Head ruling after Auditor B): the placebo contract is the one with the higher mid; at exactly equal mids (within 1e-9) the ticker that sorts first in ascending order.",
     "1. first_in_play for tennis = the first minute at which the alive rule holds for EITHER contract; every minute is in play only if the alive rule holds AT THAT MINUTE (not 'from the first on'). Clock families: in play from the minute ending at S + 60 s.",
     "2. Elapsed minute e: clock = (t - S) / 60 with t the jump minute's END ts; tennis = (t - first in-play minute) / 60. The placebo's own minute is S_Y + 60 e (clock) or first_in_play_Y + 60 e (tennis).",
@@ -154,13 +155,11 @@ def decide(m, idx):
 
 def placebo_for(bet_match, bet, matches_sorted, pos, idx, used):
     """Amendment 2 point 3 (+5, 6): the NEXT match of the family after X (by sort key then ticker) not yet served, at the same elapsed minute e; up to 20 matches; no wrap-around. -> (placebo dict or None, reason)."""
-    e = bet["elapsed"]; tried = 0
-    for j in range(pos + 1, len(matches_sorted)):
+    e = bet["elapsed"]
+    for j in range(pos + 1, min(pos + 21, len(matches_sorted))):          # the next 20 POSITIONS in (start or open, first ticker) order; a match already used is among them and is skipped (Head ruling Nov 13, 06:33Z)
         y = matches_sorted[j]
         if y["family"] != bet_match["family"]: continue
         if y["event"] in used: continue
-        tried += 1
-        if tried > 20: break
         ser = series_of(idx, y); fip = first_in_play(y, ser)
         if fip is None: continue
         tY = (y["S"] if y["kind"] == "clock" else fip) + 60 * e
@@ -188,7 +187,7 @@ def net_of(price, code, results):
 
 def family_run(fam_matches, idx, read_results=False):
     """Step 1 counts for one family (no result read unless read_results). Returns (report, decisions, placebo plan)."""
-    ms = sorted(fam_matches, key=lambda m: (m["sort"], m["event"])); dec = {}; why = {}
+    ms = sorted(fam_matches, key=lambda m: (m["sort"], min(m["codes"].values()))); dec = {}; why = {}          # (start or open, the event's first ticker ascending): Head ruling Nov 13
     for m in ms:
         d = decide(m, idx); dec[m["event"]] = d; why[d["status"]] = why.get(d["status"], 0) + 1
     qual = [d for d in dec.values() if d["status"] in ("bet", "entry_outside_band")]

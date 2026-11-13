@@ -10,7 +10,7 @@ Known gap, accepted: scorekit's held-out guard is case-sensitive ('HELDOUT_'); i
 import sys, os, json, hashlib
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 H = lambda n: hashlib.sha256(open(os.path.join(HERE, n), "rb").read()).hexdigest()
-PIN = {"scorer": ("inplayjump_second.py", "7a41a2131353a446"), "scorekit": ("scorekit.py", "02728f2afdfe62a9")}
+PIN = {"scorer": ("inplayjump_second.py", "87ad2e0179e8fe43"), "scorekit": ("scorekit.py", "02728f2afdfe62a9")}
 for key, (fn, pre) in PIN.items():
     if not H(fn).startswith(pre): raise SystemExit("refused: %s is not the frozen build (%s)" % (fn, H(fn)[:16]))
 import scorekit as k
@@ -32,10 +32,11 @@ if mode == "full":
         if os.path.basename(os.path.normpath(f)) not in runs: raise SystemExit("refused: run folder %s is not named in the CLEAN string" % f)
 spec = ij.load_series(); ms, counts = ij.build_matches(spec, lists)
 idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candles).items()}
-have = [m for m in ms if m["family"] == fam and any(t in idx for t in m["codes"].values())]
+have = [m for m in ms if m["family"] == fam]          # ALL matches listed in the development window (Head ruling Nov 13: the start check counts a match with no candle against it; the placebo order runs over all of them)
+with_candles = sum(1 for m in have if any(t in idx for t in m["codes"].values()))
 dev = next(f for f in spec["families_ranked_by_events"] if f["family"] == fam)["development"]
 sc = ij.start_check(have)
-out = {"family": fam, "counts_first": counts, "matches_with_candles": len(have), "start_check": sc}
+out = {"family": fam, "counts_first": counts, "matches_listed_in_window": len(have), "matches_with_candles": with_candles, "start_check": sc}
 rep = ij.family_run(have, idx)[0]; out["report"] = rep
 tail = "provisional, one build; selected on development; candle freshness measured on Bitcoin 15 minute only, not on these markets"
 if mode == "counts": out["label"] = tail + "; NO result read"
