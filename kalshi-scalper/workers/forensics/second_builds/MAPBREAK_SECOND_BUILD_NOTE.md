@@ -48,3 +48,27 @@ With readings 1 and 4 set equal (a switch in this build for 1, a scratch variant
 Reading 4 is not a look-ahead in the bet (the bet still needs the observed state), but it does select the second-look sample with a result that is posted after the look. On landed data both builds are limited by the candles that were pulled, which were planned the same way.
 
 Each of the four needs one sentence from Desk B (or the Head) before the recount, because under rule 16b the two builds must print the same figures.
+
+## Third comparison, on the landed development candles (2026-11-13): the same figures at the first look, except the cost line by exactly 1c
+
+After Amendment 10 lines 9 (an empty book is not a quote) and 10 (the candle that names the winner ends at or before the map market's close; ruled by the Head on Auditor B's finding, which settles reading 1 above in the Testing Desk's favour), this build was changed to match the text (sha256 `87398c20...`) and run on the whole first pull: lists `MAPBREAK_LISTS/2026-11-12T1919Z_43289005222`, candles `MAPBREAK_CANDLES/2026-11-12T1954Z_43294876878` and `MAPBREAK_CANDLES_REST/2026-11-13T0023Z_43336673397` (282 of 282 requests). Development only, counts only, no match result read by either build. The Testing Desk's build is `mapbreak.py` sha256 `881988a5...` (7aa6d6d3, audited CLEAN).
+
+| First look | CS2 | Dota 2 | Valorant | LoL |
+|---|---|---|---|---|
+| Looks left (state observable, both match contracts two-sided, a pre-match minute) | 874 | 219 | 49 | 35 |
+| Fired / filled at the next minute / fired, not filled | 62 / 45 / 17 | 3 / 0 / 3 | 3 / 3 / 0 | 2 / 2 / 0 |
+| State not observable, look reached / no pre-match minute | 42 / 37 | 12 / 4 | 4 / 4 | 6 / 1 |
+| No look minute | 108 | 34 | 6 | 6 |
+| Gap share (8c or more, spread 4c or less) | 7.1% | 1.4% | 6.1% | 5.7% |
+| Placebo share, same matches | 0.6% | 1.8% | 2.0% | 0% |
+| Gap on the cheaper side: median, quartiles, 90th percentile | 1.6c, -0.1c to 4.4c, 9.6c | 0.2c, -0.9c to 1.7c, 4.1c | 1.4c, 0.2c to 2.5c, 7.5c | 1.0c, -0.4c to 3.2c, 6.9c |
+| Median spread of the match contracts; minutes from the map close to the look | 3c; 2.7 | 3c; 2.7 | 3c; 2.6 | 3c; 2.5 |
+| One-way cost, this build (limit minus mid plus the fee, Amendment 10 line 8) | 4.0c | 4.5c | 4.0c | 4.0c |
+| One-way cost, Testing Desk's build (ask minus mid plus the fee) | 3.0c | 3.5c | 3.0c | 3.0c |
+| Verdict, both builds | no evidence at n = 45 | no evidence at n = 0 | no evidence at n = 3 | no evidence at n = 2 |
+
+24 figures a title were compared (counts, the gap distribution, the three shares, the placebo's n, share, median and 90th percentile, spread, minutes, cost). 23 are identical in every title. The one that differs is the cost line, by exactly 1c in every title: reading 2 of the table above, still to be ruled. Under the text's reading CS2's median cost is exactly 4.0c, which is AT the kill line and not above it, and Dota 2's 4.5c is above it. Neither changes a verdict here: every title is under 150 fired and filled bets and under the 10% gap share line at the first look.
+
+Readings 3 (the placebo set at the second look) and 4 (second-look matches planned from posted map results) bear on the second look only, which waits for the `MAPBREAK_CANDLES_M2` run.
+
+Output: `MAPBREAK_SECOND_OUTPUT_landed_first_pull_282_requests_counts_only.json`.

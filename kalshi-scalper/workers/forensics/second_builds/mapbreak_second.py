@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """MAPBREAK, an independent SECOND build of step 1 (Forensics desk, 2026-11-13, on the Head of R&D's order), rebuilt to the FINAL text:
-Desk B's registration and Amendments 1 to 10 (workers/mapbreak/MAPBREAK_REGISTRATION.md at 6872b365 on claude/idea-desk-b). The first version of this file
+Desk B's registration and Amendments 1 to 10, lines 1 to 10 (workers/mapbreak/MAPBREAK_REGISTRATION.md at 7898840b on claude/idea-desk-b). The first version of this file
 (commit db1c0354) followed Amendments 1 to 7 and is what found the float comparison on the 4c line.
 DISCLOSURE: this desk leak-audited the Testing Desk's mapbreak.py and breakplay.py on Nov 12, so it is not a clean-room reader; every place where the text alone
 did not settle a choice is listed in AMBIGUITIES and printed.
@@ -30,8 +30,8 @@ OBS_AGE = 10 * 60                                 # Amendment 10, line 7: that c
 EPS = 1e-9                                        # Amendment 10, line 6: every "or less" and "or more" carries this tolerance
 AMBIGUITIES = [
     "1. A match's close time (for the 2026-09-12 to 2026-10-23 window): the later close_time of its two match markets. A map's close: the later close_time of its two contracts; the age limit of Amendment 10 line 7 uses each contract's OWN close_time.",
-    "2. 'A candle that carries a bid or an ask' (Amendment 10, line 5): a bid above 0 or an ask below 1. A candle with a zero bid and an ask of 1 (an empty book) is not a quote and the search goes on to the candle before it.",
-    "3. The age limit (Amendment 10, line 7) is applied to both teams' candles: a candle that ended more than 10 minutes before its map market's close shows no 0.90 bid for either team. A contract with no quote candle at all at or before the look makes the state not observable (Amendments 7 and 8, point 3).",
+    "2. A quote candle carries a bid above 0 or an ask below 1; a zero bid with an ask of 1 is an empty book (Amendment 10, line 9, no longer a choice). The state candle is the last quote candle ending at or before the map market's close (line 10); each contract's OWN close_time is used for the cap and for the 10 minute age limit.",
+    "3. The age limit is applied to both teams' candles: a candle that ended more than 10 minutes before its map market's close shows no 0.90 bid for either team. A contract with no quote candle at all at or before its close makes the state not observable (Amendments 7 and 8, point 3).",
     "4. The pre-match minute for a named map-1 winner W: the first minute from S-10 back to S-40 at which W's match contract and BOTH map-1 contracts are two-sided (Amendment 3). 'Look reached' (Amendment 10, line 3) for a look whose state is NOT observable cannot name W; it is counted when such a minute exists for EITHER team, and the count for BOTH teams is printed beside it.",
     "5. Looks left = a look minute, an observable state and a pre-match minute for the map-1 winner. The gap share, the placebo share and the cost line are over the looks left, per title and look (Amendment 7 point 3, Amendment 10 lines 2 and 8).",
     "6. Equal gaps (within 1e-9): no bet, counted (Amendment 10, line 4). The look stays in the looks left: it is in the gap distribution with its gap, it is not a hit for the gap share, and it has no cheaper side, so it is left out of the cost line.",
@@ -147,13 +147,10 @@ def look_minute(cd, close, tickers):
     return None
 
 
-STATE_CANDLE_NOT_AFTER_CLOSE = False     # the text: the last candle ending at or before the LOOK minute. True is offered ONLY to compare like for like with a build that also requires the candle to end at or before the map market's close
-
-
-def quote_candle(cd, ticker, ts, close=None):
-    """the LAST candle ending at or before ts that carries a bid or an ask -> (end, bid or None, ask or None), else None"""
+def quote_candle(cd, ticker, ts):
+    """the LAST candle ending at or before ts that carries a bid or an ask -> (end, bid or None, ask or None), else None.
+    Amendment 10, line 9: a bid of 0.00 with an ask of 1.00 is an empty book, not a quote."""
     d = cd.get(ticker) or {}; best = None
-    if STATE_CANDLE_NOT_AFTER_CLOSE and close is not None: ts = min(ts, close)
     for k, (b, a) in d.items():
         if k > ts: continue
         hb, ha = (b is not None and b > EPS), (a is not None and a < 1 - EPS)
@@ -165,7 +162,7 @@ def observed_winner(cd, mp, ts):
     """Amendments 8, 9 and 10. mp: {team: {ticker, close}} of one map. -> team, or None when the state is not observable at ts."""
     shows = {}
     for x, v in mp.items():
-        c = quote_candle(cd, v["ticker"], ts, v["close"])
+        c = quote_candle(cd, v["ticker"], min(ts, v["close"]))                       # Amendment 10, line 10: never a candle ending after the map market's close
         if c is None: return None
         shows[x] = c[1] is not None and c[1] >= OBS_BID - EPS and c[0] >= v["close"] - OBS_AGE
     won = [x for x in shows if shows[x]]
@@ -293,6 +290,5 @@ def measure(list_folders, candle_folders):
 if __name__ == "__main__":
     a = sys.argv[1:]
     if len(a) < 5 or a[0] != "measure" or "--lists" not in a or "--candles" not in a: print(__doc__); print("\n".join(AMBIGUITIES)); sys.exit(2)
-    if "--state-candle-not-after-close" in a: STATE_CANDLE_NOT_AFTER_CLOSE = True; a = [x for x in a if x != "--state-candle-not-after-close"]
     i, j = a.index("--lists"), a.index("--candles")
     print(json.dumps(measure(a[i + 1:j], a[j + 1:]), indent=1))
