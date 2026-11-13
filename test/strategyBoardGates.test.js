@@ -192,7 +192,7 @@ gates.SB12 = () => {
   const mod = html.slice(html.indexOf('readKalshiShadowRows'), html.indexOf('readKalshiShadowRows') + 1500);
   assert.ok(/collection\(db, 'kalshiShadowRows'\)/.test(mod) && !/setDoc|updateDoc|addDoc/.test(mod), 'a plain read of the shadow log');
   assert.ok(/match \/kalshiShadowRows\/\{id\} \{\s*allow read: if isAdmin\(\);\s*allow write: if false;/.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')), 'admin read, no client write');
-  assert.ok(/@media \(max-width:760px\)\{ \.rw-h\{ grid-template-columns:20px minmax\(0,1fr\) 46px 96px;/.test(html) && /\.rw-d, \.mo-body\{ grid-template-columns:1fr; \}/.test(html) && /\.lp-row\{ display:grid; grid-template-columns:1fr 1fr;/.test(html), 'rows stack and the loop is a 2 by 2 grid on a phone, so a phone never scrolls sideways');
+  assert.ok(/@media \(max-width:760px\)\{ \.rw-h\{ grid-template-columns:20px 44px minmax\(0,1fr\) auto;/.test(html) && /\.rw-d, \.mo-body\{ grid-template-columns:1fr; \}/.test(html) && /\.lp-row\{ display:grid; grid-template-columns:1fr 1fr;/.test(html), 'rows stack and the loop is a 2 by 2 grid on a phone, so a phone never scrolls sideways');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }

@@ -979,16 +979,28 @@
   .sp-sub{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; min-width:0; }
   .sp-ladder{ display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); border-top:1px solid var(--border); padding-top:10px; flex-wrap:wrap; }
   .sp-ladder b{ font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px; }
-  .sp-sum.kal-card{ padding:16px; display:flex; flex-direction:column; gap:12px; margin-bottom:10px; }
-  .sp-sum-pf{ display:flex; flex-direction:column; min-width:0; } .sp-sum-pf b{ font-size:52px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums; } .sp-sum-pf span{ font-size:11px; color:var(--muted); margin-top:4px; }
-  .sp-sum-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; }
-  .sp-sum-c{ display:flex; flex-direction:column; min-width:0; border-top:1px solid var(--border); padding-top:8px; } .sp-sum-c span{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); } .sp-sum-c b{ font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin-top:2px; }
+  .sp-sum.kal-card{ padding:20px 22px; display:grid; grid-template-columns:auto minmax(0,1fr) 220px; gap:24px; align-items:center; margin-bottom:10px; position:relative; overflow:hidden; }
+  .sp-sum.kal-card::after{ content:''; position:absolute; inset:0; pointer-events:none; background:radial-gradient(600px 180px at 10% 0%, rgba(255,255,255,.06), transparent 70%); }
+  .sp-sum-pf{ min-width:0; } .sp-sum-ring{ position:relative; width:132px; height:132px; } .sp-sum-ring svg{ width:100%; height:100%; display:block; }
+  .sp-sum-ring .sp-ring-bg, .sp-sum-ring .sp-ring-fg{ stroke-width:8; } .sp-sum-in{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .sp-sum-in b{ font-size:34px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums; } .sp-sum-in span{ font-size:11px; color:var(--muted); margin-top:3px; }
+  .sp-sum-mid{ min-width:0; } .sp-sum-k{ font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); }
+  .sp-sum-net{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin:4px 0 6px; } .sp-sum-net b{ font-size:32px; line-height:1.1; font-weight:700; font-variant-numeric:tabular-nums; } .sp-sum-net span{ font-size:12px; color:var(--muted); }
+  .sp-sum-plot{ position:relative; height:70px; } .sp-sum-curve{ width:100%; height:100%; display:block; } .sp-sum-zero{ stroke:var(--border); stroke-width:1; stroke-dasharray:3 3; vector-effect:non-scaling-stroke; }
+  .sp-sum-area{ fill:rgba(255,255,255,.06); } .sp-sum-ln{ fill:none; stroke:var(--paper); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
+  .sp-sum-dot{ position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--paper); animation:lpPulse 2.4s ease-out infinite 2s; }
+  .sp-sum-none{ height:100%; display:flex; align-items:center; font-size:12px; color:var(--muted); border-top:1px dashed var(--border); }
+  .sp-sum-cap{ display:flex; justify-content:space-between; gap:8px; font-size:11px; color:var(--muted); margin-top:4px; }
+  .sp-sum-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
+  .sp-sum-c{ display:flex; flex-direction:column; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:10px 12px; } .sp-sum-c span{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); } .sp-sum-c b{ font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin-top:2px; } .sp-sum-c small{ font-size:12px; font-weight:600; color:var(--muted); }
+  .sp-det-body .sp-sum-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } .sp-det-body .sp-sum-c{ background:none; border:0; border-top:1px solid var(--border); border-radius:0; padding:8px 0 0; } .sp-det-body .sp-sum-c b{ font-size:16px; }
+  @media (max-width:900px){ .sp-sum.kal-card{ grid-template-columns:auto minmax(0,1fr); gap:16px 18px; } .sp-sum .sp-sum-grid{ grid-column:1 / -1; grid-template-columns:repeat(3,minmax(0,1fr)); } .sp-sum-ring{ width:104px; height:104px; } .sp-sum-in b{ font-size:28px; } }
+  @media (max-width:560px){ .sp-sum.kal-card{ padding:16px; gap:14px; } .sp-sum-net b{ font-size:26px; } .sp-sum .sp-sum-c b{ font-size:15px; } .sp-sum .sp-sum-c small{ display:block; } .sp-sum-cap span:nth-child(2){ display:none; } }
   .sp-det-body{ display:flex; flex-direction:column; gap:12px; margin-top:12px; min-width:0; }
   .sp-plot{ min-width:0; } .sp-plot svg{ width:100%; height:64px; display:block; overflow:visible; }
-  .sp-rt-h{ margin-bottom:-6px; } .sp-rt, .sp-act{ list-style:none; margin:0; padding:0; }
+  .sp-rt-h{ margin-bottom:-6px; } .sp-rt{ list-style:none; margin:0; padding:0; }
   .sp-rt li{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 10px; padding:7px 0; border-top:1px solid var(--border); font-size:12px; min-width:0; } .sp-rt li:first-child{ border-top:0; }
   .sp-rt-t{ grid-column:1 / -1; font-size:11px; color:var(--muted); } .sp-rt-m{ min-width:0; overflow-wrap:anywhere; } .sp-rt b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .sp-act li{ padding:9px 0; border-top:1px solid var(--border); min-width:0; } .sp-act li:first-child{ border-top:0; padding-top:0; } .sp-act-t{ font-size:13px; font-weight:700; overflow-wrap:anywhere; } .sp-act li.sp-act-critical .sp-act-t::before{ content:'! '; }
   /* The stage board: the loop. A 2 by 2 loop on a phone (Shadow, then Probation across the top; Off / Retired, then Live below, so the return arrow goes up the left), one row of four on a wider screen with the return arrow underneath. The grid drifts slowly behind it; the dots flow along the arrows; both stop under reduced motion. */
   .lp{ position:relative; margin:6px 0 14px; padding:10px 12px 12px; border:1px solid var(--border); border-radius:16px; background:var(--panel); }
   .lp::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px); background-size:26px 26px; -webkit-mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); animation:lpGrid 26s linear infinite; }
@@ -1008,7 +1020,10 @@
   .lp-ret{ position:relative; height:20px; margin:4px 40px 0; border:1px solid var(--border); border-top:0; border-radius:0 0 12px 12px; display:flex; align-items:flex-end; justify-content:center; } .lp-ret .lp-lab{ background:var(--panel); padding:0 8px; transform:translateY(7px); }
   .lp-ret::before{ content:''; position:absolute; left:-6px; top:-1px; border:5px solid transparent; border-bottom:7px solid var(--muted); border-top:0; }
   .lp-ret u{ position:absolute; bottom:-4px; left:0; right:0; height:6px; background:radial-gradient(circle,var(--paper) 0 3px,transparent 3.5px) no-repeat 100% 0 / 6px 6px; animation:lpRet 5s linear infinite; } .lp-ret u:nth-child(2){ animation-delay:2.5s; }
-  .lp.is-open .lp-t{ min-height:34px; padding:3px 10px; grid-template-rows:auto; } .lp.is-open .lp-t b{ grid-row:auto; font-size:15px; } .lp.is-open .lp-t em, .lp.is-open .lp-lab{ display:none; } .lp.is-open .lp-t .chev{ grid-row:auto; } .lp.is-open .lp-c{ min-width:30px; flex:0 0 36px; } .lp.is-open .lp-ret{ height:12px; } .lp.is-open .lp-ret .lp-lab{ display:none; }
+  /* Opening a box (Nov 13, 2026, the owner chose E, "box flips"; the loop shrinking into pills was "not a fan"): the loop keeps its full size, the other boxes dim, the opened box flips once and its list flips down under the loop. */
+  .lp.is-open .lp-t:not([aria-expanded="true"]){ opacity:.55; } .lp.is-open .lp-t:not([aria-expanded="true"]):hover{ opacity:1; }
+  .lp-t.lp-flip{ animation:lpFlipX .5s cubic-bezier(.3,.6,.3,1); } .lp-p.play{ transform-origin:top center; animation:lpFlipDown .55s cubic-bezier(.2,.7,.3,1) both; }
+  @keyframes lpFlipX{ 0%{ transform:perspective(600px) rotateX(0); } 50%{ transform:perspective(600px) rotateX(90deg); } 100%{ transform:perspective(600px) rotateX(0); } } @keyframes lpFlipDown{ from{ opacity:0; transform:perspective(900px) rotateX(-70deg); } } .lp.is-open .lp-ret .lp-lab{ display:none; }
   .lp-panels{ margin-top:12px; } .lp-p{ border:1px solid var(--paper); border-radius:14px; background:rgba(10,10,10,.85); overflow:hidden; } .lp-p[hidden]{ display:none; }
   .lp-prog{ position:relative; height:3px; background:var(--border); } .lp-prog i{ display:block; height:100%; width:var(--w); background:var(--paper); transform-origin:left center; } .lp-prog i::after{ content:''; position:absolute; top:-2px; left:calc(var(--w) - 6px); width:7px; height:7px; border-radius:50%; background:var(--paper); box-shadow:0 0 8px #fff; }
   .lp-prog span{ position:absolute; right:10px; top:6px; font-size:10px; color:var(--muted); white-space:nowrap; max-width:calc(100% - 20px); overflow:hidden; text-overflow:ellipsis; }
@@ -1016,7 +1031,9 @@
   .lp-rows{ padding:2px 10px 10px; display:flex; flex-direction:column; gap:5px; }
   /* A strategy row: compact (name, stage, cash PF, one status word, a thin bar) and open in place to its detail. */
   .rw{ border:1px solid var(--border); border-radius:10px; background:var(--ink,#0b0b0b); } .rw.open{ border-color:#666; } .rw:hover{ border-color:#8a8a8a; }
-  .rw-h{ all:unset; box-sizing:border-box; display:grid; grid-template-columns:20px minmax(90px,190px) auto 56px 110px minmax(50px,1fr); gap:10px; align-items:center; width:100%; min-height:44px; padding:0 12px 0 8px; cursor:pointer; font-size:12.5px; }
+  .rw-h{ all:unset; box-sizing:border-box; display:grid; grid-template-columns:20px 44px minmax(90px,220px) auto 110px minmax(50px,1fr); gap:12px; align-items:center; width:100%; min-height:60px; padding:6px 14px 6px 8px; cursor:pointer; font-size:12.5px; }
+  .rw-ring{ position:relative; width:44px; height:44px; display:flex; align-items:center; justify-content:center; } .rw-ring svg{ position:absolute; inset:0; width:100%; height:100%; } .rw-ring .sp-ring-bg, .rw-ring .sp-ring-fg{ stroke-width:10; } .rw-ring .rw-pf{ position:relative; font-size:11.5px; }
+  .rw-k{ display:flex; flex-direction:column; gap:4px; min-width:0; } .rw-cap{ font-style:normal; font-size:10.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .rw-h:focus-visible, .mo-b:focus-visible, .lp-t:focus-visible{ outline:2px solid var(--paper); outline-offset:2px; }
   .rw-n{ font-size:13.5px; overflow-wrap:anywhere; } .rw-pf{ font-variant-numeric:tabular-nums; font-weight:700; font-size:14px; } .rw-w{ font-size:10.5px; letter-spacing:.06em; color:var(--muted); font-weight:700; }
   .rw-bar{ height:5px; } .rw.near .rw-w::before{ content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--paper); margin-right:6px; vertical-align:middle; animation:lpPulse 1.7s ease-out infinite; }
@@ -1040,13 +1057,12 @@
   @keyframes rwBar{ from{ transform:scaleX(0); } } @keyframes rwRing{ from{ stroke-dashoffset:1; } } @keyframes lpTileIn{ from{ opacity:0; transform:translateY(10px); } }
   .rw.open .sp-bar i{ transform-origin:left center; animation:rwBar 1s cubic-bezier(.2,.7,.2,1) both .15s; } .rw.open .sp-ring-fg{ animation:rwRing 1s cubic-bezier(.2,.7,.2,1) both .1s; } .rw:not(.open) .sp-ring-fg, .rw:not(.open) .sp-bar i{ animation:none; }
   .lp-p.play .rw{ animation:lpRow .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i,0) * 80ms + 160ms); } .lp-p.play .lp-prog i{ animation:lpFill 1.2s cubic-bezier(.2,.7,.2,1) both .25s; } .lp-p.play .lp-prog i::after{ animation:lpTip 1.2s cubic-bezier(.2,.7,.2,1) both .25s; }
-  @media (max-width:760px){ .rw-h{ grid-template-columns:20px minmax(0,1fr) 46px 96px; padding:6px 10px 6px 6px; } .rw-h .chev{ grid-column:1; grid-row:1; } .rw-n{ grid-column:2; grid-row:1; } .rw-h .sp-badge{ grid-column:2; grid-row:2; justify-self:start; } .rw-pf{ grid-column:3; grid-row:1; } .rw-w{ grid-column:4; grid-row:1; } .rw-bar{ grid-column:3 / 5; grid-row:2; } .rw-d, .mo-body{ grid-template-columns:1fr; } .bd-l{ grid-template-columns:52px minmax(0,1fr); } .bd-b{ grid-column:2; } }
+  @media (max-width:760px){ .rw-h{ grid-template-columns:20px 44px minmax(0,1fr) auto; gap:4px 10px; padding:8px 10px 8px 6px; } .rw-h .chev{ grid-column:1; grid-row:1 / 3; } .rw-ring{ grid-column:2; grid-row:1 / 3; } .rw-n{ grid-column:3; grid-row:1; } .rw-h .sp-badge{ grid-column:4; grid-row:1; justify-self:end; } .rw-w{ grid-column:4; grid-row:2; justify-self:end; } .rw-k{ grid-column:3; grid-row:2; } .rw-d, .mo-body{ grid-template-columns:1fr; } .bd-l{ grid-template-columns:52px minmax(0,1fr); } .bd-b{ grid-column:2; } }
   @media (max-width:700px){ .lp{ padding:10px 8px; } .lp-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; } .lp-c, .lp-ret{ display:none; }
     .lp-t{ display:block; padding:6px 10px; } .lp-t b{ display:inline; margin-right:6px; } .lp-t em{ display:block; } .lp-then{ display:block; margin-top:2px; } .lp-t .chev{ position:absolute; right:8px; top:14px; margin:0; }
     .lp-t[data-i="0"]{ order:1; } .lp-t[data-i="1"]{ order:2; } .lp-t[data-i="3"]{ order:3; } .lp-t[data-i="2"]{ order:4; }
-    .lp-t::after{ position:absolute; color:var(--muted); font-size:13px; } .lp-t[data-i="0"]::after{ content:'\25B6'; right:-21px; top:40%; } .lp-t[data-i="1"]::after{ content:'\25BC'; bottom:-17px; right:46%; } .lp-t[data-i="2"]::after{ content:'\25C0'; left:-21px; top:40%; } .lp-t[data-i="3"]::after{ content:'\25B2'; top:-17px; left:46%; }
-    .lp.is-open .lp-row{ display:flex; justify-content:center; gap:10px; } .lp.is-open .lp-t{ min-height:36px; padding:4px 12px; display:flex; align-items:center; gap:6px; } .lp.is-open .lp-t::after, .lp.is-open .lp-t .chev, .lp.is-open .lp-then{ display:none; } .lp.is-open .lp-t .lp-tt{ display:none; } .lp.is-open .lp-t[aria-expanded="true"] .lp-tt{ display:inline; } .lp.is-open .lp-t b{ margin:0; } .lp.is-open .lp-t.latest .lp-tag{ display:none; } }
-  @media (min-width:700px){ .sp-sum.kal-card{ flex-direction:row; align-items:center; gap:28px; } .sp-sum .sp-sum-grid{ grid-template-columns:repeat(5,minmax(0,1fr)); flex:1; } .sp-sum-grid2{ grid-template-columns:repeat(3,minmax(0,1fr)); } .sp-sum-pf b{ font-size:60px; } }
+    .lp-t::after{ position:absolute; color:var(--muted); font-size:13px; } .lp-t[data-i="0"]::after{ content:'\25B6'; right:-21px; top:40%; } .lp-t[data-i="1"]::after{ content:'\25BC'; bottom:-17px; right:46%; } .lp-t[data-i="2"]::after{ content:'\25C0'; left:-21px; top:40%; } .lp-t[data-i="3"]::after{ content:'\25B2'; top:-17px; left:46%; } }
+  @media (min-width:700px){ .sp-det-body .sp-sum-grid2{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
   @media (max-width:420px){ .sp-ringw{ --rd:72px; } }
   /* Strategies page animation (Nov 10, 2026, the owner: animated visuals). One shot, only while #page-strategies carries sp-play (JS adds it for about 1.9 s when the page is shown, never under reduced motion): the gauges and lines draw by stroke-dashoffset, the bars and chips move by transform and opacity. No layout property is animated. */
   @keyframes spBar{ from{ transform:scaleX(0); } to{ transform:none; } }
@@ -1054,6 +1070,8 @@
   #page-strategies.sp-play .sp-ring-fg{ animation: spRing 900ms cubic-bezier(.2,.7,.3,1) 150ms backwards; }
   #page-strategies.sp-play .sp-spk{ stroke-dasharray:1; animation: lineDraw 900ms ease-out 250ms backwards; }
   @keyframes spRing{ from{ stroke-dashoffset:1; } }
+  #page-strategies.sp-play .sp-sum-ln, #page-strategies.sp-play .sp-sum-area{ animation: spSumIn 1300ms ease-out 300ms backwards; } @keyframes spSumIn{ from{ clip-path:inset(0 100% 0 0); } to{ clip-path:inset(0 0 0 0); } }
+  #page-strategies.sp-play .sp-sum-c{ animation: lpTileIn 500ms cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 90ms + 200ms); }
   #page-strategies.sp-play .sp-bar i{ transform-origin:left center; animation: spBar 800ms cubic-bezier(.2,.7,.3,1) 150ms backwards; }
   .kal-console [data-card="positions"]{ align-self:start; }
   .kal-console [data-card="trades"]{ align-self:start; }
@@ -1116,6 +1134,7 @@
     #page-strategies.sp-play .sp-ring-fg{ animation: none; }
     #page-strategies.sp-play .sp-spk, #page-strategies.sp-play .sp-bar i{ animation: none; stroke-dasharray:none; }
     #page-strategies.sp-play .lp-t{ animation: none; }
+    #page-strategies .lp-t.lp-flip, #page-strategies .lp-p.play, #page-strategies .sp-sum-dot, #page-strategies.sp-play .sp-sum-ln, #page-strategies.sp-play .sp-sum-area, #page-strategies.sp-play .sp-sum-c{ animation: none; }
     #page-strategies .lp::before, #page-strategies .lp-ln u, #page-strategies .lp-ret u, #page-strategies .lp-p.play .rw, #page-strategies .lp-p.play .lp-prog i, #page-strategies .lp-p.play .lp-prog i::after, #page-strategies .rw.near .rw-w::before, #page-strategies .rw.open .sp-bar i, #page-strategies .rw.open .sp-ring-fg{ animation: none; }
     #page-strategies .lp-ln u, #page-strategies .lp-ret u{ opacity:0; }
     #page-strategies .sx, #page-strategies .chev, #page-strategies .lp-t{ transition: none; }
@@ -1162,6 +1181,7 @@
   [data-reduce-motion="true"] .tape-track{ animation: none; }
   [data-reduce-motion="true"] #page-strategies.sp-play .sp-ring-fg{ animation: none; }
   [data-reduce-motion="true"] #page-strategies.sp-play .lp-t{ animation: none; }
+  [data-reduce-motion="true"] #page-strategies .lp-t.lp-flip, [data-reduce-motion="true"] #page-strategies .lp-p.play, [data-reduce-motion="true"] #page-strategies .sp-sum-dot, [data-reduce-motion="true"] #page-strategies.sp-play .sp-sum-ln, [data-reduce-motion="true"] #page-strategies.sp-play .sp-sum-area, [data-reduce-motion="true"] #page-strategies.sp-play .sp-sum-c{ animation: none; }
   [data-reduce-motion="true"] #page-strategies .lp::before, [data-reduce-motion="true"] #page-strategies .lp-ln u, [data-reduce-motion="true"] #page-strategies .lp-ret u, [data-reduce-motion="true"] #page-strategies .lp-p.play .rw, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i::after, [data-reduce-motion="true"] #page-strategies .rw.near .rw-w::before, [data-reduce-motion="true"] #page-strategies .rw.open .sp-bar i, [data-reduce-motion="true"] #page-strategies .rw.open .sp-ring-fg{ animation: none; }
   [data-reduce-motion="true"] #page-strategies .lp-ln u, [data-reduce-motion="true"] #page-strategies .lp-ret u{ opacity:0; }
   [data-reduce-motion="true"] #page-strategies .sx, [data-reduce-motion="true"] #page-strategies .chev, [data-reduce-motion="true"] #page-strategies .lp-t{ transition: none; }
@@ -1805,6 +1825,7 @@
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
                   <li>Strategy list kept in step with research (Nov 13): the Shadow lane now lists every wheel place the Head of R&amp;D has admitted, with whether it is counting yet, and the Retired list gains the rules closed on Nov 12 and 13 (the esports break rule, rematch, period ties, weather after the day ends, perp against binary, the stock test and others), each with its cause. A scheduled job refreshes these rows into a pull request for the owner to merge. No figures, no bot change.</li>
+                  <li>Strategies page, new top bar and a calmer open state: the All strategies bar is a profit factor ring beside net cash and a 30 day cash curve, with Today, Last 7 days and Open now as chips; opening a stage box no longer shrinks the loop into pills (the other boxes dim, the opened box flips and its list flips down, each row with a small ring and its closest kill); Recent activity is removed (the bell and the trade log carry it). Page only.</li>
                 </ul>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
@@ -4450,7 +4471,9 @@ kalshiStatusTick();
     var w30 = kalshiBoardPf(rows.filter(function(r){ return r.ts >= now - 30 * KAL_BOARD_DAY; }));
     var day = kalshiBoardPf(rows.filter(function(r){ return dayOf(r.ts) === today; })), d7 = kalshiBoardPf(rows.filter(function(r){ return r.ts >= now - 7 * KAL_BOARD_DAY; }));
     var cost = Number(openCost);
-    return { w30: w30, net: kalshiBoardPf(rows).net, today: day.net, d7: d7.net, atRisk: isFinite(cost) && cost > 0 ? kalshiStratR(cost) : 0, open: kalshiStratOpenCount(orders) };
+    // The 30 day cash curve (Nov 13, 2026, the owner chose the dial and curve): the running cash result of the last 30 days' settled trades, oldest first, starting at zero.
+    var r30 = rows.filter(function(r){ return r.ts >= now - 30 * KAL_BOARD_DAY; }), run = 0, curve = [0].concat(r30.map(function(r){ run += r.p; return kalshiStratR(run); }));
+    return { w30: w30, net: kalshiBoardPf(rows).net, today: day.net, d7: d7.net, atRisk: isFinite(cost) && cost > 0 ? kalshiStratR(cost) : 0, open: kalshiStratOpenCount(orders), curve: curve, curveFrom: r30.length ? r30[0].ts : null };
   }
   // Everything the detail panel of one live strategy shows, from its orders: the cumulative cash line, win rate, average win and loss, fees (the stored fee a contract times the contracts filled, where it is stored), best and worst day and the last n settled trades.
   function kalshiStratDetail(orders, nameOf, dayOf, nRecent){
@@ -4492,17 +4515,21 @@ kalshiStatusTick();
     var Y = function(x){ return Math.round((pad + (1 - (x - lo) / (hi - lo)) * (h - 2 * pad)) * 100) / 100; };
     return { d: v.map(function(x, i){ return (i === 0 ? 'M' : 'L') + X(i) + ' ' + Y(x); }).join(' '), zeroY: Y(0), lastX: X(v.length - 1), lastY: Y(v[v.length - 1]), n: v.length };
   }
-  // Recent activity from the Bot page's notification items: the critical and warning ones and the session starts and stops, newest first.
-  function kalshiStratActivity(items, limit){
-    return (items || []).filter(function(x){ return x && (x.level === 'critical' || x.level === 'warning' || x.title === 'Session started' || x.title === 'Bot stopped by you'); }).slice(0, limit);
-  }
   var kalshiStratOpen = {};   // which Details are open, kept across the page's redraws
+  // The "All strategies" bar (Nov 13, 2026, the owner: "the top (all strategies) needs an updated visual", option A, dial and curve): the blended 30 day cash PF in a ring (0 to 2, a tick at 1.0, the figure counts up), net cash since the start over the 30 day cash curve (dashed zero line, a dot on today), and three chips: today, the last 7 days and what is open now with its worst case. Every dollar goes through money(), so Privacy view masks it.
   function kalshiStratSummaryHtml(s, esc, money){
     var sg = function(x){ return (x > 0 ? '+' : '') + money(x); };
-    var cell = function(label, val){ return '<div class="sp-sum-c"><span>' + esc(label) + '</span><b>' + esc(val) + '</b></div>'; };
-    var pf = kalshiBoardPfText(s.w30);
-    return '<div class="kal-card sp-sum"><div class="sp-sum-pf"><b' + kalshiStratPfAttr(pf, esc) + '>' + esc(pf) + '</b><span>All strategies, cash PF over 30 days, n ' + s.w30.n + '</span></div><div class="sp-sum-grid">' +
-      cell('Net cash', sg(s.net)) + cell('Today', sg(s.today)) + cell('Last 7 days', sg(s.d7)) + cell('At risk now', money(s.atRisk)) + cell('Open positions', String(s.open)) + '</div></div>';
+    var ci = 0, chip = function(label, val, small){ return '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>' + esc(label) + '</span><b>' + esc(val) + (small ? ' <small>' + esc(small) + '</small>' : '') + '</b></div>'; };
+    var pf = kalshiBoardPfText(s.w30), r = kalshiStratRing(pf), tx = kalshiStratRingText(pf);
+    var ring = '<div class="sp-sum-pf"><div class="sp-sum-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="42"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="42" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '<line class="sp-ring-tick" x1="50" y1="86" x2="50" y2="97"/></svg>' +
+      '<div class="sp-sum-in">' + (tx.num ? '<b' + kalshiStratPfAttr(pf, esc) + '>' + esc(pf) + '</b>' : '<b>' + esc(tx.glyph) + '</b>') + '<span>' + esc(tx.num ? 'cash PF' : tx.cap) + '</span></div></div></div>';
+    var line = kalshiStratCumLine(s.curve || [], 300, 70), from = s.curveFrom ? kalshiStratDayText(new Date(s.curveFrom).toISOString().slice(0, 10)) : '';
+    var chart = line ? '<svg class="sp-sum-curve" viewBox="0 0 300 70" preserveAspectRatio="none" role="img" aria-label="' + esc('30 day cash result over ' + (line.n - 1) + ' trades') + '"><line x1="0" x2="300" y1="' + line.zeroY + '" y2="' + line.zeroY + '" class="sp-sum-zero"/><path class="sp-sum-area" d="' + line.d + ' L' + line.lastX + ' 70 L0 70Z"/><path class="sp-sum-ln" d="' + line.d + '"/></svg><i class="sp-sum-dot" style="left:' + (line.lastX / 3).toFixed(2) + '%;top:' + (line.lastY / 0.7).toFixed(2) + '%"></i>' :
+      '<div class="sp-sum-none">No settled trades in the last 30 days.</div>';
+    return '<div class="kal-card sp-sum">' + ring +
+      '<div class="sp-sum-mid"><div class="sp-sum-k">All strategies &middot; 30 days &middot; n ' + s.w30.n + '</div><div class="sp-sum-net"><b>' + esc(sg(s.net)) + '</b><span>net cash since the start</span></div>' +
+      '<div class="sp-sum-plot">' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || '30 days ago') + '</span><span>30 day cash result, dashed line is zero</span><span>Today</span></div></div>' +
+      '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + chip('Open now', String(s.open), '· ' + money(s.atRisk) + ' at risk') + '</div></div>';
   }
   var kalshiStratDayText = function(k){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(k)); return m ? new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))) : ''; };
   function kalshiStratDetailHtml(d, esc, money, timeText){
@@ -4709,9 +4736,14 @@ kalshiStatusTick();
       var o = Boolean(openSet['more:' + id]);
       return '<div class="rw-more' + (o ? ' open' : '') + '"><button type="button" class="mo-b" data-f="m:' + esc(id) + '" data-more="' + esc(id) + '" aria-expanded="' + o + '"><i class="chev"></i><span>More</span></button><div class="sx"><div class="sx-in"><div class="mo-body">' + inner + '</div></div></div></div>';
     };
+    // A small ring in each row (Nov 13, 2026, the owner chose E, "box flips"): the cash PF inside, the arc on the same 0 to 2 scale as the big ring.
+    var miniRing = function(pf){
+      var r = kalshiStratRing(pf);
+      return '<span class="rw-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="40"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '</svg><span class="rw-pf">' + esc(pf) + '</span></span>';
+    };
     var rowHtml = function(o, boxKey, i){
       var open = Boolean(openSet['row:' + o.key]), did = 'rwd-' + boxKey + '-' + i;
-      return '<div class="rw' + (open ? ' open' : '') + (o.near ? ' near' : '') + '" style="--i:' + i + '" data-fk="row:' + esc(o.key) + '"><button type="button" class="rw-h" data-f="r:' + esc(o.key) + '" data-row="' + esc(o.key) + '" aria-expanded="' + open + '" aria-controls="' + did + '"><i class="chev"></i><b class="rw-n">' + esc(o.name) + '</b><span class="sp-badge sp-b-' + esc(o.stCls) + '">' + esc(o.stage) + '</span><span class="rw-pf">' + esc(o.pf) + '</span><span class="rw-w">' + esc(o.word) + '</span><span class="sp-bar rw-bar" aria-hidden="true"><i style="width:' + pct(o.frac).toFixed(1) + '%"></i></span></button><div class="sx" id="' + did + '"><div class="sx-in"><div class="rw-d">' + o.detail + '</div>' + o.more + '</div></div></div>';
+      return '<div class="rw' + (open ? ' open' : '') + (o.near ? ' near' : '') + '" style="--i:' + i + '" data-fk="row:' + esc(o.key) + '"><button type="button" class="rw-h" data-f="r:' + esc(o.key) + '" data-row="' + esc(o.key) + '" aria-expanded="' + open + '" aria-controls="' + did + '"><i class="chev"></i>' + miniRing(o.pf) + '<b class="rw-n">' + esc(o.name) + '</b><span class="sp-badge sp-b-' + esc(o.stCls) + '">' + esc(o.stage) + '</span><span class="rw-w">' + esc(o.word) + '</span><span class="rw-k"><span class="sp-bar rw-bar" aria-hidden="true"><i style="width:' + pct(o.frac).toFixed(1) + '%"></i></span>' + (o.cap ? '<em class="rw-cap">' + esc(o.cap) + '</em>' : '') + '</span></button><div class="sx" id="' + did + '"><div class="sx-in"><div class="rw-d">' + o.detail + '</div>' + o.more + '</div></div></div>';
     };
     var ladderDl = function(label, text, extra){ return '<dl><dt>' + esc(label) + '</dt><dd>' + esc(text) + '</dd>' + (extra || '') + '</dl>'; };
     var rulesHtml = function(rules){
@@ -4740,7 +4772,7 @@ kalshiStatusTick();
       var rd = reg && reg.nextReadText ? reg.nextReadText : 'Not written yet', shadowTwin = shadowRep[s.id];
       var mo = more(s.id, '<div class="mo-sp"><span class="bd-lab">Recent results</span>' + sparkHtml(s.spark || [], 'Rolling 30 trade cash PF') + '</div>' +
         ladderDl('Sizing', KAL_BOARD_LADDER[s.id] || KAL_BOARD_LADDER.shadow, '<dt>Thresholds</dt><dd>' + esc(killWords) + '</dd><dt>Record</dt><dd>' + esc('Live record: ' + s.w.d30.n + ' settled trades in 30 days, ' + s.w.all.n + ' in all. Shadow record: ' + (shadowTwin ? 'cash PF ' + (shadowTwin.fillable === 0 ? 'n/a' : shadowTwin.pfFillable === null ? 'n/a' : shadowTwin.pfFillable.toFixed(2)) + ' over ' + shadowTwin.fillable + ' signals' : 'n/a')) + '</dd><dt>Read date</dt><dd>' + esc(rd) + '</dd>') + rulesHtml(s.rules) + (s.detail ? kalshiStratDetailHtml(s.detail, esc, money, tt) : ''));
-      box[bk].push({ key: s.id, name: s.name, stage: bk === 'off' ? 'Off' : bk === 'prob' ? 'Probation' : 'Live', stCls: bk === 'off' ? 'off' : bk === 'prob' ? 'prob' : 'live', pf: pf, word: word, frac: frac, detail: detail, more: mo, g: g });
+      box[bk].push({ key: s.id, name: s.name, stage: bk === 'off' ? 'Off' : bk === 'prob' ? 'Probation' : 'Live', stCls: bk === 'off' ? 'off' : bk === 'prob' ? 'prob' : 'live', pf: pf, word: word, frac: frac, cap: bk === 'off' ? (ret ? 'return: ' + ret.trades + ' of 60 trades' : '') : (g && !unreadable && !loading ? g.big + ' · ' + g.cap : unreadable ? 'kill state not readable' : ''), detail: detail, more: mo, g: g });
     });
     function n30(s){ return s.w.d30.n > 0; }
     // ---- Shadow rows: the rules the bot logs without money ----
@@ -4758,7 +4790,7 @@ kalshiStatusTick();
         var det = '<div class="rw-c1"><div class="rw-hd">' + ringHtml(pfText, esc) + '<div class="rw-hm"><b>' + esc(r.id) + '</b><span>cash PF, n ' + p.fillable + '</span></div></div>' + oneRule('Rule', r.rule + '. Shadow only, no money') +
           '<div class="bd-res"><span>Day <b>' + Math.min(14, Math.floor(p.days)) + ' of 14</b></span><span>Signals <b>' + p.signals + '</b></span><span class="bd-last">' + esc(p.status.split(':')[0]) + '</span></div></div>' +
           '<div class="rw-c2">' + oneRule('Kill', KAL_BOARD_SHADOW_RULES[1]) + line('Promote', KAL_BOARD_SHADOW_RULES[0], p.fillable + ' of 150 signals · PF ' + pfText + ' of 1.30', fr, 'ret') + '</div>';
-        box.shadow.push({ key: 'S:' + r.id, name: r.id, stage: 'Shadow', stCls: 'deck', pf: pfText, word: bd.text, frac: fr, detail: det,
+        box.shadow.push({ key: 'S:' + r.id, name: r.id, stage: 'Shadow', stCls: 'deck', pf: pfText, word: bd.text, frac: fr, cap: p.fillable + ' of 150 signals', detail: det,
           more: more('S:' + r.id, '<div class="mo-sp"><span class="bd-lab">Cumulative cash PF by signal</span>' + sparkHtml(r.spark || [], 'Cumulative cash PF by signal') + '</div>' + ladderDl('Sizing', KAL_BOARD_LADDER.shadow, '<dt>Thresholds</dt><dd>' + esc(KAL_BOARD_SHADOW_RULES.join(' ')) + '</dd><dt>Record</dt><dd>' + esc('Shadow record: ' + p.fillable + ' of 150 signals. Live record: none.') + '</dd><dt>Read date</dt><dd>' + esc(p.etaMs ? 'Earliest next stage ' + kalshiBoardDate(p.etaMs) : 'Not set until 10 signals') + '</dd>') + rulesHtml(KAL_BOARD_SHADOW_RULES) + (r.detail ? kalshiStratShadowDetailHtml(r.detail, esc) : '')) });
       });
     }
@@ -4820,10 +4852,7 @@ kalshiStatusTick();
     }).join('');
     var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[3].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
-    var act = !model.activity ? '' : model.activity.state === 'loading' ? '<div class="sp-sub">Reading the bot\'s events...</div>' : model.activity.items.length ? '<ul class="sp-act">' + model.activity.items.map(function(x){
-      return '<li class="sp-act-' + esc(x.level) + '"><div class="sp-act-t">' + esc(x.title) + '</div>' + (x.body ? '<div class="sp-sub">' + esc(x.body) + '</div>' : '') + '<div class="sp-sub">' + esc(tt(x.ts)) + '</div></li>'; }).join('') + '</ul>' : '<div class="sp-sub">No kills or promotions recorded.</div>';
-    var tail = !model.activity ? '' : '<div class="sp-h">Recent activity <span>warnings, stops and session starts, last 7 days</span></div><div class="kal-card">' + act + '</div>';
-    return '<div class="sp-wrap">' + summary + pipe + tail + '</div>';
+    return '<div class="sp-wrap">' + summary + pipe + '</div>';
   }
   // One GET of the committed list per page load (it is a static file next to index.html, so it costs no Firestore read); a failure is kept as the answer, never retried in a loop.
   var kalshiRegistryLoading = false;
@@ -4945,10 +4974,8 @@ kalshiStatusTick();
     var rep = rows ? kalshiBoardShadow(KAL_BOARD_SHADOW, rows, now) : [];
     var deck = { state: state, rows: KAL_BOARD_SHADOW.map(function(r, i){ return { id: r.id, rule: r.rule, rep: rep[i], spark: rows ? kalshiStratCumulative(kalshiStratShadowSeries(rows, r.id)) : [], detail: rows ? kalshiStratShadowDetail(rows, r.id, kalDayKey) : null }; }) };
     var st = document.getElementById('stratStatus'); if(st){ st.textContent = kalshiOrdersLoaded ? '' : 'Reading the bot\'s orders...'; }
-    // The summary reads the Stop Loss meter's open cost (the same worst case figure), the activity reads the Bot page's notification items (no new read).
+    // The summary reads the Stop Loss meter's open cost (the same worst case figure). Recent activity was removed on Nov 13, 2026 (the owner: the notifications and trade log already carry it).
     var summary = kalshiStratSummary(all, now, kalshiRiskMeter(all, kalshiLiveCtl && kalshiLiveCtl.session, now).openCost, kalDayKey);
-    var resolved = kalshiResolveOrders(all, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    var activity = { state: kalshiOrdersLoaded ? 'ok' : 'loading', items: kalshiOrdersLoaded ? kalshiStratActivity(kalshiNotifFeed(kalshiLiveEvents, resolved, now, kalshiMoney), 8) : [] };
     kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser) }; } });
     var regRetired = kalshiRegistry.list.filter(function(x){ return x.stage === 'Retired'; });
     kalshiStratSheets = {}; kalshiRetiredEntries(KAL_BOARD_RETIRED.rows, regRetired).forEach(function(e){ kalshiStratSheets[e.id] = e.sheet; kalshiRegData[e.id] = { live: true }; });
@@ -4956,7 +4983,7 @@ kalshiStatusTick();
     var regSplit = kalshiRegistrySplit(kalshiRegistry.list, KAL_BOARD_SHADOW.map(function(r){ return r.id; }).concat(KAL_BOARD_LIVE.map(function(r){ return r.id; })), KAL_BOARD_RETIRED.rows.map(function(r){ return r.name; }));
     // A redraw keeps keyboard focus on the same control (the markup is replaced as a whole), found by its data-f key.
     var focusKey = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute('data-f') : null;
-    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, activity: activity, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData }, escapeHtml, kalshiMoney);
+    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData }, escapeHtml, kalshiMoney);
     if(focusKey){ var fs = el.querySelectorAll('[data-f]'); for(var fi = 0; fi < fs.length; fi++){ if(fs[fi].getAttribute('data-f') === focusKey){ fs[fi].focus(); break; } } }
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
     kalshiStratAnimStop(page);
@@ -4990,7 +5017,9 @@ kalshiStatusTick();
     kalshiStratOpen.stage = kalshiStratOpen.stage === key ? null : key;
     renderStrategiesPage();
     var now = body.querySelectorAll('[data-fk^="tile:"]'), panel = kalshiStratOpen.stage ? document.getElementById('lp-p-' + kalshiStratOpen.stage) : null;
-    if(panel && !motionReduced()){ panel.classList.add('play'); setTimeout(function(){ panel.classList.remove('play'); }, 1600); }
+    // The opened box flips once and its list flips down (the panel's play class); one timeout ends both.
+    var opened = kalshiStratOpen.stage ? body.querySelector('[data-fk="tile:' + kalshiStratOpen.stage + '"]') : null;
+    if(panel && !motionReduced()){ panel.classList.add('play'); if(opened){ opened.classList.add('lp-flip'); } setTimeout(function(){ panel.classList.remove('play'); if(opened){ opened.classList.remove('lp-flip'); } }, 1600); }
     if(motionReduced()){ return; }
     for(i = 0; i < now.length; i++){
       var t = now[i], f = first[t.getAttribute('data-fk')], l = t.getBoundingClientRect();
@@ -4999,7 +5028,6 @@ kalshiStatusTick();
       if(Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(sx - 1) < 0.02 && Math.abs(sy - 1) < 0.02){ continue; }
       t.animate([{ transformOrigin: '0 0', transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' }, { transformOrigin: '0 0', transform: 'none' }], { duration: 620, easing: 'cubic-bezier(.34,1.4,.5,1)' });
     }
-    if(panel && typeof panel.animate === 'function'){ panel.animate([{ opacity: 0, transform: 'translateY(-14px) scale(.94,.8)' }, { opacity: 1, transform: 'none' }], { duration: 620, easing: 'cubic-bezier(.34,1.35,.5,1)' }); }
   }
   (function(){
     var body = document.getElementById('stratBody');
