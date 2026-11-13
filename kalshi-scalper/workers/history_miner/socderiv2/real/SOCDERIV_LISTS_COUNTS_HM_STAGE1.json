@@ -1,0 +1,261 @@
+{
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+ "leagues": {
+  "APFDDH": {
+   "btts_more_than_one": 0,
+   "games_in_window": 53,
+   "group": "B_small",
+   "kickoff_derivable": 47,
+   "kickoff_not_derivable": 6,
+   "no_btts_leg": 1,
+   "sampled": 53,
+   "series_with_no_market": [
+    "TEAMTOTAL"
+   ],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "BRASILEIRO": {
+   "btts_more_than_one": 0,
+   "games_in_window": 83,
+   "group": "A_big",
+   "kickoff_derivable": 55,
+   "kickoff_not_derivable": 5,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 429,
+   "teamtotal_unreadable": 4,
+   "winner_legs_incomplete": 0
+  },
+  "BUNDESLIGA": {
+   "btts_more_than_one": 0,
+   "games_in_window": 62,
+   "group": "A_big",
+   "kickoff_derivable": 56,
+   "kickoff_not_derivable": 4,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 463,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "COPADELREY": {
+   "btts_more_than_one": 0,
+   "games_in_window": 90,
+   "group": "B_small",
+   "kickoff_derivable": 20,
+   "kickoff_not_derivable": 40,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "EERSTEDIV": {
+   "btts_more_than_one": 0,
+   "games_in_window": 80,
+   "group": "B_small",
+   "kickoff_derivable": 56,
+   "kickoff_not_derivable": 4,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [
+    "TEAMTOTAL"
+   ],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "EFLTROPHY": {
+   "btts_more_than_one": 0,
+   "games_in_window": 30,
+   "group": "B_small",
+   "kickoff_derivable": 16,
+   "kickoff_not_derivable": 14,
+   "no_btts_leg": 0,
+   "sampled": 30,
+   "series_with_no_market": [
+    "TEAMTOTAL"
+   ],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "EPL": {
+   "btts_more_than_one": 0,
+   "games_in_window": 70,
+   "group": "A_big",
+   "kickoff_derivable": 55,
+   "kickoff_not_derivable": 5,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 414,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LALIGA": {
+   "btts_more_than_one": 0,
+   "games_in_window": 79,
+   "group": "A_big",
+   "kickoff_derivable": 59,
+   "kickoff_not_derivable": 1,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 465,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LIGAMX": {
+   "btts_more_than_one": 0,
+   "games_in_window": 83,
+   "group": "A_big",
+   "kickoff_derivable": 47,
+   "kickoff_not_derivable": 13,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 387,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LIGAPORTUGAL": {
+   "btts_more_than_one": 0,
+   "games_in_window": 55,
+   "group": "B_small",
+   "kickoff_derivable": 47,
+   "kickoff_not_derivable": 8,
+   "no_btts_leg": 0,
+   "sampled": 55,
+   "series_with_no_market": [
+    "TEAMTOTAL"
+   ],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LIGUE1": {
+   "btts_more_than_one": 0,
+   "games_in_window": 62,
+   "group": "A_big",
+   "kickoff_derivable": 49,
+   "kickoff_not_derivable": 11,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 391,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LVAVIR": {
+   "btts_more_than_one": 0,
+   "games_in_window": 35,
+   "group": "B_small",
+   "kickoff_derivable": 33,
+   "kickoff_not_derivable": 2,
+   "no_btts_leg": 0,
+   "sampled": 35,
+   "series_with_no_market": [
+    "TEAMTOTAL"
+   ],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "MLS": {
+   "btts_more_than_one": 0,
+   "games_in_window": 153,
+   "group": "A_big",
+   "kickoff_derivable": 40,
+   "kickoff_not_derivable": 20,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 334,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "SERIEA": {
+   "btts_more_than_one": 0,
+   "games_in_window": 79,
+   "group": "A_big",
+   "kickoff_derivable": 60,
+   "kickoff_not_derivable": 0,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [],
+   "teamtotal_markets": 493,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "SERIEC": {
+   "btts_more_than_one": 0,
+   "games_in_window": 296,
+   "group": "B_small",
+   "kickoff_derivable": 50,
+   "kickoff_not_derivable": 10,
+   "no_btts_leg": 0,
+   "sampled": 60,
+   "series_with_no_market": [
+    "TEAMTOTAL"
+   ],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "UCLW": {
+   "btts_more_than_one": 0,
+   "games_in_window": 36,
+   "group": "B_small",
+   "kickoff_derivable": 33,
+   "kickoff_not_derivable": 3,
+   "no_btts_leg": 0,
+   "sampled": 36,
+   "series_with_no_market": [
+    "TEAMTOTAL"
+   ],
+   "teamtotal_markets": 0,
+   "teamtotal_unreadable": 0,
+   "winner_legs_incomplete": 0
+  }
+ },
+ "leagues_with_any_series_missing": [
+  "APFDDH",
+  "EERSTEDIV",
+  "EFLTROPHY",
+  "LIGAPORTUGAL",
+  "LVAVIR",
+  "SERIEC",
+  "UCLW"
+ ],
+ "leagues_with_no_game_series": [],
+ "no_such_series": [
+  "KXAPFDDHTEAMTOTAL",
+  "KXEERSTEDIVTEAMTOTAL",
+  "KXEFLTROPHYTEAMTOTAL",
+  "KXLIGAPORTUGALTEAMTOTAL",
+  "KXLVAVIRTEAMTOTAL",
+  "KXSERIECTEAMTOTAL",
+  "KXUCLWTEAMTOTAL"
+ ],
+ "notes": [
+  "no_btts_leg and team totals are counted over sampled games whose kickoff is derivable (the targets of a game that is dropped are not looked at)",
+  "a league with all four series empty is 'no such series' for each; series_with_no_market lists them per league"
+ ],
+ "totals": {
+  "btts_more_than_one": 0,
+  "games_in_window": 1346,
+  "kickoff_derivable": 723,
+  "kickoff_not_derivable": 146,
+  "no_btts_leg": 1,
+  "sampled": 869,
+  "teamtotal_markets": 3376,
+  "teamtotal_unreadable": 4,
+  "winner_legs_incomplete": 0
+ }
+}
