@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """SPXSCALP scorer, BUILD 2 (Testing Desk, Nov 13, 2026). Research only: reads files it is given, sends nothing, places nothing, writes NO file.
-Built FROM THE CARD ALONE: Desk B's SPXSCALP_CARD_DRAFT_NOV13.md at 67bb024d (sha256 a30f8133) with Amendment 1; blind to Desk B's build 1, expected figures and fixture. Hand case: SPXSCALP_SECOND_HAND_CASE.md (committed first).
+Built FROM THE CARD ALONE: Desk B's SPXSCALP_CARD_DRAFT_NOV13.md, now at 40dfadd4 (Amendments 1 to 4); first built from 67bb024d (a30f8133) with Amendment 1; blind to Desk B's build 1, expected figures and fixture. Hand case: SPXSCALP_SECOND_HAND_CASE.md (committed first).
 Test: test_spxscalp_second.py (INVENTED rows only). The ES csv is Databento-derived and licensed: nothing ES-derived is written anywhere; the path is an argument; results go by message only. NOT RUN on real data (conditions: Auditor B CLEAN on both scorers, SPXOI1_CANDLES's structure check, the Head's go).
 Rule (card + Amendment 1): windows = KXINX15M markets closing before 2026-12-01T00:00Z (later ones are not touched); O = close - 900 s; looks = the candles ending at O + 60 m, m = 1..5; at a look |ES(t) - ES(O)| >= 0.0005 x ES(O) (1e-9), up = YES, down = NO;
 candidate ask = YES ask close or 1 - YES bid close, band 0.20 to 0.25 (variant 0.20 to 0.30) inclusive on the ask seen; the first look where both hold is the one entry. Entry fill = ask + s (s = 1c and 2c). Exits: headline (2x target, else time exit at close - 300 s), variant (half at 2x, rest at bid >= 0.80, a 2-contract position), hold to settlement.
@@ -12,13 +12,16 @@ import scorekit as k
 
 TOL = 1e-9
 SERIES = "KXINX15M"
-DEV_END = calendar.timegm((2026, 12, 1, 0, 0, 0))
+DEV_END = calendar.timegm((2026, 12, 1, 0, 0, 0))          # nothing at or after this is ever touched
+CLOSE_FROM = calendar.timegm((2026, 11, 5, 0, 0, 0))          # Amendment 4 item 13: windows closing in [CLOSE_FROM, CLOSE_TO)
+CLOSE_TO = calendar.timegm((2026, 11, 13, 0, 0, 0))
 WINDOW_S, LOOKS, TIME_EXIT_BEFORE_CLOSE_S = 900, range(1, 6), 300
 THRESHOLD = 0.0005
 BAND_LO, BANDS, SLIPS = 0.20, (0.25, 0.30), (0.01, 0.02)
 TARGET_MULT, REST_PRICE = 2.0, 0.80
 MIN_ENTRIES, PF_BAR = 100, 1.3
 EXITS = ("headline", "variant", "hold")
+LABEL = {"headline": "HEADLINE", "variant": "HALF2X", "hold": "HOLD"}
 UPPER_BOUND = "upper bound, not fill-checked"
 AMBIGUITIES = [
     "The variant exit (half at 2x, the rest at 80c) is modelled as a 2-contract position: one entry order of 2 contracts (fee on 2), two exit orders of 1 contract; the card says size 1 for the read. PF is scale-free.",
@@ -225,8 +228,14 @@ def arm_report(rows_by_slip):
 SETTLED_NOTE = "Amendment 3: an exit minute with no two-sided candle moves to the next two-sided minute; if none through the close the position is held to the close and settled. Those entries carry the full win or loss at settlement, not a sale at a quote."
 
 
+def line_of(key, r):
+    f = lambda x: "n/a" if x is None else ("inf" if x == float("inf") else "%.4f" % x)
+    one, two = r["1c"], r["2c"]
+    return "%s | 1c n=%d PF=%s net=%.2f h1=%s h2=%s | 2c n=%d PF=%s net=%.2f | %s" % (key, one["n"], f(one["pf"]), one["net"], f(one["half1_pf"]), f(one["half2_pf"]), two["n"], f(two["pf"]), two["net"], r["label"])
+
+
 def run_windows(markets, cs, es, es_stats=None):
-    c = {"windows_listed": 0, "not_touched_on_or_after_2026-12-01": 0, "no_es_start_bar": 0, "look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0, "look_not_two_sided": 0}
+    c = {"windows_listed": 0, "not_touched_on_or_after_2026-12-01": 0, "outside_2026-11-05_to_2026-11-13_not_touched": 0, "no_es_start_bar": 0, "look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0, "look_not_two_sided": 0}
     spreads, n_two_sided, looks_total = [], 0, 0
     arms = {(hi, ex, s): [] for hi in BANDS for ex in EXITS for s in SLIPS}
     settled = {(hi, ex): 0 for hi in BANDS for ex in EXITS}
@@ -241,8 +250,10 @@ def run_windows(markets, cs, es, es_stats=None):
             continue
         c["windows_listed"] += 1
         close = m["close"]
-        if close is None or close >= DEV_END:
+        if close is not None and close >= DEV_END:
             c["not_touched_on_or_after_2026-12-01"] += 1; continue
+        if close is None or not (CLOSE_FROM <= close < CLOSE_TO):
+            c["outside_2026-11-05_to_2026-11-13_not_touched"] += 1; continue
         candles = cs.get(tk, [])
         found = find_entries(close, es, candles, c)
         if found is None:
@@ -286,11 +297,12 @@ def run_windows(markets, cs, es, es_stats=None):
                 r["settled_at_close_count"] = settled[(hi, ex)]; r["settled_at_close_share"] = (settled[(hi, ex)] / entered[hi]) if entered[hi] else None
                 r["settled_at_close_entry_fill_sum_1c"] = settled_fill[(hi, ex)]; r["time_exit_moved_count"] = moved[(hi, ex)]; r["settled_at_close_note"] = SETTLED_NOTE
             if ex == "hold": r["voids"] = voids[hi]
-            rep["band_%02d_%s" % (round(hi * 100), ex)] = r
+            rep["B%02d %s" % (round(hi * 100), LABEL[ex])] = r
     spreads.sort()
     nr = lambda q: (spreads[max(0, int(math.ceil(q * len(spreads))) - 1)] if spreads else None)
     c1 = {"look_candles": looks_total, "two_sided": n_two_sided, "two_sided_share": (n_two_sided / looks_total if looks_total else None), "spread_cents_median": nr(0.5), "spread_cents_p90": nr(0.9)}
-    return {"C1_candles_two_sided_and_spread": c1, "counts": c, "arms": rep, "headline_arm": "band_25_headline at 1c", "upper_bound_note": UPPER_BOUND, "es_rows": es_stats, "ambiguities": AMBIGUITIES}
+    lines = [line_of(key, r) for key, r in rep.items()]
+    return {"C1_candles_two_sided_and_spread": c1, "counts": c, "arms": rep, "lines": lines, "headline_arm": "band_25_headline at 1c", "upper_bound_note": UPPER_BOUND, "es_rows": es_stats, "ambiguities": AMBIGUITIES}
 
 
 def run(lists, candle_runs, es_path):

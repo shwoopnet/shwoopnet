@@ -32,19 +32,22 @@ mk, cs, es = assemble(X1, X2, X3, X4, X5, X6, X7, X8)
 rep = q.run_windows(mk, Poison(cs), es)
 A = rep["arms"]
 c = rep["counts"]
-assert c["windows_listed"] == 8 and c["not_touched_on_or_after_2026-12-01"] == 1 and c["no_es_start_bar"] == 1, c
-h = A["band_25_headline"]
+assert c["windows_listed"] == 8 and c["not_touched_on_or_after_2026-12-01"] == 1 and c["outside_2026-11-05_to_2026-11-13_not_touched"] == 0 and c["no_es_start_bar"] == 1, c
+assert list(A) == ["B25 HEADLINE", "B25 HALF2X", "B25 HOLD", "B30 HEADLINE", "B30 HALF2X", "B30 HOLD"]
+assert rep["lines"][0] == "B25 HEADLINE | 1c n=4 PF=6.9286 net=0.83 h1=1.3571 h2=inf | 2c n=4 PF=5.9375 net=0.79 | FALSIFIED (fewer than 100 entries, n = 4) (upper bound, not fill-checked)", rep["lines"][0]
+assert [l.split(" |")[0] for l in rep["lines"]] == list(A)
+h = A["B25 HEADLINE"]
 assert h["entries_found"] == 4 and h["windows_without_entry"] == 2, h
-assert h["settled_at_close_count"] == 1 and h["settled_at_close_share"] == 0.25 and near(h["settled_at_close_entry_fill_sum_1c"], 0.23) and h["time_exit_moved_count"] == 0 and A["band_25_hold"].get("settled_at_close_count") is None and "settlement" in h["settled_at_close_note"]
+assert h["settled_at_close_count"] == 1 and h["settled_at_close_share"] == 0.25 and near(h["settled_at_close_entry_fill_sum_1c"], 0.23) and h["time_exit_moved_count"] == 0 and A["B25 HOLD"].get("settled_at_close_count") is None and "settlement" in h["settled_at_close_note"]
 assert h["1c"]["n"] == 4 and near(h["1c"]["net"], 0.19 - 0.14 + 0.75 + 0.03) and near(h["1c"]["pf"], 0.97 / 0.14) and near(h["1c"]["pf"], 6.9285714286)
 assert h["1c"]["n_half1"] == 2 and h["1c"]["n_half2"] == 2 and near(h["1c"]["half1_pf"], 0.19 / 0.14) and h["1c"]["half2_pf"] == float("inf")
 assert near(h["2c"]["pf"], 0.95 / 0.16) and near(h["2c"]["net"], 0.20 - 0.16 + 0.74 + 0.01) and near(h["2c"]["pf"], 5.9375) and h["counts_the_bar"] is False and h["label"].startswith("FALSIFIED (fewer than 100 entries, n = 4)") and h["label"].endswith("(upper bound, not fill-checked)")
-d = A["band_25_hold"]
+d = A["B25 HOLD"]
 assert d["1c"]["n"] == 4 and near(d["1c"]["net"], 0.75 - 0.27 + 0.75 - 0.02) and near(d["1c"]["pf"], 1.5 / 0.29) and near(d["1c"]["half1_pf"], 0.75 / 0.27) and near(d["1c"]["half2_pf"], 0.75 / 0.02) and d["voids"] == 1
 assert near(d["2c"]["pf"], 1.48 / 0.30)
-v = A["band_25_variant"]
+v = A["B25 HALF2X"]
 assert v["1c"]["n"] == 4 and near(v["1c"]["pf"], 2.32 / 0.27) and near(v["1c"]["net"], 0.74 - 0.27 + 1.51 + 0.07) and near(v["1c"]["half1_pf"], 0.74 / 0.27) and v["1c"]["half2_pf"] == float("inf") and v["settled_at_close_count"] == 1
-h30 = A["band_30_headline"]
+h30 = A["B30 HEADLINE"]
 assert h30["1c"]["n"] == 4 and near(h30["1c"]["net"], 0.19 - 0.18 + 0.75 + 0.03) and near(h30["1c"]["pf"], 0.97 / 0.18) and near(h30["1c"]["pf"], 5.3888888889)
 # C1: the share of look candles with both sides and the spread distribution (nothing missing here; spreads are 2c except the 2c-candles .22/.24 and .38/.40 and .60/.62)
 c1 = rep["C1_candles_two_sided_and_spread"]; assert c1["look_candles"] == 30 and c1["two_sided"] == 30 and c1["two_sided_share"] == 1.0 and c1["spread_cents_median"] == 2.0 and c1["spread_cents_p90"] == 2.0
@@ -123,6 +126,27 @@ noev = q.arm_report({0.01: rows([0.12, -0.1] * 50), 0.02: rows([0.12, -0.1] * 50
 exact13 = q.arm_report({0.01: rows([0.13, -0.1] * 50), 0.02: rows([0.13, -0.1] * 50)}); assert exact13["counts_the_bar"] is True          # PF 1.3 counts (inside 1e-9)
 odd = q.arm_report({0.01: rows([0.3, -0.1, 0.2, 0.1, -0.05]), 0.02: rows([0.3, -0.1, 0.2, 0.1, -0.05])}); assert odd["1c"]["n_half1"] == 2 and odd["1c"]["n_half2"] == 3 and near(odd["1c"]["half1_pf"], 0.3 / 0.1) and near(odd["1c"]["half2_pf"], 0.3 / 0.05)          # floor(5 / 2) = 2 first
 empty = q.arm_report({0.01: [], 0.02: []}); assert empty["label"].startswith("FALSIFIED (fewer than 100") and empty["1c"]["pf"] is None
+# --- ADDENDUM 3: the window range of Amendment 4, [2026-11-05, 2026-11-13); outside windows are not touched ---
+T = lambda *a: calendar.timegm(a)
+class PoisonSet(dict):
+    def __init__(self, d, bad): super().__init__(d); self.bad = bad
+    def get(self, key, default=None):
+        if key in self.bad: raise AssertionError("touched an outside window " + key)
+        return super().get(key, default)
+bw = [window("KXINX15M-B1", T(2026, 11, 5, 0, 0, 0), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)}),
+      window("KXINX15M-B2", T(2026, 11, 4, 23, 59, 59), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)}),
+      window("KXINX15M-B3", T(2026, 11, 12, 23, 59, 59), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)}),
+      window("KXINX15M-B4", T(2026, 11, 13, 0, 0, 0), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)}),
+      window("KXINX15M-B5", T(2026, 11, 20, 12, 0, 0), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)}),
+      window("KXINX15M-B6", T(2026, 12, 1, 0, 0, 0), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)})]
+mkb, csb, esb = assemble(*bw)
+rb = q.run_windows(mkb, PoisonSet(csb, {"KXINX15M-B2", "KXINX15M-B4", "KXINX15M-B5", "KXINX15M-B6"}), esb)
+assert rb["counts"]["windows_listed"] == 6 and rb["counts"]["outside_2026-11-05_to_2026-11-13_not_touched"] == 3 and rb["counts"]["not_touched_on_or_after_2026-12-01"] == 1, rb["counts"]
+assert rb["arms"]["B25 HOLD"]["entries_found"] == 2 and rb["arms"]["B25 HOLD"]["1c"]["n"] == 2
+mkn = {"KXINX15M-N": {"ticker": "KXINX15M-N", "series": "KXINX15M", "close": None, "result": "yes"}}
+assert q.run_windows(mkn, {}, {})["counts"]["outside_2026-11-05_to_2026-11-13_not_touched"] == 1          # no close: listed and not touched
+# an n/a or infinite PF prints as text in the lines
+assert q.line_of("K", {"1c": {"n": 0, "pf": None, "net": 0.0, "half1_pf": None, "half2_pf": None}, "2c": {"n": 0, "pf": float("inf"), "net": 0.0}, "label": "L"}) == "K | 1c n=0 PF=n/a net=0.00 h1=n/a h2=n/a | 2c n=0 PF=inf net=0.00 | L"
 # --- ADDENDUM: F1 rule 18 at entry ---
 f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (0.0, .22), 2: (.20, .22)}); assert f[0.25][:3] == (2, "yes", 0.22) and cnt["look_not_two_sided"] == 1          # Z1
 for cm in ({1: (0.0, .30)}, {1: (.78, 1.0)}, {1: (.22, .22)}, {1: (.23, .21)}):
@@ -141,15 +165,15 @@ def zrun(cmap_extra, result="yes", late=True):
     cm.update({m: (0.0, .02) for m in om})
     return q.run_windows(*assemble(window("KXINX15M-Z", D(5), [1000, 1001] + [1001.0] * 14, cm, result)))["arms"]
 Za = zrun({})          # Z2a: m = 10 has no bid: moves to m = 11 (bid .15)
-assert near(Za["band_25_headline"]["1c"]["net"], -0.12) and near(Za["band_25_variant"]["1c"]["net"], -0.23) and near(Za["band_25_hold"]["1c"]["net"], 0.75)
-assert Za["band_25_headline"]["settled_at_close_count"] == 0 and Za["band_25_headline"]["time_exit_moved_count"] == 1 and Za["band_25_variant"]["time_exit_moved_count"] == 1 and Za["band_25_headline"]["1c"]["n"] == 1
+assert near(Za["B25 HEADLINE"]["1c"]["net"], -0.12) and near(Za["B25 HALF2X"]["1c"]["net"], -0.23) and near(Za["B25 HOLD"]["1c"]["net"], 0.75)
+assert Za["B25 HEADLINE"]["settled_at_close_count"] == 0 and Za["B25 HEADLINE"]["time_exit_moved_count"] == 1 and Za["B25 HALF2X"]["time_exit_moved_count"] == 1 and Za["B25 HEADLINE"]["1c"]["n"] == 1
 Zb = zrun({4: (.50, .52)})          # Z2b: a target hit at m = 4; the variant's second half goes at the moved time exit
-assert near(Zb["band_25_headline"]["1c"]["net"], 0.22) and near(Zb["band_25_variant"]["1c"]["net"], 0.11) and Zb["band_25_headline"]["time_exit_moved_count"] == 0 and Zb["band_25_variant"]["time_exit_moved_count"] == 1
-Zc = zrun({4: (.50, 1.0)}); assert near(Zc["band_25_headline"]["1c"]["net"], -0.12)          # a hit candle with an empty ask is not a hit
+assert near(Zb["B25 HEADLINE"]["1c"]["net"], 0.22) and near(Zb["B25 HALF2X"]["1c"]["net"], 0.11) and Zb["B25 HEADLINE"]["time_exit_moved_count"] == 0 and Zb["B25 HALF2X"]["time_exit_moved_count"] == 1
+Zc = zrun({4: (.50, 1.0)}); assert near(Zc["B25 HEADLINE"]["1c"]["net"], -0.12)          # a hit candle with an empty ask is not a hit
 for res, hn, vn in (("yes", 0.75, 1.51), ("no", -0.25, -0.49), ("void", -0.02, -0.03)):          # Z2d: nothing two-sided from m = 10 to the close: held to the close
     Zd = zrun({}, res, late=False)
-    assert near(Zd["band_25_headline"]["1c"]["net"], hn) and near(Zd["band_25_variant"]["1c"]["net"], vn), (res, Zd["band_25_headline"]["1c"]["net"], Zd["band_25_variant"]["1c"]["net"])
-    assert Zd["band_25_headline"]["settled_at_close_count"] == 1 and Zd["band_25_headline"]["time_exit_moved_count"] == 0 and Zd["band_25_variant"]["settled_at_close_count"] == 1
+    assert near(Zd["B25 HEADLINE"]["1c"]["net"], hn) and near(Zd["B25 HALF2X"]["1c"]["net"], vn), (res, Zd["B25 HEADLINE"]["1c"]["net"], Zd["B25 HALF2X"]["1c"]["net"])
+    assert Zd["B25 HEADLINE"]["settled_at_close_count"] == 1 and Zd["B25 HEADLINE"]["time_exit_moved_count"] == 0 and Zd["B25 HALF2X"]["settled_at_close_count"] == 1
 # --- C1 on two-sided candles only (Z3) ---
 Z3 = {1: (0.0, .22), 2: (.20, .22), 3: (.30, 1.0)}
 rz = q.run_windows(*assemble(window("KXINX15M-Q", D(5), [1000, 1001] + [1001.0] * 14, Z3, omit=(4, 5))))["C1_candles_two_sided_and_spread"]
