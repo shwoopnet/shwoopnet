@@ -39,7 +39,10 @@ function slotCaps(sizingBase) {
 // OICORE limit 1c above the touch (Nov 3, 2026, the owner: "build 1", on the refinement chat's S-LIM1 read: 6 of 24 OICORE limits went unfilled because the ask moved up 1c within
 // seconds, and 3 of those 6 won). The order still fills at the best ask when the ask has not moved (Kalshi gives price improvement), so this only adds fills that would have been missed,
 // at most 1c a contract worse. Never past the strategy's own priceMax. A reviewed edit; at most 2c for any strategy.
-const SLOT_LIMIT_SLIP = Object.freeze({ OICORE: 0.01 });
+// SWITCHED OFF Nov 13, 2026 (the owner: "Yes, switch it off", on the review rule written with this slip: revert if the orders that filled above the price first seen net below zero). The review
+// read (OICORE Nov 13): the orders that filled 0.95c or more above the first seen ask were net negative while the rest were net positive, so the table is empty again and OICORE's limit is the touch.
+// Putting a slip back is a reviewed edit of this table; the mechanism stays.
+const SLOT_LIMIT_SLIP = Object.freeze({});
 const SLOT_LIMIT_SLIP_MAX = 0.02;
 // OICORE skips its very cheap entries (Nov 8, 2026, the owner approved designing small tests of the refinement chat's lead; skip-only, no new strategy). Live fills paid under 8c won
 // 1 in 27 and a forward group under 10c 0 in 17, while the simulation says about break-even, so this is a bet that live beats the simulation. It only REMOVES orders (a skipped signal is

@@ -8,12 +8,13 @@ const slot = require('../functions/kalshiSlotLib');
 const OI = slot.SLOT_STRATEGIES.find((s) => s.id === 'OICORE');
 const gates = {};
 gates.LM1 = () => {
-  assert.deepStrictEqual(Object.assign({}, slot.SLOT_LIMIT_SLIP), { OICORE: 0.01 }, 'only OICORE, 1c');
+  // Nov 13, 2026 (the owner: "Yes, switch it off"): the slip table is EMPTY, so every strategy's limit is its touch; the mechanism stays for a reviewed edit.
+  assert.deepStrictEqual(Object.assign({}, slot.SLOT_LIMIT_SLIP), {}, 'no strategy has a slip: OICORE is back at the touch');
   assert.ok(Object.isFrozen(slot.SLOT_LIMIT_SLIP) && slot.SLOT_LIMIT_SLIP_MAX === 0.02, 'frozen, and never more than 2c for any strategy');
-  assert.strictEqual(slot.slotLimitFor(OI, 0.18), 0.19, '18c touch: 19c limit');
-  assert.strictEqual(slot.slotLimitFor(OI, 0.06), 0.07, '6c touch: 7c limit');
+  assert.strictEqual(slot.slotLimitFor(OI, 0.18), 0.18, '18c touch: 18c limit (no slip)');
+  assert.strictEqual(slot.slotLimitFor(OI, 0.06), 0.06, '6c touch: 6c limit');
   assert.strictEqual(slot.slotLimitFor(OI, 0.50), 0.50, 'at the 50c top of the band: no slip past the band');
-  assert.strictEqual(slot.slotLimitFor(OI, 0.495), 0.5, 'never past priceMax');
+  assert.strictEqual(slot.slotLimitFor(OI, 0.495), 0.5, 'rounded to the cent, never past priceMax');
   assert.strictEqual(slot.slotLimitFor(Object.assign({}, OI, { id: 'OTHERX' }), 0.18), 0.18, 'any other strategy: the touch, unchanged');
 };
 gates.LM2 = () => {
@@ -21,7 +22,7 @@ gates.LM2 = () => {
   const input = (limit) => ({ strategyId: 'OICORE', ticker: 'KXBTC15M-26NOV201200-00', side: 'no', limit, step: 1, depthAtTouch: 1000, slotOrders: [], l1Orders: [], slotOrdersComplete: true,
     lockTxn: true, lock: null, position: 0, sizingBase: 800, windowCapFraction: 0.055, killLatch: null, secondsLeft: 150, now: Date.parse('2026-11-20T16:57:30Z'), oiRise: 90000 });
   const a = slot.slotOrderCheck(input(0.18)), b = slot.slotOrderCheck(input(0.19));
-  assert.ok(a.allowed && b.allowed && b.cost > a.cost, 'the 19c limit costs more than 18c in the caps: ' + a.cost + ' vs ' + b.cost);
+  assert.ok(a.allowed && b.allowed && b.cost > a.cost, 'a higher limit still costs more in the caps (the gate costs whatever limit it is given): ' + a.cost + ' vs ' + b.cost);
 };
 gates.LM3 = () => {
   // The engine: the band test is on the quoted price, the limit goes into the gate and into Kalshi's body, and a NO buy moves the YES price the other way.
