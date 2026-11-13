@@ -15,6 +15,7 @@ TOL = 1e-9
 SERIES_SHA256 = "34f708687df24f5a6243c710eb2d1f6b8d7559c965b8c18a97e27248c2ed06e8"
 JUMP, PRE_LO, PRE_HI, ASK_LO, ASK_HI, SPREAD_MAX, SLIP = 0.10, 0.15, 0.75, 0.20, 0.85, 0.04, 0.01
 AMBIGUITIES = [
+    "000. DATED Nov 13 06:41Z (Head ruling after the tennis comparison with Desk A): the standard error of the placebo difference uses the SAMPLE variance (n minus 1) in both arms (st.variance, not pvariance); enters the placebo-difference bar only.",
     "00. DATED Nov 13 06:33Z (Head ruling after the first comparison with Desk A): the placebo search order is (start or open, the event's first ticker ascending); 'up to 20' is the next 20 POSITIONS in that order (a used match is among them and is skipped, it does not extend the search); the family's matches are ALL matches listed in the development window, with or without candles.",
     "0. DATED Nov 13 06:28Z (Head ruling after Auditor B): the placebo contract is the one with the higher mid; at exactly equal mids (within 1e-9) the ticker that sorts first in ascending order.",
     "1. first_in_play for tennis = the first minute at which the alive rule holds for EITHER contract; every minute is in play only if the alive rule holds AT THAT MINUTE (not 'from the first on'). Clock families: in play from the minute ending at S + 60 s.",
@@ -230,7 +231,7 @@ def score_family(fam_matches, idx, dev_from, dev_to):
     use = {b: w for b, w in wr.items() if b in pb}; wsum = sum(use.values())
     if wsum:
         pnet = sum((w / wsum) * (sum(pb[b]) / len(pb[b])) for b, w in use.items()); rnet = sum(nets) / len(nets)
-        var_p = sum(((w / wsum) ** 2) * (st.pvariance(pb[b]) / len(pb[b]) if len(pb[b]) > 1 else 0.0) for b, w in use.items()); var_r = st.pvariance(nets) / len(nets) if len(nets) > 1 else 0.0
+        var_p = sum(((w / wsum) ** 2) * (st.variance(pb[b]) / len(pb[b]) if len(pb[b]) > 1 else 0.0) for b, w in use.items()); var_r = st.variance(nets) / len(nets) if len(nets) > 1 else 0.0
         out.update(placebo_net_cents_at_rule_mix=round(100 * pnet, 3), difference_cents=round(100 * (rnet - pnet), 3), difference_se_cents=round(100 * math.sqrt(var_p + var_r), 3), rule_bets_in_buckets_with_no_placebo=sum(w for b, w in wr.items() if b not in pb))
     out["median_elapsed_minute_rule"] = st.median(r["elapsed"] for r in rule); out["median_elapsed_minute_placebo"] = st.median(p["elapsed"] for p in plc) if plc else None
     n = len(rule); fals = n >= 300 and ((pf is not None and pf < 1.0 - TOL) or any(h is not None and h < 1.0 - TOL for h in out["halves_pf"]))
