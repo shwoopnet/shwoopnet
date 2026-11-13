@@ -94,12 +94,15 @@ def one_window(version, tk, ct, book, trades, cover):
     yb, nb = sides(t0)
     ya = None if nb is None else 1 - nb
     na = None if yb is None else 1 - yb
-    if ya is None or na is None:
+    if ya is None and na is None:
         return {"status": "no_quote"}
-    if version == "V2" and (ya - (yb or 0) > SPREAD_MAX + 1e-9):
+    if version == "V2" and (ya is None or yb is None or ya - yb > SPREAD_MAX + 1e-9):
         return {"status": "spread_wide"}
-    side = "yes" if ya <= na else "no"
-    p_ask = ya if side == "yes" else na
+    # the cheaper side is the one with the lower own ask; a side whose ask does not exist (no opposite bid) is not a candidate
+    if na is None or (ya is not None and ya <= na):
+        side, p_ask = "yes", ya
+    else:
+        side, p_ask = "no", na
     if not (BAND[0] - 1e-9 <= p_ask <= BAND[1] + 1e-9):
         return {"status": "out_of_band"}
     res = (cover.get(tk) or {}).get("result")
