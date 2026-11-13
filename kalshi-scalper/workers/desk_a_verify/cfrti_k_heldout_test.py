@@ -24,10 +24,14 @@ def T(c): return dict(pnl=c, win=1 if c > 0 else 0, day=0, close=0)
 assert H.label([T(0.5)] * 49) == "NOT_ENOUGH_DATA"
 assert H.label([T(0.30)] * 30 + [T(-0.20)] * 20) == "PASS"                    # PF 1.5, mean positive, n 50
 assert H.label([T(0.13)] * 20 + [T(-0.10)] * 30) == "FAIL"                   # PF 0.87
-assert H.label([T(0.25)] * 20 + [T(-0.20)] * 30) == "FAIL"                   # PF 0.83 (mean negative): fails
+assert H.label([T(0.25)] * 20 + [T(-0.20)] * 30) == "FAIL"                   # PF 0.83: under 1.0
 assert H.label([T(0.30)] * 12 + [T(-0.20)] * 38) == "FAIL"                   # PF 0.47 at n 50
 assert H.label([T(0.20)] * 24 + [T(-0.30)] * 26) == "FAIL"                   # PF 0.62
-mid = [T(0.22)] * 30 + [T(-0.20)] * 30; assert 1.0 < K.pf([t["pnl"] for t in mid]) < 1.3 and H.label(mid) == "FAIL"   # bar missed, PF above 1.0: still FAIL at n >= 50 (the Head's ruling)
+mid = [T(0.22)] * 30 + [T(-0.20)] * 30; assert 1.0 < K.pf([t["pnl"] for t in mid]) < 1.3 and H.label(mid) == "NO CALL"   # PF from 1.0 up to 1.3 at n >= 50: the registration's own "no call" (the Head, 17:04Z)
+assert H.label([T(0.20)] * 25 + [T(-0.20)] * 25) == "NO CALL"                # PF exactly 1.0 is NO CALL, not FAIL
+assert H.label([T(0.26)] * 25 + [T(-0.20)] * 25) == "PASS"                   # PF exactly 1.3 and mean above 0 is PASS
+assert H.label([T(0.30)] * 10 + [T(-0.01)] * 40) == "PASS"                   # large PF
+assert H.label([T(0.199)] * 25 + [T(-0.20)] * 25) == "FAIL"                  # PF just under 1.0
 # 3. under 50 prints only the count and spends nothing
 lists2, cands2, perp2 = build(2, "2026-11-14", False, 3)
 mk_ = os.path.join(tempfile.mkdtemp(), "m.txt")
@@ -41,7 +45,7 @@ try:
 except SystemExit as e: assert "2026-11-20" in str(e)
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf): H.run(lists, cands, perp, now=H.READ_NOT_BEFORE + 5, marker=mk_)
-out = buf.getvalue(); assert os.path.exists(mk_) and ("LABEL: PASS" in out or "LABEL: FAIL" in out) and "HELDOUT_PULL_RUNS.md copy read by the guard: sha256" in out, out
+out = buf.getvalue(); assert os.path.exists(mk_) and ("LABEL: PASS" in out or "LABEL: FAIL" in out or "LABEL: NO CALL" in out) and "HELDOUT_PULL_RUNS.md copy read by the guard: sha256" in out, out
 try:
     with contextlib.redirect_stdout(io.StringIO()): H.run(lists, cands, perp, now=H.READ_NOT_BEFORE + 9, marker=mk_)
     raise AssertionError("second read not refused")

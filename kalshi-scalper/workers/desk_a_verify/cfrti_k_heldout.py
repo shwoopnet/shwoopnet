@@ -1,7 +1,7 @@
 """CFRTI-K HELD-OUT reader (Desk A, Nov 13 2026), written BEFORE 2026-11-14T00:00:00Z on the Head of R&D's order, same rules as `cfrti_k.py` (the development scorer, sha256 79966ef8..., imported unchanged for decide(), the loaders and pf()).
   python3 -I cfrti_k_heldout.py <lists dir> <binary candles dir> <perp candles run folder>
 Reads ONLY closes on or after HELD_FROM = 2026-11-14T00:00:00Z (a date constant). REFUSES before READ_NOT_BEFORE = 2026-11-20T00:00:00Z (the registered read date) unless the lists folder carries MADE_UP_DATA (a test fixture). READ-ONCE: the marker file beside this script is checked BEFORE any data is read; a second real run refuses. Below 50 held-out trades (registered minimum, CFRTI_K_REGISTRATION section 4) it prints ONLY 'NOT_ENOUGH_DATA, n trades = x' and writes no marker, so the read stays unspent (the Head: under 50 is NOT_ENOUGH_DATA, not a fail; read once on the first day that has 50 rows, no peeking).
-At 50 or more it writes the marker, then prints the registered line and ONE label: PASS = cleared its registered bar (cash PF 1.3 or better, a positive mean, n of 50 or more; a re-test lead into the shadow gate, never a research-bar pass); FAIL = n of 50 or more and the bar not cleared, or cash PF under 1.0 (the owner's decision of 2026-11-13: CFRTI-K is then CLOSED FOR GOOD). No other figure, no thirds are labels. Prints the heldout_guard_v2 list-hash line first. HELDOUT_ folders and listed pull runs are refused by the guard."""
+At 50 or more it writes the marker, then prints the registered line and ONE of three labels (the registration's labels govern, the Head 17:04Z): PASS = cash PF 1.3 or better, a mean above 0, n of 50 or more (a re-test lead into the shadow gate, never a research-bar pass); NO CALL = cash PF from 1.0 up to 1.3 at n of 50 or more (what it means for the live seat is the owner's decision); FAIL = cash PF under 1.0 at n of 50 or more (the owner's decision of 2026-11-13: CFRTI-K is then CLOSED FOR GOOD). No other figure, no thirds are labels. Prints the heldout_guard_v2 list-hash line first. HELDOUT_ folders and listed pull runs are refused by the guard."""
 import sys, os, calendar, time, json, collections, datetime, math
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import cfrti_k as K
@@ -28,16 +28,17 @@ def trades_of(markets, binary, perp):
         if t: tr.append(t)
     tr.sort(key=lambda t: t["close"]); return tr
 def label(trades):
-    """the registered held-out call. n under 50: NOT_ENOUGH_DATA; PASS needs cash PF 1.3 or better and a positive mean; anything else at n of 50 or more is FAIL"""
+    """the registered held-out call (CFRTI_K_REGISTRATION section 4). n under 50: NOT_ENOUGH_DATA; at n of 50 or more: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0"""
     n = len(trades)
     if n < MIN_TRADES: return "NOT_ENOUGH_DATA"
     pn = [t["pnl"] for t in trades]; p = K.pf(pn)
-    return "PASS" if p >= 1.3 and sum(pn) > 0 else "FAIL"
+    if p >= 1.3 and sum(pn) > 0: return "PASS"
+    return "FAIL" if p < 1.0 else "NO CALL"      # the registration's labels govern (the Head, 17:04Z): PF from 1.0 up to 1.3 is its own "no call at n = x"
 def lines(trades):
     pn = [t["pnl"] for t in trades]; n = len(trades); p = K.pf(pn)
     L = ["CFRTI-K HELD-OUT (closes from 2026-11-14T00:00:00Z) | n %d | cash PF %s | mean %+.2fc | win %.1f%% | days %d" % (n, "inf" if p == float("inf") else "%.2f" % p, 100 * sum(pn) / n, 100 * sum(t["win"] for t in trades) / n, len({t["day"] for t in trades}))]
     lab = label(trades)
-    L.append("LABEL: " + ("PASS: cleared its registered bar (cash PF 1.3 or better, positive mean, n >= 50); a re-test lead, never a research-bar pass" if lab == "PASS" else "FAIL: missed its registered bar (the owner's decision of 2026-11-13: CLOSED FOR GOOD)"))
+    L.append("LABEL: " + ("PASS: cleared its registered bar (cash PF 1.3 or better, positive mean, n >= 50); a re-test lead, never a research-bar pass" if lab == "PASS" else ("NO CALL: cash PF from 1.0 up to 1.3 at n >= 50 (the registration's own 'no call'); what it means for the live seat is the owner's decision" if lab == "NO CALL" else "FAIL: cash PF under 1.0 at n >= 50 (the owner's decision of 2026-11-13: CLOSED FOR GOOD)")))
     return L
 def run(lists, cands, perp_path, now=None, marker=None, fixture=False):
     sys.path.insert(0, here); import heldout_guard_v2 as G
