@@ -756,3 +756,9 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - Perps recorders confirmed thin by Main (GitHub drops scheduled starts); a self-chaining fix is approved at low priority.
   - Ruled: no research scorer fetches Coinbase or Hyperliquid at run time.
 - 19:40Z, WXDAYEND second build: the History Miner's wxdayend2.py f21845e7 (b45dd582) reads 0 of 22 on the city-days in landed runs, matching the Testing Desk on those 22. The other 18 come from Refinement's earlier reads, which are in no landed run, so they are not recounted, and their winners are unconfirmed. The FAIL stands; the independent check covers 22 of 40.
+- 19:56Z, MMSIM1 (liquidity provision; unique; ONE read on or after 2026-11-24 on hourly KXBTCD book files).
+  - Desk B's readiness check: the Rule Q scorer and marker are committed but NEVER audited (Auditor B confirms). Amendment 3's verdict rule, Rule P, has no ported scorer.
+  - Desk A ports Rule P into a copy of mmsim1.py, with an exact Rule Q reproduction on development events. Desk B writes an independent Rule P build from the text.
+  - Auditor B audits Rule Q and the marker, then both Rule P builds, then the 16b diff, ahead of LIQREV and OICORE, all before Nov 24.
+  - The lifecycle table's Nov 17 is stale; Main fixes it in a text PR.
+- OIVER-SPREAD: build 1 (Desk A 30d45c00 at b2a3144b) and build 2 (History Miner f59664b1 at 40d4dc34) on one convention: decision at close - 180, the ask seen, no slip, C = 20, halves by floor, 86,300 inclusive, 0.08 to 0.50. The rows builder is not yet assigned.
