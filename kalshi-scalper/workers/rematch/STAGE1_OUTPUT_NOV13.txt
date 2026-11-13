@@ -1,0 +1,35 @@
+REMATCH stage 1 output. PROVISIONAL, ONE BUILD (Head of R&D's rule 16b): no verdict is recorded until the Testing Desk's independent second build prints the same figures on the same landed file.
+Reader: kalshi-scalper/workers/rematch/stage1_measure.py sha256 e2a1611f06f025469fa1586c79b7828e6011d5e06639c0c360b8c21f9282196c at commit 4da23d43, CLEAN from Auditor B at 00:14Z Nov 13.
+Inputs: lists pull/ESOCTIE_LISTS/2026-11-12T2031Z_43301161879; candles pull/REMATCH_STAGE1_CANDLES/2026-11-13T0010Z_43334957211 (120 of 120 requests answered); pairs rematch/stage1_pairs.json. Run Nov 13, 00:16Z.
+
+REMATCH stage 1: counts and cost only. No bet is scored. candle freshness measured on Bitcoin 15 minute only, not on sports.
+Every line below is 'selected on development': it can close the card, it cannot support it.
+What the candle file holds: one request has one time range for all its tickers, so the landed file also carries minutes AFTER some matches' starts. This reader takes only three instants a pair (reference, decision, entry) and never a later candle. Nobody is to look at the file itself before the stage 2 score.
+events left out of the lists read, counted: not_two_team_codes 0, no_ticker_clock 0, market_without_close_time 0
+e-soccer matches in the slice 3823 | start check (market closed 4 to 90 minutes after the ticker clock) 3680 = 96.3% (under 80%: start not derivable)
+pairs qualifying by schedule: 2934
+earlier match had a winner: 2450
+earlier match closed 300 s or more before the decision minute: 2404
+  dropped: no candle at the reference minute or in the 5 minutes before it: 2276
+  dropped: one-sided at the reference minute: 43
+loser's contract two-sided at the reference minute: 85
+  of those, spread 4c or less (tradeability count): 0
+  dropped: no candle at the decision minute or in the 5 minutes before it: 62
+  dropped: one-sided at the decision minute: 0
+two-sided at the decision minute: 23
+  of those, no candle at the entry minute or in the 5 minutes before it: 1
+instants read from a candle at the exact minute: 614
+instants read from an earlier candle (at most 5 minutes back): 1010
+STATE: fell 5c or more: 19
+  entries that pass the band and spread: 3
+PLACEBO pool: moved under 2c: 0
+  placebo entries that pass: 0
+days in the slice with a later match: 8 | projected development bets over 15 days: 6 (under 300 closes the card) | projected tradeable pairs: 0 (under 300 closes on tradeability)
+one-way entry cost at qualifying entries, ALL quotes: median 3.5c over 3 (above 4c closes on cost)
+one-way entry cost, EXACT-MINUTE quotes only (all three instants read from their own minute): median 3.0c over 1
+the worse of the two decides the cost line (Amendment 6): 3.5c
+entries whose price came from the exact entry minute: 1 of 3 (a carried price is payable only if a missing candle means an unchanged quote; not measured on these markets)
+diagnostic only, never a filter: for matches with an entry, market close minus ticker clock, minutes: p10 10 median 13 p90 14 | closed under 9 minutes after the clock (14 after the entry): 0 of 3
+STAGE 1 LINE: CLOSED at stage 1, no try spent
+
+What this reader cannot tell (Idea Desk B): Kalshi leaves out a candle for a minute in which nothing changed, and the pulled window starts 8 minutes before the reference minute. So 'no candle at the reference minute or in the 5 minutes before it' covers both a market with no quote at all and a market whose quote had not changed for more than 5 minutes. The registered rule (Amendment 4) drops both, and the floor does not move (Amendment 5, point 8).
