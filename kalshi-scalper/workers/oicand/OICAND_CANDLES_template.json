@@ -34,7 +34,7 @@
  "ticker_allowlist": [],
  "max_requests": 1,
  "requests": [],
- "notes": "Built by workers/oicand/oi_candles_job.py from the OICAND_LISTS answers; weekdays only (UTC date of the close), the last 20; EVENT830's past forward closes are dropped; end_ts is the close minus 120 s as in SPXOI1.",
+ "notes": "Built by workers/oicand/oi_candles_job.py from the OICAND_LISTS answers; weekdays only (UTC date of the close), the last 20; EVENT830's past forward closes are dropped; end_ts is the close minus 120 s as in SPXOI1. Registration text: Desk A commit 29dd035e on claude/idea-desk-a, DESK_A_OICORE_PLACES_NOV13.md sha256 2d6301c6dfd25972f58293d6023c5ec1d2262791a46fe0d5f2899f68108d14d3 (twelve places, with the Head's 21:06Z dated line); the earlier nine place version is commit 560b645c, sha256 bce3242c1396454bc5237427dd9970b4a11bc007b9be51415b88bc52d626ec44.",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
