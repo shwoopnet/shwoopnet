@@ -156,7 +156,7 @@ def run_family(fam, K, markets, candles, bounds):
         if got is None: nplb_none += 1; continue
         res = markets[got["ticker"]]["result"]
         plb.append(dict(price=got["price"], win=res == "yes", void=res == "void", nores=res not in ("yes", "no", "void"), into_play=got["elapsed"], day=day(got["close"])))
-    bucket = lambda p: min(int((p - 0.20) / 0.10), 6)
+    bucket = lambda p: min((round(p * 100) - 20) // 10, 6)      # 10c steps from 20c on the whole-cent grid (Forensics: (0.30 - 0.20) / 0.10 is 0.9999999999999998 and landed 0.30, 0.50, 0.60 and 0.70 one bucket low)
     pb = collections.defaultdict(list)
     for p in plb:
         pb[bucket(p["price"])].append(-fee_up(p["price"]) if (p["void"] or p["nores"]) else net_of(p["price"], p["win"]))      # same booking as the rule arm: void and no-result are fee-only losses, counted
@@ -323,6 +323,8 @@ def selftest():
     except SystemExit: pass
     try: dev("x.json", "ESOCCER", ["/tmp/HELDOUT_ESOCCER"], [], "/tmp"); raise AssertionError("HELDOUT_ folder not refused")
     except SystemExit as ex: assert "REFUSED" in str(ex)
+    _b = lambda p: min((round(p * 100) - 20) // 10, 6)
+    assert [_b(x / 100.0) for x in (20, 29, 30, 39, 40, 50, 60, 70, 79, 80, 85)] == [0, 0, 1, 1, 2, 3, 4, 5, 5, 6, 6], "bucket edges"
     print("SELFTEST OK (fee rounded up, Eastern clock with DST, in-play start, jump rules, entry band and spread, tie never, no look-ahead, alive rule, round trip)")
 def dev(series_path, family, lists, candles_dirs, scorekit_dir):
     import heldout_guard                                                        # standing rule (h): any component of the path or the real path starting HELDOUT_ is refused (plain, nested, relative, symlink)
