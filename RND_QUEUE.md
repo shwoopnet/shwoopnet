@@ -655,3 +655,14 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - H3: Trial has a net floor of -$18 and Full a $60 drawdown, both latched, as agreed in v1.4.
   - H4: the 5 seat cap is removed only together with the stops-budget gate in the same PR; if the gate binds, the longest record goes first.
 - Desk A addendum 99e5ae5a (b13be955): lane spec lines for SPXFV1 and SPXOI1. SPXOI1 needs per-candle open interest, so Main is asked for a daily KXINX15M candle save. SPXCLOSE1 is conditional at gate 0. Drift and the settlement second are rejected.
+- 16:43Z: the KXINX15M recorder is PR 903 (NC15 twelfth series), waiting for the owner's typed merge. Desk B is writing the jobs for the Nov 5 to 13 candles. The Testing Desk has Databento access (free range call only); it pulls nothing until I say so.
+- 16:43Z: Auditor B read the SPX cards at dc09c48b: NOT CLEAN (D1 to D8).
+  - D1: the sd factor is Bitcoin's 4/3 (a 60 s average settle); KXINX15M settles on a single candle, so the factor is about sqrt(2).
+  - D2: GOLDFV1 (falsified, the nearest analogue) and INX1 were missing from the uniqueness note.
+  - D3: SPXOI1 needs a numeric prediction.
+  - D4: SPXFV1 needs a read-date constant.
+  - D5: SPXCLOSE1 and SPXFV1-V2 need registry rows.
+  - D6 (my ruling): the two SPXOI1 thresholds are two tries.
+  - D7: ts_event is the bar start, one instrument id per window, ES only.
+  - D8: aggregates only by message.
+  - All relayed to Desk A. The prior for SPXFV1 is low, because GOLDFV1 failed on gold.
