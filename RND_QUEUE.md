@@ -666,3 +666,7 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - D7: ts_event is the bar start, one instrument id per window, ES only.
   - D8: aggregates only by message.
   - All relayed to Desk A. The prior for SPXFV1 is low, because GOLDFV1 failed on gold.
+- 16:46Z: the SPX cards are CLEAN on the text (Auditor B; Desk A 94c4dfbc, cards bb7e1e4a, registry 8323d0b7). The SPXFV1 sd factor is sqrt(119/60), ES.c.0 only, READ_DATE 2027-02-26, prior VERY LOW (GOLDFV1 falsified). Desk A marks SPXFV1 and SPXOI1 REGISTERED.
+  - The Testing Desk has the GO for the ES 1-minute pull for Nov 5 to 12 (cost check first, scratch only, spend to Main) and writes scorer build 1.
+  - The History Miner writes build 2 independently.
+  - No data run until Auditor B is CLEAN on both builds.
