@@ -129,3 +129,19 @@ Kalshi's candles do not leave an empty side out: they show a bid of 0.00 or an a
 3. **The overtime market's candle showing 0.00 and 1.00** reads "no quote", not "undecided".
 
 "Buyable" needs a bid above 0 and an ask below 1 at the candle one minute after the detection minute, as before. Also said here, not a change: the pull runner writes the sha256 and the length of every stored answer, the reader checks them when the manifest carries them, and Auditor B's structure check of the landed run checks them in any case. No kill number changed.
+
+## NHLOT: held-out line, Nov 13, 2026, 07:06Z, before any NHL candle was read (the Head of R&D's order of 06:53Z). No rule, figure or reading changes.
+
+The sample is unchanged: the 150 games of `nhlot/games.json` (closes 2026-10-21T04:35Z to 2026-11-12T06:01Z), series KXNHLGAME, KXNHLTOTAL and KXNHLOT. It is a price measurement: no result is read and no rule is scored. Every card found that ever held out these series, with its state:
+
+- **W-CAT-SPORTS1 (Refinement):** KXNHLGAME and KXNHLTOTAL among its 27 series, held-out closes at or after 2026-10-30T02:53:19Z, never read. **Released by the Head of R&D 2026-11-13 (dated line in its registration on `claude/refine-live`, 06:51Z). Development here.**
+- **TIE3 (Testing Desk; closed on two builds):** KXNHLOT held-out from 2026-11-13T00:00Z, never listed or requested. This sample ends 2026-11-12: no overlap.
+- **FAMSPORTS (research chat, run once 2026-11-03; both tries FALSIFIED, closed):** KXNHLTOTAL, 91 eligible hockey games to 2026-11-02; its last third by game date (W3) is unread and nothing can read it now (W3 opens only if the first two windows pass, and they failed). **W3's dates are not printed; it is the latest third of 190 games that end on 2026-11-02, so it lies partly or wholly inside this sample's first days (Oct 21 to Nov 2).** A closed card; named here so the Head of R&D can see it before releasing the job.
+- **USWEEP2 (research chat, generic cheap-tail sweep, run once 2026-11-03, "no lead"; closed):** KXNHLGAME is on its frozen series list (not among its scored results); for each series the last third of its anchor dates was frozen and never fetched. The dates are not printed; for a sweep run on Nov 3 they most likely fall inside this sample. A closed card, named for the same reason.
+- **SERIESLAG1 (research chat, registered 2026-11-08, no result on its branch):** uses KXNHLGAME for playoff games of April to June 2026 only. No overlap in dates.
+- **HISTDEPTH (History Miner plan):** KXNHLOT on the historical endpoint, closes before about 2026-09-07. No overlap.
+- Named these series but hold nothing out on them: ESPN1 (hockey absent from its data), NHLG1 (its frozen third is on the goal-scorer series only), SP1 and SPORTS1 F7 (October tests with no held-out window), W-SPREAD-CELL1 (spread series only).
+
+No OPEN card holds any of the three series inside the sample dates. Two CLOSED research-chat cards (FAMSPORTS, USWEEP2) have unread held-out that overlaps it.
+
+**What was swept:** as in the hourly temperature note of the same minute (whole-word names over main, `rnd-queue`, the desk branches, `claude/refine-live` and the research chat's whole tree at 79724f00; the research chat's sports registrations read by hand because it writes series as patterns). The same limit applies.
