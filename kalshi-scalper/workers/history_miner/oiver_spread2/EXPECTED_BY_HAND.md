@@ -58,3 +58,27 @@ Written BEFORE the code, from Desk A's card 1 only: `kalshi-scalper/workers/DESK
 - a held mode run
 - a HELDOUT_ path
 - a result other than yes, no or void on a development row
+
+## Dated line, 2026-11-13 19:53Z: the Head's convention for both builds (matching live OICORE on main), reworked by hand before the code
+- (a) The decision quote is the candle ending close - 180 s (yes_bid and yes_ask in the input are that candle's; the row builder must take them from there). oi_rise = OI(close - 180) - OI(close - 360), unchanged.
+- (b) C = 20, OICORE's current bottom step (PR 901), with the fee rounded up per order at C = 20.
+- (c) The price is the ASK SEEN, with no +1c (PR 895), assumed filled at that ask as a taker at the touch, with no next-candle fill check. This is an UPPER BOUND on fills.
+- (d) A tie goes to YES. (e) Halves split by signal count, the first floor(n/2). (f) As read. (g) The threshold is inclusive (>= 86,300), the floor is ask >= 0.08 and the ceiling ask <= 0.50.
+
+Reworked figures (same windows; spreads, sides and skips unchanged). Fee = ceil(round(100 x 0.07 x 20 x p x (1 - p), 6)) / 100 / 20:
+| W | side, price | order fee | per contract | result | net |
+|---|---|---|---|---|---|
+| 1 | YES 0.22 | 24.024c -> 25c | 0.0125 | yes, win | +0.7675 |
+| 2 | NO 0.30 | 29.4c -> 30c | 0.015 | yes, loss | -0.315 |
+| 3 | NO 0.12 | 14.784c -> 15c | 0.0075 | no, win | +0.8725 |
+| 8 | YES 0.49 | 34.986c -> 35c | 0.0175 | no, loss | -0.5075 |
+| 9 | NO 0.31 | 29.946c -> 30c | 0.015 | yes, loss | -0.325 |
+**Parent:** n 5, wins 1.64, losses 1.1475, PF 1.429194, net 0.4925, mean 0.0985.
+- Halves: W1 and W2 give PF 2.436508 (0.7675 / 0.315). W3, W8 and W9 give PF 1.048048 (0.8725 / 0.8325).
+- Per contract-week: 0.4925 x 84 = 41.37.
+
+**Version:** n 3, PF 5.046154 (1.64 / 0.325), net 1.315, mean 0.438333.
+- Halves: W1 gives PF inf. W3 and W9 give PF 2.684615.
+- Per contract-week: 110.46.
+
+**Unchanged:** the removed share 0.4, the counts, the takeover and kill information, and the label "no evidence at n = 3".
