@@ -23,6 +23,7 @@ LOOKS = [("7d", 7 * 86400, 6 * 3600), ("3d", 3 * 86400, 6 * 3600), ("1d", 86400,
 BUCKETS = [(0.10, 0.25), (0.25, 0.40), (0.40, 0.60), (0.60, 0.75), (0.75, 0.90)]
 B, SEED = 2000, 1
 READINGS = [
+    "F1 family read (Amendment 3): a populated cell has pooled TRAIN+VALIDATE n >= 100; supporting = pooled PF at +1c >= 1.3 and the event bootstrap 90% lower bound of pooled mean cents at +1c (B 2000, seed 1) above 0; FALSIFIED = the best populated cell (highest pooled PF at +1c) under 1.0; NO SURVIVOR = at least 3 populated cells and none supporting; precedence FALSIFIED, NO SURVIVOR, supporting, neither; a family with no populated cell reads no evidence at n = its TRAIN+VALIDATE events; both flags printed",
     "A6 (Amendment 6, ff415eb7): G1 a YES mid exists only when 0 < bid < ask < 1, a market without one makes no observation either side and is not a candidate, events with no valid-mid market per look are printed, calibration only over valid-mid markets; G2 cap of 10 open, fills offered by entry quote time then ticker, the 11th skipped and counted, net, streak and kill over accepted fills in close order; G3 an event held out in any family is in no cell of any family and not in calibration",
     "R1 family by the row's series s; KXGENERICBALLOT (named under GCB, one event) is GCB; a series outside the list (e.g. KXAPRPOTUSD, pulled by Amendment 3 but in no family) is counted and left out",
     "R2 event close = latest ct among its markets in the file; third = the listed third if the event is in the family's cut-file list, else by its close against the family's cut constants",
@@ -186,6 +187,7 @@ def run(cand, cutf, cutf3, compare):
                     c = cells.setdefault(k, {"TRAIN": [], "VALIDATE": []})
                     c[th].append({"t": t, "p": p, "won": won, "q": qts, "ct": ct, "wk": isoweek(close)})
     out = []
+    fam_cells = {}
     for (fm, lk, bi, side), c in sorted(cells.items(), key=lambda kv: (FAMILIES.index(kv[0][0]), kv[0][1:])):
         nt, nv = len(c["TRAIN"]), len(c["VALIDATE"])
         row = {"family": fm, "look": lk, "bucket": "%.2f-%.2f" % BUCKETS[bi], "side": side, "n_train": nt, "n_validate": nv}
@@ -226,12 +228,41 @@ def run(cand, cutf, cutf3, compare):
                                  "longest_loss_streak": longest, "kill_fired": fired, "kill_first_fill": first_kill,
                                  "net_at_fill_20_dollars": round(net20, 6) if net20 is not None else None, "max_open": open_max, "skipped_by_cap": skipped}
         out.append(row)
+        # Amendment 3 family read (pooled TRAIN + VALIDATE at +1c, report only, never an advance)
+        if pooled >= 100:
+            px = [pnl(o["p"], o["won"], 0.01) for o in c["TRAIN"] + c["VALIDATE"]]
+            ppf = pf(px)
+            lb = boot(px)[0]
+            fam_cells.setdefault(fm, []).append({"cell": "%s %s %s" % (lk, row["bucket"], side), "pooled_n": pooled,
+                                                "pooled_pf_p1": ppf, "pooled_boot90_lower_c": lb,
+                                                "supporting": (ppf == "inf" or ppf >= 1.3 - EPS) and lb > 0}) 
     cal = []
     for k, v in sorted(calib.items()):
         lk, bi = k.split("|")
         cal.append({"look": lk, "bucket": "%.2f-%.2f" % BUCKETS[int(bi)], "n": v["n"], "yes_share": round(v["yes"] / v["n"], 6),
                     "mean_ask": round(v["ask"] / v["n"], 6), "mean_mid": round(v["mid"] / v["mid_n"], 6) if v["mid_n"] else None})
-    return {"build": "History Miner second build, registration text only", "compare_mode": compare, "counts": counts,
+    fam_read = {}
+    for fm in FAMILIES:
+        pc = fam_cells.get(fm, [])
+        ev_n = third_counts[fm]["TRAIN"] + third_counts[fm]["VALIDATE"]
+        if not pc:
+            fam_read[fm] = {"label": "no evidence at n = %d" % ev_n, "populated_cells": 0}
+            continue
+        best = max(pc, key=lambda x: (float("inf") if x["pooled_pf_p1"] == "inf" else x["pooled_pf_p1"]))
+        bpf = float("inf") if best["pooled_pf_p1"] == "inf" else best["pooled_pf_p1"]
+        sup = [x["cell"] for x in pc if x["supporting"]]
+        flags = {"falsified": bpf < 1.0 - EPS, "no_survivor": len(pc) >= 3 and not sup}
+        if flags["falsified"]:
+            lab = "FALSIFIED (best populated cell PF under 1.0 at +1c)"
+        elif flags["no_survivor"]:
+            lab = "NO SURVIVOR at this grid (an edge of about 10c or more ruled out in the populated cells)"
+        elif sup:
+            lab = "supporting (exploratory) in %d cell(s)" % len(sup)
+        else:
+            lab = "neither supported nor failed"
+        fam_read[fm] = {"label": lab, "flags": flags, "populated_cells": len(pc), "supporting_cells": sup,
+                        "best_cell": best["cell"], "best_pooled_pf_p1": best["pooled_pf_p1"], "cells": pc}
+    return {"family_read": fam_read, "build": "History Miner second build, registration text only", "compare_mode": compare, "counts": counts,
             "event_thirds": third_counts, "events_held_out_in_any_family": held_any, "events_no_valid_mid_by_look": no_valid_mid, "cells": out, "calibration": cal, "readings": READINGS}
 
 
