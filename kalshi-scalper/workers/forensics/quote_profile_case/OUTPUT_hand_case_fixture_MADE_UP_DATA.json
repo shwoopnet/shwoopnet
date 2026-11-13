@@ -1,0 +1,81 @@
+{
+ "duplicate_answers": 2,
+ "duplicate_conflicts": 1,
+ "other_tickers_in_answers_ignored": 1,
+ "per_window": [
+  {
+   "candles": 13,
+   "cheap_20_30": 4,
+   "duplicate_answers": 0,
+   "duplicate_conflicts": 0,
+   "missing_quote": 1,
+   "not_two_sided": 3,
+   "off_cent": 1,
+   "spread_1c": 2,
+   "spread_2c": 2,
+   "spread_3c": 3,
+   "spread_over3c": 1,
+   "ticker": "KXINX15M-26NOV051300-00",
+   "two_sided": 8
+  },
+  {
+   "candles": 0,
+   "cheap_20_30": 0,
+   "duplicate_answers": 0,
+   "duplicate_conflicts": 0,
+   "missing_quote": 0,
+   "not_two_sided": 0,
+   "off_cent": 0,
+   "spread_1c": 0,
+   "spread_2c": 0,
+   "spread_3c": 0,
+   "spread_over3c": 0,
+   "ticker": "KXINX15M-26NOV051315-15",
+   "two_sided": 0
+  },
+  {
+   "candles": 2,
+   "cheap_20_30": 0,
+   "duplicate_answers": 2,
+   "duplicate_conflicts": 1,
+   "missing_quote": 0,
+   "not_two_sided": 0,
+   "off_cent": 0,
+   "spread_1c": 0,
+   "spread_2c": 1,
+   "spread_3c": 1,
+   "spread_over3c": 0,
+   "ticker": "KXINX15M-26NOV051330-30",
+   "two_sided": 2
+  }
+ ],
+ "run": "ok",
+ "ticker_dates": [
+  [
+   2026,
+   11,
+   5
+  ],
+  [
+   2026,
+   11,
+   5
+  ]
+ ],
+ "totals": {
+  "candles": 15,
+  "cheap_20_30": 4,
+  "missing_quote": 1,
+  "not_two_sided": 3,
+  "off_cent": 1,
+  "spread_1c": 2,
+  "spread_2c": 3,
+  "spread_3c": 4,
+  "spread_over3c": 1,
+  "two_sided": 10
+ },
+ "windows": 3,
+ "windows_no_candles": 1,
+ "windows_with_a_cheap_20_30_minute": 1,
+ "windows_with_a_two_sided_minute": 2
+}
