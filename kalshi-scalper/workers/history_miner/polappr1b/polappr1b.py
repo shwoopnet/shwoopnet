@@ -32,7 +32,7 @@ READINGS = [
     "R7 one observation per event per cell: the market whose yes mid (yes_ask + yes_bid)/2 at the quote is nearest 0.50; mid needs both strings present; ties by ticker",
     "R8 per contract: win = (1 - p) - fee - slip, loss = -p - fee - slip, fee = 0.07 p (1 - p) unrounded, slip 0.01 (+1c) or 0 (+0c); PF = gross gain / gross loss (no loss: 'inf'); mean in cents",
     "R9 bootstrap: VALIDATE, +1c mean cents, B 2000, random.Random(1), resample observations with replacement, limits = sorted means at int(0.05B) and int(0.95B); week-block form by ISO week of the event close, as many blocks as distinct, first-seen order",
-    "R10 as if live: TRAIN+VALIDATE fills ordered by market close then ticker, 3 contracts, p as R6, slip 0.01 a contract, fee per order ceil to the cent of 0.07*3*p*(1-p); kill = net under -15 dollars at any fill from the 20th on, or 5 losses in a row; open interval = quote end_ts to market close; max simultaneously open counted",
+    "R10 as if live: TRAIN+VALIDATE fills ordered by market close then ticker, 3 contracts, p as R6, slip 0.01 a contract, fee per order ceil to the cent of 0.07*3*p*(1-p); kill = net under -15 dollars at any fill from the 20th on, or 5 losses in a row; open interval = quote end_ts to market close; max simultaneously open counted; net_after_20_dollars is the net over ALL fills once there are 20 or more, net_at_fill_20_dollars the net at the 20th; kill_first_fill is the fill at which the kill first fires",
     "R11 calibration: approval families, TRAIN and VALIDATE events, every market with a valid YES ask in 0.10..0.90 at the look, bucket of the YES ask; realized YES share, mean ask, mean mid (where both sides present), n",
     "R12 pooled n = TRAIN events + VALIDATE events in the cell; under 100: 'no evidence at n = x (TRAIN a, VALID b)' and no PF, mean or z",
 ]
@@ -193,16 +193,20 @@ def run(cand, cutf, cutf3, compare):
             row["validate_weekblock90_c"] = boot(vx, [o["wk"] for o in c["VALIDATE"]])
             fills = sorted(c["TRAIN"] + c["VALIDATE"], key=lambda o: (o["ct"], o["t"]))
             net, streak, longest, fired, open_max = 0.0, 0, 0, False, 0
+            net20, first_kill = None, None
             for i, o in enumerate(fills):
                 fee = math.ceil(100 * 0.07 * 3 * o["p"] * (1 - o["p"]) - 1e-9) / 100
                 net += 3 * pnl(o["p"], o["won"], 0.01) + 3 * 0.07 * o["p"] * (1 - o["p"]) - fee
                 streak = 0 if o["won"] else streak + 1
                 longest = max(longest, streak)
-                if (i >= 19 and net < -15 - EPS) or streak >= 5:
-                    fired = True
+                if i == 19:
+                    net20 = net
+                if ((i >= 19 and net < -15 - EPS) or streak >= 5) and not fired:
+                    fired, first_kill = True, i + 1
                 open_max = max(open_max, sum(1 for x in fills if x["q"] <= o["q"] < x["ct"]))
             row["as_if_live"] = {"fills": len(fills), "net_after_20_dollars": round(net, 6) if len(fills) >= 20 else None,
-                                 "longest_loss_streak": longest, "kill_fired": fired, "max_open": open_max}
+                                 "longest_loss_streak": longest, "kill_fired": fired, "kill_first_fill": first_kill,
+                                 "net_at_fill_20_dollars": round(net20, 6) if net20 is not None else None, "max_open": open_max}
         out.append(row)
     cal = []
     for k, v in sorted(calib.items()):
