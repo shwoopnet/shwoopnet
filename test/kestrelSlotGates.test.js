@@ -36,7 +36,7 @@ gates['AU2 the minute function no longer reads AUD/USD quotes for the slot: the 
   assert.deepStrictEqual(slot.slotCalendarSeriesDue(slot.SLOT_STRATEGIES, NOW), [], 'no listed release window now, so no extra read (EVENT830 stays)');
   const idx = code(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8'));
   assert.ok(!/slotRollingSeriesDue|KESTREL/.test(idx), 'index.js no longer asks for a rolling read');
-  assert.ok(/slotLib\.slotCalendarSeriesDue\(slotLib\.activeSlotStrategies\(\), now\)\.filter\(/.test(idx), 'the calendar read for EVENT830 is unchanged');
+  assert.ok(/slotLib\.slotCalendarSeriesDue\(slotLib\.activeSlotStrategies\(\), now\)\.concat\(slotLib\.slotSessionSeriesDue\(slotLib\.activeSlotStrategies\(\), now\)\)\.filter\(/.test(idx), 'the calendar read for EVENT830 is unchanged (SPXOI1 adds only its own weekday-session read, slotSessionSeriesDue, nothing for any other seat)');
 };
 gates['AU3 AUD/USD never goes back on L1: not on L1_SERIES, still paused, and the L1 size lock refuses any L1 order there'] = () => {
   assert.ok(!live.L1_SERIES.includes('KXAUDUSD15M'), 'not an L1 market');
