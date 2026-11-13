@@ -21,23 +21,25 @@ Asked for by the Head of R&D at 00:00Z: up to 3 packets, due 06:00Z, from the co
 
 **On the optional extra cut (7 or more legs) the Head allowed for the Nov 26 read:** I do NOT register it now. On the log so far 0 of 2 qualifiers have 7 or more legs although about 70% of the recorded combos do, which says many-leg combos rarely meet the price, size and volume conditions. A cut that is likely empty is a spent try for nothing. I look again on Nov 19 with a week of snapshots and decide before Nov 26.
 
-## No packet: REMATCH
+## No packet: REMATCH (CLOSED, recorded on two builds)
 
-Its stage 1 read (provisional, one build, Nov 13 00:16Z) prints CLOSED: the later match's market shows no candle around the earlier match's start in about 95% of pairs, and none of the 85 quoted pairs had a spread of 4c or less. Projected development bets: 6 against a floor of 300. **What it would need:** nothing a log can give; the premise (a tradeable price before the earlier match) is not there.
+Closed at stage 1 on tradeability and count, no try spent: of 2,404 eligible pairs only 85 had the previous loser's contract two-sided at the reference minute and none of the 85 had a spread of 4c or less; 6 projected development bets against a floor of 300. **What it would need:** nothing a log can give; only a count from the wheel book recorder showing tight early quotes on e-soccer would reopen the ground, as a new card.
 
-## No packet: MAPBREAK
+## No packet: MAPBREAK (CLOSED at step 1, recorded on two builds)
 
-CS2's count is pending a recount and the other titles are under their minimum until the remaining candles are read; the state must now be observable at the look (Amendments 7 to 10). **What it would need:** the recount and the remaining candles (tonight), a development read not under 1.0, and then the wheel book recorder running: its log (match contracts every 3 seconds through the match, map contracts once a minute, results) records everything the amended rule needs. Signals per 21 days cannot be counted from a log that has not started; from lists it is about 47 best-of-three matches a day across CS2 and Dota 2 before the rule's firing share.
+Closed at both looks with both tries unspent; not falsified. The gap is real but rare and about a quarter of orders do not fill a minute later, so the largest title yields about 70 filled bets in six weeks against a minimum of 150. **What it would need:** a book and a tape for map and match markets (the wheel book recorder's phase 1 covers CS2 and Dota 2), and then a new registration counted forward.
 
 ## No packet: INPLAYJUMP
 
 Lists, pilot and validation have not landed. **What it would need:** the cost pilot to pass, then the wheel book recorder's log for the three clock families (e-soccer, table tennis, e-basketball). Tennis is phase 2 of the recorder.
 
-## No packet: a pooled politics place. Is it honest? Not today.
+## No packet: politics (answered in full on Nov 13)
 
-- **The count (from `pol-data`, events not markets, `polcount/count_families.py`):** 17 events close in 7 days across every recorded family together (activity counts 6, shipping counts 6, approval 4 listed, scheduled events 1). No single family reaches 60 signals in 45 days at any firing share; all of them pooled reach it only at about a 50% share.
-- **Why a pooled place is not honest now:** a place needs a rule, and there is no politics rule with a mechanism behind it. The one direction with published support near resolution is buying the favourite, which is the banned shape and read flat on our own data (Idea Desk C's page). Pooling families that share no mechanism would pool noise and call it a record.
-- **What it would need:** one mechanism that applies to one family with enough events. The only family that looks large enough is mention markets (nightly news shows and speeches: 4 political events with 51 word markets on the one census day), and the politics recorder does not record it. The full answer, with the re-check of every closed politics idea, is due Friday 18:00Z.
+`POLITICS_LANE_ANSWER_NOV13.md`: about 43 events and 250 markets a week in the short-dated cadence series, nearly all ladders; everything that closed stays closed except POL-i2 under a hold exit, registered as POLGAPH (one try, about 3% odds, scorer audited and matched by a second build, nothing requested yet). It is a research card, not a wheel place: whether a pooled series can hold a place is the Head's to take to the owner, and only if its development read is not under 1.0. **What a politics place would need beyond that:** a politics recorder that records (its chain was fixed on Nov 13) and the mention series added to it.
+
+## No packet yet: VOIDSNAP (new on Nov 13)
+
+A zero-try hindsight measurement on CS2 matches voided at Kalshi's "fair market price" (195 of 2,006 match events in six weeks). Scorer audited, second build matched, 79 requests waiting for the owner's merge of the job file. Its stage 2 rule is written before stage 1 is read and is unregistered. **What a place would need:** stage 1 to read "worth a rule" under all three quote-carry readings, the owner to have seen Kalshi's clause, and then fills the wheel book recorder's books can confirm.
 
 ## What is left on this desk that could still become a candidate (asked by the Head of R&D; rewritten Nov 13, 00:51Z, after the night's reads)
 

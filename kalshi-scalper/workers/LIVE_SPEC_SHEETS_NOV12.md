@@ -2,6 +2,13 @@
 
 Asked for by the Head of R&D at 19:59Z for the owner's "probation seats" decision. **This desk does research only: it places nothing and builds nothing live. These sheets describe the registered rules exactly; they change no registration.** A simplified version of any rule would be a NEW rule; none is proposed here.
 
+## Status on Nov 13, 01:54Z: two of these three rules are CLOSED
+
+- **REMATCH: CLOSED at stage 1** (tradeability and count, no try spent). Its sheet below is kept as a record and describes nothing that can be built.
+- **MAPBREAK: CLOSED at step 1 at both looks** (both tries unspent, not falsified: about 70 filled bets in six weeks against a minimum of 150). Its sheet below is kept as a record.
+- **INPLAYJUMP: still open**, unread; its sheet stands.
+- Neither closed rule is a candidate for a probation seat. This desk has no candidate with a first read at or above 1.0 today.
+
 ## Said first, plainly
 
 - **Evidence today: none, for any of the three.** No price of these markets has been read against an outcome. Author's odds that each has a real edge at the research bar: MAPBREAK about 2%, REMATCH about 1%, INPLAYJUMP about 1% a family. The likeliest result of each is that it loses its cost, about 2c to 4c a contract a bet.
