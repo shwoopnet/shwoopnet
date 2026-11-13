@@ -25,7 +25,7 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
 13. Halves: the try's trades in close-time order, first floor(n/2) and the rest. Blocks by US Central close date.
 14. Date-clustered z (Amendment 3 (h)): mu / sqrt((D/(D-1)) x sum over US Central close dates of (date sum - date n x mu)^2 / n^2); D under 2 or a zero variance gives 0. The verdict reads this corrected z against 5.27; the uncorrected one (larger by sqrt(D/(D-1))) is printed beside it. Direction accuracy is wins over ALL trades. The profit factor and net bars are tested in whole thousandths of a dollar (Amendment 4).
 15. Shuffled-book control: one permutation of the windows a market and round; a window's whole vector of 10 feature values moves together; the window keeps its own fill quotes and result. random.Random(20261114), markets in the order gold, Bitcoin, 1,000 rounds. A try with under 30 trades in a round is not counted in that round's best. An independent build cannot reproduce another build's random draws: the 99th percentile is compared approximately.
-16. Overlap: gold "held" = exactly one side's ask 0.88 to 0.97 at the last poll at or before T-360 s (within 10 s). Bitcoin needs candles this build does not read: every Bitcoin window is "unknown".
+16. Overlap: gold "held" = exactly one side's ask 0.88 to 0.97 at the last poll at or before T-360 s (within 10 s). A missing side has no ask (not in band); the other side alone can make it held. No poll there: unknown. Bitcoin needs candles this build does not read: every Bitcoin window is "unknown".
 17. The history check (candles, weaker evidence, not part of the verdict) is not built here.
 18. Stop rule (Amendment 1, point 6): fired windows with no yes or no result over 1% of fired windows, counted per try and on distinct windows; the stop uses distinct fired windows over both markets.
 """
@@ -230,10 +230,9 @@ def prepare(w):
         if bf["y"]: q["no"] = (1 - bf["y"][0][0], bf["y"][0][1])
     held = None                                                               # Bitcoin: unknown (no candle file at the read, the Head's ruling of Nov 13)
     if w["series"] == "KXGOLD15M":
-        l1 = last_at_or_before(w["polls"], T - 360000, DEC_EARLY_S * 1000)       # no poll at T-360 s within 10 s: UNKNOWN (Desk A, Nov 13); a poll with a missing side: not held
-        held = None if l1 is None else False
-        if l1 is not None and l1[1]["y"] and l1[1]["n"]:
-            asks = (1 - l1[1]["n"][0][0], 1 - l1[1]["y"][0][0]); held = sum(1 for x in asks if 0.88 - EPS <= x <= 0.97 + EPS) == 1
+        l1 = last_at_or_before(w["polls"], T - 360000, DEC_EARLY_S * 1000)       # no poll at T-360 s within 10 s: UNKNOWN (Desk A, Nov 13)
+        if l1 is not None:                                                        # a missing side has no ask and is "not in band"; the other side alone can make the window held (Desk A's reading of the first build, Nov 13 01:16Z)
+            asks = [1 - l1[1][k][0][0] for k in ("n", "y") if l1[1][k]]; held = sum(1 for x in asks if 0.88 - EPS <= x <= 0.97 + EPS) == 1
     nxt = [b for pt, b in w["polls"] if pt > t0][:2]                           # the next two polls after the decision poll, by order (no time limit), for the noise description only
     return {"feats": feats, "q": q, "fill_delay": None if fill is None else (fill[0] - t0) / 1000.0, "held": held, "noise": [{"f1": f1(b), "f2": f2(b), "f3": f3(b), "f8": f8(b), "f9": f9(b), "f10": f10(b)} for b in nxt]}
 

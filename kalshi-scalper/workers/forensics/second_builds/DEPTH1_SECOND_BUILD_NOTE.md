@@ -123,3 +123,14 @@ With these applied the three-fixture match is unchanged: 360 of 360 per-try figu
 
 `DEPTH1_SECOND_OUTPUT_fixture_seed5_{no_edge,edge030}_A4_MADE_UP_DATA.{json,txt}` and `DEPTH1_SECOND_OUTPUT_tie_fixture_seed5_MADE_UP_DATA.{json,txt}` (this build under Amendments 1 to 4); `DEPTH1_WRAPPER_OUTPUT_tie_fixture_seed5_MADE_UP_DATA_run_by_forensics.txt` (Desk A's harness run on the tie fixture); `make_depth1_tie_fixture.py`. `depth1_second.py` sha256 `0092b363...`.
 
+
+## Nov 13, about 02:05Z: the gold overlap mark aligned to the first build (Desk A's note of 01:16Z)
+
+- **What changed, one line of `depth1_second.py`:** at the poll at T minus 360 s, a missing side has no ask and is "not in band"; if the other side's ask is 0.88 to 0.97 the
+  window is HELD. Before, my build called any poll with a missing side "not held". No poll within 10 s of T minus 360 s is still "unknown" in both builds.
+- **It is information only:** the mark feeds the "without windows L1 / OICORE holds" split, not a verdict line.
+- **Re-run on the three made-up fixtures:** every printed figure is unchanged (the no-edge and edge outputs are byte for byte the same; the tie fixture's 20 try lines are
+  the same). No traded gold window in the fixtures has that case, so the fixtures do not exercise the change; it is aligned by reading, not by a test.
+- **New hash of my build:** `93212179...` (was `0092b363...`). The wrapper is untouched (`75385906...`).
+- **The Head's ruling on the one-date z (01:16Z):** a sentence, no guard. Any z that differs between the builds or is larger than 1,000 in size is recomputed exactly by both
+  before anything is recorded.
