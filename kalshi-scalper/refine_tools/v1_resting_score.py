@@ -13,6 +13,7 @@ import csv
 import glob
 import gzip
 import io
+import math
 import json
 import os
 import sys
@@ -134,7 +135,7 @@ def one_window(version, tk, ct, book, trades, cover):
             tms = epoch(tr["created_time"]) * 1000 + (int(float(tr["created_time"][20:23])) if len(tr["created_time"]) >= 23 and tr["created_time"][19] == "." else 0)
         except (ValueError, KeyError):
             continue
-        if not (t0_ms < tms <= end_ms):
+        if not (t0_ms < tms < end_ms):
             continue
         yp = fl(tr.get("yes_price_dollars"))
         tk_side = tr.get("taker_outcome_side")
@@ -178,7 +179,7 @@ def evaluate(sig, days):
             ver = [net(s["p_bid"], s["win"], 0.0, frac) for s in filled]
             res[(slip, frac)] = (ver, par_all, par_unf)
     ver, par_all, par_unf = res[(0.01, MAKER_FEE_FRAC)]
-    weeks = max(days / 7.0, 1e-9)
+    weeks = max(math.ceil(days / 7.0 - 1e-9), 1)
     def line(tag, v, p, pu):
         out.append("%s: version PF %.2f (n %d, mean %+.2fc) | parent PF all signals %.2f (n %d, mean %+.2fc) | parent PF on unfilled %.2f (n %d) | net per contract-week version %+.3f parent %+.3f" % (
             tag, pf(v), len(v), 100 * (sum(v) / len(v) if v else 0), pf(p), len(p), 100 * (sum(p) / len(p) if p else 0), pf(pu), len(pu), sum(v) / weeks, sum(p) / weeks))
