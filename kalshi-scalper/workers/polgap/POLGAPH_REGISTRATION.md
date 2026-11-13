@@ -98,3 +98,12 @@ Every "or more", "or less", "within" and band edge is compared with a tolerance 
 6. **The baseline (information only).** For a market-morning with a gap under 2c in size, each side is put through steps 3 to 6; of the sides that pass, the one with the ask nearest 50c is taken (YES on an exact tie); then one per event and morning, nearest 50c, then ticker order. It is booked at its ask plus 1c with the same fee and money rule, with no fill test and no block, so it is compared with the "optimistic, same-candle fill" figure.
 7. **The z printed** is the sum of cash results divided by the square root of the sum of squared per-event sums.
 8. **"Open at once"** counts filled bets whose look is at or before a moment and whose market close is after it.
+
+## AMENDMENT 3, Nov 13, 2026, 01:37Z: pins from the second build, no rule changed, written before any list, candle, price path or result of this card was requested or read
+
+The Forensics desk built POLGAPH from this text alone (`polgaph_second.py`, commit f3ba7edb on `claude/forensics-desk`) and made two fixtures of invented rows (seed 5, with and without a planted edge). The two builds print the same figures on both: every count of the decide step, the cost line, blocked, fired, each kind of fill, the pooled and family results with their halves, the present-candle figure, the baseline, the pooling condition and the verdict. Three places needed a pin.
+
+1. **Fill data (Amendment 1, item 5, read exactly).** A decision has fill data if an answered, uncut minute request names its ticker and its time range holds the minute ending 07:01. My first build accepted only a request starting exactly at 07:00, the shape of my own job; on a fixture whose requests ran from 06:55 to 07:05 it called every decision "no fill data". The scorer now takes the reading above. On my own job's shape the two are the same thing.
+2. **Words.** A "decision" is the event's pick for a morning (rule steps 1 to 7 before the block). A decision on an event that holds a filled, unsettled bet is "blocked". "Fired" is decisions less blocked. Fired = filled on a present candle + filled on an unchanged minute + not filled + no fill data.
+3. **The optimistic, same-candle figure** books EVERY decision at its limit, with no block and no fill test, the same basis as the baseline (Amendment 2, item 6). The second build booked fired decisions only; it aligns.
+4. **A listed market closing after 2026-11-12 23:59:59Z stops the whole run** (standing rule (h)); it is not dropped and counted.

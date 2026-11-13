@@ -335,16 +335,21 @@ def cmd_minute_job(dec_path, out_path):
 
 
 def minute_cover(run):
-    """{(ticker, look)} for every minute request that was answered with status 200."""
+    """{ticker: [(start, end)]} for every minute request that was answered with status 200 and not cut short."""
     refuse_heldout(run)
     man = json.load(open(os.path.join(run, "manifest.json")))
-    cover = set()
+    cover = {}
     for row in man.get("rows", []):
         p = row.get("params", {})
         if row.get("status") == 200 and p.get("period_interval") == 1 and not row.get("truncated"):
             for tk in str(p.get("market_tickers", "")).split(","):
-                cover.add((tk, int(p["start_ts"])))
+                cover.setdefault(tk, []).append((int(p["start_ts"]), int(p["end_ts"])))
     return cover
+
+
+def has_fill_data(cover, ticker, look):
+    """Fill data exists if an answered minute request names the ticker and its range holds the minute ending 07:01."""
+    return any(a <= look + 60 <= b for a, b in cover.get(ticker, []))
 
 
 def stats(rows):
@@ -428,7 +433,7 @@ def cmd_score(lists_run, hourly_run, minute_run, dec_path):
         if open_until.get(r["event"], 0) > r["look"]:
             n["blocked"] += 1
             continue
-        if (r["ticker"], r["look"]) not in cover:
+        if not has_fill_data(cover, r["ticker"], r["look"]):
             n["no_fill_data"] += 1
             continue
         c = minute.get(r["ticker"], {}).get(r["look"] + 60)
@@ -447,8 +452,8 @@ def cmd_score(lists_run, hourly_run, minute_run, dec_path):
         n["void"] += void
         open_until[r["event"]] = m["close"]
         bets.append(dict(r, cash=cash, cash_value=cash_v, fill=kind))
-    print("fired (decisions) %d | blocked by an open bet on the event %d | no fill data %d | not filled %d | filled on a present candle %d | filled on an unchanged minute %d | voids among filled %d"
-          % (n["decisions"], n["blocked"], n["no_fill_data"], n["not_filled"], n["filled_present"], n["filled_unchanged"], n["void"]))
+    print("decisions, one per event and morning %d | blocked by an open bet on the event %d | fired %d | no fill data %d | not filled %d | filled on a present candle %d | filled on an unchanged minute %d | voids among filled %d"
+          % (n["decisions"], n["blocked"], n["decisions"] - n["blocked"], n["no_fill_data"], n["not_filled"], n["filled_present"], n["filled_unchanged"], n["void"]))
     half = lambda rows, second: [r for r in rows if (r["morning"] >= HALF_FROM) == second]   # noqa: E731
     events = sorted((r["look"], r["close"]) for r in bets)
     peak = max((sum(1 for a, b in events if a <= t < b) for t, _ in events), default=0)
@@ -463,7 +468,7 @@ def cmd_score(lists_run, hourly_run, minute_run, dec_path):
     for f in fams:
         rows = [r for r in bets if r["family"] == f]
         by[f] = (stats(rows), stats(half(rows, False)), stats(half(rows, True)))
-        print("FAMILY %s: fired %d | %s" % (f, sum(1 for r in d["decisions"] if r["family"] == f), fmt(by[f][0])))
+        print("FAMILY %s: decisions %d | %s" % (f, sum(1 for r in d["decisions"] if r["family"] == f), fmt(by[f][0])))
         print("   first half: %s | second half: %s" % (fmt(by[f][1]), fmt(by[f][2])))
     print("information only, fills on a present candle: %s" % fmt(stats([r for r in bets if r["fill"] == "present"])))
     print("information only, optimistic, same-candle fill (every decision booked at the limit, no block): %s" % fmt(stats(optimistic)))
