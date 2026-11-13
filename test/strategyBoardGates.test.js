@@ -174,7 +174,7 @@ gates.SB13 = () => {
   // the owner's standing rule (Nov 10, 2026): every strategy shows IMPLEMENT, KILL and RETURN; a strategy without a written one says so instead of hiding the gap
   assert.ok(P.KAL_BOARD_LIVE.every((s) => Array.isArray(s.rules) && s.rules.length === 3), 'every live strategy carries three rules');
   assert.ok(/Never automatic/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'OICORE').rules[2]), 'OICORE return is the owner choice A');
-  assert.ok(/Not written yet/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'EVENT830').rules[2]), 'the missing EVENT830 return rule is shown as a gap');
+  assert.ok(/general lifecycle/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'EVENT830').rules[2]), 'EVENT830 shows its written return rule (the general lifecycle, as in the registry)');
   const now = Date.UTC(2026, 10, 10, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);

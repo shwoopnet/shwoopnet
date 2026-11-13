@@ -136,6 +136,15 @@ gates.SF11 = () => {
   assert.ok(/: 'Markets trading now: gold\.'/.test(html), 'the static line is the fallback');
   assert.ok(!/probation probe/i.test(text(menu)), 'the Rules and Start text use Trial, not probation probe');
 };
+// SF12 (stale-items audit, Nov 13, 2026): the 25c exit line said every position is sold at 25c while the second-slot strategies hold to settlement.
+gates.SF12 = () => {
+  const slot = require('../functions/kalshiSlotLib.js');
+  const held = slot.SLOT_STRATEGIES.filter((x) => x.exit && x.exit.holdToSettle === true).map((x) => x.id);
+  const exitLine = html.slice(html.indexOf('<b>Exit at 25c (fixed, always on).</b>'), html.indexOf('</div>', html.indexOf('<b>Exit at 25c (fixed, always on).</b>')));
+  held.forEach((id) => assert.ok(exitLine.includes(id), 'the 25c exit line says ' + id + ' holds to settlement'));
+  assert.ok(/closed from Friday 5 PM to Sunday 6 PM Central/.test(text(menu)), 'the Rules text states gold\'s weekend close');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

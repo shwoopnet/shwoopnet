@@ -25,7 +25,8 @@ gates.WP3 = () => { assert.ok(wh.every((r) => r.n === null)); const h = draw(reg
 gates.WP4 = () => {
   const by = (id) => reg.find((r) => r.id === id);
   assert.strictEqual(W.kalshiWheelStatus(by('WH-NC15-SILVER')).key, 'counting');
-  for (const id of ['WH-CFRTIK-BTC', 'WH-CFRTIK-SILVER', 'WH-IPJ-TT', 'WH-ESOCTIE']) assert.strictEqual(W.kalshiWheelStatus(by(id)).key, 'waiting', id);
+  for (const id of ['WH-CFRTIK-BTC', 'WH-CFRTIK-SILVER']) assert.strictEqual(W.kalshiWheelStatus(by(id)).key, 'waiting', id);
+  for (const id of ['WH-IPJ-TT', 'WH-ESOCTIE']) assert.strictEqual(W.kalshiWheelStatus(by(id)).key, 'retired', id + ' (every sports and esports place was withdrawn Nov 13)');
   assert.strictEqual(W.kalshiWheelStatus(by('WH-NC15-EURUSD')).key, 'retired');
   const h = draw(reg); assert.ok(/Counting since 2026-11-13/.test(h) && /day 1 of 7/.test(h) && /Retired on 2026-11-13: failed the bar/.test(h));
   assert.strictEqual(W.kalshiWheelDay('2026-11-13', Date.UTC(2026, 10, 30)), 7); assert.strictEqual(W.kalshiWheelDay(null, now), null);

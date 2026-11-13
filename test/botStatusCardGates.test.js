@@ -35,7 +35,7 @@ gates.SC2 = () => {
 };
 gates.SC3 = () => {
   const l = lib(FRI_EVE);
-  assert.ok(/^No market is open, /.test(l.kalshiNextEntry(FRI_EVE).what) || l.kalshiNextEntry(FRI_EVE).name === 'Open interest jump', 'with gold closed (Dogecoin is paused since Nov 3, 2026) the Closing buy says no market is open');
+  assert.ok(/^Gold is closed, /.test(l.kalshiNextEntry(FRI_EVE).what) || l.kalshiNextEntry(FRI_EVE).name === 'Open interest jump', 'with gold closed (Dogecoin is paused since Nov 3, 2026) the Closing buy says no market is open');
   assert.strictEqual(lib(TUE).kalshiGoldClosed(TUE), false); assert.strictEqual(l.kalshiGoldClosed(FRI_EVE), true, 'gold closed from Friday 5 PM Central');
   assert.strictEqual(l.kalshiGoldClosed(RealDate.parse('2026-11-02T00:30:00Z')), false, 'gold open again from Sunday 6 PM Central');
 };

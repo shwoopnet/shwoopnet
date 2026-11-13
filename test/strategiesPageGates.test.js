@@ -127,7 +127,7 @@ gates.SP4 = () => {
   const rows = (k) => (panel(h, k).match(/class="rw(?: open)?(?: near)?"/g) || []).length;
   assert.deepStrictEqual([cnt('shadow'), cnt('live')], [0, 3], 'the counts: two trial seats and one proven strategy are all Live');
   assert.strictEqual((panel(h, 'live').match(/>Trial \d+ of 90</g) || []).length, 2, 'each trial seat carries its Trial tag with its fills of 90');
-  assert.strictEqual((panel(h, 'live').match(/>Proven</g) || []).length, 1, 'a strategy that is not a seat is Proven');
+  assert.strictEqual((panel(h, 'live').match(/>Under review</g) || []).length, 1, 'a strategy that is not a seat is Under review (nothing has met the proven bar)');
   for (const k of ['shadow', 'live']) assert.strictEqual(rows(k), cnt(k), 'the ' + k + ' count equals the rows in its panel');
   assert.strictEqual(cnt('off'), rows('off') + (panel(h, 'off').match(/class="sp-rrow"/g) || []).length, 'Off / Retired counts its cooling strategies plus the retired list');
   assert.strictEqual(rows('off'), 1);
@@ -301,7 +301,8 @@ gates.SP12c = () => {
   const reg = [{ id: 'W-SPREAD-CELL1', name: 'Sports spread', cause: 'failed the bar', figures: 'n 172 and 173, PF about 0.55 to 0.60', retiredOn: '2026-11-12', reason: 'r', rule: 'x', 'return': 'y' }, { id: 'MMSIM1', name: 'Making', cause: 'family closed', figures: null, retiredOn: '2026-11-12', reason: 'z' }, { id: 'XRP', name: 'XRP', cause: 'killed while live', retiredOn: '2026-10-28', reason: 'Paused' }, { id: 'E', name: '<img onerror=1>', cause: 'bogus', retiredOn: 'nope' }];
   const en = Q.kalshiRetiredEntries(Q.KAL_BOARD_RETIRED.rows, reg);
   const by = (n) => en.find((e) => e.name === n);
-  assert.strictEqual(by('XRP').figures, 'PF 0.49, n 86', 'an old row keeps its own cash PF and count');
+  assert.strictEqual(by('XRP').figures, '', 'an old killed-while-live row carries no live figures (the no live figures rule, stale-items audit Nov 13, 2026)');
+  assert.ok(Q.KAL_BOARD_RETIRED.rows.every((r) => r.pf === undefined && r.n === undefined), 'no retired row in the page holds a live profit factor or count');
   assert.strictEqual(by('XRP').cause, 'killed while live'); assert.strictEqual(by('XRP').date, '2026-10-28', 'the registry date wins');
   assert.strictEqual(by('Making').figures, '', 'no figures means none shown');
   assert.strictEqual(by('<img onerror=1>').cause, 'superseded', 'an unknown cause is filed, not dropped');
