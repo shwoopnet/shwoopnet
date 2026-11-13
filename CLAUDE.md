@@ -1344,3 +1344,7 @@ The first `MAPBREAK_CANDLES` run stored 165 answers (c0000 to c0164, files 0001 
 
 `MAPBREAK_CANDLES_M2` (owner MAIN): 65 batched one minute candle requests, cap 65, 685 tickers (the other map-2 contract of each one-map-each match), windows from the map-1 close minus 5 minutes to the map-2 close plus 5 minutes, development only (every request ends before 2026-10-23), about 1 MB a request. Job file only; it rides in the same pull request as the `MAPBREAK_CANDLES_REST` correction. Run it after the REST job. Nothing has run.
 
+## INPLAYJUMP_PILOTVAL (Nov 12, 2026, Desk A)
+
+`INPLAYJUMP_PILOTVAL` (owner DESK_A): 22 batched candle requests (5 pilot, 17 tennis validation; three hourly candles for the tennis screen), cap 22, 159 tickers, built from the `INPLAYJUMP_LISTS` answer (run 43333651862); every request ends before 2026-10-23 (development only), under the 10,000 minutes x tickers limit. Job file only; rides in the same pull request as the MAPBREAK corrections. Nothing has run.
+
