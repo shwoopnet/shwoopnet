@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/HOURLYTEMP_MEASUREMENT_NOTE.md",
  "purpose": "Hourly city temperature, cost and timing measurement (zero tries), stage 1: the settled markets of the four hourly temperature series for seven fixed UTC days (tickers, strikes and times only; the reader never reads a result), one list of their open markets for the size at the touch, and one fee-field read.",
- "heldout": "none (a cost measurement; no result is read and no rule is scored)",
+ "heldout": "none read: a cost measurement, no result is read and no rule is scored; sample 2026-11-05 to 2026-11-11 of KXTEMPNYCHS, KXTEMPMIAH, KXTEMPLAXHS, KXTEMPCHIHS; W-CAT-CAL1 weather (Refinement) held out closes at or after 2026-10-20T06:00Z, never read, RELEASED by the Head of R&D 2026-11-13 06:51Z so development here; WXNEW1 holdout 2026-10-19 to 2026-10-31 ends before the sample; WXOTHER1 closed unread; landed run unchanged, text corrected for the record",
  "allowed_endpoints": [
   {
    "name": "markets_list",

@@ -994,7 +994,7 @@
   .sp-sum-net{ display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin:4px 0 6px; } .sp-sum-net b{ font-size:32px; line-height:1.1; font-weight:700; font-variant-numeric:tabular-nums; } .sp-sum-net span{ font-size:12px; color:var(--muted); }
   .sp-sum-plot{ position:relative; height:70px; } .sp-sum-curve{ width:100%; height:100%; display:block; } .sp-sum-zero{ stroke:var(--border); stroke-width:1; stroke-dasharray:3 3; vector-effect:non-scaling-stroke; }
   .sp-sum-area{ fill:rgba(255,255,255,.06); } .sp-sum-ln{ fill:none; stroke:var(--paper); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
-  .sp-sum-dot{ position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--paper); animation:lpPulse 2.4s ease-out infinite 2s; }
+  .sp-sum-dot{ position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--paper); animation:lpPulse 2.4s ease-out infinite; animation-delay:var(--lp-sync, 0ms); }
   .sp-sum-none{ height:100%; display:flex; align-items:center; font-size:12px; color:var(--muted); border-top:1px dashed var(--border); }
   .sp-sum-cap{ display:flex; justify-content:space-between; gap:8px; font-size:11px; color:var(--muted); margin-top:4px; }
   .sp-sum-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
@@ -1009,7 +1009,7 @@
   .sp-rt-t{ grid-column:1 / -1; font-size:11px; color:var(--muted); } .sp-rt-m{ min-width:0; overflow-wrap:anywhere; } .sp-rt b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
   /* The stage board: the loop. A 2 by 2 loop on a phone (Shadow, then Probation across the top; Off / Retired, then Live below, so the return arrow goes up the left), one row of four on a wider screen with the return arrow underneath. The grid drifts slowly behind it; the dots flow along the arrows; both stop under reduced motion. */
   .lp{ position:relative; margin:6px 0 14px; padding:10px 12px 12px; border:1px solid var(--border); border-radius:16px; background:var(--panel); }
-  .lp::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px); background-size:26px 26px; -webkit-mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); animation:lpGrid 26s linear infinite; }
+  .lp::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px); background-size:26px 26px; -webkit-mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); animation:lpGrid 26s linear infinite; animation-delay:var(--lp-sync, 0ms); }
   .lp > *{ position:relative; } .lp > .lp-hd{ min-height:20px; margin:0 2px 8px; font-size:12px; color:var(--muted); } .lp-sum b{ color:var(--paper); font-weight:600; }
   .lp-row{ display:flex; align-items:center; gap:6px; }
   .lp-t{ all:unset; box-sizing:border-box; position:relative; display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto; column-gap:8px; align-items:center; padding:6px 12px 6px 14px; min-height:46px; cursor:pointer; border:1px solid var(--border); border-radius:12px; background:var(--ink,#0b0b0b); color:var(--paper); flex:none; transition:border-color .25s,box-shadow .25s,background .25s; }
@@ -1021,11 +1021,11 @@
   .lp-t.latest{ border-color:#8a8a8a; } .lp-tag{ position:absolute; top:-8px; left:12px; font-size:9px; font-weight:700; background:var(--paper); color:var(--ink,#000); border-radius:999px; padding:0 7px; text-decoration:none; white-space:nowrap; }
   .lp-c{ flex:1; min-width:56px; display:flex; flex-direction:column; align-items:center; gap:3px; }
   .lp-ln{ position:relative; display:block; width:100%; height:2px; background:var(--border); } .lp-ln::after{ content:''; position:absolute; right:-1px; top:-4px; border:5px solid transparent; border-left:7px solid var(--muted); border-right:0; }
-  .lp-ln u{ position:absolute; top:-2px; left:0; right:0; height:6px; background:radial-gradient(circle,var(--paper) 0 3px,transparent 3.5px) no-repeat 0 0 / 6px 6px; animation:lpDot 2.6s linear infinite; } .lp-ln u:nth-child(2){ animation-delay:.87s; } .lp-ln u:nth-child(3){ animation-delay:1.73s; }
+  .lp-ln u{ position:absolute; top:-2px; left:0; right:0; height:6px; background:radial-gradient(circle,var(--paper) 0 3px,transparent 3.5px) no-repeat 0 0 / 6px 6px; animation:lpDot 2.6s linear infinite; animation-delay:var(--lp-sync, 0ms); } .lp-ln u:nth-child(2){ animation-delay:calc(var(--lp-sync, 0ms) + .87s); } .lp-ln u:nth-child(3){ animation-delay:calc(var(--lp-sync, 0ms) + 1.73s); }
   .lp-lab{ font-size:10.5px; color:var(--muted); text-align:center; line-height:1.2; }
   .lp-ret{ position:relative; height:20px; margin:4px 40px 0; border:1px solid var(--border); border-top:0; border-radius:0 0 12px 12px; display:flex; align-items:flex-end; justify-content:center; } .lp-ret .lp-lab{ background:var(--panel); padding:0 8px; transform:translateY(7px); }
   .lp-ret::before{ content:''; position:absolute; left:-6px; top:-1px; border:5px solid transparent; border-bottom:7px solid var(--muted); border-top:0; }
-  .lp-ret u{ position:absolute; bottom:-4px; left:0; right:0; height:6px; background:radial-gradient(circle,var(--paper) 0 3px,transparent 3.5px) no-repeat 100% 0 / 6px 6px; animation:lpRet 5s linear infinite; } .lp-ret u:nth-child(2){ animation-delay:2.5s; }
+  .lp-ret u{ position:absolute; bottom:-4px; left:0; right:0; height:6px; background:radial-gradient(circle,var(--paper) 0 3px,transparent 3.5px) no-repeat 100% 0 / 6px 6px; animation:lpRet 5s linear infinite; animation-delay:var(--lp-sync, 0ms); } .lp-ret u:nth-child(2){ animation-delay:calc(var(--lp-sync, 0ms) + 2.5s); }
   /* Opening a box (Nov 13, 2026, the owner chose E, "box flips"; the loop shrinking into pills was "not a fan"): the loop keeps its full size, the other boxes dim, the opened box flips once and its list flips down under the loop. */
   .lp.is-open .lp-t:not([aria-expanded="true"]){ opacity:.55; } .lp.is-open .lp-t:not([aria-expanded="true"]):hover{ opacity:1; }
   .lp-t.lp-flip{ animation:lpFlipX .5s cubic-bezier(.3,.6,.3,1); } .lp-p.play{ transform-origin:top center; animation:lpFlipDown .55s cubic-bezier(.2,.7,.3,1) both; }
@@ -1042,7 +1042,7 @@
   .rw-k{ display:flex; flex-direction:column; gap:4px; min-width:0; } .rw-cap{ font-style:normal; font-size:10.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .rw-h:focus-visible, .mo-b:focus-visible, .lp-t:focus-visible{ outline:2px solid var(--paper); outline-offset:2px; }
   .rw-n{ font-size:13.5px; overflow-wrap:anywhere; } .rw-pf{ font-variant-numeric:tabular-nums; font-weight:700; font-size:14px; } .rw-w{ font-size:10.5px; letter-spacing:.06em; color:var(--muted); font-weight:700; }
-  .rw-bar{ height:5px; } .rw.near .rw-w::before{ content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--paper); margin-right:6px; vertical-align:middle; animation:lpPulse 1.7s ease-out infinite; }
+  .rw-bar{ height:5px; } .rw.near .rw-w::before{ content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--paper); margin-right:6px; vertical-align:middle; animation:lpPulse 1.7s ease-out infinite; animation-delay:var(--lp-sync, 0ms); }
   .sx{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .38s cubic-bezier(.3,.7,.2,1); } .sx-in{ min-height:0; overflow:hidden; visibility:hidden; transition:visibility 0s .38s; }
   .rw.open > .sx, .rw-more.open > .sx{ grid-template-rows:1fr; } .rw.open > .sx > .sx-in, .rw-more.open > .sx > .sx-in{ visibility:visible; transition-delay:0s; }
   .rw-d{ display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; padding:4px 12px 8px; } .rw-c1, .rw-c2{ display:flex; flex-direction:column; gap:6px; min-width:0; }
@@ -1061,7 +1061,8 @@
   @keyframes lpDot{ from{ background-position:0 0; opacity:0; } 15%{ opacity:1; } 85%{ opacity:1; } to{ background-position:100% 0; opacity:0; } } @keyframes lpRet{ from{ background-position:100% 0; opacity:0; } 10%{ opacity:1; } 90%{ opacity:1; } to{ background-position:0 0; opacity:0; } }
   @keyframes lpRow{ from{ opacity:0; transform:translateX(-16px); } } @keyframes lpFill{ from{ transform:scaleX(0); } } @keyframes lpTip{ 0%,80%{ opacity:0; } 100%{ opacity:1; } } @keyframes lpPulse{ 0%{ box-shadow:0 0 0 0 rgba(255,255,255,.6); } 100%{ box-shadow:0 0 0 8px rgba(255,255,255,0); } }
   @keyframes rwBar{ from{ transform:scaleX(0); } } @keyframes rwRing{ from{ stroke-dashoffset:1; } } @keyframes lpTileIn{ from{ opacity:0; transform:translateY(10px); } }
-  .rw.open .sp-bar i{ transform-origin:left center; animation:rwBar 1s cubic-bezier(.2,.7,.2,1) both .15s; } .rw.open .sp-ring-fg{ animation:rwRing 1s cubic-bezier(.2,.7,.2,1) both .1s; } .rw:not(.open) .sp-ring-fg, .rw:not(.open) .sp-bar i{ animation:none; }
+  /* The fill plays once, when a row is opened by a tap (the click handler adds rw-opening); a redraw rebuilds the row without it, so a data update never replays it (Nov 13, 2026). */
+  .rw.rw-opening .sp-bar i{ transform-origin:left center; animation:rwBar 1s cubic-bezier(.2,.7,.2,1) both .15s; } .rw.rw-opening .sp-ring-fg{ animation:rwRing 1s cubic-bezier(.2,.7,.2,1) both .1s; }
   .lp-p.play .rw{ animation:lpRow .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i,0) * 80ms + 160ms); } .lp-p.play .lp-prog i{ animation:lpFill 1.2s cubic-bezier(.2,.7,.2,1) both .25s; } .lp-p.play .lp-prog i::after{ animation:lpTip 1.2s cubic-bezier(.2,.7,.2,1) both .25s; }
   @media (max-width:760px){ .rw-h{ grid-template-columns:20px 44px minmax(0,1fr) auto; gap:4px 10px; padding:8px 10px 8px 6px; } .rw-h .chev{ grid-column:1; grid-row:1 / 3; } .rw-ring{ grid-column:2; grid-row:1 / 3; } .rw-n{ grid-column:3; grid-row:1; } .rw-h .sp-badge{ grid-column:4; grid-row:1; justify-self:end; } .rw-w{ grid-column:4; grid-row:2; justify-self:end; } .rw-k{ grid-column:3; grid-row:2; } .rw-d, .mo-body{ grid-template-columns:1fr; } .bd-l{ grid-template-columns:52px minmax(0,1fr); } .bd-b{ grid-column:2; } }
   @media (max-width:700px){ .lp{ padding:10px 8px; } .lp-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; } .lp-c, .lp-ret{ display:none; }
@@ -1141,7 +1142,7 @@
     #page-strategies.sp-play .sp-spk, #page-strategies.sp-play .sp-bar i{ animation: none; stroke-dasharray:none; }
     #page-strategies.sp-play .lp-t{ animation: none; }
     #page-strategies .lp-t.lp-flip, #page-strategies .lp-p.play, #page-strategies .sp-sum-dot, #page-strategies.sp-play .sp-sum-ln, #page-strategies.sp-play .sp-sum-area, #page-strategies.sp-play .sp-sum-c{ animation: none; }
-    #page-strategies .lp::before, #page-strategies .lp-ln u, #page-strategies .lp-ret u, #page-strategies .lp-p.play .rw, #page-strategies .lp-p.play .lp-prog i, #page-strategies .lp-p.play .lp-prog i::after, #page-strategies .rw.near .rw-w::before, #page-strategies .rw.open .sp-bar i, #page-strategies .rw.open .sp-ring-fg{ animation: none; }
+    #page-strategies .lp::before, #page-strategies .lp-ln u, #page-strategies .lp-ret u, #page-strategies .lp-p.play .rw, #page-strategies .lp-p.play .lp-prog i, #page-strategies .lp-p.play .lp-prog i::after, #page-strategies .rw.near .rw-w::before, #page-strategies .rw.rw-opening .sp-bar i, #page-strategies .rw.rw-opening .sp-ring-fg{ animation: none; }
     #page-strategies .lp-ln u, #page-strategies .lp-ret u{ opacity:0; }
     #page-strategies .sx, #page-strategies .chev, #page-strategies .lp-t{ transition: none; }
     .front-eyebrow, .front-h1, .front-line, .front-win, .front-win-a .win{ animation: none; }
@@ -1188,7 +1189,7 @@
   [data-reduce-motion="true"] #page-strategies.sp-play .sp-ring-fg{ animation: none; }
   [data-reduce-motion="true"] #page-strategies.sp-play .lp-t{ animation: none; }
   [data-reduce-motion="true"] #page-strategies .lp-t.lp-flip, [data-reduce-motion="true"] #page-strategies .lp-p.play, [data-reduce-motion="true"] #page-strategies .sp-sum-dot, [data-reduce-motion="true"] #page-strategies.sp-play .sp-sum-ln, [data-reduce-motion="true"] #page-strategies.sp-play .sp-sum-area, [data-reduce-motion="true"] #page-strategies.sp-play .sp-sum-c{ animation: none; }
-  [data-reduce-motion="true"] #page-strategies .lp::before, [data-reduce-motion="true"] #page-strategies .lp-ln u, [data-reduce-motion="true"] #page-strategies .lp-ret u, [data-reduce-motion="true"] #page-strategies .lp-p.play .rw, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i::after, [data-reduce-motion="true"] #page-strategies .rw.near .rw-w::before, [data-reduce-motion="true"] #page-strategies .rw.open .sp-bar i, [data-reduce-motion="true"] #page-strategies .rw.open .sp-ring-fg{ animation: none; }
+  [data-reduce-motion="true"] #page-strategies .lp::before, [data-reduce-motion="true"] #page-strategies .lp-ln u, [data-reduce-motion="true"] #page-strategies .lp-ret u, [data-reduce-motion="true"] #page-strategies .lp-p.play .rw, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i::after, [data-reduce-motion="true"] #page-strategies .rw.near .rw-w::before, [data-reduce-motion="true"] #page-strategies .rw.rw-opening .sp-bar i, [data-reduce-motion="true"] #page-strategies .rw.rw-opening .sp-ring-fg{ animation: none; }
   [data-reduce-motion="true"] #page-strategies .lp-ln u, [data-reduce-motion="true"] #page-strategies .lp-ret u{ opacity:0; }
   [data-reduce-motion="true"] #page-strategies .sx, [data-reduce-motion="true"] #page-strategies .chev, [data-reduce-motion="true"] #page-strategies .lp-t{ transition: none; }
   [data-reduce-motion="true"] #page-strategies.sp-play .sp-spk, [data-reduce-motion="true"] #page-strategies.sp-play .sp-bar i{ animation: none; stroke-dasharray:none; }
@@ -1831,12 +1832,15 @@
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
                   <li>Strategies page: a Wheel block under the stage board lists every rotating (unproven) place with its status, its kill and return rules and how far it is from the entry bar; the seat boxes read 0 because no seat is live. Page only; nothing trades.</li>
+                  <li>Research: two kalshi-pull job files for the Fed word-mention idea (FOMCTEXT) are on main and nothing has run: FOMCTEXT_HIST_A (11 development press conference events, Jan 2025 to Apr 2026, 22 pages at most) and FOMCTEXT_EVENTS (four mention series listed with no markets, 12 pages at most). Job files and tests only.</li>
+                  <li>Research: two kalshi-pull job files join main and nothing has run: POLGAPH_LISTS_NOV4 (63 politics series, settled lists closing Sep 12 to Nov 4 only, replacing the run that held out material) and HOURLYTEMP_CANDLES (129 batched one minute candle requests for the four hourly temperature series, Nov 5 to 11). Seven landed jobs also got a corrected held-out line, text only; their landed runs are unchanged.</li>
                   <li>Research (docs only): one landed lists run that turned out to hold held-out markets is now listed in a small held-out runs file instead of being moved; its development window was cut back to Nov 4.</li>
                   <li>Process: the wheel files are settled at the Head of R&amp;D's branch head eedd28e3 (one more counting ruling on rows received at the same instant; the NC15 places count from 02:40 UTC). Docs only.</li>
                   <li>Process (the owner, Nov 13): the wheel's bar drops the single-day limit on his decision; the lane text is now v1.3 with the block-counting rulings, and the wheel admit list and ledger are refreshed from the Head of R&amp;D's branch. Docs only.</li>
                   <li>Research: HISTCUTOFF1, a two request kalshi-pull job that reads Kalshi's public historical cutoff (the date that separates the live and historical market lists) and probes whether the historical list honours an event filter on one development Fed meeting, joins the jobs bundle. Job file and tests only.</li>
                   <li>Research: three more kalshi-pull job files are on main and nothing has run: POLGAPH_LISTS (69 short-dated politics series, settled lists only), CANDLEGAP2_TTEBB (3 batched candle requests for table tennis and e-basketball markets) and RULESREAD_LISTS (26 golf, motorsport and combat sport series, rules text census). Public Kalshi data only, same runner and limits. Docs and job files only.</li>
                   <li>Research: a 79 request kalshi-pull job, VOIDSNAP_CANDLES, reads 1 minute candles of CS2 markets in the development window (closes Sep 12 to Oct 22) for a zero-try measurement of voided matches. Job file and tests only.</li>
+                  <li>Strategies page fixes: the loop no longer restarts its moving dots each time the page updates, an approved seat with no order yet (Perp-model longshot) waits in Shadow instead of Live, and a trial seat that has reached 90 fills reads "Trial, review due" instead of "Trial 90 of 90". Page only.</li>
                   <li>Strategies page, one Live box: the loop is now Shadow, Live and Off / Retired (the Probation box is gone). Every strategy trading real money sits in Live with a tag: Trial (small size, with its fills of 90 toward the 60 + 30 record) or Proven. Page only.</li>
                   <li>Strategy list kept in step with research (Nov 13): the Shadow lane now lists every wheel place the Head of R&amp;D has admitted, with whether it is counting yet, and the Retired list gains the rules closed on Nov 12 and 13 (the esports break rule, rematch, period ties, weather after the day ends, perp against binary, the stock test and others), each with its cause. A scheduled job refreshes these rows into a pull request for the owner to merge. No figures, no bot change.</li>
                   <li>Strategies page, new top bar and a calmer open state: the All strategies bar is a profit factor ring beside net cash and a 30 day cash curve, with Today, Last 7 days and Open now as chips; opening a stage box no longer shrinks the loop into pills (the other boxes dim, the opened box flips and its list flips down, each row with a small ring and its closest kill); Recent activity is removed (the bell and the trade log carry it). Page only.</li>
@@ -4811,15 +4815,17 @@ kalshiStatusTick();
     var shadowRep = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowRep[r.id] = r.rep; }); }
     var box = { shadow: [], live: [], off: [] }, kills = { live: [] }, trials = 0;
     // The trial-to-proven step shown inside Live: a trial seat counts its settled fills toward the 60 + 30 record (docs/ROTATION_LANE.md section 5a: 60 fills at 1.3, then 30 more at 1.0); a strategy that is not a seat is Proven. The count is progress only, never a pass: the record's profit factor bars are judged by the review, not here.
-    var trialTag = function(lane, fills){ if(lane !== 'probation'){ return { text: 'Proven', trial: false }; } var n = Math.max(0, Math.floor(Number(fills) || 0)); return { text: 'Trial ' + Math.min(n, 90) + ' of 90', trial: true }; };
+    var trialTag = function(lane, fills){ if(lane !== 'probation'){ return { text: 'Proven', trial: false }; } var n = Math.max(0, Math.floor(Number(fills) || 0)); return { text: n >= 90 ? 'Trial, review due' : 'Trial ' + n + ' of 90', trial: true }; };   // at 90 fills the count is done but the record is not judged here, so it says the review is due rather than a full 90 of 90 that reads like a pass (the owner's screenshot, Nov 13, 2026)
     // ---- Live, Probation and Off rows: the cards the page computes from the bot's own orders and kill state ----
     (model.live || []).forEach(function(s){
       var lane = s.lane || 'live', bk = kalshiStageBoxOf(lane), g = kalshiStratGauge(s.id, s.kill, money);
+      // An approved seat that has placed no order yet (CFRTIK before its deploy) is not trading real money, so it waits in Shadow, never in Live (Nov 13, 2026). orders is the count of every order the page holds for it, filled or not; undefined (an older caller) changes nothing.
+      var waiting = lane === 'probation' && s.orders === 0; if(waiting){ bk = 'shadow'; }
       var bd = kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1', killState: s.killState });
       var pf = kalshiBoardPfText(s.w.d30), unreadable = s.killState === 'unknown', loading = s.killState === 'loading';
       var word = lane === 'off' && bd.text === 'KILLED' ? 'COOLING' : bd.text;
       var reg = regOf(s.id), ret = s.ret || null;
-      if(bk !== 'off' && g && !unreadable && !loading){ kills[bk].push({ id: s.id, name: s.name, frac: g.frac }); }
+      if(bk === 'live' && g && !unreadable && !loading){ kills.live.push({ id: s.id, name: s.name, frac: g.frac }); }
       var frac = bk === 'off' ? (ret ? ret.frac : 0) : (g && !unreadable && !loading ? g.frac : 0);
       var last = s.detail && s.detail.recent && s.detail.recent[0] ? s.detail.recent[0] : null;
       var killWords = (s.rules && s.rules[1]) || (reg && reg.kill) || 'Not written yet', retWords = (s.rules && s.rules[2]) || (reg && reg['return']) || 'Not written yet';
@@ -4833,6 +4839,7 @@ kalshiStatusTick();
       var mo = more(s.id, '<div class="mo-sp"><span class="bd-lab">Recent results</span>' + sparkHtml(s.spark || [], 'Rolling 30 trade cash PF') + '</div>' +
         ladderDl('Sizing', KAL_BOARD_LADDER[s.id] || KAL_BOARD_LADDER.shadow, '<dt>Thresholds</dt><dd>' + esc(killWords) + '</dd><dt>Record</dt><dd>' + esc('Live record: ' + s.w.d30.n + ' settled trades in 30 days, ' + s.w.all.n + ' in all. Shadow record: ' + (shadowTwin ? 'cash PF ' + (shadowTwin.fillable === 0 ? 'n/a' : shadowTwin.pfFillable === null ? 'n/a' : shadowTwin.pfFillable.toFixed(2)) + ' over ' + shadowTwin.fillable + ' signals' : 'n/a')) + '</dd><dt>Read date</dt><dd>' + esc(rd) + '</dd>') + rulesHtml(s.rules) + (s.detail ? kalshiStratDetailHtml(s.detail, esc, money, tt) : ''));
       var tg = trialTag(lane, s.w.all.n); if(bk === 'live' && tg.trial){ trials++; }
+      if(waiting){ box.shadow.push({ key: s.id, name: s.name, stage: 'Approved', stCls: 'deck', pf: pf, word: 'WAITING', frac: 0, cap: 'approved seat, no order yet', detail: detail, more: mo, g: null }); return; }
       box[bk].push({ key: s.id, name: s.name, stage: bk === 'off' ? 'Off' : tg.text, stCls: bk === 'off' ? 'off' : tg.trial ? 'prob' : 'live', pf: pf, word: word, frac: frac, cap: bk === 'off' ? (ret ? 'return: ' + ret.trades + ' of 60 trades' : '') : (g && !unreadable && !loading ? g.big + ' · ' + g.cap : unreadable ? 'kill state not readable' : ''), detail: detail, more: mo, g: g });
     });
     function n30(s){ return s.w.d30.n > 0; }
@@ -5021,7 +5028,7 @@ kalshiStatusTick();
       if(goldCard){ kill.off = gold.state === 'killed'; kill.unknown = gold.state !== 'killed' && gold.state !== 'armed'; if(kill.off){ kill.lines = ['Gold is off: the kill rule tripped.'].concat(kill.lines); } }
       var reg = kalshiRegistry.list.filter(function(x){ return x.id === s.id; })[0] || null;
       var lane = kalshiStratLaneOf({ stage: reg ? reg.stage : undefined, drawn: true, off: liveState[s.id] === 'off', slot: KAL_SLOT_REGISTERED.indexOf(s.id) >= 0 || Boolean(reg && reg.code && reg.code.slot) });
-      return { id: s.id, lane: lane, name: s.name, rule: s.rule, rules: s.rules, w: kalshiBoardWindows(mine, now), kill: kill,
+      return { id: s.id, lane: lane, name: s.name, rule: s.rule, rules: s.rules, orders: mine.length, w: kalshiBoardWindows(mine, now), kill: kill,
         killState: goldCard ? gold.state : undefined, note: goldCard ? kalshiGoldKillNote(gold, gold.state === 'killed' ? kalshiGoldReturnProgress(kalshiShadowCache.rows, now) : '', kalDateTime) : '',
         today: kalshiBoardPf(kalshiBoardRows(mine).filter(function(r){ return kalDayKey(r.ts) === kalDayKey(now); })).net,
         ret: goldCard ? kalshiGoldReturnStats(kalshiShadowCache.rows, now) : null,
@@ -5041,6 +5048,8 @@ kalshiStatusTick();
     var regSplit = kalshiRegistrySplit(kalshiRegistry.list, KAL_BOARD_SHADOW.map(function(r){ return r.id; }).concat(KAL_BOARD_LIVE.map(function(r){ return r.id; })), KAL_BOARD_RETIRED.rows.map(function(r){ return r.name; }));
     // A redraw keeps keyboard focus on the same control (the markup is replaced as a whole), found by its data-f key.
     var focusKey = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute('data-f') : null;
+    // The loop's moving dots, the grid drift and the pulses are infinite CSS animations; a redraw replaces their elements, which restarted every one of them from zero on each data update (the owner, Nov 13, 2026: "a very obvious restart animation ... almost as if the page refreshes"). A negative delay of the time since the page loaded puts each new element at the phase the old one had, so a redraw is seamless.
+    page.style.setProperty('--lp-sync', -Math.round(typeof performance !== 'undefined' && performance.now ? performance.now() : 0) + 'ms');
     el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData }, escapeHtml, kalshiMoney);
     if(focusKey){ var fs = el.querySelectorAll('[data-f]'); for(var fi = 0; fi < fs.length; fi++){ if(fs[fi].getAttribute('data-f') === focusKey){ fs[fi].focus(); break; } } }
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
@@ -5094,7 +5103,7 @@ kalshiStatusTick();
     body.addEventListener('click', function(e){
       var t = e.target && e.target.closest ? e.target : null; if(!t){ return; }
       var r = t.closest('[data-row]'), m = t.closest('[data-more]'), s = t.closest('[data-stage]'), o;
-      if(r){ o = r.getAttribute('aria-expanded') !== 'true'; r.setAttribute('aria-expanded', String(o)); r.parentNode.classList.toggle('open', o); kalshiStratOpen['row:' + r.getAttribute('data-row')] = o; return; }
+      if(r){ o = r.getAttribute('aria-expanded') !== 'true'; r.setAttribute('aria-expanded', String(o)); r.parentNode.classList.toggle('open', o); r.parentNode.classList.toggle('rw-opening', o); kalshiStratOpen['row:' + r.getAttribute('data-row')] = o; return; }
       if(m){ o = m.getAttribute('aria-expanded') !== 'true'; m.setAttribute('aria-expanded', String(o)); m.parentNode.classList.toggle('open', o); kalshiStratOpen['more:' + m.getAttribute('data-more')] = o; return; }
       if(s){ kalshiStratStage(s.getAttribute('data-stage')); }
     });
