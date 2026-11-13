@@ -59,6 +59,7 @@ const slotRun = require("./kalshiSlotRunLib");
 const slotStoreLib = require("./kalshiSlotStoreLib");
 const shadowLib = require("./kalshiShadowLib");   // shadow rules (Nov 9, 2026): log only, no order, empty registry until a reviewed edit adds one
 const shadowSeen = new Set();
+const shadowCandleCache = {};   // successful open interest candle answers, shared by every shadow rule that needs the same market window (P2)
 const shadowLastRead = new Map();   // series to the last time a shadow rule read it (round robin under the per minute read budget)
 const longholdLib = require("./kalshiLongholdLib");   // long-hold PAPER log (Nov 12, 2026): log only, empty registry, no order
 const longholdSeen = new Set();
@@ -771,17 +772,19 @@ exports.kalshiLiveArmed = onSchedule(
         try {
           const shadowBudget = shadowLib.makeReadBudget(shadowLib.SHADOW_READS_PER_MINUTE);
           let shadowQuotes = sessionOn && market ? market.quotes : null;
-          if (!shadowQuotes) {
-            shadowQuotes = [];
+          // A shadow-allowed market that L1 does not read (none today: the list equals the L1 list) is read here under the shared budget, even with a session on.
+          const shadowExtra = sessionOn && market ? shadowLib.planShadowReads(shadowLib.SHADOW_RULES, now, shadowLastRead).filter((s) => !live.L1_SERIES.includes(s)) : [];
+          if (!shadowQuotes || shadowExtra.length) {
+            shadowQuotes = shadowQuotes ? shadowQuotes.slice() : [];
             // ONE shared budget of public reads for the whole shadow step (series lists, candle reads, second looks): the oldest unread series first, never more than 3 a minute whatever the number of rules.
-            for (const series of shadowLib.planShadowReads(shadowLib.SHADOW_RULES, now, shadowLastRead)) {
+            for (const series of (shadowExtra.length ? shadowExtra : shadowLib.planShadowReads(shadowLib.SHADOW_RULES, now, shadowLastRead))) {
               if (!shadowBudget.take()) break;
               shadowLastRead.set(series, now);
               try { for (const m of await kalshiMarketApi().markets(series)) shadowQuotes.push({ series, m }); }
               catch (e) { console.error("kalshiLiveArmed: " + series + " shadow quotes skipped: " + String((e && e.message) || e).slice(0, 120)); }
             }
           }
-          await shadowLib.runShadowTick({ now, quotes: shadowQuotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen,
+          await shadowLib.runShadowTick({ now, quotes: shadowQuotes, rules: shadowLib.SHADOW_RULES, allowedSeries: shadowLib.SHADOW_ALLOWED_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen, candleCache: shadowCandleCache,
             budget: shadowBudget, clock: Date.now, sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
             update: (id, patch) => db.collection(shadowLib.COLLECTION).doc(id).set(patch, { merge: true }),
             market: (ticker) => kalshiMarketApi().market(ticker),
