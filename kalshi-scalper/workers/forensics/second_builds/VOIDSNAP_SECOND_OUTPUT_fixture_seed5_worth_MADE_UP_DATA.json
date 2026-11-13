@@ -29,16 +29,16 @@
  "candle_tickers_not_in_the_sample_ignored": 1470,
  "readings": [
   "a. Window edges (rule 6): a candle is inside an event's window if its end time is at or after S minus 185 minutes and at or before the earlier of the event's close and S plus 480 minutes (both edges count). Candles a batched request returned outside the event's own window are not seen.",
-  "b. A minute after the window's end (rule 7), for example S when the market closed before S: the quote is still the last candle inside the window, under the carry in force. Nothing in rule 7 stops it; the detectors have their own \"closed\" test, question 1 has none.",
-  "c. A quote (rule 7) needs a bid above 0.00 and an ask under 1.00, both present. A candle with a bid of 0.00 and an ask under 1.00, or an ask of 1.00 and a bid above 0.00, is \"one side missing\".",
+  "b. SETTLED by Amendment 3, item 1: a minute after the window's end (the market has closed, or S plus 480 minutes has passed) has no quote. A minute exactly at the window's end is inside it. (This build first carried the last candle past the close.)",
+  "c. A quote (rule 7) needs a bid above 0.00 and an ask under 1.00, both present, and the bid under the ask (Amendment 3, item 3). A candle with a bid of 0.00 and an ask under 1.00, or an ask of 1.00 and a bid above 0.00, is \"one side missing\".",
   "d. The carries: registered = the last candle at or before the minute inside the window, whatever its age; 60 minute = the same if it ended 60 minutes or less before the minute (exactly 60 counts); none = only a candle ending exactly at the minute.",
-  "e. Question 2's minutes are every whole minute from S minus 185 to the window's end, both counted. Each contract is a side; a side's ask, bid and spread are that contract's own YES quotes, and its settlement value is its own listed value.",
-  "f. Printed for question 2: the first minute of the first run of 5 or more, per void the earliest over its two sides, summarised as lowest, median, highest in minutes against S; the median shortfall and the one-way cost are taken over every buyable (void, side, minute); the fee is 7% x p x (1 - p) at p = ask plus 1c, rounded up to the cent.",
+  "e. SETTLED by Amendment 3, item 2: question 2's and line 1's minutes are every whole minute from S minus 180 to the window's end, both counted; the five minutes from S minus 185 only feed the carry. (This build first counted them.) Each contract is a side; a side's ask, bid and spread are that contract's own YES quotes, and its settlement value is its own listed value.",
+  "f. Printed for question 2: the first minute of the first run of 5 or more, per void the earliest over its two sides, summarised as lowest, quartiles (the values at positions n // 4, n // 2 and 3n // 4 of the sorted list), highest, in minutes against S; the median shortfall and the one-way cost are taken over every buyable (void, side, minute); the fee is 7% x p x (1 - p) at p = ask plus 1c, rounded up to the cent.",
   "g. Line 1's information count with the band: five consecutive minutes at or after the detector's minute in which the same side is buyable AND its ask is 15c to 64c.",
   "h. \"Closed at or before that minute\" (detectors) uses the event's close, the later of its two contracts' close times.",
   "i. D1: a present candle of the first-named contract ending after S and at or before S plus 60 that is not a quote (empty book or one side missing) fails D1. Only candles inside the window are looked at.",
   "j. D2's volume is the candles' volume_fp, summed over both contracts, candles inside the window ending after S and at or before S plus 60; an event with no such candle has volume 0 and is flagged unless closed.",
-  "k. The implied share with no flagged event at all is \"n/a\" and line 2 fails.",
+  "k. The implied share with no flagged event at all is taken as zero and line 2 fails (Amendment 3, item 3).",
   "l. Line 1 counts a void only if the detector flags it under the same carry as the run.",
   "m. Line 3's best reference is chosen under each carry on its own.",
   "n. Drops (rule 2 and 3) are tested in this order: not two contracts, no close time, no ticker clock, outside the window, neither void nor played.",
@@ -56,14 +56,14 @@
      "within_3c": 128
     },
     "S-60": {
-     "voids_with_it": 154,
-     "within_1c": 89,
-     "within_3c": 128
+     "voids_with_it": 149,
+     "within_1c": 87,
+     "within_3c": 124
     },
     "S": {
-     "voids_with_it": 160,
-     "within_1c": 92,
-     "within_3c": 132
+     "voids_with_it": 152,
+     "within_1c": 90,
+     "within_3c": 127
     },
     "last two-sided": {
      "voids_with_it": 165,
@@ -73,12 +73,22 @@
    },
    "question_2": {
     "voids_with_any_buyable_minute": 98,
-    "buyable_side_minutes": 22477,
+    "buyable_side_minutes": 22472,
     "voids_with_a_run_of_5_or_more": 96,
+    "voids_with_a_run_of_5_or_more_with_the_ask_15c_to_64c": 78,
+    "voids_with_any_candle_in_the_window": 165,
+    "played_with_any_candle_in_the_window": 165,
+    "voids_with_any_candle_returned": 165,
+    "played_with_any_candle_returned": 165,
     "first_run_minute_vs_S": {
-     "lowest": -185,
+     "lowest": -180,
      "median": 84.0,
-     "highest": 120
+     "highest": 120,
+     "quartiles_by_position": [
+      69,
+      85,
+      104
+     ]
     },
     "longest_run_minutes_information_only": 411,
     "median_shortfall": 0.12,
@@ -93,9 +103,9 @@
      "line_1_count_with_ask_15c_to_64c_information_only": 69,
      "line_1": true,
      "line_2": true,
-     "line_3_best_reference": "S",
+     "line_3_best_reference": "S-180",
      "line_3_best_of": 3,
-     "line_3_share": 0.8,
+     "line_3_share": 0.7757575757575758,
      "line_3": true,
      "all_three": true,
      "failed": []
@@ -108,9 +118,9 @@
      "line_1_count_with_ask_15c_to_64c_information_only": 73,
      "line_1": true,
      "line_2": true,
-     "line_3_best_reference": "S",
+     "line_3_best_reference": "S-180",
      "line_3_best_of": 3,
-     "line_3_share": 0.8,
+     "line_3_share": 0.7757575757575758,
      "line_3": true,
      "all_three": true,
      "failed": []
@@ -143,14 +153,14 @@
      "within_3c": 128
     },
     "S-60": {
-     "voids_with_it": 150,
-     "within_1c": 87,
-     "within_3c": 125
+     "voids_with_it": 147,
+     "within_1c": 85,
+     "within_3c": 122
     },
     "S": {
-     "voids_with_it": 151,
+     "voids_with_it": 148,
      "within_1c": 88,
-     "within_3c": 126
+     "within_3c": 125
     },
     "last two-sided": {
      "voids_with_it": 165,
@@ -160,12 +170,22 @@
    },
    "question_2": {
     "voids_with_any_buyable_minute": 98,
-    "buyable_side_minutes": 6179,
+    "buyable_side_minutes": 6174,
     "voids_with_a_run_of_5_or_more": 96,
+    "voids_with_a_run_of_5_or_more_with_the_ask_15c_to_64c": 78,
+    "voids_with_any_candle_in_the_window": 165,
+    "played_with_any_candle_in_the_window": 165,
+    "voids_with_any_candle_returned": 165,
+    "played_with_any_candle_returned": 165,
     "first_run_minute_vs_S": {
-     "lowest": -185,
+     "lowest": -180,
      "median": 84.0,
-     "highest": 120
+     "highest": 120,
+     "quartiles_by_position": [
+      69,
+      85,
+      104
+     ]
     },
     "longest_run_minutes_information_only": 192,
     "median_shortfall": 0.12,
@@ -247,12 +267,22 @@
    },
    "question_2": {
     "voids_with_any_buyable_minute": 98,
-    "buyable_side_minutes": 585,
+    "buyable_side_minutes": 583,
     "voids_with_a_run_of_5_or_more": 85,
+    "voids_with_a_run_of_5_or_more_with_the_ask_15c_to_64c": 69,
+    "voids_with_any_candle_in_the_window": 165,
+    "played_with_any_candle_in_the_window": 165,
+    "voids_with_any_candle_returned": 165,
+    "played_with_any_candle_returned": 165,
     "first_run_minute_vs_S": {
      "lowest": 57,
      "median": 90,
-     "highest": 120
+     "highest": 120,
+     "quartiles_by_position": [
+      71,
+      90,
+      105
+     ]
     },
     "longest_run_minutes_information_only": 6,
     "median_shortfall": 0.12,

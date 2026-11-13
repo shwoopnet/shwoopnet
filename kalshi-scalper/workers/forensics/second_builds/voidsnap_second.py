@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """VOIDSNAP stage 1, an INDEPENDENT SECOND BUILD (Forensics desk, 2026-11-13, on the Head of R&D's order). Written from Desk B's card with Amendments 1 and 2
-(claude/idea-desk-b at a0cdeebe, kalshi-scalper/workers/voidsnap/VOIDSNAP_CARD.md, sha256 da37859d...) ALONE. Desk B's voidsnap.py was not read.
+(claude/idea-desk-b at a0cdeebe, kalshi-scalper/workers/voidsnap/VOIDSNAP_CARD.md, sha256 da37859d...) ALONE, then aligned to Amendment 3 (1af7b80b, card sha256 cfababd6...),
+which settled the two places where this build first read the text differently (readings b and e below). Desk B's voidsnap.py was not read.
 A zero-try HINDSIGHT MEASUREMENT, not a rule: the sample is chosen by the void result, so every figure is an upper bound.
 
 usage: python3 -I voidsnap_second.py sample  --lists <lists run> [--compare <VOIDSNAP_SAMPLE.json>]
@@ -10,16 +11,16 @@ usage: python3 -I voidsnap_second.py sample  --lists <lists run> [--compare <VOI
 
 Places where the text leaves a choice (READINGS, printed with the output):
  a. Window edges (rule 6): a candle is inside an event's window if its end time is at or after S minus 185 minutes and at or before the earlier of the event's close and S plus 480 minutes (both edges count). Candles a batched request returned outside the event's own window are not seen.
- b. A minute after the window's end (rule 7), for example S when the market closed before S: the quote is still the last candle inside the window, under the carry in force. Nothing in rule 7 stops it; the detectors have their own "closed" test, question 1 has none.
- c. A quote (rule 7) needs a bid above 0.00 and an ask under 1.00, both present. A candle with a bid of 0.00 and an ask under 1.00, or an ask of 1.00 and a bid above 0.00, is "one side missing".
+ b. SETTLED by Amendment 3, item 1: a minute after the window's end (the market has closed, or S plus 480 minutes has passed) has no quote. A minute exactly at the window's end is inside it. (This build first carried the last candle past the close.)
+ c. A quote (rule 7) needs a bid above 0.00 and an ask under 1.00, both present, and the bid under the ask (Amendment 3, item 3). A candle with a bid of 0.00 and an ask under 1.00, or an ask of 1.00 and a bid above 0.00, is "one side missing".
  d. The carries: registered = the last candle at or before the minute inside the window, whatever its age; 60 minute = the same if it ended 60 minutes or less before the minute (exactly 60 counts); none = only a candle ending exactly at the minute.
- e. Question 2's minutes are every whole minute from S minus 185 to the window's end, both counted. Each contract is a side; a side's ask, bid and spread are that contract's own YES quotes, and its settlement value is its own listed value.
- f. Printed for question 2: the first minute of the first run of 5 or more, per void the earliest over its two sides, summarised as lowest, median, highest in minutes against S; the median shortfall and the one-way cost are taken over every buyable (void, side, minute); the fee is 7% x p x (1 - p) at p = ask plus 1c, rounded up to the cent.
+ e. SETTLED by Amendment 3, item 2: question 2's and line 1's minutes are every whole minute from S minus 180 to the window's end, both counted; the five minutes from S minus 185 only feed the carry. (This build first counted them.) Each contract is a side; a side's ask, bid and spread are that contract's own YES quotes, and its settlement value is its own listed value.
+ f. Printed for question 2: the first minute of the first run of 5 or more, per void the earliest over its two sides, summarised as lowest, quartiles (the values at positions n // 4, n // 2 and 3n // 4 of the sorted list), highest, in minutes against S; the median shortfall and the one-way cost are taken over every buyable (void, side, minute); the fee is 7% x p x (1 - p) at p = ask plus 1c, rounded up to the cent.
  g. Line 1's information count with the band: five consecutive minutes at or after the detector's minute in which the same side is buyable AND its ask is 15c to 64c.
  h. "Closed at or before that minute" (detectors) uses the event's close, the later of its two contracts' close times.
  i. D1: a present candle of the first-named contract ending after S and at or before S plus 60 that is not a quote (empty book or one side missing) fails D1. Only candles inside the window are looked at.
  j. D2's volume is the candles' volume_fp, summed over both contracts, candles inside the window ending after S and at or before S plus 60; an event with no such candle has volume 0 and is flagged unless closed.
- k. The implied share with no flagged event at all is "n/a" and line 2 fails.
+ k. The implied share with no flagged event at all is taken as zero and line 2 fails (Amendment 3, item 3).
  l. Line 1 counts a void only if the detector flags it under the same carry as the run.
  m. Line 3's best reference is chosen under each carry on its own.
  n. Drops (rule 2 and 3) are tested in this order: not two contracts, no close time, no ticker clock, outside the window, neither void nor played.
@@ -125,7 +126,7 @@ def read_candles(folders, wanted):
     return out, len(other)
 
 
-def is_quote(b, a): return b is not None and a is not None and b > EPS and a < 1 - EPS
+def is_quote(b, a): return b is not None and a is not None and b > EPS and a < 1 - EPS and b < a - EPS
 def fee_up(p):
     import math
     return math.ceil(0.07 * p * (1 - p) * 100 - EPS) / 100.0
@@ -154,6 +155,7 @@ def analyse(ev, settle, candles, carry, void):
     rows = {t: (sorted((ts,) + v for ts, v in candles.get(t, {}).items() if ws <= ts <= we) if windowed else []) for t in ev["tickers"]}
     keys = {t: [r[0] for r in rows[t]] for t in rows}
     def q(t, m):
+        if not windowed or m > we: return None                                  # Amendment 3, item 1: no quote after the window ends
         i = bisect.bisect_right(keys[t], m) - 1
         if i < 0: return None
         ts, b, a, _ = rows[t][i]
@@ -162,7 +164,7 @@ def analyse(ev, settle, candles, carry, void):
     def mid(t, m):
         x = q(t, m); return None if x is None else (x[0] + x[1]) / 2
     first = ev["tickers"][0]; closed = lambda m: ev["close"] <= m
-    out = {"windowed": windowed, "candles": sum(len(r) for r in rows.values())}
+    out = {"windowed": windowed, "candles": sum(len(r) for r in rows.values()), "candles_returned": sum(len(candles.get(t, {})) for t in ev["tickers"])}
     m0 = mid(first, S)
     out["D1"] = (not closed(S + 60 * MIN)) and m0 is not None and all(is_quote(b, a) and abs((b + a) / 2 - m0) <= 0.02 + EPS for ts, b, a, _ in rows[first] if S < ts <= S + 60 * MIN)
     out["D2"] = (not closed(S + 60 * MIN)) and sum(v for t in rows for ts, _, _, v in rows[t] if S < ts <= S + 60 * MIN) < 10 - EPS
@@ -171,7 +173,7 @@ def analyse(ev, settle, candles, carry, void):
     v = settle.get(first); out["refs"] = {k: mid(first, S + d) for k, d in REF_AT.items()}
     out["refs"]["last two-sided"] = next(((b + a) / 2 for ts, b, a, _ in reversed(rows[first]) if is_quote(b, a)), None)
     out["near"] = {k: (None if (m is None or v is None) else abs(m - v)) for k, m in out["refs"].items()}
-    minutes = list(range(ws, we + 1, MIN)) if windowed else []
+    minutes = list(range(S - 180 * MIN, we + 1, MIN)) if windowed else []            # Amendment 3, item 2: from S minus 180; the first five minutes only feed the carry
     buy, band, short, cost = {}, {}, [], []
     for t in ev["tickers"]:
         sv = settle.get(t); buy[t] = []; band[t] = []
@@ -184,6 +186,7 @@ def analyse(ev, settle, candles, carry, void):
     r5 = [minutes[i] for t in buy for i, k in runs(buy[t]) if k >= 5]
     out["buyable_minutes"] = len(short); out["short"] = short; out["cost"] = cost
     out["run5"] = bool(r5); out["first_run_minute_vs_S"] = ((min(r5) - S) // MIN) if r5 else None
+    out["run5_band"] = any(has_run(band[t]) for t in band)
     out["longest_run"] = max((k for t in buy for _, k in runs(buy[t])), default=0)
     for name, at, _ in DETECTORS:
         idx = [i for i, m in enumerate(minutes) if m >= S + at]
@@ -211,13 +214,17 @@ def measure(list_folders, candle_folders):
                                 "within_3c": sum(1 for a in V if a["near"][k] is not None and a["near"][k] <= 0.03 + EPS)} for k in ("S-180", "S-60", "S", "last two-sided")}}
         firsts = sorted(a["first_run_minute_vs_S"] for a in V if a["run5"]); short = [x for a in V for x in a["short"]]; cost = [x for a in V for x in a["cost"]]
         c["question_2"] = {"voids_with_any_buyable_minute": sum(1 for a in V if a["buyable_minutes"]), "buyable_side_minutes": len(short), "voids_with_a_run_of_5_or_more": len(firsts),
-                           "first_run_minute_vs_S": {"lowest": firsts[0] if firsts else None, "median": med(firsts), "highest": firsts[-1] if firsts else None},
+                           "voids_with_a_run_of_5_or_more_with_the_ask_15c_to_64c": sum(1 for a in V if a["run5_band"]),
+                           "voids_with_any_candle_in_the_window": sum(1 for a in V if a["candles"]), "played_with_any_candle_in_the_window": sum(1 for a in P if a["candles"]),
+                           "voids_with_any_candle_returned": sum(1 for a in V if a["candles_returned"]), "played_with_any_candle_returned": sum(1 for a in P if a["candles_returned"]),
+                           "first_run_minute_vs_S": {"lowest": firsts[0] if firsts else None, "median": med(firsts), "highest": firsts[-1] if firsts else None,
+                                                     "quartiles_by_position": [firsts[len(firsts) // 4], firsts[len(firsts) // 2], firsts[3 * len(firsts) // 4]] if firsts else None},
                            "longest_run_minutes_information_only": max((a["longest_run"] for a in V), default=0), "median_shortfall": med(short), "one_way_cost_median": med(cost)}
         c["detectors"] = {}
         for name, at, refs in DETECTORS:
             fv, fp = sum(1 for a in V if a[name]), sum(1 for a in P if a[name])
             rv, rp = (fv / nv if nv else 0.0), (fp / len(played) if played else 0.0)
-            den = rv * b + rp * (1 - b) if b is not None else 0.0; share = (rv * b / den) if den > 0 else None
+            den = rv * b + rp * (1 - b) if b is not None else 0.0; share = (rv * b / den) if den > 0 else 0.0
             l1 = sum(1 for a in V if a[name] and a["run5_from_" + name]); l1b = sum(1 for a in V if a[name] and a["run5_band_from_" + name])
             best = max(refs, key=lambda k: (c["question_1"][k]["within_3c"], -refs.index(k))); s3 = c["question_1"][best]["within_3c"] / nv if nv else 0.0
             d = {"voids_flagged": fv, "played_flagged": fp, "implied_share_of_voids": share, "line_1_count": l1, "line_1_count_with_ask_15c_to_64c_information_only": l1b,
@@ -241,8 +248,8 @@ def lines(out):
     for cname, c in out["carries"].items():
         L.append("[%s] QUESTION 1 (first-named contract's mid against its settlement value): " % cname + "; ".join("%s: %d have it, %d within 1c, %d within 3c" % (k, v["voids_with_it"], v["within_1c"], v["within_3c"]) for k, v in c["question_1"].items()))
         q2 = c["question_2"]; fr = q2["first_run_minute_vs_S"]
-        L.append("[%s] QUESTION 2: voids with a run of 5 minutes or more %d (any buyable minute %d; buyable side-minutes %d); first run against S: lowest %s, median %s, highest %s minutes; median shortfall %sc; one-way cost %sc" % (
-            cname, q2["voids_with_a_run_of_5_or_more"], q2["voids_with_any_buyable_minute"], q2["buyable_side_minutes"], f(fr["lowest"], 0), f(fr["median"]), f(fr["highest"], 0),
+        L.append("[%s] QUESTION 2: voids with a run of 5 minutes or more %d (with the ask also 15c to 64c: %d; any buyable minute %d; buyable side-minutes %d); first run against S: lowest %s, quartiles %s, highest %s minutes; median shortfall %sc; one-way cost %sc" % (
+            cname, q2["voids_with_a_run_of_5_or_more"], q2["voids_with_a_run_of_5_or_more_with_the_ask_15c_to_64c"], q2["voids_with_any_buyable_minute"], q2["buyable_side_minutes"], f(fr["lowest"], 0), fr["quartiles_by_position"], f(fr["highest"], 0),
             f(None if q2["median_shortfall"] is None else 100 * q2["median_shortfall"]), f(None if q2["one_way_cost_median"] is None else 100 * q2["one_way_cost_median"])))
         for n, d in c["detectors"].items():
             L.append("[%s] %s: voids flagged %d of %d, played flagged %d of %d, implied share of voids %s | line 1: %d voids (needs 40; with the ask 15c to 64c: %d) %s | line 2 (30%% or more) %s | line 3: %s within 3c of the mid at %s, the best of %d (70%% or more) %s | %s" % (
