@@ -1,0 +1,165 @@
+EVENTS IN FILE BY THIRD (HELD counts are events only; no held-out candle is read or scored)
+  ALL_APPR {'TRAIN': 421, 'VALID': 27}
+  APPR_538 {'TRAIN': 47, 'VALID': 48}
+  APPR_DAILY {'VALID': 22, 'TRAIN': 26}
+  APPR_OTHER {'TRAIN': 41, 'VALID': 4}
+  APPR_RCP {'TRAIN': 257, 'VALID': 3}
+  GCB {'TRAIN': 40, 'VALID': 16}
+  KXAPRPOTUSD: unlisted, not scored (10 events)
+EVENTS WITH NO VALID MID (0 < bid < ask < 1) AT A LOOK, no observation there: 7d 479, 3d 96, 1d 19, 6h 159
+OBS 3829
+
+CALIBRATION (Amendment 5: YES ask buckets, per market, approval families pooled, TRAIN and VALID events only; descriptive only): look | bucket n meanAsk meanMid realizedYES
+7d | 0.10-0.25 n28 meanAsk0.188 meanMid0.129 realizedYES0.036
+7d | 0.25-0.40 n21 meanAsk0.312 meanMid0.275 realizedYES0.429
+7d | 0.40-0.60 n4 meanAsk0.532 meanMid0.494 realizedYES0.250
+7d | 0.60-0.75 n6 meanAsk0.642 meanMid0.624 realizedYES0.667
+7d | 0.75-0.90 n1 meanAsk0.800 meanMid0.785 realizedYES1.000
+3d | 0.10-0.25 n815 meanAsk0.168 meanMid0.151 realizedYES0.164
+3d | 0.25-0.40 n346 meanAsk0.301 meanMid0.275 realizedYES0.254
+3d | 0.40-0.60 n76 meanAsk0.472 meanMid0.417 realizedYES0.342
+3d | 0.60-0.75 n21 meanAsk0.667 meanMid0.623 realizedYES0.524
+3d | 0.75-0.90 n17 meanAsk0.837 meanMid0.794 realizedYES0.765
+1d | 0.10-0.25 n540 meanAsk0.160 meanMid0.135 realizedYES0.091
+1d | 0.25-0.40 n334 meanAsk0.317 meanMid0.277 realizedYES0.290
+1d | 0.40-0.60 n219 meanAsk0.477 meanMid0.432 realizedYES0.457
+1d | 0.60-0.75 n70 meanAsk0.665 meanMid0.584 realizedYES0.600
+1d | 0.75-0.90 n55 meanAsk0.828 meanMid0.740 realizedYES0.691
+6h | 0.10-0.25 n199 meanAsk0.163 meanMid0.131 realizedYES0.085
+6h | 0.25-0.40 n82 meanAsk0.313 meanMid0.255 realizedYES0.207
+6h | 0.40-0.60 n78 meanAsk0.484 meanMid0.369 realizedYES0.269
+6h | 0.60-0.75 n60 meanAsk0.674 meanMid0.542 realizedYES0.517
+6h | 0.75-0.90 n104 meanAsk0.835 meanMid0.614 realizedYES0.692
+
+GRID 240 cells; non-empty 183; with observations in both TRAIN and VALID 119; with n >= 30 in both 6; with pooled n >= 100: 21
+
+CELLS with TRAIN and VALID observations, best validation lower bound first ('PASS' = the registered bar; at most two advance)
+     APPR_RCP 1d 0.40-0.60 N n100/1 PF 0.52/inf mean(tr)-15.9 mean(va)+46.3 va90[+46.3,+46.3] z-3.17 | +0c: PF 0.54/inf mean(tr)-14.9 mean(va)+47.3
+     APPR_RCP 6h 0.40-0.60 Y no evidence at n = 20 (TRAIN 19, VALID 1)
+     ALL_APPR 3d 0.40-0.60 N no evidence at n = 42 (TRAIN 41, VALID 1)
+     APPR_OTHER 3d 0.40-0.60 N no evidence at n = 7 (TRAIN 6, VALID 1)
+     GCB 1d 0.60-0.75 Y no evidence at n = 4 (TRAIN 3, VALID 1)
+     APPR_OTHER 3d 0.60-0.75 N no evidence at n = 11 (TRAIN 10, VALID 1)
+     APPR_RCP 1d 0.60-0.75 Y no evidence at n = 54 (TRAIN 53, VALID 1)
+     ALL_APPR 1d 0.60-0.75 Y no evidence at n = 68 (TRAIN 63, VALID 5)
+     APPR_DAILY 1d 0.60-0.75 Y no evidence at n = 7 (TRAIN 3, VALID 4)
+     GCB 6h 0.60-0.75 N no evidence at n = 6 (TRAIN 3, VALID 3)
+     GCB 3d 0.60-0.75 N no evidence at n = 8 (TRAIN 7, VALID 1)
+     ALL_APPR 3d 0.60-0.75 N n141/3 PF 1.02/inf mean(tr)+0.4 mean(va)+27.5 va90[+24.9,+30.1] z0.24 | +0c: PF 1.07/inf mean(tr)+1.4 mean(va)+28.5
+     APPR_RCP 3d 0.60-0.75 N no evidence at n = 91 (TRAIN 89, VALID 2)
+     APPR_RCP 6h 0.60-0.75 Y no evidence at n = 29 (TRAIN 28, VALID 1)
+     APPR_RCP 6h 0.60-0.75 N no evidence at n = 22 (TRAIN 21, VALID 1)
+     ALL_APPR 1d 0.75-0.90 Y no evidence at n = 54 (TRAIN 53, VALID 1)
+     APPR_DAILY 1d 0.75-0.90 Y no evidence at n = 4 (TRAIN 3, VALID 1)
+     APPR_RCP 6h 0.75-0.90 Y no evidence at n = 38 (TRAIN 37, VALID 1)
+     APPR_OTHER 1d 0.75-0.90 N no evidence at n = 16 (TRAIN 15, VALID 1)
+     GCB 3d 0.75-0.90 N no evidence at n = 5 (TRAIN 4, VALID 1)
+     ALL_APPR 3d 0.75-0.90 N n302/3 PF 0.63/inf mean(tr)-7.6 mean(va)+20.8 va90[+20.1,+21.4] z-2.96 | +0c: PF 0.67/inf mean(tr)-6.6 mean(va)+21.8
+     APPR_RCP 3d 0.75-0.90 N n203/3 PF 0.54/inf mean(tr)-10.4 mean(va)+20.8 va90[+20.1,+21.4] z-3.20 | +0c: PF 0.58/inf mean(tr)-9.4 mean(va)+21.8
+     APPR_OTHER 3d 0.75-0.90 N no evidence at n = 21 (TRAIN 20, VALID 1)
+     APPR_RCP 6h 0.75-0.90 N no evidence at n = 47 (TRAIN 46, VALID 1)
+     ALL_APPR 6h 0.75-0.90 Y no evidence at n = 93 (TRAIN 89, VALID 4)
+     APPR_DAILY 6h 0.75-0.90 Y no evidence at n = 5 (TRAIN 2, VALID 3)
+     APPR_RCP 1d 0.75-0.90 N n153/3 PF 1.03/inf mean(tr)+0.3 mean(va)+16.0 va90[+14.1,+17.9] z0.22 | +0c: PF 1.11/inf mean(tr)+1.3 mean(va)+17.0
+     ALL_APPR 3d 0.75-0.90 Y no evidence at n = 17 (TRAIN 16, VALID 1)
+     APPR_OTHER 3d 0.75-0.90 Y no evidence at n = 3 (TRAIN 2, VALID 1)
+     GCB 6h 0.75-0.90 Y no evidence at n = 12 (TRAIN 6, VALID 6)
+     APPR_538 1d 0.40-0.60 N no evidence at n = 34 (TRAIN 16, VALID 18)
+     ALL_APPR 1d 0.75-0.90 N n264/24 PF 0.86/2.10 mean(tr)-2.1 mean(va)+7.7 va90[-3.4,+16.2] z-0.58 | +0c: PF 0.93/2.26 mean(tr)-1.1 mean(va)+8.7
+     APPR_538 1d 0.25-0.40 Y no evidence at n = 69 (TRAIN 35, VALID 34)
+     APPR_538 3d 0.75-0.90 N no evidence at n = 78 (TRAIN 45, VALID 33)
+     APPR_538 1d 0.75-0.90 N no evidence at n = 72 (TRAIN 41, VALID 31)
+     ALL_APPR 6h 0.40-0.60 N no evidence at n = 69 (TRAIN 60, VALID 9)
+     APPR_DAILY 6h 0.40-0.60 N no evidence at n = 16 (TRAIN 7, VALID 9)
+     APPR_DAILY 1d 0.75-0.90 N no evidence at n = 44 (TRAIN 23, VALID 21)
+     APPR_538 1d 0.10-0.25 Y no evidence at n = 75 (TRAIN 38, VALID 37)
+     APPR_538 3d 0.10-0.25 Y no evidence at n = 80 (TRAIN 43, VALID 37)
+     APPR_DAILY 6h 0.10-0.25 Y no evidence at n = 38 (TRAIN 20, VALID 18)
+     GCB 6h 0.10-0.25 N no evidence at n = 5 (TRAIN 4, VALID 1)
+     ALL_APPR 6h 0.10-0.25 Y n121/18 PF 0.34/0.75 mean(tr)-11.5 mean(va)-4.4 va90[-17.0,+12.0] z-4.42 | +0c: PF 0.37/0.80 mean(tr)-10.5 mean(va)-3.4
+     APPR_DAILY 6h 0.75-0.90 N no evidence at n = 40 (TRAIN 23, VALID 17)
+     APPR_538 6h 0.10-0.25 Y no evidence at n = 35 (TRAIN 22, VALID 13)
+     GCB 6h 0.10-0.25 Y no evidence at n = 21 (TRAIN 10, VALID 11)
+     ALL_APPR 6h 0.75-0.90 N n118/17 PF 0.32/0.92 mean(tr)-20.0 mean(va)-1.1 va90[-18.8,+11.6] z-4.39 | +0c: PF 0.34/0.99 mean(tr)-19.0 mean(va)-0.1
+     GCB 6h 0.40-0.60 N no evidence at n = 11 (TRAIN 8, VALID 3)
+     APPR_RCP 6h 0.10-0.25 Y no evidence at n = 55 (TRAIN 54, VALID 1)
+     ALL_APPR 6h 0.10-0.25 N no evidence at n = 33 (TRAIN 29, VALID 4)
+     APPR_538 6h 0.10-0.25 N no evidence at n = 13 (TRAIN 10, VALID 3)
+     APPR_538 3d 0.60-0.75 N no evidence at n = 42 (TRAIN 20, VALID 22)
+     APPR_DAILY 1d 0.10-0.25 Y no evidence at n = 42 (TRAIN 21, VALID 21)
+     ALL_APPR 6h 0.60-0.75 N no evidence at n = 57 (TRAIN 47, VALID 10)
+     ALL_APPR 1d 0.10-0.25 Y n296/23 PF 0.54/0.32 mean(tr)-7.6 mean(va)-13.3 va90[-21.8,-1.4] z-4.57 | +0c: PF 0.58/0.35 mean(tr)-6.6 mean(va)-12.3
+     ALL_APPR 3d 0.10-0.25 N no evidence at n = 15 (TRAIN 14, VALID 1)
+     APPR_OTHER 3d 0.10-0.25 N no evidence at n = 2 (TRAIN 1, VALID 1)
+     APPR_DAILY 1d 0.25-0.40 Y no evidence at n = 29 (TRAIN 16, VALID 13)
+     GCB 1d 0.10-0.25 Y no evidence at n = 22 (TRAIN 11, VALID 11)
+     GCB 6h 0.75-0.90 N no evidence at n = 17 (TRAIN 9, VALID 8)
+     ALL_APPR 1d 0.25-0.40 Y n232/15 PF 0.84/0.76 mean(tr)-3.9 mean(va)-5.4 va90[-23.7,+14.0] z-1.37 | +0c: PF 0.87/0.80 mean(tr)-2.9 mean(va)-4.4
+     APPR_538 3d 0.25-0.40 Y no evidence at n = 63 (TRAIN 32, VALID 31)
+     ALL_APPR 1d 0.40-0.60 N n143/3 PF 0.72/1.49 mean(tr)-7.9 mean(va)+9.3 va90[-25.1,+43.6] z-1.87 | +0c: PF 0.75/1.55 mean(tr)-6.9 mean(va)+10.3
+     APPR_RCP 1d 0.10-0.25 Y n185/3 PF 0.47/0.00 mean(tr)-8.6 mean(va)-22.8 va90[-25.2,-20.4] z-4.16 | +0c: PF 0.51/0.00 mean(tr)-7.6 mean(va)-21.8
+     GCB 1d 0.40-0.60 Y no evidence at n = 12 (TRAIN 7, VALID 5)
+     ALL_APPR 3d 0.10-0.25 Y n302/3 PF 0.98/1.51 mean(tr)-0.4 mean(va)+8.8 va90[-25.9,+43.5] z-0.14 | +0c: PF 1.04/1.59 mean(tr)+0.6 mean(va)+9.8
+     APPR_RCP 3d 0.10-0.25 Y n207/3 PF 1.07/1.51 mean(tr)+1.1 mean(va)+8.8 va90[-25.9,+43.5] z0.44 | +0c: PF 1.14/1.59 mean(tr)+2.1 mean(va)+9.8
+     GCB 3d 0.10-0.25 Y no evidence at n = 5 (TRAIN 4, VALID 1)
+     APPR_DAILY 6h 0.60-0.75 N no evidence at n = 20 (TRAIN 11, VALID 9)
+     GCB 1d 0.75-0.90 N no evidence at n = 21 (TRAIN 11, VALID 10)
+     APPR_OTHER 1d 0.25-0.40 Y no evidence at n = 6 (TRAIN 5, VALID 1)
+     APPR_538 1d 0.60-0.75 N no evidence at n = 59 (TRAIN 29, VALID 30)
+     APPR_538 3d 0.40-0.60 Y no evidence at n = 8 (TRAIN 2, VALID 6)
+     APPR_RCP 3d 0.25-0.40 Y n143/2 PF 0.79/0.00 mean(tr)-5.0 mean(va)-30.9 va90[-31.4,-30.4] z-1.44 | +0c: PF 0.83/0.00 mean(tr)-4.0 mean(va)-29.9
+     GCB 3d 0.25-0.40 Y no evidence at n = 6 (TRAIN 5, VALID 1)
+     APPR_RCP 6h 0.25-0.40 N no evidence at n = 29 (TRAIN 27, VALID 2)
+     APPR_RCP 6h 0.25-0.40 Y no evidence at n = 23 (TRAIN 22, VALID 1)
+     APPR_DAILY 6h 0.25-0.40 Y no evidence at n = 26 (TRAIN 15, VALID 11)
+     ALL_APPR 6h 0.25-0.40 Y no evidence at n = 74 (TRAIN 63, VALID 11)
+     ALL_APPR 6h 0.25-0.40 N no evidence at n = 49 (TRAIN 46, VALID 3)
+     ALL_APPR 6h 0.60-0.75 Y no evidence at n = 54 (TRAIN 51, VALID 3)
+     APPR_538 6h 0.25-0.40 Y no evidence at n = 21 (TRAIN 13, VALID 8)
+     APPR_538 6h 0.25-0.40 N no evidence at n = 11 (TRAIN 5, VALID 6)
+     APPR_DAILY 6h 0.25-0.40 N no evidence at n = 7 (TRAIN 6, VALID 1)
+     ALL_APPR 6h 0.40-0.60 Y no evidence at n = 70 (TRAIN 60, VALID 10)
+     APPR_DAILY 6h 0.40-0.60 Y no evidence at n = 23 (TRAIN 13, VALID 10)
+     GCB 1d 0.25-0.40 Y no evidence at n = 17 (TRAIN 9, VALID 8)
+     ALL_APPR 3d 0.25-0.40 Y n219/3 PF 0.72/0.00 mean(tr)-6.9 mean(va)-33.5 va90[-36.2,-30.8] z-2.45 | +0c: PF 0.75/0.00 mean(tr)-5.9 mean(va)-32.5
+     GCB 6h 0.25-0.40 N no evidence at n = 10 (TRAIN 4, VALID 6)
+     GCB 6h 0.25-0.40 Y no evidence at n = 13 (TRAIN 7, VALID 6)
+     APPR_OTHER 3d 0.25-0.40 Y no evidence at n = 14 (TRAIN 12, VALID 2)
+     APPR_RCP 1d 0.25-0.40 N no evidence at n = 31 (TRAIN 30, VALID 1)
+     ALL_APPR 1d 0.25-0.40 N no evidence at n = 46 (TRAIN 40, VALID 6)
+     APPR_DAILY 1d 0.25-0.40 N no evidence at n = 9 (TRAIN 4, VALID 5)
+     APPR_RCP 1d 0.25-0.40 Y n141/2 PF 0.63/0.00 mean(tr)-9.5 mean(va)-36.6 va90[-39.6,-33.5] z-2.72 | +0c: PF 0.66/0.00 mean(tr)-8.5 mean(va)-35.6
+     APPR_538 1d 0.40-0.60 Y no evidence at n = 49 (TRAIN 26, VALID 23)
+     GCB 6h 0.60-0.75 Y no evidence at n = 9 (TRAIN 6, VALID 3)
+     APPR_538 6h 0.75-0.90 Y no evidence at n = 45 (TRAIN 21, VALID 24)
+     ALL_APPR 3d 0.40-0.60 Y no evidence at n = 64 (TRAIN 63, VALID 1)
+     APPR_OTHER 3d 0.40-0.60 Y no evidence at n = 7 (TRAIN 6, VALID 1)
+     APPR_538 6h 0.40-0.60 Y no evidence at n = 27 (TRAIN 13, VALID 14)
+     APPR_DAILY 1d 0.40-0.60 Y no evidence at n = 12 (TRAIN 10, VALID 2)
+     APPR_RCP 6h 0.40-0.60 N no evidence at n = 36 (TRAIN 35, VALID 1)
+     GCB 1d 0.40-0.60 N no evidence at n = 8 (TRAIN 7, VALID 1)
+     ALL_APPR 1d 0.40-0.60 Y n176/4 PF 0.80/1.00 mean(tr)-5.4 mean(va)+0.0 va90[-52.0,+48.3] z-1.43 | +0c: PF 0.84/1.04 mean(tr)-4.4 mean(va)+1.0
+     APPR_RCP 1d 0.40-0.60 Y n113/2 PF 1.16/1.07 mean(tr)+3.7 mean(va)+1.8 va90[-52.8,+56.3] z0.79 | +0c: PF 1.21/1.11 mean(tr)+4.7 mean(va)+2.8
+     APPR_538 6h 0.40-0.60 N no evidence at n = 15 (TRAIN 9, VALID 6)
+     APPR_DAILY 1d 0.60-0.75 N no evidence at n = 14 (TRAIN 8, VALID 6)
+     APPR_538 3d 0.40-0.60 N no evidence at n = 5 (TRAIN 3, VALID 2)
+     GCB 1d 0.75-0.90 Y no evidence at n = 11 (TRAIN 8, VALID 3)
+     ALL_APPR 1d 0.60-0.75 N n186/7 PF 0.71/0.27 mean(tr)-7.8 mean(va)-28.8 va90[-55.9,-1.6] z-2.43 | +0c: PF 0.74/0.28 mean(tr)-6.8 mean(va)-27.8
+     APPR_DAILY 1d 0.40-0.60 N no evidence at n = 7 (TRAIN 5, VALID 2)
+     GCB 6h 0.40-0.60 Y no evidence at n = 10 (TRAIN 6, VALID 4)
+     APPR_DAILY 6h 0.60-0.75 Y no evidence at n = 11 (TRAIN 9, VALID 2)
+     APPR_RCP 1d 0.60-0.75 N n114/2 PF 0.70/0.40 mean(tr)-8.2 mean(va)-19.0 va90[-63.7,+25.6] z-1.85 | +0c: PF 0.73/0.42 mean(tr)-7.2 mean(va)-18.0
+     APPR_538 6h 0.75-0.90 N no evidence at n = 37 (TRAIN 17, VALID 20)
+     APPR_538 6h 0.60-0.75 Y no evidence at n = 11 (TRAIN 6, VALID 5)
+     APPR_538 6h 0.60-0.75 N no evidence at n = 14 (TRAIN 8, VALID 6)
+     GCB 1d 0.60-0.75 N no evidence at n = 12 (TRAIN 5, VALID 7)
+
+FAMILY READ (pooled TRAIN+VALID, +1c; a cell 'supports' only if pooled n >= 100, PF >= 1.3 and the event-clustered 90 percent lower bound of the mean is above 0; report only, never an advance)
+  ALL_APPR: NO SURVIVOR at this grid (an edge of about 10c or more ruled out in the populated cells; 12 cells with n >= 100; closes the family for new work)
+  APPR_538: no evidence at n = 80 (largest cell; 0 cells with n >= 100)
+  APPR_DAILY: no evidence at n = 44 (largest cell; 0 cells with n >= 100)
+  APPR_OTHER: no evidence at n = 21 (largest cell; 0 cells with n >= 100)
+  APPR_RCP: NO SURVIVOR at this grid (an edge of about 10c or more ruled out in the populated cells; 9 cells with n >= 100; closes the family for new work)
+  GCB: no evidence at n = 22 (largest cell; 0 cells with n >= 100)
+
+ADVANCING CELLS: 0 (HELD-OUT is not read here; frozen survivors go to the session lead)
