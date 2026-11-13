@@ -68,7 +68,13 @@ extra = [
  # X06 closes 2026-11-16T23:00Z, before the development window (2026-11-17T00:00Z): outside, not used
  game("X06", T(2026, 11, 16, 23, 0), L, flat(11, (3, 2)), {"T55": 5.5}, {"T55": (30, 34)}, 6, quote_minutes=[7]),
 ]
+# ---- z_low: 150 entries over 25 Central days (6 a day, 12:00Z = 06:00 Central, same date): PF above 1.5, halves above 1.0, day-clustered z BELOW 5.46 (the development screen must not read z)
+zlow = []
+types = [5, 0, 5, 0, 5, 0, 5, 0, 5, 0, 5, 0, 3] + [5, 0] * 6            # wins out of 6 per day, days 0 to 24 (day 13 is Dec 1)
+for d, w in enumerate(types):
+    for j in range(6):
+        zlow.append(game("Z%02d%d" % (d, j), T(2026, 11, 18, 12, 0) + d * 86400 + j * 600, L, flat(11, (3, 2)), {"T55": 5.5}, {"T55": (28, 30)}, 6 if j < w else 5, quote_minutes=[7]))
 if __name__ == "__main__":
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-    json.dump({"games": games}, open(os.path.join(out, "dev.json"), "w")); json.dump({"games": outside}, open(os.path.join(out, "outside.json"), "w")); json.dump({"games": extra}, open(os.path.join(out, "amend_extra.json"), "w"))
+    json.dump({"games": games}, open(os.path.join(out, "dev.json"), "w")); json.dump({"games": outside}, open(os.path.join(out, "outside.json"), "w")); json.dump({"games": extra}, open(os.path.join(out, "amend_extra.json"), "w")); json.dump({"games": zlow}, open(os.path.join(out, "z_low.json"), "w"))
     print(len(games), "development games,", len(outside), "outside")
