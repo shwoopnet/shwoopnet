@@ -9,6 +9,8 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import scorekit as k
 
+NET = "--net" in sys.argv; NOPH = "--noplaceholder" in sys.argv
+sys.argv = [a for a in sys.argv if not a.startswith("--")]
 run, pull = sys.argv[1], sys.argv[2]
 rd = lambda n: list(csv.DictReader(gzip.open(os.path.join(run, n), "rt")))
 cov = [r for r in rd("coverage.csv.gz") if r["ticker"].startswith("KXCS2GAME-")]
@@ -66,6 +68,10 @@ for t in T:
         for j in range(i0, i1):
             p = rows[t][j - 1] if j > 0 else None
             if p is None or p[1][0] != rows[t][j][1][0] or p[2][0] != rows[t][j][2][0]: topch = True
+        if NET:   # named switch: top of book moved NET over the minute (end state vs state before the minute)
+            e0 = bisect.bisect_right(ts, hi) - 1
+            a0 = rows[t][i0 - 1] if i0 > 0 else None
+            topch = e0 >= 0 and (a0 is None or a0[1][0] != rows[t][e0][1][0] or a0[2][0] != rows[t][e0][2][0])
         e = bisect.bisect_right(ts, hi) - 1
         ts_end = two_sided(rows[t][e]) if e >= 0 else False
         s = "a" if (ct is None or hi <= ct * 1000) else "b"
@@ -77,7 +83,7 @@ for t in T:
             elif ch: key = KEYS[4]
             else: key = KEYS[2] if ts_end else KEYS[3]
             cnt[s][basis][key] += 1
-        if s == "a" and c is not None and c["bid"] is not None and c["ask"] is not None:
+        if s == "a" and c is not None and c["bid"] is not None and c["ask"] is not None and not (NOPH and (c["bid"] <= 0 or c["ask"] >= 1 - 1e-9)):
             e2 = i1 - 1 if i1 > 0 else -1
             r = rows[t][e2]
             match["n_candle_bidask"] += 1
