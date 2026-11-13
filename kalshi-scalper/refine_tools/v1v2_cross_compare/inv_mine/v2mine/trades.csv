@@ -1,0 +1,4 @@
+ticker,created_time,yes_price_dollars,count_fp,taker_outcome_side
+KXSILVER15M-X1,2026-11-13T12:12:03.500Z,0.19,1.00,no
+KXSILVER15M-X5,2026-11-13T13:12:03.500Z,0.76,1.00,yes
+KXSILVER15M-X8,2026-11-13T13:57:03.500Z,0.19,1.00,no

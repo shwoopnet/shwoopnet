@@ -1,0 +1,111 @@
+hm_guard: HELDOUT_PULL_RUNS list read, sha256 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d (/tmp/cmp_hm/kalshi-scalper/workers/HELDOUT_PULL_RUNS.md)
+{
+ "ambiguities": [
+  "All readings ruled (V1 64539074 and V2 5e156f3e dated amendments): R1 best bids at level 1; R2/C2 a tie of the asks takes YES; R3 V2 spread on YES ask minus YES bid, 10c inclusive; R4 band inclusive; R5 rest open at both ends; C1 t0 row more than 10 s late is no_t0_row; R6 taker side from taker_outcome_side; R7 book ask at or below our price; R8 parent +1c fee at p + 0.01, version fee at our bid unrounded; R9 no result: counted, out of every PF; R10 blocks inclusive; R11/C4 halves by count, n // 2 first; R12 ceil weeks; C3 bar (2) against the parent at +0c and +1c, the stricter governs; R13 FALSIFIED = bar (2) fails OR missed windows' parent PF exceeds the VERSION PF by 0.10 or more; R14 a set with no bet fails; under 60 fills NOT_ENOUGH_DATA comes first and FALSIFIED is information only."
+ ],
+ "block": "dev",
+ "counts": {
+  "filled": 4,
+  "not filled": 1,
+  "outside_block": 1,
+  "spread test fails": 2
+ },
+ "label": "not blind on EVENT830's forward windows",
+ "registrations": "V1 64539074, V2 5e156f3e",
+ "report": {
+  "bar": {
+   "at_least_60_fills": false,
+   "net_per_week_not_lower": true,
+   "pf_beats_parent_by_0_10": true,
+   "second_half_not_worse": false
+  },
+  "falsified": false,
+  "fill_rate": 0.8,
+  "fills": 4,
+  "half_diff_first": "inf",
+  "half_diff_second": 0.412645,
+  "missed_parent_minus_version_pf_ge_0_10": false,
+  "orders": 5,
+  "parent_net_per_week": 0.130226,
+  "parent_net_per_week_p0": 0.143116,
+  "parent_pf_p0": 1.594143,
+  "parent_pf_p1": 1.523888,
+  "parent_pf_p1_on_filled": 2.670578,
+  "parent_pf_p1_on_missed": 0.0,
+  "signals": 5,
+  "verdict": "NOT_ENOUGH_DATA (FALSIFIED OR, information only: false)",
+  "version_net_per_week": 0.28458,
+  "version_pf_0": 3.555556,
+  "version_pf_100": 3.32599,
+  "version_pf_25": 3.495868,
+  "weeks": 4
+ },
+ "version": "V2",
+ "windows": [
+  {
+   "ask": 0.22,
+   "close_ts": 1794572100,
+   "filled": true,
+   "limit": 0.2,
+   "order": true,
+   "parent_p0": 0.767988,
+   "parent_p1": 0.757603,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXSILVER15M-X1",
+   "won": true
+  },
+  {
+   "ask": 0.4,
+   "close_ts": 1794573000,
+   "filled": false,
+   "limit": 0.3,
+   "order": true,
+   "parent_p0": -0.4168,
+   "parent_p1": -0.426933,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXSILVER15M-X2",
+   "won": false
+  },
+  {
+   "ask": 0.3,
+   "close_ts": 1794575700,
+   "filled": true,
+   "limit": 0.25,
+   "order": true,
+   "parent_p0": -0.3147,
+   "parent_p1": -0.324973,
+   "side": "no",
+   "status": "signal",
+   "ticker": "KXSILVER15M-X5",
+   "won": false
+  },
+  {
+   "ask": 0.22,
+   "close_ts": 1794576600,
+   "filled": true,
+   "limit": 0.2,
+   "order": true,
+   "parent_p0": 0.767988,
+   "parent_p1": 0.757603,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXSILVER15M-X6",
+   "won": true
+  },
+  {
+   "ask": 0.22,
+   "close_ts": 1794578400,
+   "filled": true,
+   "limit": 0.2,
+   "order": true,
+   "parent_p0": -0.232012,
+   "parent_p1": -0.242397,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXSILVER15M-X8",
+   "won": false
+  }
+ ]
+}

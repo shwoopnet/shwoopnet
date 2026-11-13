@@ -1,0 +1,9 @@
+close_time,series,ticker,polls,ok_polls,n429,batch_fallback,max_gap_ms,first_recv_ms,last_recv_ms,book_rows,tape_pages,tape_trades,dupes_dropped,tape_sum_count,volume_fp,result,note
+2026-11-13T12:15:00Z,KXSILVER15M,KXSILVER15M-X1,,,,,,,,,,,,,,yes,
+2026-11-13T12:30:00Z,KXSILVER15M,KXSILVER15M-X2,,,,,,,,,,,,,,no,
+2026-11-13T12:45:00Z,KXSILVER15M,KXSILVER15M-X3,,,,,,,,,,,,,,no,
+2026-11-13T13:00:00Z,KXSILVER15M,KXSILVER15M-X4,,,,,,,,,,,,,,no,
+2026-11-13T13:15:00Z,KXSILVER15M,KXSILVER15M-X5,,,,,,,,,,,,,,yes,
+2026-11-13T13:30:00Z,KXSILVER15M,KXSILVER15M-X6,,,,,,,,,,,,,,yes,
+2026-12-08T12:00:00Z,KXSILVER15M,KXSILVER15M-X7,,,,,,,,,,,,,,yes,
+2026-11-13T14:00:00Z,KXSILVER15M,KXSILVER15M-X8,,,,,,,,,,,,,,no,
