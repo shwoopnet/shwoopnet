@@ -23,7 +23,14 @@
 **Settled.**
 - 395 rows statement-type, 12 NOT STATEMENT-TYPE (11 "Good Afternoon", 1 Judy Shelton).
 - The word is present in 34 rows.
-- The feature is yes in 28. The other 6 present words are count strikes whose threshold is not met.
+- The feature is yes on 28 of the 395 statement-type strikes.
+- The other 6 present words are count strikes whose statement count is under the threshold, so their feature is no under ruling (a):
+  - KXFEDMENTION-25JAN-I40 (Inflation 40+ times, count 6);
+  - KXFEDMENTION-25JAN-I50 (Inflation 50+ times, count 6);
+  - KXFEDMENTION-25JAN-U8 (Unemployment 8+ times, count 1);
+  - KXFEDMENTION-25SEP-UNCE (Uncertainty 5+ times, count 1);
+  - KXFEDMENTION-25OCT-UNCE (Uncertainty 5+ times, count 1);
+  - KXFEDMENTION-25DEC-UNCE (Uncertainty 3+ times, count 1).
 
 **Process breach, recorded (the Head's ruling, Nov 14):**
 - Pass B fetched the 11 allowed statement pages with curl, one GET each, once, and matched them in a local script. Clarification 4 point 3 forbids any script on the Board's site.
