@@ -69,10 +69,13 @@ def main(argv=None):
             except Exception: drops["list_unparseable_close"] += 1; continue
             if lo <= c < hi: closes[m["ticker"]] = c
     pooled = {k: [] for k in range(-3, 4)}; nwin = 0
+    seen = set()
     for p in files(a.candles):
         for m in jload(p).get("markets", []):
             tk = m.get("market_ticker"); c = closes.get(tk)
             if c is None: continue
+            if tk in seen: sys.exit("STOP: a market_ticker repeats across candle files (run overlap); not counted twice")
+            seen.add(tk)
             mid = {}
             for cs in m.get("candlesticks", []):
                 try:
@@ -81,12 +84,15 @@ def main(argv=None):
                 if two_sided(b, ak): mid[t] = (b + ak) / 2
                 else: drops["candle_not_two_sided"] += 1
             nwin += 1; O = c - 900
-            dA = {t: mid[t] - mid[t - 60] for t in mid if t - 60 in mid and O <= t <= c}
-            dB = {t: math.log(es[t] / es[t - 60]) for t in es if t - 60 in es and O <= t <= c}
+            # T = whole-minute ends in [O+60, c] that have BOTH a two-sided Kalshi mid and an ES bar (computed once per window).
+            T = {t for t in range(O + 60, c + 1, 60) if t in mid and t in es}
+            drops["minute_not_in_both"] += (c - O) // 60 - len(T)
+            dA = {t: mid[t] - mid[t - 60] for t in T if t - 60 in mid}            # lookback from the whole Kalshi series
+            dB = {t: math.log(es[t] / es[t - 60]) for t in T if t - 60 in es}     # lookback from the whole ES series
             for k in range(-3, 4):
                 for t in dA:
-                    if t - 60 * k in dB: pooled[k].append((dA[t], dB[t - 60 * k]))
-                    else: drops["pair_missing_es"] += 1
+                    if (t - 60 * k) in dB: pooled[k].append((dA[t], dB[t - 60 * k]))
+                    else: drops["pair_outside_window_or_missing_es"] += 1
     cells = {}; npairs = {}
     for k in range(-3, 4):
         npairs[k] = len(pooled[k])
