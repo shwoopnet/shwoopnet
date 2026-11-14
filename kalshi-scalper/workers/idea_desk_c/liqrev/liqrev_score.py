@@ -136,6 +136,9 @@ def check(case):
         if r["inst_id"] not in KNOWN_INST: raise ValueError("unknown instrument %r" % r["inst_id"])
         if r["side"] not in ("buy", "sell"): raise ValueError("unknown side %r" % r["side"])
 
+def counts_ok(d1c, d2c, h1c, h2c):          # Amendment 7 (c): held-out alone at 1c and 2c, each dev half at 1c; never pooled
+    return pfv(h1c) >= 1.3 and pfv(d1c) >= 1.0 and pfv(d2c) >= 1.0 and pfv(h2c) >= 1.0
+
 def score(case, mode="dev"):
     check(case)
     H, cov = float(case["H_sz"]), case["coverage"]
@@ -177,7 +180,7 @@ def score(case, mode="dev"):
         h1, h2 = stats(hb, "pnl_1c"), stats(hb, "pnl_2c")
         out["held_1c"], out["held_2c"] = shown(h1), shown(h2)
         d1c, d2c = stats([b for b in dev if b["window"] == "dev1"], "pnl_1c"), stats([b for b in dev if b["window"] == "dev2"], "pnl_1c")
-        counts = pfv(h1) >= 1.3 and pfv(d1c) >= 1.0 and pfv(d2c) >= 1.0 and pfv(h2) >= 1.0   # Amendment 7 (c): held-out alone, never pooled
+        counts = counts_ok(d1c, d2c, h1, h2)
         out["counts_toward_20_30"] = counts
         if h["n"] < NO_EVIDENCE_UNDER: out["held_verdict"] = "NO_EVIDENCE at n = %d" % h["n"]
         elif out["dev_verdict"] == "CONTINUE" and all(pfv(x) >= BAR_PF for x in (d1, d2, h)) and (h["z"] or 0) >= BAR_Z:

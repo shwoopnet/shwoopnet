@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """LIQREV build 1 checks (Nov 14 revision): hand case v2 (Amendments 4 to 6), the offset check, and the guards. Invented rows only. [research]"""
-import json, os, sys, tempfile
+import json, math, os, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import liqrev_score as T
 case = json.load(open(os.path.join(HERE, "hand_case_rows_v2.json")))
@@ -58,4 +58,12 @@ hb["polls"]["KXBTC15M-W6"][0]["no_bid_px_1"] = 0.10      # YES ask 0.90 > 0.80: 
 r1, r2 = T.score(case, "held"), T.score(hb, "held")
 assert r1["triggered_dev"] == r2["triggered_dev"] == 2, (r1["triggered_dev"], r2["triggered_dev"])
 assert r2["skips"].get("band_or_spread") == 2
+# Auditor B's note: a case where pooled and held-alone PF disagree. Development halves at 1c are strong (PF 3.0), the held-out at 1c is 1.2:
+# pooled (dev + held) would be above 1.3, held alone is not, so the pass does NOT count. Raise the held-out to 1.4 and it counts.
+mk = lambda w, l: {"pf": (w / l) if l else math.inf}
+dev_strong, held_weak, held_ok, held_2c = mk(3.0, 1.0), mk(1.2, 1.0), mk(1.4, 1.0), mk(1.1, 1.0)
+pooled = (3.0 + 3.0 + 1.2) / (1.0 + 1.0 + 1.0)
+assert pooled >= 1.3 and T.counts_ok(dev_strong, dev_strong, held_weak, held_2c) is False
+assert T.counts_ok(dev_strong, dev_strong, held_ok, held_2c) is True
+assert T.counts_ok(dev_strong, mk(0.9, 1.0), held_ok, held_2c) is False and T.counts_ok(dev_strong, dev_strong, held_ok, mk(0.9, 1.0)) is False
 print("liqrev build 1 (Nov 14): hand case v2, the offset check and 7 guard or refusal checks passed")
