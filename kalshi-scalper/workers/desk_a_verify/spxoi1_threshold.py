@@ -1,5 +1,5 @@
 """SPXOI1 threshold T, derivation script, BUILD 1 (Desk A, Nov 13 2026; the Head of R&D's order of 18:49Z). Offline, sends nothing.
-  python3 -I spxoi1_threshold.py <lists dir> <candles dir>
+  python3 -I spxoi1_threshold.py <lists dir> <candles dir> [<patch candles dir> ...]      (patch folders: Nov 14, 2026; each is run-checked and merged by ticker and end, a conflicting value STOPS)
 <lists dir>: a kalshi-pull run folder (manifest.json + gz bodies) of KXINX15M market lists; ONLY the fields `ticker` and `close_time` are read from it. <candles dir>: the landed SPXOI1_CANDLES run (1 minute candles, end_ts = close minus 120 s); ONLY `end_period_ts` and the open interest (`open_interest_fp`, a string, read FIRST; `open_interest` as the fallback) are read from each candle (no price field, no result, no volume). Both run folders must pass the run-integrity check first (manifest status complete; every request answered 200 on pages 1 to k, not truncated, each file matching its manifest sha256 and bytes, the last page without a cursor), or the script refuses.
 Per KXINX15M window with close_time in [WINDOW_FROM, WINDOW_TO) (a date constant range, closes 2026-11-05T00:00:00Z up to but not including 2026-11-14T00:00:00Z): oi_rise = open_interest at the candle ending at close - 180 s MINUS open_interest at the candle ending at close - 360 s (candle end times matched EXACTLY). A window with either candle missing is DROPPED and COUNTED as 'missing candle'; a window whose open interest is not a finite number (not nan, not inf, not bool) is DROPPED and COUNTED as 'unreadable open interest'. T = the 90th percentile of oi_rise over the kept windows, NEAREST-RANK method: sort ascending, rank = ceil(0.90 x n), T = the value at that rank (1-based). Prints the guard's list-hash line, then 'n = <kept windows>, T = <value>' and two lines of dropped counts (missing candle; unreadable open interest). Nothing else: no per-window value, no price, no result.
 The window range stops at 2026-11-14, well before the research held-out start 2026-12-01T00:00:00Z (a closing window on or after it is never read; WINDOW_TO is asserted to be no later than that). HELDOUT_ folders and pull runs listed in HELDOUT_PULL_RUNS.md are refused by heldout_guard_v2."""
@@ -61,15 +61,21 @@ def oi_of(c):
     if fp is not None and fp != "": return _num(fp)
     return _num(c.get("open_interest"))
 def oi_by_end(candles):
+    """candles: one run folder, or a list of run folders (a main run and PATCH runs, the Head's order of Nov 14, 2026). Every folder passes check_run (through bodies()). Merged by (ticker, end_period_ts); a second value for the same key that is not the same number STOPS (conflict), an identical value is fine, and None (unreadable) never overrides a readable value from another folder."""
+    folders = candles if isinstance(candles, (list, tuple)) else [candles]
     out = {}
-    for b in bodies(candles):
-        for m in (b.get("markets", []) if isinstance(b, dict) else []):
-            tk = m.get("market_ticker") or m.get("ticker")
-            for c in m.get("candlesticks", []):
-                e = c.get("end_period_ts"); v = oi_of(c)      # the only candle fields read: end_period_ts and open_interest_fp / open_interest
-                if e is not None and isinstance(tk, str):
-                    try: out.setdefault(tk, {})[int(e)] = v
-                    except (TypeError, ValueError): pass
+    for folder in folders:
+        for b in bodies(folder):
+            for m in (b.get("markets", []) if isinstance(b, dict) else []):
+                tk = m.get("market_ticker") or m.get("ticker")
+                for c in m.get("candlesticks", []):
+                    e = c.get("end_period_ts"); v = oi_of(c)      # the only candle fields read: end_period_ts and open_interest_fp / open_interest
+                    if e is not None and isinstance(tk, str):
+                        try: e = int(e)
+                        except (TypeError, ValueError): continue
+                        prev = out.setdefault(tk, {})
+                        if e in prev and prev[e] is not None and v is not None and prev[e] != v: sys.exit("REFUSED: conflict for %s at end %d: %r in an earlier folder, %r in %s" % (tk, e, prev[e], v, folder))
+                        if e not in prev or prev[e] is None: prev[e] = v
     return out
 def nearest_rank(values, q=PERCENTILE):
     v = sorted(values); n = len(v)
@@ -84,11 +90,11 @@ def derive(closes_, oi):
         if a is None or b is None: unread += 1; continue
         rises.append(a - b)
     return rises, miss, unread
-def main(lists, candles):
+def main(lists, candles, *patches):
     import heldout_guard_v2 as G; print(G.list_line())
-    rises, miss, unread = derive(closes(lists), oi_by_end(candles))
+    rises, miss, unread = derive(closes(lists), oi_by_end([candles] + list(patches)))
     if not rises: sys.exit("no window kept")
     t = nearest_rank(rises); print("n = %d, T = %s" % (len(rises), ("%d" % t) if t == int(t) else "%s" % t)); print("dropped, missing candle = %d" % miss); print("dropped, unreadable open interest = %d" % unread)
 if __name__ == "__main__":
-    if len(sys.argv) != 3: sys.exit(__doc__)
-    main(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2]))
+    if len(sys.argv) < 3: sys.exit(__doc__)
+    main(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2]), *[os.path.abspath(a) for a in sys.argv[3:]])

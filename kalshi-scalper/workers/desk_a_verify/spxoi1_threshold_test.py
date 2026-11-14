@@ -86,4 +86,21 @@ except SystemExit: pass
 dd = tempfile.mkdtemp()
 def m_retry(rows): rows.insert(0, {"index": 0, "id": "r1", "page": 1, "status": 429, "bytes": 0})        # a 429 retry row before the 200 answer is fine
 S.check_run(folder(dd, "p", {"markets": fpm}, mutate=m_retry))
+# PATCH folders (the Head's order, Nov 14): extra candle run folders merged by (ticker, end_period_ts); each passes the same run-integrity check; a conflicting value for the same ticker and end STOPS; an identical duplicate is fine
+dp = tempfile.mkdtemp(); cp = base + 900 * 50; pm = [{"ticker": "KXINX15M-P1", "close_time": iso(cp)}]
+c_main = [{"market_ticker": "KXINX15M-P1", "candlesticks": [{"end_period_ts": cp - 180, "open_interest_fp": "3010"}]}]       # the close-360 candle is missing in the main run
+c_patch = [{"market_ticker": "KXINX15M-P1", "candlesticks": [{"end_period_ts": cp - 360, "open_interest_fp": "3000"}]}]
+lp, cm, cpt = folder(dp, "l", {"markets": pm}), folder(dp, "cm", {"markets": c_main}), folder(dp, "cp", {"markets": c_patch})
+assert S.derive(S.closes(lp), S.oi_by_end(cm)) == ([], 1, 0)                                                                 # main alone: dropped for a missing candle
+assert S.derive(S.closes(lp), S.oi_by_end([cm, cpt])) == ([10.0], 0, 0), "the patch must fill the missing candle"            # merged: kept, rise 10
+c_dup = [{"market_ticker": "KXINX15M-P1", "candlesticks": [{"end_period_ts": cp - 180, "open_interest_fp": "3010.0"}]}]
+assert S.derive(S.closes(lp), S.oi_by_end([cm, cpt, folder(dp, "cd", {"markets": c_dup})])) == ([10.0], 0, 0)                  # an identical value (same number) is not a conflict
+c_bad = [{"market_ticker": "KXINX15M-P1", "candlesticks": [{"end_period_ts": cp - 180, "open_interest_fp": "9999"}]}]
+try: S.oi_by_end([cm, cpt, folder(dp, "cb", {"markets": c_bad})]); raise AssertionError("a conflicting patch value was accepted")
+except SystemExit as e: assert "conflict" in str(e).lower(), str(e)
+try: S.oi_by_end([cm, folder(dp, "cx", {"markets": c_patch}, status="stopped_429")]); raise AssertionError("an incomplete patch run was accepted")
+except SystemExit: pass
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): S.main(lp, cm, cpt)
+assert buf.getvalue().strip().split("\n")[1:] == ["n = 1, T = 10", "dropped, missing candle = 0", "dropped, unreadable open interest = 0"], buf.getvalue()
 print("SPXOI1 THRESHOLD TEST OK (rise = candle at -180 s minus candle at -360 s, dropped windows counted, date range, nearest-rank P90, only two fields per source, guard)")
