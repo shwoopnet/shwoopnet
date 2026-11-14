@@ -141,6 +141,32 @@ def p_winner(l1, l2, N=12):
     return h, d, a
 
 
+def polish(err, best, wm, tm, NMAX):
+    """Levenberg-Marquardt / Gauss-Newton polish of the least-squares fit from the grid's best point (the same objective as err; rates kept at or above 0.02): central-difference Jacobian, a step is never accepted if it raises the sum of squares; stops when the step is under 1e-13 or after 80 iterations. SOCDERIV_FIT_ADDENDUM.md."""
+    def resid(a, b):
+        h, d, c = p_winner(a, b); lam = a + b; e = math.exp(-lam); cdf, run = {}, 0.0
+        for n in range(0, NMAX + 1): run += e * lam ** n / math.factorial(n); cdf[n] = run
+        return [h - wm[0], d - wm[1], c - wm[2]] + [(1 - cdf[int(kk)]) - v for kk, v in tm]
+    sse0, a, b = best; mu = 1e-9
+    for _ in range(80):
+        r = resid(a, b); hh = 1e-6
+        ja = [(x - y) / (2 * hh) for x, y in zip(resid(a + hh, b), resid(a - hh, b))]; jb = [(x - y) / (2 * hh) for x, y in zip(resid(a, b + hh), resid(a, b - hh))]
+        saa = sum(x * x for x in ja); sbb = sum(x * x for x in jb); sab = sum(x * y for x, y in zip(ja, jb)); ga = sum(x * y for x, y in zip(ja, r)); gb = sum(x * y for x, y in zip(jb, r))
+        moved = False
+        for _try in range(30):
+            A, B, D = saa * (1 + mu), sab, sbb * (1 + mu); det = A * D - B * B
+            if det <= 0: mu *= 10; continue
+            da, db = -(D * ga - B * gb) / det, -(A * gb - B * ga) / det
+            na, nb = a + da, b + db
+            if na > 0.02 and nb > 0.02:
+                ne = sum(x * x for x in resid(na, nb))
+                if ne <= sse0:
+                    a, b, sse0, mu, moved = na, nb, ne, max(mu / 10, 1e-12), True; break
+            mu *= 10
+        if not moved or max(abs(da), abs(db)) < 1e-13: break
+    return (sse0, a, b)
+
+
 def fit(win_mid, total_mid):
     """Least squares by a coarse-to-fine grid over the two rates (step 0.2, then 0.04, 0.01, 0.0025, 0.0006, 0.00015, 0.00004). win_mid = (team1, draw, team2); total_mid = {strike: mid of 'over strike'}. Returns (l1, l2, rmse over the fitted legs)."""
     wm = list(win_mid)          # not renormalised: the fit absorbs the winner overround (registration, stated weakness)
@@ -154,6 +180,7 @@ def fit(win_mid, total_mid):
         if lo is not None: cand = [(lo + i * step, lo + j * step) for i in range(span) for j in range(span)]
         else: cand = [(best[1] + i * step, best[2] + j * step) for i in range(-span, span + 1) for j in range(-span, span + 1)]
         best = min((err(a, b), a, b) for a, b in cand if a > 0.02 and b > 0.02)
+    best = polish(err, best, wm, tm, NMAX)
     return best[1], best[2], (best[0] / (3 + len(tm))) ** 0.5
 
 
@@ -187,8 +214,8 @@ def stats(rows):
     gs = [r["gap"] for r in rows]; sp = [r["spread"] for r in rows]; fire = sum(1 for r in rows if r["gap"] >= GAP - 1e-9 and r["spread"] <= SPREAD_MAX + 1e-9)          # 1e-9: a 4c spread written as 0.54 - 0.50 is 0.04000000000000004
     qs = st.quantiles(gs, n=10, method="inclusive") if len(gs) > 2 else None
     q4 = st.quantiles(gs, n=4, method="inclusive") if len(gs) > 2 else None
-    return {"n": len(rows), "median_spread": round(st.median(sp), 4), "median_round_trip_information_only": round(st.median([r["round_trip"] for r in rows]), 4), "median_one_way_entry_cost": round(st.median([r["one_way"] for r in rows]), 4),
-            "gap_quartiles_p90": None if not q4 else [round(q4[0], 4), round(st.median(gs), 4), round(q4[2], 4), round(qs[8], 4)], "share_gap_ge_8c_spread_le_4c": round(fire / len(rows), 3), "fires": fire}
+    return {"n": len(rows), "median_spread": st.median(sp), "median_round_trip_information_only": st.median([r["round_trip"] for r in rows]), "median_one_way_entry_cost": st.median([r["one_way"] for r in rows]),
+            "gap_quartiles_p90": None if not q4 else [q4[0], st.median(gs), q4[2], qs[8]], "share_gap_ge_8c_spread_le_4c": fire / len(rows), "fires": fire}
 
 
 def check_candle_runs(spec, list_folders, candle_folders):
@@ -259,14 +286,14 @@ def measure(spec, list_folders, candle_folders):
         for typ in ("btts", "teamtotal"):
             if got[typ]: G[typ]["filled"] += 1
     series_listed = {m["series"] for m in k.markets(list_folders).values()}
-    out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "fit_residual_rmse_median": None if not resid else round(st.median(resid), 4), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
+    out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "fit_residual_rmse_median": None if not resid else st.median(resid), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
            "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"}
     for grp, G in games_by_group.items():
         out["groups"][grp] = {"games_with_derivable_kickoff": G["derivable"]}
         for typ in ("btts", "teamtotal"):
             R = rows.get((grp, typ), {"targets": [], "placebo": []}); filled = G[typ]["filled"]; with_target = G[typ]["derivable"]; der = G["derivable"]          # F6 (Head, literal text): the denominator is ALL the group's games with a derivable kickoff
             s_t, s_p = stats(R["targets"]), stats(R["placebo"])
-            share_filled = None if not der else round(filled / der, 3)          # printed only; the test below is on the integers
+            share_filled = None if not der else filled / der          # printed only; the test below is on the integers
             if filled < MIN_FILLED: verdict = "no evidence at n = %d filled games" % filled
             elif s_t["median_one_way_entry_cost"] > COST_MAX: verdict = "CLOSED on cost: median one-way entry cost %.1fc is above 4c (hold to settlement; Desk B dated amendment)" % (100 * s_t["median_one_way_entry_cost"])
             elif der and filled * 2 < der: verdict = "CLOSED: not tradable (under half of the games with a derivable kickoff are filled: %d of %d)" % (filled, der)

@@ -1,0 +1,96 @@
+{
+ "counts_first": {
+  "leagues_no_such_series": 52,
+  "games_in_window": 165,
+  "sampled": 165,
+  "kickoff_not_derivable": 0,
+  "no_btts_leg": 0,
+  "teamtotal_unreadable_markets": 0
+ },
+ "candle_requests_answered_whole": "50 of 50 asked",
+ "fit_residual_rmse_median": 0.0028063000226585403,
+ "groups": {
+  "A_big": {
+   "games_with_derivable_kickoff": 165,
+   "btts": {
+    "games_with_a_derivable_kickoff_in_the_group": 165,
+    "games_with_a_target_of_this_type": 165,
+    "no_such_market_in_this_group": false,
+    "no_game_of_the_group_has_a_target_of_this_type": false,
+    "filled": 165,
+    "share_filled_of_all_derivable_games": 1.0,
+    "targets": {
+     "n": 165,
+     "median_spread": 0.040000000000000036,
+     "median_round_trip_information_only": 0.07477600000000004,
+     "median_one_way_entry_cost": 0.04000000000000002,
+     "gap_quartiles_p90": [
+      -0.0206722964993169,
+      -0.020043826670421372,
+      -0.01691830847881237,
+      -0.016803460793928027
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0,
+     "fires": 0
+    },
+    "placebo": {
+     "n": 165,
+     "median_spread": 0.020000000000000018,
+     "median_round_trip_information_only": 0.05494400000000002,
+     "median_one_way_entry_cost": 0.03000000000000001,
+     "gap_quartiles_p90": [
+      -0.015467916207157928,
+      -0.011881053686081944,
+      -0.008596738534061177,
+      -0.007970322398585639
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0,
+     "fires": 0
+    },
+    "verdict": "CLOSED on cost: median one-way entry cost 4.0c is above 4c (hold to settlement; Desk B dated amendment)"
+   },
+   "teamtotal": {
+    "games_with_a_derivable_kickoff_in_the_group": 165,
+    "games_with_a_target_of_this_type": 165,
+    "no_such_market_in_this_group": false,
+    "no_game_of_the_group_has_a_target_of_this_type": false,
+    "filled": 165,
+    "share_filled_of_all_derivable_games": 1.0,
+    "targets": {
+     "n": 330,
+     "median_spread": 0.020000000000000018,
+     "median_round_trip_information_only": 0.05324999999999999,
+     "median_one_way_entry_cost": 0.03000000000000001,
+     "gap_quartiles_p90": [
+      -0.012503004834442166,
+      -0.010019663463509826,
+      -0.005681432159369337,
+      -0.004793463550576377
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0,
+     "fires": 0
+    },
+    "placebo": {
+     "n": 165,
+     "median_spread": 0.020000000000000018,
+     "median_round_trip_information_only": 0.05494400000000002,
+     "median_one_way_entry_cost": 0.03000000000000001,
+     "gap_quartiles_p90": [
+      -0.015467916207157928,
+      -0.011881053686081944,
+      -0.008596738534061177,
+      -0.007970322398585639
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0,
+     "fires": 0
+    },
+    "verdict": "CLOSED: efficient, move on. The one number: the 90th percentile gap -0.004793463550576377"
+   }
+  }
+ },
+ "tries_added": 0,
+ "rule_scored": false,
+ "result_read": false,
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+ "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"
+}

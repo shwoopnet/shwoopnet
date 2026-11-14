@@ -92,4 +92,41 @@ assert s.near_strike({3.5: (0.54, 0.56), 2.5: (0.44, 0.46)}) == 2.5 and s.near_s
 assert s.near_strike({2.5: (0.495, 0.500), 3.5: (0.500, 0.505)}) == 2.5 and s.near_strike({3.5: (0.495, 0.500), 2.5: (0.4951, 0.5000)}) == 2.5          # sub-cent quotes: exact tie to the lower strike, no false tie
 try: s.check_candle_runs(spec, [dl], ["/tmp/HELDOUT_X"]); raise AssertionError("held-out candle folder not refused")
 except SystemExit as ex: assert "HELDOUT" in str(ex) or "held" in str(ex).lower(), ex
+# ---- Fit polish and unrounded figures (SOCDERIV_FIT_ADDENDUM.md, Auditor B 02:48Z) ----
+def exact(l1_, l2_, strikes):
+    h_, d2_, a2_ = s.p_winner(l1_, l2_); return (h_, d2_, a2_), {kk: s.over(l1_ + l2_, kk) for kk in strikes}
+for (l1_, l2_, ks_) in ((1.4, 1.0, (1.5, 2.5, 3.5)), (0.9, 1.7, (0.5, 1.5, 2.5, 3.5, 4.5)), (2.1, 0.45, (1.5, 2.5, 3.5, 10.5))):
+    wm_, tm_ = exact(l1_, l2_, ks_); g1, g2, grm = s.fit(wm_, tm_)
+    assert abs(g1 - l1_) < 1e-9 and abs(g2 - l2_) < 1e-9 and grm < 1e-9, (l1_, l2_, g1, g2, grm)          # exact recovery to 1e-9 (the old grid: about 4e-5)
+def sse_(a_, b_, wm_, tm_):
+    h_, d2_, c_ = s.p_winner(a_, b_); lam_ = a_ + b_
+    return (h_ - wm_[0]) ** 2 + (d2_ - wm_[1]) ** 2 + (c_ - wm_[2]) ** 2 + sum((s.over(lam_, kk) - v) ** 2 for kk, v in tm_.items())
+def nelder_mead(f, x0, iters=4000):
+    pts = [list(x0), [x0[0] + 0.01, x0[1]], [x0[0], x0[1] + 0.01]]; vals = [f(*p_) for p_ in pts]
+    for _ in range(iters):
+        o_ = sorted(range(3), key=lambda i: vals[i]); pts = [pts[i] for i in o_]; vals = [vals[i] for i in o_]
+        if abs(vals[2] - vals[0]) < 1e-18: break
+        c_ = [(pts[0][k_] + pts[1][k_]) / 2 for k_ in range(2)]
+        r_ = [2 * c_[k_] - pts[2][k_] for k_ in range(2)]; fr = f(*r_) if min(r_) > 0.001 else 9
+        if fr < vals[0]:
+            e_ = [3 * c_[k_] - 2 * pts[2][k_] for k_ in range(2)]; fe = f(*e_) if min(e_) > 0.001 else 9
+            pts[2], vals[2] = (e_, fe) if fe < fr else (r_, fr)
+        elif fr < vals[1]: pts[2], vals[2] = r_, fr
+        else:
+            ic = [(c_[k_] + pts[2][k_]) / 2 for k_ in range(2)]; fi = f(*ic)
+            if fi < vals[2]: pts[2], vals[2] = ic, fi
+            else:
+                for i in (1, 2): pts[i] = [(pts[0][k_] + pts[i][k_]) / 2 for k_ in range(2)]; vals[i] = f(*pts[i])
+    return pts[0], vals[0]
+for (l1_, l2_, ks_) in ((1.4, 1.0, (1.5, 2.5, 3.5)), (0.9, 1.7, (0.5, 1.5, 2.5, 3.5, 4.5)), (1.9, 0.7, (1.5, 2.5, 3.5))):
+    wm_, tm_ = exact(l1_, l2_, ks_); wm_ = (wm_[0] + .01, wm_[1] - .015, wm_[2] + .005); tm_ = {kk: v + o_ for (kk, v), o_ in zip(tm_.items(), (.012, -.008, .004, .006, -.003))}
+    g1, g2, grm = s.fit(wm_, tm_); (x_, y_), v_ = nelder_mead(lambda a_, b_: sse_(a_, b_, wm_, tm_), [g1, g2])
+    assert sse_(g1, g2, wm_, tm_) <= v_ + 1e-14 and abs(g1 - x_) < 1e-5 and abs(g2 - y_) < 1e-5, (sse_(g1, g2, wm_, tm_), v_, g1, x_, g2, y_)          # at the reference minimum
+    assert abs(grm - (sse_(g1, g2, wm_, tm_) / (3 + len(tm_))) ** 0.5) < 1e-12
+gst = s.stats([{"gap": g_, "spread": 0.02, "round_trip": 0.05 + g_ / 10, "one_way": 0.03} for g_ in (0.0123456789, 0.0234567891, 0.0345678912, 0.0456789123)])
+q1_ = 0.0123456789 + 0.75 * (0.0234567891 - 0.0123456789); md_ = (0.0234567891 + 0.0345678912) / 2; q3_ = 0.0345678912 + 0.25 * (0.0456789123 - 0.0345678912); p90_ = 0.0345678912 + 0.7 * (0.0456789123 - 0.0345678912) if False else None
+gq = gst["gap_quartiles_p90"]
+assert abs(gq[0] - q1_) < 1e-12 and abs(gq[1] - md_) < 1e-12 and abs(gq[2] - q3_) < 1e-12 and gq[0] != round(gq[0], 4) and gq[3] != round(gq[3], 4) and gst["median_spread"] == 0.02 and gst["median_one_way_entry_cost"] == 0.03
+assert gst["share_gap_ge_8c_spread_le_4c"] == 0.0 and abs(s.stats(rows4)["share_gap_ge_8c_spread_le_4c"] - 0.1) < 1e-15 and s.stats([{"gap": 0.1, "spread": 0.03, "round_trip": 0.1, "one_way": 0.04}] * 3)["share_gap_ge_8c_spread_le_4c"] == 1.0
+st3 = s.stats([{"gap": 0.1 / 3 * i, "spread": 0.0123456, "round_trip": 0.07, "one_way": 0.04123456} for i in (1, 2, 3)]); assert st3["median_spread"] == 0.0123456 and st3["median_one_way_entry_cost"] == 0.04123456
 print("socderiv synthetic tests passed")
