@@ -1,86 +1,89 @@
 #!/usr/bin/env python3
-"""PROVEN-bar read for OICORE, SECOND BUILD (Testing Desk, Nov 13, 2026). Research only: reads a file it is given, sends nothing, places nothing.
-Independent of Refinement's build 1 (not read). Hand case: PROVEN_OICORE_HAND_CASE.md (committed first). Test: test_proven_oicore_second.py (INVENTED rows only). No live figure is stored in any file; results go by message only.
+"""PROVEN-bar read for OICORE, SECOND BUILD, EXTRACT-ONLY (Testing Desk, Nov 14, 2026). Research only: reads a file it is given, sends nothing, places nothing.
+Independent of Refinement's build 1 (not read). Hand cases: PROVEN_OICORE_HAND_CASE.md and PROVEN_OICORE_HAND_CASE_ADDENDUM3.md (committed first). Test: test_proven_oicore_second.py (INVENTED rows only).
+No live figure is stored in any file; results go by message only.
 
-TASK (Head of R&D, 19:20Z, the owner's priority): from the nightly report's slot rows for strategy OICORE (settled, filled), in fill order, split into 3 equal windows by fill count;
-cash PF per window from avgFill and avgFee on the fill-booked cash basis (fillCost, functions/kalshiLiveLib.js), unrounded; PROVEN if at least 2 of 3 windows are at 1.3 or better, otherwise NOT YET with the figures.
-RULING (Head, 19:22Z): the bar is 100 fills IN TOTAL; there is NO per-window n minimum; total n under 100 is NOT_ENOUGH_DATA; each window's n is printed beside its PF.
-
-CASH BASIS (fillCost as read from origin/main): side price = avgFill for YES, 1 - avgFill for NO; cost = (side price + avgFee) x count; valid only if 0 < avgFill < 1, 0 <= avgFee < 1 and count > 0, else the row is EXCLUDED and counted
-(fillCost would fall back to the limit booking maxCost, which the report row does not carry). Payout count x $1 when the result equals the side, else 0. A void = price refunded, fee kept (-(avgFee x count)).
-A result of 'exit' (exitProceeds is not in the report row) is EXCLUDED and counted. Rows used: strategy exactly 'OICORE', count > 0, settledPnl present. Fill order = ascending ts (stable).
-Windows: rows[i*n // 3 : (i+1)*n // 3]. A window counts when its PF >= 1.3 - 1e-9 (unrounded), whatever its n. Total rows used under 100: NOT_ENOUGH_DATA; else PROVEN if at least 2 of 3 windows count, otherwise NOT YET.
-READ POINTS (Head, 19:23Z): one marker per read point, 100 and then 150 if the first says NOT YET. A read is made AT a point P and uses the FIRST P fills in fill order (my reading; rows beyond P are not read).
-Fewer than P usable fills: NOT_ENOUGH_DATA, no marker, the point is not spent. A made read writes PROVEN_OICORE_READ_<P>.local (with its verdict) BEFORE any output. Point 100 refuses if its marker exists;
-point 150 refuses unless the 100 marker exists with verdict NOT YET, and refuses if its own marker exists. Open (filled, unsettled) OICORE orders are counted and printed as open_filled_orders.
-Usage: proven_oicore_second.py <report.json> <read point 100|150>      (the nightly report with ?orders=1 (a 'slotOrders' list), or a plain list of rows)
+INPUT (Head, Nov 14, 00:30Z): ONLY Refinement's canonical extract (commit 6e63a0bd, oicore_extract.py 257b30c0): header ts,ticker,side,count,avgFill,avgFee,result; the first N settled OICORE rows by (ts, ticker);
+%.6f; LF; no generatedAt; result yes or no only. Any deviation from that format STOPs naming the line. The sha256 of the raw file bytes is printed and written into the marker.
+RULE (Head, 19:20Z to 19:23Z): rows in fill order (the extract's order), split into 3 windows by fill count, window i = rows[i*m // 3 : (i+1)*m // 3]; cash PF per window on the fill-booked cash basis, unrounded;
+a window counts at PF >= 1.3 - 1e-9 whatever its n; PROVEN if at least 2 of 3 windows count, otherwise NOT YET with the figures; each window's n is printed beside its PF.
+CASH BASIS (fillCost as read from origin/main): side price = avgFill for YES, 1 - avgFill for NO; cost = (side price + avgFee) x count; valid only if count > 0, 0 < avgFill < 1 and 0 <= avgFee < 1, else the row is EXCLUDED and counted
+(fillCost would fall back to the limit booking, which the extract does not carry). Payout count x $1 when the result equals the side, else 0. A void is not in an extract.
+READ POINTS (Head, 19:23Z): one marker per read point, 100 and then 150 if the first says NOT YET. A read at P needs exactly P rows (more than P STOPs); fewer than P usable fills is NOT_ENOUGH_DATA, no marker, the point is not spent.
+A made read writes PROVEN_OICORE_READ_<P>.local (with its verdict and the extract's sha256) BEFORE any output. Point 100 refuses if its marker exists; point 150 refuses unless the 100 marker says NOT YET and refuses if its own exists; refusals come before the file is looked at.
+Usage: proven_oicore_second.py <extract.csv> <read point 100|150>
 """
-import json, math, os, sys
+import hashlib, math, os, re, sys, time
 
-STRATEGY = "OICORE"
 BAR_PF = 1.3
-MIN_TOTAL = 100
 NEED_WINDOWS = 2
 N_WINDOWS = 3
 TOL = 1e-9
+COLS = "ts,ticker,side,count,avgFill,avgFee,result"
+POINTS = (100, 150)
+HERE = os.path.dirname(os.path.abspath(__file__))
 AMBIGUITIES = [
     "'By fill count' is by the NUMBER OF FILLED ORDERS (rows), not contracts (the Head's ruling 19:22Z); the 100-fill bar is a TOTAL, with no per-window minimum.",
-    "Rows fillCost would book at the limit (unreadable avgFill or avgFee) cannot be reproduced from the report row (maxCost is not carried): they are excluded and counted, never guessed.",
-    "A result of 'exit' (the exit watch sold some contracts) is excluded and counted: exitProceeds is not in the report row.",
-    "A void is price refunded, fee kept (the standing void rule); fillCost's own cap 'cash <= worst case' cannot be applied without maxCost.",
-    "Fill order is the row's ts (the order time), the only time the report row carries; ties keep input order.",
-    "The report covers only the hours asked for (at most 90 days): the rows given are the rows read; this reader does not page.",
+    "The extract holds exactly the first P rows by (ts, ticker): fill order is the extract's order (checked non-decreasing); a repeated (ts, ticker) is allowed and keeps its order.",
+    "Rows with count <= 0, avgFill outside (0, 1) or avgFee outside [0, 1) cannot be booked as fillCost books them (it would use the limit): excluded and counted, never guessed; usable rows under P is NOT_ENOUGH_DATA.",
+    "A void or exit row in the file STOPs: the extractor excludes them, so such a row means the file is not the canonical extract.",
+    "The number format is checked strictly (avgFill and avgFee %.6f; count an integer or %.6f): the canonical extract carries nothing else.",
 ]
+_FIXED = re.compile(r"^-?\d+\.\d{6}$")
+_COUNT = re.compile(r"^\d+(\.\d{6})?$")
 
 
-def _num(v):
+def parse_extract(path):
+    """-> {'rows': [dict(ts, ticker, side, count, fill, fee, result)], 'sha256': str}. Any deviation from the canonical format STOPs naming the line."""
+    raw = open(path, "rb").read()
+    sha = hashlib.sha256(raw).hexdigest()
     try:
-        x = float(v)
-    except (TypeError, ValueError):
-        return None
-    return x if math.isfinite(x) else None
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        raise SystemExit("STOP: the file is not utf-8 text (not the canonical extract)")
+    if "\r" in text:
+        raise SystemExit("STOP: a CR in the file: the canonical extract is LF only")
+    if text and not text.endswith("\n"):
+        raise SystemExit("STOP: the file does not end with a final LF (not the canonical extract)")
+    lines = text.split("\n")[:-1] if text else []
+    if not lines or lines[0] != COLS:
+        raise SystemExit("STOP: line 1 is not the header %s" % COLS)
+    rows, prev = [], None
+    for n, ln in enumerate(lines[1:], start=2):
+        f = ln.split(",")
+        if len(f) != 7:
+            raise SystemExit("STOP: line %d has %d fields, not 7" % (n, len(f)))
+        ts, tk, side, cnt, fill, fee, res = f
+        if not ts or not tk:
+            raise SystemExit("STOP: line %d has an empty ts or ticker" % n)
+        if side not in ("yes", "no"):
+            raise SystemExit("STOP: line %d side %r is not yes or no" % (n, side))
+        if res not in ("yes", "no"):
+            raise SystemExit("STOP: line %d result %r is not yes or no (the extractor excludes exit, void and open rows)" % (n, res))
+        if not _COUNT.match(cnt):
+            raise SystemExit("STOP: line %d count %r is not an integer or %%.6f" % (n, cnt))
+        if not _FIXED.match(fill):
+            raise SystemExit("STOP: line %d avgFill %r is not %%.6f" % (n, fill))
+        if not _FIXED.match(fee):
+            raise SystemExit("STOP: line %d avgFee %r is not %%.6f" % (n, fee))
+        if prev is not None and (ts, tk) < prev:
+            raise SystemExit("STOP: line %d is before its predecessor in (ts, ticker) order" % n)
+        prev = (ts, tk)
+        rows.append({"ts": ts, "ticker": tk, "side": side, "count": float(cnt), "fill": float(fill), "fee": float(fee), "result": res})
+    return {"rows": rows, "sha256": sha}
 
 
-def cash_result(row):
+def cash_net(row):
     """-> (net dollars, None) or (None, exclusion reason). The cash basis of fillCost."""
-    if row.get("strategy") != STRATEGY:
-        return None, "other strategy"
-    count = _num(row.get("count"))
-    if not (count is not None and count > 0):
-        return None, "not filled"
-    if row.get("settledPnl") is None or _num(row.get("settledPnl")) is None:
-        return None, "not settled"
-    res, side = row.get("result"), row.get("side")
-    if res == "exit":
-        return None, "exit (exitProceeds not in the row)"
-    avg, fee = row.get("avgFill"), row.get("avgFee")
-    a, f = _num(avg), _num(fee)
-    if avg is None or avg == "" or a is None or not (0 < a < 1):
+    c, a, f = row["count"], row["fill"], row["fee"]
+    if not (c > 0):
+        return None, "count not positive"
+    if not (0 < a < 1):
         return None, "avgFill unreadable"
-    if fee is None or fee == "" or f is None or not (0 <= f < 1):
+    if not (0 <= f < 1):
         return None, "avgFee unreadable"
-    if side not in ("yes", "no"):
-        return None, "side unreadable"
-    sp = a if side == "yes" else 1.0 - a
-    cost = (sp + f) * count
-    if res == "void":
-        return -(f * count), None
-    if res not in ("yes", "no"):
-        return None, "result not yes, no, void or exit"
-    return (count if res == side else 0.0) - cost, None
-
-
-def select(rows):
-    """-> (used [(ts, net)], exclusions {reason: n}) in fill order."""
-    used, ex = [], {}
-    for r in rows:
-        net, why = cash_result(r)
-        if why:
-            ex[why] = ex.get(why, 0) + 1
-        else:
-            used.append((str(r.get("ts")), net))
-    used.sort(key=lambda x: x[0])          # stable: ties keep input order
-    return used, ex
+    sp = a if row["side"] == "yes" else 1.0 - a
+    return (c if row["result"] == row["side"] else 0.0) - (sp + f) * c, None
 
 
 def pf_of(nets):
@@ -97,49 +100,38 @@ def split(nets, k=N_WINDOWS):
 
 
 def window_ok(nets):
-    p = pf_of(nets)
-    return p is not None and p >= BAR_PF - TOL          # no per-window n minimum (Head, 19:22Z)
+    pf = pf_of(nets)
+    return pf is not None and pf >= BAR_PF - TOL          # no per-window n minimum (Head, 19:22Z)
 
 
-def open_filled(rows):
-    """Open OICORE orders: filled (count > 0) and not yet settled (settledPnl absent)."""
-    n = 0
+def score_rows(rows, point):
+    """The figures for the rows of an extract read at point P. More than P rows STOPs; fewer usable fills than P is NOT_ENOUGH_DATA."""
+    if len(rows) > point:
+        raise SystemExit("STOP: %d rows in the extract, more than the read point %d (not the canonical extract for this point)" % (len(rows), point))
+    nets, ex = [], {}
     for r in rows:
-        c = _num(r.get("count"))
-        if r.get("strategy") == STRATEGY and c is not None and c > 0 and (r.get("settledPnl") is None or _num(r.get("settledPnl")) is None):
-            n += 1
-    return n
-
-
-def read_rows(rows, limit=None):
-    used, ex = select(rows)
-    if limit is not None and len(used) >= limit:
-        used = used[:limit]          # the read point: the FIRST `limit` fills
-    nets = [x[1] for x in used]
+        net, why = cash_net(r)
+        if why:
+            ex[why] = ex.get(why, 0) + 1
+        else:
+            nets.append(net)
     wins = split(nets)
     wf = []
     for w in wins:
-        p = pf_of(w)
-        wf.append({"n": len(w), "cash_pf_unrounded": p, "net": sum(w), "win_rate": (sum(1 for x in w if x > 0) / len(w) if w else None), "counts": window_ok(w)})
+        pf = pf_of(w)
+        wf.append({"n": len(w), "cash_pf_unrounded": pf, "net": sum(w), "win_rate": (sum(1 for x in w if x > 0) / len(w) if w else None), "counts": window_ok(w)})
     ok = sum(1 for x in wf if x["counts"])
-    verdict = "NOT_ENOUGH_DATA" if len(used) < max(MIN_TOTAL, limit or 0) else ("PROVEN" if ok >= NEED_WINDOWS else "NOT YET")          # at a read point P: under P usable fills is not enough
-    return {"python": "%s at %s" % (sys.version.split()[0], sys.executable), "rule": "100 fills in total (under 100: NOT_ENOUGH_DATA); PROVEN if at least 2 of 3 windows have cash PF >= 1.3 (unrounded, 1e-9), no per-window n minimum; else NOT YET",
-            "strategy": STRATEGY, "rows_given": len(rows), "rows_used": len(used), "open_filled_orders": open_filled(rows), "excluded": ex,
-            "excluded_unreadable_fill_or_fee": ex.get("avgFill unreadable", 0) + ex.get("avgFee unreadable", 0), "excluded_exit": ex.get("exit (exitProceeds not in the row)", 0),
-            "windows": wf, "windows_counting": ok, "VERDICT": verdict, "ambiguities": AMBIGUITIES}
-
-
-POINTS = (100, 150)
-HERE = os.path.dirname(os.path.abspath(__file__))
+    verdict = "NOT_ENOUGH_DATA" if len(nets) < point else ("PROVEN" if ok >= NEED_WINDOWS else "NOT YET")
+    return {"python": "%s at %s" % (sys.version.split()[0], sys.executable), "rule": "extract of exactly P rows; 3 windows rows[i*m//3:(i+1)*m//3]; PROVEN if at least 2 of 3 windows have cash PF >= 1.3 (unrounded, 1e-9), no per-window n minimum; else NOT YET; under P usable fills NOT_ENOUGH_DATA",
+            "rows_in_extract": len(rows), "rows_usable": len(nets), "excluded": ex, "excluded_unusable": sum(ex.values()), "windows": wf, "windows_counting": ok, "VERDICT": verdict, "ambiguities": AMBIGUITIES}
 
 
 def marker_path(point, marker_dir=None):
     return os.path.join(marker_dir or HERE, "PROVEN_OICORE_READ_%d.local" % point)
 
 
-def read_point(rows, point, marker_dir=None, now=None):
-    """One marker per read point. Refusals come before any data is looked at; NOT_ENOUGH_DATA writes no marker; a made read writes its marker BEFORE returning (the caller prints)."""
-    import time
+def read_point(path, point, marker_dir=None, now=None):
+    """One marker per read point. Refusals come before the file is looked at; NOT_ENOUGH_DATA writes no marker; a made read writes its marker BEFORE returning (the caller prints)."""
     if point not in POINTS:
         raise SystemExit("refused: read point %r; the read points are 100 and then 150" % (point,))
     m = marker_path(point, marker_dir)
@@ -151,26 +143,20 @@ def read_point(rows, point, marker_dir=None, now=None):
             raise SystemExit("refused: read point 150 needs a read at point 100 first (no marker %s)" % m100)
         if "verdict: NOT YET" not in open(m100).read():
             raise SystemExit("refused: the point-100 read did not say NOT YET (%s); a PROVEN at 100 ends the question" % open(m100).read().strip().splitlines()[-1])
-    out = read_rows(rows, limit=point)
-    out["read_point"], out["rows_read"] = point, (point if out["rows_used"] >= point else 0)
+    ex = parse_extract(path)
+    out = score_rows(ex["rows"], point)
+    out["extract_sha256"], out["read_point"] = ex["sha256"], point
     if out["VERDICT"] == "NOT_ENOUGH_DATA":
         return out          # fewer than P usable fills: not spent, no marker
     with open(m, "w") as fh:
-        fh.write("READ POINT %d MADE at %s UTC\nverdict: %s\n" % (point, time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(time.time() if now is None else now)), out["VERDICT"]))
+        fh.write("READ POINT %d MADE at %s UTC\nextract sha256: %s\nverdict: %s\n" % (point, time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(time.time() if now is None else now)), ex["sha256"], out["VERDICT"]))
     return out
-
-
-def read_file(path, point=None):
-    d = json.load(open(path))
-    rows = d.get("slotOrders") if isinstance(d, dict) else d
-    if not isinstance(rows, list):
-        raise SystemExit("STOP: no slotOrders list in %s" % path)
-    return read_point(rows, point) if point is not None else read_rows(rows)
 
 
 if __name__ == "__main__":
     a = sys.argv[1:]
     if len(a) == 2:
-        print(json.dumps(read_file(a[0], int(a[1])), indent=1, default=str))
+        import json as _j
+        print(_j.dumps(read_point(a[0], int(a[1])), indent=2, default=str))
     else:
         print(__doc__); print("\n".join(AMBIGUITIES))
