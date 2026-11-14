@@ -128,3 +128,19 @@ tm = table([["2026-03-18", "KXFEDMENTION-26MAR", "KXFEDMENTION-26MAR-INFL", "inf
 rm = F.count(tm, [run(LJ, {"hist": [{"markets": mm}], "live": [{"markets": []}]})], [run(CJ, {"c1": [{"markets": [cndl("KXFEDMENTION-26MAR-INFL", F.et_epoch("2026-03-18", 14, 5), 0.60, 0.62)]}]})], LJ, CJ)
 assert rm["qualifying"] == 1 and rm["statement_word_strikes"] == 1, rm
 print("ok", r["qualifying"], r2["qualifying"], len(jb["requests"]))
+
+# --- Nov 14: the events command (dated line 0a030458): ticker, series, title and date only, before 2026-06-17
+EJ = job("FOMCTEXT_EVENTS", [("events_KXFEDMENTION", "/events")])
+evs = [{"event_ticker": "KXFEDMENTION-25JAN29", "title": "A", "strike_date": "2025-01-29T19:00:00Z", "category": "x"},
+       {"event_ticker": "KXPOWELLMENTION-26MAR", "title": "B"},
+       {"event_ticker": "KXFEDMENTION-26JUN17", "title": "HELD"},
+       {"event_ticker": "KXJPOWMENTION-XYZ", "title": "C", "strike_date": "2026-04-29T18:00:00Z"},
+       {"event_ticker": "KXWARSHMENTION-ABC", "title": "D"},
+       {"event_ticker": "KXOTHER-25JAN29", "title": "E"}]
+ER, ED = F.events([run(EJ, {"events_KXFEDMENTION": [{"events": evs, "cursor": ""}]})], EJ)
+assert [(r["event_ticker"], r["date"], r["date_source"]) for r in ER] == [("KXFEDMENTION-25JAN29", "2025-01-29", "ticker"), ("KXPOWELLMENTION-26MAR", "2026-03-18", "ticker"),
+                                                                         ("KXJPOWMENTION-XYZ", "2026-04-29", "strike_date")], ER
+assert all(set(r) == {"event_ticker", "series_ticker", "title", "date", "date_source"} for r in ER), ER
+assert "HELD" not in json.dumps(ER) and ED == {"held_out": 1, "no_date": 1, "not_fed_series": 1}, ED
+refused(lambda: F.events([run(EJ, {"events_KXFEDMENTION": [{"events": evs, "cursor": ""}]})], job("OTHER", [("events_KXFEDMENTION", "/events")])), "committed job")
+print("events command: ok")

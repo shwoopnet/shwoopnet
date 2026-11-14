@@ -6,6 +6,7 @@ Commands:
   build-candles <table.csv> <lists job.json> <lists folder>...   -> the whole stage 2 candle job, checked by the pull runner's own check_job
   words <lists job.json> <lists folder>...   -> development markets' event ticker, date and strike-word text only (no price, volume or result), for Idea Desk C
   count <table.csv> <lists job.json> <candles job.json> --lists <folder>... --candles <folder>...   -> the stage 1 count and the CLOSE lines
+  events <events job.json> <events folder>...   -> event ticker, series, title and date of the Fed mention events dated before 2026-06-17 only (dated line of Nov 14)
 Every run folder must be PROVEN whole against its committed job (manifest job equal, status complete, every request answered, no cursor left, sha256 and bytes) before it is read.
 The hand-matched statement-word table is Desk C's (decision_date,event_ticker,market_ticker,strike_word,statement_word; card Clarification 1, 28a2d63d); this reader never matches words."""
 import calendar, csv, gzip, hashlib, json, os, re, sys
@@ -249,6 +250,30 @@ def words(list_folders, lists_job):
     return sorted(out, key=lambda x: (x["decision_date"], x["event_ticker"], x["market_ticker"]))
 
 
+def events(folders, job):
+    """Nov 14 (the Head): from a FOMCTEXT_EVENTS run (/events, no nested markets), print ONLY event_ticker, series_ticker, title and date, for events dated before 2026-06-17.
+    The date is from the event ticker; only if it gives none, from strike_date. An event at or after the cut, or with no date, is dropped before its title is read."""
+    out, drop = [], {"held_out": 0, "no_date": 0, "not_fed_series": 0}
+    for f in folders:
+        for row, body in answers(f, job):
+            for ev in (body.get("events") or []) if isinstance(body, dict) else []:
+                t = ev.get("event_ticker") if isinstance(ev, dict) else None
+                if not t:
+                    continue
+                if t.split("-")[0] not in SERIES:
+                    drop["not_fed_series"] += 1; continue
+                d, src = date_of_event(t), "ticker"
+                if d is None:
+                    sd = ev.get("strike_date")
+                    d, src = (sd[:10], "strike_date") if isinstance(sd, str) and re.fullmatch(r"\d{4}-\d\d-\d\d", sd[:10]) else (None, None)
+                if d is None:
+                    drop["no_date"] += 1; continue
+                if held_out(d):
+                    drop["held_out"] += 1; continue
+                out.append({"event_ticker": t, "series_ticker": t.split("-")[0], "title": ev.get("title"), "date": d, "date_source": src})
+    return sorted(out, key=lambda x: (x["date"], x["event_ticker"])), drop
+
+
 def count(table_path, list_folders, candle_folders, lists_job, candles_job):
     N404[0] = 0
     table = load_table(table_path); lists, drop = load_lists(list_folders, lists_job); universe(table, lists); cd = candles(candle_folders, candles_job)
@@ -301,6 +326,10 @@ if __name__ == "__main__":
         print(json.dumps({"requests": len(job["requests"]), "list_rows_dropped_unread": drop}), file=sys.stderr)
     elif a[0] == "words":             # words <lists job.json> <lists folder>...
         print(json.dumps(words(a[2:], load(a[1])), indent=1))
+    elif a[0] == "events":            # events <events job.json> <events folder>...
+        rows, drop = events(a[2:], load(a[1]))
+        print(json.dumps(rows, indent=1))
+        print(json.dumps({"events": len(rows), "dropped_unread": drop}), file=sys.stderr)
     elif a[0] == "count":             # count <table.csv> <lists job.json> <candles job.json> --lists <folder>... --candles <folder>...
         i, j = a.index("--lists"), a.index("--candles")
         print(json.dumps(count(a[1], a[i + 1:j], a[j + 1:], load(a[2]), load(a[3])), indent=1))
