@@ -60,6 +60,7 @@ def run(report, marker_dir=MARKER_DIR):
     out["read_point"] = point
     used = rows[:point]   # EXACTLY the first 100 (or 150) counted rows by ts, never "all rows present": no choice about when to look
     out["rows_used"] = len(used); m = len(used)
+    out["first_ts"], out["last_ts"] = used[0][0], used[-1][0]
     wins = []
     for i in range(3):
         w = [p for _, p in used[i * m // 3:(i + 1) * m // 3]]
