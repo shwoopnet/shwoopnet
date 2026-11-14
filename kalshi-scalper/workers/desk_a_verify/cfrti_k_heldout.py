@@ -26,9 +26,15 @@ def load_markets_ho(folder):
                     out[m["ticker"]] = dict(tk=m["ticker"], close=c, strike=float(m["floor_strike"]), yes=r == "yes", void=r == "void")
     return out
 def prove_whole(*folders):
-    """Auditor B item 4: before anything is read or any marker is written, each run folder must pass the whole-run proof (manifest status complete, every request answered 200 on pages 1..k, none truncated, the last page without a cursor, every stored file's sha256 and bytes equal to the manifest); spxoi1_threshold.check_run is that proof (it also runs the held-out guard)."""
+    """Auditor B item 4: before anything is read or any marker is written, each run folder must pass the whole-run proof (manifest status complete, every request answered 200 on pages 1..k, none truncated, the last page without a cursor, every stored file's sha256 and bytes equal to the manifest); spxoi1_threshold.check_run is that proof (it also runs the held-out guard), then every request id of the manifest's embedded job must have rows (Auditor B's follow-up (a)); a manifest with no embedded job request list is refused. The job files of the three held-out pulls are the stronger proof and are passed when they exist."""
     import spxoi1_threshold as S
-    for f in folders: S.check_run(f)
+    for f in folders:
+        S.check_run(f)
+        man = json.load(open(os.path.join(f, "manifest.json")))
+        job = man.get("job"); reqs = job.get("requests") if isinstance(job, dict) else None
+        if not isinstance(reqs, list) or not reqs: sys.exit("REFUSED: %s manifest carries no embedded job request list, so the run cannot be proven whole" % f)
+        want = {r.get("id") for r in reqs if isinstance(r, dict)}; have = {r.get("id") for r in man["rows"]}
+        if None in want or want - have: sys.exit("REFUSED: %s: request id(s) %s of the embedded job have no rows (a missing request)" % (f, sorted(str(x) for x in (want - have) | ({None} & want))))
 def boundary_excluded(folder):
     """how many settled KXBTC15M markets with a strike close EXACTLY at HELD_FROM (excluded, printed with the result)"""
     seen = set()

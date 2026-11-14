@@ -7,7 +7,7 @@ def folder(d, name, body):
     import hashlib
     p = os.path.join(d, name); os.makedirs(p); raw = json.dumps(body).encode()
     with gzip.open(p + "/a.json.gz", "wb") as f: f.write(raw)
-    json.dump({"status": "complete", "rows": [{"index": 1, "id": "r1", "page": 1, "status": 200, "bytes": len(raw), "file": "a.json.gz", "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False, "body_kind": "object"}]}, open(p + "/manifest.json", "w")); return p
+    json.dump({"job": {"job_id": "FIXTURE", "requests": [{"id": "r1"}]}, "requests_sent": 1, "status": "complete", "rows": [{"index": 1, "id": "r1", "page": 1, "status": 200, "bytes": len(raw), "file": "a.json.gz", "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False, "body_kind": "object"}]}, open(p + "/manifest.json", "w")); return p
 def build(days, start, edge, seed, override=None):
     M, B, P = K.synth(days=days, edge=edge, seed=seed)
     sh = calendar.timegm(time.strptime(start, "%Y-%m-%d")) - calendar.timegm(time.strptime("2026-08-01", "%Y-%m-%d"))
@@ -136,5 +136,20 @@ for which in range(3):
         with contextlib.redirect_stdout(io.StringIO()): H.run(folders[0], folders[1], folders[2], now=H.READ_NOT_BEFORE + 5, marker=mkx)
         raise AssertionError("an incomplete manifest was read")
     except SystemExit as e: assert "REFUSED" in str(e) and not os.path.exists(mkx)
+# Auditor B's follow-up (a): every request id of the manifest's embedded job must have rows (a request that never appears is a missing request); a manifest with no embedded job request list is refused
+def d_missreq(rows, dst):
+    m = json.load(open(dst + "/manifest.json")); m["job"]["requests"].append({"id": "r2"}); json.dump(m, open(dst + "/manifest.json", "w"))
+def d_nojob(rows, dst):
+    m = json.load(open(dst + "/manifest.json")); m.pop("job"); json.dump(m, open(dst + "/manifest.json", "w"))
+def edit_raw(dst, fn):
+    fn(None, dst)
+for which in range(3):
+    for fn in (d_missreq, d_nojob):
+        folders = [lists, cands, perp]; folders[which] = mkcopy(folders[which]); fn(None, folders[which])
+        mkx = os.path.join(tempfile.mkdtemp(), "m.txt")
+        try:
+            with contextlib.redirect_stdout(io.StringIO()): H.run(folders[0], folders[1], folders[2], now=H.READ_NOT_BEFORE + 5, marker=mkx)
+            raise AssertionError("a run with a missing request or no job was read: folder %d %s" % (which, fn.__name__))
+        except SystemExit as e: assert "REFUSED" in str(e) and not os.path.exists(mkx), (which, fn.__name__, str(e))
 print("CFRTI-K HELD-OUT TEST OK (filter strictly after Nov 14 00:00Z, boundary count, label rule, under 50 prints only the count and spends nothing, refuses before Nov 20, marker, second run refused)")
 print(out.strip())
