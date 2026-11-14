@@ -11,8 +11,20 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
-from deskb_guard import refuse_all as _refuse_all
-_refuse_all()
+import deskb_guard as _dg
+# The ONLY listed runs this reader may open (the Head's decision of Nov 14, 2026: the OICAND lists run and the four candle runs). No flag, no argument and no
+# environment variable can extend this; every other listed run, and every HELDOUT_ path, is refused exactly as deskb_guard.py refuses it.
+ALLOWED_RUNS = frozenset(["2026-11-14T0227Z_43546384963", "2026-11-14T0253Z_43548715053", "2026-11-14T0413Z_43555574326", "2026-11-14T0501Z_43559459347", "2026-11-14T0541Z_43562765461"])
+
+def guard(paths):
+    for path in [os.getcwd()] + list(paths):
+        for p in (os.path.abspath(path), os.path.realpath(path)):
+            parts = p.split(os.sep)
+            if any(x.upper().startswith("HELDOUT_") for x in parts):
+                raise SystemExit("REFUSED: %s lies in or resolves into a HELDOUT_ folder (standing rule (h))" % path)
+            bad = _dg.listed_runs().intersection(parts) - ALLOWED_RUNS
+            if bad:
+                raise SystemExit("REFUSED: %s is, or lies inside, the landed run %s, which HELDOUT_PULL_RUNS.md lists as held-out material and this reader may not read" % (path, sorted(bad)[0]))
 ALLOWED = ["KXHYPE15M", "KXBNB15M"]          # the Head's final scope (Nov 14): the only series readable from the OICAND backfill
 EVENT830 = ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"]
 CUT_DATES = ("2026-11-05", "2026-11-06", "2026-11-10", "2026-11-12", "2026-11-13")
@@ -68,6 +80,7 @@ def main(argv=None, allowed=None, cut=None):
     ap = argparse.ArgumentParser(); ap.add_argument("--lists", nargs="+", required=True); ap.add_argument("--candles", nargs="+", required=True)
     ap.add_argument("--series", nargs="+", default=ALLOWED); ap.add_argument("--days", type=int, default=20)
     a = ap.parse_args(argv); drops = Counter(); closes = {}; cutn = Counter()
+    guard(list(a.lists) + list(a.candles))
     if any(x not in allowed for x in a.series): (print("STOP: series not allowed", file=sys.stderr), sys.exit(2))
     for p in answer_files(a.lists, drops):
         for m in markets_of(p, drops):
