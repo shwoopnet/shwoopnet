@@ -90,3 +90,12 @@ The development events have MONTH-ONLY event tickers (KXFEDMENTION-26MAR), which
   - close_dollars is unchanged;
   - every earlier test still passes (the old gate-6 case, {"close": 78}, still stops; 18, 1, 24; the type-column case 3, 4, 2).
 - **Not added, noted for the record:** the pattern allows 0.0000 to 9.9999. It does not itself refuse a value above 1.0000. Auditor B's text did not ask for that bound.
+- **Amendment 4 as approved by the Head of R&D (02:27Z); replaces the pattern above; written before the code:**
+  - the pattern is ^[01]\.\d{4}$, so the leading digit is 0 or 1 and a value runs from 0.0000 to 1.9999 dollars;
+  - px() returns float(...) in dollars;
+  - two-sidedness is still decided by rule 18 in tally() (0 < bid < ask < 1, unchanged), so a value of 1.0000 or above, or of 0.0000, is never two-sided;
+  - any other shape stops; close_dollars is as before.
+  - **Expected, one row in each shape:**
+    - "0.5600" reads 0.56;
+    - "1.0000" reads 1.0, and as an ask is not two-sided;
+    - "2.0000", "56", 56, 0.56 and "0.560" each stop.
