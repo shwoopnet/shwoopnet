@@ -39,3 +39,5 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
     - VOLSLOT1 is the same mechanism.
     - EVENT1 already tested scheduled events on EURUSD, GBPUSD and USDJPY.
   - Neither counts toward the 20 to 30. No calendar was read for either.
+
+- **CURVEFIT ruled VERSION by the VA, stopped (Nov 14, 2026, 02:29Z).** It is in the cross-market consistency and residual-fade family: XLADDER1, LADCOH1, NEWH4's KINK (FALSIFIED), FXUSD, and the strict lock and parity row. No card was written and no data was read. Tonight's count of NEW cards is 0.

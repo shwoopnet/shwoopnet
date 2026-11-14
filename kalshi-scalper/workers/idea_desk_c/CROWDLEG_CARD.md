@@ -73,3 +73,45 @@
 - The trades and legs now come from the nonstop recorder `record-combo-tape.yml` (`combotape-data`, `tape/`), which replaces the widened-poll plan above; quotes with leg tickers on every row still come from `record-combo.yml`. Its coverage marks each cycle complete, capped (oldest trades of the window lost: a lower bound) or cut (window read again next cycle); a reader de-duplicates by `trade_id` across all files.
 - This card reads ONLY rows inside its own development and held-out windows, which are fixed by a dated amendment the day the recorder's first rows land, before any row is read.
 - Rule 17: KXMVE markets are also named by MVE1, NEWLIST1, USWEEP1 and USWEEP3 in the held-out registry. Reading this card's rows opens no window of those four cards, and any window of theirs still unread stays unread.
+
+## Dated note (Nov 14, 2026, 02:40Z): the nonstop tape recorder failed as merged; a fix spec for the owner (NOT built)
+
+**What happened.** PR 921's recorder (`record-combo-tape.yml`) was sized from one quiet Sunday half hour, which was this desk's error. Main read its first hour (Friday evening, `tape/2026-11-14/0120-1`, from coverage, end.txt and file sizes only):
+- All 59 cycles were capped, so the tape was incomplete.
+- About 9,000 to 10,000 raw trades a minute, about 2,400 of them combos.
+- About 84,000 distinct combos in the hour.
+- No legs at all: the look-ups never fired and the queue sat at its cap.
+- About 150 MB a day gzipped.
+The Head and this desk asked Main to disable it.
+
+**Fix spec, for the owner's decision. Nothing is built.** The freeze stands, and the Head recommends a cap of 4 requests a minute if it is approved.
+- **Legs from creation, not by look-up.** `GET /markets?mve_filter=only&min_created_ts=<the last read>` lists newly created combos with `mve_selected_legs`, 1,000 a page. At an estimated 1,400 new combos a minute that is about 1.5 to 2 pages a minute. It gives every combo's legs once, traded or not, and replaces the per-ticker look-ups, which would need about 2,100 requests an hour.
+- **Sampled complete tape minutes.** Read one whole minute of tape at a time, about 10 to 12 pages for a Friday-evening minute. Each sampled minute is complete or flagged.
+- **Narrowed storage, joined in the recorder from the creation listing, with the join rule fixed in a hand case before any data:**
+  - raw rows only for NO-taker combo trades, for NOTAKER;
+  - for YES-taker trades, per 5 minute counts per leg (leg ticker and side): trades and contracts, for CROWDLEG's C(L).
+
+**Request rate and what each card loses:**
+
+| Cap | Legs (creation) | Tape | Share of minutes read whole | Requests a minute |
+|---|---|---|---|---|
+| 8 a minute (this desk's first proposal) | about 2 a minute | one whole minute in 2 | 50% | about 8 |
+| 4 a minute (the Head's recommended cap) | about 2 a minute | one whole minute in 5 | 20% | about 4 |
+
+- **At the 4 a minute cap:**
+  - CROWDLEG's 60 minute C(L) becomes a count over 12 sampled minutes. The threshold of 10 must be re-registered (about 2 over the sampled minutes) by a dated amendment before any row is read, and its signal is noisier.
+  - NOTAKER sees about 20% of NO-taker prints.
+- **At a busier minute than 12 pages:** the sampled minute is flagged incomplete and counted, never read as quiet.
+
+**Size, an estimate to be re-measured:**
+- Raw NO-taker rows plus 5 minute leg counts plus the creation listing's legs: about 5 to 15 MB a day gzipped at either cap.
+- The creation listing's leg strings dominate, at about 1,400 combos a minute.
+- At 15 MB a day the cards' 42 days are about 0.6 GB, under the 1.2 GB stop.
+
+**Feasibility, which may decide it before any build.** Forensics' inventory (`claude/forensics-desk` 1794f5ca, `DATA_INVENTORY_TABLE_NOV14.md`) finds only **2.3% of combo quote rows two-sided**. CROWDLEG's and NOTAKER's bet needs a NO ask of 20c to 50c with a spread of 4c or less on a listed combo containing the leg. If two-sided combos are that rare, the bets may never reach 100 in 21 days at any recorder rate.
+
+So before any build this desk proposes a counts-only feasibility line on the existing `combo-data` quotes, with no result and no price beyond the two-sided flag and the spread band:
+- how many listed combos per day are two-sided with a NO ask in 20c to 50c and a spread of 4c or less;
+- how many of those carry `leg_tickers`.
+
+If that is under about 5 a day, the recorder fix is not worth the owner's requests, and both cards close as "no evidence: combos cannot be priced".
