@@ -1,0 +1,92 @@
+{
+ "build": "Forensics second build of DEPTH1, f7 ONLY after the full-precision fix",
+ "made_up_data": false,
+ "windows_with_a_decision_poll": {
+  "KXGOLD15M": 735,
+  "KXBTC15M": 1069
+ },
+ "f7": {
+  "KXGOLD15M": {
+   "n": 548,
+   "wins": 217,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.395985401459854,
+   "direction_accuracy_over_settled_trades_only": 0.396709323583181,
+   "mean_ask": 0.3974817518248175,
+   "pf": 0.9062499999999999,
+   "pf_blocks": {
+    "A": 0.7932418869187018,
+    "B": 0.8780854906682721,
+    "C": 0.9974624656375556
+   },
+   "block_n": {
+    "A": 141,
+    "B": 169,
+    "C": 238
+   },
+   "pf_halves": [
+    0.7833217027215631,
+    1.038997739261492
+   ],
+   "net_per_trade": -0.018886861313868627,
+   "net_per_trade_fee_x1.2": -0.022470802919708044,
+   "pf_fee_x1.2": 0.889615977625587,
+   "z_date_clustered": -1.6963899537605431,
+   "z_uncorrected_beside": -1.7656586442896238,
+   "bars": {
+    "one_trade_in_each_block": true,
+    "pf_pooled_at_least_1.5": false,
+    "pf_each_block_at_least_1.5": false,
+    "both_halves_above_1.0": false,
+    "net_above_0": false,
+    "stress_net_above_0": false,
+    "stress_pf_above_1.2": false
+   },
+   "without_held_and_unknown_windows": {
+    "n": 420,
+    "pf": 0.9680897887323943
+   }
+  },
+  "KXBTC15M": {
+   "n": 732,
+   "wins": 328,
+   "no_result_fee_only": 1,
+   "direction_accuracy": 0.44808743169398907,
+   "direction_accuracy_over_settled_trades_only": 0.4487004103967168,
+   "mean_ask": 0.4711748633879781,
+   "pf": 0.8123702258856099,
+   "pf_blocks": {
+    "A": 1.0113661689324713,
+    "B": 0.6894696387394312,
+    "C": 0.7933074882677004
+   },
+   "block_n": {
+    "A": 222,
+    "B": 282,
+    "C": 228
+   },
+   "pf_halves": [
+    0.9163831457733578,
+    0.7160344200702945
+   ],
+   "net_per_trade": -0.040737704918032795,
+   "net_per_trade_fee_x1.2": -0.04431967213114755,
+   "pf_fee_x1.2": 0.7977179199401422,
+   "z_date_clustered": -2.5368497769196012,
+   "z_uncorrected_beside": -2.625888990416327,
+   "bars": {
+    "one_trade_in_each_block": true,
+    "pf_pooled_at_least_1.5": false,
+    "pf_each_block_at_least_1.5": false,
+    "both_halves_above_1.0": false,
+    "net_above_0": false,
+    "stress_net_above_0": false,
+    "stress_pf_above_1.2": false
+   },
+   "without_held_and_unknown_windows": {
+    "n": 0,
+    "pf": null
+   }
+  }
+ }
+}
