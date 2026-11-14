@@ -5045,7 +5045,7 @@
   "KXXRP15M-26OCT300900-00",
   "KXXRP15M-26OCT300915-15"
  ],
- "max_requests": 421,
+ "max_requests": 433,
  "requests": [
   {
    "id": "c0482",
@@ -9258,7 +9258,7 @@
    }
   }
  ],
- "notes": "Built by workers/oicand/oi_candles_job.py from the OICAND_LISTS answers; weekdays only (UTC date of the close), the last 20; EVENT830's past forward closes are dropped; end_ts is the close minus 120 s as in SPXOI1. Registration text: Desk A commit 29dd035e on claude/idea-desk-a, DESK_A_OICORE_PLACES_NOV13.md sha256 2d6301c6dfd25972f58293d6023c5ec1d2262791a46fe0d5f2899f68108d14d3 (twelve places, with the Head's 21:06Z dated line); the earlier nine place version is commit 560b645c, sha256 bce3242c1396454bc5237427dd9970b4a11bc007b9be51415b88bc52d626ec44. Pacing 5.0 seconds (12 requests a minute) on the Head's order of Nov 14, 2026. The last 20 weekdays present include 2026-11-13 as one of the 20 (closes 00:00 to 02:35Z only), so the pull holds 19 full days plus that morning. Built from the landed OICAND_LISTS run pull/OICAND_LISTS/2026-11-14T0227Z_43546384963 (Auditor B's structure check CLEAN, 14 of 14); the builder read only ticker and close_time. Held-out guard copy HELDOUT_PULL_RUNS.md sha256 3f7e0752. Part 1 of 2 of the same candle pull, at most 902 requests each (about 27 KB a request unpacked). REST of OICAND_CANDLES_1 after the runner stopped that run at its 40 minute limit with c0001 to c0481 answered (run pull/OICAND_CANDLES_1/2026-11-14T0253Z_43548715053): this file holds c0482 to c0902 (421 requests), the same request objects byte for byte, ticker_allowlist cut to what they use. The original file must not be run again; the converter merges the runs by request id.",
+ "notes": "Built by workers/oicand/oi_candles_job.py from the OICAND_LISTS answers; weekdays only (UTC date of the close), the last 20; EVENT830's past forward closes are dropped; end_ts is the close minus 120 s as in SPXOI1. Registration text: Desk A commit 29dd035e on claude/idea-desk-a, DESK_A_OICORE_PLACES_NOV13.md sha256 2d6301c6dfd25972f58293d6023c5ec1d2262791a46fe0d5f2899f68108d14d3 (twelve places, with the Head's 21:06Z dated line); the earlier nine place version is commit 560b645c, sha256 bce3242c1396454bc5237427dd9970b4a11bc007b9be51415b88bc52d626ec44. Pacing 5.0 seconds (12 requests a minute) on the Head's order of Nov 14, 2026. The last 20 weekdays present include 2026-11-13 as one of the 20 (closes 00:00 to 02:35Z only), so the pull holds 19 full days plus that morning. Built from the landed OICAND_LISTS run pull/OICAND_LISTS/2026-11-14T0227Z_43546384963 (Auditor B's structure check CLEAN, 14 of 14); the builder read only ticker and close_time. Held-out guard copy HELDOUT_PULL_RUNS.md sha256 3f7e0752. Part 1 of 2 of the same candle pull, at most 902 requests each (about 27 KB a request unpacked). REST of OICAND_CANDLES_1 after the runner stopped that run at its 40 minute limit with c0001 to c0481 answered (run pull/OICAND_CANDLES_1/2026-11-14T0253Z_43548715053): this file holds c0482 to c0902 (421 requests), the same request objects byte for byte, ticker_allowlist cut to what they use. The original file must not be run again; the converter merges the runs by request id. max_requests is the 421 requests plus 12 for a refused request asked again (the runner counts every request sent, a repeat after a 429 included, against the cap).",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
