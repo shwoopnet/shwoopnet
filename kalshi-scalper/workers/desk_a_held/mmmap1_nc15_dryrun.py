@@ -26,4 +26,11 @@ res = json.load(open(out)); assert set(k for k in res if k.startswith("KX")) == 
 assert "result" not in json.dumps(res).lower().replace("resampling", ""), "an outcome field leaked into the output"
 assert res["excluded_windows_dropped_here"] == 1 and res["excluded_windows_in_list"] == 28, (res["excluded_windows_dropped_here"], res["excluded_windows_in_list"])
 assert res["KXSILVER15M"]["windows"] == 11, res["KXSILVER15M"]["windows"]
+# hand case (Auditor B): an exported MM_DRYRUN_DATE (or MM_DATES) must change nothing; the read set stays the three dates
+os.rename(os.path.join(d, "2026-11-12"), os.path.join(d, "2026-11-14"))
+env = dict(os.environ, MM_DRYRUN_DATE="2026-11-14", MM_DATES="2026-11-14")
+out2 = os.path.join(d, "out2.json"); r2 = subprocess.run([sys.executable, "-I", os.path.join(os.path.dirname(os.path.abspath(__file__)), "mmmap1_nc15.py"), d, out2], capture_output=True, text=True, env=env)
+assert r2.returncode != 0 or not [k for k in json.load(open(out2)) if k.startswith("KX")], "an env var added a date to the read set"
+os.rename(os.path.join(d, "2026-11-14"), os.path.join(d, "2026-11-12"))
+print("env override case OK: a folder dated 2026-11-14 is not read even with MM_DRYRUN_DATE and MM_DATES set")
 s = res["KXSILVER15M"]; print("silver trades", s["trades"], "windows", s["windows"], "e_c", s["e_c"], "quoted half spread c", s["quoted_half_spread_c"]); print("DRY RUN OK: no outcome loaded, 3 series, 36 windows")

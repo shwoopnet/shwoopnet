@@ -10,8 +10,7 @@ import numpy as np
 import pandas as pd
 
 ROOT, OUT = sys.argv[1], sys.argv[2]
-DATES = ("2026-11-11", "2026-11-12", "2026-11-13")   # FIXED read set (the Head, Nov 14): the read set cannot grow by itself; read on Nov 15 or later. No env override. DATES_EXTRA is for the synthetic dry run only (env MM_DRYRUN_DATE, ignored unless it is set by the dry run's own path).
-if os.environ.get("MM_DRYRUN_DATE"): DATES = DATES + (os.environ["MM_DRYRUN_DATE"],)
+DATES = ("2026-11-11", "2026-11-12", "2026-11-13")   # FIXED read set (the Head, Nov 14): the read set cannot grow by itself; read on Nov 15 or later. No env override of any kind.
 # Rule 1 of the Nov 14 exposure section (HELDOUT_REGISTRY.md): windows whose result the VA looked at are dropped here too, even though this script reads no result.
 EXCL_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "mmmap1_nc15_excluded_tickers.txt")
 EXCL = {l.strip() for l in open(EXCL_FILE) if l.strip()}
