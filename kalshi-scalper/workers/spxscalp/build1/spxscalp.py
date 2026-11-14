@@ -28,6 +28,31 @@ def jload(path):
 
 def files(d): return sorted(os.path.join(d, n) for n in os.listdir(d) if n.endswith(".json") or n.endswith(".json.gz"))
 
+
+def answer_files(dirs, drops):
+    """Answer files of each run folder. With a manifest.json: only rows with status 200 and not truncated, each file checked against its sha256
+    (a mismatch stops the run); other rows are counted by reason. Without a manifest (made-up fixtures): every *.json or *.json.gz file."""
+    import hashlib
+    out = []
+    for d in dirs:
+        mp = os.path.join(d, "manifest.json")
+        if os.path.exists(mp):
+            for r in json.load(open(mp)).get("rows", []):
+                if r.get("status") != 200: drops["manifest_row_not_200"] += 1; continue
+                if r.get("truncated"): drops["manifest_row_truncated"] += 1; continue
+                fp = os.path.join(d, os.path.basename(r.get("file") or ""))
+                if not r.get("file") or not os.path.exists(fp): drops["manifest_row_file_missing"] += 1; continue
+                if hashlib.sha256(open(fp, "rb").read()).hexdigest() != r.get("sha256"): sys.exit("STOP: sha256 mismatch in a run folder")
+                out.append(fp)
+        else:
+            out.extend(files(d))
+    return out
+
+def markets_of(path, drops):
+    doc = jload(path)
+    if not isinstance(doc, dict) or not isinstance(doc.get("markets"), list): drops["answer_without_markets_list"] += 1; return []
+    return doc["markets"]
+
 def load_es(path, drops):
     rows = []; bad = 0; total = 0
     with open(path, newline="") as f:
@@ -136,28 +161,31 @@ def score(entries, s, arm, drops):
     return out
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(); ap.add_argument("--es", required=True); ap.add_argument("--candles", required=True)
-    ap.add_argument("--lists", required=True); ap.add_argument("--min-entries", type=int, default=100)
+    ap = argparse.ArgumentParser(); ap.add_argument("--es", required=True); ap.add_argument("--candles", required=True, nargs="+")
+    ap.add_argument("--lists", required=True, nargs="+"); ap.add_argument("--min-entries", type=int, default=100)
     ap.add_argument("--start", default="2026-11-05"); ap.add_argument("--end", default="2026-11-13")
     a = ap.parse_args(argv); drops = Counter()
     lo = iso_ts(a.start + "T00:00:00"); hi = iso_ts(a.end + "T00:00:00")
     if hi > iso_ts("2026-12-01T00:00:00"): sys.exit("STOP: window reaches the held-out date")
     es = load_es(a.es, drops); meta = {}
-    for p in files(a.lists):
-        for m in jload(p).get("markets", []):
+    for p in answer_files(a.lists, drops):
+        for m in markets_of(p, drops):
             try: c = iso_ts(m["close_time"])
             except Exception: drops["list_unparseable_close"] += 1; continue
             if lo <= c < hi: meta[m["ticker"]] = (c, m.get("result"))
     wins = []; seen = set()
-    for p in files(a.candles):
-        for m in jload(p).get("markets", []):
-            tk = m.get("market_ticker")
-            if tk not in meta: continue
+    for p in answer_files(a.candles, drops):
+        for m in markets_of(p, drops):
+            tk = m.get("market_ticker", m.get("ticker"))
             if tk in seen: sys.exit("STOP: a market_ticker repeats across candle files (run overlap)")
-            seen.add(tk); cand = {}
+            seen.add(tk)
+            if tk not in meta: continue
+            cand = {}
             for cs in m.get("candlesticks", []):
-                try: cand[int(cs["end_period_ts"])] = (float(cs["yes_bid"]["close_dollars"]), float(cs["yes_ask"]["close_dollars"]))
-                except Exception: drops["candle_missing_side"] += 1
+                try: ts_, bd, ak = int(cs["end_period_ts"]), float(cs["yes_bid"]["close_dollars"]), float(cs["yes_ask"]["close_dollars"])
+                except Exception: drops["candle_missing_side"] += 1; continue
+                if ts_ in cand: sys.exit("STOP: duplicate candle timestamp inside one market")
+                cand[ts_] = (bd, ak)
             wins.append({"ticker": tk, "c": meta[tk][0], "result": meta[tk][1], "cand": cand})
     wins.sort(key=lambda w: (w["c"], w["ticker"]))
     print("windows with candles: %d" % len(wins))
@@ -177,7 +205,8 @@ def main(argv=None):
         for arm in ("HEADLINE", "HALF2X", "HOLD"):
             res = {}
             for s, tag in ((0.01, "1c"), (0.02, "2c")):
-                ad = Counter(); res[tag] = score(entries, s, arm, ad); bd.update(ad if (arm == "HEADLINE" and tag == "1c") else Counter())
+                ad = Counter(); res[tag] = score(entries, s, arm, ad)
+                if tag == "1c": armdrops = ad
             n = len(res["1c"]); primary = "1c"
             if any(x[3] is not None and x[3] > x[0] - 120 for x in res["1c"]): primary = "2c"
             line = []
@@ -192,8 +221,9 @@ def main(argv=None):
             elif lt(a1, 1.0) or lt(b1, 1.0) or lt(p2, 1.0): label = "FALSIFIED"
             elif ge(p1, 1.3) and ge(a1, 1.0) and ge(b1, 1.0) and ge(p2, 1.0): label = "counts"
             else: label = "no evidence"
+            print("%s %s drops (1c read): %s" % (band, arm, ", ".join("%s=%d" % kv for kv in sorted(armdrops.items())) or "none"))
             print("%s %s label: %s (primary read %s); upper bound, not fill-checked; fee mode per-order rounded; void refunds the price and keeps the fee" % (band, arm, label, primary))
-        print("%s drops: %s" % (band, ", ".join("%s=%d" % kv for kv in sorted(bd.items())) or "none"))
+        print("%s entry-scan drops: %s" % (band, ", ".join("%s=%d" % kv for kv in sorted(bd.items())) or "none"))
     print("global drops: " + (", ".join("%s=%d" % kv for kv in sorted(drops.items())) or "none"))
     return 0
 

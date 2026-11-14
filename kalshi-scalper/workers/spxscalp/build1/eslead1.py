@@ -28,6 +28,31 @@ def jload(path):
 
 def files(d): return sorted(os.path.join(d, n) for n in os.listdir(d) if n.endswith(".json") or n.endswith(".json.gz"))
 
+
+def answer_files(dirs, drops):
+    """Answer files of each run folder. With a manifest.json: only rows with status 200 and not truncated, each file checked against its sha256
+    (a mismatch stops the run); other rows are counted by reason. Without a manifest (made-up fixtures): every *.json or *.json.gz file."""
+    import hashlib
+    out = []
+    for d in dirs:
+        mp = os.path.join(d, "manifest.json")
+        if os.path.exists(mp):
+            for r in json.load(open(mp)).get("rows", []):
+                if r.get("status") != 200: drops["manifest_row_not_200"] += 1; continue
+                if r.get("truncated"): drops["manifest_row_truncated"] += 1; continue
+                fp = os.path.join(d, os.path.basename(r.get("file") or ""))
+                if not r.get("file") or not os.path.exists(fp): drops["manifest_row_file_missing"] += 1; continue
+                if hashlib.sha256(open(fp, "rb").read()).hexdigest() != r.get("sha256"): sys.exit("STOP: sha256 mismatch in a run folder")
+                out.append(fp)
+        else:
+            out.extend(files(d))
+    return out
+
+def markets_of(path, drops):
+    doc = jload(path)
+    if not isinstance(doc, dict) or not isinstance(doc.get("markets"), list): drops["answer_without_markets_list"] += 1; return []
+    return doc["markets"]
+
 def load_es(path, drops):
     rows = []; bad = 0; total = 0
     with open(path, newline="") as f:
@@ -55,32 +80,35 @@ def corr(pairs):
     return sum((a - mx) * (b - my) for a, b in pairs) / math.sqrt(sxx * syy)
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(); ap.add_argument("--es", required=True); ap.add_argument("--candles", required=True)
-    ap.add_argument("--lists", required=True); ap.add_argument("--min-pairs", type=int, default=30)
+    ap = argparse.ArgumentParser(); ap.add_argument("--es", required=True); ap.add_argument("--candles", required=True, nargs="+")
+    ap.add_argument("--lists", required=True, nargs="+"); ap.add_argument("--min-pairs", type=int, default=30)
     ap.add_argument("--start", default="2026-11-05"); ap.add_argument("--end", default="2026-11-13")
     a = ap.parse_args(argv); drops = Counter()
     lo = iso_ts(a.start + "T00:00:00"); hi = iso_ts(a.end + "T00:00:00")
     if hi > iso_ts("2026-12-01T00:00:00"): sys.exit("STOP: window reaches the held-out date")
     es = load_es(a.es, drops)
     closes = {}
-    for p in files(a.lists):
-        for m in jload(p).get("markets", []):
+    for p in answer_files(a.lists, drops):
+        for m in markets_of(p, drops):
             try: c = iso_ts(m["close_time"])
             except Exception: drops["list_unparseable_close"] += 1; continue
             if lo <= c < hi: closes[m["ticker"]] = c
     pooled = {k: [] for k in range(-3, 4)}; nwin = 0
     seen = set()
-    for p in files(a.candles):
-        for m in jload(p).get("markets", []):
-            tk = m.get("market_ticker"); c = closes.get(tk)
-            if c is None: continue
+    for p in answer_files(a.candles, drops):
+        for m in markets_of(p, drops):
+            tk = m.get("market_ticker", m.get("ticker"))
             if tk in seen: sys.exit("STOP: a market_ticker repeats across candle files (run overlap); not counted twice")
-            seen.add(tk)
+            seen.add(tk); c = closes.get(tk)
+            if c is None: continue
             mid = {}
+            tseen = set()
             for cs in m.get("candlesticks", []):
                 try:
                     t = int(cs["end_period_ts"]); b = float(cs["yes_bid"]["close_dollars"]); ak = float(cs["yes_ask"]["close_dollars"])
                 except Exception: drops["candle_missing_side"] += 1; continue
+                if t in tseen: sys.exit("STOP: duplicate candle timestamp inside one market")
+                tseen.add(t)
                 if two_sided(b, ak): mid[t] = (b + ak) / 2
                 else: drops["candle_not_two_sided"] += 1
             nwin += 1; O = c - 900
