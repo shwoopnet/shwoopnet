@@ -40,3 +40,12 @@ The allowed-series list and the cut list are now MODULE CONSTANTS (ALLOWED = KXH
 - (c) `--cut-series ...` is not an option either: argparse rejects it, so the cut cannot be turned off from the command line.
 - (d) with the module-level defaults and no override, `--series S1` stops with exit 2.
 - (e) the fixture figures are reproduced through main()'s arguments exactly as before (S1 to S5: n 12, 12, 8, 14, 13; T 110, 4, n/a, 500, 120; S5 drops event830_forward_close 1).
+
+## The reader-specific guard (the Head's decision, Nov 14), hand cases written BEFORE the code change
+`deskb_guard.py` stays unchanged. In oicore_t.py the shared import-time guard call is replaced by a function `guard(paths)`, called at the start of main() (after the arguments are parsed, before any file is opened) on the current folder and every --lists and --candles path. It keeps both shared rules: any path part (as typed made absolute, or after links resolve) starting HELDOUT_ is refused; any path part equal to a landed run folder name LISTED in HELDOUT_PULL_RUNS.md is refused UNLESS that name is one of exactly five names in one constant, ALLOWED_RUNS: 2026-11-14T0227Z_43546384963 (OICAND_LISTS), 2026-11-14T0253Z_43548715053 (OICAND_CANDLES_1), 2026-11-14T0413Z_43555574326 (OICAND_CANDLES_2), 2026-11-14T0501Z_43559459347 (OICAND_CANDLES_1_REST), 2026-11-14T0541Z_43562765461 (OICAND_CANDLES_2_REST). No flag, no environment variable and no argument of main() can add to it. The series allow-list (HYPE and BNB) is enforced in the same script as before.
+Hand cases (made-up folders under a temp directory, added to run_hand_cases.py):
+- (f) a path with a part equal to a listed run NOT among the five (POLGAPH's 2026-11-13T0627Z_43378777252): REFUSED, exit nonzero, before any file is read.
+- (g) a path with a part HELDOUT_x: REFUSED.
+- (h) the five run names as folder names (lists copy in the lists-run name, the made-up candle file in the CANDLES_1 name, empty folders for the others): accepted, and the fixture's S2 line prints as before (windows used 12, T 4, NOT SEATED: T under 5).
+- (i) a path with an allowed run name AND a HELDOUT_ part: REFUSED.
+- (j) the previous cases (a to e) still pass.
