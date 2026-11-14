@@ -8,6 +8,7 @@ DEFAULT-CLOSED. `read` refuses before 2026-11-14T00:00:00Z, refuses a second run
 HELDOUT_ folder is refused. Before the read time the scorer runs only from Python on a folder that carries the marker file MADE_UP_DATA (measure(root, made_up=True)).
 
 usage (after the read time, on the Head's word only): python3 -I depth1_second.py read <R6 root: folders <date>/<HHMM>/{book,trades,coverage}.csv.gz> <out dir>
+       python3 -I depth1_second.py f7only <R6 root> <out dir>      (Nov 14 re-run of f7_sweep_net only, after the full-precision fix; once)
 
 Places where the text leaves a choice (AMBIGUITIES, printed with the output):
  1. Poll time: t_recv_ms plus the run's clock offset (median over the run's book rows of Date header + 0.5 s minus t_recv_ms). The close T is the coverage row's close_time.
@@ -15,7 +16,7 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
  3. A ticker with coverage rows in two runs: the usable row with the most ok_polls is the window; its book rows are that run's only. One window counts once.
  4. The decision poll: the last poll with time at or before T-480 s and no earlier than T-490 s. A window with such a poll is a scored window even if that poll's book is one-sided or empty (aligned to the first build on Nov 13; every imbalance feature is then undefined, but f7 can still fire from the tape).
  5. The 30 s and 60 s lookbacks are measured from the DECISION POLL's own time: the last poll at or before (decision poll time minus 30 s or 60 s) and no more than 6 s before that.
- 6. f7's tape window: trades with created_time in [decision poll time minus 60 s, decision poll time). A sweep: same taker side, same whole second (of created_time), two or more distinct prices.
+ 6. f7's tape window: trades with created_time in (decision poll time minus 60 s, decision poll time], open at the start and closed at the end. A sweep: same taker side, same whole second (floor of created_time), two or more distinct prices (round(px, 4)). created_time is read at FULL precision (integer microseconds, the recorder's longest fraction); Nov 14 fix: the first version rounded it to the millisecond, which moved a whole second for sub-millisecond times (found by Auditor B, ordered by the Head).
  7. The fill poll: the first poll at or after (decision poll time + 1.0 s) and no later than 20 s after that instant. The other reading (from T-480 s itself) is not built.
  8. f3: weighted YES bid = sum(px x sz)/sum(sz) over the YES levels; weighted YES ask = 1 minus the same over the NO levels; plain mid = (YES bid 1 + (1 - NO bid 1))/2. HOW the sums are added decides trades: when the true value is zero the floating point residue differs between a numpy array sum and a plain running sum, and with the exact-zero rule that changes which windows trade (F3_SUM).
  9. f6: thin side = the smaller 5 level size 60 s ago; value = (then - now)/then for that side, positive when the thin side is NO, negated when it is YES; equal sizes then = 0; thin size then of 0 = undefined.
@@ -30,7 +31,7 @@ Places where the text leaves a choice (AMBIGUITIES, printed with the output):
 18. Stop rule (Amendment 1, point 6): fired windows with no yes or no result over 1% of fired windows, counted per try and on distinct windows; the stop uses distinct fired windows over both markets.
 """
 import sys, os, csv, gzip, glob, json, math, random, statistics, collections, time, email.utils
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
 MARKETS = ("KXGOLD15M", "KXBTC15M")
@@ -70,6 +71,16 @@ def num(x):
 
 def iso_ms(s):
     try: return int(round(datetime.fromisoformat(str(s).replace("Z", "+00:00")).timestamp() * 1000))
+    except Exception: return None
+
+
+EPOCH_UTC = datetime(1970, 1, 1, tzinfo=timezone.utc); ONE_US = timedelta(microseconds=1)
+def iso_us(s):
+    """created_time at full precision: integer microseconds since the epoch, exact (no float, no rounding to the millisecond); a fraction beyond 6 digits is cut (none exists in the R6 pin)."""
+    try:
+        dt = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+        if dt.tzinfo is None: dt = dt.replace(tzinfo=timezone.utc)
+        return (dt - EPOCH_UTC) // ONE_US
     except Exception: return None
 
 
@@ -120,10 +131,11 @@ def f10(b):
     near = lambda lv: sum(s for p, s in lv if lv[0][0] - p <= 0.03 + EPS)
     return _imb(near(b["y"]), near(b["n"]))
 def f7(trades, t_ms):
-    """trades: [(created_ms, price, taker side)] of the window's ticker. Sweeps in (t - 60 s, t]: open at the start, closed at the end (Amendment 2, (a))."""
-    groups = collections.defaultdict(set)
-    for ms, px, side in trades:
-        if t_ms - TAPE_S * 1000 < ms <= t_ms and side in ("yes", "no") and px is not None: groups[(side, ms // 1000)].add(round(px, 6))
+    """trades: [(created microseconds, price, taker side)] of the window's ticker (full precision, Nov 14 fix). Sweeps in (t - 60 s, t]: open at the start, closed at the end (Amendment 2, (a)).
+    The whole second is floor(created / 10^6); prices are compared after round(px, 4) (as V2 does)."""
+    groups = collections.defaultdict(set); t_us = t_ms * 1000; lo_us = t_us - TAPE_S * 1000000
+    for us, px, side in trades:
+        if lo_us < us <= t_us and side in ("yes", "no") and px is not None: groups[(side, us // 1000000)].add(round(px, 4))
     sw = collections.Counter(side for (side, _), pxs in groups.items() if len(pxs) >= 2)
     return float(sw["yes"] - sw["no"])
 
@@ -163,8 +175,8 @@ def load(root):
         tp = os.path.join(run, "trades.csv.gz")
         if os.path.exists(tp):
             for r in rows(tp):
-                ms = iso_ms(r.get("created_time"))
-                if ms is not None and r.get("ticker"): tape[run][r["ticker"]].append((ms, num(r.get("yes_price_dollars")), str(r.get("taker_outcome_side") or "").lower()))
+                us = iso_us(r.get("created_time"))
+                if us is not None and r.get("ticker"): tape[run][r["ticker"]].append((us, num(r.get("yes_price_dollars")), str(r.get("taker_outcome_side") or "").lower()))
     windows = {}; why = collections.Counter()
     for tk, lst in sorted(cand.items()):
         best = None
@@ -443,6 +455,50 @@ def read(root, outdir):
     json.dump(out, open(res, "w"), indent=1, default=str); print(json.dumps(out, indent=1, default=str))
 
 
+def f7only(root, outdir=None, made_up=False):
+    """Nov 14, 2026 (the Head's order of 00:20Z): re-run f7_sweep_net ONLY, after the full-precision fix, on the same pin. Same windows, same decision polls, same trade and score code as measure();
+    no other feature, no shuffled-book control and no verdict (the control needs all 20 tries). Writes depth1_second_f7only_result.json once; refuses a second real run."""
+    refuse_heldout(root)
+    if made_up:
+        if not os.path.exists(os.path.join(root, "MADE_UP_DATA")): raise SystemExit("REFUSED: made_up=True needs the marker file MADE_UP_DATA in the folder")
+    else:
+        refuse_heldout(outdir)
+        if time.time() < READ_NOT_BEFORE: raise SystemExit("REFUSED: DEPTH1 is not read before 2026-11-14T00:00:00Z")
+        res, mark = os.path.join(outdir, "depth1_second_f7only_result.json"), os.path.join(outdir, "depth1_second_f7only_started")
+        if os.path.exists(res) or os.path.exists(mark): raise SystemExit("REFUSED: f7 only is re-run once; a result or started marker exists")
+        open(mark, "w").write(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+    windows, C, why = load(root); prep = {}; per_market = collections.Counter()
+    for tk, w in windows.items():
+        p_ = prepare(w)
+        if isinstance(p_, str): continue
+        prep[tk] = p_; per_market[w["series"]] += 1
+    out = {"build": "Forensics second build of DEPTH1, f7 ONLY after the full-precision fix", "made_up_data": bool(made_up), "windows_with_a_decision_poll": dict(per_market), "f7": {}}
+    for m in MARKETS:
+        trs = []
+        for tk, p_ in prep.items():
+            w = windows[tk]
+            if w["series"] != m: continue
+            r = trade(p_["feats"]["f7_sweep_net"], p_["q"], w["result"])
+            if isinstance(r, str): continue
+            trs.append({"ticker": tk, "T": w["T"], "date": w["date"], "net": r[0], "stress": r[1], "ask": r[2], "win": r[3], "held": p_["held"], "value": p_["feats"]["f7_sweep_net"], "cheap": (r[2] < 0.5 - EPS) if abs(r[2] - 0.5) > EPS else None})
+        s = score(trs); nh = [t for t in trs if t["held"] is False]; s["without_held_and_unknown_windows"] = {"n": len(nh), "pf": pf([t["net"] for t in nh])}
+        out["f7"][m] = s
+    if not made_up: json.dump(out, open(res, "w"), indent=1, default=str)
+    return out
+
+
+def f7lines(out):
+    f = lambda x, d=2: "n/a" if x is None else ("inf" if x == float("inf") else ("%." + str(d) + "f") % x)
+    L = []
+    for m in MARKETS:
+        v = out["f7"][m]; b = v["pf_blocks"]; bn = v["block_n"]; nh = v["without_held_and_unknown_windows"]
+        L.append("%s f7_sweep_net n %d PF %s blocks %s (n %d) / %s (n %d) / %s (n %d) halves %s / %s net %sc stress PF %s acc %s vs mean ask %s z %s (uncorrected %s); without held n %d PF %s" % (
+            m, v["n"], f(v["pf"]), f(b["A"]), bn["A"], f(b["B"]), bn["B"], f(b["C"]), bn["C"], f(v["pf_halves"][0]), f(v["pf_halves"][1]), f(None if v["net_per_trade"] is None else 100 * v["net_per_trade"]),
+            f(v["pf_fee_x1.2"]), f(v["direction_accuracy"], 3), f(v["mean_ask"], 3), f(v["z_date_clustered"]), f(v["z_uncorrected_beside"]), nh["n"], f(nh["pf"])))
+    return L
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 4 and sys.argv[1] == "read": read(sys.argv[2], sys.argv[3])
+    elif len(sys.argv) == 4 and sys.argv[1] == "f7only": print("\n".join(f7lines(f7only(sys.argv[2], sys.argv[3]))))
     else: raise SystemExit(__doc__)
