@@ -885,3 +885,9 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 - Candle job rebuilt at 5 s pacing (0f9ea5ee, sha 636c0b7e): 407 GETs, at most 12 a minute, about 34 minutes, development only (last window 2026-04-29). The 1.0 s job (da62610b) is superseded and never runs.
 - Auditor B: CLEAN on reader, table and job. Noted: 8 of the 28 yes rows are "Balance of Risk" by the approved third reading; without them the kill arm is 20.
 - Waiting on: the owner's yes under the freeze (asked via the EA), then Main dispatches in an allocated hour.
+
+## 2026-11-14 02:30Z, haircut off Bitcoin (VA measure, partial) and rulings (Head)
+- Measured (VA, quote agreement only, no results read): Dogecoin and XRP, candle close against the R6 book at 360, 180 and 60 s left. At 360 and 180 s both are 97% to 99% within 1c on both sides, as good as Bitcoin's 95.9%. At 60 s both fall to 94% to 95% within 1c (97% to 98% within 2c); XRP's 60 s tail is skewed in the buyer's favour.
+- Unmeasured: the NC15 series (no matching candles landed; a candle pull would be new and is held by the freeze), Ethereum (no overlap), gold (its recorded windows are DEPTH1's; not released).
+- C8 stands: 1c for marks at 3 minutes or more, 2c primary in the last 2 minutes.
+- NEW C11: until a series is measured, a candle read on any NC15 series (silver, copper, WTI, natural gas, the FX pairs, HYPE, BNB, INX) uses 2c as its PRIMARY haircut at every mark, and still prints 1c. Reason: thin non-crypto books may be wider than crypto. Cards on NC15 series should prefer the recorded books (nc-data, every 5 s) for a fill check over candles.
