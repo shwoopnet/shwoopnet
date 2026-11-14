@@ -21,3 +21,10 @@
   - (5) the merged answers are ordered by request id, so giving the folders as "B,A" prints exactly what "A,B" prints, and both equal outputs/case_01.json for the split case;
   - (6) with --job files, a count other than 1 + the number of candle folders stops. A lone lists job, which zip used to accept, now stops.
   - The single-folder path is byte-unchanged.
+- **Checks run on the change, 2026-11-14 ~02:30Z (made-up data only):**
+  - before the change, all 23 made-up cases through one folder printed exactly the committed outputs;
+  - after the change: case_01 split into two folders printed exactly outputs/case_01.json, both as "A,B" and as "B,A";
+  - the split with one request id in both folders stopped "request id in two candle runs: c0000";
+  - the split with one of A's tickers asked again in B under a new id stopped "ticker in two candle runs";
+  - all 23 cases through one folder printed exactly the committed outputs again;
+  - hm_guard read the list 974f2713 on every run.

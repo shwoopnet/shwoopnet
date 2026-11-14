@@ -3,14 +3,17 @@
 SOCDERIV_SERIES.json (sha256 01b7febc...). The Testing Desk's socderiv.py and its tests were NOT read. Zero tries: no result is read,
 the market `result` field is never touched. Every output carries the registered freshness line.
 
-Usage: python3 -I socderiv2.py <series.json> <lists run folder> <candles run folder> <out.json> [--job=<lists job> --job=<candles job>]
+Usage: python3 -I socderiv2.py <series.json> <lists run folder> <candles run folder[,folder...]> <out.json> [--job=<lists job> --job=<candles job> ...]
+Several candle folders (comma-separated) are merged by request id; an id in two folders stops (dated line of Nov 14 in SOCDERIV_LISTS_NOTE_NOV13.md).
 
 Readings this build chose where the text is silent are listed in READINGS and printed in every output."""
 import gzip, hashlib, json, math, os, statistics, sys
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import socderiv2_model as M  # noqa: E402
+import hm_guard  # noqa: E402
 
 SERIES_SHA = "01b7febcd1466f880aeac1d567a259e5803d42b0b72e16a72331fd11c6d031d2"
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on sports"
@@ -132,7 +135,7 @@ def stats(gaps, spreads):
             "share_gap8_spread4": round(hit / len(gaps), 6), "count_gap8_spread4": hit}
 
 
-def run(series_path, lists_dir, candles_dir):
+def run(series_path, lists_dir, candles_dirs):
     raw = open(series_path, "rb").read()
     if hashlib.sha256(raw).hexdigest() != SERIES_SHA:
         raise Stop("series file hash")
@@ -154,7 +157,21 @@ def run(series_path, lists_dir, candles_dir):
             mk = {k: v for k, v in mk.items() if k != "result"}  # never read
             markets[mk["ticker"]] = mk
 
-    candles = load_run(candles_dir, None)
+    if len(candles_dirs) == 1:
+        candles = load_run(candles_dirs[0], None)                              # the single-folder path, unchanged
+    else:                                                                      # Nov 14: several candle runs, merged by request id
+        merged, seen_t = {}, {}
+        for d in candles_dirs:
+            part = load_run(d, None)
+            if set(part) & set(merged):
+                raise Stop("request id in two candle runs: %s" % sorted(set(part) & set(merged))[0])
+            for rid, (q, _pages) in part.items():
+                for t in q["params"]["market_tickers"].split(","):
+                    if t in seen_t and seen_t[t] != d:
+                        raise Stop("ticker in two candle runs: %s" % t)
+                    seen_t[t] = d
+            merged.update(part)
+        candles = {k: merged[k] for k in sorted(merged)}                     # ordered by request id, whatever the folder order
     cmap = {}
     for rid, (q, pages) in candles.items():
         asked = set(q["params"]["market_tickers"].split(","))
@@ -327,10 +344,14 @@ def check_jobs(pairs):
 
 def main(argv):
     try:
+        cdirs = argv[3].split(",")
         jobs = [a.split("=", 1)[1] for a in argv[5:] if a.startswith("--job=")]
-        if jobs:                 # --job=<lists job file> [--job=<candles job file> ...]; folders after the lists are the candle runs
-            check_jobs(list(zip([argv[2], argv[3]], jobs)))
-        res = run(argv[1], argv[2], argv[3])
+        hm_guard.refuse_all([argv[1], argv[2], argv[4]] + cdirs + jobs)
+        if jobs:                 # --job=<lists job file> then one --job=<candles job file> per candle folder, in the order given
+            if len(jobs) != 1 + len(cdirs):
+                raise Stop("give one job file for the lists and one per candle folder")
+            check_jobs(list(zip([argv[2]] + cdirs, jobs)))
+        res = run(argv[1], argv[2], cdirs)
     except Stop as e:
         res = {"stopped": str(e), "freshness": FRESH}
     with open(argv[4], "w") as f:
