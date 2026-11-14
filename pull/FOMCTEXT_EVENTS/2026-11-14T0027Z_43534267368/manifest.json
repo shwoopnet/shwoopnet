@@ -1,0 +1,170 @@
+{
+ "job": {
+  "job_id": "FOMCTEXT_EVENTS",
+  "status": "active",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/idea_desk_c/FOMCTEXT_CARD.md",
+  "purpose": "FOMCTEXT stage 0 (Idea Desk C): /events lists of four Fed mention series WITHOUT nested markets, for event tickers, titles and dates only, to name the development press-conference events. Owner MAIN.",
+  "heldout": "FOMCTEXT_CARD.md: an event object carries no market result; held-out events may appear by ticker, title and date only, and no market of theirs is requested by any FOMCTEXT job",
+  "allowed_endpoints": [
+   {
+    "name": "events_list",
+    "method": "GET",
+    "path_pattern": "/events",
+    "params_allowed": [
+     "series_ticker",
+     "limit",
+     "cursor",
+     "with_nested_markets"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXFEDMENTION",
+   "KXPOWELLMENTION",
+   "KXJPOWMENTION",
+   "KXWARSHMENTION"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 15,
+  "requests": [
+   {
+    "id": "events_KXFEDMENTION",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXFEDMENTION",
+     "limit": 200,
+     "with_nested_markets": "false"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "events_KXPOWELLMENTION",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXPOWELLMENTION",
+     "limit": 200,
+     "with_nested_markets": "false"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "events_KXJPOWMENTION",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXJPOWMENTION",
+     "limit": 200,
+     "with_nested_markets": "false"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "events_KXWARSHMENTION",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXWARSHMENTION",
+     "limit": 200,
+     "with_nested_markets": "false"
+    },
+    "max_pages": 3
+   }
+  ],
+  "notes": "Event lists only, with_nested_markets=false, so no market price or result is returned. 4 series, at most 3 pages of 200 each (12 pages), cap 15. Used only to write a per-event /historical/markets job for development events of KXPOWELLMENTION, KXJPOWMENTION and KXWARSHMENTION (the KXFEDMENTION development events are in FOMCTEXT_HIST_A by pattern). If the runner does not allow /events, the Chief of Staff adds it; nothing here is denied by DENY_PATH.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-14T0027Z",
+ "finished": "2026-11-14T0027Z",
+ "status": "complete",
+ "requests_sent": 4,
+ "bytes_stored": 25125,
+ "rows": [
+  {
+   "index": 1,
+   "id": "events_KXFEDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFEDMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 7492,
+   "t_send_ms": 1794616036954,
+   "t_recv_ms": 1794616037064,
+   "server_date": "Sat, 14 Nov 2026 00:27:17 GMT",
+   "file": "0001.json.gz",
+   "sha256": "58bd976cb86b2de985ad963dc6ccdb4f278a0efd8abfdf7d4457a4e617a98af9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "events_KXPOWELLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPOWELLMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 8180,
+   "t_send_ms": 1794616037954,
+   "t_recv_ms": 1794616037992,
+   "server_date": "Sat, 14 Nov 2026 00:27:17 GMT",
+   "file": "0002.json.gz",
+   "sha256": "062f5d3748ef3877d219fdcb79e07adf64a91763a3efeb745dba024810d8abac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "events_KXJPOWMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJPOWMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 3362,
+   "t_send_ms": 1794616038955,
+   "t_recv_ms": 1794616038992,
+   "server_date": "Sat, 14 Nov 2026 00:27:18 GMT",
+   "file": "0003.json.gz",
+   "sha256": "9514197ad24e79f82a77ab96beeaed5f227bb8db9f508a5f59e4d579ca1c8756",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "events_KXWARSHMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWARSHMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 6091,
+   "t_send_ms": 1794616039955,
+   "t_recv_ms": 1794616040062,
+   "server_date": "Sat, 14 Nov 2026 00:27:20 GMT",
+   "file": "0004.json.gz",
+   "sha256": "c7cdfa0f15b415433476099839effc267d9a505f1f316cdaa450cc2af45d8204",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
