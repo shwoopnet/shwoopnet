@@ -54,3 +54,6 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
   - Silver and copper list no windows during the halt.
   - The VA's descriptive look at 21 WTI and natural gas halt windows found 12 resolved NO, which contradicts a frozen reference. The VA disclosed that it read their result column.
   - Nothing survives from the NC15 history at this desk.
+  - **Correction (VA, 12:31Z):** HALTWIN is not a version of SETTLE1 by mechanism. SETTLE1 tested an outside reference leading the quote, a family the Head has declined for good.
+  - PUB20's P10 is REOPEN, not a halt rule. The daily halt hour was entered on the cheap side as TODSEAS1's HALT_IN and HALT_OUT slots, a family FALSIFIED.
+  - HALTWIN stays CLOSED under the TIECOND1 row (a frozen source makes close equal open), and the 12-of-21 NO results contradict the premise.
