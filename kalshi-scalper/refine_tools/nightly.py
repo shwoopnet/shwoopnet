@@ -54,13 +54,13 @@ for t in dayt:
 if not dayt: print('(no settled fills)')
 # ---- flags
 print('\nFLAGS')
-LOCK = {'gold L1': 50, 'OICORE': 12, 'EVENT830': 1, 'KXDOGE15M L1': 50, 'KXXRP15M L1': 1, 'KXBTC15M L1': 1, 'KXETH15M L1': 1}
+LOCK = {'gold L1': 50, 'OICORE': 20, 'EVENT830': 1, 'KXDOGE15M L1': 50, 'KXXRP15M L1': 1, 'KXBTC15M L1': 1, 'KXETH15M L1': 1}
 ex = [t for t in dayt if t['ex']]
 print('early sells: %d' % len(ex) + ''.join('\n   %s %s x%d pnl %+.2f' % (T(t['ts']).astimezone(CT).strftime('%H:%M'), t['o']['ticker'], t['c'], t['pnl']) for t in ex))
 big = [t for t in dayt if t['pnl'] < -5]
 print('losses over $5: %d' % len(big) + ''.join('\n   %s %s x%d pnl %+.2f' % (T(t['ts']).astimezone(CT).strftime('%H:%M'), t['o']['ticker'], t['c'], t['pnl']) for t in big))
 ov = [t for t in dayt if t['c'] > LOCK.get(t['grp'], 50)]
-print('orders above the size lock (assumed locks: OICORE 12 since Nov 7, EVENT830 1; edit LOCK; see the server oversize line below): %d' % len(ov) + ''.join('\n   %s x%d' % (t['o']['ticker'], t['c']) for t in ov))
+print('orders above the size lock (assumed locks: OICORE 20 (the ladder step Main named Nov 13; 12 before), EVENT830 1; edit LOCK; see the server oversize line below): %d' % len(ov) + ''.join('\n   %s x%d' % (t['o']['ticker'], t['c']) for t in ov))
 nf = [(o, g) for o, g in sub if cdate(o) == day and not (o.get('count') and o['count'] > 0)]
 from collections import Counter
 print('no-fill orders: %d %s' % (len(nf), dict(Counter(g for _, g in nf))))
@@ -98,7 +98,7 @@ dd = pk - cum
 print('OICORE HEADROOM (booked settledPnl, %d fills):' % len(o))
 if stop is None: print('  drawdown from peak %.2f (peak %.2f, net %.2f); STOP ROOM NOT SHOWN: SIZING_BASE is not set' % (dd, pk, cum))
 else: print('  drawdown from peak %.2f (peak %.2f, net %.2f, worst so far %.2f) vs stop min(5 x %d, 12%% x %.2f = %.2f, 150) = %.2f -> room %.2f' % (dd, pk, cum, mdd, cts, BASE, 0.12 * BASE, stop, stop - dd))
-print('  net kill: net %.2f after %d fills; kill if under -6.00 once 40 fills -> %s' % (cum, len(o), ('room %.2f' % (cum + 6)) if len(o) >= 40 else 'armed, room %.2f' % (cum + 6)))
+print('  net kill: net %.2f after %d fills; kill if under -50.00 once 40 fills (PR 904, live since the c6f54bed deploy of Nov 13; it was -6.00 before) -> %s' % (cum, len(o), ('room %.2f' % (cum + 50)) if len(o) >= 40 else 'armed, room %.2f' % (cum + 50)))
 print('  losing streak now %d (worst %d) vs kill at 24 -> room %d' % (streak, ms, 24 - streak))
 # ---- open positions
 op = [(x, g) for x, g in sub if x.get('status') == 'filled' and (x.get('count') or 0) > 0 and (x.get('result') is None or x.get('settledPnl') is None)]
