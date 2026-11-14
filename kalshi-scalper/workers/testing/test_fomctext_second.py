@@ -54,8 +54,9 @@ with tempfile.TemporaryDirectory() as d:
     assert (k["raw"]["count"], k["raw"]["meetings"]) == (5, 2) and (k["1c"]["count"], k["1c"]["meetings"]) == (4, 2) and (k["2c"]["count"], k["2c"]["meetings"]) == (3, 2), k
     assert k["kill"]["1c"] == {"a": True, "b": True, "c": False} and k["kill"]["2c"] == {"a": True, "b": True, "c": False} and k["kill"]["raw"] == {"a": True, "b": True, "c": False}
     assert r["VERDICT"].startswith("CLOSED") and "upper bound, not fill-checked" in r["VERDICT"]
+    assert r["haircut"] == {"1c": "does not count: fails the haircut", "2c": "does not count: fails the haircut"} and r["could_count_toward_20_to_30"] is False
     assert p["two_sided"] == 4 and p["results"] == {"yes": 3, "no": 1, "void": 0, "other": 0} and p["raw"]["count"] == 2 and p["1c"]["count"] == 2 and p["2c"]["count"] == 2 and "kill" not in p
-    assert "not statement-type, n = 1" in f.render(r) and "upper bound, not fill-checked" in f.render(r) and "KXFEDMENTION" not in f.render(r)
+    out = f.render(r); assert "could count toward the 20 to 30: no" in out and "does not count: fails the haircut" in out and "not statement-type, n = 1" in f.render(r) and "upper bound, not fill-checked" in f.render(r) and "KXFEDMENTION" not in f.render(r)
 # the held-out rows: their candle and result readers are never touched
 with tempfile.TemporaryDirectory() as d:
     T, L, C = build(d, D1)
@@ -90,9 +91,9 @@ def verdict(strikes):
         T, L, C = build(d, strikes); r = f.run(T, [L], [C], hash_check=False); return r
 r = verdict(d2()); k = r["kill_arm"]
 assert k["n"] == 30 and k["two_sided"] == 15 and k["raw"]["count"] == k["1c"]["count"] == k["2c"]["count"] == 15 and k["1c"]["meetings"] == 5 and r["VERDICT"].startswith("NOT CLOSED"), (k, r["VERDICT"])
-assert k["kill"]["1c"] == {"a": False, "b": False, "c": False}
+assert k["kill"]["1c"] == {"a": False, "b": False, "c": False} and r["haircut"] == {"1c": "passes the haircut", "2c": "passes the haircut"} and r["could_count_toward_20_to_30"] is True
 def rm_one(o): o[0][6] = "no"
-r = verdict(d2(rm_one)); assert r["kill_arm"]["1c"]["count"] == 14 and r["kill_arm"]["kill"]["1c"]["a"] is True and r["VERDICT"].startswith("CLOSED")
+r = verdict(d2(rm_one)); assert r["kill_arm"]["raw"]["count"] == 14 and r["kill_arm"]["kill"]["raw"]["a"] is True and r["VERDICT"].startswith("CLOSED") and r["could_count_toward_20_to_30"] is False
 def rm_meeting(o):
     for x in o[:3]: x[6] = "no"
 r = verdict(d2(rm_meeting)); kk = r["kill_arm"]; assert kk["1c"]["count"] == 12 and kk["1c"]["meetings"] == 4 and kk["kill"]["1c"]["a"] and kk["kill"]["1c"]["b"] and r["VERDICT"].startswith("CLOSED")
@@ -100,12 +101,12 @@ def add_nocandle(o): o.append(["2025-07-30", "KXFEDMENTION-25JUL-N9", "yes", S, 
 r = verdict(d2(add_nocandle)); kk = r["kill_arm"]; assert kk["n"] == 31 and kk["two_sided"] == 15 and kk["kill"]["1c"]["c"] is True and kk["kill"]["1c"]["a"] is False and r["VERDICT"].startswith("CLOSED")
 def on_line(o):
     for x in o[:3]: x[4], x[5] = .85, .86
-r = verdict(d2(on_line)); kk = r["kill_arm"]; assert kk["1c"]["count"] == 15 and kk["2c"]["count"] == 12 and kk["kill"]["2c"]["a"] is True and kk["kill"]["1c"]["a"] is False and r["VERDICT"].startswith("CLOSED"), kk          # CLOSED if either haircut closes
+r = verdict(d2(on_line)); kk = r["kill_arm"]; assert kk["1c"]["count"] == 15 and kk["2c"]["count"] == 12 and kk["kill"]["2c"]["a"] is True and kk["kill"]["1c"]["a"] is False and r["VERDICT"].startswith("NOT CLOSED") and r["haircut"] == {"1c": "passes the haircut", "2c": "does not count: fails the haircut"} and r["could_count_toward_20_to_30"] is False, (kk, r["VERDICT"])          # RAW decides; a haircut line only labels
 # more edges: the 1e-9 tolerance on the cap, a 2c-only count, a NOT STATEMENT-TYPE strike with feature yes stays out of the kill arm, no unlisted result is read, the hash check is called by default
 assert f.counted("yes", 0.87 + 5e-10, 0.0) and not f.counted("yes", 0.87 + 2e-9, 0.0) and f.counted("yes", 0.85, 0.02) and not f.counted("yes", 0.85, 0.03)
 def at_85(o):
     for x in o[:3]: x[4], x[5] = .83, .85
-r = verdict(d2(at_85)); kk = r["kill_arm"]; assert kk["raw"]["count"] == kk["1c"]["count"] == kk["2c"]["count"] == 15 and r["VERDICT"].startswith("NOT CLOSED")          # 0.85 + .02 = .87 is on the line and counts
+r = verdict(d2(at_85)); kk = r["kill_arm"]; assert kk["raw"]["count"] == kk["1c"]["count"] == kk["2c"]["count"] == 15 and r["VERDICT"].startswith("NOT CLOSED") and r["could_count_toward_20_to_30"] is True          # 0.85 + .02 = .87 is on the line and counts
 with tempfile.TemporaryDirectory() as d:
     T, L, C = build(d, D1[:9] + [(A, "KXFEDMENTION-25OCT-Z1", "yes", N, .40, .42, "yes")]); rz = f.run(T, [L], [C], hash_check=False)
     assert rz["not_statement_type_n"] == 2 and rz["kill_arm"]["n"] == 6 and rz["placebo"]["n"] == 2, rz          # A9 and Z1; the 6 kill-arm strikes A1 to A6; placebo A7, A8
@@ -155,6 +156,16 @@ with tempfile.TemporaryDirectory() as d:
     fp = os.path.join(C, "0001.json.gz"); body = json.load(gzip.open(fp, "rt")); body["candlesticks"][0]["yes_bid"] = {"close": "0.58"}; gzip.open(fp, "wt").write(json.dumps(body))
     try: f.run(T, [L], [C], hash_check=False); assert 0
     except SystemExit as e: assert "STOP" in str(e) and "KXFEDMENTION-25OCT-A1" in str(e)
+# RAW decides: a strike at ask .87 counts at RAW but not at 1c (.88): RAW 15 not closed, 1c 14 fails the haircut on (a), could count: no
+def one_at_87(o): o[0][4], o[0][5] = .85, .87
+r = verdict(d2(one_at_87)); kk = r["kill_arm"]; assert kk["raw"]["count"] == 15 and kk["1c"]["count"] == 14 and r["VERDICT"].startswith("NOT CLOSED") and r["haircut"]["1c"] == "does not count: fails the haircut" and r["could_count_toward_20_to_30"] is False
+# a haircut that fails on (b) alone (count still 15 or more but from fewer than 5 dates): three extra counted strikes in meeting 1, meeting 5's three strikes at ask .87
+def b_only(o):
+    for x in o[12:15]: x[4], x[5] = .85, .87          # meeting 5's counted strikes (rows 12 to 14: its K0 to K2)
+    for j in range(3): o.append(["2025-01-29", "KXFEDMENTION-25JAN-E%d" % j, "yes", S, .48, .50, "yes"])
+r = verdict(d2(b_only)); kk = r["kill_arm"]
+assert kk["raw"]["count"] == 18 and kk["raw"]["meetings"] == 5 and kk["1c"]["count"] == 15 and kk["1c"]["meetings"] == 4 and kk["kill"]["1c"] == {"a": False, "b": True, "c": kk["kill"]["1c"]["c"]}, kk
+assert r["VERDICT"].startswith("NOT CLOSED") and r["haircut"]["1c"] == "does not count: fails the haircut", (r["VERDICT"], r["haircut"])
 # --- guards ---
 with tempfile.TemporaryDirectory() as d:
     T, L, C = build(d, D1[:3] + [D1[0][:1] + ("KXFEDMENTION-25OCT-A1",) + D1[0][2:]])          # a table ticker repeated

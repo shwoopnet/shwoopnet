@@ -7,7 +7,7 @@ KILL ARM = statement-type strikes with feature (statement_word) yes; PLACEBO = s
 The 2:05 pm candle = the candle whose end_period_ts is 14:05:00 US Eastern on the decision date (zoneinfo America/New_York); YES ask / bid = the candle's yes_ask / yes_bid close; a missing candle is not carried forward (not two-sided).
 Two-sided: 0 < bid < ask < 1 (1e-9). Result from the lists run, by market ticker: yes counts; void and any other result are excluded and counted. A counted strike: settled YES, two-sided, entry price at or under 0.87.
 Printed per set: RAW (the card's wording: the 2:05 pm ask at or under 0.87), 1c (ask + 0.01) and 2c (ask + 0.02), per C7; the count and its distinct decision dates. Kill line (card): (a) fewer than 15 counted strikes, (b) from fewer than 5 distinct decision dates,
-(c) fewer than half of ALL kill-arm strikes two-sided at 2:05 pm (those with no candle included). CLOSED if a kill condition holds at 1c OR at 2c (C7: it counts only if both are fine); RAW is information. Every result line says "upper bound, not fill-checked".
+(c) fewer than half of ALL kill-arm strikes two-sided at 2:05 pm (those with no candle included). RAW decides the verdict (the Head's ruling A, 02:33Z); 1c and 2c are printed beside it and decide only whether a pass could count toward the 20 to 30 ("does not count: fails the haircut"); CLOSED is never called from a haircut line. Every result line says "upper bound, not fill-checked".
 STOPs: a table ticker repeated; a table strike missing from the lists or from the candle answers (the universe check); a market_ticker in more than one candle answer. Prints aggregates only, no strike line.
 Usage: fomctext_second.py <STATEMENT_WORD_TABLE.csv> --lists <lists run>... --candles <candle run>...
 """
@@ -26,7 +26,7 @@ STATEMENT_TYPE, NOT_STATEMENT = "statement-type", "NOT STATEMENT-TYPE"
 AUDITED = {"scorekit.py": "f219b43c755b4b87"}
 BOUND = "upper bound, not fill-checked"
 AMBIGUITIES = [
-    "Entry price at 1c and 2c = ask + 0.01 / + 0.02, and the 0.87 cap applies to that entry price; RAW is the card's literal wording (the ask itself at or under 0.87). The kill line is judged at 1c AND 2c (CLOSED if either closes), RAW is information.",
+    "Entry price at 1c and 2c = ask + 0.01 / + 0.02, and the 0.87 cap applies to that entry price; RAW is the card's literal wording (the ask itself at or under 0.87). RAW decides the verdict (Head's ruling A); 1c and 2c only label whether a pass could count toward the 20 to 30.",
     "Counted = settled YES, two-sided at 2:05 pm, entry price at or under 0.87; the settlement gap is then at least 0.13 (the card's 10c line is implied).",
     "(c) is judged on ALL kill-arm strikes including those with no candle, and does not depend on the haircut.",
     "A market's result is read from the lists answers by ticker (a later answer overwrites an earlier one); a result other than yes, no or void is counted as 'other'.",
@@ -169,10 +169,12 @@ def measure(dev, dropped, total, cs, res):
     other = [r for r in dev if r["type"] != STATEMENT_TYPE]
     ka, pl = figures(kill_rows, cs, res), figures(placebo_rows, cs, res)
     ka["kill"] = kill(ka)
-    closed = [name for name in ("1c", "2c") if any(ka["kill"][name].values())]
-    verdict = ("CLOSED: efficient, move on (kill line holds at %s)" % " and ".join(closed)) if closed else "NOT CLOSED (no kill condition holds at 1c or 2c)"
+    held = [x for x, v in ka["kill"]["raw"].items() if v]
+    verdict = ("CLOSED: efficient, move on (the card's kill line holds on the plain count: (%s))" % ", ".join(held)) if held else "NOT CLOSED (no kill condition holds on the plain count)"
+    haircut = {name: ("does not count: fails the haircut" if any(ka["kill"][name].values()) else "passes the haircut") for name in ("1c", "2c")}
+    could = (not held) and all(v == "passes the haircut" for v in haircut.values())
     return {"table_rows": total, "heldout_rows_dropped": dropped, "development_rows": len(dev), "kill_arm": ka, "placebo": pl, "not_statement_type_n": len(other),
-            "VERDICT": verdict + "; " + BOUND, "ambiguities": AMBIGUITIES}
+            "VERDICT": verdict + "; " + BOUND, "haircut": haircut, "could_count_toward_20_to_30": could, "ambiguities": AMBIGUITIES}
 
 
 def run(table, lists, candle_runs, hash_check=True):
@@ -209,7 +211,9 @@ def render(r):
         lines.append("  kill line at %s: (a) fewer than %d counted: %s; (b) fewer than %d decision dates: %s; (c) fewer than half two-sided: %s" % (name, MIN_COUNT, kl[name]["a"], MIN_MEETINGS, kl[name]["b"], kl[name]["c"]))
     lines += _line("placebo (statement-type, feature no)", r["placebo"])
     lines.append("not statement-type, n = %d (outside the kill line and the placebo)" % r["not_statement_type_n"])
-    lines.append("VERDICT: " + r["VERDICT"])
+    lines.append("VERDICT (decided on the plain count): " + r["VERDICT"])
+    lines.append("haircut lines (decide only whether a pass could count toward the 20 to 30; %s): 1c %s; 2c %s" % (BOUND, r["haircut"]["1c"], r["haircut"]["2c"]))
+    lines.append("could count toward the 20 to 30: %s" % ("yes" if r["could_count_toward_20_to_30"] else "no"))
     return "\n".join(lines)
 
 
