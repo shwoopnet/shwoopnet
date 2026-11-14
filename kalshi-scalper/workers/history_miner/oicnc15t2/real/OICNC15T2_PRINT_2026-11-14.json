@@ -1,0 +1,45 @@
+{
+ "T_day_us_central": "2026-11-13",
+ "label": "thresholds only: open interest fields of the allowed series; no price, volume, quote or result read; the OICAND lists run is not opened",
+ "other_series_candle_sets_skipped_unread": 17643,
+ "series": {
+  "KXBNB15M": {
+   "T": 4351.84,
+   "dropped": {
+    "event830_cut": 0,
+    "missing_candle": 0,
+    "no_open_interest": 0,
+    "outside_20_days": 212,
+    "repeated_ticker": 0
+   },
+   "first_day_used": "2026-10-21",
+   "last_day_used": "2026-11-12",
+   "n": 1587,
+   "not_seated_reason": [],
+   "rank": 1429,
+   "seated": true,
+   "trading_days_available": 23,
+   "trading_days_used": 20,
+   "windows_seen": 1799
+  },
+  "KXHYPE15M": {
+   "T": 6796.75,
+   "dropped": {
+    "event830_cut": 0,
+    "missing_candle": 0,
+    "no_open_interest": 0,
+    "outside_20_days": 212,
+    "repeated_ticker": 0
+   },
+   "first_day_used": "2026-10-21",
+   "last_day_used": "2026-11-12",
+   "n": 1587,
+   "not_seated_reason": [],
+   "rank": 1429,
+   "seated": true,
+   "trading_days_available": 23,
+   "trading_days_used": 20,
+   "windows_seen": 1799
+  }
+ }
+}
