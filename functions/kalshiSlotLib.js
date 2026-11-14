@@ -142,9 +142,11 @@ function slotSkipCalendarRow(strategy, ticker, closeMs) {
   const name = strategy && strategy.entry ? strategy.entry.skipCalendar : undefined;
   if (name === undefined) return null;
   const rows = Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, name) ? SLOT_CALENDARS[name] : null;
-  if (!rows || !isNum(closeMs)) return null;
+  if (!rows) return null;
   const wk = windowKey(String(ticker || ""));
-  return rows.find((r) => Date.parse(r.closeUtc) === closeMs && r.window === wk) || null;
+  // A SKIP must fail safe (security review, Nov 14, 2026): it matches on EITHER the close instant OR the ticker's window code, so a close time that differs from the calendar row (or an unreadable one) can never
+  // make a seat trade a window its threshold never saw. (EVENT830's own slotCalendarRow needs BOTH, because there a non-match means "do not trade".)
+  return rows.find((r) => (isNum(closeMs) && Date.parse(r.closeUtc) === closeMs) || r.window === wk) || null;
 }
 // The series whose quotes the minute function must read NOW for a calendar strategy, because one of its listed windows is about to enter its entry time. Empty on every other minute, so the bot reads
 // nothing extra on a day with no release (and on a release day only around the one minute that can enter). Pure: the caller passes the clock and the strategies.
@@ -642,6 +644,7 @@ function slotOrderCheckWith(flags, input) {
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMin") && !(isNum(i.oiRise) && i.oiRise >= strategy.entry.oiRiseMin)) return no("the open interest rise is missing or below " + strategy.entry.oiRiseMin + " contracts");
   // A calendar strategy enters only the window that closes at a listed release (the close Kalshi reports and the ticker's window code must both match one frozen row); a spread rule refuses a missing or wide spread.
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "calendar") && !slotCalendarRow(strategy, i.ticker, i.closeTime)) return no("this market's window is not a listed release window");
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "skipCalendar") && !isNum(i.closeTime)) return no("this strategy skips listed release windows and the close time is not readable");
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "skipCalendar") && slotSkipCalendarRow(strategy, i.ticker, i.closeTime)) return no("this market's window is a listed release window that this strategy never trades");
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "maxSpread") && !(isNum(i.spread) && i.spread >= 0 && i.spread <= strategy.entry.maxSpread + 1e-9)) return no("the spread is missing or wider than " + strategy.entry.maxSpread);
   if (!Array.isArray(i.slotOrders) || !Array.isArray(i.l1Orders) || i.slotOrdersComplete !== true) return no("the order books were not read in full, so the caps cannot be checked");

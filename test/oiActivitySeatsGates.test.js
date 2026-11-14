@@ -67,7 +67,7 @@ gates.HB3 = () => {
   const REL = Date.parse('2026-11-17T13:30:00Z'), TKR = 'KXHYPE15M-26NOV170830-30';
   assert.ok(slot.slotSkipCalendarRow(s, TKR, REL), 'a listed release window is found');
   assert.strictEqual(slot.slotSkipCalendarRow(s, 'KXHYPE15M-26NOV170845-30', Date.parse('2026-11-17T13:45:00Z')), null, 'the window after it is ordinary');
-  assert.strictEqual(slot.slotSkipCalendarRow(s, TKR, REL + 900000), null, 'the close and the ticker code must both match one row');
+  assert.ok(slot.slotSkipCalendarRow(s, TKR, REL + 900000), 'a skip fails safe: the ticker window code alone is enough (changed on purpose after the security review; EVENT830 itself still needs both)');
   assert.strictEqual(slot.slotSkipCalendarRow(seat('OICORE'), TKR, REL), null, 'a strategy without skipCalendar is never skipped');
   const input = (o) => Object.assign({ strategyId: 'HYPEOI1', ticker: TKR, side: 'yes', limit: 0.3, step: 1, depthAtTouch: 100, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null,
     position: 0, sizingBase: 500, windowCapFraction: 0.055, secondsLeft: 150, now: REL - 150000, closeTime: REL, oiRise: 7000 }, o || {});
@@ -147,8 +147,25 @@ gates.HB4 = async () => {
   for (const r of rows) {
     const c = Date.parse(r.closeUtc);
     assert.ok(slot.slotSkipCalendarRow(s, 'KXBNB15M-' + r.window + '-30', c), r.window + ' is skipped');
-    assert.strictEqual(slot.slotSkipCalendarRow(s, 'KXBNB15M-' + r.window + '-30', c - 900000), null);
+    assert.strictEqual(slot.slotSkipCalendarRow(s, 'KXBNB15M-26NOV171400-30', Date.parse('2026-11-17T14:00:00Z')), null, 'an ordinary window is not skipped');
   }
+};
+
+gates.HB4b = () => {
+  // Consequence (security review, Nov 14, 2026): the skip fails SAFE. A window that matches EVENT830's calendar on only ONE of the two (close instant or ticker window code) is still skipped, and an unreadable close
+  // time is skipped by its window code, so a delayed release or a bad close time can never make a seat trade a window its threshold never saw.
+  const s = seat('HYPEOI1'), r = slot.SLOT_CALENDARS.EVENT830[0], c = Date.parse(r.closeUtc);
+  assert.ok(slot.slotSkipCalendarRow(s, 'KXHYPE15M-' + r.window + '-30', c + 60000), 'right window code, close time off by a minute: skipped');
+  assert.ok(slot.slotSkipCalendarRow(s, 'KXHYPE15M-26DEC312359-30', c), 'right close instant, other window code: skipped');
+  assert.ok(slot.slotSkipCalendarRow(s, 'KXHYPE15M-' + r.window + '-30', NaN), 'unreadable close time, right window code: skipped');
+  assert.strictEqual(slot.slotSkipCalendarRow(s, 'KXHYPE15M-26NOV171400-30', Date.parse('2026-11-17T14:00:00Z')), null, 'an ordinary window is not skipped');
+  // the gate refuses a skipCalendar seat when the close time is unreadable
+  const reg = [s];
+  const base = { strategyId: 'HYPEOI1', ticker: 'KXHYPE15M-26NOV170900-30', side: 'yes', limit: 0.3, step: 1, depthAtTouch: 100, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null,
+    position: 0, sizingBase: 500, windowCapFraction: 0.055, secondsLeft: 150, now: Date.parse('2026-11-17T14:00:00Z') - 150000, closeTime: Date.parse('2026-11-17T14:00:00Z'), oiRise: 7000 };
+  const run1 = (o) => slot._testOnly.slotOrderCheckWith({ enabled: true, registry: reg, everUsed: true, activitySeats: [] }, Object.assign({}, base, o));
+  assert.strictEqual(run1({}).allowed, true, 'an ordinary window with a readable close time passes');
+  const bad = run1({ closeTime: NaN }); assert.strictEqual(bad.allowed, false); assert.ok(bad.reasons.some((x) => /not readable/.test(x)), JSON.stringify(bad.reasons));
 };
 
 gates.HB5 = () => {
