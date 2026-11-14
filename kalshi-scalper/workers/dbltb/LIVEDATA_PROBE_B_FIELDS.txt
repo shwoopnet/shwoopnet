@@ -1,0 +1,265 @@
+job LIVEDATA_PROBE_B | 3 requests, the same ids, paths and parameters as the committed job file [field names only, no value]
+LIVEDATA_PROBE_A field reader | requests asked 3 | answered whole 3 | run finished: yes [field names only, no value]
+ms_sports page 1: 127496 bytes, cut short by the runner: no, 79 distinct fields [field names only, no value]
+  $ | object x 1
+  $.cursor | string x 1
+  $.milestones | array x 1 | array length 100 to 100
+  $.milestones[] | object x 100
+  $.milestones[].category | string x 100
+  $.milestones[].details | object x 100
+  $.milestones[].details.away_last_games | array x 2 | array length 5 to 5
+  $.milestones[].details.away_last_games[] | object x 10
+  $.milestones[].details.away_last_games[].date | string x 10 | times from 2026-10-30T23:30:00Z to 2026-11-10T00:00:00Z
+  $.milestones[].details.away_last_games[].opponent_points | number x 10
+  $.milestones[].details.away_last_games[].opponent_structured_id | string x 10
+  $.milestones[].details.away_last_games[].points | number x 10
+  $.milestones[].details.away_last_games[].structured_id | string x 10
+  $.milestones[].details.away_last_games[].winner | bool x 10
+  $.milestones[].details.away_player_id | string x 4
+  $.milestones[].details.away_team_id | string x 71
+  $.milestones[].details.best_of | string x 1
+  $.milestones[].details.broadcasts | array x 7 | array length 1 to 1
+  $.milestones[].details.broadcasts[] | object x 7
+  $.milestones[].details.broadcasts[].name | string x 7
+  $.milestones[].details.broadcasts[].scope | string x 7
+  $.milestones[].details.coverage | object x 1
+  $.milestones[].details.first_competitor_id | string x 29
+  $.milestones[].details.gender | string x 32
+  $.milestones[].details.home_last_games | array x 2 | array length 5 to 5
+  $.milestones[].details.home_last_games[] | object x 10
+  $.milestones[].details.home_last_games[].date | string x 10 | times from 2026-10-30T23:30:00Z to 2026-11-11T00:30:00Z
+  $.milestones[].details.home_last_games[].opponent_points | number x 10
+  $.milestones[].details.home_last_games[].opponent_structured_id | string x 10
+  $.milestones[].details.home_last_games[].points | number x 10
+  $.milestones[].details.home_last_games[].structured_id | string x 10
+  $.milestones[].details.home_last_games[].winner | bool x 10
+  $.milestones[].details.home_player_id | string x 4
+  $.milestones[].details.home_team_id | string x 71
+  $.milestones[].details.is_ko | bool x 1
+  $.milestones[].details.is_womens | bool x 4
+  $.milestones[].details.league | string x 75
+  $.milestones[].details.main_game_event_ticker | string x 92
+  $.milestones[].details.match_type | string x 7
+  $.milestones[].details.optic_odds_league | string x 3
+  $.milestones[].details.player_id_mapping | object x 45
+  $.milestones[].details.player_id_mapping.<key> | string x 398
+  $.milestones[].details.round | string x 25
+  $.milestones[].details.season | object x 1
+  $.milestones[].details.season.type | string x 1
+  $.milestones[].details.season.week | number x 1
+  $.milestones[].details.season.year | number x 1
+  $.milestones[].details.season_type | string x 6
+  $.milestones[].details.season_year | number x 2, string x 3
+  $.milestones[].details.second_competitor_id | string x 29
+  $.milestones[].details.series_to_stat_mapping | object x 3
+  $.milestones[].details.series_to_stat_mapping.<key> | string x 19
+  $.milestones[].details.series_to_stat_name_mapping | object x 3
+  $.milestones[].details.series_to_stat_name_mapping.<key> | string x 19
+  $.milestones[].details.session_id | string x 7
+  $.milestones[].details.source | string x 38
+  $.milestones[].details.source_id | string x 41
+  $.milestones[].details.statsperform_player_id_mapping | object x 2
+  $.milestones[].details.statsperform_player_id_mapping.<key> | string x 96
+  $.milestones[].details.status | string x 96
+  $.milestones[].details.tie_id | string x 2
+  $.milestones[].details.tier | null x 3, string x 35
+  $.milestones[].details.tour | string x 25
+  $.milestones[].details.tournament | string x 7
+  $.milestones[].details.tournament_name | string x 25
+  $.milestones[].end_date | string x 95 | times from 2026-11-11T06:06:05Z to 2026-11-13T23:40:17Z
+  $.milestones[].id | string x 100
+  $.milestones[].last_updated_ts | string x 100 | times from 2026-11-13T00:43:11Z to 2026-11-14T00:45:15Z
+  $.milestones[].notification_message | string x 100
+  $.milestones[].primary_event_tickers | array x 100 | array length 1 to 46
+  $.milestones[].primary_event_tickers[] | string x 250
+  $.milestones[].related_event_tickers | array x 100 | array length 1 to 58
+  $.milestones[].related_event_tickers[] | string x 310
+  $.milestones[].source_id | string x 12
+  $.milestones[].source_ids | object x 100
+  $.milestones[].source_ids.<key> | string x 121
+  $.milestones[].start_date | string x 100 | times from 2024-05-09T00:00:00Z to 2026-11-12T00:00:00Z
+  $.milestones[].title | string x 100
+  $.milestones[].type | string x 100
+ms_sports page 2: 142553 bytes, cut short by the runner: no, 89 distinct fields [field names only, no value]
+  $ | object x 1
+  $.cursor | string x 1
+  $.milestones | array x 1 | array length 100 to 100
+  $.milestones[] | object x 100
+  $.milestones[].category | string x 100
+  $.milestones[].details | object x 100
+  $.milestones[].details.away_last_games | array x 8 | array length 5 to 5
+  $.milestones[].details.away_last_games[] | object x 40
+  $.milestones[].details.away_last_games[].date | string x 40 | times from 2026-10-31T02:00:00Z to 2026-11-11T01:00:00Z
+  $.milestones[].details.away_last_games[].opponent_points | number x 40
+  $.milestones[].details.away_last_games[].opponent_structured_id | string x 40
+  $.milestones[].details.away_last_games[].points | number x 40
+  $.milestones[].details.away_last_games[].structured_id | string x 40
+  $.milestones[].details.away_last_games[].winner | bool x 40
+  $.milestones[].details.away_player_id | string x 7
+  $.milestones[].details.away_team_id | string x 68
+  $.milestones[].details.broadcasts | array x 27 | array length 1 to 3
+  $.milestones[].details.broadcasts[] | object x 29
+  $.milestones[].details.broadcasts[].name | string x 29
+  $.milestones[].details.broadcasts[].scope | string x 29
+  $.milestones[].details.conference | string x 3
+  $.milestones[].details.coverage | object x 2
+  $.milestones[].details.division | string x 3
+  $.milestones[].details.double_header_game_number | number x 1
+  $.milestones[].details.first_competitor_id | string x 32
+  $.milestones[].details.game_injuries | object x 2
+  $.milestones[].details.game_injuries.<key> | array x 3 | array length 1 to 5
+  $.milestones[].details.game_injuries.<key>[] | object x 11
+  $.milestones[].details.game_injuries.<key>[].description | string x 11
+  $.milestones[].details.game_injuries.<key>[].name | string x 11
+  $.milestones[].details.game_injuries.<key>[].source | string x 11
+  $.milestones[].details.game_injuries.<key>[].start_date | string x 11 | times from 2026-09-28T00:00:00Z to 2026-11-11T00:00:00Z
+  $.milestones[].details.game_injuries.<key>[].statsperform_injury_id | string x 11
+  $.milestones[].details.game_injuries.<key>[].status | string x 11
+  $.milestones[].details.game_injuries.<key>[].structured_id | string x 11
+  $.milestones[].details.gender | string x 23
+  $.milestones[].details.home_last_games | array x 8 | array length 5 to 5
+  $.milestones[].details.home_last_games[] | object x 40
+  $.milestones[].details.home_last_games[].date | string x 40 | times from 2026-10-29T00:00:00Z to 2026-11-11T00:30:00Z
+  $.milestones[].details.home_last_games[].opponent_points | number x 40
+  $.milestones[].details.home_last_games[].opponent_structured_id | string x 40
+  $.milestones[].details.home_last_games[].points | number x 40
+  $.milestones[].details.home_last_games[].structured_id | string x 40
+  $.milestones[].details.home_last_games[].winner | bool x 40
+  $.milestones[].details.home_player_id | string x 7
+  $.milestones[].details.home_team_id | string x 68
+  $.milestones[].details.is_double_header | bool x 1
+  $.milestones[].details.is_ko | bool x 2
+  $.milestones[].details.is_womens | bool x 7
+  $.milestones[].details.league | string x 77
+  $.milestones[].details.main_game_event_ticker | string x 87
+  $.milestones[].details.optic_odds_league | string x 4
+  $.milestones[].details.player_id_mapping | object x 48
+  $.milestones[].details.player_id_mapping.<key> | string x 108
+  $.milestones[].details.round | string x 23
+  $.milestones[].details.season | object x 3
+  $.milestones[].details.season.type | string x 3
+  $.milestones[].details.season.week | number x 3
+  $.milestones[].details.season.year | number x 3
+  $.milestones[].details.season_type | string x 12
+  $.milestones[].details.season_year | number x 8, string x 4
+  $.milestones[].details.second_competitor_id | string x 32
+  $.milestones[].details.series_to_stat_mapping | object x 2
+  $.milestones[].details.series_to_stat_mapping.<key> | string x 10
+  $.milestones[].details.series_to_stat_name_mapping | object x 2
+  $.milestones[].details.series_to_stat_name_mapping.<key> | string x 10
+  $.milestones[].details.source | string x 46
+  $.milestones[].details.source_id | string x 46
+  $.milestones[].details.statsperform_player_id_mapping | object x 6
+  $.milestones[].details.statsperform_player_id_mapping.<key> | string x 287
+  $.milestones[].details.status | string x 89
+  $.milestones[].details.tie_id | string x 2
+  $.milestones[].details.tier | string x 49
+  $.milestones[].details.tour | string x 23
+  $.milestones[].details.tournament_name | string x 23
+  $.milestones[].end_date | string x 100 | times from 2026-11-12T00:19:51Z to 2026-11-12T05:31:26Z
+  $.milestones[].id | string x 100
+  $.milestones[].last_updated_ts | string x 100 | times from 2026-11-13T00:43:11Z to 2026-11-13T05:43:12Z
+  $.milestones[].notification_message | string x 100
+  $.milestones[].primary_event_tickers | array x 100 | array length 1 to 46
+  $.milestones[].primary_event_tickers[] | string x 494
+  $.milestones[].related_event_tickers | array x 100 | array length 1 to 46
+  $.milestones[].related_event_tickers[] | string x 529
+  $.milestones[].source_id | string x 7
+  $.milestones[].source_ids | object x 100
+  $.milestones[].source_ids.<key> | string x 181
+  $.milestones[].start_date | string x 100 | times from 2026-11-12T00:00:00Z to 2026-11-12T01:55:05Z
+  $.milestones[].title | string x 100
+  $.milestones[].type | string x 100
+ev_itf_doubles page 1: 7310 bytes, cut short by the runner: no, 44 distinct fields [field names only, no value]
+  $ | object x 1
+  $.cursor | string x 1
+  $.events | array x 1 | array length 5 to 5
+  $.events[] | object x 5
+  $.events[].category | string x 5
+  $.events[].collateral_return_type | string x 5
+  $.events[].event_ticker | string x 5
+  $.events[].exchange_index | number x 5
+  $.events[].last_updated_ts | string x 5 | times from 2026-11-13T17:42:21Z to 2026-11-13T23:42:12Z
+  $.events[].mutually_exclusive | bool x 5
+  $.events[].product_metadata | object x 5
+  $.events[].product_metadata.competition | string x 5
+  $.events[].product_metadata.competition_scope | string x 5
+  $.events[].series_ticker | string x 5
+  $.events[].settlement_sources | array x 5 | array length 4 to 4
+  $.events[].settlement_sources[] | object x 20
+  $.events[].settlement_sources[].name | string x 20
+  $.events[].settlement_sources[].url | string x 20
+  $.events[].strike_period | string x 5
+  $.events[].sub_title | string x 5
+  $.events[].title | string x 5
+  $.milestones | array x 1 | array length 5 to 5
+  $.milestones[] | object x 5
+  $.milestones[].category | string x 5
+  $.milestones[].details | object x 5
+  $.milestones[].details.first_competitor_id | string x 5
+  $.milestones[].details.gender | string x 5
+  $.milestones[].details.main_game_event_ticker | string x 5
+  $.milestones[].details.round | string x 5
+  $.milestones[].details.second_competitor_id | string x 5
+  $.milestones[].details.status | string x 5
+  $.milestones[].details.tour | string x 5
+  $.milestones[].details.tournament_name | string x 5
+  $.milestones[].id | string x 5
+  $.milestones[].last_updated_ts | string x 5 | times from 2026-11-13T17:36:20Z to 2026-11-13T23:36:10Z
+  $.milestones[].notification_message | string x 5
+  $.milestones[].primary_event_tickers | array x 5 | array length 1 to 1
+  $.milestones[].primary_event_tickers[] | string x 5
+  $.milestones[].related_event_tickers | array x 5 | array length 1 to 1
+  $.milestones[].related_event_tickers[] | string x 5
+  $.milestones[].source_ids | object x 5
+  $.milestones[].start_date | string x 5 | times from 2026-11-13T16:41:10Z to 2026-11-13T23:23:06Z
+  $.milestones[].title | string x 5
+  $.milestones[].type | string x 5
+ev_chall_doubles page 1: 5586 bytes, cut short by the runner: no, 46 distinct fields [field names only, no value]
+  $ | object x 1
+  $.cursor | string x 1
+  $.events | array x 1 | array length 4 to 4
+  $.events[] | object x 4
+  $.events[].category | string x 4
+  $.events[].collateral_return_type | string x 4
+  $.events[].event_ticker | string x 4
+  $.events[].exchange_index | number x 4
+  $.events[].last_updated_ts | string x 4 | times from 2026-11-13T15:12:07Z to 2026-11-14T00:03:51Z
+  $.events[].mutually_exclusive | bool x 4
+  $.events[].product_metadata | object x 4
+  $.events[].product_metadata.competition | string x 4
+  $.events[].product_metadata.competition_scope | string x 4
+  $.events[].series_ticker | string x 4
+  $.events[].settlement_sources | array x 4 | array length 1 to 1
+  $.events[].settlement_sources[] | object x 4
+  $.events[].settlement_sources[].name | string x 4
+  $.events[].settlement_sources[].url | string x 4
+  $.events[].strike_period | string x 4
+  $.events[].sub_title | string x 4
+  $.events[].title | string x 4
+  $.milestones | array x 1 | array length 4 to 4
+  $.milestones[] | object x 4
+  $.milestones[].category | string x 4
+  $.milestones[].details | object x 4
+  $.milestones[].details.first_competitor_id | string x 4
+  $.milestones[].details.gender | string x 4
+  $.milestones[].details.main_game_event_ticker | string x 4
+  $.milestones[].details.round | string x 4
+  $.milestones[].details.second_competitor_id | string x 4
+  $.milestones[].details.status | string x 4
+  $.milestones[].details.tour | string x 4
+  $.milestones[].details.tournament_name | string x 4
+  $.milestones[].id | string x 4
+  $.milestones[].last_updated_ts | string x 4 | times from 2026-11-13T16:00:30Z to 2026-11-14T00:01:09Z
+  $.milestones[].notification_message | string x 4
+  $.milestones[].primary_event_tickers | array x 4 | array length 1 to 1
+  $.milestones[].primary_event_tickers[] | string x 4
+  $.milestones[].related_event_tickers | array x 4 | array length 1 to 1
+  $.milestones[].related_event_tickers[] | string x 4
+  $.milestones[].source_id | string x 4
+  $.milestones[].source_ids | object x 4
+  $.milestones[].source_ids.<key> | string x 4
+  $.milestones[].start_date | string x 4 | times from 2026-11-14T03:10:00Z to 2026-11-14T12:00:00Z
+  $.milestones[].title | string x 4
+  $.milestones[].type | string x 4
+nothing above is a value: no temperature, score or status word was printed; a key is shown only when it is a plain lowercase field name, and anything else is shown as <key> [field names only, no value]
