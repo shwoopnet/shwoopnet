@@ -41,3 +41,8 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
   - Neither counts toward the 20 to 30. No calendar was read for either.
 
 - **CURVEFIT ruled VERSION by the VA, stopped (Nov 14, 2026, 02:29Z).** It is in the cross-market consistency and residual-fade family: XLADDER1, LADCOH1, NEWH4's KINK (FALSIFIED), FXUSD, and the strict lock and parity row. No card was written and no data was read. Tonight's count of NEW cards is 0.
+
+- **CLOSED (Nov 14, 2026, 02:41Z): CROWDLEG, NOTAKER and the held idea DECLINED QUOTE**, as "no evidence: combos cannot be priced".
+  - The feasibility count found 0 qualifying combos per complete day, against a pre-fixed threshold of 5. Auditor B's recount was equal.
+  - No try was counted.
+  - The recorder rebuild is the Head's and the owner's call; the Head recommends dropping it.

@@ -115,3 +115,10 @@ So before any build this desk proposes a counts-only feasibility line on the exi
 - how many of those carry `leg_tickers`.
 
 If that is under about 5 a day, the recorder fix is not worth the owner's requests, and both cards close as "no evidence: combos cannot be priced".
+
+## Closed for want of evidence (Nov 14, 2026, 02:41Z, on the Head of R&D's fixed rule): **no evidence: combos cannot be priced.**
+
+- The feasibility count (counts only; reader audited CLEAN before the run; hand case first at a06cfe15) was run once on combo-data fedfd5e4. It found 0 qualifying combos (two-sided under rule 18, NO ask 20c to 50c, spread 4c or less) on the one complete day 2026-11-13 (45 polls, 18,000 sampled quotes, 455 two-sided), and 0 on the partial days.
+- The average is 0.0, against the threshold of 5 fixed before the run. Auditor B's independent recount was equal (rule 16b). Their aggregate sanity check: 500 of 502 two-sided combos have a NO ask above 0.50; 2 are in the band, and neither has a spread of 4c or less.
+- It reads as "no qualifying combo in 18,000 sampled quotes of one complete day": each poll lists 400 different combos.
+- Print: `crowdleg/feasibility/FEASIBILITY_PRINT_2026-11-14.json` (ae8591b3). No result, volume or size was read, and no try was counted.
