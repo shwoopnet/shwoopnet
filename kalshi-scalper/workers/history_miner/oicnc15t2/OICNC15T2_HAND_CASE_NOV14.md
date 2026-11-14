@@ -1,0 +1,72 @@
+# OICORE-NC15 thresholds, build 2 (History Miner, 2026-11-14 ~07:00Z): dated text and hand case, before the code
+
+**Sources, text only (rule 16b; Desk B's code not read):**
+- The Head's text of 06:24Z: per market, T is the nearest-rank 90th percentile, rank ceil(0.9 n - 1e-12), of that market's own window rises.
+  - rise = open interest at the candle ending close - 180 s, minus the candle ending close - 360 s, one rise per window, over its previous 20 trading days, from the OICAND backfill (four runs, merged by request id).
+  - Not seated if T is 0, T is under 5 contracts, or the market has fewer than 20 trading days.
+  - Print per market: n, trading days, T, and dropped counts (missing candle, no open_interest, outside the 20 days, repeated ticker). Thresholds only, no price, result or quote.
+- The Head's final scope of 06:34Z: only KXHYPE15M and KXBNB15M, through an allowed-series parameter; any other series stops the reader. Keep the EVENT830 13:30Z cut and open interest fields only.
+- The Head's guard ruling of 06:38Z: a reader-specific guard in this script only. It keeps the HELDOUT_ rule and the listed-run refusal for every run, plus ONE constant naming the OICAND run folders allowed, and the series allow-list. No flag, no command-line extension. hm_guard.py is unchanged.
+- Desk A's frozen definitions v5 (claude/idea-desk-a 0dd16134, DESK_A_FROZEN_OICORE_PLACES_DEFINITIONS_NOV13.md), sections 1, 3, 7 (F1, G5):
+  - A trading day = a US Central calendar day with at least one window whose two candles exist.
+  - T per SERIES. T for a US Central day uses only the 20 trading days before 00:00 US Central of that day.
+  - Open interest is read from `open_interest_fp` (a string, converted) FIRST, and from `open_interest` only if `open_interest_fp` is absent. Null, blank, not finite, or bool is UNREADABLE, and an unreadable value counts as a missing candle for the rise.
+  - A window with a missing candle has no rise and is left out of T's sample. Nothing is carried forward or interpolated.
+
+**How it is built:**
+- **Inputs:** the four candle runs only, by command-line folder:
+  - OICAND_CANDLES_1/2026-11-14T0253Z_43548715053
+  - OICAND_CANDLES_1_REST/2026-11-14T0501Z_43559459347
+  - OICAND_CANDLES_2/2026-11-14T0413Z_43555574326
+  - OICAND_CANDLES_2_REST/2026-11-14T0541Z_43562765461
+  - plus their four job files from main, each equal to its run's embedded job.
+- **The lists run is never opened** (it carries the result field). A window's close is taken from its candle request: the end_ts of a request is close - 120 s, as the job's purpose states ("from 7 minutes to 2 minutes before each close").
+  - The close is cross-checked against the ticker's own US Eastern close code (YYMONDDHHMM). A mismatch STOPS the reader.
+- **Reader guard:**
+  - (1) any HELDOUT_ part is refused, as typed or after links resolve;
+  - (2) a part equal to any run listed in HELDOUT_PULL_RUNS.md is refused UNLESS it is one of the allowed run folders;
+  - (3) the list unreadable or without its header refuses everything (hm_guard.listed_runs is reused unchanged).
+- **The allowed constant names FOUR run folders, the four candle runs.** Reading flagged for the Head: the ruling said "the five OICAND run folder names". The fifth, OICAND_LISTS, is not needed and holds results, so it is left out. This is stricter than the ruling; it is added only if the Head says so.
+- **Run whole-ness:**
+  - status "complete", or "stopped_time" for a partial run (the runner's own name for its time limit);
+  - manifest job equal to the committed job;
+  - every 200 row's file inside the folder, sha256 and bytes equal, not truncated;
+  - a request counts as answered by its 200 row.
+  - Across the four runs, every request id of OICAND_CANDLES_1 and OICAND_CANDLES_2 must be answered exactly once (a REST job's request must equal the base job's request of the same id). An id answered in two runs, or in none, STOPS the reader.
+- **Series allow-list:** ALLOWED_SERIES = ("KXHYPE15M", "KXBNB15M"), a constant.
+  - The reader computes only those. Asking for any other series STOPS it.
+  - A batched answer's candles for any other ticker are skipped by their ticker alone; no other field of theirs is read. The skipped count is printed.
+- **EVENT830 cut:** a window whose close is within 5 minutes of 13:30Z on 2026-11-05, 11-06, 11-10 or 11-12 is dropped before any field other than its ticker and close is read, and counted ("event830_cut"). The job already excludes these; the reader checks again.
+- **Fields read:** ticker, end_period_ts, open_interest_fp, open_interest. Nothing else (no price, volume, quote or result).
+- **Repeated ticker:** a ticker appearing in more than one request (or twice in one answer) is DROPPED in every occurrence and counted. Reading flagged: the Head's text says "dropped"; I drop all occurrences rather than keep one.
+- **T's day:** T is printed for the US Central day 2026-11-13 (the first day after the backfill, which ends 2026-11-13T02:35Z = 2026-11-12 20:35 CT). So it uses the 20 most recent trading days before 2026-11-13 00:00 CT. Windows on older trading days are "outside the 20 days", counted. Reading flagged for the Head.
+- **Print, per series:**
+  - windows seen;
+  - dropped: event830_cut, missing_candle (a candle at close - 180 or close - 360 absent), no_open_interest (candle present, field unreadable), repeated_ticker, outside_20_days;
+  - trading days available; trading days used (at most 20);
+  - n (rises in the used days); rank; T;
+  - seated true or false, with the reason (T 0, T under 5, fewer than 20 trading days).
+  - Also printed: the other-series rows skipped, and the guard list line.
+
+**Expected by hand (invented runs, test_oicnc15t2.py):**
+- **Fixture H (HYPE):** 22 weekdays, one window a day closing 15:00Z. Day k (1 = oldest) has open interest 1000 at close - 360 and 1000 + k at close - 180, so its rise is k. Also:
+  - day 23 (a weekday after day 22): a window whose close - 180 candle is ABSENT, so missing_candle 1. It is that day's only window, so it is not a trading day.
+  - day 24: a window whose close - 180 candle has open_interest_fp null, so no_open_interest 1. Not a trading day.
+  - a window closing 2026-11-05 13:30Z: event830_cut 1.
+  - one ticker present in two requests: repeated_ticker 2 (both occurrences), and its day has a second, normal window, so the day still counts.
+  - Result: trading days available 22, used 20 (days 3 to 22), outside_20_days 2 (days 1 and 2), n 20, rank ceil(18 - 1e-12) = 18, sorted rises 3..22, so T = 20; seated.
+  - The repeated ticker's day needs care in the fixture: it is day 22, whose normal window has rise 22.
+- **Fixture B (BNB):** 19 trading days, rises all 7. T = 7 but only 19 days: NOT seated (fewer than 20 trading days).
+- **Variant Z:** HYPE's 20 days all have rise 0, so T = 0: NOT seated. **Variant S:** rises all 4, so T = 4: NOT seated (under 5).
+- **Other series:** KXSILVER15M candles in the same answers are skipped, and the count is printed. Asking for KXSILVER15M stops the reader.
+- **Guard:**
+  - a listed run outside the allowed four (e.g. OICAND_LISTS/..., or another listed name) is refused;
+  - a HELDOUT_ path is refused;
+  - the four allowed folders are accepted;
+  - an unreadable list refuses everything.
+- **Merge:**
+  - an id answered in two runs stops;
+  - an id answered in none stops;
+  - a REST request differing from the base request stops;
+  - a status other than complete or stopped_time stops;
+  - a close not matching its ticker code stops.
