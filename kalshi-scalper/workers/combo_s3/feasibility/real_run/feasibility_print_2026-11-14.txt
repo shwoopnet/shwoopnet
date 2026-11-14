@@ -1,0 +1,6 @@
+combo-data tip fedfd5e4, quotes files only, reader 5c8125fc (s3_feasibility.py c1900d52...)
+S3 feasibility count, counts only (no result read)
+2026-11-13: snapshots 45 | rows 18000 | two-sided rows 455 | qualifying rows (S3 rule) 6 | would-be fills 6 (two-sided on both sides: 1) | full day
+2026-11-14: snapshots 5 | rows 2000 | two-sided rows 20 | qualifying rows (S3 rule) 1 | would-be fills 1 (two-sided on both sides: 0)
+ignored before 2026-11-13T00:00Z: 2 snapshots, 800 rows
+verdict: not decided yet (1 full days, need 3)
