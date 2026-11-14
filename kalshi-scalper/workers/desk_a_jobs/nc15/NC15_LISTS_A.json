@@ -24,12 +24,7 @@
   "KXWTI15M",
   "KXEURUSD15M",
   "KXGBPUSD15M",
-  "KXUSDJPY15M",
-  "KXHYPE15M",
-  "KXBNB15M",
-  "KXAUDUSD15M",
-  "KXUSDCAD15M",
-  "KXNATGAS15M"
+  "KXUSDJPY15M"
  ],
  "ticker_allowlist": [],
  "max_requests": 320,

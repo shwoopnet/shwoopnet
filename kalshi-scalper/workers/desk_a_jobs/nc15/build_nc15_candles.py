@@ -11,7 +11,7 @@ END = ts("2026-11-13T23:59:00Z")
 EVENT830_SERIES = ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"]
 EVENT830_DATES = ["2026-11-05", "2026-11-06", "2026-11-10", "2026-11-12", "2026-11-13"]      # SLOT_CALENDARS.EVENT830 rows up to the end date (functions/kalshiSlotLib.js on main); each is a 13:30Z close
 CUT_S = 300
-MAX_PER_FILE = 458                                                                           # the runner stops a run at 40 minutes (about 480 requests at 5 s): cap = 458 + 12 retries = 470 at most (the Head, Nov 14)
+MAX_PER_FILE = 420                                                                           # 420 requests is 35 minutes at 5 s, under the runner's 40 minute stop with room for 12 retries and their doubling pauses: cap = 420 + 12 = 432 (the Head's 470 rule, tightened by Auditor B, Nov 14)
 RETRY_SLACK = 12                                                                             # the runner counts every request SENT against the cap, retries included
 READER_RULE = "STANDING READER RULE: drop any candle ending after its market's close (a batched hour returns one extra candle ending at close + 60 s for the closes before the block's last close)."
 def parse_lists(folder):

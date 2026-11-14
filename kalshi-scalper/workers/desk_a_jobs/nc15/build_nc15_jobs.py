@@ -12,8 +12,8 @@ CHUNK_S = 10 * 86400                          # 10 days x 96 windows = 960 marke
 REGISTRATION = "kalshi-scalper/workers/NC15_CANDLE_HISTORY_REGISTRATION.md"
 HELDOUT = ("Development history, ending 2026-11-13T23:59:00Z; nothing after it is asked. NC15DEPTH1's pooled scoring window opens 2026-11-19T00:00Z, after this job's end. Many other cards hold out dates inside the range these series cover (per HELDOUT_REGISTRY.md, Auditor B's reading), so the landed runs WILL hold prices and results of those cards' held-out windows: the landed runs go into HELDOUT_PULL_RUNS.md (Main, in the landing PR); a reader may open them only through heldout_guard_v2 and must apply its own card's cutoff. Held-out guard copy HELDOUT_PULL_RUNS.md sha256 974f271366673c38f1a326335ed69db465aa2e15a327672b12a1e0f28640c126.")
 STOP = {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3, "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"}
-def base(job_id, purpose, endpoints, tickers, max_requests, requests, notes):
-    return {"job_id": job_id, "registration": REGISTRATION, "purpose": purpose, "heldout": HELDOUT, "allowed_endpoints": endpoints, "series_allowlist": list(SERIES), "ticker_allowlist": tickers,
+def base(job_id, purpose, endpoints, tickers, max_requests, requests, notes, series=None):
+    return {"job_id": job_id, "registration": REGISTRATION, "purpose": purpose, "heldout": HELDOUT, "allowed_endpoints": endpoints, "series_allowlist": list(series if series is not None else SERIES), "ticker_allowlist": tickers,
             "max_requests": max_requests, "requests": requests, "notes": notes, "owner": "DESK_A", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 5.0, "status": "active", "stop_rules": STOP}
 def chunks():
     out, lo = [], LIST_START
@@ -33,7 +33,7 @@ def lists_jobs():
         cap = sum(r["max_pages"] for r in reqs) + 14      # the runner counts PAGES and retries against the cap: the page budget plus 14 for 429 retries (Main, KP14b)
         if cap > MAX_CAP: raise SystemExit("file %s would have a cap of %d, over %d" % (g, cap, MAX_CAP))
         jobs.append(base("NC15_LISTS_" + g, "Settled markets (tickers and close times; a reader never reads a result) of NC15 series group %s (%s) from before their listing to 2026-11-13T23:59Z, in 10 day close ranges, as input for the hourly candle jobs." % (g, ", ".join(group)), ep, [], cap, reqs,
-                       "Group %s of 2 (split by series so no file can page past %d requests; the runner stops a run at 40 minutes). %d series x %d ranges of 10 days (from %s). Pacing 5.0 s on the Head's order of Nov 14, 2026. max_requests is the page budget (%d requests x 3 pages = %d) plus 14 for 429 retries. Candles are NOT requested here." % (g, MAX_CAP, len(group), len(chunks()), "2026-06-01T00:00:00Z", len(reqs), 3 * len(reqs))))
+                       "Group %s of 2 (split by series so no file can page past %d requests; the runner stops a run at 40 minutes). %d series x %d ranges of 10 days (from %s). Pacing 5.0 s on the Head's order of Nov 14, 2026. max_requests is the page budget (%d requests x 3 pages = %d) plus 14 for 429 retries. Candles are NOT requested here." % (g, MAX_CAP, len(group), len(chunks()), "2026-06-01T00:00:00Z", len(reqs), 3 * len(reqs)), series=group))
     return jobs
 def read_coverage(repo, ref):
     names = subprocess.run(["git", "-C", repo, "ls-tree", "-r", "--name-only", ref], capture_output=True, text=True, check=True).stdout.split()
