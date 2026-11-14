@@ -46,3 +46,4 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
   - The feasibility count found 0 qualifying combos per complete day, against a pre-fixed threshold of 5. Auditor B's recount was equal.
   - No try was counted.
   - The recorder rebuild is the Head's and the owner's call; the Head recommends dropping it.
+- **Combo tape rebuild dropped by the owner (Nov 14, 2026, 02:45Z, "drop combo rebuild").** Nothing is built. The fix spec stays on CROWDLEG_CARD.md as history.
