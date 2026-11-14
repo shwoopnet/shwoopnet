@@ -34,11 +34,11 @@
  "ticker_allowlist": [],
  "max_requests": 1,
  "requests": [],
- "notes": "Built by workers/oicand/oi_candles_job.py from the OICAND_LISTS answers; weekdays only (UTC date of the close), the last 20; EVENT830's past forward closes are dropped; end_ts is the close minus 120 s as in SPXOI1. Registration text: Desk A commit 29dd035e on claude/idea-desk-a, DESK_A_OICORE_PLACES_NOV13.md sha256 2d6301c6dfd25972f58293d6023c5ec1d2262791a46fe0d5f2899f68108d14d3 (twelve places, with the Head's 21:06Z dated line); the earlier nine place version is commit 560b645c, sha256 bce3242c1396454bc5237427dd9970b4a11bc007b9be51415b88bc52d626ec44.",
+ "notes": "Built by workers/oicand/oi_candles_job.py from the OICAND_LISTS answers; weekdays only (UTC date of the close), the last 20; EVENT830's past forward closes are dropped; end_ts is the close minus 120 s as in SPXOI1. Registration text: Desk A commit 29dd035e on claude/idea-desk-a, DESK_A_OICORE_PLACES_NOV13.md sha256 2d6301c6dfd25972f58293d6023c5ec1d2262791a46fe0d5f2899f68108d14d3 (twelve places, with the Head's 21:06Z dated line); the earlier nine place version is commit 560b645c, sha256 bce3242c1396454bc5237427dd9970b4a11bc007b9be51415b88bc52d626ec44. Pacing 5.0 seconds (12 requests a minute) on the Head's order of Nov 14, 2026. The last 20 weekdays present include 2026-11-13 as one of the 20 (closes 00:00 to 02:35Z only), so the pull holds 19 full days plus that morning. Built from the landed OICAND_LISTS run pull/OICAND_LISTS/2026-11-14T0227Z_43546384963 (Auditor B's structure check CLEAN, 14 of 14); the builder read only ticker and close_time. Held-out guard copy HELDOUT_PULL_RUNS.md sha256 3f7e0752.",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
- "pacing_seconds": 1.0,
+ "pacing_seconds": 5.0,
  "stop_rules": {
   "pause_seconds_on_429": "5, doubling to 60",
   "stop_after_consecutive_429": 3,
