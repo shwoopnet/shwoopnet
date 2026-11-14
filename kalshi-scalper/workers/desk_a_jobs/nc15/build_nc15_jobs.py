@@ -26,8 +26,9 @@ def lists_job():
     for s in SERIES:
         for i, (lo, hi) in enumerate(chunks(), 1):
             reqs.append({"id": "settled_%s_%02d" % (s, i), "path": "/markets", "params": {"series_ticker": s, "status": "settled", "min_close_ts": lo, "max_close_ts": hi, "limit": 1000}, "max_pages": 3})
-    return base("NC15_LISTS", "Settled markets (tickers and close times; a reader never reads a result) of the 11 NC15 series from before their listing to 2026-11-13T23:59Z, in 10 day close ranges, as the input from which the hourly candle jobs are built.", ep, [], len(reqs), reqs,
-                "%d series x %d ranges of 10 days (from %s). Pacing 5.0 s (12 requests a minute) on the Head's order of Nov 14, 2026. Candles are NOT requested here." % (len(SERIES), len(chunks()), "2026-06-01T00:00:00Z"))
+    cap = sum(r["max_pages"] for r in reqs) + 14      # the runner counts PAGES against the cap: the page budget plus 14 for 429 retries (Main, KP14b)
+    return base("NC15_LISTS", "Settled markets (tickers and close times; a reader never reads a result) of the 11 NC15 series from before their listing to 2026-11-13T23:59Z, in 10 day close ranges, as the input from which the hourly candle jobs are built.", ep, [], cap, reqs,
+                "%d series x %d ranges of 10 days (from %s). Pacing 5.0 s (12 requests a minute) on the Head's order of Nov 14, 2026. max_requests is the page budget (%d requests x 3 pages = %d) plus 14 for 429 retries. Candles are NOT requested here." % (len(SERIES), len(chunks()), "2026-06-01T00:00:00Z", len(reqs), 3 * len(reqs)))
 def read_coverage(repo, ref):
     names = subprocess.run(["git", "-C", repo, "ls-tree", "-r", "--name-only", ref], capture_output=True, text=True, check=True).stdout.split()
     rows = {}

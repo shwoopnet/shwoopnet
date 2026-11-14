@@ -32,7 +32,7 @@
   "KXNATGAS15M"
  ],
  "ticker_allowlist": [],
- "max_requests": 187,
+ "max_requests": 575,
  "requests": [
   {
    "id": "settled_KXSILVER15M_01",
@@ -2279,7 +2279,7 @@
    "max_pages": 3
   }
  ],
- "notes": "11 series x 17 ranges of 10 days (from 2026-06-01T00:00:00Z). Pacing 5.0 s (12 requests a minute) on the Head's order of Nov 14, 2026. Candles are NOT requested here.",
+ "notes": "11 series x 17 ranges of 10 days (from 2026-06-01T00:00:00Z). Pacing 5.0 s (12 requests a minute) on the Head's order of Nov 14, 2026. max_requests is the page budget (187 requests x 3 pages = 561) plus 14 for 429 retries. Candles are NOT requested here.",
  "owner": "DESK_A",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",

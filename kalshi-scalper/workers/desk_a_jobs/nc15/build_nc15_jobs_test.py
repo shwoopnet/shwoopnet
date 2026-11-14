@@ -6,7 +6,8 @@ import build_nc15_jobs as B
 ch = B.chunks(); assert ch[0][0] == B.LIST_START and ch[-1][1] == B.END
 for (a, b), (c, d) in zip(ch, ch[1:]): assert c == b + 1 and a <= b
 assert all(b - a + 1 <= B.CHUNK_S for a, b in ch) and len(ch) == 17, len(ch)
-j = B.lists_job(); assert len(j["requests"]) == 11 * 17 == j["max_requests"] and len({r["id"] for r in j["requests"]}) == len(j["requests"])
+j = B.lists_job(); assert len(j["requests"]) == 11 * 17 and len({r["id"] for r in j["requests"]}) == len(j["requests"])
+pages = sum(r["max_pages"] for r in j["requests"]); assert pages == 561 and pages + 14 == j["max_requests"] <= 1200, (pages, j["max_requests"])      # the runner counts PAGES against the cap (Main, KP14b): page budget plus 14 for 429 retries
 assert all(r["params"]["status"] == "settled" and r["params"]["limit"] == 1000 and r["max_pages"] == 3 and r["params"]["series_ticker"] in B.SERIES for r in j["requests"])
 assert j["pacing_seconds"] == 5.0 and j["owner"] == "DESK_A" and j["ticker_allowlist"] == [] and max(r["params"]["max_close_ts"] for r in j["requests"]) == B.END
 # the probe: invented coverage; hour A has 3 + 4 + 4 + 4 tickers, hour B has 11 each (the winner); an incomplete hour is skipped
@@ -20,7 +21,7 @@ for k in range(4): put(hb + 900 * (k + 1), 11, "B")
 put(hb + 7200 + 900, 5, "C")                  # an hour with only one close: incomplete
 quartet, bycl = B.pick_hour(rows); assert quartet == [hb + 900, hb + 1800, hb + 2700, hb + 3600], quartet
 pj = B.probe_job(rows); r1, r2 = pj["requests"]
-assert len(pj["requests"]) == 2 == pj["max_requests"] and len(r1["params"]["market_tickers"].split(",")) == 44 == len(pj["ticker_allowlist"])
+pg = sum(r.get("max_pages", 1) for r in pj["requests"]); assert len(pj["requests"]) == 2 and pg == 2 and pg <= pj["max_requests"] <= 1200 and pj["max_requests"] == 2 and len(r1["params"]["market_tickers"].split(",")) == 44 == len(pj["ticker_allowlist"])
 assert r1["params"]["start_ts"] == quartet[0] - 900 and r1["params"]["end_ts"] == quartet[-1] and r2["params"]["end_ts"] == quartet[0] and r2["params"]["start_ts"] == quartet[0] - 900
 assert set(r2["params"]["market_tickers"].split(",")) == set(bycl[quartet[0]]) and len(bycl[quartet[0]]) == 11 and r1["params"]["period_interval"] == r2["params"]["period_interval"] == 1
 assert all(t in pj["ticker_allowlist"] for t in r1["params"]["market_tickers"].split(","))
