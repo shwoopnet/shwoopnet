@@ -1,0 +1,171 @@
+{
+ "job": {
+  "owner": "DESK_B",
+  "registration": "kalshi-scalper/workers/dbltb/LIVEDATA_FINDING_AND_DBLTB_CARD.md",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "status": "active",
+  "job_id": "LIVEDATA_PROBE_B",
+  "purpose": "Zero-try field probe of Kalshi's own sports live-data feed: current Sports milestones and the open ITF and challenger doubles events with their milestones. Field names, counts and time stamps only; no score, name, price or result is printed.",
+  "heldout": "none in range: no request asks for a result, a price or a past game. The milestone list is bounded to milestones updated since 2026-11-13T00:00Z and the two event lists are OPEN events. Cards that hold out tennis series, none of them doubles (HELDOUT_REGISTRY.md on rnd-queue, Nov 13): INPLAYJUMP (KXITFMATCH, KXITFWMATCH, KXATPCHALLENGERMATCH, KXWTACHALLENGERMATCH, held-out block not pulled), TENNISBREAK (singles and set-winner series, held-out from 2026-10-23, never pulled), TENNIS1 (closed unread), W-CAT-SPORTS1 (released). No card holds KXITFDOUBLES or KXATPCHALLENGERDOUBLES. EVERY SPORT (the milestone request covers all sports): the held-out blocks of some cards are OPEN-ENDED or run later than 2026-11-13T00:00Z: TENNISBREAK (closed unread, will never be read), W-CAT-SPORTS1, SOCCER1, SOCCERELO1 and FAMSPORTS. All of them except TENNISBREAK are RELEASED by the Head of R&D; TENNISBREAK is closed unread and will never be read. MAPBREAK, PREMOVE, ESOCTIE, REMATCH and INPLAYJUMP end before 2026-11-13T00:00Z. The answers are read by the field reader only (field names, types and counts), by no person. THE EXCEPTION: sports live data is a third party's data that Kalshi relays and its terms were not read; the owner accepted that risk on Nov 13 (popup, relayed by the Executive Assistant: 'Both, ignore the terms'). This job must NOT be dispatched until that acceptance is recorded in CLAUDE.md on main. The landed answers may hold scores of games finished today; they are third-party live data under the owner's exception, and no reader or person opens them beyond field names. CARDS WITH UNRELEASED HELD-OUT OR FORWARD WINDOWS THAT THE SPORTS MILESTONE FEED CAN OVERLAP (a milestone may carry a final score from today): SWING1, SCOUT1, SPORTS-PRE, VIRT1 and USWEEP1. No request returns a market, a price or a result for them, and no reader or person opens the answers beyond field names, types and counts.",
+  "allowed_endpoints": [
+   {
+    "name": "milestones",
+    "method": "GET",
+    "path_pattern": "/milestones",
+    "params_allowed": [
+     "limit",
+     "category",
+     "min_updated_ts",
+     "cursor"
+    ]
+   },
+   {
+    "name": "events",
+    "method": "GET",
+    "path_pattern": "/events",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "with_milestones"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXATPCHALLENGERDOUBLES",
+   "KXITFDOUBLES"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 8,
+  "requests": [
+   {
+    "id": "ms_sports",
+    "path": "/milestones",
+    "params": {
+     "limit": 100,
+     "category": "Sports",
+     "min_updated_ts": 1794528000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "ev_itf_doubles",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXITFDOUBLES",
+     "status": "open",
+     "limit": 5,
+     "with_milestones": "true"
+    }
+   },
+   {
+    "id": "ev_chall_doubles",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXATPCHALLENGERDOUBLES",
+     "status": "open",
+     "limit": 5,
+     "with_milestones": "true"
+    }
+   }
+  ],
+  "notes": "Written, not sent (the Head of R&D, 13:55Z Nov 13). Step B2 (live data of a few milestone ids, one event's live data) can only be written once this probe's answers show the ids; about 8 requests. Read by dbltb/livedata_fields.py (field names, types and counts only; unchanged, Auditor B CLEAN, 9d257b6d). AFTER THE RUN LANDS (rule h, the Head of R&D 14:36Z Nov 13): its folder must be listed in HELDOUT_PULL_RUNS.md on main, naming the field reader (dbltb/livedata_fields.py) as the ONLY reader that opens it."
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-14T0054Z",
+ "finished": "2026-11-14T0054Z",
+ "status": "complete",
+ "requests_sent": 4,
+ "bytes_stored": 282945,
+ "rows": [
+  {
+   "index": 1,
+   "id": "ms_sports",
+   "path": "/milestones",
+   "params": {
+    "limit": 100,
+    "category": "Sports",
+    "min_updated_ts": 1794528000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 127496,
+   "t_send_ms": 1794617665521,
+   "t_recv_ms": 1794617665565,
+   "server_date": "Sat, 14 Nov 2026 00:54:25 GMT",
+   "file": "0001.json.gz",
+   "sha256": "c272a3e489c36fdae6b646d2046d7ab6f7d3278c7280d8815e1cdceb9220aa2a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "ms_sports",
+   "path": "/milestones",
+   "params": {
+    "limit": 100,
+    "category": "Sports",
+    "min_updated_ts": 1794528000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 142553,
+   "t_send_ms": 1794617666521,
+   "t_recv_ms": 1794617666571,
+   "server_date": "Sat, 14 Nov 2026 00:54:26 GMT",
+   "file": "0002.json.gz",
+   "sha256": "0f0c5560515b6c0f61f16cc9ead83da7353907e007e6bfda8328d150a4defa5e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "ev_itf_doubles",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXITFDOUBLES",
+    "status": "open",
+    "limit": 5,
+    "with_milestones": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 7310,
+   "t_send_ms": 1794617667521,
+   "t_recv_ms": 1794617667556,
+   "server_date": "Sat, 14 Nov 2026 00:54:27 GMT",
+   "file": "0003.json.gz",
+   "sha256": "43b9c1880755b903507804931bd490af06af2ba875f7518d7a357f162debc220",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "ev_chall_doubles",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERDOUBLES",
+    "status": "open",
+    "limit": 5,
+    "with_milestones": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 5586,
+   "t_send_ms": 1794617668521,
+   "t_recv_ms": 1794617668551,
+   "server_date": "Sat, 14 Nov 2026 00:54:28 GMT",
+   "file": "0004.json.gz",
+   "sha256": "6b9d2e6006d9909496e1e3c6b499eca21218926ee5ed41c3c880b6f84379a50d",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
