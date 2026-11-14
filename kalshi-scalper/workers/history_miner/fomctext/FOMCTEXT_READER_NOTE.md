@@ -78,3 +78,15 @@ The development events have MONTH-ONLY event tickers (KXFEDMENTION-26MAR), which
     - the two NOT rows are still required by the universe check: a list missing one of them refuses;
   - **(3) refusals:** a table with no type column, and a table with type "statement" on one row.
 - **For Desk C's real table** (claude/idea-desk-c ab6db60a, 493e6d6a..., 407 rows), the amended count prints 28, 367 and 12. That is checked only when the count runs, after Auditor B's CLEAN on the table, the job and this amendment, and the owner's yes.
+
+## Amendment 4, 2026-11-14 ~02:30Z: the unit of a plain `close` (Auditor B, 02:27Z, after the structure check of FOMCTEXT_CANDLES 0147Z_43542605086; written before the code and before any count)
+- On the landed historical candles, `yes_bid.close` and `yes_ask.close` are STRINGS of the form d.dddd on all 34,526 candles (Auditor B, shape only).
+- `px()` now reads a plain `close` ONLY when it is a str matching ^\d\.\d{4}$, and takes float(...) as dollars.
+- Any other form STOPS the reader, with a message that still contains "plain 'close'": a number (int or float), an integer string, or another pattern ("0.560", "56").
+- `close_dollars` is read exactly as before. Everything else is byte-unchanged.
+- **Expected by hand:**
+  - a candle with yes_bid.close "0.5600" gives 0.56;
+  - each of "56", 56, 0.56 (a float) and "0.560" stops;
+  - close_dollars is unchanged;
+  - every earlier test still passes (the old gate-6 case, {"close": 78}, still stops; 18, 1, 24; the type-column case 3, 4, 2).
+- **Not added, noted for the record:** the pattern allows 0.0000 to 9.9999. It does not itself refuse a value above 1.0000. Auditor B's text did not ask for that bound.
