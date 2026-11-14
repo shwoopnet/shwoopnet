@@ -99,3 +99,21 @@ The development events have MONTH-ONLY event tickers (KXFEDMENTION-26MAR), which
     - "0.5600" reads 0.56;
     - "1.0000" reads 1.0, and as an ask is not two-sided;
     - "2.0000", "56", 56, 0.56 and "0.560" each stop.
+
+## Amendment 5, 2026-11-14 ~02:50Z: the 1c and 2c haircut lines beside the RAW verdict (the Head of R&D, 02:35Z; card Clarification 8, claude/idea-desk-c 2bd8809c; written from that text and the card only, not from any other build's code; before the code and before any count)
+- **The RAW verdict and every RAW field are byte-unchanged.**
+- For each haircut h in {1c, 2c}, a strike of the kill arm (statement-type, feature yes) counts on that line when ALL hold:
+  - two-sided at 14:05 ET at the RAW quote (0 < bid < ask < 1, as now);
+  - settled YES (a NO, void or other result never counts);
+  - entry = ask + h is at or under 0.87 (the card's cap, applied to the entry price);
+  - 1 - entry is 10c or more (always true once the cap holds; kept as the card's wording).
+- Prices are compared in whole ten-thousandths of a dollar (ask rounded to 4 places, h added as 100 or 200), so an entry of exactly 0.8700 counts and float noise cannot move a strike across the cap.
+- The same CLOSE conditions are judged on each line: (a) fewer than 15 counted strikes; (b) from fewer than 5 meetings; (c) fewer than half of the kill arm two-sided at 14:05 ET. (c) is a quote fact and is the same number on every line.
+- Each line prints "passes the haircut" when none holds, else "does not count: fails the haircut" with the conditions that hold.
+- "could count toward the 20 to 30: yes" only when the RAW verdict is not CLOSED AND both haircut lines pass; otherwise "no".
+- **Reading I took, flagged for the Head and Auditor B:** the lines apply to the kill arm only (not the placebo or the 12 NOT STATEMENT-TYPE rows); no fee and no exit haircut are applied (the card's C7 fee and bid-1c exit belong to a PF read; this stage is a count of entry prices, and the Head's text names the entry price only).
+- **Expected by hand:**
+  - **H1 (new):** 5 meetings x 3 kill-arm strikes, settled YES, two-sided, asks 0.85, 0.86, 0.87 (bid 2c under). RAW: 15 qualifying, 5 meetings, survives. 1c: entries 0.86, 0.87, 0.88, so 10 count, 5 meetings, fails (a). 2c: entries 0.87, 0.88, 0.89, so 5 count, 5 meetings, fails (a). Could count: no.
+  - **Fixture 1 (existing, asks 0.80):** RAW 18, 6 meetings, survives. 1c and 2c: 18 count, 6 meetings, both pass. Could count: yes.
+  - **Fixture 2 (existing, boundary):** RAW 1 qualifying (A87), CLOSED. 1c: A87's entry is 0.88, so 0 count, fails (a) and (b); 2c the same. Could count: no. Two-sided on every line: 2 of 6, so (c) does not hold on any line.
+  - Every earlier test still passes unchanged.
