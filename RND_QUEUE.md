@@ -864,3 +864,6 @@ Book-shape features on 15 minute crypto and gold: no lead.
 
 ## 2026-11-14 00:34Z, DEPTH1 CLOSED (Auditor B's closing line)
 DEPTH1 FALSIFIED. Two builds equal on all 20 tries at PRINTED precision (V2 keeps no unrounded file, so not 1e-9). Inputs identical: 344 files, tree aa0ba9c8, list sha 1a882b02. Shuffled-book control compared approximately by card point 15. The 18 non-f7 tries were equal from the first full run; f7 was equal after Forensics' fix (depth1_second.py b46f5083: full-precision created_time, which 99.9% of pin trades need) on an f7-only run. V2's frozen code matched the registration. Independence held: the second build misread the card; it was not copied. No full re-run; the read-once lock stands.
+
+## 2026-11-14 00:53Z, SOCDERIV stage 4 measure (build 1, Testing Desk), pending the History Miner's comparison
+Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer derivative legs (BTTS, team totals) against a goals model fitted to the main lines: gaps are inside the model's own error (placebo p90 0.005 to 0.007) and far below the round trip (about 4.4c). A_big BTTS p90 gap 0.025, team total 0.010; B_small BTTS 0.025; B_small team total no filled games (no evidence at n = 0). Verdict CLOSED: efficient, no tradeable gap. Not final until the History Miner's print matches (Auditor B compares).
