@@ -70,3 +70,6 @@ All readings below use only information available at the time of each decision.
 11. **C1 and spread.** Look candles are the five looks of windows that have a start bar; two-sided uses rule 18; the YES spread median and p90 are printed over those looks, in cents, p90 by nearest rank (ceil).
 12. **ES loader.** The file's single instrument is the most frequent instrument_id (a tie stops the run); other ids are dropped at load and counted. Rows with an unparseable ts_event, instrument_id or close are counted. The run STOPS if none are kept or more than 5% of rows are skipped (5% is the stated number).
 13. **Window range.** Windows closing in [2026-11-05, 2026-11-13). Nothing at or after 2026-12-01 is touched in any case.
+
+## Amendment 5 (2026-11-14, before any data is opened): duplicates
+If a market_ticker appears in more than one candle file, the run STOPS (a run overlap; never counted twice, never silently deduplicated). The looks and scans of Amendments 1 and 4 already stay inside [O+60m, c]; a lookback for the ES move reaches back only to the start bar ES(O).

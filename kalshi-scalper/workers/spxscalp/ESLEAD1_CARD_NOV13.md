@@ -34,3 +34,7 @@ The ES bars are Databento licensed data. They are never sent to any other sessio
 
 ## Amendment 4 (2026-11-13, before any data is opened): fixed readings shared with SPXSCALP
 Same readings as SPXSCALP Amendment 4 items 1 (rule 18 and empty sides, locked and crossed are not two-sided), 6 (missing ES bar drops the pair and is counted; ES close at t is the bar with ts_event = t - 60 s), 12 (the ES loader and the 5% stop) and 13 (windows closing in [2026-11-05, 2026-11-13)). ESLEAD1 specifics: dA's lookback is taken from the whole Kalshi series and dB's from the whole ES series; T is per window; lag k pairs (dA[t], dB[t - 60k]); positive lag = Kalshi lags ES; the Pearson correlation is pooled over all windows; min_pairs 30; the prediction line reads pass, fail, or "untestable at n = N" (Amendment 3). A result field is not used by ESLEAD1.
+
+## Amendment 5 (2026-11-14, before any data is opened): window bound and duplicates
+- A window contributes changes only at minute ends t from O+60 to c inclusive, where O = close - 900 s and c = close. A change's lookback (the minute t-60) may reach outside the window (ES at O is a valid lookback). No change is recorded at t = O, and no minute end outside [O+60, c] contributes. T (Amendment 1) is the minute ends in [O+60, c] that have both a two-sided Kalshi mid and an ES bar; a lag pair needs t and t-60k both in T.
+- If a market_ticker appears in more than one candle file, the run STOPS (a run overlap; never counted twice, never silently deduplicated).
