@@ -210,6 +210,33 @@ with tempfile.TemporaryDirectory() as tmpd:
     finally:
         q.k.guard, q.k.markets, q.k.candles, q.check_candle_overlap = saved
 assert q.MAX_SKIP_SHARE == 0.05
+# --- ADDENDUM 5: a NO position exits at the NO bid = 1 - YES ask (Auditor B's defect) ---
+def nrun():
+    def nw(tk, close, cm, res): 
+        base = {m: (.62, .64) for m in range(2, 16)}; base.update(cm); base[1] = (.78, .80)
+        return window(tk, close, [1000, 999] + [999.0] * 14, base, res)
+    N1 = nw("KXINX15M-N1", D(5), {2: (.70, .72), 3: (.60, .62), 4: (.52, .54), 5: (.48, .50), 6: (.44, .46), 7: (.44, .46), 8: (.44, .46), 9: (.18, .20), 10: (.44, .46)}, "no")
+    N2 = nw("KXINX15M-N2", D(6), {10: (.58, .60)}, "yes")
+    N3 = nw("KXINX15M-N3", D(8), {m: (.60, 1.0) for m in range(10, 16)}, "no")
+    N4 = nw("KXINX15M-N4", D(9), {3: (.82, .84), 10: (.82, .84)}, "no")
+    return q.run_windows(*assemble(N1, N2, N3, N4))
+rn = nrun()["arms"]
+hn = rn["B25 HEADLINE"]; hv = rn["B25 HALF2X"]; hh = rn["B25 HOLD"]
+assert hn["entries_found"] == 4 and hn["1c"]["n"] == 4 and near(hn["1c"]["net"], 0.18 + 0.12 + 0.75 - 0.11) and near(hn["1c"]["pf"], 1.05 / 0.11)
+assert abs(hn["1c"]["pf"] - 9.545454545) < 1e-6 and hn["1c"]["half1_pf"] == float("inf") and abs(hn["1c"]["half2_pf"] - 0.75 / 0.11) < 1e-9 and near(hn["1c"]["net"], 0.94)
+assert abs(hv["1c"]["net"] - 2.26) < 1e-9 and abs(hv["1c"]["pf"] - 2.47 / 0.21) < 1e-9 and abs(hh["1c"]["net"] - 2.0) < 1e-9 and abs(hh["1c"]["pf"] - 9.0) < 1e-9
+assert hn["settled_at_close_count"] == 1 and hv["settled_at_close_count"] == 1 and hn["time_exit_moved_count"] == 0
+def solo(name, close, cm, res):          # per-window nets through run_windows with one window
+    base = {m: (.62, .64) for m in range(2, 16)}; base.update(cm); base[1] = (.78, .80)
+    return q.run_windows(*assemble(window("KXINX15M-" + name, close, [1000, 999] + [999.0] * 14, base, res)))["arms"]
+a1 = solo("S1", D(5), {2: (.70, .72), 3: (.60, .62), 4: (.52, .54), 5: (.48, .50), 6: (.44, .46), 7: (.44, .46), 8: (.44, .46), 9: (.18, .20), 10: (.44, .46)}, "no")
+assert near(a1["B25 HEADLINE"]["1c"]["net"], 0.18) and near(a1["B25 HEADLINE"]["2c"]["net"], 0.20) and near(a1["B25 HALF2X"]["1c"]["net"], 0.71) and near(a1["B25 HOLD"]["1c"]["net"], 0.75)
+a2 = solo("S2", D(6), {10: (.58, .60)}, "yes"); assert near(a2["B25 HEADLINE"]["1c"]["net"], 0.12) and near(a2["B25 HALF2X"]["1c"]["net"], 0.25) and near(a2["B25 HOLD"]["1c"]["net"], -0.25)
+a3 = solo("S3", D(8), {m: (.60, 1.0) for m in range(10, 16)}, "no"); assert near(a3["B25 HEADLINE"]["1c"]["net"], 0.75) and near(a3["B25 HALF2X"]["1c"]["net"], 1.51)
+a4 = solo("S4", D(9), {3: (.82, .84), 10: (.82, .84)}, "no"); assert near(a4["B25 HEADLINE"]["1c"]["net"], -0.11) and near(a4["B25 HALF2X"]["1c"]["net"], -0.21) and near(a4["B25 HOLD"]["1c"]["net"], 0.75)
+# a YES position is unchanged by the flip rule: the earlier YES cases (X1 and Z windows above) still pass; the flip helper itself
+assert q.flip_candle({"ts": 5, "bid": .58, "ask": .60}) == {"ts": 5, "bid": 1 - .60, "ask": 1 - .58} and q.two_sided(q.flip_candle({"ts": 5, "bid": .58, "ask": .60})) and not q.two_sided(q.flip_candle({"ts": 5, "bid": .60, "ask": 1.0}))
+assert q.flip_candle({"ts": 5, "bid": None, "ask": .60})["ask"] is None and q.flip_candle({"ts": 5, "bid": .5, "ask": None})["bid"] is None
 # --- ADDENDUM 4 (Amendment 5): a market_ticker in more than one candle file (or answer) STOPS the run, before the ES file is opened ---
 import gzip, json
 def mkrun_c(d, bodies):

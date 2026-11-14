@@ -30,6 +30,7 @@ AMBIGUITIES = [
     "The hold arm's primary slip is 1c (entry slip only); every figure is also printed at 2c.",
     "A look whose candle lacks a bid or an ask has no price: no entry at that look. A look with a missing ES bar, or an instrument change from the start bar, is skipped (counted).",
     "Amendment 5: a market_ticker in more than one candle answer STOPS the run (any ticker in the candle files, a repeat inside one answer too), before the ES file is opened; looks and scans already lie inside [O+60 m, c] and the ES lookback reaches only to ES(O).",
+    "A NO position exits at the NO bid = 1 - YES ask (target, 0.80 and time-exit scans all read the flipped candle); fixed after Auditor B's differential run (addendum 5).",
     "Rule 18 and Amendment 3 (ee92cf2f): every candle price used must be two-sided (0 < bid < ask < 1, 1e-9); at entry a candle that is not is no price (look_not_two_sided). The time exit is the first two-sided candle ending in [close - 300 s, close] (a missing candle counts as not two-sided); if none, each open half settles (payout, no exit fee, void refunds the price, entry fee kept). Nothing is dropped for the exit arms. A target or 80c hit needs a two-sided candle.",
     "ES loader: rows read, kept and skipped (timestamp, value, instrument) counted; the file's single instrument is the most frequent id (a tie stops); STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice, the card does not state it).",
     "Rule label order: fewer than 100 entries -> FALSIFIED; a half under 1.0 at 1c or PF under 1.0 at 2c -> FALSIFIED; counts -> 'counts the bar'; else 'no evidence'. An empty half is reported 'undefined' and does not by itself falsify.",
@@ -130,6 +131,11 @@ def after_entry(candles, t_entry, close):
     """Candles after the entry candle through the minute ending close - 300 s, in time order, as (t, bid)."""
     last = close - TIME_EXIT_BEFORE_CLOSE_S
     return [(c["ts"], c.get("bid")) for c in sorted(candles, key=lambda c: c["ts"]) if t_entry < c["ts"] <= last and two_sided(c)]
+
+
+def flip_candle(c):
+    """A NO position sells at the NO bid = 1 - YES ask and its NO ask is 1 - YES bid (card Amendment 4 item 1). Two-sidedness is unchanged by the flip."""
+    return {"ts": c["ts"], "bid": None if c.get("ask") is None else 1.0 - c["ask"], "ask": None if c.get("bid") is None else 1.0 - c["bid"]}
 
 
 def time_exit(candles, close):
@@ -275,7 +281,8 @@ def run_windows(markets, cs, es, es_stats=None):
             if res is None or str(res).strip() == "" or res not in ("yes", "no", "void"):
                 raise SystemExit("STOP: result %r on entered window %s is not yes, no or void" % (res, tk))
             voids[hi] += (res == "void")
-            path, texit = after_entry(candles, t, close), time_exit(candles, close)
+            ex_candles = [flip_candle(x) for x in candles] if side == "no" else candles          # exits read the position's own side
+            path, texit = after_entry(ex_candles, t, close), time_exit(ex_candles, close)
             for s in SLIPS:
                 fill = ask + s
                 key = (close, tk)
