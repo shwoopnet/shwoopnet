@@ -867,3 +867,9 @@ DEPTH1 FALSIFIED. Two builds equal on all 20 tries at PRINTED precision (V2 keep
 
 ## 2026-11-14 00:53Z, SOCDERIV stage 4 measure (build 1, Testing Desk), pending the History Miner's comparison
 Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer derivative legs (BTTS, team totals) against a goals model fitted to the main lines: gaps are inside the model's own error (placebo p90 0.005 to 0.007) and far below the round trip (about 4.4c). A_big BTTS p90 gap 0.025, team total 0.010; B_small BTTS 0.025; B_small team total no filled games (no evidence at n = 0). Verdict CLOSED: efficient, no tradeable gap. Not final until the History Miner's print matches (Auditor B compares).
+
+## 2026-11-14 01:21Z, tonight's landed runs and checks
+- OIFIELD_CHECK (0114Z_43539336412): open_interest_fp present, populated and nonzero in 8 of 8 candles for all 11 NC15 markets (one window, Nov 13 19:00Z). The OICORE-places question of whether OI exists is answered yes; the places work itself stays parked (versions; nightly OI recorder held under the freeze).
+- SPXOI1: 143 listed, 133 with candles (10 Nov 5 tickers built with the wrong suffix). Quote profile n 133. Threshold T build 1 (Desk A): n 132, T 5563.63, superseded once the owner-approved 10-request patch lands; both builds recompute then. SPXSCALP and ESLEAD1 wait for the patch.
+- SOCDERIV measure: closed as efficient (build 1); the History Miner's build 2 to compare.
+- DEPTH1: closed FALSIFIED (see above).
