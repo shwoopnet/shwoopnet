@@ -1,4 +1,4 @@
-# FOMCTEXT reader, Nov 14: Amendment 4 (plain close as a d.dddd dollar string) on top of the type column; supersedes 919255f2's freeze
-913bf4938143557346cfca1f0e93855395946ba898fe4450908f2e77da896bd6  fomctext.py
-5843b53981f2d52954896ef359e18b85800a6ebea5c668e3e99bad5e2acac285  test_fomctext.py
-8d526f6c4f9148b2747a6c2fbad2cab784558d83e48a0b655000e25807a19106  FOMCTEXT_READER_NOTE.md
+# FOMCTEXT reader, Nov 14: Amendment 4 as approved by the Head (pattern ^[01]\.\d{4}$); supersedes 913bf493's freeze
+502022c705d9156ec0ba1f6b64b23d05c4ab61774fe1d039866a9ca2b30b1aa4  fomctext.py
+252844f3ac0e3ab083045f25205b4c5028d8c4f5eae55ff218dbf8d59da31d6a  test_fomctext.py
+96bb0f7c6a377713f641db2874052c10b94004e4fcc3d48ee3233b3a2f016140  FOMCTEXT_READER_NOTE.md

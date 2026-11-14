@@ -169,6 +169,15 @@ print("type column: ok")
 
 # --- Nov 14, Amendment 4: a plain close is read only as a d.dddd dollar string
 assert F.px({"close": "0.5600"}) == 0.56 and F.px({"close_dollars": "0.5600"}) == 0.56
-for bad in ("56", 56, 0.56, "0.560"):
+assert F.px({"close": "1.0000"}) == 1.0
+for bad in ("2.0000", "56", 56, 0.56, "0.560"):
     refused(lambda: F.px({"close": bad}), "plain 'close'")
 print("amendment 4: ok")
+
+# Amendment 4 as approved: a 1.0000 ask is read but is not two-sided (rule 18 in tally), so the strike does not qualify
+d4 = F.DEV_DATES[0]; ev4 = ev_of[d4]; t4 = ev4 + "-ONE"
+L4 = run(LJ, {"hist": [{"markets": [{"ticker": t4, "event_ticker": ev4, "result": "yes"}]}], "live": [{"markets": []}]})
+C4 = run(CJ, {"c1": [{"markets": [{"market_ticker": t4, "candlesticks": [{"end_period_ts": F.et_epoch(d4, 14, 5), "yes_bid": {"close": "0.9800"}, "yes_ask": {"close": "1.0000"}}]}]}]})
+r4 = F.count(table([[d4, ev4, t4, "one", "yes"]]), [L4], [C4], LJ, CJ)
+assert r4["two_sided_at_1405"] == 0 and r4["qualifying"] == 0, r4
+print("amendment 4 as approved: ok")

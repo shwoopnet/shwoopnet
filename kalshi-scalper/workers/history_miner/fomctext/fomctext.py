@@ -240,9 +240,9 @@ def px(node):
             return None
     if "close" in node:                                                       # Amendment 4: only a d.dddd dollar string (the landed /historical shape)
         v = node["close"]
-        if isinstance(v, str) and re.fullmatch(r"\d\.\d{4}", v):
+        if isinstance(v, str) and re.fullmatch(r"[01]\.\d{4}", v):            # as approved by the Head (02:27Z): leading digit 0 or 1
             return float(v)
-        raise SystemExit("refused: a plain 'close' field that is not a d.dddd dollar string (%r)" % (v,))
+        raise SystemExit("refused: a plain 'close' field that is not a [01].dddd dollar string (%r)" % (v,))
     return None
 
 
