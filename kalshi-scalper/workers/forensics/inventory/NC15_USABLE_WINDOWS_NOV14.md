@@ -1,0 +1,40 @@
+# NC15 candle history: the windows a NEW card may read, per series (Forensics desk, Nov 14, 2026; the Head's order of 12:22Z)
+
+Counts and dates only. **No price, result or candle answer was opened.** The NC15_LISTS runs carry result fields and are for Desk A's builder and Auditor B only (HELDOUT_PULL_RUNS.md), so I did not open them. "Listed" below means **the windows requested by the seven NC15_CANDLES job files on main (A1 to B4), which Desk A built from the lists**: 47,420 distinct tickers, 11 series; the close time of a window is read from its ticker (the Eastern time in the name, converted to UTC, daylight saving handled). The list answers may hold older windows that no candle job asked for; I cannot see them. 8 tickers (4 HYPE and 4 BNB, Nov 1 01:00 to 01:45 EST, the repeated hour) have a different name form and are left out of the counts; they close after every cut below.
+A day is a UTC close date. Held-out sources: `HELDOUT_REGISTRY.md` (rnd-queue, 224 KB version of Nov 14), and the research registrations on `claude/epic-ptolemy-0amjd9` (79724f00) for the cards' window text and result headers (only the lines that state dates or counts).
+
+## 1. The table: windows a new card may read (fixed cuts, constants in a file)
+
+| Series | First and last listed close (candle jobs) | Listed windows, days | Usable from | Usable to (before) | Usable windows, days | The cut and the card responsible |
+|---|---|---|---|---|---|---|
+| KXSILVER15M | 2026-09-07T00:00Z to 2026-11-13T22:00Z | 4,594, 61 | 2026-09-07T00:00Z | 2026-10-05T00:00Z | 1,923, 26 | PUB20 W3 "10-05 to end of data" (also SPIKE1, TODSEAS1, VOLSLOT1: W3 2026-10-05 on). NEWH2 (silver from 2026-10-28) and EVENT830 and EVENT1 (Nov 5 on) are later and do not bind |
+| KXCOPPER15M | same first, last 2026-11-13T22:00Z | 4,594, 61 | 2026-09-07T00:00Z | 2026-10-05T00:00Z | 1,923, 26 | PUB20, SPIKE1, TODSEAS1, VOLSLOT1 (W3 from 2026-10-05) |
+| KXWTI15M | 2026-09-07T00:00Z to 2026-11-13T23:45Z | 4,927, 68 | 2026-09-07T00:00Z | 2026-10-03T16:00Z | 1,977, 27 | FXREF1 frozen cut "markets closing from 2026-10-03T16:00Z"; PUB20 Oct 5 is later |
+| KXNATGAS15M | 2026-09-07T00:00Z to 2026-11-13T23:45Z | 4,932, 68 | 2026-09-07T00:00Z | 2026-10-05T00:00Z | 1,984, 28 | PUB20, SPIKE1, TODSEAS1, VOLSLOT1 (W3 from 2026-10-05) |
+| KXEURUSD15M | 2026-09-23T22:30Z to 2026-11-13T22:00Z | 3,471, 45 | 2026-09-23T22:30Z | 2026-10-03T16:00Z | 650, 9 | FXREF1 (2026-10-03T16:00Z); FXUSD holdout 2026-10-23 to 10-30 and PUB20 Oct 5 are later |
+| KXGBPUSD15M | same | 3,471, 45 | 2026-09-23T22:30Z | 2026-10-03T16:00Z | 650, 9 | FXREF1 |
+| KXUSDJPY15M | same | 3,471, 45 | 2026-09-23T22:30Z | 2026-10-03T16:00Z | 650, 9 | FXREF1 |
+| KXAUDUSD15M | 2026-10-07T21:45Z to 2026-11-13T22:00Z | 2,537, 33 | none | | **0, 0** | the whole listed history starts after the FXREF1 and PUB20 cuts (its history from 2026-10-07 is entirely inside the frozen W3 that SPIKE1 and TODSEAS1 also state) |
+| KXUSDCAD15M | same | 2,537, 33 | none | | **0, 0** | same |
+| KXHYPE15M | 2026-09-07T00:00Z to 2026-11-13T23:45Z | 6,439, 68 | 2026-09-07T00:00Z | 2026-10-03T00:00Z | 2,464, 26 | XOI1 W3 "2026-10-03 to 2026-11-02" (printed in its registration, 89 dates, W1 08-06 to 09-03, W2 09-04 to 10-02). QSTALE1 W3 from 10-05, TSLM1 W3 10-05 to 11-03 and LAG15 and XCRY1 (from about 10-11) are later |
+| KXBNB15M | same | 6,439, 68 | 2026-09-07T00:00Z | 2026-10-03T00:00Z | 2,464, 26 | XOI1 (same) |
+
+Outside every series' range the cards that act on dates after these: EVENT830 (13:30Z release-day closes, forward windows 2026-11-05 to 2026-12-23: the builder already cut them), NC15DEPTH1 (scoring from 2026-11-19, beyond the data), OICOREX1 (windows closing 2026-10-28 on, spent), NEWH2, FXUSD (Oct 23 to Oct 30). The OICAND allow-list (OICORE-NC15 threshold readers only, HYPE and BNB open interest only) is a reader permission, not a hold on other cards.
+A consequence the desks should know: **USD/CAD and AUD/USD have no usable window**; FX pairs EUR, GBP and JPY have 9 days; silver, copper, WTI and natural gas 26 to 28 days; HYPE and BNB 26 days. Counts are windows with a candle job, so a window with no market answer is still counted here.
+
+## 2. Cards whose third is computed (not a constant in a file) and what I could fix
+
+Every one of these starts after the binding cut above (so none lowers a usable window), derived from counts the cards printed:
+- **LAG15 (HYPE, BNB, ZEC, NEAR; silver and copper named in the registration).** The result prints 68 UTC dates, 2026-08-27 to 2026-11-02 (a 68 day span, so every date), W1 22 days, W2 23, W3 the rest = **23 dates, so W3 starts 2026-10-11** for the crypto-new assets (the date index 46 of 68). **Metals: not scored** (LAG15_RESULT.md covers 25,668 markets = the four crypto assets; silver and copper were not run). The registration states "eligible dates sorted, split into three equal thirds by number of dates"; the eligible set for silver and copper depends on the data on file (a model, a valid quote, volume), and **I cannot fix it from a file**. Bounds: the listing at registration is 4,476 silver and 4,401 copper settled markets (about 93 a weekday, so about 48 weekdays from 2026-08-27 to 2026-11-02); if every weekday is eligible, W3 = the last 16, **starting 2026-10-12**. W3 could start before 2026-10-05 only if at least 6 of the 21 weekdays from 2026-10-05 to 2026-11-02 are ineligible. For Auditor B to check. **Because PUB20's 2026-10-05 already holds silver and copper, LAG15 does not move their cut unless that condition holds; if the Head wants the strict rule ("not fixable from a file: the whole series stays held") the silver and copper rows go to 0 usable.**
+- **SETTLE1 (the nine non-crypto series).** Result prints "the 68 dates with a triggered quotable look: W1 23, W2 23, W3 22": **W3 = the last 22 of 68 consecutive dates (2026-08-27 to 2026-11-02), starts 2026-10-12.**
+- **XMET1 (silver, copper, platinum, palladium; gold triggers).** Result: 53 eligible dates, **W1 17, W2 18, W3 18**, history 2026-08-27 to 2026-11-02 (68 days, so 15 dates missing, probably weekends). W3 = the last 18 eligible dates: about 2026-10-09 to 2026-10-16 depending on which days are missing; **not fixable from a file** (the date list is printed by its `counts` command). It starts after 2026-10-05 if the missing days are mostly weekends, as the weekday count (48 plus Sunday evening closes) suggests.
+- **XCRY1 (HYPE, BNB, ZEC, NEAR).** "The follow and control windows are the date thirds of all eligible markets (23 dates each)", 68 dates 2026-08-27 to 2026-11-02: **W3 = the last 23 dates, starts 2026-10-11** (or 10-12 if the thirds are 23/22/23 from the front).
+- **TSLM1, QSTALE1 (HYPE, BNB and others).** TSLM1: W3 holdout "2026-10-05 to 2026-11-03" (its result, 90 dates). QSTALE1: W3 2026-10-05 to 2026-11-03 (90 dates, printed).
+- **XOI1.** W3 2026-10-03 to 2026-11-02, printed in the registration (89 dates). This is the earliest start among cards on HYPE and BNB, so it is the binding one.
+- **PPW1:** the registry marks it NO HELD-OUT (all three date thirds are reported), so it adds no cut.
+
+Dated sources: the registry's Table 1 rows for these cards (lines 38 to 140 of the Nov 14 file) and the registrations and results on the research branch; no figure of any card's result beyond its date and count headers was read.
+
+## 3. How it was counted
+
+`ticker -> UTC close` : `KX<NAME>15M-YYMMMDDHHMM-mm` with HHMM Eastern (America/New_York), converted to UTC. Listed = union of the `ticker_allowlist` of the seven NC15_CANDLES jobs. Usable = listed windows with a close on or after the first listed close and before the binding cut. Days = distinct UTC dates among them. Script: `nc15_usable_windows.py` (this folder; arguments: the folder holding the seven job files); the job files used: `NC15_CANDLES_A1` to `B4` on main (sha of the held-out list copy 974f2713..., the copy on main now lists the NC15 runs under 1cb177e8...).
