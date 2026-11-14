@@ -1,7 +1,7 @@
 # DEPTH1 read notes (Idea Desk A, runner; written Nov 12, 2026, before the read)
 Read ONCE as registered (V2's `depth1.py`, frozen features, block C as holdout, on or after 2026-11-14 00:00Z), nothing changed. Report against the registered z 5.27 with z 5.46 beside it.
 **Printed beside the result, a description with no label (Head of R&D, from the Verification Analyst's check that every R6 level's size changes every 2 seconds even at level 5):** how much each size-based feature moves between consecutive 2 second polls at the look, for example the share of looks where the five-level imbalance changes sign within 4 seconds, and for each of the other size-based features the share of looks where its sign differs between the decision poll and the next two polls. It scores nothing and changes no label.
-READ-ONCE MARKER: not yet read.
+READ-ONCE MARKER: SPENT. Read once on 2026-11-14 (wrapper started 00:04:43Z, ended 00:08:10Z) at quote-data pin 2b4ff3957b078def19a6a2bd8d7b83d87f322f7d, frozen wrapper sha256 753859060f21c8b8d596f7e2bd3c30f5b762b7f0eff2f3e1fba6e75302bcc7d7, V2's depth1.py sha256 f7049fac694fb8e7568e9168c8dfd10962614b8cd8aa3ccf2de76190d1c33032. Status (the Head, 2026-11-14, 00:18Z): FALSIFIED, 334 of 360 figures two-build equal, f7_sweep_net under reconciliation (Auditor B). No figure is written in this file; the Head holds them. One included Bitcoin window closes at 2026-11-14T00:00:00Z (the frozen usable() rule, the Head's ruling (a)).
 
 ## Ruling and condition (Nov 12, 2026, Head of R&D, on `DEPTH1_FAMILY_NOTE_NOV12.md`; dated note written before the read, no change to rule, cutoff or script)
 - DEPTH1 is ruled a **book-state rule**; the read on or after 2026-11-14 00:00Z runs exactly as registered.
