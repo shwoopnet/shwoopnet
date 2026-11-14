@@ -1,0 +1,177 @@
+{
+ "coverage": [
+  [
+   1794960000000,
+   1795046400000
+  ],
+  [
+   1796083200000,
+   1796086800000
+  ]
+ ],
+ "liquidations": [
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795003350000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "300",
+   "bk_px": "90000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795003410000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "250",
+   "bk_px": "90000"
+  },
+  {
+   "inst_id": "BTC-USD-SWAP",
+   "ts_ms": 1795004410000,
+   "side": "buy",
+   "pos_side": "short",
+   "sz": "2000",
+   "bk_px": "100000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795004440000,
+   "side": "buy",
+   "pos_side": "short",
+   "sz": "350",
+   "bk_px": "100000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795005750000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "600",
+   "bk_px": "90000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795006200000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "600",
+   "bk_px": "90000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795007100000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "300",
+   "bk_px": "90000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795007100000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "300",
+   "bk_px": "90000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1795007130000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "150",
+   "bk_px": "90000"
+  },
+  {
+   "inst_id": "BTC-USDT-SWAP",
+   "ts_ms": 1796083500000,
+   "side": "sell",
+   "pos_side": "long",
+   "sz": "600",
+   "bk_px": "90000"
+  }
+ ],
+ "windows": [
+  {
+   "ticker": "KXBTC15M-W1",
+   "close": "2026-11-18T12:15:00Z",
+   "result": "yes"
+  },
+  {
+   "ticker": "KXBTC15M-W2",
+   "close": "2026-11-18T12:30:00Z",
+   "result": "yes"
+  },
+  {
+   "ticker": "KXBTC15M-W3",
+   "close": "2026-11-18T12:45:00Z",
+   "result": "no"
+  },
+  {
+   "ticker": "KXBTC15M-W4",
+   "close": "2026-11-18T13:00:00Z",
+   "result": "yes"
+  },
+  {
+   "ticker": "KXBTC15M-W5",
+   "close": "2026-11-18T13:15:00Z",
+   "result": "no"
+  },
+  {
+   "ticker": "KXBTC15M-W6",
+   "close": "2026-12-01T00:15:00Z",
+   "result": "yes"
+  }
+ ],
+ "polls": {
+  "KXBTC15M-W1": [
+   {
+    "t_recv_ms": 1795003441000,
+    "yes_bid_px_1": 0.45,
+    "no_bid_px_1": 0.52,
+    "offset_ms": 0
+   }
+  ],
+  "KXBTC15M-W2": [
+   {
+    "t_recv_ms": 1795004462000,
+    "yes_bid_px_1": 0.6,
+    "no_bid_px_1": 0.37,
+    "offset_ms": 0
+   }
+  ],
+  "KXBTC15M-W3": [
+   {
+    "t_recv_ms": 1795005781000,
+    "yes_bid_px_1": 0.3,
+    "no_bid_px_1": 0.68,
+    "offset_ms": 0
+   }
+  ],
+  "KXBTC15M-W4": [
+   {
+    "t_recv_ms": 1795006261000,
+    "yes_bid_px_1": 0.85,
+    "no_bid_px_1": 0.13,
+    "offset_ms": 0
+   }
+  ],
+  "KXBTC15M-W5": [
+   {
+    "t_recv_ms": 1795007161000,
+    "yes_bid_px_1": 0.4,
+    "no_bid_px_1": 0.57,
+    "offset_ms": 0
+   }
+  ],
+  "KXBTC15M-W6": [
+   {
+    "t_recv_ms": 1796083561000,
+    "yes_bid_px_1": 0.4,
+    "no_bid_px_1": 0.57,
+    "offset_ms": 0
+   }
+  ]
+ },
+ "H_sz": 500
+}
