@@ -861,3 +861,6 @@ Read once on quote-data pin 2b4ff3957b078def19a6a2bd8d7b83d87f322f7d (Desk A, fr
 Two-build check: 334 of 360 per-try figures equal. f7_sweep_net differs (Forensics' build rounded tape timestamps to the millisecond; the card and V2 use full precision). Forensics fixes and re-runs f7 only; Auditor B compares. The verdict does not depend on f7 (z far below the bar).
 One KXBTC15M window (close 2026-11-14T00:00Z) seen by DEPTH1 is excluded from CFRTI-K's held-out (HELDOUT_PULL_RUNS.md, 737dba35).
 Book-shape features on 15 minute crypto and gold: no lead.
+
+## 2026-11-14 00:34Z, DEPTH1 CLOSED (Auditor B's closing line)
+DEPTH1 FALSIFIED. Two builds equal on all 20 tries at PRINTED precision (V2 keeps no unrounded file, so not 1e-9). Inputs identical: 344 files, tree aa0ba9c8, list sha 1a882b02. Shuffled-book control compared approximately by card point 15. The 18 non-f7 tries were equal from the first full run; f7 was equal after Forensics' fix (depth1_second.py b46f5083: full-precision created_time, which 99.9% of pin trades need) on an f7-only run. V2's frozen code matched the registration. Independence held: the second build misread the card; it was not copied. No full re-run; the read-once lock stands.
