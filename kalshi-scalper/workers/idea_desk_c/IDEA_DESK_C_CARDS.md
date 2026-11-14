@@ -22,3 +22,9 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
 - **Odds.** 1% to reach the bar (cut from 2% after the evidence check, registration Amendment 1); about 85% that it closes at the cost kill or in development.
 
 - **Closed for want of a source (Nov 13, 2026, Head of R&D):** the settling-average idea for KXGENERICBALLOTVOTEHUB (signal from the published polling average the market settles on). VoteHub refuses automated fetches (HTTP 403 on its terms page and homepage), so its terms are unread and it is not cleared. Not registered, no try counted. The only unblock is the owner reading VoteHub's terms in a browser.
+
+- **Held as an idea only, not a card (Nov 14, 2026): DECLINED QUOTE**, handed over from Desk B on the Head's order.
+  - Idea: a combo that is listed but never trades reads as "the maker's ask was too rich", so buy NO on other combos sharing its legs.
+  - Its trigger, a request then no fill, is new. Its bet and its join to legs are CROWDLEG's and NOTAKER's, so it would be a third signal in the family "combo-tape flow joined to legs".
+  - Under one test per family it waits until CROWDLEG's read is filed, and goes to the VA only then.
+  - It is now countable: the nonstop tape (PR 921) gives every combo trade, and the 30 minute listing gives the combos listed.
