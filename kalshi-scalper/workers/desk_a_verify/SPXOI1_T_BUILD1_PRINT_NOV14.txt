@@ -1,0 +1,8 @@
+SPXOI1 T build 1 (spxoi1_threshold.py v2 sha256 3f135c49da9f6f177515eabf1a9943a84a854ccfca478884ecf702d141d8a68a)
+kalshi-pull-data commit d32cb53c5808c64604a38fefbfe1a38e02a237b4
+runs: SPXOI1_LISTS/2026-11-14T0101Z_43537940232 + SPXOI1_CANDLES/2026-11-14T0107Z_43538584524 + SPXOI1_CANDLES_PATCH/2026-11-14T0124Z_43540387136
+HELDOUT_PULL_RUNS.md copy read by the guard: sha256 974f271366673c38f1a326335ed69db465aa2e15a327672b12a1e0f28640c126
+n = 140, T = 5463.9
+dropped, missing candle = 3
+dropped, unreadable open interest = 0
+EXIT 0
