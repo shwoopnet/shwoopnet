@@ -30,7 +30,7 @@ def files(d): return sorted(os.path.join(d, n) for n in os.listdir(d) if n.endsw
 
 
 def answer_files(dirs, drops):
-    """Answer files of each run folder. With a manifest.json: only rows with status 200 and not truncated, each file checked against its sha256
+    """Answer files of each run folder. With a manifest.json: only rows with status 200 and not truncated, each file checked against its sha256 (of the DECOMPRESSED body for a .gz file, as the runner writes it)
     (a mismatch stops the run); other rows are counted by reason. Without a manifest (made-up fixtures): every *.json or *.json.gz file."""
     import hashlib
     out = []
@@ -42,7 +42,7 @@ def answer_files(dirs, drops):
                 if r.get("truncated"): drops["manifest_row_truncated"] += 1; continue
                 fp = os.path.join(d, os.path.basename(r.get("file") or ""))
                 if not r.get("file") or not os.path.exists(fp): drops["manifest_row_file_missing"] += 1; continue
-                if hashlib.sha256(open(fp, "rb").read()).hexdigest() != r.get("sha256"): sys.exit("STOP: sha256 mismatch in a run folder")
+                if hashlib.sha256((gzip.open if fp.endswith(".gz") else open)(fp, "rb").read()).hexdigest() != r.get("sha256"): sys.exit("STOP: sha256 mismatch in a run folder")
                 out.append(fp)
         else:
             out.extend(files(d))
