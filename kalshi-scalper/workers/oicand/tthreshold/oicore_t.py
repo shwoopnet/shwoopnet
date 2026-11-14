@@ -62,19 +62,20 @@ def oi_of(c):
 def p90(vals):
     s = sorted(vals); return s[max(0, math.ceil(0.9 * len(s) - 1e-9) - 1)]
 
-def main(argv=None):
+def main(argv=None, allowed=None, cut=None):
+    allowed = ALLOWED if allowed is None else allowed      # reachable only through this function's arguments (tests), never from the command line
+    cut = EVENT830 if cut is None else cut
     ap = argparse.ArgumentParser(); ap.add_argument("--lists", nargs="+", required=True); ap.add_argument("--candles", nargs="+", required=True)
-    ap.add_argument("--series", nargs="+", default=ALLOWED); ap.add_argument("--allowed-series", nargs="+", default=ALLOWED)
-    ap.add_argument("--cut-series", nargs="+", default=EVENT830); ap.add_argument("--days", type=int, default=20)
+    ap.add_argument("--series", nargs="+", default=ALLOWED); ap.add_argument("--days", type=int, default=20)
     a = ap.parse_args(argv); drops = Counter(); closes = {}; cutn = Counter()
-    if any(x not in a.allowed_series for x in a.series): (print("STOP: series not allowed", file=sys.stderr), sys.exit(2))
+    if any(x not in allowed for x in a.series): (print("STOP: series not allowed", file=sys.stderr), sys.exit(2))
     for p in answer_files(a.lists, drops):
         for m in markets_of(p, drops):
             tk = m.get("ticker")
             if not isinstance(tk, str) or tk.split("-")[0] not in a.series: continue
             try: c = ep(m["close_time"])
             except Exception: drops["list_unparseable_close"] += 1; continue
-            if tk.split("-")[0] in a.cut_series and datetime.fromtimestamp(c, timezone.utc).strftime("%H:%M:%S") == "13:30:00" and datetime.fromtimestamp(c, timezone.utc).strftime("%Y-%m-%d") in CUT_DATES:
+            if tk.split("-")[0] in cut and datetime.fromtimestamp(c, timezone.utc).strftime("%H:%M:%S") == "13:30:00" and datetime.fromtimestamp(c, timezone.utc).strftime("%Y-%m-%d") in CUT_DATES:
                 cutn[tk.split("-")[0]] += 1; continue
             closes[tk] = c
     cand, seen = {}, set()
