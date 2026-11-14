@@ -1,0 +1,13 @@
+python 3.13.18 at /usr/local/bin/python3
+table rows 407, held-out rows dropped 0, development rows 407
+kill arm (statement-type, feature yes) (n = 28): two-sided at 2:05 pm 11 of 28 (39.3%); results yes 26, no 2, void 0, other 0
+  counted (settled YES, entry at or under 0.87, upper bound, not fill-checked): RAW (ask) raw: 0 strikes from 0 decision dates; 1c 1c: 0 strikes from 0 decision dates; 2c 2c: 0 strikes from 0 decision dates
+  kill line at raw: (a) fewer than 15 counted: True; (b) fewer than 5 decision dates: True; (c) fewer than half two-sided: True
+  kill line at 1c: (a) fewer than 15 counted: True; (b) fewer than 5 decision dates: True; (c) fewer than half two-sided: True
+  kill line at 2c: (a) fewer than 15 counted: True; (b) fewer than 5 decision dates: True; (c) fewer than half two-sided: True
+placebo (statement-type, feature no) (n = 367): two-sided at 2:05 pm 306 of 367 (83.4%); results yes 119, no 248, void 0, other 0
+  counted (settled YES, entry at or under 0.87, upper bound, not fill-checked): RAW (ask) raw: 61 strikes from 9 decision dates; 1c 1c: 60 strikes from 9 decision dates; 2c 2c: 60 strikes from 9 decision dates
+not statement-type, n = 12 (outside the kill line and the placebo)
+VERDICT (decided on the plain count): CLOSED: efficient, move on (the card's kill line holds on the plain count: (a, b, c)); upper bound, not fill-checked
+haircut lines (decide only whether a pass could count toward the 20 to 30; upper bound, not fill-checked): 1c does not count: fails the haircut; 2c does not count: fails the haircut
+could count toward the 20 to 30: no
