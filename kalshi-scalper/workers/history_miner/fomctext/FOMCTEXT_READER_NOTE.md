@@ -42,3 +42,19 @@ Usage is now `build-candles <table.csv> <lists job.json> <lists folder>...` and 
 
 ## Amendment 3 (Nov 13, 2026, about 05:45Z, before any FOMCTEXT answer exists; Auditor B's finding, the Head's order)
 The development events have MONTH-ONLY event tickers (KXFEDMENTION-26MAR), which the YYMONDD parser read as no date, so every row was treated as held out and dropped (fail closed, no leak, but no count). Now a month-only event ticker takes its decision date from a fixed map in the script, the eleven development months only: 25JAN 2025-01-29, 25MAR 2025-03-19, 25MAY 2025-05-07, 25JUN 2025-06-18, 25JUL 2025-07-30, 25SEP 2025-09-17, 25OCT 2025-10-29, 25DEC 2025-12-10, 26JAN 2026-01-28, 26MAR 2026-03-18, 26APR 2026-04-29. Checked against Idea Desk C's card (8851d822, lines 13 to 14, and Clarification 1, lines 107 to 108): the same eleven dates. A month-only ticker NOT in the map stays held out (25AUG, 26JUN and later can never be read through it). The held-out test still cuts on the date; the YYMONDD form is unchanged. Fixtures: a mapped month (kept and counted), an unmapped month and a held-out month (both dropped as held out).
+
+## Dated line, 2026-11-14 ~01:25Z: the `events` command (the Head of R&D's order of 01:22Z; written before the code)
+`events <events job.json> <events folder>...` reads a FOMCTEXT_EVENTS run (the /events lists of the four Fed mention series, with no nested markets) and prints ONLY event_ticker, series_ticker, title and date.
+- **Proof first:** the run is read only through `answers()`. It must be whole against its committed job, complete, every request answered, no cursor left, sha256 and bytes matching, inside its folder, with no held-out path.
+- **Date:**
+  - from the event ticker by `date_of_event` (YYMONDD, or a month-only form in MONTH_ONLY);
+  - only if that gives none, from the event's `strike_date` (its first 10 characters, YYYY-MM-DD), with date_source "strike_date";
+  - neither gives a date: dropped, counted no_date.
+- **Cut:** an event with a date on or after 2026-06-17 is dropped, counted held_out. That happens after only its ticker (and, when needed, strike_date) is read; its title is never read.
+- **Also dropped:** a series not among the four Fed series (not_fed_series). Not restricted to the eleven development dates: the command exists to name events.
+- **Output:** sorted by date then event ticker; drop counts go to stderr. No market, price, volume or result field exists in these answers (no nested markets) or is printed.
+- **Made-up hand case (test_fomctext.py):**
+  - one run with events KXFEDMENTION-25JAN29 (title "A"), KXPOWELLMENTION-26MAR (month-only, mapped), KXFEDMENTION-26JUN17 (held out), KXJPOWMENTION-XYZ with strike_date "2026-04-29T18:00:00Z" (no ticker date, so the strike_date is used), KXWARSHMENTION-ABC with no strike_date (no_date), and KXOTHER-25JAN29 (not_fed_series);
+  - expected printed rows: KXFEDMENTION-25JAN29 dated 2025-01-29, KXPOWELLMENTION-26MAR dated its MONTH_ONLY date, KXJPOWMENTION-XYZ dated 2026-04-29 (source strike_date), sorted by date;
+  - expected drops: held_out 1, no_date 1, not_fed_series 1;
+  - a run whose embedded job differs from the given job is refused.
