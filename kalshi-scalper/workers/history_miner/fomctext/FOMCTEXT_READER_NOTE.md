@@ -61,3 +61,20 @@ The development events have MONTH-ONLY event tickers (KXFEDMENTION-26MAR), which
 - **Addendum, 2026-11-14 ~01:30Z (before the code):** the reader's own `refuse_heldout` refuses only HELDOUT_-named paths, not the landed runs listed in HELDOUT_PULL_RUNS.md (now main's copy, sha256 974f2713..., PR 922). `answers()` therefore also calls `hm_guard.refuse_all([folder])` first, for every command.
   - Expected: a run folder whose name is a run listed in that file (the test uses LIVEDATA_PROBE_B's folder name from the list) is refused by every command.
   - Every other figure in the tests is unchanged.
+
+## Dated line, 2026-11-14 ~01:40Z: the `type` column in count (card Clarification 7, the Head's ruling of 01:31Z, claude/idea-desk-c 20196129; Desk C's request); written before the code
+- **load_table** reads a `type` column. Its value, stripped, must be exactly "statement-type" or "NOT STATEMENT-TYPE"; a missing column or any other value REFUSES the table. Every row, of either type, stays in the universe check, unchanged.
+- **count:**
+  - the kill-line arm is statement-type rows with statement_word yes;
+  - the placebo is statement-type rows with statement_word no;
+  - NOT STATEMENT-TYPE rows are in neither, printed as their own key `not_statement_type` = {"n": k, "line": "not statement-type, n = k"}, outside the verdict and the placebo;
+  - `strikes_in_table` still counts every row.
+- **build-candles and words:** unchanged (the frozen job da62610b asks for all 407).
+- **Expected, by hand:**
+  - **(1) every earlier test:** the test helper's tables gain type = "statement-type" for each old five-column row, and every earlier figure is unchanged (all their rows are statement-type);
+  - **(2) the new made-up case:**
+    - 9 strikes at one development meeting: 3 statement-type yes, 4 statement-type no, 2 NOT STATEMENT-TYPE (no);
+    - expected statement_word_strikes 3, placebo strikes 4, not_statement_type n 2 with the line "not statement-type, n = 2", strikes_in_table 9;
+    - the two NOT rows are still required by the universe check: a list missing one of them refuses;
+  - **(3) refusals:** a table with no type column, and a table with type "statement" on one row.
+- **For Desk C's real table** (claude/idea-desk-c ab6db60a, 493e6d6a..., 407 rows), the amended count prints 28, 367 and 12. That is checked only when the count runs, after Auditor B's CLEAN on the table, the job and this amendment, and the owner's yes.
