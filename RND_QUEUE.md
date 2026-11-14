@@ -901,3 +901,13 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 - C11 adopted (01b03936). Calendar terms (Main): RBA, BoC, ECB allowed with attribution; Treasury, BoE, BoJ held.
 - Owner allowed the NC15 candle history pull: Desk A builds NC15_LISTS (about 110) and a 2-request probe; then hourly-batched candles (about 2,400) or a 45-day fallback (about 4,400).
 - Tally of unique strategies above the cutoff: 0.
+
+## 2026-11-14 07:20Z, morning results and rulings (Head)
+- FOMCTEXT CLOSED (efficient): two blind builds equal (History Miner 9ff3e103, Testing b023d39c). Kill arm 28, two-sided at 2:05 pm 11, 0 at or under the 0.87 cap at RAW, 1c and 2c. Placebo 367 (306 two-sided, 61 qualifying). Development only, no held-out read.
+- OICORE-NC15 thresholds FINAL, two blind builds equal (Desk B a8aa5fed, History Miner b32bb999; Auditor B rule 16b EQUAL): KXHYPE15M T 6796.75 and KXBNB15M T 4351.84, n 1,587 each, 20 trading days 2026-10-21 to 11-12. The other nine NC15 places are held for open cards (PUB20, FXREF1, FXUSD, LAG15 metals; allow-list in HELDOUT_PULL_RUNS.md, PR 934).
+- Guard principle (Head): a held-out window stays protected while its card is OPEN (its held-out read can still happen). A closed card's held-out is released only for OI-only threshold reads. A status that can't be shown from a file counts as OPEN. Status table: Desk A HELDOUT_REGISTRY.md.
+- Live activity seats 2 and 3 (HYPE, BNB) depart from v5 on four points (fixed T, 180 to 120 s span, 3 contracts, skip EVENT830 13:30Z windows): note OICORE_PLACES_LIVE_SEAT_DEPARTURES_NOV14.md (f67fd1a94), outside v5's version rule.
+- Version ruling: a sheet's version is its file content. A byte-identical revert re-dates nothing. v5 stays dated at 80dd16134; the edit 9d4c6f342 never counts.
+- SOCDERIV: box-edge, side and edge columns, team_total spelling settled; both builds re-freezing; no run yet.
+- Combo: CROWDLEG, NOTAKER, DECLINED QUOTE CLOSED (0 a day against 5). Owner: drop the rebuild; recorder runs to Nov 16 for S3's 3-day count, then off.
+- Tally of unique strategies above the cutoff: 0.
