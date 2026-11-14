@@ -28,21 +28,22 @@ def two_sided(r):
     return yb is not None and ya is not None and na is not None and 0 < yb < ya < 1 and 0 < na < 1
 
 def qualifies(r, t):
-    if not two_sided(r): return None
-    na, size, vol, legs = num(r.get("no_ask")), num(r.get("yes_bid_size")), num(r.get("volume")), num(r.get("legs"))
+    na = num(r.get("no_ask"))
+    if na is None or not 0 < na < 1: return None        # S3's own rule: a NO ask is posted and under 1.0; no YES-side condition
+    size, vol, legs = num(r.get("yes_bid_size")), num(r.get("volume")), num(r.get("legs"))
     if size is None or vol is None or legs is None or not r.get("close_time"): return None
     p = na + SLIP
     try: left = ts(r["close_time"]) - t
     except ValueError: return None
     if P_MIN - EPS <= p <= P_MAX + EPS and size >= MIN_SIZE and vol > 0 and LEGS_MIN <= legs <= LEGS_MAX and CLOSE_MIN_S <= left <= CLOSE_MAX_S:
-        return {"ticker": r["ticker"], "event": r.get("event_ticker", "")}
+        return {"ticker": r["ticker"], "event": r.get("event_ticker", ""), "two": two_sided(r)}
     return None
 
 def main(argv=None):
     ap = argparse.ArgumentParser(); ap.add_argument("root"); ap.add_argument("--full-snapshots", type=int, default=40)
     ap.add_argument("--min-days", type=int, default=3); ap.add_argument("--threshold", type=float, default=5.0)
     a = ap.parse_args(argv)
-    days = defaultdict(lambda: {"snaps": 0, "rows": 0, "two": 0, "qual": 0, "fills": 0}); ignored_s = ignored_r = 0
+    days = defaultdict(lambda: {"snaps": 0, "rows": 0, "two": 0, "qual": 0, "fills": 0, "fills2": 0}); ignored_s = ignored_r = 0
     seen_t, seen_e = set(), set(); files = sorted(glob.glob(os.path.join(a.root, "combo", "*", "*", "quotes.csv.gz")))
     snaps = []
     for q in files:
@@ -62,11 +63,11 @@ def main(argv=None):
         cand.sort(key=lambda f: f["ticker"]); n = 0
         for f in cand:
             if n >= MAX_PER_SNAP or f["ticker"] in seen_t or (f["event"] and f["event"] in seen_e): continue
-            seen_t.add(f["ticker"]); seen_e.add(f["event"]); d["fills"] += 1; n += 1
+            seen_t.add(f["ticker"]); seen_e.add(f["event"]); d["fills"] += 1; d["fills2"] += 1 if f["two"] else 0; n += 1
     print("S3 feasibility count, counts only (no result read)")
     for day in sorted(days):
         d = days[day]
-        print("%s: snapshots %d | rows %d | two-sided rows %d | qualifying rows %d | would-be fills %d%s" % (day, d["snaps"], d["rows"], d["two"], d["qual"], d["fills"], " | full day" if d["snaps"] >= a.full_snapshots else ""))
+        print("%s: snapshots %d | rows %d | two-sided rows %d | qualifying rows (S3 rule) %d | would-be fills %d (two-sided on both sides: %d)%s" % (day, d["snaps"], d["rows"], d["two"], d["qual"], d["fills"], d["fills2"], " | full day" if d["snaps"] >= a.full_snapshots else ""))
     print("ignored before 2026-11-13T00:00Z: %d snapshots, %d rows" % (ignored_s, ignored_r))
     full = [days[x]["fills"] for x in sorted(days) if days[x]["snaps"] >= a.full_snapshots]
     if len(full) < a.min_days: print("verdict: not decided yet (%d full days, need %d)" % (len(full), a.min_days))

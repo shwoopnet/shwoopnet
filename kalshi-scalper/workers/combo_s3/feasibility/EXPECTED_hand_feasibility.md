@@ -24,3 +24,11 @@ Expected per day (rows, two-sided, qualifying before the one-per rules, would-be
 | 2026-11-14 | 1 | 2 | 1 | 1 | 1 (C13) |
 Ignored: 1 snapshot, 1 row before 2026-11-13T00:00Z.
 With the full-day floor lowered to 1 snapshot (the fixture flag): 2 full days; with fewer than 3 full days the verdict is "not decided yet". With the floor at 1 and a third made-up day not present the average of 2 days is 2.0 (under 5), but the 3-day minimum still applies; a flag --min-days 2 gives "no evidence: combos cannot be priced (average 2.0 a day)". With the default floor of 40 snapshots no fixture day is full: "not decided yet (0 full days)".
+
+## Correction after Auditor B's read (Nov 14), written BEFORE the code change
+The would-be fills and the verdict use S3's OWN qualification: a NO ask is posted and under 1.0, and the other S3 rules; there is NO YES-side condition (a NO buy needs a NO ask, not a YES ask). Rule 18 on both sides is printed as separate information: "two-sided rows", and "would-be fills that are two-sided on both sides". The earlier text "counted exactly as S3 would fill them" was wrong for the code as first written (it required both sides) and is fixed here. The fixture changes: C3 now has no_ask 1.00 (an empty bid gives a NO ask of 1.00 in the data), snapshot B gains C16 (yes_ask 1.00, no_ask .70, size 5, volume 3, 3 legs, closing in 24 h: a would-be fill that is NOT two-sided), and C14 stays crossed (yes_bid .30, yes_ask .28, no_ask .72), which S3's own rule accepts. New expected table:
+| day | snapshots | rows | two-sided rows | qualifying rows (S3's rule) | would-be fills | of which two-sided on both sides |
+|---|---|---|---|---|---|---|
+| 2026-11-13 | 2 | 13 | 11 | 6 | 4 (C1, C10, C11, C16) | 3 |
+| 2026-11-14 | 1 | 2 | 1 | 2 | 2 (C13, C14) | 1 |
+Ignored: 1 snapshot, 1 row before the start. With --full-snapshots 1 and --min-days 2: average 3.0 would-be fills a day over 2 full days, under 5: "no evidence: combos cannot be priced (average 3.0 ...)". With the defaults: "not decided yet (0 full days, need 3)". The 1e-9 tolerance on the band stays (the registered inclusive reading); s3_score.py has none, and Auditor B checks that in the scorer's own audit.
