@@ -855,3 +855,9 @@ The VA confirmed C1 to C6 (its re-run: Bitcoin cheaper-side ask, 95.9% within 1c
 - C9 Every line carries "upper bound, not fill-checked": fill share below 100% was measured (FILLHAIRCUT1, GOLDHAIRCUT1), and C5 ignores it.
 - C10 Each line states its fee mode ("per-order rounded", C4). A VOID refunds the price, keeps the fee, and is counted and printed.
 Limit: the 1c sizing was measured on Bitcoin's ask side only; other series and the exit side are assumed symmetric, untested.
+
+## 2026-11-14 00:22Z, DEPTH1 held-out read: FALSIFIED (one read, spent)
+Read once on quote-data pin 2b4ff3957b078def19a6a2bd8d7b83d87f322f7d (Desk A, frozen V2 depth1.py f7049fac). 20 tries (10 book features x gold, Bitcoin). Every try fails the bar (z 5.27); best is Bitcoin f6 (thin-side depletion), z +2.74, which is a closed-family feature. Second look flags: none. Desk A's read notes 6abf21bc carry the marker and labels.
+Two-build check: 334 of 360 per-try figures equal. f7_sweep_net differs (Forensics' build rounded tape timestamps to the millisecond; the card and V2 use full precision). Forensics fixes and re-runs f7 only; Auditor B compares. The verdict does not depend on f7 (z far below the bar).
+One KXBTC15M window (close 2026-11-14T00:00Z) seen by DEPTH1 is excluded from CFRTI-K's held-out (HELDOUT_PULL_RUNS.md, 737dba35).
+Book-shape features on 15 minute crypto and gold: no lead.
