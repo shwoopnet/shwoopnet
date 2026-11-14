@@ -13,7 +13,9 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 from deskb_guard import refuse_all as _refuse_all
 _refuse_all()
-NC15 = ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M", "KXHYPE15M", "KXBNB15M"]
+ALLOWED = ["KXHYPE15M", "KXBNB15M"]          # the Head's final scope (Nov 14): the only series readable from the OICAND backfill
+EVENT830 = ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"]
+CUT_DATES = ("2026-11-05", "2026-11-06", "2026-11-10", "2026-11-12", "2026-11-13")
 CT = ZoneInfo("America/Chicago")
 MIN_T = 5.0
 
@@ -62,14 +64,19 @@ def p90(vals):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(); ap.add_argument("--lists", nargs="+", required=True); ap.add_argument("--candles", nargs="+", required=True)
-    ap.add_argument("--series", nargs="+", default=NC15); ap.add_argument("--days", type=int, default=20)
-    a = ap.parse_args(argv); drops = Counter(); closes = {}
+    ap.add_argument("--series", nargs="+", default=ALLOWED); ap.add_argument("--allowed-series", nargs="+", default=ALLOWED)
+    ap.add_argument("--cut-series", nargs="+", default=EVENT830); ap.add_argument("--days", type=int, default=20)
+    a = ap.parse_args(argv); drops = Counter(); closes = {}; cutn = Counter()
+    if any(x not in a.allowed_series for x in a.series): (print("STOP: series not allowed", file=sys.stderr), sys.exit(2))
     for p in answer_files(a.lists, drops):
         for m in markets_of(p, drops):
             tk = m.get("ticker")
             if not isinstance(tk, str) or tk.split("-")[0] not in a.series: continue
-            try: closes[tk] = ep(m["close_time"])
-            except Exception: drops["list_unparseable_close"] += 1
+            try: c = ep(m["close_time"])
+            except Exception: drops["list_unparseable_close"] += 1; continue
+            if tk.split("-")[0] in a.cut_series and datetime.fromtimestamp(c, timezone.utc).strftime("%H:%M:%S") == "13:30:00" and datetime.fromtimestamp(c, timezone.utc).strftime("%Y-%m-%d") in CUT_DATES:
+                cutn[tk.split("-")[0]] += 1; continue
+            closes[tk] = c
     cand, seen = {}, set()
     for p in answer_files(a.candles, drops):
         for m in markets_of(p, drops):
@@ -101,6 +108,7 @@ def main(argv=None):
         days = sorted(P["days"]); used = days[-a.days:]; rises = [r for d in used for r in P["days"][d]]
         outside = sum(len(P["days"][d]) for d in days[:-a.days]) if len(days) > a.days else 0
         drop = dict(P["d"]); 
+        if cutn.get(s): drop["event830_forward_close"] = cutn[s]
         if outside: drop["windows_outside_last_days"] = outside
         dtxt = ", ".join("%s=%d" % kv for kv in sorted(drop.items())) or "none"
         if len(days) < a.days: verdict, T = "NOT SEATED: fewer than %d trading days" % a.days, None
