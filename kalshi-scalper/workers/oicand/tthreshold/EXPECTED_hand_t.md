@@ -32,3 +32,11 @@ Only KXHYPE15M and KXBNB15M are readable from the OICAND backfill (the other nin
 Fixture additions (run with --allowed-series S1 S2 S3 S4 S5 --cut-series S5 --days 3): series S5 has the three Central days Nov 3, 4, 5 with windows 16:00 to 16:45Z and rises 10, 20, ... 120 (twelve), plus a window closing 2026-11-04T13:30:00Z with rise 3000 (a 13:30Z close but NOT a cut date, so it counts) and a window closing 2026-11-05T13:30:00Z with rise 5000 (a cut date: dropped).
 Expected S5: windows used n 13 (twelve plus the 3000), 3 trading days available and used (Nov 3 to Nov 5 Central; both 13:30Z closes are Central 07:30), the rises sorted ..., 120, 3000, ceil(0.9 x 13) = ceil(11.7) = 12, the 12th smallest = 120, so T 120, SEATED; dropped: event830_forward_close 1. A reader without the cut would have 14 rises and T = 3000 (the 13th of 14).
 Stop test: running with `--allowed-series S1 --series S1 S2` must stop with exit code 2 and the message "STOP: series not allowed" before printing any market. The S1 to S4 lines above are unchanged.
+
+## Correction after Auditor B's read (Nov 14), written BEFORE the code change: the scope cannot be switched off from the command line
+The allowed-series list and the cut list are now MODULE CONSTANTS (ALLOWED = KXHYPE15M, KXBNB15M; the EVENT830 cut list), with NO command line flag. `--allowed-series` and `--cut-series` are removed; `--series` stays (default ALLOWED) so a narrower choice is allowed. Tests reach the constants through main()'s own arguments (`main(argv, allowed=..., cut=...)`, which the command line cannot reach). Hand cases, run by `run_hand_cases.py` in this folder:
+- (a) `--series KXXRP15M` (or any series outside HYPE and BNB) stops with exit 2 and "STOP: series not allowed", before any run folder is read.
+- (b) `--allowed-series ...` is not an option: argparse rejects it (exit 2, "unrecognized arguments").
+- (c) `--cut-series ...` is not an option either: argparse rejects it, so the cut cannot be turned off from the command line.
+- (d) with the module-level defaults and no override, `--series S1` stops with exit 2.
+- (e) the fixture figures are reproduced through main()'s arguments exactly as before (S1 to S5: n 12, 12, 8, 14, 13; T 110, 4, n/a, 500, 120; S5 drops event830_forward_close 1).
