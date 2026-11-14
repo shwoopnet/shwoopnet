@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """NC15 1 minute candle history: job builder (Idea Desk A, Nov 14, 2026, the Head's order). Offline, sends nothing, reads no price, size or result.
-  python3 -I build_nc15_jobs.py lists  <out dir>                     writes NC15_LISTS.json (settled market lists per series, 10 day close ranges)
+  python3 -I build_nc15_jobs.py lists  <out dir>                     writes NC15_LISTS_A.json and NC15_LISTS_B.json (settled market lists per series group, 10 day close ranges)
   python3 -I build_nc15_jobs.py probe  <git repo> <ref> <out dir>    writes NC15_PROBE.json: the hour (4 consecutive 15 minute closes) with the most recorded tickers on nc-data coverage files (columns close_time, series, ticker ONLY are read), as ONE batched request for the hour and ONE plain per-close request for its first close
 Tickers are never typed: the probe's come from the NC15 recorder's coverage files, the candle jobs' (a later step, not here) come from the landed lists run. End date 2026-11-13T23:59Z; nothing later is asked."""
 import sys, os, json, csv, gzip, io, subprocess, calendar, time, collections
@@ -20,15 +20,21 @@ def chunks():
     while lo <= END:
         hi = min(lo + CHUNK_S - 1, END); out.append((lo, hi)); lo = hi + 1
     return out
-def lists_job():
+GROUPS = {"A": SERIES[:6], "B": SERIES[6:]}      # two files by series group: the runner stops a run at 40 minutes (about 480 requests at 5 s), so no file may page past 470 (the Head, Nov 14)
+MAX_CAP = 470
+def lists_jobs():
     ep = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "min_close_ts", "max_close_ts", "limit", "cursor"]}]
-    reqs = []
-    for s in SERIES:
-        for i, (lo, hi) in enumerate(chunks(), 1):
-            reqs.append({"id": "settled_%s_%02d" % (s, i), "path": "/markets", "params": {"series_ticker": s, "status": "settled", "min_close_ts": lo, "max_close_ts": hi, "limit": 1000}, "max_pages": 3})
-    cap = sum(r["max_pages"] for r in reqs) + 14      # the runner counts PAGES against the cap: the page budget plus 14 for 429 retries (Main, KP14b)
-    return base("NC15_LISTS", "Settled markets (tickers and close times; a reader never reads a result) of the 11 NC15 series from before their listing to 2026-11-13T23:59Z, in 10 day close ranges, as the input from which the hourly candle jobs are built.", ep, [], cap, reqs,
-                "%d series x %d ranges of 10 days (from %s). Pacing 5.0 s (12 requests a minute) on the Head's order of Nov 14, 2026. max_requests is the page budget (%d requests x 3 pages = %d) plus 14 for 429 retries. Candles are NOT requested here." % (len(SERIES), len(chunks()), "2026-06-01T00:00:00Z", len(reqs), 3 * len(reqs)))
+    jobs = []
+    for g, group in GROUPS.items():
+        reqs = []
+        for s in group:
+            for i, (lo, hi) in enumerate(chunks(), 1):
+                reqs.append({"id": "settled_%s_%02d" % (s, i), "path": "/markets", "params": {"series_ticker": s, "status": "settled", "min_close_ts": lo, "max_close_ts": hi, "limit": 1000}, "max_pages": 3})
+        cap = sum(r["max_pages"] for r in reqs) + 14      # the runner counts PAGES and retries against the cap: the page budget plus 14 for 429 retries (Main, KP14b)
+        if cap > MAX_CAP: raise SystemExit("file %s would have a cap of %d, over %d" % (g, cap, MAX_CAP))
+        jobs.append(base("NC15_LISTS_" + g, "Settled markets (tickers and close times; a reader never reads a result) of NC15 series group %s (%s) from before their listing to 2026-11-13T23:59Z, in 10 day close ranges, as input for the hourly candle jobs." % (g, ", ".join(group)), ep, [], cap, reqs,
+                       "Group %s of 2 (split by series so no file can page past %d requests; the runner stops a run at 40 minutes). %d series x %d ranges of 10 days (from %s). Pacing 5.0 s on the Head's order of Nov 14, 2026. max_requests is the page budget (%d requests x 3 pages = %d) plus 14 for 429 retries. Candles are NOT requested here." % (g, MAX_CAP, len(group), len(chunks()), "2026-06-01T00:00:00Z", len(reqs), 3 * len(reqs))))
+    return jobs
 def read_coverage(repo, ref):
     names = subprocess.run(["git", "-C", repo, "ls-tree", "-r", "--name-only", ref], capture_output=True, text=True, check=True).stdout.split()
     rows = {}
@@ -60,9 +66,11 @@ def probe_job(rows):
                 "Hour closes %s; %d tickers in the batch; tickers come from the NC15 recorder's coverage files (columns close_time, series and ticker only). Pacing 5.0 s. max_requests is 8 = the 2 requests plus 6 for 429 or other retries (the runner counts every request sent against the cap)." % (", ".join(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(c)) for c in quartet), len(alltk)))
 if __name__ == "__main__":
     a = sys.argv[1:]
-    if len(a) == 2 and a[0] == "lists": job, out = lists_job(), a[1]
-    elif len(a) == 4 and a[0] == "probe": job, out = probe_job(read_coverage(a[1], a[2])), a[3]
+    if len(a) == 2 and a[0] == "lists": jobs, out = lists_jobs(), a[1]
+    elif len(a) == 4 and a[0] == "probe": jobs, out = [probe_job(read_coverage(a[1], a[2]))], a[3]
     else: sys.exit(__doc__)
-    os.makedirs(out, exist_ok=True); p = os.path.join(out, job["job_id"] + ".json")
-    with open(p, "w") as f: json.dump(job, f, indent=1); f.write("\n")
-    print("wrote", p, "| requests", len(job["requests"]))
+    os.makedirs(out, exist_ok=True)
+    for job in jobs:
+        p = os.path.join(out, job["job_id"] + ".json")
+        with open(p, "w") as f: json.dump(job, f, indent=1); f.write("\n")
+        print("wrote", p, "| requests", len(job["requests"]), "| cap", job["max_requests"])

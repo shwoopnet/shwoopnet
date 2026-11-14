@@ -11,6 +11,7 @@ END = ts("2026-11-13T23:59:00Z")
 EVENT830_SERIES = ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"]
 EVENT830_DATES = ["2026-11-05", "2026-11-06", "2026-11-10", "2026-11-12", "2026-11-13"]      # SLOT_CALENDARS.EVENT830 rows up to the end date (functions/kalshiSlotLib.js on main); each is a 13:30Z close
 CUT_S = 300
+MAX_PER_FILE = 458                                                                           # the runner stops a run at 40 minutes (about 480 requests at 5 s): cap = 458 + 12 retries = 470 at most (the Head, Nov 14)
 RETRY_SLACK = 12                                                                             # the runner counts every request SENT against the cap, retries included
 READER_RULE = "STANDING READER RULE: drop any candle ending after its market's close (a batched hour returns one extra candle ending at close + 60 s for the closes before the block's last close)."
 def parse_lists(folder):
@@ -33,7 +34,7 @@ def plan(lists):
         if s in EVENT830_SERIES and any(abs(cl - ts(d + "T13:30:00Z")) <= CUT_S for d in EVENT830_DATES): c["event830"] += 1; continue
         closes[tk] = cl
     return {"closes": closes, "dropped_event830": c["event830"], "ignored_after_end": c["after_end"], "ignored_unknown_series": c["unknown_series"], "ignored_no_close": c["no_close"]}
-def build_jobs(pl, max_per_file=1188):
+def build_jobs(pl, max_per_file=MAX_PER_FILE):
     blocks = collections.defaultdict(list)
     for tk, cl in pl["closes"].items(): blocks[(cl - 1) // 3600].append(tk)
     reqs = []

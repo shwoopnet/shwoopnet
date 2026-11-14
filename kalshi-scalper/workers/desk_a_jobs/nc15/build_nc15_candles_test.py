@@ -33,16 +33,17 @@ assert plan["dropped_event830"] == 8, plan["dropped_event830"]           # one c
 # 2. ignored: after the end date, unknown series, no close_time (counted)
 assert plan["ignored_after_end"] == 1 and plan["ignored_unknown_series"] == 1 and plan["ignored_no_close"] == 1, plan
 # 3. hourly grouping: every request holds the closes of ONE hour block (closes in (H, H+3600]), one ticker per series per close, at most 44 tickers
-jobs = C.build_jobs(plan, max_per_file=1188)
+jobs = C.build_jobs(plan)      # the default file size: cap <= 470 (the runner stops a run at 40 minutes, about 480 requests at 5 s; the Head, Nov 14)
+assert C.MAX_PER_FILE == 458 and C.MAX_PER_FILE + C.RETRY_SLACK <= 470
 reqs = [r for j in jobs for r in j["requests"]]
 assert all(len(r["params"]["market_tickers"].split(",")) <= 44 for r in reqs) and all(r["params"]["period_interval"] == 1 for r in reqs)
 for r in reqs:
     tk = r["params"]["market_tickers"].split(","); cl = [plan["closes"][t] for t in tk]
     assert r["params"]["start_ts"] == min(cl) - 900 and r["params"]["end_ts"] == max(cl) and max(cl) - min(cl) <= 2700 and len({(c - 1) // 3600 for c in cl}) == 1, r
 assert sorted(t for r in reqs for t in r["params"]["market_tickers"].split(",")) == sorted(plan["closes"]), "every kept ticker in exactly one request"
-# 4. file limits and caps: at most 1,188 requests a file, cap = requests + 12 (the runner counts every request SENT, retries included), cap <= 1,200, ids unique, allowlist = the tickers
+# 4. file limits and caps: at most 458 requests a file, cap = requests + 12 (the runner counts every request SENT, retries included), cap <= 470, ids unique, allowlist = the tickers
 for j in jobs:
-    assert len(j["requests"]) <= 1188 and j["max_requests"] == len(j["requests"]) + 12 <= 1200, (len(j["requests"]), j["max_requests"])
+    assert len(j["requests"]) <= 458 and j["max_requests"] == len(j["requests"]) + 12 <= 470, (len(j["requests"]), j["max_requests"])
     allt = {t for r in j["requests"] for t in r["params"]["market_tickers"].split(",")}
     assert set(j["ticker_allowlist"]) == allt and j["pacing_seconds"] == 5.0 and j["owner"] == "DESK_A"
 assert len({r["id"] for r in reqs}) == len(reqs) and len({j["job_id"] for j in jobs}) == len(jobs)

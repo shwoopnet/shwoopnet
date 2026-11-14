@@ -6,10 +6,15 @@ import build_nc15_jobs as B
 ch = B.chunks(); assert ch[0][0] == B.LIST_START and ch[-1][1] == B.END
 for (a, b), (c, d) in zip(ch, ch[1:]): assert c == b + 1 and a <= b
 assert all(b - a + 1 <= B.CHUNK_S for a, b in ch) and len(ch) == 17, len(ch)
-j = B.lists_job(); assert len(j["requests"]) == 11 * 17 and len({r["id"] for r in j["requests"]}) == len(j["requests"])
-pages = sum(r["max_pages"] for r in j["requests"]); assert pages == 561 and pages + 14 == j["max_requests"] <= 1200, (pages, j["max_requests"])      # the runner counts PAGES against the cap (Main, KP14b): page budget plus 14 for 429 retries
-assert all(r["params"]["status"] == "settled" and r["params"]["limit"] == 1000 and r["max_pages"] == 3 and r["params"]["series_ticker"] in B.SERIES for r in j["requests"])
-assert j["pacing_seconds"] == 5.0 and j["owner"] == "DESK_A" and j["ticker_allowlist"] == [] and max(r["params"]["max_close_ts"] for r in j["requests"]) == B.END
+jl = B.lists_jobs(); assert [x["job_id"] for x in jl] == ["NC15_LISTS_A", "NC15_LISTS_B"]       # split by series group: the runner stops a run at 40 minutes (about 480 requests at 5 s), so no file may page past 470 (the Head, Nov 14)
+reqs_all = [r for x in jl for r in x["requests"]]
+assert len(reqs_all) == 11 * 17 and len({r["id"] for r in reqs_all}) == len(reqs_all)
+assert sorted({r["params"]["series_ticker"] for r in reqs_all}) == sorted(B.SERIES) and {r["params"]["series_ticker"] for r in jl[0]["requests"]}.isdisjoint({r["params"]["series_ticker"] for r in jl[1]["requests"]})
+for x in jl:
+    pages = sum(r["max_pages"] for r in x["requests"]); assert pages + 14 == x["max_requests"] <= 470, (pages, x["max_requests"])      # the runner counts PAGES and retries against the cap: page budget plus 14, and at most 470
+    assert x["pacing_seconds"] == 5.0 and x["owner"] == "DESK_A" and x["ticker_allowlist"] == [] and set(x["series_allowlist"]) == set(B.SERIES)
+assert sum(sum(r["max_pages"] for r in x["requests"]) for x in jl) == 561
+assert all(r["params"]["status"] == "settled" and r["params"]["limit"] == 1000 and r["max_pages"] == 3 and r["params"]["series_ticker"] in B.SERIES for r in reqs_all) and max(r["params"]["max_close_ts"] for r in reqs_all) == B.END
 # the probe: invented coverage; hour A has 3 + 4 + 4 + 4 tickers, hour B has 11 each (the winner); an incomplete hour is skipped
 base0 = B.ts("2026-11-12T14:00:00Z")           # :00 of an hour; the quartet starts at :15
 rows = {}
