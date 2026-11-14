@@ -1,0 +1,68 @@
+{
+ "development_meetings_in_table": 11,
+ "no_market_dates": [],
+ "strikes_in_table": 407,
+ "statement_word_strikes": 28,
+ "two_sided_at_1405": 11,
+ "qualifying": 0,
+ "qualifying_meetings": [],
+ "excluded": {
+  "no_candle_at_1405": 14,
+  "result_not_yes_or_no": 0
+ },
+ "placebo_non_statement_words": {
+  "strikes": 367,
+  "two_sided_at_1405": 306,
+  "qualifying": 61,
+  "qualifying_meetings": [
+   "2025-03-19",
+   "2025-05-07",
+   "2025-06-18",
+   "2025-09-17",
+   "2025-10-29",
+   "2025-12-10",
+   "2026-01-28",
+   "2026-03-18",
+   "2026-04-29"
+  ],
+  "excluded": {
+   "no_candle_at_1405": 60,
+   "result_not_yes_or_no": 0
+  }
+ },
+ "list_rows_dropped_unread": {
+  "held_out": 0,
+  "not_a_development_decision_date": 0,
+  "not_fed_series": 0
+ },
+ "not_statement_type": {
+  "n": 12,
+  "line": "not statement-type, n = 12"
+ },
+ "development_events_in_lists_not_named_by_the_table": {
+  "count": 0,
+  "events": []
+ },
+ "candle_requests_answered_404": 0,
+ "verdict": "CLOSED, efficient, move on: (a) fewer than 15 qualifying strikes (0); (b) from fewer than 5 meetings (0); (c) fewer than half of statement-word strikes two-sided at 2:05 pm (11 of 28)",
+ "haircut_1c": {
+  "entry": "ask + 0.01, capped at 0.87",
+  "qualifying": 0,
+  "qualifying_meetings": [],
+  "two_sided_at_1405": 11,
+  "strikes": 28,
+  "passes": false,
+  "label": "does not count: fails the haircut: (a) fewer than 15 qualifying strikes (0); (b) from fewer than 5 meetings (0); (c) fewer than half of statement-word strikes two-sided at 2:05 pm (11 of 28)"
+ },
+ "haircut_2c": {
+  "entry": "ask + 0.02, capped at 0.87",
+  "qualifying": 0,
+  "qualifying_meetings": [],
+  "two_sided_at_1405": 11,
+  "strikes": 28,
+  "passes": false,
+  "label": "does not count: fails the haircut: (a) fewer than 15 qualifying strikes (0); (b) from fewer than 5 meetings (0); (c) fewer than half of statement-word strikes two-sided at 2:05 pm (11 of 28)"
+ },
+ "could_count_toward_20_to_30": "no",
+ "label": "zero tries; development only; reads settlements by design (see FOMCTEXT_READER_NOTE.md); the placebo is not part of the kill line"
+}
