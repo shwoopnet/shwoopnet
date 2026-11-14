@@ -11,6 +11,9 @@ Every run folder must be PROVEN whole against its committed job (manifest job eq
 The hand-matched statement-word table is Desk C's (decision_date,event_ticker,market_ticker,strike_word,statement_word; card Clarification 1, 28a2d63d); this reader never matches words."""
 import calendar, csv, gzip, hashlib, json, os, re, sys
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import hm_guard  # noqa: E402  (Nov 14: listed landed runs refused, not only HELDOUT_ names)
+
 SERIES = ("KXFEDMENTION", "KXPOWELLMENTION", "KXJPOWMENTION", "KXWARSHMENTION")
 DEV_DATES = ("2025-01-29", "2025-03-19", "2025-05-07", "2025-06-18", "2025-07-30", "2025-09-17", "2025-10-29", "2025-12-10", "2026-01-28", "2026-03-18", "2026-04-29")
 HELDOUT_FROM = calendar.timegm((2026, 6, 17, 0, 0, 0))     # decision dates at or after this are held out (the card); refused
@@ -77,6 +80,7 @@ def answers(folder, job):
     the run took has a 200 row or a final 404 (no such market), a list request's last 200 page carries no cursor, and every stored file's sha256 and byte length match the manifest.
     Yields (row, body) for the 200 rows in order. Anything else stops the reader: a partial pull is not read."""
     refuse_heldout(folder)
+    hm_guard.refuse_all([folder])
     m = json.load(open(inside(folder, "manifest.json")))
     if m.get("job") != job:
         raise SystemExit("refused: %s was not run from the committed job file" % folder)

@@ -144,3 +144,9 @@ assert all(set(r) == {"event_ticker", "series_ticker", "title", "date", "date_so
 assert "HELD" not in json.dumps(ER) and ED == {"held_out": 1, "no_date": 1, "not_fed_series": 1}, ED
 refused(lambda: F.events([run(EJ, {"events_KXFEDMENTION": [{"events": evs, "cursor": ""}]})], job("OTHER", [("events_KXFEDMENTION", "/events")])), "committed job")
 print("events command: ok")
+
+# --- Nov 14 addendum: a landed run listed in HELDOUT_PULL_RUNS.md is refused by every command (hm_guard), not only HELDOUT_ names
+listed = run(EJ, {"events_KXFEDMENTION": [{"events": evs, "cursor": ""}]}, name="2026-11-14T0054Z_43537213544")
+refused(lambda: F.events([listed], EJ), "landed run")
+refused(lambda: F.words([run(LJ, {"hist": [{"markets": []}], "live": [{"markets": []}]}, name="2026-11-14T0054Z_43537213544")], LJ), "landed run")
+print("listed runs refused: ok")

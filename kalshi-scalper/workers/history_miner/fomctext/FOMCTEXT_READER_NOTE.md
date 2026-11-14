@@ -58,3 +58,6 @@ The development events have MONTH-ONLY event tickers (KXFEDMENTION-26MAR), which
   - expected printed rows: KXFEDMENTION-25JAN29 dated 2025-01-29, KXPOWELLMENTION-26MAR dated its MONTH_ONLY date, KXJPOWMENTION-XYZ dated 2026-04-29 (source strike_date), sorted by date;
   - expected drops: held_out 1, no_date 1, not_fed_series 1;
   - a run whose embedded job differs from the given job is refused.
+- **Addendum, 2026-11-14 ~01:30Z (before the code):** the reader's own `refuse_heldout` refuses only HELDOUT_-named paths, not the landed runs listed in HELDOUT_PULL_RUNS.md (now main's copy, sha256 974f2713..., PR 922). `answers()` therefore also calls `hm_guard.refuse_all([folder])` first, for every command.
+  - Expected: a run folder whose name is a run listed in that file (the test uses LIVEDATA_PROBE_B's folder name from the list) is refused by every command.
+  - Every other figure in the tests is unchanged.

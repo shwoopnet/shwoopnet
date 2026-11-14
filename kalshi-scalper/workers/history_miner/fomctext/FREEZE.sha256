@@ -1,4 +1,4 @@
-# FOMCTEXT reader, Nov 14: the events command added (dated line 0a030458); supersedes the Amendment 3 freeze (fomctext.py 3b7fb809, test 0e40c8b3)
-30c56c9ff06683b96fe75fc0e13053c87e7fc2c4951425deb0e8d2d6032c76de  fomctext.py
-136496815f58e4bf22359bbeb834ad532088b96bf5b4dee327c68fbb79d1320e  test_fomctext.py
-ea009b11bb21fb5ccfacc0be5dd4f2763bae6b8547d1cd45851f2fd4fc1b550d  FOMCTEXT_READER_NOTE.md
+# FOMCTEXT reader, Nov 14: events command and hm_guard in answers() (dated line and addendum); supersedes f640f3bb's freeze
+aff0320afe6a691cbd6723c5090b60abc48c0ea802ba38f1a9ca1b2bbb6464d8  fomctext.py
+9fffe19a0af54810b4ab6c5ff4918395d6093a8cc5a2316db9831f963818740f  test_fomctext.py
+f069834072d329d32551fc4c3d7fc5ec656eada9e78cc2f4c741af3ca9f86a94  FOMCTEXT_READER_NOTE.md
