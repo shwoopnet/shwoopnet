@@ -1,0 +1,7 @@
+python 3.13.18 at /usr/local/bin/python3
+n = 132
+T = 5563.63
+missing candle = 11
+unreadable open interest = 0
+outside range, not read = 0 (of 143 KXINX15M windows listed)
+extra: windows with rise >= T = 14
