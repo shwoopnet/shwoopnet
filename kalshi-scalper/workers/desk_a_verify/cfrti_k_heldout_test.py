@@ -19,6 +19,11 @@ lists, cands, perp = build(60, "2026-10-25", True, 7)
 mk = H.load_markets_ho(lists); assert mk and min(m["close"] for m in mk.values()) >= H_MON, "a close before HELD_FROM was loaded"
 assert max(m["close"] for m in mk.values()) > H_MON + 30 * 86400
 tr, _why = H.trades_of(mk, K.load_binary(cands), K.load_perp(perp)); assert len(tr) >= 50 and min(t["close"] for t in tr) >= H_MON, len(tr)
+# 1b. the boundary (the Head, Nov 14, 2026): DEPTH1 read the window closing EXACTLY at HELD_FROM first, so the held-out is closes STRICTLY after it; the excluded count is returned for printing
+_d = tempfile.mkdtemp()
+_L = folder(_d, "lists_b", {"markets": [{"ticker": "KXBTC15M-B%d" % i, "close_time": iso(H_MON + off), "result": "yes", "floor_strike": 80000.0} for i, off in enumerate((-900, 0, 900, 900 + 900))]})
+_b = H.load_markets_ho(_L); assert sorted(m["close"] - H_MON for m in _b.values()) == [900, 1800], "the window closing exactly at HELD_FROM must be excluded"
+assert H.boundary_excluded(_L) == 1, "the count of windows closing exactly at HELD_FROM"
 # 2. the label rule
 def T(c): return dict(pnl=c, win=1 if c > 0 else 0, day=0, close=0)
 assert H.label([T(0.5)] * 29) == "NOT_ENOUGH_DATA"                              # n under 30: never a call
@@ -76,5 +81,5 @@ try:
     assert not os.path.exists(mk2) and "NOT_ENOUGH_DATA, n trades = 35" in _b2.getvalue() and "cash PF" not in _b2.getvalue()
     rows = open(lg).read().strip().split("\n"); assert len(rows) == 2 and all("n=35" in r for r in rows) and "2026-11-20" in rows[0], rows      # only the run that wrote no marker is logged
 finally: H.trades_of = orig
-print("CFRTI-K HELD-OUT TEST OK (filter from Nov 14, label rule, under 50 prints only the count and spends nothing, refuses before Nov 20, marker, second run refused)")
+print("CFRTI-K HELD-OUT TEST OK (filter strictly after Nov 14 00:00Z, boundary count, label rule, under 50 prints only the count and spends nothing, refuses before Nov 20, marker, second run refused)")
 print(out.strip())
