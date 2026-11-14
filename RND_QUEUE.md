@@ -873,3 +873,9 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 - SPXOI1: 143 listed, 133 with candles (10 Nov 5 tickers built with the wrong suffix). Quote profile n 133. Threshold T build 1 (Desk A): n 132, T 5563.63, superseded once the owner-approved 10-request patch lands; both builds recompute then. SPXSCALP and ESLEAD1 wait for the patch.
 - SOCDERIV measure: closed as efficient (build 1); the History Miner's build 2 to compare.
 - DEPTH1: closed FALSIFIED (see above).
+
+## 2026-11-14 01:27Z, HOURLYTEMP measured and parked
+- Cost measurement (zero tries, no result read), two builds (Desk B 8066391f, Testing Desk d72cb4e5), Auditor B comparing: NOT closed on cost (median near-money round trip about 4.4c to 4.8c at the 30 minute look in all four cities).
+- HOURLYNOW (nowcast against hourly brackets): VA rules a VERSION of WXDAYEND; no card. Versions don't count under the owner's order.
+- Synoptic Data (the settling source): FORBIDDEN for trading use by its terms (Sec 2.6, event contracts), per Main's read. Parked like Polymarket and ESPN: no automated read unless Synoptic consents in writing.
+- The suggested proxy-match measurement is NOT run (it would join outcomes inside W-CAT-CAL1's released held-out only to serve a version).
