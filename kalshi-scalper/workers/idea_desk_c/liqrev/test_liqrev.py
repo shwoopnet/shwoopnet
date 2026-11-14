@@ -52,4 +52,10 @@ assert T.score(gap)["skips"].get("no_liq_coverage") == 5
 h = T.score(case, "held")
 assert h["held"]["n"] == 1 and h["held"]["net"] == 0.55 and h["held_verdict"].startswith("NO_EVIDENCE") and h["counts_toward_20_30"] is False
 assert "held_1c" in h and "held_2c" in h and h["label"] == "upper bound, not fill-checked"
+# Auditor B item a: a held-out window that fails the band does not change the development zero-try count
+hb = json.loads(json.dumps(case))
+hb["polls"]["KXBTC15M-W6"][0]["no_bid_px_1"] = 0.10      # YES ask 0.90 > 0.80: band failure in the held-out window
+r1, r2 = T.score(case, "held"), T.score(hb, "held")
+assert r1["triggered_dev"] == r2["triggered_dev"] == 2, (r1["triggered_dev"], r2["triggered_dev"])
+assert r2["skips"].get("band_or_spread") == 2
 print("liqrev build 1 (Nov 14): hand case v2, the offset check and 7 guard or refusal checks passed")

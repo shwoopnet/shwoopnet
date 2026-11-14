@@ -199,3 +199,17 @@ This amendment is the one place for the fill and threshold rule, and it governs 
   - A taker fill at the ask seen at a 2 second R6 poll is not checked for size, nor for the quote moving before the order arrives.
   - The R8 fill is an upper bound, as the card's rule section already says: "Fill at the ask seen plus the rounded fee (an upper bound)".
 - **Every LIQREV result line says "upper bound, not fill-checked"** (C9), at R8's fill, at 1c and at 2c alike.
+
+## Amendment 7 (Nov 14, 2026, 02:45Z, before H and before any row is read; Auditor B's items b and c on build 1)
+
+- **(b) The development kill.** Amendment 5 governs. The development read closes the card if:
+  - a development half is under PF 1.2 at R8's fill; or
+  - fewer than 60 development windows triggered with a two-sided quote (the zero-try count: bets plus band-or-spread skips, development windows only).
+
+  The original "fewer than 60 bets" is replaced by that count and no longer closes the card on its own: 80 triggered windows with 30 band failures (50 bets) do not close it. With under 30 development bets the read is labelled "no evidence at n = x".
+- **(c) The counting PF is the held-out window alone.** A pass counts toward the owner's 20 to 30 only if all three hold:
+  - the held-out PF at 1c is 1.3 or better;
+  - each development half's PF at 1c is 1.0 or better;
+  - the held-out PF at 2c is 1.0 or better.
+
+  Development and held-out bets are never pooled for this label. Both builds read it this way.

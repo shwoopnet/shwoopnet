@@ -142,7 +142,7 @@ def score(case, mode="dev"):
     allrows = dedupe(case["liquidations"])
     rows = [r for r in allrows if r["inst_id"] == USED_INST]
     usd_ignored = len(allrows) - len(rows)
-    bets, skips = [], {}
+    bets, skips, band_win = [], {}, {}
     for w in case["windows"]:
         b, why = decide(w, rows, case["polls"], H, cov)
         if b and mode == "dev" and b["window"] == "held": b, why = None, "held_window_ignored"
@@ -150,9 +150,11 @@ def score(case, mode="dev"):
             why = "held_window_ignored"
         if b: bets.append(b)
         else: skips[why] = skips.get(why, 0) + 1
+        if why == "band_or_spread": band_win[w["ticker"]] = window_of(ms(w["close"]))
     dev = [b for b in bets if b["window"] in ("dev1", "dev2")]
     d, d1, d2 = stats(dev), stats([b for b in dev if b["window"] == "dev1"]), stats([b for b in dev if b["window"] == "dev2"])
-    triggered = len(bets) + skips.get("band_or_spread", 0)
+    dev_band = sum(1 for w in case["windows"] if band_win.get(w["ticker"]) in ("dev1", "dev2"))   # Auditor B a: development windows only
+    triggered_dev = len(dev) + dev_band
     out = {"mode": mode, "label": LABEL, "bets": bets, "skips": dict(sorted(skips.items())), "usd_swap_rows_ignored": usd_ignored,
            "dev": shown(d), "dev1": shown(d1), "dev2": shown(d2)}
     for k in ("pnl_1c", "pnl_2c"):                                         # Amendment 5 (c): the haircut lines, printed beside
@@ -160,7 +162,8 @@ def score(case, mode="dev"):
         out["dev" + sfx] = shown(stats(dev, k))
         out["dev1" + sfx] = shown(stats([b for b in dev if b["window"] == "dev1"], k))
         out["dev2" + sfx] = shown(stats([b for b in dev if b["window"] == "dev2"], k))
-    if triggered - (len([b for b in bets if b["window"] == "held"])) < DEV_MIN:
+    out["triggered_dev"] = triggered_dev
+    if triggered_dev < DEV_MIN:
         out["dev_verdict"] = "CLOSED (zero-try count: under %d triggered windows with a two-sided quote)" % DEV_MIN
     elif pfv(d1) < 1.2 or pfv(d2) < 1.2:                                  # Amendment 5: a development half under 1.2 closes it
         out["dev_verdict"] = "CLOSED"
@@ -173,9 +176,8 @@ def score(case, mode="dev"):
         out["held"] = shown(h)
         h1, h2 = stats(hb, "pnl_1c"), stats(hb, "pnl_2c")
         out["held_1c"], out["held_2c"] = shown(h1), shown(h2)
-        all1, all2 = stats(dev + hb, "pnl_1c"), stats(dev + hb, "pnl_2c")
         d1c, d2c = stats([b for b in dev if b["window"] == "dev1"], "pnl_1c"), stats([b for b in dev if b["window"] == "dev2"], "pnl_1c")
-        counts = pfv(all1) >= 1.3 and pfv(d1c) >= 1.0 and pfv(d2c) >= 1.0 and pfv(all2) >= 1.0
+        counts = pfv(h1) >= 1.3 and pfv(d1c) >= 1.0 and pfv(d2c) >= 1.0 and pfv(h2) >= 1.0   # Amendment 7 (c): held-out alone, never pooled
         out["counts_toward_20_30"] = counts
         if h["n"] < NO_EVIDENCE_UNDER: out["held_verdict"] = "NO_EVIDENCE at n = %d" % h["n"]
         elif out["dev_verdict"] == "CONTINUE" and all(pfv(x) >= BAR_PF for x in (d1, d2, h)) and (h["z"] or 0) >= BAR_Z:
