@@ -47,3 +47,10 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
   - No try was counted.
   - The recorder rebuild is the Head's and the owner's call; the Head recommends dropping it.
 - **Combo tape rebuild dropped by the owner (Nov 14, 2026, 02:45Z, "drop combo rebuild").** Nothing is built. The fix spec stays on CROWDLEG_CARD.md as history.
+
+- **HALTWIN CLOSED by the VA (Nov 14, 2026, 12:30Z).** No card was written and no try was counted.
+  - It is a version of TIECOND1 (the 7e "conditional tie premium" row, frozen-source rules), PUB20 P10 (halts) and SETTLE1 (FALSIFIED).
+  - The settlement source is a single Pyth 1 minute candle, not CME futures (SETTLE1's rulebook read).
+  - Silver and copper list no windows during the halt.
+  - The VA's descriptive look at 21 WTI and natural gas halt windows found 12 resolved NO, which contradicts a frozen reference. The VA disclosed that it read their result column.
+  - Nothing survives from the NC15 history at this desk.
