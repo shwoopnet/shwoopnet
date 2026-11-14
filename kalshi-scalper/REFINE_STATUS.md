@@ -4,6 +4,10 @@ HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; line
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-13 06:28 PM CT (00:28Z): Window caveat: reports are 14 days; the OICORE proven-bar read and any since-start line need a long report
+
+dash.sh asks the nightly endpoint for 336 hours, so OICORE fills older than 14 days rolled out of every figure I sent since Nov 13 17Z (the report's OICORE count stayed near 93 while the true count was higher, found at 00:27Z Nov 14). The proven-bar read (oicore_proven.py, first 100 rows by ts) must be run on a report with hours of at least 1440 (dash_long.sh in the scratchpad does that; the endpoint allows 90 days). Earlier since-start and OICORE cumulative lines were 14-day window figures and are corrected by message. No figures here.
+
 ## 2026-11-13 05:00 PM CT (23:00Z): S-LIM1-LIVE end stamp: OICORE limit slip OFF from 2026-11-13T17:59:25Z
 
 Main (Nov 13): SLOT_LIMIT_SLIP is empty on main and in the deployed commit c6f54bed; kalshiLiveArmed stamped 2026-11-13T17:59:25Z running it (nightly report deploys block). Checked in the repo: git grep at c6f54bed shows SLOT_LIMIT_SLIP = Object.freeze({}). So the S-LIM1-LIVE tracker ends at that stamp (file SLIP_OFF_TS, no figures); OICORE orders placed at or after it are touch-priced, before it slip-on; there is no pending revert deploy. The before/after read keeps its plan (new touch-priced fills only, NOT_ENOUGH_DATA below 40 new fills) and the 100-fill read is taken on the whole record and on the touch-priced fills separately. The live OICORE net kill is -50 after 40 fills (PR 904), streak 24; my earlier -6 figure was the old line. Also: XRPYES10 was retired Nov 11, its orders in the top line are old; balance moves are bot net plus the owner's own manual trades. No figures here.
