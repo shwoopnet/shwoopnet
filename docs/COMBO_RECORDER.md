@@ -6,6 +6,8 @@ Research data only. Nothing here trades, signs or holds a key. It records Kalshi
 
 **Leg tickers (added Nov 12, 2026, the Head of R&D: so nesting and price-consistency checks are possible).** `quotes.csv` has a last column `leg_tickers`: the combo's legs as `market_ticker:side` joined by `|`, read from the same listing answer that gives the leg count (`mve_selected_legs`), so no request is added. It is capped at 600 characters; a longer one is cut at a whole leg and ends with `|...`, and `legs` keeps the true count. To keep a day under 1 MB it is filled for the first 100 quote rows only (the tightest spreads, which are also the ones that get books); rows 101 to 400 leave it empty. A missing legs list is empty, never zero. Older files have 18 columns and stay parseable (the new column is appended last).
 
+**Nov 13, 2026: leg tickers on every quote row, and no trade reads.** For Idea Desk C's CROWDLEG and NOTAKER cards, `leg_tickers` is now filled on all 400 quote rows (it was the first 100), so a reader can find every listed combo that contains a given leg. The 15 per-combo trade reads were removed: the separate nonstop recorder `record-combo-tape.yml` (`docs/COMBO_TAPE_RECORDER.md`) reads every combo trade on the public tape every minute, with each combo's legs. `trades_read` in the coverage row is now always 0 and no `trades.csv` is written here. Requests per run fall to at most 48 (5 list pages, 40 books, 3 settled pages once a day) inside the same 90 budget; the leg tickers add an ESTIMATED 0.6 MB a day gzipped (re-measure from the first files).
+
 **Where it goes.** Gzipped CSV files on its own `combo-data` branch (under `combo/DATE/HHMM/`), pushed with the built-in token. Never main, never the other data branches, never published with the site (`_config.yml` excludes `.github`, `scripts` and `docs`).
 
 **Safety.** Public GET endpoints under `/markets` only. No key, no secret, no auth header, no POST, no order path, no Firestore. A plain User-Agent (`shwoopnet-research-recorder`). Redirects are refused. A 429 waits 5 seconds, doubling up to 60; three refusals in a row end the run early and it says so. A hard budget of 90 requests a run.
@@ -16,13 +18,13 @@ Research data only. Nothing here trades, signs or holds a key. It records Kalshi
 |---|---|
 | Cadence | one poll every 30 minutes (48 runs a day) |
 | Spacing | at least 6 seconds between requests, so requests per minute never exceed 10 |
-| Requests per run | at most 90 (budget); the caps are 5 list pages, 40 books, 15 trade reads, plus 3 settled pages once a day; a trial run of the widened filter used 60, three of them refused and waited out |
+| Requests per run | at most 90 (budget); the caps are 5 list pages and 40 books, plus 3 settled pages once a day (15 trade reads until Nov 13, 2026); a trial run of the widened filter used 60, three of them refused and waited out |
 | Requests per day | at most 4,320; about 2,900 at the trial's size, about 2 a minute on average |
 | MB per day (gzipped) | about 0.9 MB with the leg tickers (an estimate: 0.7 measured in the trial plus about 0.2 for 100 rows of leg tickers, sized on synthetic leg strings because the real ones were not readable when this was written; re-measure from the first files); the trial figure was about 0.7 MB gzipped (about 15 KB a run, 13 KB of it the 400 capped quote rows, so the trial sits at the quote cap); under 1 MB at the caps; about 72 MB over the whole run (80 days). The old filter measured about 7 KB a run and 0.35 MB a day |
 | Runner minutes | about 6 a run in the trial (6 min 3 s), 9 at the budget: about 310 to 430 runner minutes a day, 9,400 to 13,000 a month, free on a public repo |
 | Ends | 2027-01-31 23:59 UTC by itself (workflow and script); sooner by deleting `.github/workflows/record-combo.yml` |
 
-**Honest limits.** Most combos have an empty book (no bids on either side); in the widened trial 10 of the 40 tightest spreads had any depth, and 3,966 of the 5,000 listed combos had a posted price on some side (the 400 quote rows and 40 books are therefore a small slice of the selection). That is a finding about the market, not a fault. Prices are stored as the exchange returns them, nothing is computed. Gates: `test/comboBookRecorderGates.test.js` (CB1 to CB13).
+**Honest limits.** Most combos have an empty book (no bids on either side); in the widened trial 10 of the 40 tightest spreads had any depth, and 3,966 of the 5,000 listed combos had a posted price on some side (the 400 quote rows and 40 books are therefore a small slice of the selection). That is a finding about the market, not a fault. Prices are stored as the exchange returns them, nothing is computed. Gates: `test/comboBookRecorderGates.test.js` (CB1 to CB14).
 
 ## What it is expected to capture, and the stop rule (added Nov 12, 2026, the EA's note)
 
