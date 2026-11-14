@@ -68,6 +68,15 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     def run(name, **kw):
         d = os.path.join(dc, name); os.mkdir(d); mkrun(d, jc, build(**kw)); return s.measure(spec, [dl], [d])
     eff = run("eff", edge_btts=0.0, half=0.005)
+    d_pg = os.path.join(dc, "pg"); os.mkdir(d_pg); mkrun(d_pg, jc, build(edge_btts=0.0, half=0.005)); pgf = os.path.join(dc, "pergame.jsonl")
+    s.measure(spec, [dl], [d_pg], pergame=pgf); pgl = [json.loads(x) for x in open(pgf).read().splitlines()]
+    keys_ = [(r["league"], r["game"], r["type"], r["ticker"], r["kind"]) for r in pgl]; assert keys_ == sorted(keys_) and len(set(keys_)) == len(keys_) and len(pgl) >= 150
+    assert {r["kind"] for r in pgl} == {"target", "placebo"} and not any(("result" in k_ or "settle" in k_) for r in pgl for k_ in r)
+    for r in pgl:
+        for f_ in ("league", "group", "game", "type", "ticker", "kind", "ts", "minutes_before_kickoff", "l1", "l2", "rmse", "iterations", "cap_hit", "model", "mid", "bid", "ask", "gap", "fires"): assert f_ in r, f_
+        assert abs(r["mid"] - (r["bid"] + r["ask"]) / 2) < 1e-12 and r["fires"] == (r["gap"] >= s.GAP - 1e-9 and r["ask"] - r["bid"] <= s.SPREAD_MAX + 1e-9) and 0.01 <= r["l1"] <= 6.0 and 0.01 <= r["l2"] <= 6.0 and r["iterations"] <= 200 and r["cap_hit"] is False
+    assert json.loads(json.dumps(pgl)) == pgl and sum(1 for r in pgl if r["kind"] == "target") >= 150
+    nopg = run("nopg", edge_btts=0.0, half=0.005); assert "polish" in nopg and nopg["polish"]["fits"] > 0 and nopg["polish"]["cap_hit"] == 0 and nopg["polish"]["max_iterations"] <= 200
     A = eff["groups"]["A_big"]
     assert eff["tries_added"] == 0 and eff["rule_scored"] is False and eff["result_read"] is False and "Bitcoin 15 minute only" in eff["freshness"]
     assert A["btts"]["filled"] >= 150 and A["btts"]["verdict"].startswith("CLOSED: efficient"), A["btts"]
@@ -129,4 +138,23 @@ gq = gst["gap_quartiles_p90"]
 assert abs(gq[0] - q1_) < 1e-12 and abs(gq[1] - md_) < 1e-12 and abs(gq[2] - q3_) < 1e-12 and gq[0] != round(gq[0], 4) and gq[3] != round(gq[3], 4) and gst["median_spread"] == 0.02 and gst["median_one_way_entry_cost"] == 0.03
 assert gst["share_gap_ge_8c_spread_le_4c"] == 0.0 and abs(s.stats(rows4)["share_gap_ge_8c_spread_le_4c"] - 0.1) < 1e-15 and s.stats([{"gap": 0.1, "spread": 0.03, "round_trip": 0.1, "one_way": 0.04}] * 3)["share_gap_ge_8c_spread_le_4c"] == 1.0
 st3 = s.stats([{"gap": 0.1 / 3 * i, "spread": 0.0123456, "round_trip": 0.07, "one_way": 0.04123456} for i in (1, 2, 3)]); assert st3["median_spread"] == 0.0123456 and st3["median_one_way_entry_cost"] == 0.04123456
+# ---- Addendum 2 (Head rulings 02:59Z): box [0.01, 6.0], Poisson sums to 40 goals, polish rule and cap, reported iterations ----
+def p80(l1_, l2_):
+    p1_ = [math.exp(-l1_) * l1_ ** n / math.factorial(n) for n in range(80)]; p2_ = [math.exp(-l2_) * l2_ ** n / math.factorial(n) for n in range(80)]
+    return (math.fsum(p1_[i] * p2_[j] for i in range(80) for j in range(i)), math.fsum(p1_[i] * p2_[i] for i in range(80)), math.fsum(p1_[i] * p2_[j] for i in range(80) for j in range(i + 1, 80)))
+import math
+for (a_, b_) in ((5.0, 4.0), (1.5, 1.2), (6.0, 6.0), (0.3, 0.02)):
+    h_, d_, c_ = s.p_winner(a_, b_); r_ = p80(a_, b_)
+    assert abs(h_ + d_ + c_ - 1) < 1e-14 and all(abs(x - y) < 1e-14 for x, y in zip((h_, d_, c_), r_)), (a_, b_, (h_, d_, c_), r_)
+h12 = s.p_winner(1.5, 1.2, N=12); h40 = s.p_winner(1.5, 1.2); assert max(abs(x - y) for x, y in zip(h12, h40)) > 1e-9          # N = 12 was wrong at 1e-9
+for (l1_, l2_) in ((0.5, 0.015), (0.012, 1.4), (5.2, 0.8)):
+    wm_, tm_ = exact(l1_, l2_, (1.5, 2.5, 3.5)); g1, g2, grm = s.fit(wm_, tm_)
+    assert abs(g1 - l1_) < 1e-9 and abs(g2 - l2_) < 1e-9, (l1_, l2_, g1, g2)
+for wm_, tm_ in (((0.02, 0.03, 0.95), {1.5: 0.99, 2.5: 0.99}), ((0.4, 0.3, 0.3), {1.5: 0.0001, 2.5: 0.00001})):
+    g1, g2, _ = s.fit(wm_, tm_); assert 0.01 <= g1 <= 6.0 and 0.01 <= g2 <= 6.0, (g1, g2)
+wm_, tm_ = exact(1.4, 1.0, (1.5, 2.5, 3.5)); fr = s.fit_full(wm_, tm_)
+assert fr["cap_hit"] is False and 0 <= fr["iterations"] <= 200 and abs(fr["l1"] - 1.4) < 1e-9
+wm2_ = (wm_[0] + .01, wm_[1] - .015, wm_[2] + .005); fr1 = s.fit_full(wm2_, tm_, cap=1); assert fr1["cap_hit"] is True and fr1["iterations"] == 1
+fr200 = s.fit_full(wm2_, tm_); assert fr200["cap_hit"] is False and fr200["iterations"] > 1 and fr200["sse"] <= fr1["sse"]
+print("socderiv addendum 2 tests passed")
 print("socderiv synthetic tests passed")

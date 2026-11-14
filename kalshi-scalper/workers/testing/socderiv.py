@@ -128,10 +128,11 @@ def build_candles(spec, list_folders):
 
 def pois(l, n): return math.exp(-l) * l ** n / math.factorial(n)
 def over(lam, strike): return 1 - sum(pois(lam, n) for n in range(0, int(strike) + 1))        # strike x.5: count > x.5
-_FACT = [math.factorial(n) for n in range(0, 13)]
+_FACT = [math.factorial(n) for n in range(0, 41)]
+BOX_LO, BOX_HI, POLISH_CAP, POLISH_TOL = 0.01, 6.0, 200, 1e-13          # Head rulings 02:59Z (SOCDERIV_FIT_ADDENDUM.md addendum 2)
 
 
-def p_winner(l1, l2, N=12):
+def p_winner(l1, l2, N=40):
     """(team1 wins, draw, team2 wins) for independent Poisson counts, O(N)."""
     e1, e2 = math.exp(-l1), math.exp(-l2)
     p1 = [e1 * l1 ** n / _FACT[n] for n in range(N)]; p2 = [e2 * l2 ** n / _FACT[n] for n in range(N)]
@@ -141,14 +142,15 @@ def p_winner(l1, l2, N=12):
     return h, d, a
 
 
-def polish(err, best, wm, tm, NMAX):
-    """Levenberg-Marquardt / Gauss-Newton polish of the least-squares fit from the grid's best point (the same objective as err; rates kept at or above 0.02): central-difference Jacobian, a step is never accepted if it raises the sum of squares; stops when the step is under 1e-13 or after 80 iterations. SOCDERIV_FIT_ADDENDUM.md."""
+def polish(err, best, wm, tm, NMAX, cap=POLISH_CAP):
+    """Levenberg-Marquardt / Gauss-Newton polish of the least-squares fit from the grid's best point (the same objective as err; rates kept inside [0.01, 6.0]): central-difference Jacobian, a step is never accepted if it raises the sum of squares or leaves the box; stops when the step is under 1e-13, or the SSE improves by less than 1e-13 relative, or after `cap` iterations (default 200). Returns (sse, a, b, iterations, cap_hit). SOCDERIV_FIT_ADDENDUM.md addendum 2."""
     def resid(a, b):
         h, d, c = p_winner(a, b); lam = a + b; e = math.exp(-lam); cdf, run = {}, 0.0
         for n in range(0, NMAX + 1): run += e * lam ** n / math.factorial(n); cdf[n] = run
         return [h - wm[0], d - wm[1], c - wm[2]] + [(1 - cdf[int(kk)]) - v for kk, v in tm]
-    sse0, a, b = best; mu = 1e-9
-    for _ in range(80):
+    sse0, a, b = best; mu = 1e-9; iters = 0; stopped = False
+    for _ in range(cap):
+        iters += 1; da = db = 0.0; old = sse0
         r = resid(a, b); hh = 1e-6
         ja = [(x - y) / (2 * hh) for x, y in zip(resid(a + hh, b), resid(a - hh, b))]; jb = [(x - y) / (2 * hh) for x, y in zip(resid(a, b + hh), resid(a, b - hh))]
         saa = sum(x * x for x in ja); sbb = sum(x * x for x in jb); sab = sum(x * y for x, y in zip(ja, jb)); ga = sum(x * y for x, y in zip(ja, r)); gb = sum(x * y for x, y in zip(jb, r))
@@ -158,17 +160,17 @@ def polish(err, best, wm, tm, NMAX):
             if det <= 0: mu *= 10; continue
             da, db = -(D * ga - B * gb) / det, -(A * gb - B * ga) / det
             na, nb = a + da, b + db
-            if na > 0.02 and nb > 0.02:
+            if BOX_LO <= na <= BOX_HI and BOX_LO <= nb <= BOX_HI:
                 ne = sum(x * x for x in resid(na, nb))
                 if ne <= sse0:
                     a, b, sse0, mu, moved = na, nb, ne, max(mu / 10, 1e-12), True; break
             mu *= 10
-        if not moved or max(abs(da), abs(db)) < 1e-13: break
-    return (sse0, a, b)
+        if not moved or max(abs(da), abs(db)) < POLISH_TOL or old <= 0 or (old - sse0) / old < POLISH_TOL: stopped = True; break
+    return (sse0, a, b, iters, not stopped)
 
 
-def fit(win_mid, total_mid):
-    """Least squares by a coarse-to-fine grid over the two rates (step 0.2, then 0.04, 0.01, 0.0025, 0.0006, 0.00015, 0.00004). win_mid = (team1, draw, team2); total_mid = {strike: mid of 'over strike'}. Returns (l1, l2, rmse over the fitted legs)."""
+def fit_full(win_mid, total_mid, cap=POLISH_CAP):
+    """Least squares by a coarse-to-fine grid over the two rates (step 0.2, then 0.04, 0.01, 0.0025, 0.0006, 0.00015, 0.00004). win_mid = (team1, draw, team2); total_mid = {strike: mid of 'over strike'}. Returns a dict: l1, l2, rmse over the fitted legs, sse, iterations and cap_hit of the polish (the first stage covers 0.01 to 5.81, every point inside the box [0.01, 6.0])."""
     wm = list(win_mid)          # not renormalised: the fit absorbs the winner overround (registration, stated weakness)
     tm = list(total_mid.items()); NMAX = max([8] + [int(kk) for kk, _ in tm])          # cdf up to the largest strike (a 10.5 line exists on the real lists)
     def err(a, b):
@@ -176,12 +178,16 @@ def fit(win_mid, total_mid):
         for n in range(0, NMAX + 1): run += e * lam ** n / math.factorial(n); cdf[n] = run
         return (h - wm[0]) ** 2 + (d - wm[1]) ** 2 + (c - wm[2]) ** 2 + sum((1 - cdf[int(kk)] - v) ** 2 for kk, v in tm)
     best = (1e9, 1.0, 1.0)
-    for step, span, lo in ((0.2, 20, 0.1), (0.04, 5, None), (0.01, 4, None), (0.0025, 4, None), (0.0006, 4, None), (0.00015, 4, None), (0.00004, 4, None)):
+    for step, span, lo in ((0.2, 30, BOX_LO), (0.04, 5, None), (0.01, 4, None), (0.0025, 4, None), (0.0006, 4, None), (0.00015, 4, None), (0.00004, 4, None)):
         if lo is not None: cand = [(lo + i * step, lo + j * step) for i in range(span) for j in range(span)]
         else: cand = [(best[1] + i * step, best[2] + j * step) for i in range(-span, span + 1) for j in range(-span, span + 1)]
-        best = min((err(a, b), a, b) for a, b in cand if a > 0.02 and b > 0.02)
-    best = polish(err, best, wm, tm, NMAX)
-    return best[1], best[2], (best[0] / (3 + len(tm))) ** 0.5
+        best = min((err(a, b), a, b) for a, b in cand if BOX_LO <= a <= BOX_HI and BOX_LO <= b <= BOX_HI)
+    best = polish(err, best, wm, tm, NMAX, cap)
+    return {"l1": best[1], "l2": best[2], "rmse": (best[0] / (3 + len(tm))) ** 0.5, "sse": best[0], "iterations": best[3], "cap_hit": best[4]}
+
+
+def fit(win_mid, total_mid):
+    r = fit_full(win_mid, total_mid); return r["l1"], r["l2"], r["rmse"]
 
 
 def two(idx, t, ts):
@@ -234,14 +240,21 @@ def check_candle_runs(spec, list_folders, candle_folders):
     return sum(seen.values()), len(want)
 
 
-def measure(spec, list_folders, candle_folders):
+def pgrow(g, typ, tk, kind, ts, fr, val, b, a, gp):
+    """One per-game row (addendum 2, item 4). No market result or settlement field. For a placebo row the fit is the refit without the left-out strike and tk is that strike's ticker."""
+    return {"league": g["league"], "group": g["group"], "game": g["game"], "type": typ, "ticker": tk, "kind": kind, "ts": ts, "minutes_before_kickoff": (g["kickoff"] - ts) / 60,
+            "l1": fr["l1"], "l2": fr["l2"], "rmse": fr["rmse"], "iterations": fr["iterations"], "cap_hit": fr["cap_hit"], "model": val, "mid": (a + b) / 2, "bid": b, "ask": a, "gap": gp,
+            "fires": bool(gp >= GAP - 1e-9 and a - b <= SPREAD_MAX + 1e-9)}
+
+
+def measure(spec, list_folders, candle_folders, pergame=None):
     answered, asked = check_candle_runs(spec, list_folders, candle_folders)
     gs, counts = games(spec, list_folders)
     idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
     rows = {}              # (group, type) -> list of target rows ; placebo rows kept alongside
     cache = {}; seen_pl = set()          # one placebo per (game, instant) of a filled target of that type (Miner R10)
     games_by_group = {}
-    resid = []
+    resid = []; pg = []          # pg: the per-game rows (addendum 2, item 4): no result field of any kind
     for g in gs:
         G = games_by_group.setdefault(g["group"], {"derivable": 0, "btts": {"derivable": 0, "filled": 0}, "teamtotal": {"derivable": 0, "filled": 0}})
         G["derivable"] += 1
@@ -265,28 +278,34 @@ def measure(spec, list_folders, candle_folders):
             if len(tie) != 1 or len(t1) != 1 or len(t2) != 1: continue
             totm = {kk: sum(v) / 2 for kk, v in tot.items()}
             ck = (g["game"], g["league"], ts)
-            if ck not in cache: cache[ck] = fit((wm[t1[0]], wm[tie[0]], wm[t2[0]]), totm)
-            l1, l2, rmse = cache[ck]; resid.append(rmse)
+            if ck not in cache: cache[ck] = fit_full((wm[t1[0]], wm[tie[0]], wm[t2[0]]), totm)
+            fr = cache[ck]; l1, l2, rmse = fr["l1"], fr["l2"], fr["rmse"]; resid.append(rmse)
             b, a = two(idx, tk, ts)
             if typ == "btts": val = (1 - math.exp(-l1)) * (1 - math.exp(-l2))
             else: val = over(l1 if tt[0] == g["team1"] else l2, tt[1])
             mid = (a + b) / 2
             row = {"gap": gap(val, b, a), "spread": a - b, "round_trip": (a - b) + 2 * 0.07 * mid * (1 - mid), "one_way": one_way(val, b, a)}
             rows.setdefault((g["group"], typ), {"targets": [], "placebo": []})["targets"].append(row)
+            pg.append(pgrow(g, typ, tk, "target", ts, fr, val, b, a, row["gap"]))
             # placebo: refit with the total strike nearest 50c left out, compare its model value with its own quote
             near = near_strike(tot); rest = {kk: v for kk, v in totm.items() if kk != near}
             if len(rest) >= 2 and (g["league"], g["game"], ts, typ) not in seen_pl:
                 seen_pl.add((g["league"], g["game"], ts, typ))
                 pk = ck + (near,)
-                if pk not in cache: cache[pk] = fit((wm[t1[0]], wm[tie[0]], wm[t2[0]]), rest)
-                p1, p2, _ = cache[pk]
+                if pk not in cache: cache[pk] = fit_full((wm[t1[0]], wm[tie[0]], wm[t2[0]]), rest)
+                frp = cache[pk]; p1, p2 = frp["l1"], frp["l2"]
                 tkk = [t for t, kk in g["totals"].items() if kk == near][0]; pb, pa = tot[near]
+                pg.append(pgrow(g, typ, tkk, "placebo", ts, frp, over(p1 + p2, near), pb, pa, gap(over(p1 + p2, near), pb, pa)))
                 rows[(g["group"], typ)]["placebo"].append({"gap": gap(over(p1 + p2, near), pb, pa), "spread": pa - pb, "one_way": one_way(over(p1 + p2, near), pb, pa), "round_trip": (pa - pb) + 2 * 0.07 * ((pa + pb) / 2) * (1 - (pa + pb) / 2)})
             got[typ] = True
         for typ in ("btts", "teamtotal"):
             if got[typ]: G[typ]["filled"] += 1
+    if pergame:
+        with open(pergame, "w") as fh:
+            for r in sorted(pg, key=lambda r: (r["league"], r["game"], r["type"], r["ticker"], r["kind"])): fh.write(json.dumps(r, sort_keys=True) + "\n")
+    its = sorted(f["iterations"] for f in cache.values()); polish_rep = {"fits": len(its), "median_iterations": st.median(its) if its else None, "max_iterations": its[-1] if its else None, "cap_hit": sum(1 for f in cache.values() if f["cap_hit"]), "cap": POLISH_CAP}
     series_listed = {m["series"] for m in k.markets(list_folders).values()}
-    out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "fit_residual_rmse_median": None if not resid else st.median(resid), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
+    out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "polish": polish_rep, "fit_residual_rmse_median": None if not resid else st.median(resid), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
            "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"}
     for grp, G in games_by_group.items():
         out["groups"][grp] = {"games_with_derivable_kickoff": G["derivable"]}
@@ -330,4 +349,7 @@ if __name__ == "__main__":
             j, c = build_candles(spec, a[2:]); A, B = split_candles(j)
             for nm, jj in (("A", A), ("B", B)): open(os.path.join(a[1], "SOCDERIV_CANDLES_%s.json" % nm), "w").write(json.dumps(jj, indent=1) + "\n")
             print(json.dumps({"requests": [len(A["requests"]), len(B["requests"])], "tickers": [len(A["ticker_allowlist"]), len(B["ticker_allowlist"])]}))
-        elif a[0] == "measure": i = a.index("--candles"); print(json.dumps(measure(spec, a[1:i], a[i + 1:]), indent=1))
+        elif a[0] == "measure":
+            i = a.index("--candles"); rest = a[i + 1:]; pgf = None
+            if "--pergame" in rest: j = rest.index("--pergame"); pgf = rest[j + 1]; rest = rest[:j] + rest[j + 2:]
+            print(json.dumps(measure(spec, a[1:i], rest, pergame=pgf), indent=1))
