@@ -26,7 +26,7 @@ def answer_files(dirs):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(); ap.add_argument("--lists", nargs="+", required=True); ap.add_argument("--template", required=True)
-    ap.add_argument("--out", required=True); ap.add_argument("--from", dest="lo", default="2026-11-05"); ap.add_argument("--to", dest="hi", default="2026-11-14")
+    ap.add_argument("--out", required=True); ap.add_argument("--from", dest="lo", default="2026-11-05"); ap.add_argument("--to", dest="hi", default="2026-11-14"); ap.add_argument("--exclude-job", default=None)
     a = ap.parse_args(argv); lo = ts(a.lo + "T00:00:00"); hi = ts(a.hi + "T00:00:00")
     if hi > ts("2026-12-01T00:00:00"): sys.exit("STOP: the range reaches the held-out date")
     seen = {}; 
@@ -38,12 +38,15 @@ def main(argv=None):
             if tk in seen: sys.exit("STOP: a listed ticker repeats across files")
             c = ts(m["close_time"])
             if lo <= c < hi: seen[tk] = c
+    if a.exclude_job:
+        asked = {r["params"]["market_tickers"] for r in json.load(open(a.exclude_job)).get("requests", [])}
+        seen = {tk: c for tk, c in seen.items() if tk not in asked}
     if not seen: sys.exit("STOP: no market kept")
     job = json.load(open(a.template)); reqs = []
     for i, (tk, c) in enumerate(sorted(seen.items(), key=lambda kv: (kv[1], kv[0])), 1):
         reqs.append({"id": "c%03d" % i, "path": "/markets/candlesticks", "params": {"market_tickers": tk, "start_ts": c - 1800, "end_ts": c - 120, "period_interval": 1}})
     assert all(r["params"]["market_tickers"] in seen for r in reqs)      # every ticker is a listed ticker
-    job["requests"] = reqs; job["max_requests"] = len(reqs)
+    job["requests"] = reqs; job["max_requests"] = len(reqs); job["ticker_allowlist"] = sorted(r["params"]["market_tickers"] for r in reqs)
     json.dump(job, open(a.out, "w"), indent=1); print("requests: %d" % len(reqs)); return 0
 
 if __name__ == "__main__": sys.exit(main())

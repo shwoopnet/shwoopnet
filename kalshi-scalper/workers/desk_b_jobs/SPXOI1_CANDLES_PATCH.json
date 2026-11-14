@@ -1,0 +1,148 @@
+{
+ "job_id": "SPXOI1_CANDLES_PATCH",
+ "registration": "kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md",
+ "purpose": "Ten KXINX15M one minute candle reads for the Nov 5 windows that SPXOI1_CANDLES asked with a wrong ticker (rebuilt from the close minute; the listed suffix is -30). Tickers are exactly as listed in the SPXOI1_LISTS run; the owner approved this 10 request patch pull (Nov 14, 2026). Development dates only; reads end 120 s before each close.",
+ "heldout": "Development dates only, Nov 5 to Nov 13, 2026, nothing after Nov 13. The Head of R&D (2026-11-13 16:45Z): SPXFV1 and SPXOI1 HELDOUT_FIRST 2026-12-01T00:00:00Z (registry 8323d0b7); INX1 now reads 'no KXINX15M window read'. Every date in this job is before the held-out.",
+ "allowed_endpoints": [
+  {
+   "name": "batch_candles",
+   "method": "GET",
+   "path_pattern": "/markets/candlesticks",
+   "params_allowed": [
+    "market_tickers",
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXINX15M"
+ ],
+ "ticker_allowlist": [
+  "KXINX15M-26NOV051300-30",
+  "KXINX15M-26NOV051315-30",
+  "KXINX15M-26NOV051345-30",
+  "KXINX15M-26NOV051400-30",
+  "KXINX15M-26NOV051415-30",
+  "KXINX15M-26NOV051445-30",
+  "KXINX15M-26NOV051500-30",
+  "KXINX15M-26NOV051515-30",
+  "KXINX15M-26NOV051545-30",
+  "KXINX15M-26NOV051600-30"
+ ],
+ "max_requests": 10,
+ "requests": [
+  {
+   "id": "c001",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051300-30",
+    "start_ts": 1793899800,
+    "end_ts": 1793901480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c002",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051315-30",
+    "start_ts": 1793900700,
+    "end_ts": 1793902380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c003",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051345-30",
+    "start_ts": 1793902500,
+    "end_ts": 1793904180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c004",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051400-30",
+    "start_ts": 1793903400,
+    "end_ts": 1793905080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c005",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051415-30",
+    "start_ts": 1793904300,
+    "end_ts": 1793905980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c006",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051445-30",
+    "start_ts": 1793906100,
+    "end_ts": 1793907780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c007",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051500-30",
+    "start_ts": 1793907000,
+    "end_ts": 1793908680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c008",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051515-30",
+    "start_ts": 1793907900,
+    "end_ts": 1793909580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c009",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051545-30",
+    "start_ts": 1793909700,
+    "end_ts": 1793911380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c010",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051600-30",
+    "start_ts": 1793910600,
+    "end_ts": 1793912280,
+    "period_interval": 1
+   }
+  }
+ ],
+ "notes": "Patch for SPXOI1_CANDLES: the 10 Nov 5 tickers it asked wrongly, taken exactly as listed in SPXOI1_LISTS (builder jobbuilder/build_spxoi1_candle_job.py, commit 14b1c29c, with --exclude-job against SPXOI1_CANDLES). 10 requests, one ticker each, about 15 seconds at 1 s pacing. start_ts = close - 1800, end_ts = close - 120, period_interval 1. Nothing after Nov 5; the held-out line is as in SPXOI1_CANDLES.",
+ "owner": "DESK_B",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "status": "active",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
