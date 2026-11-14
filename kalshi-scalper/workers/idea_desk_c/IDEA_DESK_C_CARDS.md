@@ -28,3 +28,14 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
   - Its trigger, a request then no fill, is new. Its bet and its join to legs are CROWDLEG's and NOTAKER's, so it would be a third signal in the family "combo-tape flow joined to legs".
   - Under one test per family it waits until CROWDLEG's read is filed, and goes to the VA only then.
   - It is now countable: the nonstop tape (PR 921) gives every combo trade, and the 30 minute listing gives the combos listed.
+
+- **Ruled VERSION by the VA, stopped (Nov 14, 2026, 02:27Z).** No card was written and no data was read for either.
+  - **AUCTIONDAY** (Treasury coupon-auction days on the daily yield ladders) is a version of the calendar-event family.
+    - Same family as EVENT1 and EVENT830, and the same idea as Desk A's AUCTION1.
+    - Also near TNOTE1 (FALSIFIED) and the VA's Nov 13 "auction tail" ruling.
+    - At about one event a month per tenor, it could not be read for years.
+    - The Treasury calendar was held on terms anyway.
+  - **CBWEEK** (central-bank decision weeks on the weekly FX ladders) is a version of the volatility-calendar family.
+    - VOLSLOT1 is the same mechanism.
+    - EVENT1 already tested scheduled events on EURUSD, GBPUSD and USDJPY.
+  - Neither counts toward the 20 to 30. No calendar was read for either.
