@@ -13,6 +13,8 @@ const ACTIVITY_PRICE_CEILING = 0.88;                           // no entry price
 const ACTIVITY_SEAT_DAILY_LOSS = 6, ACTIVITY_SEAT_WEEKLY_LOSS = 20, ACTIVITY_SHARED_WEEKLY_LOSS = 40;
 const ACTIVITY_CUT_FILLS = 100, ACTIVITY_CUT_PF = 0.8;
 const ACTIVITY_TZ = "America/Chicago";
+// Series an activity seat may never use: the declined list (7e) bans any Dogecoin strategy, which a familyId cannot catch (the Head of R&D, Nov 14, 2026).
+const ACTIVITY_BANNED_SERIES = Object.freeze(["KXDOGE15M"]);
 // Families the owner declined or evidence closed (docs/STRATEGY_LIFECYCLE.md 7e). A seat naming one is refused. A reviewed edit may extend this list, never shrink it without the owner.
 const ACTIVITY_DECLINED_FAMILIES = Object.freeze([
   "favourite-late", "taker-order-flow", "market-making", "weather-forecast-vs-market", "mapbreak", "lock-parity-scan", "approval-no-side", "gold-hold",
@@ -75,6 +77,7 @@ function validateActivitySeat(seat) {
   else if (ACTIVITY_DECLINED_FAMILIES.includes(seat.familyId)) e.push("the family '" + seat.familyId + "' is declined or closed by evidence");
   if (typeof seat.readme !== "string" || !seat.readme) e.push("readme (the pre-registration pointer) is required");
   if (!Array.isArray(seat.series) || seat.series.length < 1 || seat.series.some((s) => typeof s !== "string" || !/^KX[A-Z0-9]+$/.test(s))) e.push("series must be a list of Kalshi series names");
+  else if (seat.series.some((x) => ACTIVITY_BANNED_SERIES.includes(x))) e.push("a series on the declined list (Dogecoin) is refused");
   if (!isDate(seat.reviewedAt)) e.push("reviewedAt must be YYYY-MM-DD");
   if (seat.contractsPerOrder !== ACTIVITY_CONTRACTS) e.push("an activity seat is exactly " + ACTIVITY_CONTRACTS + " contracts");
   if (seat.ioc !== true) e.push("an activity seat's order must be immediate-or-cancel (ioc: true)");
@@ -161,6 +164,6 @@ function activityOrderCheck(input) {
 
 module.exports = {
   ACTIVITY_LABEL, ACTIVITY_SEATS, ACTIVITY_MAX_SEATS, ACTIVITY_CONTRACTS, ACTIVITY_MAX_ORDER_COST, ACTIVITY_PRICE_CEILING, ACTIVITY_SEAT_DAILY_LOSS, ACTIVITY_SEAT_WEEKLY_LOSS,
-  ACTIVITY_SHARED_WEEKLY_LOSS, ACTIVITY_CUT_FILLS, ACTIVITY_CUT_PF, ACTIVITY_DECLINED_FAMILIES,
+  ACTIVITY_SHARED_WEEKLY_LOSS, ACTIVITY_CUT_FILLS, ACTIVITY_CUT_PF, ACTIVITY_DECLINED_FAMILIES, ACTIVITY_BANNED_SERIES,
   fee, centralDayStart, centralWeekStart, validateActivitySeat, activeActivitySeats, activityCut, activityFiredToday, activityOrderCheck,
 };

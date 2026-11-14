@@ -167,6 +167,13 @@ gates['AS9 the library imports nothing, nothing in functions or the page names i
   assert.ok(!/kalshiActivityLib|ACTIVITY_SEATS/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), 'the page does not name it');
 };
 
+gates['AS10 a seat on a Dogecoin series is refused, because the declined list bans any Dogecoin strategy and a family id cannot catch it'] = () => {
+  assert.ok(act.ACTIVITY_BANNED_SERIES.includes('KXDOGE15M'));
+  const r = act.validateActivitySeat(seat({ series: ['KXBTC15M', 'KXDOGE15M'] }));
+  assert.ok(!r.ok && /Dogecoin/.test(JSON.stringify(r)), 'refused');
+  assert.ok(act.validateActivitySeat(seat()).ok, 'the demo seat still validates');
+};
+
 (async () => {
   for (const [k, f] of Object.entries(gates)) { try { await f(); console.log('ok  ' + k); } catch (e) { console.error('FAIL ' + k + '\n' + (e.stack || e)); process.exit(1); } }
 })();
