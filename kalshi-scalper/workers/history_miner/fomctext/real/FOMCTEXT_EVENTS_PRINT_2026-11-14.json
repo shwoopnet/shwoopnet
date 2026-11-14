@@ -1,0 +1,156 @@
+[
+ {
+  "event_ticker": "KXFEDMENTION-25JAN",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during today's Fed press conference?",
+  "date": "2025-01-29",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-25MAR",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his Mar 2025 press conference?",
+  "date": "2025-03-19",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXJPOWMENTION-25APR04",
+  "series_ticker": "KXJPOWMENTION",
+  "title": "What will Jerome Powell say at the SABEW Conference?",
+  "date": "2025-04-04",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXJPOWMENTION-25APR16",
+  "series_ticker": "KXJPOWMENTION",
+  "title": "What will Powell say at the ECC?",
+  "date": "2025-04-16",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-25MAY",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his May 2025 FOMC press conference?",
+  "date": "2025-05-07",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXJPOWMENTION-25MAY15",
+  "series_ticker": "KXJPOWMENTION",
+  "title": "What will Jerome Powell say during the Framework Review?",
+  "date": "2025-05-15",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-25JUN",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his Jun 2025 press conference?",
+  "date": "2025-06-18",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-25JUL",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will the Federal Reserve Chair say at the July press conference?",
+  "date": "2025-07-30",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXPOWELLMENTION-25AUG24",
+  "series_ticker": "KXPOWELLMENTION",
+  "title": "What will Jerome Powell say during his speech at the Jackson Hole Economic Policy Symposium?",
+  "date": "2025-08-24",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-25SEP",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his Sep 2025 press conference?",
+  "date": "2025-09-17",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXPOWELLMENTION-25SEP23",
+  "series_ticker": "KXPOWELLMENTION",
+  "title": "What Will Powell Say During His Speech?",
+  "date": "2025-09-23",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXPOWELLMENTION-25OCT15",
+  "series_ticker": "KXPOWELLMENTION",
+  "title": "What will Powell say during his Speech?",
+  "date": "2025-10-15",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXPOWELLMENTION-25OCT25",
+  "series_ticker": "KXPOWELLMENTION",
+  "title": "What will Powell say during the Federal Reserve Open Board Meeting?",
+  "date": "2025-10-25",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-25OCT",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What Will Powell Say During His October Press Conference?",
+  "date": "2025-10-29",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXPOWELLMENTION-25DEC02",
+  "series_ticker": "KXPOWELLMENTION",
+  "title": "What will Jerome Powell say during his remarks on George Shultz's economic policy contributions?",
+  "date": "2025-12-02",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-25DEC",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his Dec 2025 press conference?",
+  "date": "2025-12-10",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-26JAN",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his January press conference?",
+  "date": "2026-01-28",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-26MAR",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his March press conference?",
+  "date": "2026-03-18",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXPOWELLMENTION-26MAR30",
+  "series_ticker": "KXPOWELLMENTION",
+  "title": "What will Jerome Powell say during his remarks at Harvard University?",
+  "date": "2026-03-30",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXWARSHMENTION-26APR21",
+  "series_ticker": "KXWARSHMENTION",
+  "title": "What will Kevin Warsh say during his Senate Confirmation Hearing?",
+  "date": "2026-04-21",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXFEDMENTION-26APR",
+  "series_ticker": "KXFEDMENTION",
+  "title": "What will Powell say during his April press conference?",
+  "date": "2026-04-29",
+  "date_source": "ticker"
+ },
+ {
+  "event_ticker": "KXPOWELLMENTION-26MAY31",
+  "series_ticker": "KXPOWELLMENTION",
+  "title": "What will Jerome Powell say during his acceptance remarks for the JFK Courage Award?",
+  "date": "2026-05-31",
+  "date_source": "ticker"
+ }
+]

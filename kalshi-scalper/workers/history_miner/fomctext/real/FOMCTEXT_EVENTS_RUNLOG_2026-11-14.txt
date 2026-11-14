@@ -1,0 +1,9 @@
+# FOMCTEXT events, one run, 2026-11-14 ~01:28Z (Auditor B CLEAN on aff0320a at 01:25Z; the Head's order of 01:22Z)
+run folder: FOMCTEXT_EVENTS/2026-11-14T0027Z_43534267368 (embedded job equal to main's job file)
+fomctext.py aff0320afe6a691cbd6723c5090b60abc48c0ea802ba38f1a9ca1b2bbb6464d8
+hm_guard.py c0b7826e28cc72c7039e21f3bc7df44b0c412a165580ad4c2ffdf4986f822553
+HELDOUT_PULL_RUNS.md (my copy = main's at run time) 974f271366673c38f1a326335ed69db465aa2e15a327672b12a1e0f28640c126
+print FOMCTEXT_EVENTS_PRINT_2026-11-14.json 984b7e47f095655b46433855b8eb2c3d5bfeaca433935a6bb8433308a9185194
+stderr:
+hm_guard: HELDOUT_PULL_RUNS list read, sha256 974f271366673c38f1a326335ed69db465aa2e15a327672b12a1e0f28640c126 (/tmp/claude-0/hm/wt/kalshi-scalper/workers/HELDOUT_PULL_RUNS.md)
+{"events": 22, "dropped_unread": {"held_out": 4, "no_date": 5, "not_fed_series": 0}}
