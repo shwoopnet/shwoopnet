@@ -130,9 +130,11 @@ with tempfile.TemporaryDirectory() as d:
 node = lambda **kw: dict(kw)
 assert f.quote((node(close="0.5800"), node(close="0.6000")), "T") == (0.58, 0.60) and f.quote((node(close_dollars="0.58"), node(close_dollars="0.60")), "T") == (0.58, 0.60)
 assert f.quote((node(close_dollars="0.58", close="9"), node(close_dollars="0.60", close="9")), "T") == (0.58, 0.60)          # close_dollars is used as before
-for bad in (0.58, "0.58", "58", "0.0000", "1.0000", "1.5000", "0.58000", " 0.5800", "0.5800\n", "-0.5000", True, None, ["0.5800"]):
+for bad in (0.58, "0.58", "58", "0.58000", " 0.5800", "0.5800\n", "-0.5000", "2.0000", True, None, ["0.5800"]):
     try: f.quote((node(close=bad), node(close="0.6000")), "KXFEDMENTION-25OCT-BAD"); assert 0, bad
     except SystemExit as e: assert "STOP" in str(e) and "KXFEDMENTION-25OCT-BAD" in str(e), (bad, str(e))
+assert f.quote((node(close="0.0000"), node(close="0.6000")), "T") == (0.0, 0.60) and f.quote((node(close="0.5800"), node(close="1.0000")), "T") == (0.58, 1.0) and f.quote((node(close="0.5800"), node(close="1.5000")), "T") == (0.58, 1.5)          # read, then rule 18 decides
+assert not f.two_sided(0.0, 0.60) and not f.two_sided(0.58, 1.0) and not f.two_sided(0.58, 1.5)
 assert f.quote((None, node(close="0.6000")), "T") == (None, 0.60) and f.quote(({}, node(close="0.6000")), "T") == (None, 0.60) and f.quote(("x", None), "T") == (None, None) and f.quote((node(close_dollars=None), node(close="0.6000")), "T") == (None, 0.60)
 # end to end in close form: the same strikes score exactly as D1 does; only the 14:05 candle is looked at
 def to_close_form(C):
@@ -145,14 +147,9 @@ def to_close_form(C):
             body["candlesticks"].append({"end_period_ts": 5, "yes_bid": {"close": "0.0000"}, "yes_ask": {"close": "1.0000"}})          # another minute: never read
             gzip.open(fp, "wt").write(json.dumps(body))
 with tempfile.TemporaryDirectory() as d:
-    D1x = [x for x in D1 if not x[1].endswith("-A6")]          # A6 is a 0.00-bid placeholder: in close form the literal unit rule stops on it (below)
-    T, L, C = build(d, D1x); to_close_form(C)
+    T, L, C = build(d, D1); to_close_form(C)          # includes the placeholder strike A6 (bid 0.00 -> close "0.0000"): read, not two-sided, no stop (the Head, 02:31Z)
     r = f.run(T, [L], [C], hash_check=False); k = r["kill_arm"]
-    assert (k["raw"]["count"], k["1c"]["count"], k["2c"]["count"]) == (5, 4, 3) and r["placebo"]["raw"]["count"] == 2 and k["two_sided"] == 7 and k["n"] == 9, r
-with tempfile.TemporaryDirectory() as d:
-    T, L, C = build(d, D1); to_close_form(C)          # with the placeholder strike A6 (bid 0.00 -> close "0.0000")
-    try: f.run(T, [L], [C], hash_check=False); assert 0
-    except SystemExit as e: assert "STOP" in str(e) and "KXFEDMENTION-25OCT-A6" in str(e) and "'0.0000'" in str(e)
+    assert (k["raw"]["count"], k["1c"]["count"], k["2c"]["count"]) == (5, 4, 3) and r["placebo"]["raw"]["count"] == 2 and k["two_sided"] == 7 and k["n"] == 10, r
 with tempfile.TemporaryDirectory() as d:
     T, L, C = build(d, D1); to_close_form(C)
     fp = os.path.join(C, "0001.json.gz"); body = json.load(gzip.open(fp, "rt")); body["candlesticks"][0]["yes_bid"] = {"close": "0.58"}; gzip.open(fp, "wt").write(json.dumps(body))

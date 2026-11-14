@@ -31,7 +31,7 @@ AMBIGUITIES = [
     "(c) is judged on ALL kill-arm strikes including those with no candle, and does not depend on the haircut.",
     "A market's result is read from the lists answers by ticker (a later answer overwrites an earlier one); a result other than yes, no or void is counted as 'other'.",
     "A table strike with no answer in the candle run (the universe check) or no market in the lists STOPs the run; a strike whose candles lack the 14:05 minute is simply not two-sided.",
-    "The unit rule (Head, 02:28Z): close_dollars as before; a `close` must be a string [01].dddd with 0 < value < 1 or the run STOPs; applied to the 14:05 candle of a scored strike only. Literal reading: 0.0000 and 1.0000 in `close` STOP (flagged to the Head).",
+    "The unit rule (Head, 02:28Z): close_dollars as before; a `close` must be a string [01].dddd (read as its float) or the run STOPs; applied to the 14:05 candle of a scored strike only; 0.0000 and 1.0000 are read and are not two-sided (the Head's ruling, 02:31Z).",
     "A candle node's ticker is market_ticker, else ticker, else the request id without a leading 'h_'.",
 ]
 
@@ -60,16 +60,16 @@ _CLOSE = re.compile(r"[01]\.\d{4}")
 
 
 def side_price(node, ticker):
-    """One side of the 14:05 candle (the Head's unit rule, Amendment 4): close_dollars is read as before; otherwise `close` must be a STRING matching [01].dddd (full match) with 0 < value < 1, anything else STOPs;
-    an absent, null or non-object node, or one with neither key, is no price."""
+    """One side of the 14:05 candle (the Head's unit rule, Amendment 4; ruling 02:31Z): close_dollars is read as before; otherwise `close` must be a STRING full-matching [01].dddd, read as its float ("0.0000" and "1.0000" are READ, and
+    rule 18 then marks the strike not two-sided); a value of any other shape STOPs; an absent, null or non-object node, or one with neither key, is no price."""
     if not isinstance(node, dict):
         return None
     if "close_dollars" in node:
         return k.price(node, "close")
     if "close" in node:
         v = node["close"]
-        if not (isinstance(v, str) and _CLOSE.fullmatch(v) and 0.0 < float(v) < 1.0):
-            raise SystemExit("STOP: yes_bid/yes_ask close of %s is %s, not a string [01].dddd strictly between 0 and 1 (the unit rule)" % (ticker, type(v).__name__ + " " + repr(v)))
+        if not (isinstance(v, str) and _CLOSE.fullmatch(v)):
+            raise SystemExit("STOP: yes_bid/yes_ask close of %s is %s, not a string [01].dddd (the unit rule)" % (ticker, type(v).__name__ + " " + repr(v)))
         return float(v)
     return None
 
