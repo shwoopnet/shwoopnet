@@ -70,14 +70,23 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     eff = run("eff", edge_btts=0.0, half=0.005)
     d_pg = os.path.join(dc, "pg"); os.mkdir(d_pg); mkrun(d_pg, jc, build(edge_btts=0.0, half=0.005)); pgf = os.path.join(dc, "socderiv_pergame.csv")
     s.measure(spec, [dl], [d_pg], pergame=pgf); import csv as csv_; txt_ = open(pgf).read().splitlines(); assert txt_[0] == "game_key,fit_iters,cap_hit,rate_home,rate_away,sse,leg_ticker,leg_type,strike,model_value,market_mid,gap,fires"
-    pgl = list(csv_.DictReader(open(pgf))); keys_ = [(r["game_key"], r["leg_ticker"]) for r in pgl]; assert keys_ == sorted(keys_) and len(pgl) >= 300 and len(set(r["leg_ticker"] for r in pgl)) == len(pgl)
+    pgl = list(csv_.DictReader(open(pgf))); keys_ = [(r["game_key"], r["leg_ticker"]) for r in pgl]; assert keys_ == sorted(keys_) and len(set(r["leg_ticker"] for r in pgl)) == len(pgl)
+    nlegs_ = sum(len(g_["btts"]) + len(g_["teamtotals"]) + len(g_["teamtotals_unreadable"]) for g_ in gs); assert len(pgl) == nlegs_ and nlegs_ > 300, (len(pgl), nlegs_)          # a row for EVERY target leg of every derivable game
+    assert all(r["game_key"] == "KX" + g_["league"] + "GAME-" + g_["game"] for r, g_ in [(r, next(x for x in gs if "KX" + x["league"] + "GAME-" + x["game"] == r["game_key"])) for r in pgl])
+    assert all(r["game_key"].startswith("KX") and "GAME-" in r["game_key"] for r in pgl)
     assert not any(("result" in c_ or "settle" in c_) for c_ in txt_[0].split(",")) and {r["leg_type"] for r in pgl} == {"btts", "teamtotal"}
+    bad_ = {tk_ for g_ in gs for tk_, _ in g_["teamtotals_unreadable"]}; assert len(bad_) == 8 * 60
     for r in pgl:
+        if r["leg_ticker"] in bad_:
+            assert all(r[c_] == "" for c_ in ("fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "model_value", "market_mid", "gap")) and r["fires"] == "False" and r["leg_type"] == "teamtotal"; continue
         for c_ in ("rate_home", "rate_away", "sse", "model_value", "market_mid", "gap"): assert repr(float(r[c_])) == r[c_], (c_, r[c_])
         assert (r["strike"] == "") == (r["leg_type"] == "btts") and (r["strike"] == "1.5" or r["leg_type"] == "btts") and r["fires"] in ("True", "False") and r["cap_hit"] == "False" and 0 <= int(r["fit_iters"]) <= 200
         assert 0.01 <= float(r["rate_home"]) <= 6.0 and 0.01 <= float(r["rate_away"]) <= 6.0
         assert (r["fires"] == "True") == (float(r["gap"]) >= s.GAP - 1e-9)          # the fixture half-spread is 0.005, so the spread leg of the rule always holds
     assert sum(1 for r in pgl if r["leg_type"] == "btts") >= 150
+    d_th = os.path.join(dc, "pgthin"); os.mkdir(d_th); mkrun(d_th, jc, build(edge_btts=0.0, half=0.005, thin=True)); pgt = os.path.join(dc, "thin.csv"); s.measure(spec, [dl], [d_th], pergame=pgt)
+    thin_ = list(csv_.DictReader(open(pgt))); assert len(thin_) == nlegs_ and all(r["fit_iters"] == "" and r["rate_home"] == "" and r["model_value"] == "" and r["market_mid"] == "" and r["gap"] == "" and r["fires"] == "False" and r["leg_ticker"] for r in thin_)
+    assert [(r["game_key"], r["leg_ticker"]) for r in thin_] == keys_
     nopg = run("nopg", edge_btts=0.0, half=0.005); assert "polish" in nopg and nopg["polish"]["fits"] > 0 and nopg["polish"]["cap_hit"] == 0 and nopg["polish"]["max_iterations"] <= 200
     A = eff["groups"]["A_big"]
     assert eff["tries_added"] == 0 and eff["rule_scored"] is False and eff["result_read"] is False and "Bitcoin 15 minute only" in eff["freshness"]

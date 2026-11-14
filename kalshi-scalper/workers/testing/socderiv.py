@@ -93,14 +93,14 @@ def games(spec, list_folders):
             tot = {m["ticker"]: m["floor"] for m in by.get((ser["total"], gk), []) if m["floor"] is not None}
             btts = [m["ticker"] for m in by.get((ser["btts"], gk), [])]
             if len(btts) != 1: counts["no_btts_leg"] += 1; btts = []          # the BTTS leg is the ONE market of the event KX<LG>BTTS-<game key> (Head ruling Nov 13 08:21Z); none or more than one: no BTTS leg, counted
-            tts = {}
+            tts = {}; bad_tts = []
             for m in by.get((ser["teamtotal"], gk), []):
                 hits = [c for c in teams if code(m["ticker"]).startswith(c)]          # exactly one team code must prefix the last segment; two (one code the start of the other, e.g. CR and CRU) is not guessed: unreadable (registration: "if their shape cannot be read, unreadable, not guessed")
                 tm = hits[0] if len(hits) == 1 else None
-                if tm is None or m["floor"] is None: counts["teamtotal_unreadable_markets"] += 1; continue
+                if tm is None or m["floor"] is None: counts["teamtotal_unreadable_markets"] += 1; bad_tts.append((m["ticker"], m["floor"])); continue
                 tts[m["ticker"]] = (tm, m["floor"])
             winner = sorted(m["ticker"] for m in mk)
-            out.append({"group": g, "league": lg, "game": gk, "kickoff": ko, "winner": winner, "team1": teams[0], "team2": teams[1], "totals": tot, "btts": btts, "teamtotals": tts})
+            out.append({"group": g, "league": lg, "game": gk, "kickoff": ko, "winner": winner, "team1": teams[0], "team2": teams[1], "totals": tot, "btts": btts, "teamtotals": tts, "teamtotals_unreadable": sorted(bad_tts, key=lambda x: x[0])})
     return out, counts
 
 
@@ -245,8 +245,14 @@ PG_COLS = ("game_key", "fit_iters", "cap_hit", "rate_home", "rate_away", "sse", 
 
 def pgrow(g, typ, tk, strike, fr, val, b, a, gp):
     """One per-game row (addendum 3: the Miner's CSV spec). One row per game per derivative leg; no market result or settlement field; no placebo rows. league is kept only for the sort tie-break and is not written."""
-    return {"league": g["league"], "game_key": g["game"], "fit_iters": fr["iterations"], "cap_hit": fr["cap_hit"], "rate_home": fr["l1"], "rate_away": fr["l2"], "sse": fr["sse"], "leg_ticker": tk, "leg_type": typ,
+    return {"league": g["league"], "game_key": "KX%sGAME-%s" % (g["league"], g["game"]), "fit_iters": fr["iterations"], "cap_hit": fr["cap_hit"], "rate_home": fr["l1"], "rate_away": fr["l2"], "sse": fr["sse"], "leg_ticker": tk, "leg_type": typ,
             "strike": strike, "model_value": val, "market_mid": (a + b) / 2, "gap": gp, "fires": bool(gp >= GAP - 1e-9 and a - b <= SPREAD_MAX + 1e-9)}
+
+
+def pgblank(g, typ, tk, strike):
+    """A target leg with no fit (never two-sided, or unreadable): the fit and value columns blank, fires False (addendum 4)."""
+    return {"league": g["league"], "game_key": "KX%sGAME-%s" % (g["league"], g["game"]), "fit_iters": None, "cap_hit": None, "rate_home": None, "rate_away": None, "sse": None, "leg_ticker": tk, "leg_type": typ,
+            "strike": strike, "model_value": None, "market_mid": None, "gap": None, "fires": False}
 
 
 def write_pergame(path, pg):
@@ -308,6 +314,9 @@ def measure(spec, list_folders, candle_folders, pergame=None):
             got[typ] = True
         for typ in ("btts", "teamtotal"):
             if got[typ]: G[typ]["filled"] += 1
+        have = {r["leg_ticker"] for r in pg if r["game_key"] == "KX%sGAME-%s" % (g["league"], g["game"])}
+        for typ, tk, tt in targets + [("teamtotal", x, (None, fl)) for x, fl in g["teamtotals_unreadable"]]:
+            if tk not in have: pg.append(pgblank(g, typ, tk, None if tt is None else tt[1]))
     if pergame: write_pergame(pergame, pg)
     its = sorted(f["iterations"] for f in cache.values()); polish_rep = {"fits": len(its), "median_iterations": st.median(its) if its else None, "max_iterations": its[-1] if its else None, "cap_hit": sum(1 for f in cache.values() if f["cap_hit"]), "cap": POLISH_CAP}
     series_listed = {m["series"] for m in k.markets(list_folders).values()}
