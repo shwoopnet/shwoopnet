@@ -27,7 +27,7 @@ assert.deepStrictEqual(wheel.WHEEL_SEATS, []);
 assert.strictEqual(Object.isFrozen(wheel.WHEEL_SEATS), true);
 assert.deepStrictEqual(wheel.activeWheelSeats(), []);
 assert.strictEqual(wheel.WHEEL_FULL_SEATS_ENABLED, false);
-assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'the wheel must not add a strategy to the slot registry');
+assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'the wheel must not add a strategy to the slot registry');
 assert.deepStrictEqual(wheel.WHEEL_RULE_IDS, []);
 // With the production (empty) rule list not even a well formed seat is valid.
 assert.strictEqual(wheel.validateWheelSeat(seat()).ok, false);

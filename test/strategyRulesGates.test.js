@@ -47,6 +47,14 @@ gates.SR2 = () => {
       assert.ok(param(c, 'Daily loss cap').startsWith('$' + L.dailyPerContract.toFixed(2) + ' a contract') && param(c, 'Daily loss cap').includes(Math.round(L.dailyMaxFraction * 100) + '%'), s.id + ' daily cap');
       assert.ok(param(c, 'Drawdown stop').startsWith('$' + L.stopPerContract + ' a contract') && param(c, 'Drawdown stop').includes('($' + L.stopPerContract * L.steps[0] + ' at ' + L.steps[0] + ')') && param(c, 'Drawdown stop').includes(Math.round(L.stopMaxFraction * 100) + '%'), s.id + ' drawdown stop');
       assert.ok(c.rules[0].includes('Starts at ' + L.steps[0] + ' contracts') && c.rules[0].includes(L.steps.slice(1, -1).join(', ') + ' and ' + L.steps[L.steps.length - 1]), s.id + ' goes live line follows the ladder');
+    } else if (slot.SLOT_SEAT_CAPS[s.id]) {
+      // an activity seat (Nov 14, 2026): its own slot caps and the activity limits, all from the code
+      const act = require('../functions/kalshiActivityLib.js'), sc = slot.SLOT_SEAT_CAPS[s.id];
+      assert.ok(param(c, 'Contracts') === String(s.contractsPerOrder) + ', no ladder', s.id + ' contracts');
+      assert.ok(param(c, 'Daily loss cap').includes('$' + sc.daily + ' a day') && param(c, 'Daily loss cap').includes('$' + act.ACTIVITY_SEAT_DAILY_LOSS + ' a day'), s.id + ' daily caps');
+      assert.ok(param(c, 'Weekly loss cap').includes('$' + act.ACTIVITY_SEAT_WEEKLY_LOSS + ' a week') && param(c, 'Weekly loss cap').includes('$' + act.ACTIVITY_SHARED_WEEKLY_LOSS + ' a week'), s.id + ' weekly caps');
+      assert.ok(param(c, 'Lifetime loss cap') === 'Its own: ' + (slot.SLOT_CAP_FRACTIONS.lifetime * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.lifetime, s.id + ' lifetime cap');
+      assert.ok(c.rules[1].includes('cut if its last ' + act.ACTIVITY_CUT_FILLS + ' trades win less than ' + act.ACTIVITY_CUT_PF), s.id + ' cut line');
     } else {
       assert.ok(param(c, 'Contracts').startsWith(String(s.contractsPerOrder)), s.id + ' contracts');
       assert.ok(param(c, 'Daily loss cap') === 'Its own: ' + (slot.SLOT_CAP_FRACTIONS.daily * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.daily, s.id + ' daily cap ' + param(c, 'Daily loss cap'));

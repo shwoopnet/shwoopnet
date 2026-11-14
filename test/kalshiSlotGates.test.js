@@ -45,9 +45,9 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.strictEqual(slot.SLOT_EVER_USED, true, 'once admitted, watching is never set back');
   assert.strictEqual(slot.slotActive(), true);
   assert.strictEqual(slot.slotWatch(), true);
-  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-13');   // moved with the SPXOI1 seat
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-14');   // moved with the SPXOI1 seat
   assert.ok(Object.isFrozen(slot.SLOT_STRATEGIES));
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'exactly three strategies are admitted (CFRTIK added Nov 12, 2026; FLOW1 removed Nov 4, 2026; XRPYES10 and KESTREL removed Nov 11, 2026)');
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'exactly three strategies are admitted (CFRTIK added Nov 12, 2026; FLOW1 removed Nov 4, 2026; XRPYES10 and KESTREL removed Nov 11, 2026)');
   const o = slot.SLOT_STRATEGIES[0];
   assert.ok(Object.isFrozen(o) && Object.isFrozen(o.entry) && Object.isFrozen(o.exit) && Object.isFrozen(o.killRules) && Object.isFrozen(o.killRules.minNet) && Object.isFrozen(o.scaleIn) && Object.isFrozen(o.series), 'every level is frozen');
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o)), {
@@ -68,7 +68,7 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.ok(o.scaleIn.maxSteps * o.contractsPerOrder <= slot.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, 'all steps together fit the open contracts ceiling');
   assert.ok(o.reviewedAt <= slot.SLOT_LAST_REVIEWED_ON, 'reviewedAt is not after the last reviewed date');
   assert.ok(o.series.every((x) => slot.SLOT_SERIES_ALLOWED.includes(x)));
-  assert.deepStrictEqual(slot.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'the production lookup returns exactly the registry entries');
+  assert.deepStrictEqual(slot.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'the production lookup returns exactly the registry entries');
   assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
   assert.strictEqual(slot.slotOrderCheck.length, 1);
   // A hand-built or unregistered strategy still cannot enter, whatever it claims.
@@ -84,16 +84,16 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.ok(prereg.includes('SLOT-OICORE') && /SLOT_STRATEGIES/.test(prereg), 'the registered readme anchor exists in the pre-registration file');
   const c = code(libSrc);
   assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(|process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b|https?:|child_process|\bfs\b/.test(c), 'the library must have no network, store, clock, environment, randomness, timer or signing code');
-  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSpxoiConfig"']);   // the second is SPXOI1's threshold file (Nov 13, 2026): frozen pure data, checked next
+  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSpxoiConfig"', '"./kalshiActivityLib"']);   // the third is the pure, import-free activity seat rails (Nov 14, 2026); the second is SPXOI1's threshold file (Nov 13, 2026): frozen pure data, checked next
   const cfgSrc = code(fs.readFileSync(path.join(root, 'functions', 'kalshiSpxoiConfig.js'), 'utf8'));
   assert.ok(!/require\(|import|fetch|Date|process\.|fs\b|http/.test(cfgSrc), 'the threshold file is pure data: no import, network, clock or environment');
 };
 gates['a switch on alone does nothing: the switch needs a valid registered strategy, and a stored value cannot add one'] = () => {
   // Admitted state: the production switch is on, so the "switch alone" property is proved through the injected-flags path, which is how the gate always proved it.
-  assert.deepStrictEqual(AS({ enabled: true }).map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'with no registry given the only strategies are the shipped ones');
+  assert.deepStrictEqual(AS({ enabled: true }).map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'with no registry given the only strategies are the shipped ones');
   assert.deepStrictEqual(AS({ enabled: true, registry: [] }), []);
   assert.deepStrictEqual(AS({ enabled: false, registry: [GOOD()] }), [], 'a registry with the switch off is nothing');
-  assert.deepStrictEqual(AS({ enabled: true, registry: slot.SLOT_STRATEGIES }).map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'the shipped registry passes the same validation');
+  assert.deepStrictEqual(AS({ enabled: true, registry: slot.SLOT_STRATEGIES }).map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'the shipped registry passes the same validation');
   assert.strictEqual(W({ enabled: true }, input()).allowed, false);
   assert.strictEqual(W({ enabled: false, registry: [GOOD()] }, input()).allowed, false);
   assert.ok(!/data\(\)|\.get\(|localStorage|request\.data/.test(code(libSrc)));

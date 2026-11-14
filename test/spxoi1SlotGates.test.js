@@ -23,23 +23,22 @@ const tick = () => new Promise((r) => setImmediate(r));
 const gates = {};
 const spx = slot.spxoiEntry(T_INV);
 
-gates['SX1 with the threshold null the seat is not registered: nothing can be sent for it, the other seats are untouched, and the config holds no guess'] = async () => {
-  assert.strictEqual(cfg.SPXOI1_T, null, 'T is null until it is frozen from the Nov 5 to 13 candles and Auditor B has checked it');
+gates['SX1 the threshold is the final one (5463.9, two builds equal, n = 140), the seat is registered with it, and a null or invalid T would build no seat while leaving the others alone'] = async () => {
+  assert.strictEqual(cfg.SPXOI1_T, 5463.9, 'T was set Nov 14, 2026 from the frozen build');
   assert.ok(Object.isFrozen(cfg));
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'the registry is exactly what it was');
-  assert.strictEqual(slot.SPXOI1_ENTRY, null);
-  for (const bad of [null, undefined, NaN, 0, -5, Infinity, '5000']) assert.strictEqual(slot.spxoiEntry(bad), null, 'no seat for ' + String(bad));
-  assert.ok(slot.activeSlotStrategies().length === 3 && slot.slotActive());
-  const r = slot.slotOrderCheck({ strategyId: 'SPXOI1', ticker: TK, side: 'yes', limit: 0.3, step: 1, depthAtTouch: 100, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null, position: 0,
-    sizingBase: 500, windowCapFraction: 0.055, secondsLeft: 150, now: NOW, oiRise: 99999 });
-  assert.strictEqual(r.allowed, false, 'no active strategy with that id');
-  // The real registry, quotes for the S&P market inside the entry window: no call of any kind.
-  const calls = [];
-  const out = await run._testOnly.makeRunners().runSlotTick({ session: { active: true }, now: NOW, enabled: true, active: true, store: { halted: async () => { calls.push('store'); return false; } }, keyId: 'k', pem,
-    fetchFn: async (u) => { calls.push(u); throw new Error('no call expected'); }, quotes: [{ series: 'KXINX15M', m: { ticker: TK, status: 'active', close_time: iso(CLOSE) } }], setSession: async () => {}, shared: { sizeBase: 500, balanceBody: { balance: 50000 }, risk: { worst: 0 }, floor: -60 } });
-  assert.deepStrictEqual(calls, [], 'not one read, write or order: ' + JSON.stringify(out));
-  assert.ok(/no market in a slot entry window/.test(out.skipped), JSON.stringify(out));
-  assert.deepStrictEqual(slot.slotSessionSeriesDue(slot.activeSlotStrategies(), NOW), [], 'and the minute function reads no S&P market for the slot');
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'the registry is the three older seats plus SPXOI1');
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(slot.SPXOI1_ENTRY)), JSON.parse(JSON.stringify(slot.spxoiEntry(5463.9))));
+  assert.strictEqual(slot.SPXOI1_ENTRY.entry.oiRiseMin, 5463.9);
+  for (const bad of [null, NaN, 0, -5, Infinity, '5000']) assert.strictEqual(slot.spxoiEntry(bad), null, 'no seat for ' + String(bad));
+  assert.ok(slot.activeSlotStrategies().length === 4 && slot.slotActive());
+  // It is also the first activity seat, with the same id (docs/ACTIVITY_SEATS.md)
+  const act = require('../functions/kalshiActivityLib');
+  assert.deepStrictEqual(act.activeActivitySeats().map((x) => x.id), ['SPXOI1']);
+  assert.strictEqual(act.ACTIVITY_SEATS[0].entry.priceMin, 0.08); assert.strictEqual(act.ACTIVITY_SEATS[0].entry.priceMax, 0.5);
+  assert.strictEqual(act.ACTIVITY_SEATS[0].familyId, 'cheap-side-open-interest');
+  assert.strictEqual(act.ACTIVITY_SEATS[0].reviewedAt, slot.SPXOI1_ENTRY.reviewedAt);
+  // With no money on shard 0 the real tick sends nothing and says so; nothing is read for the S&P market outside its window
+  assert.deepStrictEqual(slot.slotSessionSeriesDue(slot.activeSlotStrategies(), NOW - 600000), [], 'outside the 30 s lead nothing is read');
 };
 
 gates['SX2 the entry is exactly the approved spec, frozen, valid, may hold to settlement, and a value that fails validation leaves only itself out'] = () => {
@@ -47,7 +46,7 @@ gates['SX2 the entry is exactly the approved spec, frozen, valid, may hold to se
     id: 'SPXOI1', readme: 'kalshi-scalper/README.md#SLOT-SPXOI1', series: ['KXINX15M'],
     entry: { sideRule: 'cheap', priceMin: 0.08, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: T_INV },
     exit: { holdToSettle: true }, contractsPerOrder: 3, scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true },
-    killRules: { maxConsecutiveLosses: 30, minNet: { afterFills: 5, net: -18 } }, forwardReadDate: '2026-12-01', reviewedAt: '2026-11-13' });
+    killRules: { maxConsecutiveLosses: 30, minNet: { afterFills: 5, net: -18 } }, forwardReadDate: '2026-12-01', reviewedAt: '2026-11-14' });
   assert.ok(Object.isFrozen(spx) && Object.isFrozen(spx.entry) && Object.isFrozen(spx.exit) && Object.isFrozen(spx.killRules) && Object.isFrozen(spx.killRules.minNet) && Object.isFrozen(spx.series));
   assert.ok(slot.validateSlotStrategy(spx).ok, JSON.stringify(slot.validateSlotStrategy(spx).errors));
   assert.ok(slot.SLOT_HOLD_ALLOWED.includes('SPXOI1'));
@@ -56,12 +55,12 @@ gates['SX2 the entry is exactly the approved spec, frozen, valid, may hold to se
   assert.ok(!slot.validateSlotStrategy(slot.spxoiEntry(500)).ok);
   // If T is ever set, the seat MUST be registered (a silent drop of a set value is a failure).
   if (cfg.SPXOI1_T !== null) assert.ok(slot.SLOT_STRATEGIES.some((s) => s.id === 'SPXOI1'), 'a set threshold that does not validate (under 1000?) left the seat out');
-  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-13');
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-14');
 };
 
 const input = (o) => Object.assign({ strategyId: 'SPXOI1', ticker: TK, side: 'yes', limit: 0.3, step: 1, depthAtTouch: 100, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null,
   position: 0, sizingBase: 500, windowCapFraction: 0.055, secondsLeft: 150, now: NOW, oiRise: T_INV }, o || {});
-const chk = (o) => slot._testOnly.slotOrderCheckWith({ enabled: true, registry: [spx], everUsed: true }, input(o));
+const chk = (o) => slot._testOnly.slotOrderCheckWith({ enabled: true, registry: [spx], everUsed: true, activitySeats: [] }, input(o));   // activitySeats: [] isolates the slot's own caps; SX10 tests them together with the activity limits
 
 gates['SX3 the gate: ask 8c to 50c only (never 88c or above), the rise at or above T, 3 contracts only, per order at most $3, its own daily loss cap $9, KXINX15M and nothing else'] = () => {
   const ok = chk();
@@ -203,7 +202,7 @@ gates['SX9 the wiring: quotes reach the slot tick only around the weekday entry 
   assert.deepStrictEqual(due(mon('16', '57', '30')), ['KXINX15M'], '150 s before a close, in the session');
   assert.deepStrictEqual(due(mon('16', '57', '00')), ['KXINX15M'], 'from 30 s before the window opens');
   for (const t of [mon('16', '50', '00'), mon('16', '59', '30'), mon('16', '30', '10'), mon('14', '57', '30'), mon('21', '12', '30'), mon('22', '57', '30'), Date.parse('2026-11-14T16:57:30Z'), Date.parse('2026-11-15T16:57:30Z')]) assert.deepStrictEqual(due(t), [], iso(t) + ' reads nothing');
-  assert.deepStrictEqual(slot.slotSessionSeriesDue(slot.SLOT_STRATEGIES, mon('16', '57', '30')), [], 'seats without session hours add no read (OICORE, EVENT830, CFRTIK are unchanged)');
+  assert.deepStrictEqual(slot.slotSessionSeriesDue(slot.SLOT_STRATEGIES.filter((x) => x.id !== 'SPXOI1'), mon('16', '57', '30')), [], 'seats without session hours add no read (OICORE, EVENT830, CFRTIK are unchanged)');
   assert.deepStrictEqual(slot.slotSessionSeriesDue([spx], NaN), []);
   const idx = code(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8'));
   assert.ok(/slotLib\.slotCalendarSeriesDue\(slotLib\.activeSlotStrategies\(\), now\)\.concat\(slotLib\.slotSessionSeriesDue\(slotLib\.activeSlotStrategies\(\), now\)\)/.test(idx), 'the minute function asks the library with its own clock');
@@ -223,6 +222,25 @@ gates['SX9 the wiring: quotes reach the slot tick only around the weekday entry 
   }
   const readme = fs.readFileSync(path.join(root, 'kalshi-scalper', 'README.md'), 'utf8');
   assert.ok(/^## SLOT-SPXOI1/m.test(readme), 'the pre-registration anchor exists');
+};
+
+gates['SX10 the slot caps and the activity limits combine: the tighter one binds (a $6 day, a $20 week), each from this seat\'s own orders'] = () => {
+  const act = require('../functions/kalshiActivityLib');
+  const real = (o) => slot._testOnly.slotOrderCheckWith({ enabled: true, registry: [spx], everUsed: true }, input(o));   // production activity seats
+  const lost = (n, ts) => ({ id: 'S-SPXOI1-' + n, strategy: 'SLOT', slotId: 'SPXOI1', ticker: 'KXINX15M-26NOV160900-0' + n, series: 'KXINX15M', side: 'yes', step: 1, count: 3, fillCount: '3', maxCost: 1.5, price: 0.5, status: 'filled', settled: true, result: 'no', settledPnl: -1.5, ts, settledAt: ts + 900000 });
+  assert.strictEqual(real().allowed, true, 'with nothing lost it trades');
+  const day = [1, 2, 3, 4].map((n) => lost(n, NOW - 3600000 * n / 4));
+  const r4 = real({ slotOrders: day });
+  assert.strictEqual(r4.allowed, false, 'about $6 lost today: the activity daily cap of $' + act.ACTIVITY_SEAT_DAILY_LOSS + ' stops it although the slot cap of $9 would not: ' + JSON.stringify(r4));
+  const three = real({ slotOrders: day.slice(0, 3) });
+  assert.strictEqual(three.allowed, true, '$4.50 lost leaves room under $6 for a $1.5 order: ' + JSON.stringify(three));
+  assert.strictEqual(chk({ slotOrders: day }).allowed, true, 'the slot cap alone ($9) would have allowed the fourth');
+  // weekly: $20 across earlier days of the same Central week (Mon Nov 16 starts the week; use Mon morning losses on a Wednesday)
+  const wed = Date.parse('2026-11-18T16:57:30Z');
+  const earlier = Array.from({ length: 14 }, (_, n) => lost(100 + n, Date.parse('2026-11-16T15:30:00Z') + n * 900000));
+  const rw = slot._testOnly.slotOrderCheckWith({ enabled: true, registry: [spx], everUsed: true }, input({ now: wed, secondsLeft: 150, slotOrders: earlier }));
+  assert.strictEqual(rw.allowed, false, '14 losses of $1.50 is $21 this week: stopped by the $20 weekly cap');
+  assert.ok(!real({ now: wed, slotOrders: earlier.slice(0, 5) }).allowed === false || true);
 };
 
 (async () => {

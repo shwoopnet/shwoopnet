@@ -103,7 +103,7 @@ gates.RT1 = () => {
   // Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): gold L1 is the single favourite-late strategy. Consequence: the board lists no shadow rule and only
   // L1, OICORE and EVENT830 live; the five retired duplicates sit under Retired, each with its written return rule and no invented figure; the empty Shadow lane says so instead of drawing nothing.
   assert.deepStrictEqual(P.KAL_BOARD_SHADOW, [], 'no shadow rule is running');
-  assert.deepStrictEqual(P.KAL_BOARD_LIVE.map((s) => s.id), ['L1', 'OICORE', 'EVENT830', 'CFRTIK']);   // CFRTIK added Nov 12, 2026 (probation seat)
+  assert.deepStrictEqual(P.KAL_BOARD_LIVE.map((s) => s.id), ['L1', 'OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1']);   // CFRTIK added Nov 12, 2026 (probation seat)
   for (const id of ['XRPYES10', 'KESTREL', 'GOLDALL', 'XRPFAV6', 'LANTERN']) {
     const r = P.KAL_BOARD_RETIRED.rows.find((x) => x.name === id);
     assert.ok(r, id + ' is under Retired');
@@ -119,14 +119,14 @@ gates.RT1 = () => {
 };
 gates.SP4 = () => {
   // Consequence (the stage board, Nov 12, 2026; one Live box since Nov 13, 2026, the owner: "Merge into one Live box"): three boxes in the loop order, a trial seat in Live with its Trial tag; the count on a box equals the strategies in its panel; a killed strategy is in Off / Retired and never in Live.
-  const live = liveModel(money).map((s) => Object.assign(s, { lane: { L1: 'off', OICORE: 'probation', EVENT830: 'live', CFRTIK: 'probation' }[s.id], killState: s.id === 'L1' ? 'killed' : undefined }));
+  const live = liveModel(money).map((s) => Object.assign(s, { lane: { L1: 'off', OICORE: 'probation', EVENT830: 'live', CFRTIK: 'probation', SPXOI1: 'probation' }[s.id], killState: s.id === 'L1' ? 'killed' : undefined }));
   const h = P.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.deepStrictEqual([...h.matchAll(/data-stage="(\w+)"/g)].map((m) => m[1]), ['shadow', 'live', 'off'], 'Shadow, Live, Off / Retired, in the loop order');
   assert.deepStrictEqual(P.KAL_STAGES.map((s) => s.key), ['shadow', 'live', 'off']);
   const cnt = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*>(?:<u[^>]*>[^<]*</u>)?<b data-count="(\\d+)"').exec(h)[1]);
   const rows = (k) => (panel(h, k).match(/class="rw(?: open)?(?: near)?"/g) || []).length;
-  assert.deepStrictEqual([cnt('shadow'), cnt('live')], [0, 3], 'the counts: two trial seats and one proven strategy are all Live');
-  assert.strictEqual((panel(h, 'live').match(/>Trial \d+ of 90</g) || []).length, 2, 'each trial seat carries its Trial tag with its fills of 90');
+  assert.deepStrictEqual([cnt('shadow'), cnt('live')], [0, 4], 'the counts: three trial seats and one proven strategy are all Live');
+  assert.strictEqual((panel(h, 'live').match(/>Trial \d+ of 90</g) || []).length, 3, 'each trial seat carries its Trial tag with its fills of 90');
   assert.strictEqual((panel(h, 'live').match(/>Under review</g) || []).length, 1, 'a strategy that is not a seat is Under review (nothing has met the proven bar)');
   for (const k of ['shadow', 'live']) assert.strictEqual(rows(k), cnt(k), 'the ' + k + ' count equals the rows in its panel');
   assert.strictEqual(cnt('off'), rows('off'), 'Off, coming back counts only its cooling strategies (cleanup, Nov 13, 2026: no retired history on the page)');
@@ -156,7 +156,7 @@ gates.SP5 = () => {
   const n = P.KAL_BOARD_LIVE.length + SHADOW_FIX.length;
   assert.strictEqual((plain.match(/class="rw(?: open)?(?: near)?"/g) || []).length, n, 'one row per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/<dt>Sizing<\/dt>/g) || []).length, n, 'every row keeps the Sizing line in More');
-  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Trial seat: 3 contracts, no add-on (balance ladder, held at 15, once the trial ends)', OICORE: 'Own ladder, step 20 (20, 25, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
+  assert.deepStrictEqual(P.KAL_BOARD_LADDER, { L1: 'Trial seat: 3 contracts, no add-on (balance ladder, held at 15, once the trial ends)', OICORE: 'Own ladder, step 20 (20, 25, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', SPXOI1: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
   assert.strictEqual((plain.match(/<dd>Next: 3 contracts as a probe<\/dd>/g) || []).length, 4, 'all four fixture shadow rules say next 3 contracts');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 3 && (plain.match(/class="lp-p"/g) || []).length === 3 && /id="lp"/.test(plain), 'three boxes and three panels in one loop');
@@ -456,11 +456,11 @@ gates.GK5 = () => {
 };
 gates.GK6 = () => {
   // Consequence: the header line and the boxes agree. A killed card is counted under Off / Retired and nowhere else; the Live box counts only what trades.
-  const live = ['L1', 'OICORE', 'EVENT830', 'CFRTIK'].map((id) => ({ id, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: id === 'L1', count: 5 }, lane: id === 'L1' ? 'off' : 'probation', spark: [], detail: null, killState: id === 'L1' ? 'killed' : undefined, note: id === 'L1' ? 'Gold is off: the kill rule tripped; it returns only by the written return rule' : '' }));
+  const live = ['L1', 'OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'].map((id) => ({ id, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: id === 'L1', count: 5 }, lane: id === 'L1' ? 'off' : 'probation', spark: [], detail: null, killState: id === 'L1' ? 'killed' : undefined, note: id === 'L1' ? 'Gold is off: the kill rule tripped; it returns only by the written return rule' : '' }));
   const out = Q.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [], retired: [] }, registryList: [], registryState: 'ok' }, esc, money);
   const cell = (k) => Number(new RegExp('data-stage="' + k + '"[^>]*><b data-count="(\\d+)"').exec(out)[1]);
-  assert.deepStrictEqual([cell('shadow'), cell('live'), cell('off')], [0, 3, 1]);
-  assert.ok(/<b>3<\/b> of the live strategies are on trial/.test(out) && !/off or retired/.test(out), 'the header line adds only the trial count, which no box shows');
+  assert.deepStrictEqual([cell('shadow'), cell('live'), cell('off')], [0, 4, 1]);
+  assert.ok(/<b>4<\/b> of the live strategies are on trial/.test(out) && !/off or retired/.test(out), 'the header line adds only the trial count, which no box shows');
   assert.ok(/>STOPPED</.test(out) === false && />COOLING</.test(out) && !/>HEALTHY</.test(/<section class="lp-p" id="lp-p-off"[\s\S]*?<\/section>/.exec(out)[0]), 'the killed gold row reads cooling down, never healthy');
   assert.ok(/Gold is off: the kill rule tripped/.test(out), 'the plain line is in the open detail');
 };
