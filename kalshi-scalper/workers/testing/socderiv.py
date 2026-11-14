@@ -166,7 +166,46 @@ def polish(err, best, wm, tm, NMAX, cap=POLISH_CAP):
                     a, b, sse0, mu, moved = na, nb, ne, max(mu / 10, 1e-12), True; break
             mu *= 10
         if not moved or max(abs(da), abs(db)) < POLISH_TOL or old <= 0 or (old - sse0) / old < POLISH_TOL: stopped = True; break
-    return (sse0, a, b, iters, not stopped)
+    return boundary_stage(resid, sse0, a, b, iters, not stopped, cap)
+
+
+def boundary_stage(resid, sse2, a, b, iters, cap_hit, cap, stub=None):
+    """SOCDERIV_FIT_ADDENDUM.md addendum 5 (the History Miner's text, confirmed by the Head for both builds): a rate within 1e-12 of 0.01 or 6.0 whose SSE gradient points out of the box is set exactly to that bound and held, and the other rate is polished alone (1-D Levenberg-Marquardt) with the same stops; the cap of `cap` iterations is shared with the 2-D passes; both on bounds: nothing is iterated; used only if its SSE is not above the 2-D SSE + 1e-15. Returns (sse, a, b, iterations, cap_hit, on_bound)."""
+    sse_of = lambda x, y: sum(v * v for v in resid(x, y))
+    def grad(x, y, which):
+        hh = 1e-6; r0 = x if which == 0 else y
+        f = (lambda v: sse_of(v, y)) if which == 0 else (lambda v: sse_of(x, v))
+        if r0 - hh < BOX_LO: return (f(r0 + hh) - f(r0)) / hh
+        if r0 + hh > BOX_HI: return (f(r0) - f(r0 - hh)) / hh
+        return (f(r0 + hh) - f(r0 - hh)) / (2 * hh)
+    def on_bound(r, which):
+        lo, hi = abs(r - BOX_LO) < 1e-12, abs(r - BOX_HI) < 1e-12
+        if not (lo or hi): return None
+        g = grad(a, b, which)
+        if lo and g > 0: return BOX_LO
+        if hi and g < 0: return BOX_HI
+        return None
+    ba, bb = on_bound(a, 0), on_bound(b, 1)
+    if ba is None and bb is None: return (sse2, a, b, iters, cap_hit, False)
+    if ba is not None and bb is not None: return (sse_of(ba, bb), ba, bb, iters, cap_hit, True)
+    free_is_b = ba is not None; fixed = ba if free_is_b else bb; x = b if free_is_b else a
+    rr = (lambda v: resid(fixed, v)) if free_is_b else (lambda v: resid(v, fixed))
+    sse1 = sum(v * v for v in rr(x)); mu = 1e-9; it = iters; stopped = False
+    while it < cap:
+        it += 1; old = sse1; hh = 1e-6; r = rr(x)
+        xp, xm = min(x + hh, BOX_HI), max(x - hh, BOX_LO); j = [(u - w) / (xp - xm) for u, w in zip(rr(xp), rr(xm))]
+        jj = sum(v * v for v in j); g = sum(u * w for u, w in zip(j, r)); moved = False; dx = 0.0
+        for _try in range(30):
+            if jj <= 0: break
+            dx = -g / (jj * (1 + mu)); nx = x + dx
+            if BOX_LO <= nx <= BOX_HI:
+                ne = sum(v * v for v in rr(nx))
+                if ne <= sse1: x, sse1, mu, moved = nx, ne, max(mu / 10, 1e-12), True; break
+            mu *= 10
+        if not moved or abs(dx) < POLISH_TOL or old <= 0 or (old - sse1) / old < POLISH_TOL: stopped = True; break
+    out = (sse1, fixed, x, it, not stopped, True) if free_is_b else (sse1, x, fixed, it, not stopped, True)
+    if stub is not None: out = stub
+    return out if out[0] <= sse2 + 1e-15 else (sse2, a, b, iters, cap_hit, False)
 
 
 def fit_full(win_mid, total_mid, cap=POLISH_CAP):
@@ -183,7 +222,7 @@ def fit_full(win_mid, total_mid, cap=POLISH_CAP):
         else: cand = [(best[1] + i * step, best[2] + j * step) for i in range(-span, span + 1) for j in range(-span, span + 1)]
         best = min((err(a, b), a, b) for a, b in cand if BOX_LO <= a <= BOX_HI and BOX_LO <= b <= BOX_HI)
     best = polish(err, best, wm, tm, NMAX, cap)
-    return {"l1": best[1], "l2": best[2], "rmse": (best[0] / (3 + len(tm))) ** 0.5, "sse": best[0], "iterations": best[3], "cap_hit": best[4]}
+    return {"l1": best[1], "l2": best[2], "rmse": (best[0] / (3 + len(tm))) ** 0.5, "sse": best[0], "iterations": best[3], "cap_hit": best[4], "on_bound": best[5]}
 
 
 def fit(win_mid, total_mid):
@@ -240,19 +279,19 @@ def check_candle_runs(spec, list_folders, candle_folders):
     return sum(seen.values()), len(want)
 
 
-PG_COLS = ("game_key", "fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "leg_ticker", "leg_type", "strike", "model_value", "market_mid", "gap", "fires")
+PG_COLS = ("game_key", "fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "leg_ticker", "leg_type", "strike", "model_value", "market_mid", "gap", "side", "edge", "fires")
 
 
 def pgrow(g, typ, tk, strike, fr, val, b, a, gp):
     """One per-game row (addendum 3: the Miner's CSV spec). One row per game per derivative leg; no market result or settlement field; no placebo rows. league is kept only for the sort tie-break and is not written."""
-    return {"league": g["league"], "game_key": "KX%sGAME-%s" % (g["league"], g["game"]), "fit_iters": fr["iterations"], "cap_hit": fr["cap_hit"], "rate_home": fr["l1"], "rate_away": fr["l2"], "sse": fr["sse"], "leg_ticker": tk, "leg_type": typ,
-            "strike": strike, "model_value": val, "market_mid": (a + b) / 2, "gap": gp, "fires": bool(gp >= GAP - 1e-9 and a - b <= SPREAD_MAX + 1e-9)}
+    return {"league": g["league"], "game_key": "KX%sGAME-%s" % (g["league"], g["game"]), "fit_iters": fr["iterations"], "cap_hit": fr["cap_hit"], "rate_home": fr["l1"], "rate_away": fr["l2"], "sse": fr["sse"], "leg_ticker": tk, "leg_type": "team_total" if typ == "teamtotal" else typ,
+            "strike": strike, "model_value": val, "market_mid": (a + b) / 2, "gap": val - (a + b) / 2, "side": "yes" if a <= 1 - b + 1e-9 else "no", "edge": gp, "fires": bool(gp >= GAP - 1e-9 and a - b <= SPREAD_MAX + 1e-9)}
 
 
 def pgblank(g, typ, tk, strike):
     """A target leg with no fit (never two-sided, or unreadable): the fit and value columns blank, fires False (addendum 4)."""
-    return {"league": g["league"], "game_key": "KX%sGAME-%s" % (g["league"], g["game"]), "fit_iters": None, "cap_hit": None, "rate_home": None, "rate_away": None, "sse": None, "leg_ticker": tk, "leg_type": typ,
-            "strike": strike, "model_value": None, "market_mid": None, "gap": None, "fires": False}
+    return {"league": g["league"], "game_key": "KX%sGAME-%s" % (g["league"], g["game"]), "fit_iters": None, "cap_hit": None, "rate_home": None, "rate_away": None, "sse": None, "leg_ticker": tk, "leg_type": "team_total" if typ == "teamtotal" else typ,
+            "strike": strike, "model_value": None, "market_mid": None, "gap": None, "side": None, "edge": None, "fires": False}
 
 
 def write_pergame(path, pg):
@@ -318,7 +357,7 @@ def measure(spec, list_folders, candle_folders, pergame=None):
         for typ, tk, tt in targets + [("teamtotal", x, (None, fl)) for x, fl in g["teamtotals_unreadable"]]:
             if tk not in have: pg.append(pgblank(g, typ, tk, None if tt is None else tt[1]))
     if pergame: write_pergame(pergame, pg)
-    its = sorted(f["iterations"] for f in cache.values()); polish_rep = {"fits": len(its), "median_iterations": st.median(its) if its else None, "max_iterations": its[-1] if its else None, "cap_hit": sum(1 for f in cache.values() if f["cap_hit"]), "cap": POLISH_CAP}
+    its = sorted(f["iterations"] for f in cache.values()); polish_rep = {"fits": len(its), "median_iterations": st.median(its) if its else None, "max_iterations": its[-1] if its else None, "fits_on_bound": sum(1 for f in cache.values() if f["on_bound"]), "cap_hit": sum(1 for f in cache.values() if f["cap_hit"]), "cap": POLISH_CAP}
     series_listed = {m["series"] for m in k.markets(list_folders).values()}
     out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "polish": polish_rep, "fit_residual_rmse_median": None if not resid else st.median(resid), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
            "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"}

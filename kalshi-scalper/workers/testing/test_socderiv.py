@@ -69,25 +69,26 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
         d = os.path.join(dc, name); os.mkdir(d); mkrun(d, jc, build(**kw)); return s.measure(spec, [dl], [d])
     eff = run("eff", edge_btts=0.0, half=0.005)
     d_pg = os.path.join(dc, "pg"); os.mkdir(d_pg); mkrun(d_pg, jc, build(edge_btts=0.0, half=0.005)); pgf = os.path.join(dc, "socderiv_pergame.csv")
-    s.measure(spec, [dl], [d_pg], pergame=pgf); import csv as csv_; txt_ = open(pgf).read().splitlines(); assert txt_[0] == "game_key,fit_iters,cap_hit,rate_home,rate_away,sse,leg_ticker,leg_type,strike,model_value,market_mid,gap,fires"
+    s.measure(spec, [dl], [d_pg], pergame=pgf); import csv as csv_; txt_ = open(pgf).read().splitlines(); assert txt_[0] == "game_key,fit_iters,cap_hit,rate_home,rate_away,sse,leg_ticker,leg_type,strike,model_value,market_mid,gap,side,edge,fires"
     pgl = list(csv_.DictReader(open(pgf))); keys_ = [(r["game_key"], r["leg_ticker"]) for r in pgl]; assert keys_ == sorted(keys_) and len(set(r["leg_ticker"] for r in pgl)) == len(pgl)
     nlegs_ = sum(len(g_["btts"]) + len(g_["teamtotals"]) + len(g_["teamtotals_unreadable"]) for g_ in gs); assert len(pgl) == nlegs_ and nlegs_ > 300, (len(pgl), nlegs_)          # a row for EVERY target leg of every derivable game
     assert all(r["game_key"] == "KX" + g_["league"] + "GAME-" + g_["game"] for r, g_ in [(r, next(x for x in gs if "KX" + x["league"] + "GAME-" + x["game"] == r["game_key"])) for r in pgl])
     assert all(r["game_key"].startswith("KX") and "GAME-" in r["game_key"] for r in pgl)
-    assert not any(("result" in c_ or "settle" in c_) for c_ in txt_[0].split(",")) and {r["leg_type"] for r in pgl} == {"btts", "teamtotal"}
+    assert not any(("result" in c_ or "settle" in c_) for c_ in txt_[0].split(",")) and {r["leg_type"] for r in pgl} == {"btts", "team_total"}
     bad_ = {tk_ for g_ in gs for tk_, _ in g_["teamtotals_unreadable"]}; assert len(bad_) == 8 * 60
     for r in pgl:
         if r["leg_ticker"] in bad_:
-            assert all(r[c_] == "" for c_ in ("fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "model_value", "market_mid", "gap")) and r["fires"] == "False" and r["leg_type"] == "teamtotal"; continue
-        for c_ in ("rate_home", "rate_away", "sse", "model_value", "market_mid", "gap"): assert repr(float(r[c_])) == r[c_], (c_, r[c_])
+            assert all(r[c_] == "" for c_ in ("fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "model_value", "market_mid", "gap")) and r["fires"] == "False" and r["leg_type"] == "team_total" and r["side"] == "" and r["edge"] == ""; continue
+        for c_ in ("rate_home", "rate_away", "sse", "model_value", "market_mid", "gap", "edge"): assert repr(float(r[c_])) == r[c_], (c_, r[c_])
+        assert abs(float(r["gap"]) - (float(r["model_value"]) - float(r["market_mid"]))) < 1e-12 and r["side"] in ("yes", "no")
         assert (r["strike"] == "") == (r["leg_type"] == "btts") and (r["strike"] == "1.5" or r["leg_type"] == "btts") and r["fires"] in ("True", "False") and r["cap_hit"] == "False" and 0 <= int(r["fit_iters"]) <= 200
         assert 0.01 <= float(r["rate_home"]) <= 6.0 and 0.01 <= float(r["rate_away"]) <= 6.0
-        assert (r["fires"] == "True") == (float(r["gap"]) >= s.GAP - 1e-9)          # the fixture half-spread is 0.005, so the spread leg of the rule always holds
+        assert (r["fires"] == "True") == (float(r["edge"]) >= s.GAP - 1e-9)          # the fixture half-spread is 0.005, so the spread leg of the rule always holds
     assert sum(1 for r in pgl if r["leg_type"] == "btts") >= 150
     d_th = os.path.join(dc, "pgthin"); os.mkdir(d_th); mkrun(d_th, jc, build(edge_btts=0.0, half=0.005, thin=True)); pgt = os.path.join(dc, "thin.csv"); s.measure(spec, [dl], [d_th], pergame=pgt)
-    thin_ = list(csv_.DictReader(open(pgt))); assert len(thin_) == nlegs_ and all(r["fit_iters"] == "" and r["rate_home"] == "" and r["model_value"] == "" and r["market_mid"] == "" and r["gap"] == "" and r["fires"] == "False" and r["leg_ticker"] for r in thin_)
+    thin_ = list(csv_.DictReader(open(pgt))); assert len(thin_) == nlegs_ and all(r["fit_iters"] == "" and r["rate_home"] == "" and r["model_value"] == "" and r["market_mid"] == "" and r["gap"] == "" and r["side"] == "" and r["edge"] == "" and r["fires"] == "False" and r["leg_ticker"] for r in thin_)
     assert [(r["game_key"], r["leg_ticker"]) for r in thin_] == keys_
-    nopg = run("nopg", edge_btts=0.0, half=0.005); assert "polish" in nopg and nopg["polish"]["fits"] > 0 and nopg["polish"]["cap_hit"] == 0 and nopg["polish"]["max_iterations"] <= 200
+    nopg = run("nopg", edge_btts=0.0, half=0.005); assert "polish" in nopg and nopg["polish"]["fits"] > 0 and nopg["polish"]["cap_hit"] == 0 and nopg["polish"]["max_iterations"] <= 200 and nopg["polish"]["fits_on_bound"] == 0
     A = eff["groups"]["A_big"]
     assert eff["tries_added"] == 0 and eff["rule_scored"] is False and eff["result_read"] is False and "Bitcoin 15 minute only" in eff["freshness"]
     assert A["btts"]["filled"] >= 150 and A["btts"]["verdict"].startswith("CLOSED: efficient"), A["btts"]
@@ -168,4 +169,34 @@ assert fr["cap_hit"] is False and 0 <= fr["iterations"] <= 200 and abs(fr["l1"] 
 wm2_ = (wm_[0] + .01, wm_[1] - .015, wm_[2] + .005); fr1 = s.fit_full(wm2_, tm_, cap=1); assert fr1["cap_hit"] is True and fr1["iterations"] == 1
 fr200 = s.fit_full(wm2_, tm_); assert fr200["cap_hit"] is False and fr200["iterations"] > 1 and fr200["sse"] <= fr1["sse"]
 print("socderiv addendum 2 tests passed")
+# ---- Addendum 5: boundary rule ----
+def sse2_(a_, b_, wm_, tm_): return sse_(a_, b_, wm_, tm_)
+def golden(f, lo, hi):
+    g_ = (math.sqrt(5) - 1) / 2; c_, d_ = hi - g_ * (hi - lo), lo + g_ * (hi - lo)
+    for _ in range(200):
+        if f(c_) < f(d_): hi = d_
+        else: lo = c_
+        c_, d_ = hi - g_ * (hi - lo), lo + g_ * (hi - lo)
+    return (lo + hi) / 2
+def grad_(a_, b_, wm_, tm_, which):
+    hh = 1e-6
+    if which == 0: return (sse_(a_ + hh, b_, wm_, tm_) - sse_(a_ - hh, b_, wm_, tm_)) / (2 * hh)
+    return (sse_(a_, b_ + hh, wm_, tm_) - sse_(a_, b_ - hh, wm_, tm_)) / (2 * hh)
+wm_, tm_ = exact(0.5, 0.005, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_)
+ref_ = golden(lambda v_: sse_(v_, 0.01, wm_, tm_), 0.01, 6.0)
+assert fb["l2"] == 0.01 and abs(fb["l1"] - ref_) < 1e-8 and fb["on_bound"] is True and abs(grad_(fb["l1"], 0.01, wm_, tm_, 0)) < 1e-9, (fb, ref_)
+wm_, tm_ = exact(6.8, 1.0, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_)
+ref_ = golden(lambda v_: sse_(6.0, v_, wm_, tm_), 0.01, 6.0)
+assert fb["l1"] == 6.0 and abs(fb["l2"] - ref_) < 1e-8 and fb["on_bound"] is True and abs(grad_(6.0, fb["l2"], wm_, tm_, 1)) < 1e-9, (fb, ref_)
+wm_, tm_ = exact(0.001, 0.002, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_)
+assert fb["l1"] == 0.01 and fb["l2"] == 0.01 and fb["on_bound"] is True and fb["iterations"] == 1 and fb["cap_hit"] is False, fb          # nothing iterated in the 1-D stage
+for (l1_, l2_) in ((1.4, 1.0), (0.012, 1.4)):
+    wm_, tm_ = exact(l1_, l2_, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_); assert fb["on_bound"] is False and abs(fb["l1"] - l1_) < 1e-9
+# a rate within 1e-12 of a bound whose gradient points INTO the box is not held
+wm_, tm_ = exact(1.4, 1.0, (1.5, 2.5, 3.5)); res_ = lambda a_, b_: [x_ - y_ for x_, y_ in zip(list(s.p_winner(a_, b_)) + [1 - sum(s.pois(a_ + b_, n_) for n_ in range(int(kk_) + 1)) for kk_ in (1.5, 2.5, 3.5)], list(wm_) + list(tm_.values()))]
+inward = s.boundary_stage(res_, sse_(0.01, 1.0, wm_, tm_), 0.01, 1.0, 5, False, 200); assert inward[5] is False and inward[1] == 0.01 and inward[3] == 5
+# the 1-D result is discarded when its SSE is above the 2-D result's by more than 1e-15 (stub)
+wm_, tm_ = exact(0.5, 0.005, (1.5, 2.5, 3.5)); res_ = lambda a_, b_: [x_ - y_ for x_, y_ in zip(list(s.p_winner(a_, b_)) + [1 - sum(s.pois(a_ + b_, n_) for n_ in range(int(kk_) + 1)) for kk_ in (1.5, 2.5, 3.5)], list(wm_) + list(tm_.values()))]
+base_ = sse_(0.3, 0.01, wm_, tm_); worse = s.boundary_stage(res_, base_, 0.3, 0.01, 7, False, 200, stub=(base_ + 1e-9, 0.3, 0.01, 9, False, True)); assert worse == (base_, 0.3, 0.01, 7, False, False), worse
+print("socderiv addendum 5 tests passed")
 print("socderiv synthetic tests passed")
