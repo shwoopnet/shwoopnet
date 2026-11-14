@@ -238,8 +238,11 @@ def px(node):
             return float(node["close_dollars"])
         except (TypeError, ValueError):
             return None
-    if "close" in node:
-        raise SystemExit("refused: a candle carries a plain 'close' field; its unit is not yet fixed (dated amendment needed)")
+    if "close" in node:                                                       # Amendment 4: only a d.dddd dollar string (the landed /historical shape)
+        v = node["close"]
+        if isinstance(v, str) and re.fullmatch(r"\d\.\d{4}", v):
+            return float(v)
+        raise SystemExit("refused: a plain 'close' field that is not a d.dddd dollar string (%r)" % (v,))
     return None
 
 

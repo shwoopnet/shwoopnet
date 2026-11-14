@@ -166,3 +166,9 @@ refused(lambda: F.count(table(tb7), [run(LJ, {"hist": [{"markets": mk7[:-1]}], "
 refused(lambda: F.load_table(table([r[:5] for r in tb7], header=["decision_date", "event_ticker", "market_ticker", "strike_word", "statement_word"])), "no type column")
 refused(lambda: F.load_table(table(tb7[:1] + [tb7[1][:5] + ["statement"]])), "type must be")
 print("type column: ok")
+
+# --- Nov 14, Amendment 4: a plain close is read only as a d.dddd dollar string
+assert F.px({"close": "0.5600"}) == 0.56 and F.px({"close_dollars": "0.5600"}) == 0.56
+for bad in ("56", 56, 0.56, "0.560"):
+    refused(lambda: F.px({"close": bad}), "plain 'close'")
+print("amendment 4: ok")

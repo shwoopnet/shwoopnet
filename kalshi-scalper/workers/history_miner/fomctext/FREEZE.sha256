@@ -1,4 +1,4 @@
-# FOMCTEXT reader, Nov 14: the type column (Clarification 7) on top of events and hm_guard; supersedes aff0320a's freeze
-919255f29609dfd7128b36fa7e3554690643272972f88311d3569df8068a984b  fomctext.py
-8ceaf50f8e30c7c423721c6b138495b1639239c1e28f043889268d66b76fba53  test_fomctext.py
-a6dc820b423f94d4a76a37d3e5e6e2081d8b2232d6a30a7eda67453cc0fac288  FOMCTEXT_READER_NOTE.md
+# FOMCTEXT reader, Nov 14: Amendment 4 (plain close as a d.dddd dollar string) on top of the type column; supersedes 919255f2's freeze
+913bf4938143557346cfca1f0e93855395946ba898fe4450908f2e77da896bd6  fomctext.py
+5843b53981f2d52954896ef359e18b85800a6ebea5c668e3e99bad5e2acac285  test_fomctext.py
+8d526f6c4f9148b2747a6c2fbad2cab784558d83e48a0b655000e25807a19106  FOMCTEXT_READER_NOTE.md
