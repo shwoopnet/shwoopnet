@@ -1,0 +1,6 @@
+oicore_t.py c46ac74108cb8790 (commit 0427e401); runs: OICAND_LISTS 0227Z_43546384963, OICAND_CANDLES_1 0253Z_43548715053, _1_REST 0501Z_43559459347, _2 0413Z_43555574326, _2_REST 0541Z_43562765461; default series (KXHYPE15M, KXBNB15M), default 20 days
+OICORE-NC15 threshold T (reader build 1; open interest rises only; no price, result or quote read)
+KXHYPE15M: listed windows 2663 | windows used (n) 1587 | trading days available 23, used 20 | days used 2026-10-21 to 2026-11-12 | T 6796.75 | SEATED | dropped: no_candle_answer_for_listed_window=864, windows_outside_last_days=212
+KXBNB15M: listed windows 2663 | windows used (n) 1587 | trading days available 23, used 20 | days used 2026-10-21 to 2026-11-12 | T 4351.84 | SEATED | dropped: no_candle_answer_for_listed_window=864, windows_outside_last_days=212
+markets with no open interest at all: 0
+global drops: none
