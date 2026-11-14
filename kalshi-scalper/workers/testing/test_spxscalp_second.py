@@ -202,12 +202,43 @@ with tempfile.TemporaryDirectory() as tmpd:
         try: q.check_es_rows(q.load_es_counted(es_file(rows))[1]); assert 0
         except SystemExit: pass
     mkw, csw, esw = assemble(window("KXINX15M-F", D(5), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)}))
-    saved = (q.k.guard, q.k.markets, q.k.candles); q.k.guard = lambda f: None; q.k.markets = lambda l: mkw; q.k.candles = lambda c: csw
+    saved = (q.k.guard, q.k.markets, q.k.candles, q.check_candle_overlap); q.k.guard = lambda f: None; q.k.markets = lambda l: mkw; q.k.candles = lambda c: csw; q.check_candle_overlap = lambda r: None
     try:
         ro = q.run(["l"], ["c"], es_file([good(i) for i in range(10)])); assert ro["es_rows"]["rows_read"] == 10 and ro["es_rows"]["rows_kept"] == 10
         try: q.run(["l"], ["c"], es_file(bad)); assert 0
         except SystemExit as ex: assert "skipped" in str(ex)
     finally:
-        q.k.guard, q.k.markets, q.k.candles = saved
+        q.k.guard, q.k.markets, q.k.candles, q.check_candle_overlap = saved
 assert q.MAX_SKIP_SHARE == 0.05
+# --- ADDENDUM 4 (Amendment 5): a market_ticker in more than one candle file (or answer) STOPS the run, before the ES file is opened ---
+import gzip, json
+def mkrun_c(d, bodies):
+    os.makedirs(d); rows = []
+    for i, (rid, body) in enumerate(bodies):
+        f = "%04d.json.gz" % (i + 1); gzip.open(os.path.join(d, f), "wt").write(json.dumps(body)); rows.append({"id": rid, "page": 1, "status": 200, "file": f})
+    json.dump({"job": {}, "rows": rows, "status": "complete"}, open(os.path.join(d, "manifest.json"), "w"))
+cn = lambda tk: {"markets": [{"market_ticker": tk, "candlesticks": [{"end_period_ts": D(5) - 840, "yes_bid": {"close_dollars": "0.40"}, "yes_ask": {"close_dollars": "0.42"}}]}]}
+with tempfile.TemporaryDirectory() as td:
+    a1, a2, a3, a4 = (os.path.join(td, n) for n in ("a1", "a2", "a3", "a4"))
+    mkrun_c(a1, [("c1", cn("KXINX15M-A")), ("c2", cn("KXINX15M-B"))]); mkrun_c(a2, [("c3", cn("KXINX15M-C"))]); mkrun_c(a3, [("c4", cn("KXINX15M-B"))])
+    mkrun_c(a4, [("c5", {"markets": [cn("KXINX15M-D")["markets"][0], cn("KXINX15M-D")["markets"][0]]})])
+    assert q.check_candle_overlap([a1, a2]) is None
+    b1, b2, b3, b4 = (os.path.join(td, n) for n in ("b1", "b2", "b3", "b4"))
+    cnode = lambda extra: dict(extra, candlesticks=cn("X")["markets"][0]["candlesticks"])
+    mkrun_c(b1, [("REQ-1", cnode({}))]); mkrun_c(b2, [("REQ-1", cnode({}))]); mkrun_c(b3, [("r7", cnode({"ticker": "KXINX15M-T"}))]); mkrun_c(b4, [("r8", cnode({"ticker": "KXINX15M-T"}))])
+    for runs, name in (([b1, b2], "REQ-1"), ([b3, b4], "KXINX15M-T")):          # a single-market answer: ticker, else the request id
+        try: q.check_candle_overlap(runs); assert 0
+        except SystemExit as ex: assert name in str(ex), str(ex)
+    for runs, name in (([a1, a3], "KXINX15M-B"), ([a4], "KXINX15M-D")):
+        try: q.check_candle_overlap(runs); assert 0
+        except SystemExit as ex: assert name in str(ex) and "STOP" in str(ex), str(ex)
+    saved = (q.k.guard, q.k.markets, q.k.candles, q.load_es_counted); q.k.guard = lambda f: None; q.k.markets = lambda l: {}; q.k.candles = lambda c: {}
+    opened = []; q.load_es_counted = lambda path: opened.append(path) or ({}, {"rows_read": 1, "rows_kept": 1, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 0})
+    try:
+        try: q.run(["l"], [a1, a3], "es.csv"); assert 0
+        except SystemExit: pass
+        assert opened == []
+        q.run(["l"], [a1, a2], "es.csv"); assert opened == ["es.csv"]
+    finally:
+        q.k.guard, q.k.markets, q.k.candles, q.load_es_counted = saved
 print("test_spxscalp_second: all checks passed")

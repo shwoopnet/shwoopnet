@@ -29,6 +29,7 @@ AMBIGUITIES = [
     "An exit price at or below 0 (bid - s) is clamped to 0 for the fee only; the net uses the unclamped price.",
     "The hold arm's primary slip is 1c (entry slip only); every figure is also printed at 2c.",
     "A look whose candle lacks a bid or an ask has no price: no entry at that look. A look with a missing ES bar, or an instrument change from the start bar, is skipped (counted).",
+    "Amendment 5: a market_ticker in more than one candle answer STOPS the run (any ticker in the candle files, a repeat inside one answer too), before the ES file is opened; looks and scans already lie inside [O+60 m, c] and the ES lookback reaches only to ES(O).",
     "Rule 18 and Amendment 3 (ee92cf2f): every candle price used must be two-sided (0 < bid < ask < 1, 1e-9); at entry a candle that is not is no price (look_not_two_sided). The time exit is the first two-sided candle ending in [close - 300 s, close] (a missing candle counts as not two-sided); if none, each open half settles (payout, no exit fee, void refunds the price, entry fee kept). Nothing is dropped for the exit arms. A target or 80c hit needs a two-sided candle.",
     "ES loader: rows read, kept and skipped (timestamp, value, instrument) counted; the file's single instrument is the most frequent id (a tie stops); STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice, the card does not state it).",
     "Rule label order: fewer than 100 entries -> FALSIFIED; a half under 1.0 at 1c or PF under 1.0 at 2c -> FALSIFIED; counts -> 'counts the bar'; else 'no evidence'. An empty half is reported 'undefined' and does not by itself falsify.",
@@ -305,9 +306,27 @@ def run_windows(markets, cs, es, es_stats=None):
     return {"C1_candles_two_sided_and_spread": c1, "counts": c, "arms": rep, "lines": lines, "headline_arm": "band_25_headline at 1c", "upper_bound_note": UPPER_BOUND, "es_rows": es_stats, "ambiguities": AMBIGUITIES}
 
 
+def check_candle_overlap(candle_runs):
+    """Amendment 5: a market_ticker in more than one candle answer (file) STOPS the run; never counted twice, never silently merged. Covers EVERY market_ticker in the candle files,
+    a repeat inside one answer too. The ticker is the node's market_ticker, else ticker, else the request id (scorekit's rule)."""
+    seen = {}
+    for f in ([candle_runs] if isinstance(candle_runs, str) else list(candle_runs)):
+        for row, body in k.iter_answers(f):
+            nodes = body.get("markets") if isinstance(body, dict) and isinstance(body.get("markets"), list) else [body]
+            for n in nodes:
+                if not isinstance(n, dict) or not isinstance(n.get("candlesticks"), list):
+                    continue
+                t = n.get("market_ticker") or n.get("ticker") or row["id"]
+                where = "%s/%s" % (os.path.basename(str(f).rstrip("/")), row.get("file"))
+                if t in seen:
+                    raise SystemExit("STOP: market_ticker %s appears in more than one candle answer (%s and %s): a run overlap, never counted twice" % (t, seen[t], where))
+                seen[t] = where
+
+
 def run(lists, candle_runs, es_path):
     for f in list(lists) + list(candle_runs):
         k.guard(f)
+    check_candle_overlap(candle_runs)          # Amendment 5: before the ES file is opened
     es, st = load_es_counted(es_path)
     check_es_rows(st)
     return run_windows(k.markets(lists), k.candles(candle_runs), es, st)

@@ -120,6 +120,37 @@ r6 = e.measure(mk, cs, es, 6); assert r6["prediction"] == "untestable at n = 5" 
 Mz = [0.50] * 6; rz0 = e.measure(*assemble(window("KXINX15M-Zv", D(5), Mz)), 3); assert rz0["prediction"] == "untestable at n = 5" and rz0["prediction_peak_at_lag_0_passed"] is None          # no Kalshi change at all: lag 0 zero variance
 rm6 = e.measure(*assemble(window("KXINX15M-E", D(5), M1, drop_es=(0,))), 6); n0, n1 = rm6["lags"][0]["n_pairs"], rm6["lags"][1]["n_pairs"]
 assert n0 != n1 and rm6["prediction"] == "untestable at n = %d" % n0, (n0, n1, rm6["prediction"])
+# --- ADDENDUM 3 (Amendment 5): T lies in [O+60, c]; a lookback may reach outside; no change at t = O; duplicate candle tickers STOP ---
+def reference(mid_by_m, es_by_m):
+    """An independent reference: minute index m (0 = O, 15 = close); T = m in 1..15 with a two-sided mid and an ES bar; dA[m] = mid[m] - mid[m-1], dB[m] = ln(es[m] / es[m-1]) with lookbacks from the whole series."""
+    T_ = [m for m in range(1, 16) if m in mid_by_m and m in es_by_m]
+    dA_ = {m: mid_by_m[m] - mid_by_m[m - 1] for m in T_ if (m - 1) in mid_by_m}
+    dB_ = {m: math.log(es_by_m[m] / es_by_m[m - 1]) for m in T_ if (m - 1) in es_by_m}
+    out = {}
+    for k_ in LAGS:
+        xs = [dA_[m] for m in T_ if m in dA_ and (m - k_) in T_ and (m - k_) in dB_]; ys = [dB_[m - k_] for m in T_ if m in dA_ and (m - k_) in T_ and (m - k_) in dB_]
+        n = len(xs); r_ = None
+        if n >= 1:
+            mx, my = sum(xs) / n, sum(ys) / n; sxx = sum((x - mx) ** 2 for x in xs); syy = sum((y - my) ** 2 for y in ys)
+            r_ = None if sxx <= 1e-24 or syy <= 1e-24 else sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / math.sqrt(sxx * syy)
+        out[k_] = (n, r_)
+    return out
+def w_from(tk, close, mids_m, es_m):
+    o = close - 900
+    return {"ticker": tk, "close": close}, [{"ts": o + 60 * m, "bid": round(v - 0.01, 10), "ask": round(v + 0.01, 10)} for m, v in mids_m.items()], {o + 60 * m: (1, c) for m, c in es_m.items()}
+midW = {0: 0.50, **{m: M1[m - 1] for m in range(1, 7)}}
+esW = {m: ES_CLOSES[m] for m in range(0, 7)}; esW[-1] = 999.0
+rx = e.measure(*assemble(w_from("KXINX15M-X", D(5), midW, esW)), 3); refx = reference(midW, esW)
+assert [rx["lags"][k_]["n_pairs"] for k_ in LAGS] == [refx[k_][0] for k_ in LAGS]
+for k_ in LAGS:
+    if refx[k_][1] is not None and refx[k_][0] >= 3: assert abs(rx["lags"][k_]["corr"] - refx[k_][1]) < 1e-9, (k_, rx["lags"][k_], refx[k_])
+assert rx["lags"][0]["n_pairs"] == 6 and abs(rx["lags"][0]["corr"] - (-0.02 / math.sqrt(0.0019333333333 * 6))) < 1e-6 and abs(rx["lags"][0]["corr"] + 0.1857) < 1e-3
+assert rx["lags"][1]["n_pairs"] == 5 and abs(rx["lags"][1]["corr"] - 1.0) < 1e-9 and rx["lags"][-1]["n_pairs"] == 5 and abs(rx["lags"][-1]["corr"] + 0.4082) < 1e-3
+midU = {13: .50, 14: .52, 15: .50, 16: .52, 17: .54}; esU = {12: 1000.0, 13: 1001.0, 14: 1000.0, 15: 1001.0, 16: 1002.001, 17: 1001.0}
+ru = e.measure(*assemble(w_from("KXINX15M-U", D(5), midU, esU)), 1); refu = reference(midU, esU)
+assert [ru["lags"][k_]["n_pairs"] for k_ in LAGS] == [0, 0, 1, 2, 2, 1, 0] == [refu[k_][0] for k_ in LAGS], [ru["lags"][k_]["n_pairs"] for k_ in LAGS]
+for k_ in LAGS:
+    if refu[k_][1] is not None: assert abs(ru["lags"][k_]["corr"] - refu[k_][1]) < 1e-9
 # F1 (rule 18): a candle with an empty side, a locked or a crossed book has no mid (never carried); counted as not_two_sided
 def with_candle(w, m_, bid, ask):
     mk_, cs_, es_ = assemble(w)
@@ -166,16 +197,47 @@ with tempfile.TemporaryDirectory() as tmpd:
     _, stb = e.load_es_counted(es_file([good(i) for i in range(95)] + [bad[0]] * 5)); assert stb["rows_read"] == 100 and e.check_es_rows(stb) is None          # exactly 5%: passes
     # run() wires the check and returns the counts: stub the scorekit readers (invented fixtures only)
     mkw, csw, esw = assemble(window("KXINX15M-F", D(5), M1))
-    saved = (e.k.guard, e.k.markets, e.k.candles); e.k.guard = lambda f: None; e.k.markets = lambda l: mkw; e.k.candles = lambda c: csw
+    saved = (e.k.guard, e.k.markets, e.k.candles, e.check_candle_overlap); e.k.guard = lambda f: None; e.k.markets = lambda l: mkw; e.k.candles = lambda c: csw; e.check_candle_overlap = lambda r: None
     try:
         fgood = es_file([good(i) for i in range(10)])
         ro = e.run(["l"], ["c"], fgood, 3); assert ro["es_rows"] == {"rows_read": 10, "rows_kept": 10, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 0}
         try: e.run(["l"], ["c"], es_file(bad), 3); assert 0
         except SystemExit as ex: assert "skipped" in str(ex)
     finally:
-        e.k.guard, e.k.markets, e.k.candles = saved
+        e.k.guard, e.k.markets, e.k.candles, e.check_candle_overlap = saved
 assert e.MAX_SKIP_SHARE == 0.05
 
+# duplicate candle tickers STOP, before the ES file is opened (Amendment 5)
+import gzip, json
+def mkrun_c(d, bodies):
+    os.makedirs(d); rows = []
+    for i, (rid, body) in enumerate(bodies):
+        f = "%04d.json.gz" % (i + 1); gzip.open(os.path.join(d, f), "wt").write(json.dumps(body)); rows.append({"id": rid, "page": 1, "status": 200, "file": f})
+    json.dump({"job": {}, "rows": rows, "status": "complete"}, open(os.path.join(d, "manifest.json"), "w"))
+cn = lambda tk: {"markets": [{"market_ticker": tk, "candlesticks": [{"end_period_ts": D(5) - 840, "yes_bid": {"close_dollars": "0.40"}, "yes_ask": {"close_dollars": "0.42"}}]}]}
+with tempfile.TemporaryDirectory() as td:
+    a1, a2, a3, a4 = (os.path.join(td, n) for n in ("a1", "a2", "a3", "a4"))
+    mkrun_c(a1, [("c1", cn("KXINX15M-A")), ("c2", cn("KXINX15M-B"))]); mkrun_c(a2, [("c3", cn("KXINX15M-C"))]); mkrun_c(a3, [("c4", cn("KXINX15M-B"))])
+    mkrun_c(a4, [("c5", {"markets": [cn("KXINX15M-D")["markets"][0], cn("KXINX15M-D")["markets"][0]]})])
+    assert e.check_candle_overlap([a1, a2]) is None
+    b1, b2, b3, b4 = (os.path.join(td, n) for n in ("b1", "b2", "b3", "b4"))
+    cnode = lambda extra: dict(extra, candlesticks=cn("X")["markets"][0]["candlesticks"])
+    mkrun_c(b1, [("REQ-1", cnode({}))]); mkrun_c(b2, [("REQ-1", cnode({}))]); mkrun_c(b3, [("r7", cnode({"ticker": "KXINX15M-T"}))]); mkrun_c(b4, [("r8", cnode({"ticker": "KXINX15M-T"}))])
+    for runs, name in (([b1, b2], "REQ-1"), ([b3, b4], "KXINX15M-T")):          # a single-market answer: ticker, else the request id
+        try: e.check_candle_overlap(runs); assert 0
+        except SystemExit as ex: assert name in str(ex), str(ex)
+    for runs, name in (([a1, a3], "KXINX15M-B"), ([a4], "KXINX15M-D")):
+        try: e.check_candle_overlap(runs); assert 0
+        except SystemExit as ex: assert name in str(ex) and "STOP" in str(ex), str(ex)
+    saved = (e.k.guard, e.k.markets, e.k.candles, e.load_es_counted); e.k.guard = lambda f: None; e.k.markets = lambda l: {}; e.k.candles = lambda c: {}
+    opened = []; e.load_es_counted = lambda path: opened.append(path) or ({}, {"rows_read": 1, "rows_kept": 1, "skipped_ts": 0, "skipped_value": 0, "skipped_instrument": 0})
+    try:
+        try: e.run(["l"], [a1, a3], "es.csv", 3); assert 0
+        except SystemExit: pass
+        assert opened == []          # the stop comes before the ES file is opened
+        e.run(["l"], [a1, a2], "es.csv", 3); assert opened == ["es.csv"]
+    finally:
+        e.k.guard, e.k.markets, e.k.candles, e.load_es_counted = saved
 # nothing is written and the floor has no default
 src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "eslead1_second.py")).read()
 assert '"w"' not in src and "'w'" not in src and "write(" not in src.replace("sys.stdout.write", "")

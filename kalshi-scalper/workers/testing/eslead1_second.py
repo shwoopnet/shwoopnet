@@ -19,6 +19,7 @@ LAGS = tuple(range(-3, 4))
 AMBIGUITIES = [
     "T is the set of timestamps present in both series within the window, computed once; a pair needs t and t - 60 k both in T and both changes defined; dA needs mid(t - 60 s) in the whole A series, dB needs ES(t - 60 s) in the whole ES series (the window's first minute uses the close at the window start).",
     "An instrument_id change between the two ES bars of a change drops it (counted as 'roll'); the card is silent.",
+    "Amendment 5: T = the minute ends in [O+60, c] (O = close - 900 s, c = close) with a two-sided mid and an ES bar; no change at t = O; a lookback may reach outside (ES at O, a Kalshi mid at O); a market_ticker in more than one candle answer STOPS the run.",
     "Rule 18 (Auditor B F1): a candle has a mid only if 0 < bid < ask < 1 (1e-9 slack); an empty, locked or crossed book has none, is never carried, and is counted as not_two_sided. The card line stating it is pending (Head or Desk B).",
     "ES loader (F2): rows read, kept and skipped (timestamp or value) are counted and returned; STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice, not in the card).",
     "Prediction (Amendment 3): lag 0 needs at least min_pairs pairs (30 in the real run) and must be the largest of the defined lags (a tie passes, 1e-9), none of +1 to +3 above it; if lag 0 is n/a the text is 'untestable at n = N', not a pass; n/a lags are named.",
@@ -130,7 +131,7 @@ def measure(markets, cs, es, min_pairs, es_stats=None):
         if not A:
             cnt["windows_without_candles"] += 1; continue
         cnt["windows_used"] += 1
-        T = sorted(t for t in A if t in es)
+        T = sorted(t for t in A if t in es and c - 900 + 60 <= t <= c)          # Amendment 5: minute ends in [O+60, c] only; lookbacks (t - 60) may reach outside
         Tset = set(T)
         dA, dB = {}, {}
         for t in T:
@@ -168,9 +169,27 @@ def measure(markets, cs, es, min_pairs, es_stats=None):
             "defined_peak_lag": (max(defined, key=lambda kk: defined[kk]) if defined else None), "ambiguities": AMBIGUITIES}
 
 
+def check_candle_overlap(candle_runs):
+    """Amendment 5: a market_ticker in more than one candle answer (file) STOPS the run; never counted twice, never silently merged. Covers EVERY market_ticker in the candle files,
+    a repeat inside one answer too. The ticker is the node's market_ticker, else ticker, else the request id (scorekit's rule)."""
+    seen = {}
+    for f in ([candle_runs] if isinstance(candle_runs, str) else list(candle_runs)):
+        for row, body in k.iter_answers(f):
+            nodes = body.get("markets") if isinstance(body, dict) and isinstance(body.get("markets"), list) else [body]
+            for n in nodes:
+                if not isinstance(n, dict) or not isinstance(n.get("candlesticks"), list):
+                    continue
+                t = n.get("market_ticker") or n.get("ticker") or row["id"]
+                where = "%s/%s" % (os.path.basename(str(f).rstrip("/")), row.get("file"))
+                if t in seen:
+                    raise SystemExit("STOP: market_ticker %s appears in more than one candle answer (%s and %s): a run overlap, never counted twice" % (t, seen[t], where))
+                seen[t] = where
+
+
 def run(lists, candle_runs, es_path, min_pairs):
     for f in list(lists) + list(candle_runs):
         k.guard(f)
+    check_candle_overlap(candle_runs)          # Amendment 5: before the ES file is opened
     es, st = load_es_counted(es_path)
     check_es_rows(st)
     return measure(k.markets(lists), k.candles(candle_runs), es, min_pairs, st)
