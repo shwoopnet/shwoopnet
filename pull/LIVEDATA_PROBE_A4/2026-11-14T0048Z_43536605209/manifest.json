@@ -1,0 +1,269 @@
+{
+ "job": {
+  "owner": "DESK_B",
+  "registration": "kalshi-scalper/workers/dbltb/LIVEDATA_FINDING_AND_DBLTB_CARD.md",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "status": "active",
+  "job_id": "LIVEDATA_PROBE_A4",
+  "purpose": "Zero-try field probe, version 4 of probe A (Idea Desk C's TEMPBLEND delta): Kalshi's temperature index with per-station detail on two past windows, how far back it is served, the calibration timeline, and the open hourly temperature events. Fields and counts only.",
+  "heldout": "none in range for any result: no request asks for a price or a result, and the readers print field names, types and counts, never a value. NOTHING TOUCHES TEMPBLEND'S HELD-OUT WINDOW (settlement times 2026-11-12 to before 2026-12-10): the live-freshness request was DROPPED (the Head's ruling), the two index windows are 2026-11-03 and 2026-09-13, both inside TEMPBLEND's development window (2026-09-13 to before 2026-11-05), and the open-event lists carry no value of the held-out hours that anyone reads. Other cards holding an hourly temperature series out: W-CAT-CAL1 weather (released by the Head 2026-11-13 06:51Z); WXNEW1 (holdout 2026-10-19 to 2026-10-31, not read; no value read here); WXOTHER1 (closed unread). This desk's cost measurement uses 2026-11-05 to 2026-11-11 (no held-out). THE EXCEPTION: Kalshi's index endpoints and per-station detail are outside the owner's earlier read-and-allowed terms; the owner accepted that risk on Nov 13 ('Both, ignore the terms'). Must NOT be dispatched until that acceptance is recorded in CLAUDE.md on main and Auditor B has checked the structure. NO REQUEST RETURNS A SETTLED MARKET, A PRICE OR A RESULT: the open-event lists carry event metadata only, the index and calibration answers carry no market, and the earlier request for a settled Miami market (A3) was DROPPED on the auditor's finding that it could return a market settled on 2026-11-12 or later.",
+  "allowed_endpoints": [
+   {
+    "name": "events",
+    "method": "GET",
+    "path_pattern": "/events",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "with_milestones"
+    ]
+   },
+   {
+    "name": "weather_index",
+    "method": "GET",
+    "path_pattern": "/live_data/weather/miami",
+    "params_allowed": [
+     "last_sec",
+     "detailed",
+     "from",
+     "to"
+    ]
+   },
+   {
+    "name": "weather_calibrations",
+    "method": "GET",
+    "path_pattern": "/live_data/weather/miami/calibrations",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXTEMPMIAH",
+   "KXTEMPCHIHS",
+   "KXTEMPNYCHS",
+   "KXTEMPLAXHS"
+  ],
+  "ticker_allowlist": [],
+  "requests": [
+   {
+    "id": "ev_kxtempmiah",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXTEMPMIAH",
+     "status": "open",
+     "limit": 2,
+     "with_milestones": "true"
+    }
+   },
+   {
+    "id": "ev_kxtempchihs",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXTEMPCHIHS",
+     "status": "open",
+     "limit": 2,
+     "with_milestones": "true"
+    }
+   },
+   {
+    "id": "ev_kxtempnychs",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXTEMPNYCHS",
+     "status": "open",
+     "limit": 2,
+     "with_milestones": "true"
+    }
+   },
+   {
+    "id": "ev_kxtemplaxhs",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXTEMPLAXHS",
+     "status": "open",
+     "limit": 2,
+     "with_milestones": "true"
+    }
+   },
+   {
+    "id": "wx_nov3_detailed",
+    "path": "/live_data/weather/miami",
+    "params": {
+     "from": 1793664000000,
+     "to": 1793671200000,
+     "detailed": "true"
+    }
+   },
+   {
+    "id": "wx_sep13_detailed",
+    "path": "/live_data/weather/miami",
+    "params": {
+     "from": 1789257600000,
+     "to": 1789264800000,
+     "detailed": "true"
+    }
+   },
+   {
+    "id": "wx_calibrations",
+    "path": "/live_data/weather/miami/calibrations"
+   }
+  ],
+  "max_requests": 9,
+  "notes": "Written not sent (the Head of R&D, rulings of 14:27Z Nov 13). The settlement SOURCE of the four hourly series is answered from the series names, not from this probe: KXTEMPMIAH, KXTEMPCHIHS, KXTEMPNYCHS and KXTEMPLAXHS are the Synoptic metro-index series (V2's WXNEW1 amendment names them so) and the TWC series are the ones without the S suffix. A reader extension printing station ids is DEFERRED until the Verification Analyst scores TEMPBLEND unique (allowlisted keys only, new hash, Auditor B first). Miami only for the live-data windows: the other three city keys come from the event milestones and asking them is a second step. The audited field reader (9d257b6d) reads it unchanged. Probe A (7f79c9f8) and A2 (0c335733, superseded, never sent) stay as the record. A4 (Nov 13, 14:32Z): the settled-market request mk_miami_rules is removed and the /markets endpoint is no longer allowed (the Head's ruling; the rules-field names can wait for a request after TEMPBLEND's held-out ends). A3 (eeb7f48d) is superseded and never sent."
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-14T0048Z",
+ "finished": "2026-11-14T0048Z",
+ "status": "complete",
+ "requests_sent": 7,
+ "bytes_stored": 89450,
+ "rows": [
+  {
+   "index": 1,
+   "id": "ev_kxtempmiah",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1011,
+   "t_send_ms": 1794617326836,
+   "t_recv_ms": 1794617326900,
+   "server_date": "Sat, 14 Nov 2026 00:48:46 GMT",
+   "file": "0001.json.gz",
+   "sha256": "61b3662b1e508107c849f8b0a04bcec6d898de07f6c725ea01ba60f0dfce0a8d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "ev_kxtempchihs",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPCHIHS",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1030,
+   "t_send_ms": 1794617327836,
+   "t_recv_ms": 1794617327873,
+   "server_date": "Sat, 14 Nov 2026 00:48:47 GMT",
+   "file": "0002.json.gz",
+   "sha256": "6c2690f92cbda06e0b7aef0c5c385204923ecf78a923f3e9c0c435e2f1e6dbe3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "ev_kxtempnychs",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPNYCHS",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1034,
+   "t_send_ms": 1794617328836,
+   "t_recv_ms": 1794617328872,
+   "server_date": "Sat, 14 Nov 2026 00:48:48 GMT",
+   "file": "0003.json.gz",
+   "sha256": "e31df99486ec3f63e99cf8d4a16bc76bac4d5ae20fa2d5c6edea10920067851b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "ev_kxtemplaxhs",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPLAXHS",
+    "status": "open",
+    "limit": 2,
+    "with_milestones": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1049,
+   "t_send_ms": 1794617329836,
+   "t_recv_ms": 1794617329918,
+   "server_date": "Sat, 14 Nov 2026 00:48:49 GMT",
+   "file": "0004.json.gz",
+   "sha256": "42e09c5933511100e9f1a525bf338d56a0cf5d742e3e18607da4e0b5aa79442a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "wx_nov3_detailed",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "from": 1793664000000,
+    "to": 1793671200000,
+    "detailed": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 70219,
+   "t_send_ms": 1794617330837,
+   "t_recv_ms": 1794617330876,
+   "server_date": "Sat, 14 Nov 2026 00:48:50 GMT",
+   "file": "0005.json.gz",
+   "sha256": "56420cd9519d0c2934b4ba9b8534aa074e75893560f6c45b7443d63377e3678d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "wx_sep13_detailed",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "from": 1789257600000,
+    "to": 1789264800000,
+    "detailed": "true"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 53,
+   "t_send_ms": 1794617331837,
+   "t_recv_ms": 1794617331872,
+   "server_date": "Sat, 14 Nov 2026 00:48:51 GMT",
+   "file": "0006.json.gz",
+   "sha256": "4c9804f977eefaaffa3e52bd1d7cfcbdf2ce66586eb7ec76ab459c778e3e6b65",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "wx_calibrations",
+   "path": "/live_data/weather/miami/calibrations",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 15054,
+   "t_send_ms": 1794617332837,
+   "t_recv_ms": 1794617332876,
+   "server_date": "Sat, 14 Nov 2026 00:48:52 GMT",
+   "file": "0007.json.gz",
+   "sha256": "e14f217f38cd7849d6c51466ad9bdc9016a6be93da1105223f88ae6341e9fa71",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
