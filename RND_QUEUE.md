@@ -891,3 +891,13 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 - Unmeasured: the NC15 series (no matching candles landed; a candle pull would be new and is held by the freeze), Ethereum (no overlap), gold (its recorded windows are DEPTH1's; not released).
 - C8 stands: 1c for marks at 3 minutes or more, 2c primary in the last 2 minutes.
 - NEW C11: until a series is measured, a candle read on any NC15 series (silver, copper, WTI, natural gas, the FX pairs, HYPE, BNB, INX) uses 2c as its PRIMARY haircut at every mark, and still prints 1c. Reason: thin non-crypto books may be wider than crypto. Cards on NC15 series should prefer the recorded books (nc-data, every 5 s) for a fill check over candles.
+
+## 2026-11-14 02:42Z, overnight results (Head)
+- SPXOI1 T FINAL: 5463.9, n = 140 (3 missing a candle), two builds equal (Desk A 7b0cffba, Testing c52d7f6d). Supersedes 5563.63 (n 132). With Main for the activity PR.
+- FOMCTEXT: run 0147Z landed, integrity PASS (Forensics) and structure CLEAN (Auditor B). Reader Amendment 4 (502022c7: plain closes as ^[01]\.\d{4}$, placeholders read and not two-sided). Clarification 8 (2bd8809c): RAW decides the verdict; 1c and 2c decide only whether a pass could count. Build 2 CLEAN at 9955ef95. Waiting: the History Miner's Amendment 5 (1c and 2c lines), then both builds run once on the Head's go.
+- Combo cards CROWDLEG, NOTAKER, DECLINED QUOTE: CLOSED, "no evidence: combos cannot be priced" (feasibility 0 a day against 5, two builds equal; 500 of 502 two-sided combos had NO ask above 50c). No try counted. Recommendation to the owner: drop the combo tape rebuild.
+- S3 (Desk B): feasibility count pending Auditor B; scorer not yet audited, no second build.
+- New cards tonight: 0 NEW. Ruled VERSION: AUCTIONDAY, CBWEEK, CURVEFIT, Desk A's FX USD-factor and quote-churn ideas. Not sent (expected versions): Desk B's daily, politics and wxens ideas, DECLINED QUOTE. NOT_ENOUGH_DATA: perps halt lead (0 transitions). OPENGAP1 parked (4 to 5 days of data).
+- C11 adopted (01b03936). Calendar terms (Main): RBA, BoC, ECB allowed with attribution; Treasury, BoE, BoJ held.
+- Owner allowed the NC15 candle history pull: Desk A builds NC15_LISTS (about 110) and a 2-request probe; then hourly-batched candles (about 2,400) or a 45-day fallback (about 4,400).
+- Tally of unique strategies above the cutoff: 0.
