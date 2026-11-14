@@ -164,3 +164,7 @@ Every read on candles follows the haircut rule and C7 to C10:
 (c) **Process record: the `events` print.** This desk read the `events` print at `claude/history-miner` 4b053d6a. The History Miner's message said it ran with `fomctext.py` aff0320a, which it reported as Auditor B CLEAN. Whether that run came before or after Auditor B's clearance of the `events` command is being confirmed by the Head with the Miner, and is added here when known. The print holds no market result, only event ticker, series, title and date.
 
 Both passes were already running when these rulings arrived. Each was given the `type` column and the count instruction by message, with nothing else changed.
+
+**Dated line (Nov 14, 2026, the Head of R&D's ruling): pass B's breach.** Pass B fetched the 11 allowed public-domain statement pages with curl, 11 GETs, once. It opened no other page. Its bodies and script stayed in scratch only and were never committed. The fault was in this desk's instruction, and the Head shares it. The pass is kept. From now on: no curl, script or loop on the Board's site, for any worker; the web reader only. The settled table is `fomctext/STATEMENT_WORD_TABLE.csv`, with its note beside it.
+
+**Process record (c), resolved:** the History Miner's run log (`claude/history-miner` 2f5cd750) shows the `events` command ran at 01:26:08Z, after Auditor B's CLEAN on aff0320a at 01:25:48Z.

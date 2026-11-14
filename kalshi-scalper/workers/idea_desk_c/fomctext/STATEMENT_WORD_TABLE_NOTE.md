@@ -1,0 +1,34 @@
+# FOMCTEXT statement-word table (Nov 14, 2026)
+
+**Source.** The FOMC statements published by the Board of Governors of the Federal Reserve System (federalreserve.gov, press releases `monetaryYYYYMMDDa.htm`), for the eleven development decision dates only: 2025-01-29, 03-19, 05-07, 06-18, 07-30, 09-17, 10-29, 12-10; 2026-01-28, 03-18, 04-29. No statement dated 2026-06-17 or later was opened. No transcript, minutes, implementation note or market page was read for matching.
+
+**File.** `STATEMENT_WORD_TABLE.csv`, 407 rows, one per development KXFEDMENTION strike from `WORDS_PRINT.json`. Its columns:
+- `statement_word`: the feature the reader uses.
+- `type`, `word_present`, `count`, `threshold`.
+- Both passes: answer, count and type for each.
+- `third_reading`, and `context` (at most 125 characters quoted from the statement).
+
+**How it was made (card Clarifications 4 and 6).**
+- Two blind passes, A and B. Neither saw the other's answers.
+- Matching rule as in Clarification 4.
+- Count strikes: the feature is "statement count meets the strike's threshold".
+- NOT STATEMENT-TYPE strikes have the feature set to no, and are excluded from the scored set.
+
+**Agreement.**
+- 399 of 407 answers, 406 of 407 types, and all 11 counts.
+- 9 third readings, by this desk, approved by the Head of R&D on Nov 14:
+  - "Balance of Risk" is YES on 8 meetings. Each market's own rules text counts a plural form of the phrase, and the statements say "balance of risks".
+  - Judy Shelton is NOT STATEMENT-TYPE.
+
+**Settled.**
+- 395 rows statement-type, 12 NOT STATEMENT-TYPE (11 "Good Afternoon", 1 Judy Shelton).
+- The word is present in 34 rows.
+- The feature is yes in 28. The other 6 present words are count strikes whose threshold is not met.
+
+**Process breach, recorded (the Head's ruling, Nov 14):**
+- Pass B fetched the 11 allowed statement pages with curl, one GET each, once, and matched them in a local script. Clarification 4 point 3 forbids any script on the Board's site.
+- It opened no other page. Its extracted bodies and script stayed in scratch and were never committed.
+- The fault was in this desk's instruction, which did not forbid curl. The Head shares it.
+- The pass is kept. From now on every worker uses the web reader only on the Board's site: no curl, script or loop.
+
+**Reader note.** The History Miner's reader (`fomctext.py`, sha256 aff0320a) has no `type` column. Its `count` treats `statement_word` = no as the placebo set, so the 12 NOT STATEMENT-TYPE rows fall in the placebo printed beside the kill line, never in the kill line itself. A reader that drops them from the placebo too is an audited amendment, not a table edit.
