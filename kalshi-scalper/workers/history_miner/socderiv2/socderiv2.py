@@ -7,7 +7,7 @@ Usage: python3 -I socderiv2.py <series.json> <lists run folder> <candles run fol
 Several candle folders (comma-separated) are merged by request id; an id in two folders stops (dated line of Nov 14 in SOCDERIV_LISTS_NOTE_NOV13.md).
 
 Readings this build chose where the text is silent are listed in READINGS and printed in every output."""
-import gzip, hashlib, json, math, os, statistics, sys
+import csv, gzip, hashlib, json, math, os, statistics, sys
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -130,9 +130,9 @@ def stats(gaps, spreads):
     if not gaps:
         return {"n": 0}
     hit = sum(1 for g, s in zip(gaps, spreads) if g >= GAP_LINE - EPS and s <= SPREAD_LINE + EPS)
-    return {"n": len(gaps), "median": round(statistics.median(gaps), 6), "q1": round(q_lin(gaps, 0.25), 6),
-            "q3": round(q_lin(gaps, 0.75), 6), "p90": round(q_lin(gaps, 0.90), 6),
-            "share_gap8_spread4": round(hit / len(gaps), 6), "count_gap8_spread4": hit}
+    return {"n": len(gaps), "median": statistics.median(gaps), "q1": q_lin(gaps, 0.25),          # unrounded (Auditor B 03:24Z, the Head's 02:59Z rulings)
+            "q3": q_lin(gaps, 0.75), "p90": q_lin(gaps, 0.90),
+            "share_gap8_spread4": hit / len(gaps), "count_gap8_spread4": hit}
 
 
 def run(series_path, lists_dir, candles_dirs):
@@ -188,6 +188,7 @@ def run(series_path, lists_dir, candles_dirs):
                     d[ts] = c
 
     cells = {}
+    pergame = []
     no_btts = {}
     league_rows = {}
     for lg in sorted(group_of):
@@ -244,15 +245,19 @@ def run(series_path, lists_dir, candles_dirs):
             for tt in ("BTTS", "TEAMTOTAL"):
                 c = cells.setdefault((grp, tt), {"derivable": 0, "games_with_target": 0, "targets": 0, "unreadable": 0,
                                                  "targets_filled": 0, "games_filled": set(), "gaps": [], "spreads": [],
-                                                 "cost": [], "roundtrip": [], "resid": [], "plac": {}})
+                                                 "cost": [], "roundtrip": [], "resid": [], "plac": {}, "iters_max": 0, "cap_hits": 0})
                 c["derivable"] += 1
                 mine = [x for x in targets if x[0] == tt]
                 if mine:
                     c["games_with_target"] += 1
                 for _, tk, team, line in mine:
                     c["targets"] += 1
+                    blank = {"game_key": ev, "fit_iters": "", "cap_hit": "", "rate_home": "", "rate_away": "", "sse": "", "leg_ticker": tk,
+                             "leg_type": "btts" if tt == "BTTS" else "team_total", "strike": "" if tt == "BTTS" or line is None else line,
+                             "model_value": "", "market_mid": "", "gap": "", "fires": False}
                     if team == "unreadable":
                         c["unreadable"] += 1
+                        pergame.append(blank)
                         continue
                     for m_ in range(30, 91):
                         ts = int(ko - m_ * 60)
@@ -268,7 +273,8 @@ def run(series_path, lists_dir, candles_dirs):
                             continue
                         wm = [(b + a) / 2 for b, a in wq]
                         tm = [(ln, (q[0] + q[1]) / 2) for ln, _, q in tq]
-                        l1, l2, sse = M.fit(wm, tm)
+                        l1, l2, sse, fi, fc = M.fit(wm, tm)
+                        c["iters_max"] = max(c["iters_max"], fi); c["cap_hits"] += fc
                         c["resid"].append(math.sqrt(sse / (3 + len(tm))))
                         if tt == "BTTS":
                             val = M.p_btts(l1, l2)
@@ -280,6 +286,8 @@ def run(series_path, lists_dir, candles_dirs):
                         c["games_filled"].add(ev)
                         c["gaps"].append(gap)
                         c["spreads"].append(a - b)
+                        pergame.append(dict(blank, fit_iters=fi, cap_hit=fc, rate_home=l1, rate_away=l2, sse=sse, model_value=val, market_mid=(a + b) / 2,
+                                            gap=val - (a + b) / 2, fires=(gap >= GAP_LINE - EPS and (a - b) <= SPREAD_LINE + EPS)))
                         c["cost"].append((a - (a + b) / 2) + fee_cents(sa + 0.01))
                         mid = (a + b) / 2
                         c["roundtrip"].append((a - b) + 2 * 0.07 * mid * (1 - mid))
@@ -287,10 +295,13 @@ def run(series_path, lists_dir, candles_dirs):
                         if pk not in c["plac"]:
                             ln0, _, q0 = min(tq, key=lambda x: (round(abs((x[2][0] + x[2][1]) / 2 - 0.5), 9), x[0]))   # 26ae3495 (b): a tie within 1e-9 takes the LOWER strike
                             rest = [(ln, mm) for ln, mm in tm if ln != ln0]
-                            p1, p2, _ = M.fit(wm, rest)
+                            p1, p2, _, pi_, pc_ = M.fit(wm, rest)
+                            c["iters_max"] = max(c["iters_max"], pi_); c["cap_hits"] += pc_
                             _, _, pg = cheaper(q0[0], q0[1], M.p_total_over(p1, p2, ln0))
                             c["plac"][pk] = (pg, q0[1] - q0[0])
                         break
+                    else:
+                        pergame.append(blank)          # no two-sided instant: the leg's row, blank
 
     out_cells = []
     for (grp, tt), c in sorted(cells.items()):
@@ -318,20 +329,22 @@ def run(series_path, lists_dir, candles_dirs):
         elif flags["survives_share_test"]:
             v = "survives the measurement"
         else:
-            v = "efficient, move on (p90 gap %s)" % st.get("p90")
+            v = "efficient, move on (p90 gap %s)" % round(st.get("p90"), 6)        # the verdict text keeps 6 dp; the figure is unrounded
         out_cells.append({
             "group": grp, "target": tt, "games_kickoff_derivable": c["derivable"], "games_with_target": c["games_with_target"],
             "targets": c["targets"], "targets_unreadable": c["unreadable"], "targets_filled": c["targets_filled"],
             "market_note": "no such market in this group" if c["targets"] == 0 else None,   # 26ae3495 (a)
-            "games_filled": nf, "filled_share": round(nf / c["derivable"], 6) if c["derivable"] else None,
-            "median_spread": round(statistics.median(c["spreads"]), 6) if c["spreads"] else None,
-            "one_way_cost_median": round(cost, 6) if cost is not None else None,
-            "round_trip_median_info_only": round(statistics.median(c["roundtrip"]), 6) if c["roundtrip"] else None,
+            "games_filled": nf, "filled_share": nf / c["derivable"] if c["derivable"] else None,
+            "median_spread": statistics.median(c["spreads"]) if c["spreads"] else None,
+            "one_way_cost_median": cost,
+            "round_trip_median_info_only": statistics.median(c["roundtrip"]) if c["roundtrip"] else None,
             "gap": st, "placebo": ps,
-            "fit_residual_median": round(statistics.median(c["resid"]), 6) if c["resid"] else None,
+            "fit_residual_median": statistics.median(c["resid"]) if c["resid"] else None,
+            "fit_iters_max": c["iters_max"], "fit_cap_hits": c["cap_hits"],
             "flags": flags, "verdict": v, "freshness": FRESH})
     return {"build": "History Miner second build, from the registration text only", "freshness": FRESH,
-            "no_such_series": sorted(no_such), "no_btts_leg_by_group": no_btts, "leagues": league_rows, "cells": out_cells, "readings": READINGS}
+            "no_such_series": sorted(no_such), "no_btts_leg_by_group": no_btts, "leagues": league_rows, "cells": out_cells, "readings": READINGS,
+            "_pergame": sorted(pergame, key=lambda r: (r["game_key"], r["leg_ticker"]))}
 
 
 def check_jobs(pairs):
@@ -340,6 +353,27 @@ def check_jobs(pairs):
         m = json.load(open(os.path.join(folder, "manifest.json")))
         if m.get("job") != json.load(open(jobfile)):
             raise Stop("the run's job is not the committed job: %s" % folder)
+
+
+PERGAME_NAME = "socderiv_pergame.csv"
+PERGAME_COLS = ("game_key", "fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "leg_ticker", "leg_type", "strike", "model_value", "market_mid", "gap", "fires")
+
+
+def cell_text(v):
+    """The Head's 02:59Z per-game format: floats as Python repr (unrounded), booleans True/False (Python bool repr, the Head 06:32Z), blanks empty."""
+    if isinstance(v, bool):
+        return repr(v)
+    if isinstance(v, float):
+        return repr(v)
+    return str(v)
+
+
+def write_pergame(path, rows):
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f, lineterminator="\n")
+        w.writerow(PERGAME_COLS)
+        for r in rows:
+            w.writerow([cell_text(r[k]) for k in PERGAME_COLS])
 
 
 def main(argv):
@@ -354,6 +388,9 @@ def main(argv):
         res = run(argv[1], argv[2], cdirs)
     except Stop as e:
         res = {"stopped": str(e), "freshness": FRESH}
+    pg = res.pop("_pergame", None)
+    if pg is not None:
+        write_pergame(os.path.join(os.path.dirname(os.path.abspath(argv[4])), PERGAME_NAME), pg)
     with open(argv[4], "w") as f:
         json.dump(res, f, indent=1, sort_keys=True)
         f.write("\n")

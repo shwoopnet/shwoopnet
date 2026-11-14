@@ -79,3 +79,23 @@ Plus Auditor B (03:24Z): the comparison figures in the main print are unrounded 
   - every float column round-trips through float(repr(x)).
 - **Unrounded print:** p90 equals q_lin(gaps, 0.9) exactly; the verdict quotes round(p90, 6).
 - **The 23 made-up cases:** re-run with the polish check (no polished SSE above the refinement's). Every changed field is listed before any committed output is replaced.
+- **The Head's settlement of the per-game readings (06:32Z, verbatim intent), before the code change:**
+  1. rate_home is team1, the team with the LOWER code (alphabetical); rate_away is the other. Already so: the winner mids are taken in the order (lower code, TIE, higher code), so the fit's first rate is the lower code's.
+  2. strike is empty for btts rows. Already so.
+  3. fires and cap_hit are written **True** or **False** (Python bool repr), replacing "true or false" above. A blank row's cap_hit stays empty.
+  4. No league column and no placebo rows. Sorted by game_key, then leg_ticker, with no other tie-break. Already so.
+  - Not covered by the settlement, kept as above and flagged again: game_key is the WINNER event ticker, and every target leg has a row (blank fit fields when unfilled or unreadable).
+  - **Confirmed by the Head (06:33Z):** (a) game_key is the WINNER event ticker for every row of that game; (b) every target leg of every kickoff-derivable sampled game has a row, blank fit fields and fires False when unfilled or unreadable. Both were already built this way.
+
+## Result on the 23 made-up cases (2026-11-14 ~07:05Z, code as frozen below; outputs replaced only after this list)
+- **Polish check (P4):** 16,780 fits over all 23 cases, placebo refits included. Polished SSE above the refinement's: 0. Singular: 0. Rejected: 0. fit_iters_max is 2 in every cell (1 in cases 21 and 23); cap hits 0.
+- **Changed fields** (old committed output against new), every numeric change under 5.2e-7. This is the removal of the 6 dp rounding (up to 5e-7) plus the fit's last-digit moves:
+  - gap and placebo median, q1, q3, p90: 44 cell values each, max 5.11e-7;
+  - fit_residual_median: 44, max 3.36e-7;
+  - round_trip_median_info_only: 44, max 5e-7;
+  - filled_share: 8, max 3.33e-7;
+  - median_spread and one_way_cost_median: 44 each, max 7e-17 (float noise only).
+- New fields fit_iters_max and fit_cap_hits in every cell.
+- **verdict text:** 9 cells (A_big TEAMTOTAL-type cell 1 in cases 1, 3, 4, 5, 9, 10, 15, 17, 18). Only the quoted p90 moved, -0.004794 to -0.004793, one step at the 6th decimal; the same words.
+- **No count changed** (n, filled, targets, hits, flags). Case 20 is the refusal, unchanged.
+- **Per-game file (all 22 cases with a print, 11,385 rows):** checked rows = sum of targets; filled rows = sum of targets_filled; fires rows = sum of count_gap8_spread4; sorted; columns exactly as ruled; no result column; floats round-trip; btts strike blank; game_key a winner event. All OK. These CSVs came from the harness before the True/False change. The frozen formatter is tested separately in test_fit_polish.py ("per-game format: ok").
