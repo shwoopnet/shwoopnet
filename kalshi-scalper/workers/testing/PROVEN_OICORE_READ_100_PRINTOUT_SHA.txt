@@ -1,0 +1,2 @@
+OICORE proven-bar read at 100 fills, build 2 (proven_oicore_second.py 5988bdce, commit 93644db8), run once Nov 14 on the extract with sha256 20c00443381f1edeeca51a962639dd9a280a8da0d1a1a35f27bbf4c1dfa54bb9.
+sha256 of my printout (kept in scratch, not in the repo): 9b2d76a57def52849019dccaa1d484e8e2f3bad5fabeebdb20c008ee5f9b9744
