@@ -4,6 +4,10 @@ HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; line
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-14 09:01 AM CT (15:01Z): Idea 4 maker resting entries replay: SKIPPED, no try
+
+The stored task 'Idea 4 maker resting entries replay on R6 data' (routine trig_01JnkcJ8Xfd5uwk9Mhc8wZ52) fired Nov 14 15:00Z and was not run. Head of R&D ruling (a): V1 and V2 already cover resting entries; the gold part is on the declined list (7e, closed by MAKERREPLAY1); the other L1 series would be a favourite-late version, which the owner's freeze and the Nov 13 no-sweep agreement rule out. Logged as skipped with that reason, no try added to the ledger, nothing registered, no data read. The routine is stale and Main (which owns routines) is told so it can be disabled.
+
 ## 2026-11-13 06:28 PM CT (00:28Z): Window caveat: reports are 14 days; the OICORE proven-bar read and any since-start line need a long report
 
 dash.sh asks the nightly endpoint for 336 hours, so OICORE fills older than 14 days rolled out of every figure I sent since Nov 13 17Z (the report's OICORE count stayed near 93 while the true count was higher, found at 00:27Z Nov 14). The proven-bar read (oicore_proven.py, first 100 rows by ts) must be run on a report with hours of at least 1440 (dash_long.sh in the scratchpad does that; the endpoint allows 90 days). Earlier since-start and OICORE cumulative lines were 14-day window figures and are corrected by message. No figures here.
