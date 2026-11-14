@@ -192,3 +192,10 @@ This amendment is the one place for the fill and threshold rule, and it governs 
    - Dropping BTC-USD-SWAP does not only remove triggers. H is recomputed on the one-instrument distribution, so the trigger set can change in either direction.
    - The change is that every trigger is now defined on BTC-USDT-SWAP contracts alone.
    - Where Amendment 4 differs from R2, from R3 or from Amendment 3's text of sizes "in BTC", Amendment 4 governs. Builds read sizes as raw `sz` of BTC-USDT-SWAP.
+
+## Amendment 6 (Nov 14, 2026, 02:38Z, before H is computed; Auditor B's condition for a CLEAN text)
+
+- **Struck:** Amendment 5's sentence that this card's R6 book fills are "fill-checked against the quote, not against queue position", and the clause that "upper bound, not fill-checked" applies only to candle reads. Both were wrong.
+  - A taker fill at the ask seen at a 2 second R6 poll is not checked for size, nor for the quote moving before the order arrives.
+  - The R8 fill is an upper bound, as the card's rule section already says: "Fill at the ask seen plus the rounded fee (an upper bound)".
+- **Every LIQREV result line says "upper bound, not fill-checked"** (C9), at R8's fill, at 1c and at 2c alike.
