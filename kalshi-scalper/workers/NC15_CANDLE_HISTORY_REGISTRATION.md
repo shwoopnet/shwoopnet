@@ -1,0 +1,12 @@
+# NC15 1 minute candle history pull (registration of a pull, Idea Desk A, Nov 14, 2026; the owner's freeze exception, relayed by the Head of R&D)
+
+**What:** a public-data history pull of 1 minute candles for the 11 NC15 series (KXSILVER15M, KXCOPPER15M, KXWTI15M, KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M, KXHYPE15M, KXBNB15M, KXAUDUSD15M, KXUSDCAD15M, KXNATGAS15M) so development reads of candle-based cards can run on more than the 2.5 days the NC15 books hold. Candles are read under the candle haircut rule (C1 to C11 at rnd-queue 01b03936: 2c primary on NC15 series until the VA has measured the series). The NC15 books on nc-data remain the fill check. No card is registered here; each card that reads these candles carries its own registration, held-out line and VA ruling.
+
+**Steps (all through the kalshi-pull runner, GET only, 5 s pacing, files under 1,200 requests, builder-generated tickers only):**
+1. `NC15_LISTS` (187 requests): settled markets per series in 10 day close ranges from 2026-06-01 to 2026-11-13T23:59Z. Only tickers and close times are used by the builder; a reader never reads a result.
+2. `NC15_PROBE` (2 requests): one hour of 43 recorded tickers batched, and the first close alone, to learn the batch shape (does a ticker return only its own window, is a minute padded or missing). Compared by shapes and timestamps only, by Desk A and Auditor B.
+3. Hourly candle files (about 2,400 requests, 2 files) built from the landed lists if the probe is clean; else the per-close fallback on the last 45 days. The real totals go to the Head before these files go to Main.
+
+**End date:** 2026-11-13T23:59:00Z; nothing later is asked. NC15DEPTH1's pooled scoring window opens 2026-11-19T00:00Z, after the end. Many other cards hold out dates inside the range (HELDOUT_REGISTRY.md, Auditor B's reading): the landed runs go into HELDOUT_PULL_RUNS.md (Main, in the landing PR) and are opened only through heldout_guard_v2 (guard copy sha256 974f271366673c38f1a326335ed69db465aa2e15a327672b12a1e0f28640c126), with each reader applying its own card's cutoff.
+
+**Cost (estimates until the lists land):** lists about 187 requests, about 16 minutes at 5 s; probe 2 requests; candles about 2,400 requests, about 3.3 hours. No Firestore, no key, no order; research data only.
