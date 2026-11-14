@@ -879,3 +879,9 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 - HOURLYNOW (nowcast against hourly brackets): VA rules a VERSION of WXDAYEND; no card. Versions don't count under the owner's order.
 - Synoptic Data (the settling source): FORBIDDEN for trading use by its terms (Sec 2.6, event contracts), per Main's read. Parked like Polymarket and ESPN: no automated read unless Synoptic consents in writing.
 - The suggested proxy-match measurement is NOT run (it would join outcomes inside W-CAT-CAL1's released held-out only to serve a version).
+
+## 2026-11-14 01:35Z: FOMCTEXT ready for the owner's word (Head)
+- Statement-word table settled (claude/idea-desk-c c1a642f3, sha 493e6d6a): 407 rows, 395 statement-type, 12 NOT STATEMENT-TYPE; feature yes 28, placebo 367; the 12 sit on their own line (Clarification 7, reader 919255f2).
+- Candle job rebuilt at 5 s pacing (0f9ea5ee, sha 636c0b7e): 407 GETs, at most 12 a minute, about 34 minutes, development only (last window 2026-04-29). The 1.0 s job (da62610b) is superseded and never runs.
+- Auditor B: CLEAN on reader, table and job. Noted: 8 of the 28 yes rows are "Balance of Risk" by the approved third reading; without them the kill arm is 20.
+- Waiting on: the owner's yes under the freeze (asked via the EA), then Main dispatches in an allocated hour.
