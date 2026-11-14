@@ -56,8 +56,8 @@ def probe_job(rows):
     ep = [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}]
     reqs = [{"id": "hour_batch", "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(alltk), "start_ts": first - 900, "end_ts": quartet[-1], "period_interval": 1}},
             {"id": "first_close_plain", "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(bycl[first]), "start_ts": first - 900, "end_ts": first, "period_interval": 1}}]
-    return base("NC15_PROBE", "Two reads to learn the batch shape: the 1 minute candles of one hour (4 closes) for every recorded ticker in one batched request, and the first close's tickers alone as the plain request of the same window. Compared by shapes and timestamps only (does a ticker return only its own window, are minutes padded or missing); no price is read.", ep, alltk, 2, reqs,
-                "Hour closes %s; %d tickers in the batch; tickers come from the NC15 recorder's coverage files (columns close_time, series and ticker only). Pacing 5.0 s." % (", ".join(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(c)) for c in quartet), len(alltk)))
+    return base("NC15_PROBE", "Two reads to learn the batch shape: the 1 minute candles of one hour (4 closes) for every recorded ticker in one batched request, and the first close's tickers alone as the plain request of the same window. Compared by shapes and timestamps only (does a ticker return only its own window, are minutes padded or missing); no price is read.", ep, alltk, 2 + 6, reqs,
+                "Hour closes %s; %d tickers in the batch; tickers come from the NC15 recorder's coverage files (columns close_time, series and ticker only). Pacing 5.0 s. max_requests is 8 = the 2 requests plus 6 for 429 or other retries (the runner counts every request sent against the cap)." % (", ".join(time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(c)) for c in quartet), len(alltk)))
 if __name__ == "__main__":
     a = sys.argv[1:]
     if len(a) == 2 and a[0] == "lists": job, out = lists_job(), a[1]

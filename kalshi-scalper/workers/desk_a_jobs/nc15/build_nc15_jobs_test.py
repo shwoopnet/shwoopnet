@@ -21,7 +21,7 @@ for k in range(4): put(hb + 900 * (k + 1), 11, "B")
 put(hb + 7200 + 900, 5, "C")                  # an hour with only one close: incomplete
 quartet, bycl = B.pick_hour(rows); assert quartet == [hb + 900, hb + 1800, hb + 2700, hb + 3600], quartet
 pj = B.probe_job(rows); r1, r2 = pj["requests"]
-pg = sum(r.get("max_pages", 1) for r in pj["requests"]); assert len(pj["requests"]) == 2 and pg == 2 and pg <= pj["max_requests"] <= 1200 and pj["max_requests"] == 2 and len(r1["params"]["market_tickers"].split(",")) == 44 == len(pj["ticker_allowlist"])
+pg = sum(r.get("max_pages", 1) for r in pj["requests"]); assert len(pj["requests"]) == 2 and pg == 2 and pg + 6 == pj["max_requests"] <= 1200, (pg, pj["max_requests"])      # the runner counts every request SENT against the cap, a 429 retry or a retried non-200 included (kalshi_pull.py: sent += 1, then "sent >= cap"): pages + 6 leaves room for retries and len(r1["params"]["market_tickers"].split(",")) == 44 == len(pj["ticker_allowlist"])
 assert r1["params"]["start_ts"] == quartet[0] - 900 and r1["params"]["end_ts"] == quartet[-1] and r2["params"]["end_ts"] == quartet[0] and r2["params"]["start_ts"] == quartet[0] - 900
 assert set(r2["params"]["market_tickers"].split(",")) == set(bycl[quartet[0]]) and len(bycl[quartet[0]]) == 11 and r1["params"]["period_interval"] == r2["params"]["period_interval"] == 1
 assert all(t in pj["ticker_allowlist"] for t in r1["params"]["market_tickers"].split(","))

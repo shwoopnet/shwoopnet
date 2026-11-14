@@ -74,7 +74,7 @@
   "KXWTI15M-26NOV111945-45",
   "KXWTI15M-26NOV112000-00"
  ],
- "max_requests": 2,
+ "max_requests": 8,
  "requests": [
   {
    "id": "hour_batch",
@@ -97,7 +97,7 @@
    }
   }
  ],
- "notes": "Hour closes 2026-11-12T00:15:00Z, 2026-11-12T00:30:00Z, 2026-11-12T00:45:00Z, 2026-11-12T01:00:00Z; 43 tickers in the batch; tickers come from the NC15 recorder's coverage files (columns close_time, series and ticker only). Pacing 5.0 s.",
+ "notes": "Hour closes 2026-11-12T00:15:00Z, 2026-11-12T00:30:00Z, 2026-11-12T00:45:00Z, 2026-11-12T01:00:00Z; 43 tickers in the batch; tickers come from the NC15 recorder's coverage files (columns close_time, series and ticker only). Pacing 5.0 s. max_requests is 8 = the 2 requests plus 6 for 429 or other retries (the runner counts every request sent against the cap).",
  "owner": "DESK_A",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
