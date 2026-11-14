@@ -1,0 +1,354 @@
+{
+ "job": {
+  "job_id": "FOMCTEXT_HIST_A",
+  "status": "active",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/idea_desk_c/FOMCTEXT_CARD.md",
+  "purpose": "FOMCTEXT development markets (Idea Desk C): one /historical/markets list per development KXFEDMENTION event, 11 FOMC press conferences Jan 2025 to Apr 2026, by event_ticker. Owner MAIN: the runner lists no Desk C.",
+  "heldout": "FOMCTEXT_CARD.md: decision dates on or after 2026-06-17 are held out; no event dated 2026-06-17 or later is requested here",
+  "allowed_endpoints": [
+   {
+    "name": "hist_markets_list",
+    "method": "GET",
+    "path_pattern": "/historical/markets",
+    "params_allowed": [
+     "event_ticker",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXFEDMENTION"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 25,
+  "requests": [
+   {
+    "id": "hist_KXFEDMENTION-25JAN",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25JAN",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-25MAR",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25MAR",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-25MAY",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25MAY",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-25JUN",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25JUN",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-25JUL",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25JUL",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-25SEP",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25SEP",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-25OCT",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25OCT",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-25DEC",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-25DEC",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-26JAN",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-26JAN",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-26MAR",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-26MAR",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXFEDMENTION-26APR",
+    "path": "/historical/markets",
+    "params": {
+     "event_ticker": "KXFEDMENTION-26APR",
+     "limit": 1000
+    },
+    "max_pages": 2
+   }
+  ],
+  "notes": "Event tickers are DERIVED from the pattern KXFEDMENTION-YYMON (confirmed for KXFEDMENTION-26MAR by the Chief of Staff's probe, Nov 13); only development months are listed (2025: JAN, MAR, MAY, JUN, JUL, SEP, OCT, DEC; 2026: JAN, MAR, APR). An EMPTY answer means a wrong guess (or a meeting the series did not list), NOT an empty meeting, and is reported as such. Limit 1000 with max_pages 2 so no list can end on a cursor (an event holds tens of strikes); page budget 22, cap 25. No event dated 2026-06-17 or later is requested. Slow family: 8 events a year, paper list at most.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-14T0022Z",
+ "finished": "2026-11-14T0022Z",
+ "status": "complete",
+ "requests_sent": 11,
+ "bytes_stored": 933755,
+ "rows": [
+  {
+   "index": 1,
+   "id": "hist_KXFEDMENTION-25JAN",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25JAN",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 28582,
+   "t_send_ms": 1794615722449,
+   "t_recv_ms": 1794615722575,
+   "server_date": "Sat, 14 Nov 2026 00:22:02 GMT",
+   "file": "0001.json.gz",
+   "sha256": "30ac7461460bef690aaaec9eb39a103bcd0c7197f1eae29912f68cb5e8e37741",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "hist_KXFEDMENTION-25MAR",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25MAR",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 76095,
+   "t_send_ms": 1794615723450,
+   "t_recv_ms": 1794615723561,
+   "server_date": "Sat, 14 Nov 2026 00:22:03 GMT",
+   "file": "0002.json.gz",
+   "sha256": "a7a8f797fd380d9568995a39105d4b04b049b4febf1d0d95131ae1a535368ece",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "hist_KXFEDMENTION-25MAY",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25MAY",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 75822,
+   "t_send_ms": 1794615724450,
+   "t_recv_ms": 1794615724570,
+   "server_date": "Sat, 14 Nov 2026 00:22:04 GMT",
+   "file": "0003.json.gz",
+   "sha256": "51a3a309e689382c7356bd3f92f8f091647c92386d2654d455d354d3561fb902",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "hist_KXFEDMENTION-25JUN",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25JUN",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 83317,
+   "t_send_ms": 1794615725450,
+   "t_recv_ms": 1794615725567,
+   "server_date": "Sat, 14 Nov 2026 00:22:05 GMT",
+   "file": "0004.json.gz",
+   "sha256": "c73756ceb779e311c1be2c33c93fedf25ad502ad1f7a90e86861dd41a43ee5e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "hist_KXFEDMENTION-25JUL",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25JUL",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 77889,
+   "t_send_ms": 1794615726450,
+   "t_recv_ms": 1794615726631,
+   "server_date": "Sat, 14 Nov 2026 00:22:06 GMT",
+   "file": "0005.json.gz",
+   "sha256": "88a62f9c2b9f783880e8accda717464a2d5a0efeeb0c888f026546bf67895ae1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "hist_KXFEDMENTION-25SEP",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25SEP",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 93950,
+   "t_send_ms": 1794615727450,
+   "t_recv_ms": 1794615727566,
+   "server_date": "Sat, 14 Nov 2026 00:22:07 GMT",
+   "file": "0006.json.gz",
+   "sha256": "856d28993c23e05bf4955acdf4283767930f471e8425b946f84972e8d6aba130",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "hist_KXFEDMENTION-25OCT",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25OCT",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 88047,
+   "t_send_ms": 1794615728450,
+   "t_recv_ms": 1794615728674,
+   "server_date": "Sat, 14 Nov 2026 00:22:08 GMT",
+   "file": "0007.json.gz",
+   "sha256": "ff9b3248b2041ce748a8abc4ef6fc5c344d2a989110a16c561a6487255f4a3a2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "hist_KXFEDMENTION-25DEC",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-25DEC",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 90652,
+   "t_send_ms": 1794615729450,
+   "t_recv_ms": 1794615729542,
+   "server_date": "Sat, 14 Nov 2026 00:22:09 GMT",
+   "file": "0008.json.gz",
+   "sha256": "51113208d97bb82579fb76001a61a922041aa30565198310fe2aa9948c5a982c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "hist_KXFEDMENTION-26JAN",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26JAN",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 97286,
+   "t_send_ms": 1794615730450,
+   "t_recv_ms": 1794615730780,
+   "server_date": "Sat, 14 Nov 2026 00:22:10 GMT",
+   "file": "0009.json.gz",
+   "sha256": "7f3b3a9aca345fff4f52cbc04d9a219fe5e159d0fd0e6b8b7755173e967f06f2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "hist_KXFEDMENTION-26MAR",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26MAR",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 118437,
+   "t_send_ms": 1794615731450,
+   "t_recv_ms": 1794615731544,
+   "server_date": "Sat, 14 Nov 2026 00:22:11 GMT",
+   "file": "0010.json.gz",
+   "sha256": "4c986c06fd91714e971c1284e78dbba12813f790d3c7e1601371f0984dd64f23",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "hist_KXFEDMENTION-26APR",
+   "path": "/historical/markets",
+   "params": {
+    "event_ticker": "KXFEDMENTION-26APR",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 103678,
+   "t_send_ms": 1794615732451,
+   "t_recv_ms": 1794615732546,
+   "server_date": "Sat, 14 Nov 2026 00:22:12 GMT",
+   "file": "0011.json.gz",
+   "sha256": "e6f8c4023344e964216d90ec2fb1c82db8a2cc0b9cceed84c46368bc42cc0fd4",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
