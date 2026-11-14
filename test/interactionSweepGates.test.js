@@ -57,7 +57,7 @@ gates.PT3 = () => {
   const block = html.slice(html.indexOf('  var KAL_BOARD_LIVE = ['), html.indexOf('  var KAL_RULES_BUILDING'));
   const lines = [...block.matchAll(/rules: \[('(?:[^'\\]|\\.)*'), ('(?:[^'\\]|\\.)*'), ('(?:[^'\\]|\\.)*')\]/g)].flatMap((m) => [m[1], m[2], m[3]]);
   const shadow = /var KAL_BOARD_SHADOW_RULES = \[('(?:[^'\\]|\\.)*'), ('(?:[^'\\]|\\.)*'), ('(?:[^'\\]|\\.)*')\];/.exec(html);
-  assert.ok(lines.length === 15 && shadow, 'five live strategies and the shadow lines');
+  assert.ok(lines.length === 21 && shadow, 'seven live strategies and the shadow lines');
   for (const l of lines.concat(shadow.slice(1))) {
     assert.ok(l.length < 150 && !/\.\s+[A-Z]/.test(l) && !/Nov \d+|checkpoint|exception|rows\b/.test(l), 'one short plain sentence: ' + l);
   }

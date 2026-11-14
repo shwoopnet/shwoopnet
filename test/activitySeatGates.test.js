@@ -25,12 +25,12 @@ const chk = (o) => act.activityOrderCheck(Object.assign({ seatId: 'ACTA', count:
 
 gates['AS1 a strategy that is not a registered activity seat is untouched by the check, and the seat list is frozen'] = () => {
   // Since Nov 14, 2026 the first seat, SPXOI1, is registered (see AS11); any other id still does nothing.
-  assert.deepStrictEqual(act.ACTIVITY_SEATS.map((s) => s.id), ['SPXOI1']);
+  assert.deepStrictEqual(act.ACTIVITY_SEATS.map((s) => s.id), ['SPXOI1', 'HYPEOI1', 'BNBOI1']);
   assert.ok(Object.isFrozen(act.ACTIVITY_SEATS));
-  assert.deepStrictEqual(act.activeActivitySeats().map((s) => s.id), ['SPXOI1']);
+  assert.deepStrictEqual(act.activeActivitySeats().map((s) => s.id), ['SPXOI1', 'HYPEOI1', 'BNBOI1']);
   const r = act.activityOrderCheck({ seatId: 'ACTA', count: 3, limit: 0.3, slotOrders: [], now: 1, read });
   assert.deepStrictEqual(r, { applies: false, allowed: true, reason: '' });
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'no seat was added to the slot registry');
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1', 'HYPEOI1', 'BNBOI1'], 'no seat was added to the slot registry');
 };
 
 gates['AS2 the shared $40 weekly cap binds across seats and every seat resumes Monday 00:00 Central, DST included'] = () => {

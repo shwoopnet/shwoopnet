@@ -11,6 +11,15 @@ const ACTIVITY_LABEL = "Activity seat: unproven, for live data";
 const ACTIVITY_SEATS = Object.freeze([Object.freeze({
   id: "SPXOI1", familyId: "cheap-side-open-interest", readme: "kalshi-scalper/README.md#SLOT-SPXOI1", series: Object.freeze(["KXINX15M"]),
   entry: Object.freeze({ priceMin: 0.08, priceMax: 0.5 }), contractsPerOrder: 3, ioc: true, reviewedAt: "2026-11-14",
+}),
+// Seats 2 and 3 (Nov 14, 2026): HYPEOI1 and BNBOI1, the same mechanism on the HYPE and BNB 15 minute markets (thresholds in kalshiSpxoiConfig).
+Object.freeze({
+  id: "HYPEOI1", familyId: "cheap-side-open-interest", readme: "kalshi-scalper/README.md#SLOT-HYPEOI1", series: Object.freeze(["KXHYPE15M"]),
+  entry: Object.freeze({ priceMin: 0.08, priceMax: 0.5 }), contractsPerOrder: 3, ioc: true, reviewedAt: "2026-11-14",
+}),
+Object.freeze({
+  id: "BNBOI1", familyId: "cheap-side-open-interest", readme: "kalshi-scalper/README.md#SLOT-BNBOI1", series: Object.freeze(["KXBNB15M"]),
+  entry: Object.freeze({ priceMin: 0.08, priceMax: 0.5 }), contractsPerOrder: 3, ioc: true, reviewedAt: "2026-11-14",
 })]);
 const ACTIVITY_MAX_SEATS = 3;
 const ACTIVITY_CONTRACTS = 3, ACTIVITY_MAX_ORDER_COST = 3;     // dollars, fee included, at the seat's top price

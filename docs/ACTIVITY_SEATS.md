@@ -30,3 +30,13 @@ Every figure is replayed from the settled slot orders on every check (cash basis
 - Kill rules in the slot registry: net below -$18 after 5 fills, or 30 losses in a row. Activity terms: $6 a day and $20 a week for the seat, $40 a week shared, cut if the last 100 fills have profit factor under 0.8, nothing at 88c or above.
 - How the caps combine: the slot's own per seat caps (`SLOT_SEAT_CAPS`: $3 an order, $9 a day) and the activity limits are BOTH checked, so the tighter binds: a day stops at $6 (the activity cap), the $9 slot cap never binds first. The slot's daily and lifetime loss caps are counted from each strategy's own orders, so this seat's losses do not use another seat's room (and the reverse). The shared 12% stop, the hard stop and the 5.5% window cap still apply.
 - The page has no look of its own for it: it coincides with the open interest jump look, so a second ring entry would only merge names.
+
+## HYPEOI1 and BNBOI1, seats 2 and 3 (Nov 14, 2026)
+
+- Markets: `KXHYPE15M` and `KXBNB15M`, every day (crypto, 24/7). Same family `cheap-side-open-interest`; with SPXOI1 that is three seats, the most `ACTIVITY_MAX_SEATS` allows.
+- Rule as SPXOI1 (look 120 to 180 seconds before the close, open interest rise at or above T, cheaper side 8c to 50c, limit = ask, 3 contracts, IOC, held to settlement) with fixed thresholds in `functions/kalshiSpxoiConfig.js`: HYPE 6796.75, BNB 4351.84. Pre-registration: `kalshi-scalper/README.md#SLOT-HYPEOI1` and `#SLOT-BNBOI1`.
+- Both markets are RESERVED to EVENT830. `SLOT_SERIES_ALSO` names the only two extra ids allowed beside it (one per market); every other id is still refused. EVENT830 is unchanged.
+- **Interaction with EVENT830:** each seat skips any window that closes at one of EVENT830's listed 13:30Z releases (`entry.skipCalendar`, skip reason `event830_window`), because T was computed without those closes. So the two never want the same window. On every other window EVENT830 does not trade, so there is no overlap.
+- Quotes: the minute function reads the two markets only in the minute or two before each quarter hour's entry span (`SLOT_SESSION_HOURS` with `allDays`), no Firestore read.
+- Caps: the slot's per seat caps ($3 an order, $9 a day) and the activity limits are both checked, the tighter binds. Exchange shard of these two markets is not recorded in this repo; the engine fails closed on a short shard.
+

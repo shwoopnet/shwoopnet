@@ -18,7 +18,7 @@ const watch = /var KAL_WATCH = [^\n]*\n/.exec(html)[0];
 const f = new Function(looks + watch + ['kalshiStrategyState', 'kalshiCtWeekMinute', 'kalshiGoldClosed', 'kalshiNextEntry', 'kalshiMarketName', 'kalshiDurationText', 'kalshiSilentMarkets'].map(fnSource).join('\n') +
   '; return { kalshiStrategyState, kalshiNextEntry, kalshiSilentMarkets };')();
 const TUE = Date.parse('2026-11-03T15:00:00Z'), Q = 900000, base = Math.floor(TUE / Q) * Q;
-const SLOTS = ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'];
+const SLOTS = ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1', 'HYPEOI1', 'BNBOI1'];
 const state = (gold, extra) => f.kalshiStrategyState(Object.assign({ gold: { state: gold }, slotIds: SLOTS, registry: [], shadowIds: ['SHADOWX'] }, extra || {}));
 // every look (minute offset in the quarter) the card can name, across a whole quarter
 const names = (st, from) => { const out = new Set(); for (let t = from; t < from + Q; t += 30000) { const n = f.kalshiNextEntry(t, st); if (n) out.add(n.name); } return [...out]; };

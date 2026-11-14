@@ -186,7 +186,9 @@ function makeRunners(flags) {
     const seenInShared = new Set((sh.recentList || []).map((t) => t.id || t.clientOrderId));
     for (const job of jobs) {
       const { s, ticker, series } = job;
-      let verdict = null;                          // the last refusal decide() gave inside the transaction, for the skip code (log only)
+      // A seat with entry.skipCalendar never trades a window closing at one of that calendar's instants (EVENT830's 13:30Z releases): its threshold was computed with those closes cut. Decided before any wait or read.
+      if (s.entry.skipCalendar !== undefined && slotLib.slotSkipCalendarRow(s, ticker, Date.parse(job.closeTime))) { skip(job, "event830_window"); results.push(ticker + ": an EVENT830 release window, this seat does not trade it"); continue; }
+      let verdict = null;                         // the last refusal decide() gave inside the transaction, for the skip code (log only)
       const latch = latches && !latches.unreadable && Object.prototype.hasOwnProperty.call(latches, s.id) ? latches[s.id] : (latches && latches.unreadable ? latches : null);
       // The reference model's input (CFRTIK): the perp candles, waited for BEFORE the market is read, so the quote the decision uses is as fresh as the candle. Any missing piece is no order, never an older candle in its place.
       let perp = null;

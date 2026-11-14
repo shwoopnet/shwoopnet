@@ -26,6 +26,9 @@ const EVENT830_SERIES = Object.freeze(["KXSILVER15M", "KXCOPPER15M", "KXWTI15M",
 const SPXOI1_SERIES = "KXINX15M";
 const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M"].concat(EVENT830_SERIES, [SPXOI1_SERIES]));
 const SLOT_SERIES_RESERVED = Object.freeze(Object.assign(EVENT830_SERIES.reduce((o, x) => { o[x] = "EVENT830"; return o; }, {}), { [SPXOI1_SERIES]: "SPXOI1" }));
+// HYPEOI1 and BNBOI1 (activity seats 2 and 3, Nov 14, 2026) also trade KXHYPE15M and KXBNB15M. Those two stay reserved (nothing else may list them): this map names the ONLY extra ids allowed beside the reserved one.
+// EVENT830 itself is unchanged. Each of the two seats skips EVENT830's listed windows (entry.skipCalendar), so it never trades a window that its threshold (computed with those closes cut) never saw.
+const SLOT_SERIES_ALSO = Object.freeze({ KXHYPE15M: Object.freeze(["HYPEOI1"]), KXBNB15M: Object.freeze(["BNBOI1"]) });
 const SLOT_MAX_CONTRACTS_PER_ORDER = 10;
 const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold contracts in one ticker, all strategies together
 const SLOT_MAX_SCALE_STEPS = 3;
@@ -134,6 +137,15 @@ function slotCalendarRow(strategy, ticker, closeMs) {
   const wk = windowKey(String(ticker || ""));
   return rows.find((r) => Date.parse(r.closeUtc) === closeMs && r.window === wk) || null;
 }
+// A strategy that names entry.skipCalendar never enters a window that closes at one of that calendar's instants (same two-part match as slotCalendarRow). Null when the strategy has none or the window is not listed.
+function slotSkipCalendarRow(strategy, ticker, closeMs) {
+  const name = strategy && strategy.entry ? strategy.entry.skipCalendar : undefined;
+  if (name === undefined) return null;
+  const rows = Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, name) ? SLOT_CALENDARS[name] : null;
+  if (!rows || !isNum(closeMs)) return null;
+  const wk = windowKey(String(ticker || ""));
+  return rows.find((r) => Date.parse(r.closeUtc) === closeMs && r.window === wk) || null;
+}
 // The series whose quotes the minute function must read NOW for a calendar strategy, because one of its listed windows is about to enter its entry time. Empty on every other minute, so the bot reads
 // nothing extra on a day with no release (and on a release day only around the one minute that can enter). Pure: the caller passes the clock and the strategies.
 const SLOT_CALENDAR_LEAD_MS = 30 * 1000;               // read from 30 seconds before the entry window opens, so a function that starts a little early still has the quotes
@@ -225,14 +237,30 @@ function spxoiEntry(T = spxoiThreshold()) {   // the argument exists for tests o
   });
 }
 const SPXOI1_ENTRY = spxoiEntry();
+// HYPEOI1 and BNBOI1 (Nov 14, 2026, activity seats 2 and 3; kalshi-scalper/README.md#SLOT-HYPEOI1 and #SLOT-BNBOI1; rule: Desk A's frozen sheet DESK_A_FROZEN_OICORE_PLACES_DEFINITIONS_NOV13.md v5). SPXOI1's shape on the HYPE and BNB 15 minute markets,
+// 24/7, with the thresholds in kalshiSpxoiConfig (frozen, two builds equal). skipCalendar: EVENT830's listed 13:30Z windows are never entered, because T was computed with those closes cut.
+function oiSeatEntry(id, series, T) {
+  if (!(typeof T === "number" && Number.isFinite(T) && T > 0)) return null;
+  return Object.freeze({
+    id, readme: "kalshi-scalper/README.md#SLOT-" + id, series: Object.freeze([series]),
+    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.08, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: T, skipCalendar: "EVENT830" }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 3,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 30, minNet: Object.freeze({ afterFills: 5, net: -18 }) }),
+    forwardReadDate: "2026-12-01", reviewedAt: "2026-11-14",
+  });
+}
+const HYPEOI1_ENTRY = oiSeatEntry("HYPEOI1", "KXHYPE15M", spxoiConfig.HYPEOI1_T);
+const BNBOI1_ENTRY = oiSeatEntry("BNBOI1", "KXBNB15M", spxoiConfig.BNBOI1_T);
 // Own caps per seat (Nov 13, 2026): a seat listed here may send at most perOrder dollars in one order and lose at most daily dollars in 24 hours, whatever the base-scaled caps allow. They can only LOWER a cap, never raise one.
-const SLOT_SEAT_CAPS = Object.freeze({ SPXOI1: Object.freeze({ perOrder: 3, daily: 9 }) });
+const SLOT_SEAT_CAPS = Object.freeze({ SPXOI1: Object.freeze({ perOrder: 3, daily: 9 }), HYPEOI1: Object.freeze({ perOrder: 3, daily: 9 }), BNBOI1: Object.freeze({ perOrder: 3, daily: 9 }) });
 // A tie between the two sides' prices goes to YES for these seats (SPXOI1's registered rule); every other "cheap" seat keeps the older reading, where a tie goes to NO.
-const SLOT_TIE_YES = Object.freeze(["SPXOI1"]);
+const SLOT_TIE_YES = Object.freeze(["SPXOI1", "HYPEOI1", "BNBOI1"]);
 const slotCheapSide = (strategyId, yesPrice, noPrice) => (SLOT_TIE_YES.includes(strategyId) ? (yesPrice <= noPrice ? "yes" : "no") : (yesPrice < noPrice ? "yes" : "no"));
 // Weekday market hours for a seat whose market is not open around the clock (UTC minutes since midnight, Monday to Friday). It only decides when the minute function reads that market's quotes; the entry window,
 // the quote and the gate decide everything else. 15:00Z to 21:00Z is a registration fact for KXINX15M; a window outside it simply is not read.
-const SLOT_SESSION_HOURS = Object.freeze({ SPXOI1: Object.freeze({ startUtcMin: 15 * 60, endUtcMin: 21 * 60 }) });
+// allDays: a market that trades every day (HYPE and BNB crypto) is read in every quarter hour's entry span, weekends included.
+const SLOT_SESSION_HOURS = Object.freeze({ SPXOI1: Object.freeze({ startUtcMin: 15 * 60, endUtcMin: 21 * 60 }), HYPEOI1: Object.freeze({ startUtcMin: 0, endUtcMin: 24 * 60, allDays: true }), BNBOI1: Object.freeze({ startUtcMin: 0, endUtcMin: 24 * 60, allDays: true }) });
 function slotSessionSeriesDue(strategies, now) {
   const out = [];
   if (!isNum(now)) return out;
@@ -241,7 +269,7 @@ function slotSessionSeriesDue(strategies, now) {
   for (const s of strategies || []) {
     const h = s && Object.prototype.hasOwnProperty.call(SLOT_SESSION_HOURS, s.id) ? SLOT_SESSION_HOURS[s.id] : null;
     if (!h || !s.entry) continue;
-    if (dow < 1 || dow > 5 || minOfDay < h.startUtcMin || minOfDay > h.endUtcMin) continue;
+    if ((!h.allDays && (dow < 1 || dow > 5)) || minOfDay < h.startUtcMin || minOfDay > h.endUtcMin) continue;
     if (left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec + SLOT_CALENDAR_LEAD_MS / 1000) for (const x of s.series) if (!out.includes(x)) out.push(x);
   }
   return out;
@@ -250,6 +278,8 @@ function slotSessionSeriesDue(strategies, now) {
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
 // Optional (Oct 30, 2026, the open interest core): the open interest on the market must have risen by at least this many contracts over the 3 minutes to the signal candle, or no order. Absent means no such condition.
 const ENTRY_KEYS_OI = ENTRY_KEYS.concat(["oiRiseMin"]);
+// Optional (Nov 14, 2026, HYPEOI1 and BNBOI1): skipCalendar names a frozen list in SLOT_CALENDARS (EVENT830's); a window closing at one of its instants is never entered, with oiRiseMin as in ENTRY_KEYS_OI.
+const ENTRY_KEYS_OISKIP = ENTRY_KEYS_OI.concat(["skipCalendar"]);
 // Optional (Nov 3, 2026, EVENT830): maxSpread, the widest YES spread (ask minus bid) at which an order may go; calendar, the name of a frozen list in SLOT_CALENDARS (it must be the strategy's own id).
 const ENTRY_KEYS_CAL = ENTRY_KEYS.concat(["maxSpread", "calendar"]);
 // Optional (Nov 4, 2026, FLOW1): taker flow on the side bought over the 3 minutes before the look must be at or below this (net selling). A missing or unreadable flow means no order.
@@ -261,7 +291,7 @@ const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
 // the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
-const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "CFRTIK", "SPXOI1"]);   // XRPYES10 and KESTREL left this list Nov 11, 2026 with their retirement   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "CFRTIK", "SPXOI1", "HYPEOI1", "BNBOI1"]);   // XRPYES10 and KESTREL left this list Nov 11, 2026 with their retirement   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];
@@ -277,14 +307,15 @@ function validateSlotStrategy(s) {
   if (!/^[A-Z0-9]{2,10}$/.test(s.id)) e.push("id must be 2 to 10 capitals or digits");
   if (typeof s.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(s.readme)) e.push("readme must point at a pre-registration file");
   if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !SLOT_SERIES_ALLOWED.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + SLOT_SERIES_ALLOWED.join(", "));
-  if (Array.isArray(s.series)) for (const x of s.series) if (Object.prototype.hasOwnProperty.call(SLOT_SERIES_RESERVED, x) && SLOT_SERIES_RESERVED[x] !== s.id) e.push(x + " is reserved for " + SLOT_SERIES_RESERVED[x]);
-  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW) && !exactKeys(s.entry, ENTRY_KEYS_REF)) e.push("entry has the wrong fields");
+  if (Array.isArray(s.series)) for (const x of s.series) if (Object.prototype.hasOwnProperty.call(SLOT_SERIES_RESERVED, x) && SLOT_SERIES_RESERVED[x] !== s.id && !((SLOT_SERIES_ALSO[x] || []).includes(s.id))) e.push(x + " is reserved for " + SLOT_SERIES_RESERVED[x]);
+  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_OISKIP) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW) && !exactKeys(s.entry, ENTRY_KEYS_REF)) e.push("entry has the wrong fields");
   else {
     const x = s.entry;
     if (!["yes", "no", "favourite", "cheap"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
     if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
     if (Object.prototype.hasOwnProperty.call(x, "flowMax") && !(isNum(x.flowMax) && x.flowMax >= -1 && x.flowMax <= 0)) e.push("entry.flowMax must be a share from -1 to 0 (net selling)");
     if (Object.prototype.hasOwnProperty.call(x, "refModel") && !(SLOT_REF_MODELS.includes(x.refModel) && x.refModel === s.id && isNum(x.minEdge) && x.minEdge > 0 && x.minEdge <= 0.5)) e.push("entry.refModel must name this strategy's own frozen decision, with a minEdge above 0 and at most 0.5");
+    if (Object.prototype.hasOwnProperty.call(x, "skipCalendar") && !(x.skipCalendar === "EVENT830" && s.id !== "EVENT830" && Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, x.skipCalendar) && SLOT_CALENDARS[x.skipCalendar].length > 0 && Object.prototype.hasOwnProperty.call(x, "oiRiseMin"))) e.push("entry.skipCalendar must name EVENT830's frozen calendar, on another strategy that has an oiRiseMin");
     if (Object.prototype.hasOwnProperty.call(x, "maxSpread") && !(isNum(x.maxSpread) && x.maxSpread >= 0.01 && x.maxSpread <= 0.2)) e.push("entry.maxSpread must be 0.01 to 0.20");
     if (Object.prototype.hasOwnProperty.call(x, "calendar") && !(x.calendar === s.id && Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, x.calendar) && SLOT_CALENDARS[x.calendar].length > 0)) e.push("entry.calendar must name this strategy's own frozen calendar in SLOT_CALENDARS");
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > SLOT_MAX_PRICE || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside " + SLOT_MIN_PRICE + " to " + SLOT_MAX_PRICE + " with priceMin below priceMax");
@@ -327,7 +358,7 @@ function validateSlotStrategy(s) {
 
 // The registry the rest of the module reads. It is built here, after the validator exists: the trial seat joins only when its threshold is set AND its entry passes validation (a failing entry is left out on its own, never
 // allowed to invalidate the other seats; gate SX2 fails if a set threshold ever produces a seat that is not registered).
-const SLOT_STRATEGIES = Object.freeze(SLOT_STRATEGIES_BASE.concat(SPXOI1_ENTRY && validateSlotStrategy(SPXOI1_ENTRY).ok ? [SPXOI1_ENTRY] : []));
+const SLOT_STRATEGIES = Object.freeze(SLOT_STRATEGIES_BASE.concat([SPXOI1_ENTRY, HYPEOI1_ENTRY, BNBOI1_ENTRY].filter((x) => x && validateSlotStrategy(x).ok)));
 
 // The strategies that may act. Fails closed three ways: the switch is off, any entry is invalid (the whole registry is refused, so a typo
 // cannot quietly drop one guard and keep the rest), or an id repeats.
@@ -611,6 +642,7 @@ function slotOrderCheckWith(flags, input) {
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMin") && !(isNum(i.oiRise) && i.oiRise >= strategy.entry.oiRiseMin)) return no("the open interest rise is missing or below " + strategy.entry.oiRiseMin + " contracts");
   // A calendar strategy enters only the window that closes at a listed release (the close Kalshi reports and the ticker's window code must both match one frozen row); a spread rule refuses a missing or wide spread.
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "calendar") && !slotCalendarRow(strategy, i.ticker, i.closeTime)) return no("this market's window is not a listed release window");
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "skipCalendar") && slotSkipCalendarRow(strategy, i.ticker, i.closeTime)) return no("this market's window is a listed release window that this strategy never trades");
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "maxSpread") && !(isNum(i.spread) && i.spread >= 0 && i.spread <= strategy.entry.maxSpread + 1e-9)) return no("the spread is missing or wider than " + strategy.entry.maxSpread);
   if (!Array.isArray(i.slotOrders) || !Array.isArray(i.l1Orders) || i.slotOrdersComplete !== true) return no("the order books were not read in full, so the caps cannot be checked");
   if (i.slotOrders.some((t) => isSlotOrder(t) && !Number.isFinite(num(t.ts)))) return no("a slot order has no readable time, so the loss figures cannot be trusted");
@@ -758,7 +790,7 @@ module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord, accountOrder,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
   SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor, SLOT_SKIP_BELOW, SLOT_SKIP_BELOW_MAX, slotSkipsPrice,
-  SPXOI1_SERIES, SPXOI1_ENTRY, spxoiEntry, SLOT_SEAT_CAPS, SLOT_TIE_YES, slotCheapSide, SLOT_SESSION_HOURS, slotSessionSeriesDue,
+  SPXOI1_SERIES, SPXOI1_ENTRY, spxoiEntry, HYPEOI1_ENTRY, BNBOI1_ENTRY, oiSeatEntry, SLOT_SERIES_ALSO, slotSkipCalendarRow, SLOT_SEAT_CAPS, SLOT_TIE_YES, slotCheapSide, SLOT_SESSION_HOURS, slotSessionSeriesDue,
   EVENT830_SERIES, SLOT_SERIES_RESERVED, SLOT_CALENDARS, slotCalendarRow, slotCalendarSeriesDue, SLOT_CALENDAR_LEAD_MS,
   SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,

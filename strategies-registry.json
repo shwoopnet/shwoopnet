@@ -248,6 +248,64 @@
    "figures": null
   },
   {
+   "id": "HYPEOI1",
+   "name": "HYPE open interest jump",
+   "stage": "Probe",
+   "rule": "Activity seat: unproven, for live data. HYPE 15 minute market only, every day: 2 to 3 minutes before the close, buys the cheaper side at 8c to 50c when open interest rose by at least 6,796.75 contracts over the minutes before, 3 contracts, holds it until the market closes; never a window that closes at one of the EVENT830 release times",
+   "goesLive": "On trial at 3 contracts; it moves up only by a reviewed decision after its record is in",
+   "label": null,
+   "startDate": null,
+   "nextRead": "2026-12-01",
+   "nextReadText": "Held-out read of the research rule, once, on or after 2026-12-01. Trial fills are not research evidence",
+   "n": null,
+   "nBasis": null,
+   "kill": "It stops if it is down $18 after 5 trades, or after 30 losses in a row; it is cut if its last 100 trades win less than 0.8 times what they lose",
+   "return": "After a stop, when a fresh paper record wins at least 1.3 times what it loses",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "Activity seat: unproven, for live data. Trial: below the research bar, no evidence. No edge expected; it keeps the account trading.",
+    "S&P 500 market is on exchange shard 0, which may hold no money; the bot logs a skip and sends nothing in that case"
+   ],
+   "code": {
+    "live": "HYPEOI1",
+    "slot": "HYPEOI1"
+   },
+   "roomTarget": null,
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
+  },
+  {
+   "id": "BNBOI1",
+   "name": "BNB open interest jump",
+   "stage": "Probe",
+   "rule": "Activity seat: unproven, for live data. BNB 15 minute market only, every day: 2 to 3 minutes before the close, buys the cheaper side at 8c to 50c when open interest rose by at least 4,351.84 contracts over the minutes before, 3 contracts, holds it until the market closes; never a window that closes at one of the EVENT830 release times",
+   "goesLive": "On trial at 3 contracts; it moves up only by a reviewed decision after its record is in",
+   "label": null,
+   "startDate": null,
+   "nextRead": "2026-12-01",
+   "nextReadText": "Held-out read of the research rule, once, on or after 2026-12-01. Trial fills are not research evidence",
+   "n": null,
+   "nBasis": null,
+   "kill": "It stops if it is down $18 after 5 trades, or after 30 losses in a row; it is cut if its last 100 trades win less than 0.8 times what they lose",
+   "return": "After a stop, when a fresh paper record wins at least 1.3 times what it loses",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "Activity seat: unproven, for live data. Trial: below the research bar, no evidence. No edge expected; it keeps the account trading.",
+    "S&P 500 market is on exchange shard 0, which may hold no money; the bot logs a skip and sends nothing in that case"
+   ],
+   "code": {
+    "live": "BNBOI1",
+    "slot": "BNBOI1"
+   },
+   "roomTarget": null,
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
+  },
+  {
    "id": "S3",
    "name": "Combo house side",
    "stage": "Paper",

@@ -26,14 +26,14 @@ const spx = slot.spxoiEntry(T_INV);
 gates['SX1 the threshold is the final one (5463.9, two builds equal, n = 140), the seat is registered with it, and a null or invalid T would build no seat while leaving the others alone'] = async () => {
   assert.strictEqual(cfg.SPXOI1_T, 5463.9, 'T was set Nov 14, 2026 from the frozen build');
   assert.ok(Object.isFrozen(cfg));
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'the registry is the three older seats plus SPXOI1');
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1', 'HYPEOI1', 'BNBOI1'], 'the registry is the three older seats plus SPXOI1');
   assert.deepStrictEqual(JSON.parse(JSON.stringify(slot.SPXOI1_ENTRY)), JSON.parse(JSON.stringify(slot.spxoiEntry(5463.9))));
   assert.strictEqual(slot.SPXOI1_ENTRY.entry.oiRiseMin, 5463.9);
   for (const bad of [null, NaN, 0, -5, Infinity, '5000']) assert.strictEqual(slot.spxoiEntry(bad), null, 'no seat for ' + String(bad));
-  assert.ok(slot.activeSlotStrategies().length === 4 && slot.slotActive());
+  assert.ok(slot.activeSlotStrategies().length === 6 && slot.slotActive());
   // It is also the first activity seat, with the same id (docs/ACTIVITY_SEATS.md)
   const act = require('../functions/kalshiActivityLib');
-  assert.deepStrictEqual(act.activeActivitySeats().map((x) => x.id), ['SPXOI1']);
+  assert.deepStrictEqual(act.activeActivitySeats().map((x) => x.id), ['SPXOI1', 'HYPEOI1', 'BNBOI1']);
   assert.strictEqual(act.ACTIVITY_SEATS[0].entry.priceMin, 0.08); assert.strictEqual(act.ACTIVITY_SEATS[0].entry.priceMax, 0.5);
   assert.strictEqual(act.ACTIVITY_SEATS[0].familyId, 'cheap-side-open-interest');
   assert.strictEqual(act.ACTIVITY_SEATS[0].reviewedAt, slot.SPXOI1_ENTRY.reviewedAt);
@@ -198,11 +198,11 @@ gates['SX8 shard 0 with too little money: a shard_short skip is logged and nothi
 
 gates['SX9 the wiring: quotes reach the slot tick only around the weekday entry span, and a set threshold cannot ship without the page, the registry row and the relay'] = () => {
   const mon = (hh, mm, ss) => Date.parse('2026-11-16T' + hh + ':' + mm + ':' + ss + 'Z');
-  const due = (t) => slot.slotSessionSeriesDue([spx, ...slot.SLOT_STRATEGIES], t);
+  const due = (t) => slot.slotSessionSeriesDue([spx, ...slot.SLOT_STRATEGIES.filter((x) => !['HYPEOI1', 'BNBOI1'].includes(x.id))], t);   // the weekday-only S&P seat; the every-day HYPE and BNB seats have their own gates (test/oiActivitySeatsGates.test.js)
   assert.deepStrictEqual(due(mon('16', '57', '30')), ['KXINX15M'], '150 s before a close, in the session');
   assert.deepStrictEqual(due(mon('16', '57', '00')), ['KXINX15M'], 'from 30 s before the window opens');
   for (const t of [mon('16', '50', '00'), mon('16', '59', '30'), mon('16', '30', '10'), mon('14', '57', '30'), mon('21', '12', '30'), mon('22', '57', '30'), Date.parse('2026-11-14T16:57:30Z'), Date.parse('2026-11-15T16:57:30Z')]) assert.deepStrictEqual(due(t), [], iso(t) + ' reads nothing');
-  assert.deepStrictEqual(slot.slotSessionSeriesDue(slot.SLOT_STRATEGIES.filter((x) => x.id !== 'SPXOI1'), mon('16', '57', '30')), [], 'seats without session hours add no read (OICORE, EVENT830, CFRTIK are unchanged)');
+  assert.deepStrictEqual(slot.slotSessionSeriesDue(slot.SLOT_STRATEGIES.filter((x) => !['SPXOI1', 'HYPEOI1', 'BNBOI1'].includes(x.id)), mon('16', '57', '30')), [], 'seats without session hours add no read (OICORE, EVENT830, CFRTIK are unchanged)');
   assert.deepStrictEqual(slot.slotSessionSeriesDue([spx], NaN), []);
   const idx = code(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8'));
   assert.ok(/slotLib\.slotCalendarSeriesDue\(slotLib\.activeSlotStrategies\(\), now\)\.concat\(slotLib\.slotSessionSeriesDue\(slotLib\.activeSlotStrategies\(\), now\)\)/.test(idx), 'the minute function asks the library with its own clock');
