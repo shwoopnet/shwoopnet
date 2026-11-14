@@ -23,3 +23,17 @@ A search that only compares SSE values cannot do this: near the minimum SSE chan
 - **P3 (grid-off valley):** mids from rates (2.9137, 0.4071). The rates are recovered within 1e-9.
 - **P4:** for every fit in the 23 made-up cases, the polished SSE is at or below the refinement SSE.
 - **Effect on the 23 committed case outputs:** fit-derived figures (gaps, model values, residuals) may move by about 1e-7 or less, and counts should not change. I will re-run the 23 cases and report each changed field and its size before any output file is replaced. Expected outputs are not edited silently.
+
+## Objective as built, and a false comment disclosed (2026-11-14 ~03:05Z, Auditor B's 02:58Z request; before any change to the objective)
+- **Box:** rates in [0.01, 6] each. The grid starts at 0.05.
+- **Truncation:** MAXG = 20 goals a side, in the winner probabilities. Away is computed as 1 - home - draw, so the tail lands in away. The total-goals and team-total strikes take P(X <= k) as an exact partial sum for k <= 20.
+- **Disclosed:** the model's comment says the tail beyond 20 is "below 1e-12 for rates under 6". That is FALSE. Computed P(X > 20):
+  - rate 3: 1.2e-11;
+  - rate 4: 1.9e-9;
+  - rate 6: 1.5e-6.
+  - With 40 goals the tail is under 1e-15 up to rate 6 (3.3e-16 at rate 4, 0 at rate 6 in double precision).
+  - So a fit with a rate above about 3.5 carries a winner-probability error above 1e-9 in the current build.
+- **Proposed, pending the Head's ruling on the objective for both builds:**
+  - MAXG = 40, so the tail is under 1e-15 in the box;
+  - the box stays [0.01, 6] unless the Head rules otherwise.
+  - The code is not changed until that ruling.
