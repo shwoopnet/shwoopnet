@@ -5,6 +5,7 @@
    "filled_share": 0.4983388704318937,
    "fit_cap_hits": 0,
    "fit_iters_max": 2,
+   "fit_on_bound": 0,
    "fit_residual_median": 0.0028063105487458706,
    "flags": {
     "closed_on_cost": false,
@@ -49,6 +50,7 @@
    "filled_share": 0.4983388704318937,
    "fit_cap_hits": 0,
    "fit_iters_max": 2,
+   "fit_on_bound": 0,
    "fit_residual_median": 0.0028063105487458706,
    "flags": {
     "closed_on_cost": false,

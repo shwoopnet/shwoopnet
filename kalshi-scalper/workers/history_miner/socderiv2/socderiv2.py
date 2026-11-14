@@ -245,7 +245,7 @@ def run(series_path, lists_dir, candles_dirs):
             for tt in ("BTTS", "TEAMTOTAL"):
                 c = cells.setdefault((grp, tt), {"derivable": 0, "games_with_target": 0, "targets": 0, "unreadable": 0,
                                                  "targets_filled": 0, "games_filled": set(), "gaps": [], "spreads": [],
-                                                 "cost": [], "roundtrip": [], "resid": [], "plac": {}, "iters_max": 0, "cap_hits": 0})
+                                                 "cost": [], "roundtrip": [], "resid": [], "plac": {}, "iters_max": 0, "cap_hits": 0, "on_bound": 0})
                 c["derivable"] += 1
                 mine = [x for x in targets if x[0] == tt]
                 if mine:
@@ -254,7 +254,7 @@ def run(series_path, lists_dir, candles_dirs):
                     c["targets"] += 1
                     blank = {"game_key": ev, "fit_iters": "", "cap_hit": "", "rate_home": "", "rate_away": "", "sse": "", "leg_ticker": tk,
                              "leg_type": "btts" if tt == "BTTS" else "team_total", "strike": "" if tt == "BTTS" or line is None else line,
-                             "model_value": "", "market_mid": "", "gap": "", "fires": False}
+                             "model_value": "", "market_mid": "", "gap": "", "side": "", "edge": "", "fires": False}
                     if team == "unreadable":
                         c["unreadable"] += 1
                         pergame.append(blank)
@@ -273,8 +273,8 @@ def run(series_path, lists_dir, candles_dirs):
                             continue
                         wm = [(b + a) / 2 for b, a in wq]
                         tm = [(ln, (q[0] + q[1]) / 2) for ln, _, q in tq]
-                        l1, l2, sse, fi, fc = M.fit(wm, tm)
-                        c["iters_max"] = max(c["iters_max"], fi); c["cap_hits"] += fc
+                        l1, l2, sse, fi, fc, fb = M.fit(wm, tm)
+                        c["iters_max"] = max(c["iters_max"], fi); c["cap_hits"] += fc; c["on_bound"] += fb
                         c["resid"].append(math.sqrt(sse / (3 + len(tm))))
                         if tt == "BTTS":
                             val = M.p_btts(l1, l2)
@@ -287,7 +287,7 @@ def run(series_path, lists_dir, candles_dirs):
                         c["gaps"].append(gap)
                         c["spreads"].append(a - b)
                         pergame.append(dict(blank, fit_iters=fi, cap_hit=fc, rate_home=l1, rate_away=l2, sse=sse, model_value=val, market_mid=(a + b) / 2,
-                                            gap=val - (a + b) / 2, fires=(gap >= GAP_LINE - EPS and (a - b) <= SPREAD_LINE + EPS)))
+                                            gap=val - (a + b) / 2, side=side, edge=gap, fires=(gap >= GAP_LINE - EPS and (a - b) <= SPREAD_LINE + EPS)))
                         c["cost"].append((a - (a + b) / 2) + fee_cents(sa + 0.01))
                         mid = (a + b) / 2
                         c["roundtrip"].append((a - b) + 2 * 0.07 * mid * (1 - mid))
@@ -295,8 +295,8 @@ def run(series_path, lists_dir, candles_dirs):
                         if pk not in c["plac"]:
                             ln0, _, q0 = min(tq, key=lambda x: (round(abs((x[2][0] + x[2][1]) / 2 - 0.5), 9), x[0]))   # 26ae3495 (b): a tie within 1e-9 takes the LOWER strike
                             rest = [(ln, mm) for ln, mm in tm if ln != ln0]
-                            p1, p2, _, pi_, pc_ = M.fit(wm, rest)
-                            c["iters_max"] = max(c["iters_max"], pi_); c["cap_hits"] += pc_
+                            p1, p2, _, pi_, pc_, pb_ = M.fit(wm, rest)
+                            c["iters_max"] = max(c["iters_max"], pi_); c["cap_hits"] += pc_; c["on_bound"] += pb_
                             _, _, pg = cheaper(q0[0], q0[1], M.p_total_over(p1, p2, ln0))
                             c["plac"][pk] = (pg, q0[1] - q0[0])
                         break
@@ -340,7 +340,7 @@ def run(series_path, lists_dir, candles_dirs):
             "round_trip_median_info_only": statistics.median(c["roundtrip"]) if c["roundtrip"] else None,
             "gap": st, "placebo": ps,
             "fit_residual_median": statistics.median(c["resid"]) if c["resid"] else None,
-            "fit_iters_max": c["iters_max"], "fit_cap_hits": c["cap_hits"],
+            "fit_iters_max": c["iters_max"], "fit_cap_hits": c["cap_hits"], "fit_on_bound": c["on_bound"],
             "flags": flags, "verdict": v, "freshness": FRESH})
     return {"build": "History Miner second build, from the registration text only", "freshness": FRESH,
             "no_such_series": sorted(no_such), "no_btts_leg_by_group": no_btts, "leagues": league_rows, "cells": out_cells, "readings": READINGS,
@@ -356,7 +356,7 @@ def check_jobs(pairs):
 
 
 PERGAME_NAME = "socderiv_pergame.csv"
-PERGAME_COLS = ("game_key", "fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "leg_ticker", "leg_type", "strike", "model_value", "market_mid", "gap", "fires")
+PERGAME_COLS = ("game_key", "fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "leg_ticker", "leg_type", "strike", "model_value", "market_mid", "gap", "side", "edge", "fires")
 
 
 def cell_text(v):

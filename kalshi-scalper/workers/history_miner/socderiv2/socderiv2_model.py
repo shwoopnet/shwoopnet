@@ -58,7 +58,7 @@ def sse(lh, la, winner_mids, total_mids):
 
 
 def fit(winner_mids, total_mids):
-    """Least squares over (home rate, away rate) in [0.01, 6]: a coarse grid (step 0.05), coordinate refinement halving the step to 1e-7, then the Nov 14 Gauss-Newton polish. Returns (home, away, sse, iters, cap_hit). Deterministic; ties keep the first point."""
+    """Least squares over (home rate, away rate) in [0.01, 6]: a coarse grid (step 0.05), coordinate refinement halving the step to 1e-7, then the Nov 14 Gauss-Newton polish. Returns (home, away, sse, iters, cap_hit, on_bound). Deterministic; ties keep the first point."""
     best = None
     lh = 0.05
     while lh <= 6.0 + 1e-12:
@@ -93,48 +93,86 @@ def residuals(lh, la, winner_mids, total_mids):
     return [h - winner_mids[0], d - winner_mids[1], a - winner_mids[2]] + [p_total_over(lh, la, line) - mid for line, mid in total_mids]
 
 
+LO, HI = 0.01, 6.0
+
+
 def polish(lh, la, v0, winner_mids, total_mids):
-    """Gauss-Newton on the residuals from the refinement point (FIT_POLISH_NOTE_NOV14.md, amended for the Head's 02:59Z rulings): central-difference Jacobian (h 1e-6),
-    stop before moving if both step parts are under 1e-13, stop after a move that lowered SSE by under 1e-13 relative, at most POLISH_CAP passes.
-    Returns (home, away, sse, iters, cap_hit); used only if its SSE is not above the refinement's + 1e-15."""
+    """Gauss-Newton on the residuals from the refinement point (FIT_POLISH_NOTE_NOV14.md, final spec of the Head's 07:10Z): central-difference Jacobian (h 1e-6).
+    A rate that lands on a bound (by a clipped full step) is held there and the other rate is polished alone. Stops: |step| under 1e-13 before a move, SSE
+    falling by less than 1e-13 relative after a move, or POLISH_CAP passes (2-D and 1-D passes share the cap). Returns (home, away, sse, iters, cap_hit, on_bound);
+    used only if its SSE is not above the refinement's + 1e-15."""
     H = 1e-6
     x, y, v = lh, la, v0
+    held = [x in (LO, HI), y in (LO, HI)]
     it, stopped = 0, False
+    inbox = lambda a: LO <= a <= HI
+    clip = lambda a: min(HI, max(LO, a))
     while it < POLISH_CAP:
+        if held[0] and held[1]:
+            stopped = True
+            break
         it += 1
         r = residuals(x, y, winner_mids, total_mids)
-        rxp = residuals(x + H, y, winner_mids, total_mids); rxm = residuals(x - H, y, winner_mids, total_mids)
-        ryp = residuals(x, y + H, winner_mids, total_mids); rym = residuals(x, y - H, winner_mids, total_mids)
-        jx = [(p - m) / (2 * H) for p, m in zip(rxp, rxm)]; jy = [(p - m) / (2 * H) for p, m in zip(ryp, rym)]
-        a11 = sum(t * t for t in jx); a12 = sum(t * u for t, u in zip(jx, jy)); a22 = sum(u * u for u in jy)
-        g1 = sum(t * q for t, q in zip(jx, r)); g2 = sum(u * q for u, q in zip(jy, r))
-        det = a11 * a22 - a12 * a12
-        if det <= 1e-14 * (a11 + a22) ** 2:
-            POLISH_FLAGS["singular"] += 1
-            return lh, la, v0, it, False
-        dx = -(a22 * g1 - a12 * g2) / det; dy = -(a11 * g2 - a12 * g1) / det
+        jx = jy = None
+        if not held[0]:
+            rp, rm = residuals(x + H, y, winner_mids, total_mids), residuals(x - H, y, winner_mids, total_mids)
+            jx = [(p_ - m) / (2 * H) for p_, m in zip(rp, rm)]
+        if not held[1]:
+            rp, rm = residuals(x, y + H, winner_mids, total_mids), residuals(x, y - H, winner_mids, total_mids)
+            jy = [(p_ - m) / (2 * H) for p_, m in zip(rp, rm)]
+        if jx is not None and jy is not None:
+            a11 = sum(t * t for t in jx); a12 = sum(t * u for t, u in zip(jx, jy)); a22 = sum(u * u for u in jy)
+            g1 = sum(t * q for t, q in zip(jx, r)); g2 = sum(u * q for u, q in zip(jy, r))
+            det = a11 * a22 - a12 * a12
+            if det <= 1e-14 * (a11 + a22) ** 2:
+                POLISH_FLAGS["singular"] += 1
+                return lh, la, v0, it, False, lh in (LO, HI) or la in (LO, HI)
+            dx = -(a22 * g1 - a12 * g2) / det; dy = -(a11 * g2 - a12 * g1) / det
+        else:
+            jj = jx if jx is not None else jy
+            K = 1e-4                                                 # 1-D Newton: J'J plus the residuals' second-derivative term (FIT_POLISH_NOTE, B3 correction)
+            if jx is not None:
+                rp2, rm2 = residuals(x + K, y, winner_mids, total_mids), residuals(x - K, y, winner_mids, total_mids)
+            else:
+                rp2, rm2 = residuals(x, y + K, winner_mids, total_mids), residuals(x, y - K, winner_mids, total_mids)
+            r2 = [(p_ - 2 * q + m) / (K * K) for p_, q, m in zip(rp2, r, rm2)]
+            a = sum(t * t for t in jj) + sum(q * s2 for q, s2 in zip(r, r2)); g = sum(t * q for t, q in zip(jj, r))
+            if a <= 0:
+                stopped = True
+                break
+            d = -g / a
+            dx, dy = (d, 0.0) if jx is not None else (0.0, d)
         if abs(dx) < 1e-13 and abs(dy) < 1e-13:
             stopped = True
             break
-        moved = False
-        for _h in range(41):
-            nx, ny = x + dx, y + dy
-            if 0.01 <= nx <= 6 and 0.01 <= ny <= 6:
-                nv = sse(nx, ny, winner_mids, total_mids)
-                if nv <= v + 1e-15 * (1 + v):
-                    moved = True
-                    break
-            dx /= 2; dy /= 2
+        moved, newheld = False, list(held)
+        if not (inbox(x + dx) and inbox(y + dy)):                   # the full step leaves the box: try it clipped (a rate lands on its bound)
+            cx = clip(x + dx) if not inbox(x + dx) else x            # only the rate that leaves the box moves, to its bound; the other stays this pass
+            cy = clip(y + dy) if not inbox(y + dy) else y
+            cv = sse(cx, cy, winner_mids, total_mids)
+            if cv <= v + 1e-15 * (1 + v):
+                nx, ny, nv, moved = cx, cy, cv, True
+                newheld = [held[0] or cx in (LO, HI), held[1] or cy in (LO, HI)]
+        if not moved:
+            for _h in range(41):
+                nx, ny = x + dx, y + dy
+                if inbox(nx) and inbox(ny):
+                    nv = sse(nx, ny, winner_mids, total_mids)
+                    if nv <= v + 1e-15 * (1 + v):
+                        moved = True
+                        break
+                dx /= 2; dy /= 2
         if not moved:
             stopped = True
             break
         small = (v - nv) < 1e-13 * v
-        x, y, v = nx, ny, nv
-        if small:
+        landed = newheld != held                                   # a rate landed on a bound on this pass: go on to polish the other alone
+        x, y, v, held = nx, ny, nv, newheld
+        if small and not landed:
             stopped = True
             break
     cap_hit = not stopped
     if v > v0 + 1e-15:
         POLISH_FLAGS["rejected"] += 1
-        return lh, la, v0, it, cap_hit
-    return x, y, v, it, cap_hit
+        return lh, la, v0, it, cap_hit, lh in (LO, HI) or la in (LO, HI)
+    return x, y, v, it, cap_hit, held[0] or held[1]

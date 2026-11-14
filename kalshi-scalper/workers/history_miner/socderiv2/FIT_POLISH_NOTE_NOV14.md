@@ -133,3 +133,26 @@ The Head, verbatim:
 - **B3:** mids from (6.4, 0.8). Home is exactly 6.0, on_bound True. The away gradient is under 1e-10.
 - **B4:** P1 to P3 are unchanged (interior, on_bound False, same rates within 1e-12).
 - **Columns:** the format test has side and edge after gap. On a filled row fires == (edge >= 0.08 - 1e-9 and spread <= 0.04 + 1e-9). On the 23 cases, rows with fires True = the sum of count_gap8_spread4, as before.
+- **One detail added while coding (before any test was run), flagged:** the stop "SSE fell by less than 1e-13 relative after a move" does not apply on the pass in which a rate newly lands on a bound. Otherwise a landing step that barely changes SSE would end the polish before the other rate was polished alone, which the Head's rule asks for.
+- **Correction after the first test run (disclosed):** B2 FAILED with the clipping rule above. With mids from (0.003, 1.5), the clipped point moved the away rate by its full 2-D step, which was computed as if home went to 0.003. SSE rose, so the step was halved, and home crept to 0.0100000000000022 without ever landing (away gradient 2.9e-8).
+  - **Rule now:** if the full step would put a rate outside the box, ONLY that rate moves, exactly to its bound, and the other rate stays where it is for that pass. This is accepted if SSE is not above the current SSE + 1e-15 x (1 + SSE); then the rate is held and the other is polished alone. Otherwise the whole step is halved as before.
+  - Expected results B1 to B4 are unchanged.
+- **Second correction after a test run (disclosed):** B3 FAILED.
+  - Home landed on 6.0 and the 1-D Gauss-Newton stopped after 1 pass with the away gradient at 1.9e-10. Its step was still about 1.4e-8, but SSE fell by about 3e-18, under the 1e-13-relative stop.
+  - Cause: at a bound the residuals are large against J'J (0.0069 here), so Gauss-Newton converges only linearly, and the relative-SSE stop ends it early. With the step-only stop instead, it reaches gradient 4e-13 but uses all 200 passes (cap hit).
+  - **Rule now:** the 1-D polish of the free rate is a Newton step. The curvature is J'J PLUS the sum of r_i x r_i'' (r_i'' by central second difference, K = 1e-4), and the step is d = -(J'r) / that curvature. The rest is unchanged: halving, box guard, the Head's stops, the shared cap of 200.
+  - The 2-D phase is unchanged (Gauss-Newton; interior fits converge in 2 passes).
+  - If the curvature is not positive, the polish stops at the current point (counted as stopped, not capped).
+  - Checked before the test, in scratch, on 7 noisy inputs near and beyond both bounds: the free rate's gradient is at most 6e-12, in 1 to 3 passes, with no cap hit. The held rate's gradient points out of the box in every case.
+  - Expected results B1 to B4 are unchanged.
+
+## Result on the 23 made-up cases, final spec (2026-11-14 ~07:50Z)
+- 16,780 fits. Polished SSE above the refinement's: 0. Singular: 0. Rejected: 0. Cap hits 0. fit_iters_max 2.
+- **fit_on_bound is 0 in all 44 cells:** no made-up fit reaches a bound, so the bound rule is exercised only by the hand cases B1 to B3.
+- **Against b3920acf's outputs:** the ONLY change is the new field fit_on_bound (0 everywhere). Every other figure is byte-identical.
+- **Per-game files (22 cases, 11,385 rows), all checks pass:**
+  - columns in the ruled order, side and edge after gap;
+  - rows = targets; filled = targets_filled; fires True = count_gap8_spread4;
+  - side yes or no and edge present on every filled row; side, edge empty and fires False on every blank row;
+  - fires True only where edge >= 0.08 - 1e-9;
+  - leg_type btts or team_total; sorted.
