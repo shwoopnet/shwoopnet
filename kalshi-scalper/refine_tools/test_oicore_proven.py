@@ -64,6 +64,13 @@ class T(unittest.TestCase):
         r = P.run({"slotOrders": rows}, self.m)
         srt = sorted(x["ts"] for x in rows)
         self.assertEqual((r["first_ts"], r["last_ts"]), (srt[0], srt[99]))      # the 100th row by ts, not the newest of the 130
+    def test_dry_run_never_reads_or_writes_a_marker(self):
+        # the report-mode command line is counts only: even with 130 rows it gives no windows, no PF, no verdict of a read, and no marker
+        r = P.dry_run({"slotOrders": [row(i) for i in range(130)]}, self.m)
+        self.assertEqual(r["n"], 130)
+        self.assertEqual(r["verdict"], "COUNTS ONLY (no read; use oicore_extract.py then oicore_proven.py --extract)")
+        self.assertNotIn("windows", r)
+        self.assertFalse(os.path.exists(self.m))
     def test_fill_order_by_ts(self):
         rows = [row(i, result="no") for i in range(34)] + [row(i) for i in range(34, 100)]   # losses first, then wins, given out of order
         rows.reverse()

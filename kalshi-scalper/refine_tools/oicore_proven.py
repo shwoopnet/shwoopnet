@@ -1,6 +1,6 @@
 #!/usr/bin/env python3 -I
 """OICORE proven-bar read (Head of R&D rules, Nov 13, 2026). Local file only, no network, no token.
-Usage: python3 -I oicore_proven.py --extract <canonical extract csv> <100|150>   (the real read, see oicore_extract.py)\n       python3 -I oicore_proven.py <nightly report json>   (dry run: counts only below 100 rows; not used for the read)
+Usage: python3 -I oicore_proven.py --extract <canonical extract csv> <100|150>   (the real read, see oicore_extract.py)\n       python3 -I oicore_proven.py <nightly report json>   (counts only, at any size; never a read)
 Rules: rows = OICORE orders with status filled and result yes or no; rows with result exit, or an unreadable avgFill or avgFee, are EXCLUDED and COUNTED.
 n >= 100 rows (rows, not contracts), sorted by ts (fill order); the read point uses EXACTLY the first 100 (or first 150) rows and splits them rows[i*m//3:(i+1)*m//3] with m = 100 or 150.
 Cash PF per window, unrounded, fill-booked basis: paid = avgFill for YES, 1 - avgFill for NO; win = count*(1 - paid) - avgFee*count, loss = -(count*paid) - avgFee*count.
@@ -71,6 +71,22 @@ def run(report, marker_dir=MARKER_DIR):
     open(marker, "w").write(out["verdict"] + "\n")
     return out
 
+def dry_run(report, marker_dir=MARKER_DIR):
+    """Counts only. Never scores, never writes a marker. The report-mode command line uses this; the read itself is run_extract on a canonical extract."""
+    rows, n_exit, n_unread, n_open = 0, 0, 0, 0
+    for o in report.get("slotOrders", []):
+        if o.get("strategy") != "OICORE" or o.get("status") != "filled":
+            continue
+        if o.get("result") == "exit":
+            n_exit += 1; continue
+        if o.get("result") not in ("yes", "no"):
+            n_open += 1; continue
+        if cash(o) is None:
+            n_unread += 1; continue
+        rows += 1
+    return {"n": rows, "excluded_exit": n_exit, "excluded_unreadable": n_unread, "open_unsettled": n_open,
+            "verdict": "COUNTS ONLY (no read; use oicore_extract.py then oicore_proven.py --extract)"}
+
 def run_extract(text, point, marker_dir=MARKER_DIR):
     """The real read: scores a canonical extract (oicore_extract.py) only; the extract must hold exactly `point` rows."""
     lines = text.rstrip("\n").split("\n")
@@ -105,4 +121,4 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "--extract":
         print(json.dumps(run_extract(open(sys.argv[2]).read(), int(sys.argv[3])), indent=1, default=str))
     else:
-        print(json.dumps(run(json.load(open(sys.argv[1]))), indent=1, default=str))
+        print(json.dumps(dry_run(json.load(open(sys.argv[1]))), indent=1, default=str))
