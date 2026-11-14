@@ -16,6 +16,9 @@ const ACTIVITY_TZ = "America/Chicago";
 // Families the owner declined or evidence closed (docs/STRATEGY_LIFECYCLE.md 7e). A seat naming one is refused. A reviewed edit may extend this list, never shrink it without the owner.
 const ACTIVITY_DECLINED_FAMILIES = Object.freeze([
   "favourite-late", "taker-order-flow", "market-making", "weather-forecast-vs-market", "mapbreak", "lock-parity-scan", "approval-no-side", "gold-hold",
+  // Added after the security review (Nov 14, 2026), from docs/STRATEGY_LIFECYCLE.md 7e. A free string matched exactly cannot catch a renamed idea: 7e rule 2 (a rename IS the declined idea) is a reviewer's check at admission, with the owner's popup.
+  "ex-dividend-perp-short", "conditional-tie-premium", "second-of-minute-taker-clustering", "fractional-size-flow", "cheap-side-price-regime-grammar-sweep",
+  "gold-maker-entry", "gold-price-floor", "gold-band-narrowed", "gold-ladder-cap", "l1-other-markets",
 ]);
 
 const isNum = (x) => typeof x === "number" && Number.isFinite(x);
@@ -47,11 +50,13 @@ function centralMidnight(y, m, d) {
 // Start (UTC ms) of the Central day and of the Central week (Monday 00:00) that contain `ms`. Not finite in, not finite out.
 function centralDayStart(ms) {
   if (!isNum(ms)) return NaN;
-  const p = centralParts(ms);
-  return centralMidnight(p.year, p.month, p.day);
+  try { const p = centralParts(ms); return centralMidnight(p.year, p.month, p.day); } catch (e) { return NaN; }   // an out of range clock refuses, never throws
 }
 function centralWeekStart(ms) {
   if (!isNum(ms)) return NaN;
+  try { return centralWeekStartUnsafe(ms); } catch (e) { return NaN; }
+}
+function centralWeekStartUnsafe(ms) {
   const p = centralParts(ms);
   const dow = new Date(Date.UTC(p.year, p.month - 1, p.day)).getUTCDay();         // 0 Sunday .. 6 Saturday of the Central calendar date
   const back = (dow + 6) % 7;                                                       // days since Monday

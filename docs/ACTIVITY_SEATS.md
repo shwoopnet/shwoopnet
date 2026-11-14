@@ -17,3 +17,7 @@ Every figure is replayed from the settled slot orders on every check (cash basis
 ## What is not built
 
 No seat is registered (`ACTIVITY_SEATS` is empty). Admitting one is a later reviewed edit: add the entry, map it to a second-slot strategy (the slot validator needs a kill rule, so use its loosest, 100 fills and -$60, which the weekly caps beat; hold-to-settle needs a `SLOT_HOLD_ALLOWED` entry; `SLOT_LAST_REVIEWED_ON` moves to match), register the page text, and get the owner's popup with the exact spec. The 12% account stop, the hard stop and the window cap still apply to every seat order.
+
+## Declined families are a reviewer's check (Nov 14, 2026)
+
+`familyId` is a free string matched exactly, so the code list cannot catch a renamed declined idea. Rule 2 of the declined list (`docs/STRATEGY_LIFECYCLE.md` 7e) says a rename IS the declined idea: that is checked by the reviewer at admission, together with the owner's popup that quotes any earlier NO. The code list is extended by a reviewed edit and never shrunk without the owner. It also draws on the registry for MAPBREAK and the approval NO side (closed Nov 12 to 13), which the declined-list table does not carry yet.
