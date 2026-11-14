@@ -151,3 +151,16 @@ Every read on candles follows the haircut rule and C7 to C10:
 - **C8:** an entry or exit in the last 2 minutes before the close uses 2c as its primary.
 - **C9:** every result line says "upper bound, not fill-checked".
 - **C10:** the fee mode is per-order rounded. A void refunds the price, keeps the fee, and is counted as a bet.
+
+## Clarification 6 (Nov 14, 2026, 01:28Z, the Head of R&D's rulings; before the passes are settled and before any candle job)
+
+(a) **Count strikes** (for example "Cut 7+ times"). The strike's own literal condition is applied to the statement. Each pass records the plain count of the word's matches, under Clarification 4's matching rule. The feature is "statement count meets the strike's threshold", yes or no. A pass never interprets beyond the strike's words.
+
+(b) **Strikes that are not statement language** (greetings such as "Good Afternoon", names of reporters, Q&A or spoken phrases) are marked NOT STATEMENT-TYPE.
+- They are excluded from the scored set and counted by type, because a statement cannot inform them.
+- Both passes classify each strike independently, from the strike text alone.
+- A disagreement on type goes to a third reading by this desk, recorded in the table.
+
+(c) **Process record: the `events` print.** This desk read the `events` print at `claude/history-miner` 4b053d6a. The History Miner's message said it ran with `fomctext.py` aff0320a, which it reported as Auditor B CLEAN. Whether that run came before or after Auditor B's clearance of the `events` command is being confirmed by the Head with the Miner, and is added here when known. The print holds no market result, only event ticker, series, title and date.
+
+Both passes were already running when these rulings arrived. Each was given the `type` column and the count instruction by message, with nothing else changed.
