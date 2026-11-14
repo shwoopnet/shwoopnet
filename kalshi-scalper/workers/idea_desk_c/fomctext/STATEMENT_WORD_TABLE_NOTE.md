@@ -54,3 +54,11 @@
   - The reader's universe check needs every strike of each event, so the 12 NOT STATEMENT-TYPE strikes are in the request list too.
   - About 7 minutes at 1 request a second, one run.
 - **Status.** It is a NEW pull, and the owner's freeze forbids one without the owner's word. So it waits for Auditor B's check and the owner's yes. It is not sent to Main to dispatch.
+
+**Rebuilt at the shared rate (Nov 14, 2026, the Head of R&D).** At `pacing_seconds` 1.0 the job would send 60 requests a minute. The shared R&D Kalshi budget is 12 a minute (`docs/RND_CHARTER.md` section 9, allocated by Main).
+
+The job now has `pacing_seconds` 5.0, so it sends at most 12 a minute and runs about 34 minutes. That is the only change: the 407 requests and every other key are identical to the reader's build, and the pull runner's `check_job` passes.
+
+- New sha256: 636c0b7eb2547c47785d8378c4e34b0cfa7f5e2e070124db1cb3dcb5f5e466aa.
+- The 1.0 version, 397ee925 at da62610b, is superseded and never runs.
+- Even after the owner's yes, Main dispatches it only in an hour Main has allocated to it.

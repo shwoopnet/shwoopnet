@@ -434,7 +434,7 @@
   "KXFEDMENTION-26MAR-VOLA",
   "KXFEDMENTION-26MAR-YIEL"
  ],
- "pacing_seconds": 1.0,
+ "pacing_seconds": 5.0,
  "max_requests": 407,
  "stop_rules": {
   "pause_seconds_on_429": "5, doubling to 60",
