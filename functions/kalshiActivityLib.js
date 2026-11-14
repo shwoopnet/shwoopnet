@@ -5,8 +5,13 @@
 // Everything below is REPLAYED from settled slot orders on every call; nothing is stored, so two instances always agree. Nothing stored, sent by the page or typed into a callable
 // can add, enlarge or re-arm a seat: every number is a constant in this file, and a return after the PF cut is a reviewed edit (reviewedAt moves).
 
-const ACTIVITY_LABEL = "Activity seat: no edge expected, data only";
-const ACTIVITY_SEATS = Object.freeze([]);                      // EMPTY. An entry is a reviewed edit with the owner's popup.
+const ACTIVITY_LABEL = "Activity seat: unproven, for live data";
+// SPXOI1 is the first seat (Nov 14, 2026, the owner's popup): OICORE's mechanism on the S&P 500 15 minute market, a trial below the research bar. It is also a second-slot strategy of the same id.
+// An entry is a reviewed edit with the owner's popup.
+const ACTIVITY_SEATS = Object.freeze([Object.freeze({
+  id: "SPXOI1", familyId: "cheap-side-open-interest", readme: "kalshi-scalper/README.md#SLOT-SPXOI1", series: Object.freeze(["KXINX15M"]),
+  entry: Object.freeze({ priceMin: 0.08, priceMax: 0.5 }), contractsPerOrder: 3, ioc: true, reviewedAt: "2026-11-14",
+})]);
 const ACTIVITY_MAX_SEATS = 3;
 const ACTIVITY_CONTRACTS = 3, ACTIVITY_MAX_ORDER_COST = 3;     // dollars, fee included, at the seat's top price
 const ACTIVITY_PRICE_CEILING = 0.88;                           // no entry price at 88c or above

@@ -105,7 +105,7 @@ const SLOT_EXIT_LEFT_FLOOR_SEC = 45;                   // every exit is before s
 const SLOT_OPEN_STATUSES = Object.freeze(["filled", "sending", "unknown"]);   // the statuses runL1Tick counts as money in a window; ANY order with fills counts too, whatever its status
 const SLOT_WINDOW_SHARE = 0.75;                        // the slot may take at most this share of the shared window cap, so L1 (gold first) is never starved of its room
 const SLOT_L1_RESERVE = 1.05;                          // dollars always left in the window for one more L1 contract (a 97c contract plus its fee)
-const SLOT_LAST_REVIEWED_ON = "2026-11-13";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
+const SLOT_LAST_REVIEWED_ON = "2026-11-14";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
 const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M|KXSILVER15M|KXCOPPER15M|KXWTI15M|KXEURUSD15M|KXGBPUSD15M|KXUSDJPY15M|KXHYPE15M|KXBNB15M|KXINX15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
 const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to kalshiLiveLib.L1_WINDOW_CAP_FRACTION; the caller passes the live one
 
@@ -221,7 +221,7 @@ function spxoiEntry(T = spxoiThreshold()) {   // the argument exists for tests o
     exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 3,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
     killRules: Object.freeze({ maxConsecutiveLosses: 30, minNet: Object.freeze({ afterFills: 5, net: -18 }) }),
-    forwardReadDate: "2026-12-01", reviewedAt: "2026-11-13",
+    forwardReadDate: "2026-12-01", reviewedAt: "2026-11-14",
   });
 }
 const SPXOI1_ENTRY = spxoiEntry();

@@ -742,7 +742,7 @@ gates['RET2 an open order of a retired strategy still counts in the shared loss 
   }
 };
 gates['RET3 no new XRPYES10 or KESTREL entry can be sent: not in the registry, the hold list, the allowed or reserved series, or the ticker shape; the real tick sends nothing for their markets'] = async () => {
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK']);
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1']);
   assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED.slice(), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1']);
   assert.ok(!slot.SLOT_SERIES_ALLOWED.includes('KXXRP15M') && !slot.SLOT_SERIES_ALLOWED.includes('KXAUDUSD15M') && !('KXAUDUSD15M' in slot.SLOT_SERIES_RESERVED));
   assert.strictEqual(typeof slot.slotRollingSeriesDue, 'undefined', 'the rolling quote read for a non-L1 market is gone');

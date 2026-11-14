@@ -23,13 +23,14 @@ const ord = (id, ts, net, extra) => Object.assign({ strategy: 'SLOT', slotId: id
   settled: true, result: net > 0 ? 'yes' : 'no', settledPnl: net, step: 1, cid: 'o' + (n++) }, extra || {});
 const chk = (o) => act.activityOrderCheck(Object.assign({ seatId: 'ACTA', count: 3, limit: 0.8, slotOrders: [], now: Date.parse('2026-11-18T18:00:00Z'), read, seats: SEATS }, o));
 
-gates['AS1 with no seat registered the check does nothing and the empty list stays empty and frozen'] = () => {
-  assert.deepStrictEqual(act.ACTIVITY_SEATS, []);
+gates['AS1 a strategy that is not a registered activity seat is untouched by the check, and the seat list is frozen'] = () => {
+  // Since Nov 14, 2026 the first seat, SPXOI1, is registered (see AS11); any other id still does nothing.
+  assert.deepStrictEqual(act.ACTIVITY_SEATS.map((s) => s.id), ['SPXOI1']);
   assert.ok(Object.isFrozen(act.ACTIVITY_SEATS));
-  assert.deepStrictEqual(act.activeActivitySeats(), []);
+  assert.deepStrictEqual(act.activeActivitySeats().map((s) => s.id), ['SPXOI1']);
   const r = act.activityOrderCheck({ seatId: 'ACTA', count: 3, limit: 0.3, slotOrders: [], now: 1, read });
   assert.deepStrictEqual(r, { applies: false, allowed: true, reason: '' });
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'no seat was added to the slot registry');
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'no seat was added to the slot registry');
 };
 
 gates['AS2 the shared $40 weekly cap binds across seats and every seat resumes Monday 00:00 Central, DST included'] = () => {
@@ -90,7 +91,7 @@ gates['AS4 no entry at 88c or above, never more than 3 contracts or $3 an order'
   assert.strictEqual(act.activeActivitySeats([...SEATS, seat({ id: 'ACTD' })]).length, 0);
   assert.strictEqual(act.activeActivitySeats([seat(), seat()]).length, 0);
   assert.strictEqual(act.activeActivitySeats([seat(), seat({ id: 'ACTB', ioc: false })]).length, 0);
-  assert.strictEqual(act.ACTIVITY_LABEL, 'Activity seat: no edge expected, data only');
+  assert.strictEqual(act.ACTIVITY_LABEL, 'Activity seat: unproven, for live data');
 };
 
 gates['AS5 the profit factor cut needs 100 settled fills, then cuts a seat under 0.8 until a reviewed edit'] = () => {
