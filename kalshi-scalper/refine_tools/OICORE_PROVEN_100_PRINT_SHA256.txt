@@ -1,0 +1,5 @@
+OICORE proven-bar 100 read, canonical path, Nov 14 2026 (printout kept off the branch; hashes only)
+extract sha256 20c00443381f1edeeca51a962639dd9a280a8da0d1a1a35f27bbf4c1dfa54bb9 (100 rows)
+printout sha256 be548dbdc12df26106571851e361bf1d0519b729cbe9361538ca4b6861389f38
+extractor oicore_extract.py 257b30c0324a4ca90dc4bc03662b57fdd8548fa650d5d09c5ec9c67a121b14ac, scorer oicore_proven.py 9e33b35c1f581abc8c5f5843a585db3c3f791fc66c21c4f758ad5af3e1e06962
+breach note: at 17:27Z Nov 14 an hourly dry run in report mode consumed the real 100 marker; only the verdict word was seen; fix f101f01a, marker ignored by git e5099fbf; Head ruled (1): the canonical path decides.
