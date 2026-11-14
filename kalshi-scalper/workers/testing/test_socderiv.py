@@ -68,14 +68,16 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     def run(name, **kw):
         d = os.path.join(dc, name); os.mkdir(d); mkrun(d, jc, build(**kw)); return s.measure(spec, [dl], [d])
     eff = run("eff", edge_btts=0.0, half=0.005)
-    d_pg = os.path.join(dc, "pg"); os.mkdir(d_pg); mkrun(d_pg, jc, build(edge_btts=0.0, half=0.005)); pgf = os.path.join(dc, "pergame.jsonl")
-    s.measure(spec, [dl], [d_pg], pergame=pgf); pgl = [json.loads(x) for x in open(pgf).read().splitlines()]
-    keys_ = [(r["league"], r["game"], r["type"], r["ticker"], r["kind"]) for r in pgl]; assert keys_ == sorted(keys_) and len(set(keys_)) == len(keys_) and len(pgl) >= 150
-    assert {r["kind"] for r in pgl} == {"target", "placebo"} and not any(("result" in k_ or "settle" in k_) for r in pgl for k_ in r)
+    d_pg = os.path.join(dc, "pg"); os.mkdir(d_pg); mkrun(d_pg, jc, build(edge_btts=0.0, half=0.005)); pgf = os.path.join(dc, "socderiv_pergame.csv")
+    s.measure(spec, [dl], [d_pg], pergame=pgf); import csv as csv_; txt_ = open(pgf).read().splitlines(); assert txt_[0] == "game_key,fit_iters,cap_hit,rate_home,rate_away,sse,leg_ticker,leg_type,strike,model_value,market_mid,gap,fires"
+    pgl = list(csv_.DictReader(open(pgf))); keys_ = [(r["game_key"], r["leg_ticker"]) for r in pgl]; assert keys_ == sorted(keys_) and len(pgl) >= 300 and len(set(r["leg_ticker"] for r in pgl)) == len(pgl)
+    assert not any(("result" in c_ or "settle" in c_) for c_ in txt_[0].split(",")) and {r["leg_type"] for r in pgl} == {"btts", "teamtotal"}
     for r in pgl:
-        for f_ in ("league", "group", "game", "type", "ticker", "kind", "ts", "minutes_before_kickoff", "l1", "l2", "rmse", "iterations", "cap_hit", "model", "mid", "bid", "ask", "gap", "fires"): assert f_ in r, f_
-        assert abs(r["mid"] - (r["bid"] + r["ask"]) / 2) < 1e-12 and r["fires"] == (r["gap"] >= s.GAP - 1e-9 and r["ask"] - r["bid"] <= s.SPREAD_MAX + 1e-9) and 0.01 <= r["l1"] <= 6.0 and 0.01 <= r["l2"] <= 6.0 and r["iterations"] <= 200 and r["cap_hit"] is False
-    assert json.loads(json.dumps(pgl)) == pgl and sum(1 for r in pgl if r["kind"] == "target") >= 150
+        for c_ in ("rate_home", "rate_away", "sse", "model_value", "market_mid", "gap"): assert repr(float(r[c_])) == r[c_], (c_, r[c_])
+        assert (r["strike"] == "") == (r["leg_type"] == "btts") and (r["strike"] == "1.5" or r["leg_type"] == "btts") and r["fires"] in ("True", "False") and r["cap_hit"] == "False" and 0 <= int(r["fit_iters"]) <= 200
+        assert 0.01 <= float(r["rate_home"]) <= 6.0 and 0.01 <= float(r["rate_away"]) <= 6.0
+        assert (r["fires"] == "True") == (float(r["gap"]) >= s.GAP - 1e-9)          # the fixture half-spread is 0.005, so the spread leg of the rule always holds
+    assert sum(1 for r in pgl if r["leg_type"] == "btts") >= 150
     nopg = run("nopg", edge_btts=0.0, half=0.005); assert "polish" in nopg and nopg["polish"]["fits"] > 0 and nopg["polish"]["cap_hit"] == 0 and nopg["polish"]["max_iterations"] <= 200
     A = eff["groups"]["A_big"]
     assert eff["tries_added"] == 0 and eff["rule_scored"] is False and eff["result_read"] is False and "Bitcoin 15 minute only" in eff["freshness"]

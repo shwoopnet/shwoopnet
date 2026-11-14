@@ -240,11 +240,20 @@ def check_candle_runs(spec, list_folders, candle_folders):
     return sum(seen.values()), len(want)
 
 
-def pgrow(g, typ, tk, kind, ts, fr, val, b, a, gp):
-    """One per-game row (addendum 2, item 4). No market result or settlement field. For a placebo row the fit is the refit without the left-out strike and tk is that strike's ticker."""
-    return {"league": g["league"], "group": g["group"], "game": g["game"], "type": typ, "ticker": tk, "kind": kind, "ts": ts, "minutes_before_kickoff": (g["kickoff"] - ts) / 60,
-            "l1": fr["l1"], "l2": fr["l2"], "rmse": fr["rmse"], "iterations": fr["iterations"], "cap_hit": fr["cap_hit"], "model": val, "mid": (a + b) / 2, "bid": b, "ask": a, "gap": gp,
-            "fires": bool(gp >= GAP - 1e-9 and a - b <= SPREAD_MAX + 1e-9)}
+PG_COLS = ("game_key", "fit_iters", "cap_hit", "rate_home", "rate_away", "sse", "leg_ticker", "leg_type", "strike", "model_value", "market_mid", "gap", "fires")
+
+
+def pgrow(g, typ, tk, strike, fr, val, b, a, gp):
+    """One per-game row (addendum 3: the Miner's CSV spec). One row per game per derivative leg; no market result or settlement field; no placebo rows. league is kept only for the sort tie-break and is not written."""
+    return {"league": g["league"], "game_key": g["game"], "fit_iters": fr["iterations"], "cap_hit": fr["cap_hit"], "rate_home": fr["l1"], "rate_away": fr["l2"], "sse": fr["sse"], "leg_ticker": tk, "leg_type": typ,
+            "strike": strike, "model_value": val, "market_mid": (a + b) / 2, "gap": gp, "fires": bool(gp >= GAP - 1e-9 and a - b <= SPREAD_MAX + 1e-9)}
+
+
+def write_pergame(path, pg):
+    with open(path, "w", newline="") as fh:
+        fh.write(",".join(PG_COLS) + "\n")
+        for r in sorted(pg, key=lambda r: (r["game_key"], r["leg_ticker"], r["league"], r["leg_type"])):
+            fh.write(",".join("" if r[c] is None else repr(r[c]) if isinstance(r[c], float) else str(r[c]) for c in PG_COLS) + "\n")
 
 
 def measure(spec, list_folders, candle_folders, pergame=None):
@@ -286,7 +295,7 @@ def measure(spec, list_folders, candle_folders, pergame=None):
             mid = (a + b) / 2
             row = {"gap": gap(val, b, a), "spread": a - b, "round_trip": (a - b) + 2 * 0.07 * mid * (1 - mid), "one_way": one_way(val, b, a)}
             rows.setdefault((g["group"], typ), {"targets": [], "placebo": []})["targets"].append(row)
-            pg.append(pgrow(g, typ, tk, "target", ts, fr, val, b, a, row["gap"]))
+            pg.append(pgrow(g, typ, tk, None if tt is None else tt[1], fr, val, b, a, row["gap"]))
             # placebo: refit with the total strike nearest 50c left out, compare its model value with its own quote
             near = near_strike(tot); rest = {kk: v for kk, v in totm.items() if kk != near}
             if len(rest) >= 2 and (g["league"], g["game"], ts, typ) not in seen_pl:
@@ -295,14 +304,11 @@ def measure(spec, list_folders, candle_folders, pergame=None):
                 if pk not in cache: cache[pk] = fit_full((wm[t1[0]], wm[tie[0]], wm[t2[0]]), rest)
                 frp = cache[pk]; p1, p2 = frp["l1"], frp["l2"]
                 tkk = [t for t, kk in g["totals"].items() if kk == near][0]; pb, pa = tot[near]
-                pg.append(pgrow(g, typ, tkk, "placebo", ts, frp, over(p1 + p2, near), pb, pa, gap(over(p1 + p2, near), pb, pa)))
                 rows[(g["group"], typ)]["placebo"].append({"gap": gap(over(p1 + p2, near), pb, pa), "spread": pa - pb, "one_way": one_way(over(p1 + p2, near), pb, pa), "round_trip": (pa - pb) + 2 * 0.07 * ((pa + pb) / 2) * (1 - (pa + pb) / 2)})
             got[typ] = True
         for typ in ("btts", "teamtotal"):
             if got[typ]: G[typ]["filled"] += 1
-    if pergame:
-        with open(pergame, "w") as fh:
-            for r in sorted(pg, key=lambda r: (r["league"], r["game"], r["type"], r["ticker"], r["kind"])): fh.write(json.dumps(r, sort_keys=True) + "\n")
+    if pergame: write_pergame(pergame, pg)
     its = sorted(f["iterations"] for f in cache.values()); polish_rep = {"fits": len(its), "median_iterations": st.median(its) if its else None, "max_iterations": its[-1] if its else None, "cap_hit": sum(1 for f in cache.values() if f["cap_hit"]), "cap": POLISH_CAP}
     series_listed = {m["series"] for m in k.markets(list_folders).values()}
     out = {"counts_first": counts, "candle_requests_answered_whole": "%d of %d asked" % (answered, asked), "polish": polish_rep, "fit_residual_rmse_median": None if not resid else st.median(resid), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
