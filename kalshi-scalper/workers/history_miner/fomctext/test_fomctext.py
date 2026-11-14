@@ -18,10 +18,12 @@ def run(jb, answers, name=None, status="complete", tamper=None):
     if tamper: tamper(rows)
     json.dump({"job": jb, "status": status, "rows": rows}, open(os.path.join(d, "manifest.json"), "w")); return d
 
-def table(rows):
+def table(rows, header=None):
+    """Clarification 7: a five-column row gains type = statement-type (every earlier fixture's rows are statement-type); a six-column row carries its own type."""
     p = os.path.join(tempfile.mkdtemp(), "t.csv")
     with open(p, "w", newline="") as f:
-        w = csv.writer(f); w.writerow(["decision_date", "event_ticker", "market_ticker", "strike_word", "statement_word"]); w.writerows(rows)
+        w = csv.writer(f); w.writerow(header or ["decision_date", "event_ticker", "market_ticker", "strike_word", "statement_word", "type"])
+        w.writerows([list(r) + ["statement-type"] if len(r) == 5 and header is None else r for r in rows])
     return p
 
 def cndl(t, ts, bid, ask):
@@ -150,3 +152,17 @@ listed = run(EJ, {"events_KXFEDMENTION": [{"events": evs, "cursor": ""}]}, name=
 refused(lambda: F.events([listed], EJ), "landed run")
 refused(lambda: F.words([run(LJ, {"hist": [{"markets": []}], "live": [{"markets": []}]}, name="2026-11-14T0054Z_43537213544")], LJ), "landed run")
 print("listed runs refused: ok")
+
+# --- Nov 14, Clarification 7: the type column. 3 statement-type yes, 4 statement-type no, 2 NOT STATEMENT-TYPE at one meeting
+d7 = F.DEV_DATES[0]; ev7 = ev_of[d7]; mk7, cd7, tb7 = [], [], []
+for k, (sw, ty) in enumerate([("yes", "statement-type")] * 3 + [("no", "statement-type")] * 4 + [("no", "NOT STATEMENT-TYPE")] * 2):
+    t7 = "%s-Z%d" % (ev7, k); mk7.append({"ticker": t7, "event_ticker": ev7, "result": "yes"}); tb7.append([d7, ev7, t7, "z%d" % k, sw, ty])
+    cd7.append(cndl(t7, F.et_epoch(d7, 14, 5), 0.78, 0.80))
+L7 = run(LJ, {"hist": [{"markets": mk7}], "live": [{"markets": []}]}); C7 = run(CJ, {"c1": [{"markets": cd7}]})
+r7 = F.count(table(tb7), [L7], [C7], LJ, CJ)
+assert r7["statement_word_strikes"] == 3 and r7["placebo_non_statement_words"]["strikes"] == 4 and r7["strikes_in_table"] == 9, r7
+assert r7["not_statement_type"] == {"n": 2, "line": "not statement-type, n = 2"}, r7["not_statement_type"]
+refused(lambda: F.count(table(tb7), [run(LJ, {"hist": [{"markets": mk7[:-1]}], "live": [{"markets": []}]})], [C7], LJ, CJ), "disagree")   # a NOT row is still in the universe check
+refused(lambda: F.load_table(table([r[:5] for r in tb7], header=["decision_date", "event_ticker", "market_ticker", "strike_word", "statement_word"])), "no type column")
+refused(lambda: F.load_table(table(tb7[:1] + [tb7[1][:5] + ["statement"]])), "type must be")
+print("type column: ok")

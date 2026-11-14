@@ -138,8 +138,14 @@ def load_lists(folders, job):
     return keep, drop
 
 
+TYPES = ("statement-type", "NOT STATEMENT-TYPE")
+
+
 def load_table(path):
-    rows = list(csv.DictReader(open(path)))
+    rd = csv.DictReader(open(path))
+    if "type" not in (rd.fieldnames or []):
+        raise SystemExit("refused: the table has no type column (Clarification 7)")
+    rows = list(rd)
     out = {}
     for r in rows:
         if r["market_ticker"] in out:
@@ -150,7 +156,11 @@ def load_table(path):
             raise SystemExit("refused: the table names a date that is not a development decision date (%s)" % r["decision_date"])
         if r["statement_word"].strip().lower() not in ("yes", "no"):
             raise SystemExit("refused: statement_word must be yes or no (%s)" % r["market_ticker"])
-        out[r["market_ticker"]] = {"date": r["decision_date"], "event": r["event_ticker"], "word": r["strike_word"], "sw": r["statement_word"].strip().lower() == "yes"}
+        ty = (r.get("type") or "").strip()                                     # Clarification 7: the type column, exactly one of two values
+        if ty not in TYPES:
+            raise SystemExit("refused: type must be one of %s (%s has %r)" % (list(TYPES), r["market_ticker"], r.get("type")))
+        out[r["market_ticker"]] = {"date": r["decision_date"], "event": r["event_ticker"], "word": r["strike_word"], "sw": r["statement_word"].strip().lower() == "yes",
+                                   "stype": ty == TYPES[0]}
     return out
 
 
@@ -282,8 +292,9 @@ def count(table_path, list_folders, candle_folders, lists_job, candles_job):
     N404[0] = 0
     table = load_table(table_path); lists, drop = load_lists(list_folders, lists_job); universe(table, lists); cd = candles(candle_folders, candles_job)
     unnamed = unnamed_events(table, lists)
-    sw = tally({t: v for t, v in table.items() if v["sw"]}, lists, cd)
-    placebo = tally({t: v for t, v in table.items() if not v["sw"]}, lists, cd)   # Clarification 1 point 5: printed beside, never part of the kill line
+    sw = tally({t: v for t, v in table.items() if v["stype"] and v["sw"]}, lists, cd)          # Clarification 7: statement-type, feature yes
+    placebo = tally({t: v for t, v in table.items() if v["stype"] and not v["sw"]}, lists, cd)  # statement-type, feature no; printed beside, never part of the kill line
+    n_not = sum(1 for v in table.values() if not v["stype"])                                    # NOT STATEMENT-TYPE: in neither arm
     n_sw, n_two, qual, meetings = sw["strikes"], sw["two_sided_at_1405"], sw["qualifying"], set(sw["qualifying_meetings"])
     close = []
     if qual < CLOSE_MIN_STRIKES: close.append("(a) fewer than 15 qualifying strikes (%d)" % qual)
@@ -293,6 +304,7 @@ def count(table_path, list_folders, candle_folders, lists_job, candles_job):
     return {"development_meetings_in_table": len(met), "no_market_dates": sorted(d for d in DEV_DATES if d not in met), "strikes_in_table": len(table),
             "statement_word_strikes": n_sw, "two_sided_at_1405": n_two, "qualifying": qual, "qualifying_meetings": sorted(meetings), "excluded": sw["excluded"],
             "placebo_non_statement_words": placebo, "list_rows_dropped_unread": drop,
+            "not_statement_type": {"n": n_not, "line": "not statement-type, n = %d" % n_not},
             "development_events_in_lists_not_named_by_the_table": {"count": len(unnamed), "events": unnamed},
             "candle_requests_answered_404": N404[0],
             "verdict": ("CLOSED, efficient, move on: " + "; ".join(close)) if close else "survives stage 1: register 1 try separately (slow-family paper screen)",

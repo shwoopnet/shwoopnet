@@ -1,4 +1,4 @@
-# FOMCTEXT reader, Nov 14: events command and hm_guard in answers() (dated line and addendum); supersedes f640f3bb's freeze
-aff0320afe6a691cbd6723c5090b60abc48c0ea802ba38f1a9ca1b2bbb6464d8  fomctext.py
-9fffe19a0af54810b4ab6c5ff4918395d6093a8cc5a2316db9831f963818740f  test_fomctext.py
-f069834072d329d32551fc4c3d7fc5ec656eada9e78cc2f4c741af3ca9f86a94  FOMCTEXT_READER_NOTE.md
+# FOMCTEXT reader, Nov 14: the type column (Clarification 7) on top of events and hm_guard; supersedes aff0320a's freeze
+919255f29609dfd7128b36fa7e3554690643272972f88311d3569df8068a984b  fomctext.py
+8ceaf50f8e30c7c423721c6b138495b1639239c1e28f043889268d66b76fba53  test_fomctext.py
+a6dc820b423f94d4a76a37d3e5e6e2081d8b2232d6a30a7eda67453cc0fac288  FOMCTEXT_READER_NOTE.md
