@@ -14,6 +14,7 @@
 
 const bot = require("./kalshiSignalLib");
 const spxoiConfig = require("./kalshiSpxoiConfig");   // SPXOI1_T, the one number not known yet (null = the seat is not registered)
+const activity = require("./kalshiActivityLib");   // activity seats: pure, empty registry, a no-op until a seat is registered
 
 // ---- The master switch and the hard caps. Changing any of these is a reviewed code edit, never a stored value. ----------------------------
 const SLOT_ENABLED = true;                            // phase A: off. Turning it on is its own reviewed pull request, after the wiring phases.
@@ -673,6 +674,12 @@ function slotOrderCheckWith(flags, input) {
     const c = costOf(n);
     if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9) break;
     n -= 1;
+  }
+  // Activity seats (docs/ACTIVITY_SEATS.md): a registered activity seat is also refused here when any of its weekly, daily or PF caps says stop. For every other strategy
+  // (and while ACTIVITY_SEATS is empty) applies is false and nothing changes. `flags.activitySeats` exists only for tests.
+  if (n >= 1) {
+    const act = activity.activityOrderCheck({ seatId: strategy.id, count: n, limit: i.limit, slotOrders: i.slotOrders, now: i.now, read: accountOrder, seats: flags && flags.activitySeats });
+    if (act.applies && !act.allowed) return no(act.reason);
   }
   if (n < 1) return no("no whole contract fits the caps (per order, per market, depth share, window, total, the shared window limit, or what is left of the daily and lifetime loss caps)");
   if (n < wanted) reasons.push("cut from " + wanted + " to " + n + " by the caps");

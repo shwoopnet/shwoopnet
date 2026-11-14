@@ -1871,6 +1871,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Nov 14</div>
+                <ul class="changelog-list">
+                  <li>Trading, built but switched off (no seat is registered, so nothing changes in the bot): the guard rails for "activity seats", small trial seats on unproven ideas that keep the account active for data only, with no edge expected. Each seat would be 3 contracts, at most $3 an order, never at 88c or above, a $6 daily and $20 weekly loss limit, one shared $40 weekly limit that resets Monday 00:00 Central, and an automatic cut if its last 100 settled trades win less than 0.8 times what they lose.</li>
+                </ul>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
                   <li>Research: a new nonstop recorder keeps every combo trade on Kalshi's public trade tape, read once a minute, with each combo's legs, for two paper-only research cards; the half hour combo recorder now keeps the legs of every combo it lists and leaves trades to the new recorder. Public data only; nothing in the bot changed.</li>

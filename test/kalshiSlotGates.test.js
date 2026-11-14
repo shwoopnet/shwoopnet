@@ -84,7 +84,7 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.ok(prereg.includes('SLOT-OICORE') && /SLOT_STRATEGIES/.test(prereg), 'the registered readme anchor exists in the pre-registration file');
   const c = code(libSrc);
   assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(|process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b|https?:|child_process|\bfs\b/.test(c), 'the library must have no network, store, clock, environment, randomness, timer or signing code');
-  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSpxoiConfig"']);   // the second is SPXOI1's threshold file (Nov 13, 2026): frozen pure data, checked next
+  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSpxoiConfig"', '"./kalshiActivityLib"']);   // the third is the pure, import-free activity seat rails (Nov 14, 2026); the second is SPXOI1's threshold file (Nov 13, 2026): frozen pure data, checked next
   const cfgSrc = code(fs.readFileSync(path.join(root, 'functions', 'kalshiSpxoiConfig.js'), 'utf8'));
   assert.ok(!/require\(|import|fetch|Date|process\.|fs\b|http/.test(cfgSrc), 'the threshold file is pure data: no import, network, clock or environment');
 };
