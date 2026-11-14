@@ -178,3 +178,10 @@ Both passes were already running when these rulings arrived. Each was given the 
 - **Nothing runs until both hold:**
   1. Auditor B is CLEAN on the table, the job and the amendment;
   2. the owner says yes under the freeze.
+
+## Clarification 8 (Nov 14, 2026, 02:34Z, the Head of R&D's ruling, before any count)
+
+1. **The verdict is judged on the RAW kill line as the card fixed it** (Stage 1, the CLOSE conditions (a) to (c)).
+   - The 1c and 2c haircut lines (C7) are printed beside it. They decide only whether a pass could count toward the owner's 20 to 30.
+   - If either haircut line fails, the label is "does not count: fails the haircut", and the card stays open on paper.
+2. **Reading of Clarification 1 point 4:** a bid or ask of exactly 0.0000 or 1.0000 is read, and is not two-sided. Two-sided means 0 < bid < ask < 1.
