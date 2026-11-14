@@ -1,0 +1,11 @@
+# f7 full-precision hand case (Forensics desk, Nov 14, 2026; INVENTED trades, written before the fix)
+The Head's order of 00:20Z: created_time at full precision (here: integer microseconds, the recorder's maximum), the whole second = floor, prices compared after round(px, 4), the sweep window (t - 60 s, t] open at the start, closed at the end.
+Decision poll time t = 1,000,000.0 ms (1000 s), so the window in microseconds is (940,000,000, 1,000,000,000]. A trade is (created microseconds, price, taker side).
+
+Case 1 (a whole second that the millisecond rounding moves): yes at 990,999,600 us price 0.50 and yes at 990,400,000 us price 0.51. Both are in second 990 (floor). Rounded to the millisecond the first becomes 991,000 ms, second 991, and the old build saw two different seconds. EXPECTED f7 = +1 (one yes sweep).
+Case 2 (the window's open lower edge): yes at 940,000,000 us 0.50 and 940,000,000 us 0.51 (exactly the open edge, both outside); then yes at 940,000,001 us 0.50 and 940,000,400 us 0.52 (inside, second 940, two prices). EXPECTED f7 = +1. (The old build rounded 940,000,001 us to 940,000 ms, which is not above the edge, and dropped both.)
+Case 3 (the closed upper edge): no at 1,000,000,000 us 0.60 (inside, the edge is closed) and no at 1,000,000,001 us 0.61 (outside). Both are second 1000, but only one trade and one price are inside. EXPECTED f7 = 0. (The old build rounded the second one back to 1,000,000 ms, inside, and saw two prices.)
+Case 4 (the price rounding): yes at 960,100,000 us price 0.50004 and yes at 960,200,000 us price 0.5000; round(px, 4) makes both 0.5. EXPECTED f7 = 0. (Rounded to 6 places the old build saw two prices.)
+Case 5 (a plain sweep, no sub-millisecond effect, one per side so the sign is tested): yes at 970,000,000 us 0.40 and 970,500,000 us 0.41; no at 980,000,000 us 0.40 and no at 980,500,000 us 0.41, and a third no at 981,000,000 us 0.42 alone (one price in its second, no sweep). EXPECTED f7 = 0 (+1 yes sweep, -1 no sweep).
+Case 6 (all of it together): the trades of cases 1 to 5 in one list. EXPECTED f7 = +2 (yes sweeps: case 1, case 2, case 5's yes = 3; no sweeps: case 5's no = 1; so 3 minus 1 = +2).
+Old build on the same lists (for the record, expected to differ): case 1 gives 0, case 2 gives 0, case 3 gives -1, case 4 gives +1, case 5 gives 0.
