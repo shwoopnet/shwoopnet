@@ -117,3 +117,4 @@ The development events have MONTH-ONLY event tickers (KXFEDMENTION-26MAR), which
   - **Fixture 1 (existing, asks 0.80):** RAW 18, 6 meetings, survives. 1c and 2c: 18 count, 6 meetings, both pass. Could count: yes.
   - **Fixture 2 (existing, boundary):** RAW 1 qualifying (A87), CLOSED. 1c: A87's entry is 0.88, so 0 count, fails (a) and (b); 2c the same. Could count: no. Two-sided on every line: 2 of 6, so (c) does not hold on any line.
   - Every earlier test still passes unchanged.
+- **Correction to the hand case above (2026-11-14, after the first test run, disclosed):** Fixture 2 has 3 of 6 two-sided, not 2 (A87, A88 and NOSETTLE at 0.20/0.22 are two-sided; the existing RAW test already pins 3). My hand line miscounted. The conclusion is unchanged: exactly half is not under half, so (c) holds on no line. The test asserts 3.

@@ -5,7 +5,7 @@ development decision date is dropped BEFORE any field other than its ticker is r
 Commands:
   build-candles <table.csv> <lists job.json> <lists folder>...   -> the whole stage 2 candle job, checked by the pull runner's own check_job
   words <lists job.json> <lists folder>...   -> development markets' event ticker, date and strike-word text only (no price, volume or result), for Idea Desk C
-  count <table.csv> <lists job.json> <candles job.json> --lists <folder>... --candles <folder>...   -> the stage 1 count and the CLOSE lines
+  count <table.csv> <lists job.json> <candles job.json> --lists <folder>... --candles <folder>...   -> the stage 1 count and the CLOSE lines (RAW), plus the 1c and 2c haircut lines (Amendment 5)
   events <events job.json> <events folder>...   -> event ticker, series, title and date of the Fed mention events dated before 2026-06-17 only (dated line of Nov 14)
 Every run folder must be PROVEN whole against its committed job (manifest job equal, status complete, every request answered, no cursor left, sha256 and bytes) before it is read.
 The hand-matched statement-word table is Desk C's (decision_date,event_ticker,market_ticker,strike_word,statement_word; card Clarification 1, 28a2d63d); this reader never matches words."""
@@ -304,6 +304,7 @@ def count(table_path, list_folders, candle_folders, lists_job, candles_job):
     if len(meetings) < CLOSE_MIN_MEETINGS: close.append("(b) from fewer than 5 meetings (%d)" % len(meetings))
     if n_sw == 0 or 2 * n_two < n_sw: close.append("(c) fewer than half of statement-word strikes two-sided at 2:05 pm (%d of %d)" % (n_two, n_sw))
     met = {v["date"] for v in table.values()}
+    hc = {h: haircut_line({t: v for t, v in table.items() if v["stype"] and v["sw"]}, lists, cd, h) for h in (1, 2)}   # Amendment 5: kill arm only; RAW untouched
     return {"development_meetings_in_table": len(met), "no_market_dates": sorted(d for d in DEV_DATES if d not in met), "strikes_in_table": len(table),
             "statement_word_strikes": n_sw, "two_sided_at_1405": n_two, "qualifying": qual, "qualifying_meetings": sorted(meetings), "excluded": sw["excluded"],
             "placebo_non_statement_words": placebo, "list_rows_dropped_unread": drop,
@@ -311,6 +312,8 @@ def count(table_path, list_folders, candle_folders, lists_job, candles_job):
             "development_events_in_lists_not_named_by_the_table": {"count": len(unnamed), "events": unnamed},
             "candle_requests_answered_404": N404[0],
             "verdict": ("CLOSED, efficient, move on: " + "; ".join(close)) if close else "survives stage 1: register 1 try separately (slow-family paper screen)",
+            "haircut_1c": hc[1], "haircut_2c": hc[2],
+            "could_count_toward_20_to_30": "yes" if (not close and hc[1]["passes"] and hc[2]["passes"]) else "no",
             "label": "zero tries; development only; reads settlements by design (see FOMCTEXT_READER_NOTE.md); the placebo is not part of the kill line"}
 
 
@@ -332,6 +335,27 @@ def tally(group, lists, cd):
         if q:
             qual += 1; meetings.add(v["date"])
     return {"strikes": len(group), "two_sided_at_1405": n_two, "qualifying": qual, "qualifying_meetings": sorted(meetings), "excluded": excl}
+
+
+def haircut_line(group, lists, cd, h):
+    """Amendment 5 (Nov 14): the card's kill conditions judged with the entry at the ask + h cents (h = 1 or 2), the 0.87 cap applied to that entry, in whole ten-thousandths of a dollar."""
+    n_two, qual, meetings = 0, 0, set()
+    for t, v in sorted(group.items()):
+        c = cd.get(t, {}).get(et_epoch(v["date"], 14, 5))
+        bid = px(c.get("yes_bid")) if c else None; ask = px(c.get("yes_ask")) if c else None
+        two = bid is not None and ask is not None and bid > TOL and bid < ask - TOL and ask < 1 - TOL   # the RAW quote's two-sidedness, as tally()
+        n_two += two
+        if not two or lists[t]["result"] != "yes":
+            continue
+        e4 = int(round(ask * 10000)) + 100 * h
+        if e4 <= 8700 and 10000 - e4 >= 1000:
+            qual += 1; meetings.add(v["date"])
+    close = []
+    if qual < CLOSE_MIN_STRIKES: close.append("(a) fewer than 15 qualifying strikes (%d)" % qual)
+    if len(meetings) < CLOSE_MIN_MEETINGS: close.append("(b) from fewer than 5 meetings (%d)" % len(meetings))
+    if len(group) == 0 or 2 * n_two < len(group): close.append("(c) fewer than half of statement-word strikes two-sided at 2:05 pm (%d of %d)" % (n_two, len(group)))
+    return {"entry": "ask + 0.0%d, capped at 0.87" % h, "qualifying": qual, "qualifying_meetings": sorted(meetings), "two_sided_at_1405": n_two, "strikes": len(group),
+            "passes": not close, "label": "passes the haircut" if not close else "does not count: fails the haircut: " + "; ".join(close)}
 
 
 if __name__ == "__main__":

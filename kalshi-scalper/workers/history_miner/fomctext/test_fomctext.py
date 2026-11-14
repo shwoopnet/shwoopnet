@@ -181,3 +181,23 @@ C4 = run(CJ, {"c1": [{"markets": [{"market_ticker": t4, "candlesticks": [{"end_p
 r4 = F.count(table([[d4, ev4, t4, "one", "yes"]]), [L4], [C4], LJ, CJ)
 assert r4["two_sided_at_1405"] == 0 and r4["qualifying"] == 0, r4
 print("amendment 4 as approved: ok")
+
+# --- Nov 14, Amendment 5: 1c and 2c haircut lines beside the RAW verdict (hand case in FOMCTEXT_READER_NOTE.md)
+mk5, cd5, tb5 = [], [], []
+for d in F.DEV_DATES[:5]:
+    ev = ev_of[d]; ts = F.et_epoch(d, 14, 5)
+    for k, a in enumerate((0.85, 0.86, 0.87)):
+        t = "%s-H%d" % (ev, k); mk5.append({"ticker": t, "event_ticker": ev, "result": "yes"}); tb5.append([d, ev, t, "h%d" % k, "yes"]); cd5.append(cndl(t, ts, a - 0.02, a))
+r5 = F.count(table(tb5), [run(LJ, {"hist": [{"markets": mk5}], "live": [{"markets": []}]})], [run(CJ, {"c1": [{"markets": cd5}]})], LJ, CJ)
+assert r5["qualifying"] == 15 and r5["verdict"].startswith("survives"), r5
+assert r5["haircut_1c"]["qualifying"] == 10 and len(r5["haircut_1c"]["qualifying_meetings"]) == 5 and not r5["haircut_1c"]["passes"], r5["haircut_1c"]
+assert r5["haircut_1c"]["label"].startswith("does not count: fails the haircut") and "(a)" in r5["haircut_1c"]["label"] and "(b)" not in r5["haircut_1c"]["label"]
+assert r5["haircut_2c"]["qualifying"] == 5 and len(r5["haircut_2c"]["qualifying_meetings"]) == 5 and not r5["haircut_2c"]["passes"], r5["haircut_2c"]
+assert r5["could_count_toward_20_to_30"] == "no"
+for h in ("haircut_1c", "haircut_2c"):
+    assert r[h]["qualifying"] == 18 and len(r[h]["qualifying_meetings"]) == 6 and r[h]["label"] == "passes the haircut", r[h]
+assert r["could_count_toward_20_to_30"] == "yes"
+for h in ("haircut_1c", "haircut_2c"):
+    assert r2[h]["qualifying"] == 0 and r2[h]["two_sided_at_1405"] == 3 and r2[h]["strikes"] == 6 and "(a)" in r2[h]["label"] and "(b)" in r2[h]["label"] and "(c)" not in r2[h]["label"], r2[h]
+assert r2["verdict"].startswith("CLOSED") and r2["could_count_toward_20_to_30"] == "no"
+print("amendment 5: ok")

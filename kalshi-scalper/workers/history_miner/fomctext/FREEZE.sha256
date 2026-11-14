@@ -1,4 +1,4 @@
-# FOMCTEXT reader, Nov 14: Amendment 4 as approved by the Head (pattern ^[01]\.\d{4}$); supersedes 913bf493's freeze
-502022c705d9156ec0ba1f6b64b23d05c4ab61774fe1d039866a9ca2b30b1aa4  fomctext.py
-252844f3ac0e3ab083045f25205b4c5028d8c4f5eae55ff218dbf8d59da31d6a  test_fomctext.py
-96bb0f7c6a377713f641db2874052c10b94004e4fcc3d48ee3233b3a2f016140  FOMCTEXT_READER_NOTE.md
+# FOMCTEXT reader, Nov 14: Amendment 5 (1c and 2c haircut lines beside the RAW verdict); supersedes 502022c7's freeze
+28e55c3f1d14be008fdb7a31f6802889ad285ede4b59f8d577c9c7bcf9811880  fomctext.py
+20f57735a3a111a957121ca7320cc85b169b85c851406312a124f25287846f0e  test_fomctext.py
+81b9b1c4aab782ef78da058a5cccfe4fe5bb9d62701ebd9e15800e1ca8eeaea7  FOMCTEXT_READER_NOTE.md
