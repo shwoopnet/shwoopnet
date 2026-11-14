@@ -43,7 +43,7 @@ assert r.ran_flag("yes", 0.10, {"bid": 0.10, "ask": 0.11}) is True and r.ran_fla
 
 # --- end to end ---
 W = [  # id, close, z, perp kwargs, decision quotes, next quotes, result
-    ("H1", T(14, 0, 0), 1.0, {}, (.90, .91), (.90, .91), "no"), ("H2", T(14, 0, 30), -1.0, {}, (.09, .10), (.09, .10), "no"), ("H3", T(14, 0, 45), 1.0, {}, (.90, .91), (.87, .88), "void"),
+    ("E0", T(14, 0, 0), 1.0, {}, (.90, .91), (.90, .91), "no"), ("H1", T(14, 0, 15), 1.0, {}, (.90, .91), (.90, .91), "no"), ("H2", T(14, 0, 30), -1.0, {}, (.09, .10), (.09, .10), "no"), ("H3", T(14, 0, 45), 1.0, {}, (.90, .91), (.87, .88), "void"),
     ("H4", T(14, 1, 0), 0.5, {}, (.70, .71), (.70, .71), "yes"), ("H5", T(14, 1, 15), 1.0, {}, (.90, .94), None, "no"), ("H6", T(14, 1, 30), 1.0, {"drop_open": True}, (.90, .91), None, "no"),
     ("H7", T(14, 1, 45), 1.0, {"keep": 6}, (.90, .91), None, "no"), ("H8", T(14, 2, 0), 1.0, {}, None, None, "no"), ("H9", T(14, 2, 15), 1.0, {"flat": True}, (.90, .91), None, "no"),
     ("N1", T(10, 0, 15), 1.0, {}, (.90, .91), (.90, .91), "no"), ("D1", T(6, 0, 15), 1.0, {}, (.90, .91), None, "no"),
@@ -65,7 +65,7 @@ with tempfile.TemporaryDirectory() as t:
     mkrun(lists, [("L1", {"markets": mrows})]); mkrun(cands, [("C1", {"markets": crows})]); mkrun(prun, [("P1", {"market_ticker": "KXBTCPERP", "candlesticks": pcs})])
     mk, cc, pc = k.markets([lists]), k.candles([cands]), k.candles([prun])
     held, g = r.build(mk, cc, r.perp_mids(pc))
-    assert g["windows_listed"] == 14 and g["closes_before_2026-11-14_not_read"] == 5 and g["heldout_windows"] == 9, g          # B0 08 Nov 23:45 not read, B1 09 Nov 00:00 and B2 13 Nov 23:45 not blind, H1 14 Nov 00:00 held-out
+    assert g["windows_listed"] == 15 and g["closes_on_or_before_2026-11-14T00:00Z_not_read"] == 6 and g["window_closing_at_2026-11-14T00:00Z_excluded"] == 1 and g["heldout_windows"] == 9, g          # B0 08 Nov 23:45 not read, B1 09 Nov 00:00 and B2 13 Nov 23:45 not blind, H1 14 Nov 00:00 held-out
     assert g["traded_heldout"] == 3 and g["void_traded"] == 1 and "traded_not_blind" not in g, g
     assert g["edge under 5c"] == 1 and g["spread above 3c"] == 1 and g["no opening minute"] == 1 and g["fewer than 6 changes"] == 1 and g["no decision candle"] == 1 and g["sd zero"] == 1, g
     assert [x["ticker"][-2:] for x in held] == ["H1", "H2", "H3"] and [x["side"] for x in held] == ["no", "yes", "no"] and [x["ran"] for x in held] == [False, False, True]
@@ -101,7 +101,25 @@ with tempfile.TemporaryDirectory() as t:
     assert rp["+2 s"]["filled"] == 0 and rp["+6 s"]["filled"] == 1 and rp["+6 s"]["of_signals"] == 3 and abs(rp["+6 s"]["net"] - (0.9 - f(0.1))) < 1e-9, rp
     assert rp["rows_with_a_book_at_decision"] == 1 and rp["ask_not_on_the_book"] == 1 and "NO exchange-time offset" in rp["clock"], rp
     assert r.replay_lines(held, None).startswith("NOT COMPUTED")
-    assert not any(x["ticker"].endswith(("N1", "B1", "B2", "B0", "D1")) for x in held)          # nothing before 2026-11-14T00:00Z is read
+    assert not any(x["ticker"].endswith(("N1", "B1", "B2", "B0", "D1", "E0")) for x in held)
+    # Addendum 2: the window closing at exactly 2026-11-14T00:00:00Z is never read (no result, no candles): poisoned readers
+    class NoRead(dict):
+        def __getitem__(self, key):
+            if key == "result": raise AssertionError("read the result of an excluded window")
+            return super().__getitem__(key)
+    class NoCands(dict):
+        def get(self, key, default=None):
+            if key.endswith(("-E0", "-N1", "-B0", "-B1", "-B2", "-D1")): raise AssertionError("read the candles of a window at or before the boundary: " + key)
+            return super().get(key, default)
+    mk_p = {tk: (NoRead(m) if tk.endswith(("-E0", "-N1", "-B0", "-B1", "-B2", "-D1")) else m) for tk, m in mk.items()}
+    held_p, g_p = r.build(mk_p, NoCands(cc), r.perp_mids(pc)); assert [x["ticker"] for x in held_p] == [x["ticker"] for x in held] and g_p["window_closing_at_2026-11-14T00:00Z_excluded"] == 1
+    # the Cutoff guard (rule h): a trade at the boundary second is a development trade in the held-out read; one second later passes; the 00:15Z close passes
+    assert r.HELDOUT_FIRST == r.HELDOUT_AFTER + 1 and r.HELDOUT_AFTER == T(14, 0, 0)
+    mkf0 = os.path.join(t, "B.md"); open(mkf0, "w").write("READ-ONCE MARKER: not yet read.\n"); cutb = k.Cutoff(r.HELDOUT_FIRST, mkf0, "READ-ONCE MARKER", held_out=True)
+    import inspect as _insp; assert "k.Cutoff(HELDOUT_FIRST," in _insp.getsource(r.heldout_read)          # the read builds its guard from the constant the boundary test above checks
+    for ts_, ok_ in ((T(14, 0, 0), False), (T(14, 0, 1), True), (T(14, 0, 15), True)):
+        try: cutb.check([{"ts": ts_, "event": "x"}], now=None); assert ok_
+        except RuntimeError: assert not ok_, ts_          # nothing before 2026-11-14T00:00Z is read
     # rules text check
     assert "simple average of the sixty seconds" in r.check_rules_text([lists])
     # the full read: refused before READ_DATE; committed marker; local marker; NOT_ENOUGH_DATA does not spend the read

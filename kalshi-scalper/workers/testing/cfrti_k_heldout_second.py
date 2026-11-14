@@ -5,7 +5,7 @@ NOT RUN ON DATA. Hand case: CFRTI_K_HELD_HAND_CASE.md (committed before this cod
 
 READ: refuses before READ_DATE (2026-11-20T00:00Z), before anything is loaded; needs the committed line starting 'READ-ONCE MARKER' in the registration file and refuses if it already says READ ON <date>;
       refuses if the local marker file CFRTI_K_HELDOUT_READ.local exists; n under 50 prints only 'NOT_ENOUGH_DATA, n = x' and writes NO marker (the read is not spent); every run that reaches the count is appended to CFRTI_K_HELDOUT_RUNS.log with its date and n; otherwise writes the local marker BEFORE printing.
-Windows: settled KXBTC15M markets from the lists. The reader reads ONLY closes on or after 2026-11-14T00:00:00Z; earlier closes are not read (counted).
+Windows: settled KXBTC15M markets from the lists. The reader reads ONLY closes STRICTLY AFTER 2026-11-14T00:00:00Z (the Head, 2026-11-14 00:10Z: DEPTH1 read the 00:00:00Z window first, so the first held-out close is 00:15Z); the window closing at 00:00:00Z and earlier closes are not read (counted, the boundary window counted by itself).
 Rule (sections 7 and 12): decision candle = the KXBTC15M candle ending close - 120 s (YES bid and ask CLOSE both present, spread <= 0.03); cheap side YES if its ask is in [0.05, 0.30] else NO if 1 - yes_bid is in [0.05, 0.30];
   perp mid = (bid close + ask close)/2 of PERPBTC1M; model index = strike x (mid at the candle ending close - 120 / mid at the candle ending close - 900), a missing opening mid drops the window;
   volatility: mids at close - 120 - 60j (j = 0..10), log changes between neighbouring marks where both exist, at least 6 changes, sample sd (n - 1) x sqrt(4/3); chance(YES) = Phi(ln(mid_now/mid_open)/sd);
@@ -22,7 +22,8 @@ import calendar, glob, json, math, os, random, statistics as st, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import scorekit as k
 
-HELDOUT_FIRST = calendar.timegm((2026, 11, 14, 0, 0, 0))
+HELDOUT_AFTER = calendar.timegm((2026, 11, 14, 0, 0, 0))          # held-out = closes STRICTLY AFTER this (the Head, 2026-11-14 00:10Z: DEPTH1 read the window closing at this second first)
+HELDOUT_FIRST = HELDOUT_AFTER + 1          # closes are whole seconds: close > HELDOUT_AFTER is close >= HELDOUT_FIRST, the date constant the Cutoff guard gets
 READ_DATE = calendar.timegm((2026, 11, 20, 0, 0, 0))
 MIN_ROWS = 50
 BAR_PF = 1.3
@@ -47,6 +48,7 @@ AMBIGUITIES = [
     "READ_DATE 2026-11-20 (the dated line: Nov 14 is only the START of the held-out window). If there are under 50 rows on Nov 20 the reader prints NOT_ENOUGH_DATA and is run again on the first day with 50, once.",
     "The perp ticker in the candle runs is taken as KXBTCPERP, or the only ticker present; anything else stops the run (the landed layout of the perp answer is the scorekit shape, unverified for this reader).",
     "R6 clock offsets (exchange time via the Date header) are NOT applied: poll time = t_recv_ms / 1000. The replay and stale-ask lines say so.",
+    "Held-out = closes STRICTLY AFTER 2026-11-14T00:00:00Z (the Head's message of 2026-11-14 00:10Z; Desk A's dated card line is pending): the 00:00:00Z window is not read, counted by itself. Closes are whole seconds, so the Cutoff constant is 00:00:01Z.",
     "The Cutoff guard compares each held-out row's WINDOW CLOSE (trade 'ts' = close) with HELDOUT_FIRST, since the card defines the held-out by close.",
 ]
 
@@ -123,7 +125,7 @@ def ran_flag(side, ask, nxt):
 
 def build(mk, cs, mids):
     """-> (held-out trades, counts). Trade ts = the window close (the Cutoff guard reads it)."""
-    g = {"windows_listed": 0, "closes_before_2026-11-14_not_read": 0, "heldout_windows": 0, "no decision candle": 0, "traded_heldout": 0, "void_traded": 0}
+    g = {"windows_listed": 0, "closes_on_or_before_2026-11-14T00:00Z_not_read": 0, "window_closing_at_2026-11-14T00:00Z_excluded": 0, "heldout_windows": 0, "no decision candle": 0, "traded_heldout": 0, "void_traded": 0}
     held = []
     for tkr in sorted(mk):
         m = mk[tkr]
@@ -133,8 +135,11 @@ def build(mk, cs, mids):
         c = m["close"]
         if c is None:
             g["no close time"] = g.get("no close time", 0) + 1; continue
-        if c < HELDOUT_FIRST:
-            g["closes_before_2026-11-14_not_read"] += 1; continue
+        if c <= HELDOUT_AFTER:
+            g["closes_on_or_before_2026-11-14T00:00Z_not_read"] += 1
+            if c == HELDOUT_AFTER:
+                g["window_closing_at_2026-11-14T00:00Z_excluded"] += 1
+            continue
         g["heldout_windows"] += 1
         res = m["result"]
         if res is None or str(res).strip() == "":
@@ -310,7 +315,7 @@ def heldout_read(marker, lists, cands, perp, r6_root=None, now=None, local_marke
     r6 = load_r6(r6_root) if r6_root else None
     log_run(run_log, now, len(held), "READ MADE, marker written: %s" % label(figures(held)).split(" (")[0].split(",")[0])
     return {"constants": {"card": "CFRTI_K_REGISTRATION.md at Desk A 3be6d090, sha256 35b8a1fc6a9f5268", "fee_line_followed": "fee 0.07 x p x (1 - p) unrounded, cash (sections 1 and 7)",
-                          "label_line_followed": "dated line 2026-11-13 17:04Z: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0; under 50 NOT_ENOUGH_DATA", "HELDOUT_FIRST": "2026-11-14T00:00:00Z", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "n_under_50": "NOT_ENOUGH_DATA, no marker, whatever the PF", "PASS": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)", "NO_CALL": "cash PF from 1.0 up to 1.3", "FAIL": "cash PF < 1.0 (then CLOSED FOR GOOD)", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
+                          "label_line_followed": "dated line 2026-11-13 17:04Z: PASS = cash PF 1.3 or better and a mean above 0; NO CALL = cash PF from 1.0 up to 1.3; FAIL = cash PF under 1.0; under 50 NOT_ENOUGH_DATA", "HELDOUT_AFTER": "2026-11-14T00:00:00Z (closes strictly after; Head 2026-11-14 00:10Z)", "HELDOUT_FIRST": "2026-11-14T00:00:01Z (the Cutoff constant)", "READ_DATE": "2026-11-20T00:00:00Z", "min_rows": MIN_ROWS, "n_under_50": "NOT_ENOUGH_DATA, no marker, whatever the PF", "PASS": "n >= 50, cash PF >= 1.3, mean > 0 (unrounded)", "NO_CALL": "cash PF from 1.0 up to 1.3", "FAIL": "cash PF < 1.0 (then CLOSED FOR GOOD)", "fee": "0.07 p (1 - p) unrounded", "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL, "vol": "sample sd of up to 10 one-minute log changes (>= 6) x sqrt(4/3)",
                           "haircut_seed": HAIRCUT_SEED}, "rules_primary_text": rules, "counts": g,
             "HELDOUT": group_report(held, r6), "ambiguities": AMBIGUITIES}
 
