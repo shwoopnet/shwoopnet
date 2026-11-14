@@ -1,0 +1,3522 @@
+{
+ "job": {
+  "job_id": "NC15_LISTS_A",
+  "registration": "kalshi-scalper/workers/NC15_CANDLE_HISTORY_REGISTRATION.md",
+  "purpose": "Settled markets (tickers and close times; a reader never reads a result) of NC15 series group A (KXSILVER15M, KXCOPPER15M, KXWTI15M, KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M) from before their listing to 2026-11-13T23:59Z, in 10 day close ranges, as input for the hourly candle jobs.",
+  "heldout": "Development history, ending 2026-11-13T23:59:00Z; nothing after it is asked. NC15DEPTH1's pooled scoring window opens 2026-11-19T00:00Z, after this job's end. Many other cards hold out dates inside the range these series cover (per HELDOUT_REGISTRY.md, Auditor B's reading), so the landed runs WILL hold prices and results of those cards' held-out windows: the landed runs go into HELDOUT_PULL_RUNS.md (Main, in the landing PR); a reader may open them only through heldout_guard_v2 and must apply its own card's cutoff. Held-out guard copy HELDOUT_PULL_RUNS.md sha256 974f271366673c38f1a326335ed69db465aa2e15a327672b12a1e0f28640c126.",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "min_close_ts",
+     "max_close_ts",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXSILVER15M",
+   "KXCOPPER15M",
+   "KXWTI15M",
+   "KXEURUSD15M",
+   "KXGBPUSD15M",
+   "KXUSDJPY15M"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 320,
+  "requests": [
+   {
+    "id": "settled_KXSILVER15M_01",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1780272000,
+     "max_close_ts": 1781135999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_02",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1781136000,
+     "max_close_ts": 1781999999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_03",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1782000000,
+     "max_close_ts": 1782863999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_04",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1782864000,
+     "max_close_ts": 1783727999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_05",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1783728000,
+     "max_close_ts": 1784591999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_06",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1784592000,
+     "max_close_ts": 1785455999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_07",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1785456000,
+     "max_close_ts": 1786319999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_08",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1786320000,
+     "max_close_ts": 1787183999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_09",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1787184000,
+     "max_close_ts": 1788047999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_10",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1788048000,
+     "max_close_ts": 1788911999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_11",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1788912000,
+     "max_close_ts": 1789775999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_12",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1789776000,
+     "max_close_ts": 1790639999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_13",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1790640000,
+     "max_close_ts": 1791503999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_14",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1791504000,
+     "max_close_ts": 1792367999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_15",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1792368000,
+     "max_close_ts": 1793231999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_16",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1793232000,
+     "max_close_ts": 1794095999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSILVER15M_17",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSILVER15M",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794614340,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_01",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1780272000,
+     "max_close_ts": 1781135999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_02",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1781136000,
+     "max_close_ts": 1781999999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_03",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1782000000,
+     "max_close_ts": 1782863999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_04",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1782864000,
+     "max_close_ts": 1783727999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_05",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1783728000,
+     "max_close_ts": 1784591999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_06",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1784592000,
+     "max_close_ts": 1785455999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_07",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1785456000,
+     "max_close_ts": 1786319999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_08",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1786320000,
+     "max_close_ts": 1787183999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_09",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1787184000,
+     "max_close_ts": 1788047999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_10",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1788048000,
+     "max_close_ts": 1788911999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_11",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1788912000,
+     "max_close_ts": 1789775999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_12",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1789776000,
+     "max_close_ts": 1790639999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_13",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1790640000,
+     "max_close_ts": 1791503999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_14",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1791504000,
+     "max_close_ts": 1792367999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_15",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1792368000,
+     "max_close_ts": 1793231999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_16",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1793232000,
+     "max_close_ts": 1794095999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXCOPPER15M_17",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCOPPER15M",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794614340,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_01",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1780272000,
+     "max_close_ts": 1781135999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_02",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1781136000,
+     "max_close_ts": 1781999999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_03",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1782000000,
+     "max_close_ts": 1782863999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_04",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1782864000,
+     "max_close_ts": 1783727999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_05",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1783728000,
+     "max_close_ts": 1784591999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_06",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1784592000,
+     "max_close_ts": 1785455999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_07",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1785456000,
+     "max_close_ts": 1786319999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_08",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1786320000,
+     "max_close_ts": 1787183999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_09",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1787184000,
+     "max_close_ts": 1788047999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_10",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1788048000,
+     "max_close_ts": 1788911999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_11",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1788912000,
+     "max_close_ts": 1789775999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_12",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1789776000,
+     "max_close_ts": 1790639999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_13",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1790640000,
+     "max_close_ts": 1791503999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_14",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1791504000,
+     "max_close_ts": 1792367999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_15",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1792368000,
+     "max_close_ts": 1793231999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_16",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1793232000,
+     "max_close_ts": 1794095999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXWTI15M_17",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXWTI15M",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794614340,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_01",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1780272000,
+     "max_close_ts": 1781135999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_02",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1781136000,
+     "max_close_ts": 1781999999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_03",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1782000000,
+     "max_close_ts": 1782863999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_04",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1782864000,
+     "max_close_ts": 1783727999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_05",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1783728000,
+     "max_close_ts": 1784591999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_06",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1784592000,
+     "max_close_ts": 1785455999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_07",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1785456000,
+     "max_close_ts": 1786319999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_08",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1786320000,
+     "max_close_ts": 1787183999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_09",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1787184000,
+     "max_close_ts": 1788047999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_10",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1788048000,
+     "max_close_ts": 1788911999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_11",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1788912000,
+     "max_close_ts": 1789775999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_12",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1789776000,
+     "max_close_ts": 1790639999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_13",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1790640000,
+     "max_close_ts": 1791503999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_14",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1791504000,
+     "max_close_ts": 1792367999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_15",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1792368000,
+     "max_close_ts": 1793231999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_16",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1793232000,
+     "max_close_ts": 1794095999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEURUSD15M_17",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEURUSD15M",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794614340,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_01",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1780272000,
+     "max_close_ts": 1781135999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_02",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1781136000,
+     "max_close_ts": 1781999999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_03",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1782000000,
+     "max_close_ts": 1782863999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_04",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1782864000,
+     "max_close_ts": 1783727999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_05",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1783728000,
+     "max_close_ts": 1784591999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_06",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1784592000,
+     "max_close_ts": 1785455999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_07",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1785456000,
+     "max_close_ts": 1786319999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_08",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1786320000,
+     "max_close_ts": 1787183999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_09",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1787184000,
+     "max_close_ts": 1788047999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_10",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1788048000,
+     "max_close_ts": 1788911999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_11",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1788912000,
+     "max_close_ts": 1789775999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_12",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1789776000,
+     "max_close_ts": 1790639999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_13",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1790640000,
+     "max_close_ts": 1791503999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_14",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1791504000,
+     "max_close_ts": 1792367999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_15",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1792368000,
+     "max_close_ts": 1793231999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_16",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1793232000,
+     "max_close_ts": 1794095999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXGBPUSD15M_17",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXGBPUSD15M",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794614340,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_01",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1780272000,
+     "max_close_ts": 1781135999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_02",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1781136000,
+     "max_close_ts": 1781999999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_03",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1782000000,
+     "max_close_ts": 1782863999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_04",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1782864000,
+     "max_close_ts": 1783727999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_05",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1783728000,
+     "max_close_ts": 1784591999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_06",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1784592000,
+     "max_close_ts": 1785455999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_07",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1785456000,
+     "max_close_ts": 1786319999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_08",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1786320000,
+     "max_close_ts": 1787183999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_09",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1787184000,
+     "max_close_ts": 1788047999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_10",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1788048000,
+     "max_close_ts": 1788911999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_11",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1788912000,
+     "max_close_ts": 1789775999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_12",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1789776000,
+     "max_close_ts": 1790639999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_13",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1790640000,
+     "max_close_ts": 1791503999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_14",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1791504000,
+     "max_close_ts": 1792367999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_15",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1792368000,
+     "max_close_ts": 1793231999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_16",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1793232000,
+     "max_close_ts": 1794095999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUSDJPY15M_17",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUSDJPY15M",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794614340,
+     "limit": 1000
+    },
+    "max_pages": 3
+   }
+  ],
+  "notes": "Group A of 2 (split by series so no file can page past 470 requests; the runner stops a run at 40 minutes). 6 series x 17 ranges of 10 days (from 2026-06-01T00:00:00Z). Pacing 5.0 s on the Head's order of Nov 14, 2026. max_requests is the page budget (102 requests x 3 pages = 306) plus 14 for 429 retries. Candles are NOT requested here.",
+  "owner": "DESK_A",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 5.0,
+  "status": "active",
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-14T0639Z",
+ "finished": "2026-11-14T0647Z",
+ "status": "complete",
+ "requests_sent": 102,
+ "bytes_stored": 58806551,
+ "rows": [
+  {
+   "index": 1,
+   "id": "settled_KXSILVER15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1781135999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638348360,
+   "t_recv_ms": 1794638348501,
+   "server_date": "Sat, 14 Nov 2026 06:39:08 GMT",
+   "file": "0001.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "settled_KXSILVER15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1781136000,
+    "max_close_ts": 1781999999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638353361,
+   "t_recv_ms": 1794638353404,
+   "server_date": "Sat, 14 Nov 2026 06:39:13 GMT",
+   "file": "0002.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "settled_KXSILVER15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1782000000,
+    "max_close_ts": 1782863999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638358361,
+   "t_recv_ms": 1794638358404,
+   "server_date": "Sat, 14 Nov 2026 06:39:18 GMT",
+   "file": "0003.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "settled_KXSILVER15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1782864000,
+    "max_close_ts": 1783727999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638363361,
+   "t_recv_ms": 1794638363395,
+   "server_date": "Sat, 14 Nov 2026 06:39:23 GMT",
+   "file": "0004.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "settled_KXSILVER15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1783728000,
+    "max_close_ts": 1784591999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638368361,
+   "t_recv_ms": 1794638368418,
+   "server_date": "Sat, 14 Nov 2026 06:39:28 GMT",
+   "file": "0005.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "settled_KXSILVER15M_06",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1784592000,
+    "max_close_ts": 1785455999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638373361,
+   "t_recv_ms": 1794638373465,
+   "server_date": "Sat, 14 Nov 2026 06:39:33 GMT",
+   "file": "0006.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "settled_KXSILVER15M_07",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1785456000,
+    "max_close_ts": 1786319999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638378361,
+   "t_recv_ms": 1794638378518,
+   "server_date": "Sat, 14 Nov 2026 06:39:38 GMT",
+   "file": "0007.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "settled_KXSILVER15M_08",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1786320000,
+    "max_close_ts": 1787183999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638383361,
+   "t_recv_ms": 1794638383402,
+   "server_date": "Sat, 14 Nov 2026 06:39:43 GMT",
+   "file": "0008.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "settled_KXSILVER15M_09",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1787184000,
+    "max_close_ts": 1788047999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638388361,
+   "t_recv_ms": 1794638388397,
+   "server_date": "Sat, 14 Nov 2026 06:39:48 GMT",
+   "file": "0009.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "settled_KXSILVER15M_10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1788048000,
+    "max_close_ts": 1788911999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 447734,
+   "t_send_ms": 1794638393362,
+   "t_recv_ms": 1794638393419,
+   "server_date": "Sat, 14 Nov 2026 06:39:53 GMT",
+   "file": "0010.json.gz",
+   "sha256": "d46ed40c5e6cff00b8cb65c9a37f05e20fb54a2b4e6819606656331d26019ced",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "settled_KXSILVER15M_11",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1788912000,
+    "max_close_ts": 1789775999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1811309,
+   "t_send_ms": 1794638398362,
+   "t_recv_ms": 1794638398440,
+   "server_date": "Sat, 14 Nov 2026 06:39:58 GMT",
+   "file": "0011.json.gz",
+   "sha256": "c6f59d2fd9cc65b2946835dd1f88a3967e1b281310d360fcdb12887f7524395a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "settled_KXSILVER15M_12",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1789776000,
+    "max_close_ts": 1790639999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1374934,
+   "t_send_ms": 1794638403362,
+   "t_recv_ms": 1794638403432,
+   "server_date": "Sat, 14 Nov 2026 06:40:03 GMT",
+   "file": "0012.json.gz",
+   "sha256": "b1901f95abf95f89346404ec85b0cc89a6ddac9c79411ed630da273dde1058d4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "settled_KXSILVER15M_13",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1790640000,
+    "max_close_ts": 1791503999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1683392,
+   "t_send_ms": 1794638408362,
+   "t_recv_ms": 1794638408440,
+   "server_date": "Sat, 14 Nov 2026 06:40:08 GMT",
+   "file": "0013.json.gz",
+   "sha256": "ab229ad05e9e729148c9342e2890b6ee9bdcb194b374d1ad7697e852b3f74172",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "settled_KXSILVER15M_14",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1791504000,
+    "max_close_ts": 1792367999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1247216,
+   "t_send_ms": 1794638413362,
+   "t_recv_ms": 1794638413500,
+   "server_date": "Sat, 14 Nov 2026 06:40:13 GMT",
+   "file": "0014.json.gz",
+   "sha256": "6ff8c22853560cc8ff0d1ddd2749e814022647b63d9d604fe9ec6db0a98cc34a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "settled_KXSILVER15M_15",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1792368000,
+    "max_close_ts": 1793231999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1666162,
+   "t_send_ms": 1794638418362,
+   "t_recv_ms": 1794638418441,
+   "server_date": "Sat, 14 Nov 2026 06:40:18 GMT",
+   "file": "0015.json.gz",
+   "sha256": "9e37ace7fb055bddd28baab3fb2d62739a12cd545ee4a93ee1689bc725aa8284",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "settled_KXSILVER15M_16",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1793232000,
+    "max_close_ts": 1794095999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1418719,
+   "t_send_ms": 1794638423362,
+   "t_recv_ms": 1794638423449,
+   "server_date": "Sat, 14 Nov 2026 06:40:23 GMT",
+   "file": "0016.json.gz",
+   "sha256": "905a19247f3a03080a4ccf7721dd5874cc02d44e279f20fe0ed6675e7971b8e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "settled_KXSILVER15M_17",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794614340,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1034402,
+   "t_send_ms": 1794638428362,
+   "t_recv_ms": 1794638428445,
+   "server_date": "Sat, 14 Nov 2026 06:40:28 GMT",
+   "file": "0017.json.gz",
+   "sha256": "f97ea44b623808da9f027f7f7efdc9144e7eb5198e2f7e41a8884fd41a3c20b6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "settled_KXCOPPER15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1781135999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638433362,
+   "t_recv_ms": 1794638433464,
+   "server_date": "Sat, 14 Nov 2026 06:40:33 GMT",
+   "file": "0018.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "settled_KXCOPPER15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1781136000,
+    "max_close_ts": 1781999999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638438363,
+   "t_recv_ms": 1794638438400,
+   "server_date": "Sat, 14 Nov 2026 06:40:38 GMT",
+   "file": "0019.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "settled_KXCOPPER15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1782000000,
+    "max_close_ts": 1782863999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638443363,
+   "t_recv_ms": 1794638443426,
+   "server_date": "Sat, 14 Nov 2026 06:40:43 GMT",
+   "file": "0020.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "settled_KXCOPPER15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1782864000,
+    "max_close_ts": 1783727999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638448363,
+   "t_recv_ms": 1794638448402,
+   "server_date": "Sat, 14 Nov 2026 06:40:48 GMT",
+   "file": "0021.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "settled_KXCOPPER15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1783728000,
+    "max_close_ts": 1784591999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638453363,
+   "t_recv_ms": 1794638453404,
+   "server_date": "Sat, 14 Nov 2026 06:40:53 GMT",
+   "file": "0022.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "settled_KXCOPPER15M_06",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1784592000,
+    "max_close_ts": 1785455999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638458363,
+   "t_recv_ms": 1794638458401,
+   "server_date": "Sat, 14 Nov 2026 06:40:58 GMT",
+   "file": "0023.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "settled_KXCOPPER15M_07",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1785456000,
+    "max_close_ts": 1786319999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638463363,
+   "t_recv_ms": 1794638463487,
+   "server_date": "Sat, 14 Nov 2026 06:41:03 GMT",
+   "file": "0024.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "settled_KXCOPPER15M_08",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1786320000,
+    "max_close_ts": 1787183999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638468363,
+   "t_recv_ms": 1794638468424,
+   "server_date": "Sat, 14 Nov 2026 06:41:08 GMT",
+   "file": "0025.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 26,
+   "id": "settled_KXCOPPER15M_09",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1787184000,
+    "max_close_ts": 1788047999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638473363,
+   "t_recv_ms": 1794638473465,
+   "server_date": "Sat, 14 Nov 2026 06:41:13 GMT",
+   "file": "0026.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 27,
+   "id": "settled_KXCOPPER15M_10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1788048000,
+    "max_close_ts": 1788911999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 427776,
+   "t_send_ms": 1794638478363,
+   "t_recv_ms": 1794638478480,
+   "server_date": "Sat, 14 Nov 2026 06:41:18 GMT",
+   "file": "0027.json.gz",
+   "sha256": "23fe269924fb8fe5d96badd94002bfd54264c34b9adabebde64356b957c46490",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 28,
+   "id": "settled_KXCOPPER15M_11",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1788912000,
+    "max_close_ts": 1789775999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1730777,
+   "t_send_ms": 1794638483363,
+   "t_recv_ms": 1794638483444,
+   "server_date": "Sat, 14 Nov 2026 06:41:23 GMT",
+   "file": "0028.json.gz",
+   "sha256": "d853860235096095179c5bf1055ac3a0204ae84385b861bc240493da9c00498b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 29,
+   "id": "settled_KXCOPPER15M_12",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1789776000,
+    "max_close_ts": 1790639999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1313889,
+   "t_send_ms": 1794638488364,
+   "t_recv_ms": 1794638488428,
+   "server_date": "Sat, 14 Nov 2026 06:41:28 GMT",
+   "file": "0029.json.gz",
+   "sha256": "e7edcf6fd62acef59dd69d370676abc357b63ab6bb1985635a3349e5589346c7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 30,
+   "id": "settled_KXCOPPER15M_13",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1790640000,
+    "max_close_ts": 1791503999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1608364,
+   "t_send_ms": 1794638493364,
+   "t_recv_ms": 1794638493444,
+   "server_date": "Sat, 14 Nov 2026 06:41:33 GMT",
+   "file": "0030.json.gz",
+   "sha256": "44a414e5fae64ff6d8bd7b73543431518dbd2ab20a70b239e01b23b099cf3d12",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 31,
+   "id": "settled_KXCOPPER15M_14",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1791504000,
+    "max_close_ts": 1792367999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1188214,
+   "t_send_ms": 1794638498364,
+   "t_recv_ms": 1794638498501,
+   "server_date": "Sat, 14 Nov 2026 06:41:38 GMT",
+   "file": "0031.json.gz",
+   "sha256": "06fa55618f7957eb57c97c26eeb1fb7f15a8a635efb6da511e4586e1aaa77b20",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 32,
+   "id": "settled_KXCOPPER15M_15",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1792368000,
+    "max_close_ts": 1793231999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1588591,
+   "t_send_ms": 1794638503364,
+   "t_recv_ms": 1794638503442,
+   "server_date": "Sat, 14 Nov 2026 06:41:43 GMT",
+   "file": "0032.json.gz",
+   "sha256": "5223ced4096172df5c085761c2712279fd720bd42e6928f95831e8dc356b3e94",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 33,
+   "id": "settled_KXCOPPER15M_16",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1793232000,
+    "max_close_ts": 1794095999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1351714,
+   "t_send_ms": 1794638508364,
+   "t_recv_ms": 1794638508493,
+   "server_date": "Sat, 14 Nov 2026 06:41:48 GMT",
+   "file": "0033.json.gz",
+   "sha256": "0f4478264b3e6a697257fc2f28244a1232b7d9a61e2b82d708f3ca9c6b1e4f25",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 34,
+   "id": "settled_KXCOPPER15M_17",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794614340,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 983548,
+   "t_send_ms": 1794638513364,
+   "t_recv_ms": 1794638513464,
+   "server_date": "Sat, 14 Nov 2026 06:41:53 GMT",
+   "file": "0034.json.gz",
+   "sha256": "d26fdea7ccbe8a2bd57d0e532454e167bafb1f0b9da000de0c79f740307cd234",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 35,
+   "id": "settled_KXWTI15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1781135999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638518364,
+   "t_recv_ms": 1794638518399,
+   "server_date": "Sat, 14 Nov 2026 06:41:58 GMT",
+   "file": "0035.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 36,
+   "id": "settled_KXWTI15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1781136000,
+    "max_close_ts": 1781999999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638523364,
+   "t_recv_ms": 1794638523401,
+   "server_date": "Sat, 14 Nov 2026 06:42:03 GMT",
+   "file": "0036.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 37,
+   "id": "settled_KXWTI15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1782000000,
+    "max_close_ts": 1782863999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638528364,
+   "t_recv_ms": 1794638528402,
+   "server_date": "Sat, 14 Nov 2026 06:42:08 GMT",
+   "file": "0037.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 38,
+   "id": "settled_KXWTI15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1782864000,
+    "max_close_ts": 1783727999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638533365,
+   "t_recv_ms": 1794638533399,
+   "server_date": "Sat, 14 Nov 2026 06:42:13 GMT",
+   "file": "0038.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 39,
+   "id": "settled_KXWTI15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1783728000,
+    "max_close_ts": 1784591999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638538365,
+   "t_recv_ms": 1794638538401,
+   "server_date": "Sat, 14 Nov 2026 06:42:18 GMT",
+   "file": "0039.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 40,
+   "id": "settled_KXWTI15M_06",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1784592000,
+    "max_close_ts": 1785455999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638543365,
+   "t_recv_ms": 1794638543538,
+   "server_date": "Sat, 14 Nov 2026 06:42:23 GMT",
+   "file": "0040.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 41,
+   "id": "settled_KXWTI15M_07",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1785456000,
+    "max_close_ts": 1786319999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638548365,
+   "t_recv_ms": 1794638548423,
+   "server_date": "Sat, 14 Nov 2026 06:42:28 GMT",
+   "file": "0041.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 42,
+   "id": "settled_KXWTI15M_08",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1786320000,
+    "max_close_ts": 1787183999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638553365,
+   "t_recv_ms": 1794638553399,
+   "server_date": "Sat, 14 Nov 2026 06:42:33 GMT",
+   "file": "0042.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 43,
+   "id": "settled_KXWTI15M_09",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1787184000,
+    "max_close_ts": 1788047999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638558365,
+   "t_recv_ms": 1794638558423,
+   "server_date": "Sat, 14 Nov 2026 06:42:38 GMT",
+   "file": "0043.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 44,
+   "id": "settled_KXWTI15M_10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1788048000,
+    "max_close_ts": 1788911999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 446609,
+   "t_send_ms": 1794638563365,
+   "t_recv_ms": 1794638563414,
+   "server_date": "Sat, 14 Nov 2026 06:42:43 GMT",
+   "file": "0044.json.gz",
+   "sha256": "e7051d86eb3b18120f9c00ea68b0761a045fc04727e25cd9acb6c7016c476c09",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 45,
+   "id": "settled_KXWTI15M_11",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1788912000,
+    "max_close_ts": 1789775999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1807025,
+   "t_send_ms": 1794638568365,
+   "t_recv_ms": 1794638568458,
+   "server_date": "Sat, 14 Nov 2026 06:42:48 GMT",
+   "file": "0045.json.gz",
+   "sha256": "ac4aceb0df25786463883f51d3cfb8dc081d527623c06b2750c1aa00d27ff3da",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 46,
+   "id": "settled_KXWTI15M_12",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1789776000,
+    "max_close_ts": 1790639999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1434486,
+   "t_send_ms": 1794638573365,
+   "t_recv_ms": 1794638573465,
+   "server_date": "Sat, 14 Nov 2026 06:42:53 GMT",
+   "file": "0046.json.gz",
+   "sha256": "ca1f6350ce6dbf85d88ece9797069435420f306e6aa97ceac1fdff0f302374d9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 47,
+   "id": "settled_KXWTI15M_13",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1790640000,
+    "max_close_ts": 1791503999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1804836,
+   "t_send_ms": 1794638578366,
+   "t_recv_ms": 1794638578458,
+   "server_date": "Sat, 14 Nov 2026 06:42:58 GMT",
+   "file": "0047.json.gz",
+   "sha256": "5b0b2dd96e3de63c1dbc5e3921f4c72f5ba9a49b4da1d56b4cdd2ff4e47cb4c8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 48,
+   "id": "settled_KXWTI15M_14",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1791504000,
+    "max_close_ts": 1792367999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1423345,
+   "t_send_ms": 1794638583366,
+   "t_recv_ms": 1794638583498,
+   "server_date": "Sat, 14 Nov 2026 06:43:03 GMT",
+   "file": "0048.json.gz",
+   "sha256": "3bb1c48425d978c4607b299cadd659a46efa15cc3bb25a59b77a086eb4d9d2e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 49,
+   "id": "settled_KXWTI15M_15",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1792368000,
+    "max_close_ts": 1793231999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1811026,
+   "t_send_ms": 1794638588366,
+   "t_recv_ms": 1794638588561,
+   "server_date": "Sat, 14 Nov 2026 06:43:08 GMT",
+   "file": "0049.json.gz",
+   "sha256": "ef551de5d56aa5444bcb10ce3cf2bdcddf444e1c6eb16f8933dbb162a34143ad",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 50,
+   "id": "settled_KXWTI15M_16",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1793232000,
+    "max_close_ts": 1794095999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1602937,
+   "t_send_ms": 1794638593366,
+   "t_recv_ms": 1794638593446,
+   "server_date": "Sat, 14 Nov 2026 06:43:13 GMT",
+   "file": "0050.json.gz",
+   "sha256": "70351a335d1a6a14204f51f3040601d6d2da38b415e29c8bad1f8247f3208f11",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 51,
+   "id": "settled_KXWTI15M_17",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794614340,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1095923,
+   "t_send_ms": 1794638598366,
+   "t_recv_ms": 1794638598444,
+   "server_date": "Sat, 14 Nov 2026 06:43:18 GMT",
+   "file": "0051.json.gz",
+   "sha256": "53f0cf15d394a7b86c5447b2794025e874809e8ecd0becc9c423f55d8802301a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 52,
+   "id": "settled_KXEURUSD15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1781135999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638603366,
+   "t_recv_ms": 1794638603423,
+   "server_date": "Sat, 14 Nov 2026 06:43:23 GMT",
+   "file": "0052.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 53,
+   "id": "settled_KXEURUSD15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1781136000,
+    "max_close_ts": 1781999999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638608366,
+   "t_recv_ms": 1794638608404,
+   "server_date": "Sat, 14 Nov 2026 06:43:28 GMT",
+   "file": "0053.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 54,
+   "id": "settled_KXEURUSD15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1782000000,
+    "max_close_ts": 1782863999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638613366,
+   "t_recv_ms": 1794638613410,
+   "server_date": "Sat, 14 Nov 2026 06:43:33 GMT",
+   "file": "0054.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 55,
+   "id": "settled_KXEURUSD15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1782864000,
+    "max_close_ts": 1783727999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638618367,
+   "t_recv_ms": 1794638618401,
+   "server_date": "Sat, 14 Nov 2026 06:43:38 GMT",
+   "file": "0055.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 56,
+   "id": "settled_KXEURUSD15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1783728000,
+    "max_close_ts": 1784591999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638623367,
+   "t_recv_ms": 1794638623405,
+   "server_date": "Sat, 14 Nov 2026 06:43:43 GMT",
+   "file": "0056.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 57,
+   "id": "settled_KXEURUSD15M_06",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1784592000,
+    "max_close_ts": 1785455999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638628367,
+   "t_recv_ms": 1794638628404,
+   "server_date": "Sat, 14 Nov 2026 06:43:48 GMT",
+   "file": "0057.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 58,
+   "id": "settled_KXEURUSD15M_07",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1785456000,
+    "max_close_ts": 1786319999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638633367,
+   "t_recv_ms": 1794638633406,
+   "server_date": "Sat, 14 Nov 2026 06:43:53 GMT",
+   "file": "0058.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 59,
+   "id": "settled_KXEURUSD15M_08",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1786320000,
+    "max_close_ts": 1787183999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638638367,
+   "t_recv_ms": 1794638638434,
+   "server_date": "Sat, 14 Nov 2026 06:43:58 GMT",
+   "file": "0059.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 60,
+   "id": "settled_KXEURUSD15M_09",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1787184000,
+    "max_close_ts": 1788047999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638643367,
+   "t_recv_ms": 1794638643471,
+   "server_date": "Sat, 14 Nov 2026 06:44:03 GMT",
+   "file": "0060.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 61,
+   "id": "settled_KXEURUSD15M_10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1788048000,
+    "max_close_ts": 1788911999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638648367,
+   "t_recv_ms": 1794638648475,
+   "server_date": "Sat, 14 Nov 2026 06:44:08 GMT",
+   "file": "0061.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 62,
+   "id": "settled_KXEURUSD15M_11",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1788912000,
+    "max_close_ts": 1789775999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638653367,
+   "t_recv_ms": 1794638653426,
+   "server_date": "Sat, 14 Nov 2026 06:44:13 GMT",
+   "file": "0062.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 63,
+   "id": "settled_KXEURUSD15M_12",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1789776000,
+    "max_close_ts": 1790639999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 726702,
+   "t_send_ms": 1794638658367,
+   "t_recv_ms": 1794638658499,
+   "server_date": "Sat, 14 Nov 2026 06:44:18 GMT",
+   "file": "0063.json.gz",
+   "sha256": "620d1b96a066c2f827b7e35bf729b7cb1c412b27c7542caf61feef6248a9d4a0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 64,
+   "id": "settled_KXEURUSD15M_13",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1790640000,
+    "max_close_ts": 1791503999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1911049,
+   "t_send_ms": 1794638663368,
+   "t_recv_ms": 1794638663484,
+   "server_date": "Sat, 14 Nov 2026 06:44:23 GMT",
+   "file": "0064.json.gz",
+   "sha256": "2779adc6b66185346bcf5e7fe653cc5ab8ab77e8ebf3b5f799601e76ae0f21b7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 65,
+   "id": "settled_KXEURUSD15M_14",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1791504000,
+    "max_close_ts": 1792367999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1437659,
+   "t_send_ms": 1794638668368,
+   "t_recv_ms": 1794638668660,
+   "server_date": "Sat, 14 Nov 2026 06:44:28 GMT",
+   "file": "0065.json.gz",
+   "sha256": "40e06b911fc2a616c4ff9d2507dff315b8f167fb054783d5db4af47bcd61a181",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 66,
+   "id": "settled_KXEURUSD15M_15",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1792368000,
+    "max_close_ts": 1793231999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1928235,
+   "t_send_ms": 1794638673368,
+   "t_recv_ms": 1794638673643,
+   "server_date": "Sat, 14 Nov 2026 06:44:33 GMT",
+   "file": "0066.json.gz",
+   "sha256": "2da5ef52486d6dcb38a4d6951332062e49652c557cdb98dcc6c15f3141131313",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 67,
+   "id": "settled_KXEURUSD15M_16",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1793232000,
+    "max_close_ts": 1794095999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1633659,
+   "t_send_ms": 1794638678368,
+   "t_recv_ms": 1794638678563,
+   "server_date": "Sat, 14 Nov 2026 06:44:38 GMT",
+   "file": "0067.json.gz",
+   "sha256": "eae023bc92e8c9311159ed5c56cd6920711d9c05efd549019fb337f59b0634d1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 68,
+   "id": "settled_KXEURUSD15M_17",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794614340,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1198781,
+   "t_send_ms": 1794638683368,
+   "t_recv_ms": 1794638683593,
+   "server_date": "Sat, 14 Nov 2026 06:44:43 GMT",
+   "file": "0068.json.gz",
+   "sha256": "c1b25bb8cad0d5d8477b80a3e1823ba024a86bdefb9f85cdfc1d4ce2d9a1222f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 69,
+   "id": "settled_KXGBPUSD15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1781135999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638688368,
+   "t_recv_ms": 1794638688479,
+   "server_date": "Sat, 14 Nov 2026 06:44:48 GMT",
+   "file": "0069.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 70,
+   "id": "settled_KXGBPUSD15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1781136000,
+    "max_close_ts": 1781999999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638693368,
+   "t_recv_ms": 1794638693485,
+   "server_date": "Sat, 14 Nov 2026 06:44:53 GMT",
+   "file": "0070.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 71,
+   "id": "settled_KXGBPUSD15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1782000000,
+    "max_close_ts": 1782863999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638698368,
+   "t_recv_ms": 1794638698528,
+   "server_date": "Sat, 14 Nov 2026 06:44:58 GMT",
+   "file": "0071.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 72,
+   "id": "settled_KXGBPUSD15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1782864000,
+    "max_close_ts": 1783727999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638703368,
+   "t_recv_ms": 1794638703456,
+   "server_date": "Sat, 14 Nov 2026 06:45:03 GMT",
+   "file": "0072.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 73,
+   "id": "settled_KXGBPUSD15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1783728000,
+    "max_close_ts": 1784591999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638708369,
+   "t_recv_ms": 1794638708490,
+   "server_date": "Sat, 14 Nov 2026 06:45:08 GMT",
+   "file": "0073.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 74,
+   "id": "settled_KXGBPUSD15M_06",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1784592000,
+    "max_close_ts": 1785455999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638713369,
+   "t_recv_ms": 1794638713526,
+   "server_date": "Sat, 14 Nov 2026 06:45:13 GMT",
+   "file": "0074.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 75,
+   "id": "settled_KXGBPUSD15M_07",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1785456000,
+    "max_close_ts": 1786319999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638718369,
+   "t_recv_ms": 1794638718480,
+   "server_date": "Sat, 14 Nov 2026 06:45:18 GMT",
+   "file": "0075.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 76,
+   "id": "settled_KXGBPUSD15M_08",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1786320000,
+    "max_close_ts": 1787183999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638723369,
+   "t_recv_ms": 1794638723457,
+   "server_date": "Sat, 14 Nov 2026 06:45:23 GMT",
+   "file": "0076.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 77,
+   "id": "settled_KXGBPUSD15M_09",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1787184000,
+    "max_close_ts": 1788047999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638728369,
+   "t_recv_ms": 1794638728458,
+   "server_date": "Sat, 14 Nov 2026 06:45:28 GMT",
+   "file": "0077.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 78,
+   "id": "settled_KXGBPUSD15M_10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1788048000,
+    "max_close_ts": 1788911999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638733369,
+   "t_recv_ms": 1794638733472,
+   "server_date": "Sat, 14 Nov 2026 06:45:33 GMT",
+   "file": "0078.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 79,
+   "id": "settled_KXGBPUSD15M_11",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1788912000,
+    "max_close_ts": 1789775999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638738369,
+   "t_recv_ms": 1794638738406,
+   "server_date": "Sat, 14 Nov 2026 06:45:38 GMT",
+   "file": "0079.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 80,
+   "id": "settled_KXGBPUSD15M_12",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1789776000,
+    "max_close_ts": 1790639999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 726694,
+   "t_send_ms": 1794638743369,
+   "t_recv_ms": 1794638743429,
+   "server_date": "Sat, 14 Nov 2026 06:45:43 GMT",
+   "file": "0080.json.gz",
+   "sha256": "162a7dec17439b2547b12d4a96ab2b57218c664d873a4441cd994a115b67df0a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 81,
+   "id": "settled_KXGBPUSD15M_13",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1790640000,
+    "max_close_ts": 1791503999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1911366,
+   "t_send_ms": 1794638748369,
+   "t_recv_ms": 1794638748505,
+   "server_date": "Sat, 14 Nov 2026 06:45:48 GMT",
+   "file": "0081.json.gz",
+   "sha256": "91882a510c6185a495a4d5aa40e90648238574ed77fd9df750cdfdbd0726025b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 82,
+   "id": "settled_KXGBPUSD15M_14",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1791504000,
+    "max_close_ts": 1792367999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1437298,
+   "t_send_ms": 1794638753370,
+   "t_recv_ms": 1794638753574,
+   "server_date": "Sat, 14 Nov 2026 06:45:53 GMT",
+   "file": "0082.json.gz",
+   "sha256": "c0a3c805882a9f2a58af157dfefed3cebb7dba427446b2a50f0a04729b67a86f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 83,
+   "id": "settled_KXGBPUSD15M_15",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1792368000,
+    "max_close_ts": 1793231999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1926421,
+   "t_send_ms": 1794638758370,
+   "t_recv_ms": 1794638758455,
+   "server_date": "Sat, 14 Nov 2026 06:45:58 GMT",
+   "file": "0083.json.gz",
+   "sha256": "a840f018674ebe65be919e986b6425149b28bbaa21479f4e78b2f4c5ce52c1aa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 84,
+   "id": "settled_KXGBPUSD15M_16",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1793232000,
+    "max_close_ts": 1794095999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1633002,
+   "t_send_ms": 1794638763370,
+   "t_recv_ms": 1794638763518,
+   "server_date": "Sat, 14 Nov 2026 06:46:03 GMT",
+   "file": "0084.json.gz",
+   "sha256": "4cac98735078b671220fcfa3bfc1fba64b5c01b79e2638367180c8d38ca33c85",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 85,
+   "id": "settled_KXGBPUSD15M_17",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794614340,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1198132,
+   "t_send_ms": 1794638768370,
+   "t_recv_ms": 1794638768457,
+   "server_date": "Sat, 14 Nov 2026 06:46:08 GMT",
+   "file": "0085.json.gz",
+   "sha256": "e9ad6c260d4a4c805bb11ce268a860e03ef5e7ad79f8e30f5c6afb9df1f9c925",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 86,
+   "id": "settled_KXUSDJPY15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1781135999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638773370,
+   "t_recv_ms": 1794638773406,
+   "server_date": "Sat, 14 Nov 2026 06:46:13 GMT",
+   "file": "0086.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 87,
+   "id": "settled_KXUSDJPY15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1781136000,
+    "max_close_ts": 1781999999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638778370,
+   "t_recv_ms": 1794638778413,
+   "server_date": "Sat, 14 Nov 2026 06:46:18 GMT",
+   "file": "0087.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 88,
+   "id": "settled_KXUSDJPY15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1782000000,
+    "max_close_ts": 1782863999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638783370,
+   "t_recv_ms": 1794638783407,
+   "server_date": "Sat, 14 Nov 2026 06:46:23 GMT",
+   "file": "0088.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 89,
+   "id": "settled_KXUSDJPY15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1782864000,
+    "max_close_ts": 1783727999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638788370,
+   "t_recv_ms": 1794638788405,
+   "server_date": "Sat, 14 Nov 2026 06:46:28 GMT",
+   "file": "0089.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 90,
+   "id": "settled_KXUSDJPY15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1783728000,
+    "max_close_ts": 1784591999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638793370,
+   "t_recv_ms": 1794638793407,
+   "server_date": "Sat, 14 Nov 2026 06:46:33 GMT",
+   "file": "0090.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 91,
+   "id": "settled_KXUSDJPY15M_06",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1784592000,
+    "max_close_ts": 1785455999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638798371,
+   "t_recv_ms": 1794638798410,
+   "server_date": "Sat, 14 Nov 2026 06:46:38 GMT",
+   "file": "0091.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 92,
+   "id": "settled_KXUSDJPY15M_07",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1785456000,
+    "max_close_ts": 1786319999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638803371,
+   "t_recv_ms": 1794638803404,
+   "server_date": "Sat, 14 Nov 2026 06:46:43 GMT",
+   "file": "0092.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 93,
+   "id": "settled_KXUSDJPY15M_08",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1786320000,
+    "max_close_ts": 1787183999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638808371,
+   "t_recv_ms": 1794638808405,
+   "server_date": "Sat, 14 Nov 2026 06:46:48 GMT",
+   "file": "0093.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 94,
+   "id": "settled_KXUSDJPY15M_09",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1787184000,
+    "max_close_ts": 1788047999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638813371,
+   "t_recv_ms": 1794638813409,
+   "server_date": "Sat, 14 Nov 2026 06:46:53 GMT",
+   "file": "0094.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 95,
+   "id": "settled_KXUSDJPY15M_10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1788048000,
+    "max_close_ts": 1788911999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638818371,
+   "t_recv_ms": 1794638818404,
+   "server_date": "Sat, 14 Nov 2026 06:46:58 GMT",
+   "file": "0095.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 96,
+   "id": "settled_KXUSDJPY15M_11",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1788912000,
+    "max_close_ts": 1789775999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794638823371,
+   "t_recv_ms": 1794638823413,
+   "server_date": "Sat, 14 Nov 2026 06:47:03 GMT",
+   "file": "0096.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 97,
+   "id": "settled_KXUSDJPY15M_12",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1789776000,
+    "max_close_ts": 1790639999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 726709,
+   "t_send_ms": 1794638828371,
+   "t_recv_ms": 1794638828431,
+   "server_date": "Sat, 14 Nov 2026 06:47:08 GMT",
+   "file": "0097.json.gz",
+   "sha256": "6d78ec5b210f0527f2a2edffbaa64468b2fbde804b281ae63758819b8e908360",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 98,
+   "id": "settled_KXUSDJPY15M_13",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1790640000,
+    "max_close_ts": 1791503999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1911137,
+   "t_send_ms": 1794638833371,
+   "t_recv_ms": 1794638833593,
+   "server_date": "Sat, 14 Nov 2026 06:47:13 GMT",
+   "file": "0098.json.gz",
+   "sha256": "8960304335dcf0f560f0776503b1ce0afdd5d7c3b7a206f3e91e95d241429e90",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 99,
+   "id": "settled_KXUSDJPY15M_14",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1791504000,
+    "max_close_ts": 1792367999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1437127,
+   "t_send_ms": 1794638838371,
+   "t_recv_ms": 1794638838464,
+   "server_date": "Sat, 14 Nov 2026 06:47:18 GMT",
+   "file": "0099.json.gz",
+   "sha256": "86f8747fa2411839790ccbb313e40b19b0ad80dd10f2eb4906ef8e17a8f1cd94",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 100,
+   "id": "settled_KXUSDJPY15M_15",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1792368000,
+    "max_close_ts": 1793231999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1926816,
+   "t_send_ms": 1794638843372,
+   "t_recv_ms": 1794638843449,
+   "server_date": "Sat, 14 Nov 2026 06:47:23 GMT",
+   "file": "0100.json.gz",
+   "sha256": "b4338811bbc5e22b8758f29b9bddd9e362d79cdf31a694b22acf158fd7f2d165",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 101,
+   "id": "settled_KXUSDJPY15M_16",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1793232000,
+    "max_close_ts": 1794095999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1633257,
+   "t_send_ms": 1794638848372,
+   "t_recv_ms": 1794638848442,
+   "server_date": "Sat, 14 Nov 2026 06:47:28 GMT",
+   "file": "0101.json.gz",
+   "sha256": "1f46858c654a85d971a301b6f435b0a07daf69645162f63f96e79d8d0036e76c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 102,
+   "id": "settled_KXUSDJPY15M_17",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794614340,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1197959,
+   "t_send_ms": 1794638853372,
+   "t_recv_ms": 1794638853516,
+   "server_date": "Sat, 14 Nov 2026 06:47:33 GMT",
+   "file": "0102.json.gz",
+   "sha256": "ea5eb2d8e620372fdfe435826d7c0a93fed310e44c20424b78d2ac08808c2ecd",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
