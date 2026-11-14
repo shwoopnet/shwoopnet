@@ -168,3 +168,13 @@ Both passes were already running when these rulings arrived. Each was given the 
 **Dated line (Nov 14, 2026, the Head of R&D's ruling): pass B's breach.** Pass B fetched the 11 allowed public-domain statement pages with curl, 11 GETs, once. It opened no other page. Its bodies and script stayed in scratch only and were never committed. The fault was in this desk's instruction, and the Head shares it. The pass is kept. From now on: no curl, script or loop on the Board's site, for any worker; the web reader only. The settled table is `fomctext/STATEMENT_WORD_TABLE.csv`, with its note beside it.
 
 **Process record (c), resolved:** the History Miner's run log (`claude/history-miner` 2f5cd750) shows the `events` command ran at 01:26:08Z, after Auditor B's CLEAN on aff0320a at 01:25:48Z.
+
+## Clarification 7 (Nov 14, 2026, 01:31Z, the Head of R&D's ruling, before any candle is pulled or counted)
+
+- **The candle job stays exactly as frozen.** It is `jobs/FOMCTEXT_CANDLES.json`, 407 requests, da62610b, and it still covers the 12 NOT STATEMENT-TYPE strikes. Fetching them adds no bars, and it keeps the reader's universe check whole.
+- **The reader is amended before any count.** The kill line uses statement-type strikes with feature yes (28). The placebo is statement-type strikes with feature no (367 = 395 - 28). The 12 NOT STATEMENT-TYPE strikes are excluded from both, and printed as their own line, "not statement-type, n = 12", outside the kill line and the placebo.
+- **Why.** A statement cannot inform a greeting or a non-member's name. Counting them in the placebo would dilute it with strikes the mechanism cannot reach.
+- **Who and when.** The History Miner owns the reader and makes the amendment, reading the table's `type` column. Auditor B audits the amendment together with the table and the job.
+- **Nothing runs until both hold:**
+  1. Auditor B is CLEAN on the table, the job and the amendment;
+  2. the owner says yes under the freeze.
