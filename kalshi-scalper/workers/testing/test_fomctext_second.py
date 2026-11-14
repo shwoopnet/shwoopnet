@@ -126,6 +126,38 @@ with tempfile.TemporaryDirectory() as d:
     calls = []; sv = f.check_hashes; f.check_hashes = lambda want=None: calls.append(1)
     try: f.run(T, [L], [C]); f.run(T, [L], [C], hash_check=False); assert calls == [1]
     finally: f.check_hashes = sv
+# --- ADDENDUM: the unit rule (Head, 02:28Z) ---
+node = lambda **kw: dict(kw)
+assert f.quote((node(close="0.5800"), node(close="0.6000")), "T") == (0.58, 0.60) and f.quote((node(close_dollars="0.58"), node(close_dollars="0.60")), "T") == (0.58, 0.60)
+assert f.quote((node(close_dollars="0.58", close="9"), node(close_dollars="0.60", close="9")), "T") == (0.58, 0.60)          # close_dollars is used as before
+for bad in (0.58, "0.58", "58", "0.0000", "1.0000", "1.5000", "0.58000", " 0.5800", "0.5800\n", "-0.5000", True, None, ["0.5800"]):
+    try: f.quote((node(close=bad), node(close="0.6000")), "KXFEDMENTION-25OCT-BAD"); assert 0, bad
+    except SystemExit as e: assert "STOP" in str(e) and "KXFEDMENTION-25OCT-BAD" in str(e), (bad, str(e))
+assert f.quote((None, node(close="0.6000")), "T") == (None, 0.60) and f.quote(({}, node(close="0.6000")), "T") == (None, 0.60) and f.quote(("x", None), "T") == (None, None) and f.quote((node(close_dollars=None), node(close="0.6000")), "T") == (None, 0.60)
+# end to end in close form: the same strikes score exactly as D1 does; only the 14:05 candle is looked at
+def to_close_form(C):
+    for fn in sorted(os.listdir(C)):
+        if fn.endswith(".json.gz"):
+            fp = os.path.join(C, fn); body = json.load(gzip.open(fp, "rt"))
+            for c in body["candlesticks"]:
+                for side in ("yes_bid", "yes_ask"):
+                    c[side] = {"close": "%.4f" % float(c[side]["close_dollars"])}
+            body["candlesticks"].append({"end_period_ts": 5, "yes_bid": {"close": "0.0000"}, "yes_ask": {"close": "1.0000"}})          # another minute: never read
+            gzip.open(fp, "wt").write(json.dumps(body))
+with tempfile.TemporaryDirectory() as d:
+    D1x = [x for x in D1 if not x[1].endswith("-A6")]          # A6 is a 0.00-bid placeholder: in close form the literal unit rule stops on it (below)
+    T, L, C = build(d, D1x); to_close_form(C)
+    r = f.run(T, [L], [C], hash_check=False); k = r["kill_arm"]
+    assert (k["raw"]["count"], k["1c"]["count"], k["2c"]["count"]) == (5, 4, 3) and r["placebo"]["raw"]["count"] == 2 and k["two_sided"] == 7 and k["n"] == 9, r
+with tempfile.TemporaryDirectory() as d:
+    T, L, C = build(d, D1); to_close_form(C)          # with the placeholder strike A6 (bid 0.00 -> close "0.0000")
+    try: f.run(T, [L], [C], hash_check=False); assert 0
+    except SystemExit as e: assert "STOP" in str(e) and "KXFEDMENTION-25OCT-A6" in str(e) and "'0.0000'" in str(e)
+with tempfile.TemporaryDirectory() as d:
+    T, L, C = build(d, D1); to_close_form(C)
+    fp = os.path.join(C, "0001.json.gz"); body = json.load(gzip.open(fp, "rt")); body["candlesticks"][0]["yes_bid"] = {"close": "0.58"}; gzip.open(fp, "wt").write(json.dumps(body))
+    try: f.run(T, [L], [C], hash_check=False); assert 0
+    except SystemExit as e: assert "STOP" in str(e) and "KXFEDMENTION-25OCT-A1" in str(e)
 # --- guards ---
 with tempfile.TemporaryDirectory() as d:
     T, L, C = build(d, D1[:3] + [D1[0][:1] + ("KXFEDMENTION-25OCT-A1",) + D1[0][2:]])          # a table ticker repeated
@@ -158,7 +190,7 @@ with tempfile.TemporaryDirectory() as d:
         fn = "%04d.json.gz" % (i + 1); gzip.open(os.path.join(C, fn), "wt").write(json.dumps(body)); rr.append({"id": rid, "page": 1, "status": 200, "file": fn})
     json.dump({"job": {}, "rows": rr, "status": "complete"}, open(os.path.join(C, "manifest.json"), "w"))
     got = f.read_candles([C], {"KXFEDMENTION-25OCT-X1", "KXFEDMENTION-25OCT-X2", "KXFEDMENTION-25OCT-X3"})
-    assert got["KXFEDMENTION-25OCT-X1"][e] == (0.40, 0.42) and got["KXFEDMENTION-25OCT-X2"][e] == (0.30, 0.33) and got["KXFEDMENTION-25OCT-X3"][e] == (0.10, 0.12)
+    assert f.quote(got["KXFEDMENTION-25OCT-X1"][e], "x") == (0.40, 0.42) and f.quote(got["KXFEDMENTION-25OCT-X2"][e], "x") == (0.30, 0.33) and f.quote(got["KXFEDMENTION-25OCT-X3"][e], "x") == (0.10, 0.12)
 # the pure figure rules
 assert f.two_sided(0.58, 0.60) and not f.two_sided(0.0, 0.3) and not f.two_sided(0.6, 1.0) and not f.two_sided(0.6, 0.6) and not f.two_sided(0.7, 0.6) and not f.two_sided(None, 0.5) and f.two_sided(0.01, 0.99)
 assert f.counted("yes", 0.87, 0.0) and not f.counted("yes", 0.871, 0.0) and f.counted("yes", 0.86, 0.01) and not f.counted("yes", 0.86, 0.02) and not f.counted("no", 0.5, 0.0) and not f.counted("void", 0.5, 0.0) and f.counted("yes", 0.87 - 5e-10, 0.0) and not f.counted("yes", None, 0.0)

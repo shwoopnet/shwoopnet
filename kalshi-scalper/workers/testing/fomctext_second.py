@@ -11,7 +11,7 @@ Printed per set: RAW (the card's wording: the 2:05 pm ask at or under 0.87), 1c 
 STOPs: a table ticker repeated; a table strike missing from the lists or from the candle answers (the universe check); a market_ticker in more than one candle answer. Prints aggregates only, no strike line.
 Usage: fomctext_second.py <STATEMENT_WORD_TABLE.csv> --lists <lists run>... --candles <candle run>...
 """
-import calendar, csv, datetime, hashlib, math, os, sys, zoneinfo
+import calendar, csv, datetime, hashlib, math, os, re, sys, zoneinfo
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import scorekit as k
@@ -31,6 +31,7 @@ AMBIGUITIES = [
     "(c) is judged on ALL kill-arm strikes including those with no candle, and does not depend on the haircut.",
     "A market's result is read from the lists answers by ticker (a later answer overwrites an earlier one); a result other than yes, no or void is counted as 'other'.",
     "A table strike with no answer in the candle run (the universe check) or no market in the lists STOPs the run; a strike whose candles lack the 14:05 minute is simply not two-sided.",
+    "The unit rule (Head, 02:28Z): close_dollars as before; a `close` must be a string [01].dddd with 0 < value < 1 or the run STOPs; applied to the 14:05 candle of a scored strike only. Literal reading: 0.0000 and 1.0000 in `close` STOP (flagged to the Head).",
     "A candle node's ticker is market_ticker, else ticker, else the request id without a leading 'h_'.",
 ]
 
@@ -53,6 +54,29 @@ def two_sided(bid, ask):
 
 def counted(result, ask, slip):
     return result == "yes" and ask is not None and ask + slip <= CAP + TOL
+
+
+_CLOSE = re.compile(r"[01]\.\d{4}")
+
+
+def side_price(node, ticker):
+    """One side of the 14:05 candle (the Head's unit rule, Amendment 4): close_dollars is read as before; otherwise `close` must be a STRING matching [01].dddd (full match) with 0 < value < 1, anything else STOPs;
+    an absent, null or non-object node, or one with neither key, is no price."""
+    if not isinstance(node, dict):
+        return None
+    if "close_dollars" in node:
+        return k.price(node, "close")
+    if "close" in node:
+        v = node["close"]
+        if not (isinstance(v, str) and _CLOSE.fullmatch(v) and 0.0 < float(v) < 1.0):
+            raise SystemExit("STOP: yes_bid/yes_ask close of %s is %s, not a string [01].dddd strictly between 0 and 1 (the unit rule)" % (ticker, type(v).__name__ + " " + repr(v)))
+        return float(v)
+    return None
+
+
+def quote(raw, ticker):
+    """(bid, ask) from the raw (yes_bid node, yes_ask node) pair of the 14:05 candle."""
+    return side_price(raw[0], ticker), side_price(raw[1], ticker)
 
 
 def load_table(path):
@@ -105,7 +129,7 @@ def read_candles(candle_runs, wanted):
                         ts = int(c["end_period_ts"])
                     except (KeyError, TypeError, ValueError):
                         continue
-                    cs[ts] = (k.price(c.get("yes_bid"), "close"), k.price(c.get("yes_ask"), "close"))
+                    cs[ts] = (c.get("yes_bid"), c.get("yes_ask"))          # raw nodes: the unit rule is applied to the 14:05 candle only
                 out[t] = cs
     return out
 
@@ -117,7 +141,8 @@ def figures(rows, cs, res):
     two = 0
     quotes = []
     for r in rows:
-        bid, ask = cs.get(r["ticker"], {}).get(candle_end(r["date"]), (None, None))
+        raw = cs.get(r["ticker"], {}).get(candle_end(r["date"]))
+        bid, ask = quote(raw, r["ticker"]) if raw is not None else (None, None)
         ok = two_sided(bid, ask)
         two += ok
         rv = res.get(r["ticker"])
