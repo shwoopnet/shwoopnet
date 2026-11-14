@@ -168,3 +168,27 @@ All three only REMOVE bets; none adds or changes one.
    - So this card measures whether the information existing at exchange time t predicts the Kalshi move. It does not test whether a live bot could have seen it.
    - A live version would need a real-time liquidation feed and its own registration. Paper and shadow only, as before.
 5. **Rule 17 table (Amendment 2 c).** Auditor B's checks (CFRTI-K frozen hashes, BOOKCH1 sha256s, W-SPOTLEAD1's unseen block) are due before the 2026-11-30 development read, not before H.
+
+## Amendment 5 (Nov 14, 2026, 02:36Z, before H is computed and before any row is read; Auditor B's two items on Amendment 4)
+
+This amendment is the one place for the fill and threshold rule, and it governs over Amendment 4 item 2. It follows the Head's FOMCTEXT Clarification 8 pattern: the verdict is judged on the card's own lines, and the haircut lines decide only counting.
+
+1. **One rule for the fill, the thresholds and the print.**
+   - **(a) The fill for the verdict.** The kill and bar numbers are read at R8's fill: the ask seen at the R6 poll, with the per-order rounded fee, and a void counted as a fee-only loss.
+     - Kill: a development half under 1.2, or fewer than 60 triggered windows with a two-sided quote, closes it.
+     - Bar: PF 1.5 in each of three windows. The three windows are development half 1, development half 2 and held-out, plus z 5.46 on the held-out alone.
+     - The candle haircut is not the verdict fill: this card prices from R6 books, not candles.
+   - **(b) The development half threshold is 1.2**, as the card's kill line and R14 say. Amendment 4 item 2's "1.0 or better" is withdrawn: it misquoted C7's counting rule as a kill line.
+   - **(c) What each build prints, per window (half 1, half 2, held-out):**
+     - n, cash PF and net at R8's fill;
+     - the same at a 1c and a 2c haircut (entry at the ask + 1c or + 2c, fee rounded);
+     - z on the held-out only.
+   - **The labels:**
+     - The verdict is from R8's fill.
+     - A pass counts toward the owner's 20 to 30 only if, at 1c, PF is 1.3 or better with both halves 1.0 or better, AND at 2c PF is 1.0 or better (C7).
+     - Otherwise the label is "does not count: fails the haircut", and the card stays open on paper.
+     - Every line says "upper bound, not fill-checked" only where it is read from candles. This card's R6 book fills are fill-checked against the quote, not against queue position.
+2. **Amendment 4 item 1, wording corrected.**
+   - Dropping BTC-USD-SWAP does not only remove triggers. H is recomputed on the one-instrument distribution, so the trigger set can change in either direction.
+   - The change is that every trigger is now defined on BTC-USDT-SWAP contracts alone.
+   - Where Amendment 4 differs from R2, from R3 or from Amendment 3's text of sizes "in BTC", Amendment 4 governs. Builds read sizes as raw `sz` of BTC-USDT-SWAP.
