@@ -47,9 +47,14 @@ def num(x):
     except (TypeError, ValueError): return None
 
 def oi_of(c):
-    for k in ("open_interest", "open_interest_fp"):
-        v = num(c.get(k))
-        if v is not None: return v
+    """Desk A v3 F1: open_interest_fp is read FIRST; open_interest only if open_interest_fp is ABSENT. null, blank, bool, nan and inf are unreadable (None, a missing candle), with no fallback."""
+    for k in ("open_interest_fp", "open_interest"):
+        if k in c:
+            v = c[k]
+            if isinstance(v, bool) or v is None: return None
+            try: x = float(v) if not isinstance(v, str) or v.strip() else None
+            except (TypeError, ValueError): return None
+            return x if x is not None and math.isfinite(x) else None
     return None
 
 def p90(vals):
@@ -101,7 +106,7 @@ def main(argv=None):
         if len(days) < a.days: verdict, T = "NOT SEATED: fewer than %d trading days" % a.days, None
         else:
             T = p90(rises); verdict = "SEATED" if T >= MIN_T else ("NOT SEATED: T under %d" % int(MIN_T) if T > 0 else "NOT SEATED: T of 0 or less")
-        print("%s: listed windows %d | windows used (n) %d | trading days available %d, used %d | T %s | %s | dropped: %s" % (s, P["listed"], len(rises), len(days), len(used), "n/a" if T is None else ("%g" % T), verdict, dtxt))
+        print("%s: listed windows %d | windows used (n) %d | trading days available %d, used %d | days used %s | T %s | %s | dropped: %s" % (s, P["listed"], len(rises), len(days), len(used), ("%s to %s" % (used[0], used[-1])) if used else "none", "n/a" if T is None else ("%g" % T), verdict, dtxt))
     print("markets with no open interest at all: %d" % sum(1 for s in a.series if s in per and not per[s]["anyoi"]))
     print("global drops: " + (", ".join("%s=%d" % kv for kv in sorted(drops.items())) or "none"))
     return 0
