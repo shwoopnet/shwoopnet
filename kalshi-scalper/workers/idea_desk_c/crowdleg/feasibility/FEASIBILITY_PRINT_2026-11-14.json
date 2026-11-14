@@ -1,0 +1,37 @@
+{
+ "avg_qualifying_per_complete_day": 0.0,
+ "complete_days": 1,
+ "days": {
+  "2026-11-12": {
+   "complete_day": false,
+   "listed_distinct": 800,
+   "polls": 2,
+   "qualifying_distinct": 0,
+   "qualifying_with_legs": 0,
+   "rows": 800,
+   "two_sided_distinct": 27
+  },
+  "2026-11-13": {
+   "complete_day": true,
+   "listed_distinct": 18000,
+   "polls": 45,
+   "qualifying_distinct": 0,
+   "qualifying_with_legs": 0,
+   "rows": 18000,
+   "two_sided_distinct": 455
+  },
+  "2026-11-14": {
+   "complete_day": false,
+   "listed_distinct": 2000,
+   "polls": 5,
+   "qualifying_distinct": 0,
+   "qualifying_with_legs": 0,
+   "rows": 2000,
+   "two_sided_distinct": 20
+  }
+ },
+ "label": "counts only; no result, volume or price beyond the two-sided flag and the band",
+ "refused_unread": [],
+ "threshold": 5.0,
+ "verdict": "CLOSE: no evidence, combos cannot be priced"
+}
