@@ -153,3 +153,18 @@ All three only REMOVE bets; none adds or changes one.
   - with fewer than 30 bets: "no evidence at n = x";
   - held-out: PASS only if development CONTINUEs, PF is 1.5 or better in development half 1, half 2 and the held-out, and the held-out z is 5.46 or more; otherwise FALSIFIED, which closes the liquidation-fade family.
 - **R15, coverage:** a window is scored only if one OKX recorder coverage interval contains [close - 720 s - 180 s, close - 180 s). Otherwise it is "no_liq_coverage", because a missing feed would read as no liquidations. Coverage intervals come from the recorder's coverage.csv. How they are built belongs to the row builder (a separate file, written later and audited).
+
+## Amendment 4 (Nov 14, 2026, 02:35Z, before H is computed and before any OKX or R6 row is read; Auditor B's NOT YET CLEAN on d2822839)
+
+1. **R2, size unit (replaced).** H and L(t) are counted in raw contracts (`sz`) of **BTC-USDT-SWAP only**. BTC-USD-SWAP rows are still recorded, but are not used.
+   - Why: the recorder stores no contract value (`ROW_COLS` in `scripts/record_oklq.py` has `sz` and `bk_px` but no ctVal), and this desk has no confirmed source for one.
+   - Counting one instrument in its own raw contracts needs no conversion, so no unconfirmed unit can move H or a trigger.
+   - Mixing the inverse swap would need a USD-to-BTC conversion that is not confirmed. Dropping it can only remove triggers, never add a mis-sized one.
+   - R3 is unchanged otherwise: L(t) is the summed `sz` of one side of BTC-USDT-SWAP with `ts_ms` in [t - 180 s, t). H is the 99th percentile of that per-minute L over the calibration minutes, as R4 and R5 say.
+2. **The bar's z.** z is computed on the **held-out window alone**: day-clustered by US Central date, at least 5.46, as R14 says. The development halves are checked by PF only (each half 1.0 or better at the 1c haircut and at 2c, per C7). Build 1 and build 2 must both read it this way.
+3. **R6 clock.** The poll time is `t_recv_ms` **plus the run's offset**: the median, over the run's polls, of (the Date header + 0.5 s) - `t_recv_ms`, as in DEPTH1 and OIVER. The first poll with corrected time in (t, t + 10 s] is the quote.
+4. **Information at t.** L(t) uses OKX rows by **`ts_ms` alone**, the exchange's own event time. This is accepted knowingly:
+   - The OKX recorder runs a few times a day and fetches the last hours of the feed, so a row's `t_recv_ms` is hours after its `ts_ms`. A receive-time rule would remove every trigger.
+   - So this card measures whether the information existing at exchange time t predicts the Kalshi move. It does not test whether a live bot could have seen it.
+   - A live version would need a real-time liquidation feed and its own registration. Paper and shadow only, as before.
+5. **Rule 17 table (Amendment 2 c).** Auditor B's checks (CFRTI-K frozen hashes, BOOKCH1 sha256s, W-SPOTLEAD1's unseen block) are due before the 2026-11-30 development read, not before H.
