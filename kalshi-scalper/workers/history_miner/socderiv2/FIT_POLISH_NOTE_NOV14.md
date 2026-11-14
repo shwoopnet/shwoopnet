@@ -99,3 +99,37 @@ Plus Auditor B (03:24Z): the comparison figures in the main print are unrounded 
 - **verdict text:** 9 cells (A_big TEAMTOTAL-type cell 1 in cases 1, 3, 4, 5, 9, 10, 15, 17, 18). Only the quoted p90 moved, -0.004794 to -0.004793, one step at the 6th decimal; the same words.
 - **No count changed** (n, filled, targets, hits, flags). Case 20 is the refusal, unchanged.
 - **Per-game file (all 22 cases with a print, 11,385 rows):** checked rows = sum of targets; filled rows = sum of targets_filled; fires rows = sum of count_gap8_spread4; sorted; columns exactly as ruled; no result column; floats round-trip; btts strike blank; game_key a winner event. All OK. These CSVs came from the harness before the True/False change. The frozen formatter is tested separately in test_fit_polish.py ("per-game format: ok").
+
+## Final spec (the Head, 07:10Z, after Auditor B's differential), before the code
+The Head, verbatim:
+1. Box edge, for both builds: a rate that lands on a bound stays there, and the other rate is polished alone to the same stop (step or relative SSE under 1e-13, cap 200). Print the count of fits with a rate on a bound.
+2. Keep gap = model_value minus market_mid, and ADD two columns after it: side (yes or no, the cheaper side the aggregate trades) and edge (that side's model value minus its ask, the figure the headline uses). fires must be consistent with edge.
+3. leg_type is team_total; btts unchanged. (Already so.)
+
+**How "lands on a bound" is built (the exact rule, flagged for Auditor B so both builds can be compared):**
+- A rate equal to 0.01 or 6.0 when the polish starts is on a bound.
+- In a 2-D pass, if the full Gauss-Newton step would put a rate outside [0.01, 6]:
+  - that rate is set exactly to its bound; the other rate takes its full step, clipped to the box the same way;
+  - if this clipped point's SSE is not above the current SSE + 1e-15 x (1 + SSE), it is accepted and the clipped rate(s) are on a bound;
+  - otherwise the whole step is halved as before, without clipping.
+- Once a rate is on a bound it is held there for the rest of the polish. The other rate is polished ALONE by 1-D Gauss-Newton on the same residuals, d = -(J'r) / (J'J) on that rate, with:
+  - the same halving and box guard;
+  - the same stops (|d| under 1e-13 before a move; SSE falling by less than 1e-13 relative after a move);
+  - the cap of 200 passes shared with the 2-D passes.
+- If both rates are on bounds, the polish stops.
+- The "not above the refinement's SSE + 1e-15" check applies as before.
+- fit() returns (home, away, sse, iters, cap_hit, on_bound), where on_bound is True if either rate ends on a bound.
+- Each cell prints fit_on_bound, the count of fits (placebo refits included) with a rate on a bound.
+
+**Per-game columns:** game_key, fit_iters, cap_hit, rate_home, rate_away, sse, leg_ticker, leg_type, strike, model_value, market_mid, gap, side, edge, fires.
+- side = "yes" or "no", the cheaper side (the NO ask is 1 - YES bid; "no" only when strictly cheaper by more than 1e-9, ties to yes, as the aggregate).
+- edge = that side's model value minus its ask (the aggregate's gap).
+- fires = edge >= 0.08 - 1e-9 AND spread <= 0.04 + 1e-9.
+- On a blank row, side and edge are empty and fires is False.
+
+**Expected by hand (test_fit_polish.py):**
+- **B1:** mids exactly from rates (0.01, 1.2) with totals 1.5, 2.5, 3.5. The fit returns home exactly 0.01 and away within 1e-9 of 1.2, on_bound True, SSE under 1e-20.
+- **B2:** mids from (0.003, 1.5), where the minimum lies outside the box. Home is exactly 0.01, on_bound True. The SSE gradient on away is under 1e-10 at the result.
+- **B3:** mids from (6.4, 0.8). Home is exactly 6.0, on_bound True. The away gradient is under 1e-10.
+- **B4:** P1 to P3 are unchanged (interior, on_bound False, same rates within 1e-12).
+- **Columns:** the format test has side and edge after gap. On a filled row fires == (edge >= 0.08 - 1e-9 and spread <= 0.04 + 1e-9). On the 23 cases, rows with fires True = the sum of count_gap8_spread4, as before.
