@@ -1,3 +1,5 @@
+**REMOVED Nov 14, 2026 (the owner: "drop combo rebuild").** The recorder described below was disabled after its first hour showed it could not keep up with the tape rate, and its workflow, script and gates were deleted. Kept as the record. Data already on `combotape-data` stays.
+
 # Combo trade-tape recorder (Nov 13, 2026, the owner: "Yes, nonstop recorder")
 
 Research data only. Nothing here trades, signs or holds a key. It exists for Idea Desk C's CROWDLEG and NOTAKER cards (both paper only): CROWDLEG counts the combo trades whose taker bought YES on combos that share one leg; NOTAKER follows each combo trade whose taker bought NO. Both need EVERY combo trade, with each combo's legs.
