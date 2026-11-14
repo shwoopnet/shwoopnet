@@ -72,6 +72,7 @@ def main(a):
             except ValueError: t = None
             if t is None: continue
             k = row[ik] if ik is not None else "all"
+            if kind in ("bookl", "quotes"): k = k.split("-")[0]          # the series, so a gap is a stop of the whole series' recording
             if kind == "quotes" and cut is not None and t >= cut: acc[k].skipped += 1; continue
             if kind == "bookl" and cut is not None and ic is not None: pass
             A = acc[k]; A.n += 1; A.files.add(p)
