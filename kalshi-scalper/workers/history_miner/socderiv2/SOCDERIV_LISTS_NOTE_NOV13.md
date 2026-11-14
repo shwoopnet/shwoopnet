@@ -16,3 +16,8 @@
   - (1) made-up case_01, with its candle run split into two folders by request id (first half, second half) and given as "A,B", prints EXACTLY outputs/case_01.json;
   - (2) the same split with one request id copied into both folders stops;
   - (3) every one of the 23 made-up cases printed through the one-folder path is unchanged.
+- **Addendum, 2026-11-14 ~01:00Z (Auditor B's two additions; written before the code):**
+  - (4) a market ticker asked in two DIFFERENT candle folders, even under different request ids, STOPS ("ticker in two candle runs");
+  - (5) the merged answers are ordered by request id, so giving the folders as "B,A" prints exactly what "A,B" prints, and both equal outputs/case_01.json for the split case;
+  - (6) with --job files, a count other than 1 + the number of candle folders stops. A lone lists job, which zip used to accept, now stops.
+  - The single-folder path is byte-unchanged.
