@@ -4,7 +4,7 @@
 set -e
 HERE="$(cd "$(dirname "$0")" && pwd)"; cd "$HERE"
 [ $# -eq 4 ] || { echo "usage: $0 <lists run> <candle run A> <candle run B> <out>"; exit 2; }
-want_reader=e19da29e274b3e8f; want_scorekit=f219b43c755b4b87
+want_reader=634f2d6cd04f7bb0; want_scorekit=f219b43c755b4b87
 [ "$(sha256sum socderiv.py | cut -c1-16)" = "$want_reader" ] || { echo "refused: socderiv.py is not the audited build"; exit 3; }
 [ "$(sha256sum scorekit.py | cut -c1-16)" = "$want_scorekit" ] || { echo "refused: scorekit.py is not the audited build"; exit 3; }
 python3 -I socderiv.py measure "$1" --candles "$2" "$3" --pergame "$(dirname "$4")/socderiv_pergame.csv" > "$4" 2> "$4.stderr"
