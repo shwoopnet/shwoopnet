@@ -1,3 +1,7 @@
 SPXSCALP build 2 (spxscalp_second.py 4e933a63, commit 62a2f6d3) and ESLEAD1 build 2 (eslead1_second.py a64918ba, commit 630c1816), each run once Nov 15 on lists SPXOI1_LISTS/2026-11-14T0101Z_43537940232, candles SPXOI1_CANDLES/2026-11-14T0107Z_43538584524 plus SPXOI1_CANDLES_PATCH/2026-11-14T0124Z_43540387136, ES file sha256 0142d6e5fda96579951e24eda0bddaea1e0708f0c63b67a21ff31f141d1495c2 (the file itself is Databento-derived and is in no repo).
 sha256 of the SPXSCALP printout (kept in scratch, not in the repo): ed3c68bb822fb38c2bfe9edd626b43ebd0454446cb08f2e46132bd9371550a27
 sha256 of the ESLEAD1 printout (kept in scratch, not in the repo): dde500d905ecd4767fe2135ae11f56ca32fd636ade4a0713ae9cbf19aa2276ef
+
+Desk B build 1 (claude/idea-desk-b ccb2fcdf; spxscalp.py d979bd462fb580dd, eslead1.py c4e2d78401a2611e), run ONCE by the Testing Desk Nov 15 on the same inputs and the same ES file (sha256 0142d6e5...1495c2), run AFTER build 2 (the Head ordered build 1 first; build 2 was already run and committed before that order arrived; disclosed to the Head and Auditor B).
+sha256 of the build 1 SPXSCALP printout (scratch only): 33d92afffab6dc47dc7ae7356748ce9406567465bcc3cdc9e28e0aad39582bde
+sha256 of the build 1 ESLEAD1 printout (scratch only): d0ee57f681a9082c7ee911b8751731fd9a5a6620f0978afe4edfb3d752456b73
