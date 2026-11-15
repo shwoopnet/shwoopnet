@@ -1,0 +1,36 @@
+# FLIPS0-X haircut recompute, BUILD 2: hand case (Testing Desk, Nov 15, 2026). Written BEFORE any code.
+Sources, read for the rule only: research branch claude/epic-ptolemy-0amjd9 `src/scalper/flips0x.py` (series_rows, SERIES), `ideas100.py` (ENTRIES L1360, the FLIPS_0 rule, flips, path, side_mid), `ideas20.py` (load_btc, at, entries), `lstrats.favorite` and `net`, `analyze.valid_quote`, README:6084 and the Oct 23 result (n 536, raw PF 1.77); rnd-queue C1 to C11; Desk A's input list (extract claude/forensics-desk `FLIPS0X_extract.sqlite.xz` sha256 5e07f56c90ad41475f792d4c8f299685b72d3bde3d80742c5a7dfef49e23584f; spec and cut log beside it). Desk A's hand case was read as the haircut statement; my windows and figures are my own.
+## What I build: `flips0x_second.py <extract.sqlite>`
+Reads only the extract (market(ticker, series, open_ts, close_ts, result, strike, src), candle(ticker, end_ts, bid_c, ask_c, ...)); prints aggregates only; writes nothing. The 16 series of the card (XRP, Dogecoin, gold, BNB, HYPE, NEAR, ZEC, silver, platinum, palladium, copper, WTI, natural gas, EUR/USD, GBP/USD, USD/JPY); any other series is ignored (counted). A market with a result other than yes or no is excluded (counted). Candles ending after the close are dropped (counted); candles with a missing bid or ask are DROPPED at load (the market keeps its others). Candles are sorted by end time. Decision candle = the loaded candle ending exactly 360 s before the close (none: skip, no decision candle); `e` = ALL loaded candles strictly before it (from the market's first loaded candle). Quote test (valid_quote): bid >= 0.001, ask <= 0.999, ask >= bid, ask - bid <= 0.10 (1e-9 slack: MY READING; the card compares raw floats); invalid: skip (bad quote). Favourite: YES if 0.88 <= ask <= 0.97 (1e-9 slack), else NO at round(1 - bid, 4) if in band, else skip (band). FLIPS_0: len(e) >= 4 (else skip, too few earlier candles) AND the favourite side's mid path (side mid of each earlier candle in order, then of the decision candle; YES mid = (bid + ask)/2, NO mid = 1 minus that) has ZERO flips: the minute changes are taken, those with absolute value 0.004 or less are ignored, then sign changes between consecutive remaining changes are counted (MY READING: a change counts as ignored when |x| <= 0.004 + 1e-9, because 0.84 - 0.836 prints 0.0040000000000000036 in floats and the card, taken literally, would count it as a move; to confirm with Desk A). More than 0 flips: skip (flips). Hold to settlement; entry price = the favourite's ask (YES ask, or round(1 - bid, 4)) + h, h in {0, 0.01, 0.02}, capped at 0.99; fee_up_order = ceil(0.07 x 10 x price x (1 - price) x 100 - 1e-9) / 100; cash = 10 x (win - price) - fee on the UNADJUSTED cash (not the series-baseline adjusted net the card prints; the card's raw PF 1.77 is this basis). PF = positive over absolute negative (infinite with no loss, 0 with no win and a loss). Halves floor(n/2) by close time (ties by ticker). The decision candle is 360 s before the close, not in the last 2 minutes: 1c is primary (C8) and 2c printed. C11 (an NC15 series takes 2c primary at every mark): per-series rows are printed at 1c AND 2c, for information; the C7 count test is for the whole set at 1c (PF >= 1.3, both halves >= 1.0) and 2c (PF >= 1.0), 1e-9 slack. Label on every line: "upper bound, not fill-checked; fee mode per-order rounded".
+## Invented windows (close = 5000000 + 900 k; series in brackets; earlier candles at C-720, C-660, C-600, C-540, C-480, C-420 unless stated, with bid = mid - 0.01 and ask = mid + 0.01 (YES mids); decision candle at C-360)
+| W | k | series | earlier YES mids | decision b / a | result | expected |
+|---|---|---|---|---|---|---|
+| G1 | 1 | XRP | 0.80 0.82 0.84 0.86 0.88 0.90 | 0.91 / 0.92 | yes | YES p 0.92, 0 flips, win |
+| G2 | 2 | XRP | 0.80 0.82 0.84 0.86 0.84 0.90 | 0.91 / 0.92 | yes | skip (flips: changes + + + - + give 2) |
+| G3 | 3 | gold | three earlier only (C-540, C-480, C-420): 0.84 0.86 0.88 | 0.91 / 0.92 | yes | skip (too few earlier candles) |
+| G4 | 4 | Dogecoin | 0.18 0.15 0.12 0.10 0.08 0.06 (NO mids 0.82 0.85 0.88 0.90 0.92 0.94) | 0.03 / 0.04 | no | YES ask 0.04 out of band; NO p round(1 - 0.03, 4) = 0.97 (band edge, inclusive), 0 flips, win |
+| G5 | 5 | gold | 0.80 0.82 0.8225 0.84 0.86 0.88 | 0.90 / 0.91 | no | YES p 0.91; the +0.0025 change is ignored; 0 flips; loss |
+| G6 | 6 | XRP | 0.80 0.82 0.84 0.836 0.86 0.88 | 0.89 / 0.90 | yes | YES p 0.90; the -0.004 change is ignored (my reading); 0 flips; win |
+| G7 | 7 | silver | 0.80 0.82 0.84 0.86 0.88 0.90 | 0.97 / 0.98 | yes | skip (band: YES ask 0.98, NO 0.03) |
+| G8 | 8 | silver | 0.80 0.82 0.84 0.86 0.88 0.90 | 0.79 / 0.91 (spread 0.12) | yes | skip (bad quote) |
+| G9 | 9 | WTI | 0.80 0.82 0.84 0.86 0.88 0.90 | decision candle has a null bid (dropped at load) | yes | skip (no decision candle) |
+| G10 | 10 | WTI | as G1 | 0.91 / 0.92 | void | excluded (result) |
+Plus one KXBTC15M market (ignored).
+## Expected, by hand (fee = ceil(70 price (1 - price) - 1e-9) / 100)
+| W | h 0 | 1c | 2c |
+|---|---|---|---|
+| G1 | 0.92: 5.152 -> 6 -> 0.06; 0.80 - 0.06 = +0.74 | 0.93: 4.557 -> 5 -> 0.05; 0.70 - 0.05 = +0.65 | 0.94: 3.948 -> 4 -> 0.04; 0.60 - 0.04 = +0.56 |
+| G4 | 0.97: 2.037 -> 3 -> 0.03; 0.30 - 0.03 = +0.27 | 0.98: 1.372 -> 2 -> 0.02; 0.20 - 0.02 = +0.18 | 0.99: 0.693 -> 1 -> 0.01; 0.10 - 0.01 = +0.09 |
+| G5 | 0.91: 5.733 -> 6 -> 0.06; -9.10 - 0.06 = -9.16 | 0.92: fee 0.06: -9.20 - 0.06 = -9.26 | 0.93: fee 0.05: -9.30 - 0.05 = -9.35 |
+| G6 | 0.90: 6.3 -> 7 -> 0.07; 1.00 - 0.07 = +0.93 | 0.91: fee 0.06: 0.90 - 0.06 = +0.84 | 0.92: fee 0.06: 0.80 - 0.06 = +0.74 |
+Trades 4 (G1, G4, G5, G6; wins 3, loss 1). Counts: considered 9 (G1 to G9; G10 excluded, the BTC market ignored): trades 4, skip flips 1 (G2), too few earlier 1 (G3), band 1 (G7), bad quote 1 (G8), no decision candle 1 (G9).
+All four: h 0 positives 0.74 + 0.27 + 0.93 = 1.94, negatives 9.16, net -6.22, PF 0.211790; 1c 0.65 + 0.18 + 0.84 = 1.67, 9.26, net -7.59, PF 0.180346; 2c 0.56 + 0.09 + 0.74 = 1.39, 9.35, net -7.96, PF 0.148663. Halves floor(4/2) = 2 (G1, G4 | G5, G6): first (no loss) infinite, nets +1.01, +0.83, +0.65; second: h 0 0.93 / 9.16 = 0.101528, net -8.23; 1c 0.84 / 9.26 = 0.090713, net -8.42; 2c 0.74 / 9.35 = 0.079144, net -8.61.
+Per series (for information): XRP (G1, G6) n 2, wins 2, 1c net +1.49 (PF infinite), 2c net +1.30; Dogecoin (G4) n 1, wins 1, 1c +0.18, 2c +0.09; gold (G5) n 1, wins 0, 1c -9.26 (PF 0), 2c -9.35.
+COUNTS toward the 20 to 30: no.
+## Further hand cases
+- The flip count uses the whole earlier path, not only four candles (G1 has six earlier candles).
+- A change of exactly 0.004 is ignored; 0.0041 is a move (a path up, then down by 0.0041 then up has 2 flips).
+- A candle with a missing bid or ask is dropped at load, so a market whose decision candle is incomplete has no decision candle, and a market whose EARLIER candle is incomplete keeps the others (the path simply lacks that point).
+- A candle ending after the close is dropped and counted; one ending exactly at the close is kept (never the decision candle).
+- Band edges 0.88 and 0.97 inclusive; entry price cap 0.99.
+- The printout names the extract's raw sha256 and every count; no ticker.
