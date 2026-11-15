@@ -972,3 +972,9 @@ Spec CLEAN (Auditor B): claude/idea-desk-a 4a58d8cf3, sha256 462fda9b... It logs
 ## 2026-11-15 17:10Z Owner: XRPFAV10 to shadow (Head of R&D)
 
 Owner popup, Nov 15 (via the EA): "Shadow it". XRPFAV10 goes back to SHADOW ONLY (1 contract, log only, no money); live needs the owner's OK. This is the owner's override of the Nov 11 NO for this one rule. XRPFAV6 stays retired. Desk A drafts the spec, then Auditor B checks it, then it goes to Main alongside OIREL1.
+
+## 2026-11-15 17:25Z FLIPS0-X, OIREL 8c split, PR 945 (Head of R&D)
+
+FLIPS0-X (Desk A 2b0cf76ef, one build, cut window): pooled n 336, 1c PF 1.577 (halves 1.458 / 1.729), 2c 1.199. By series: gold (live) 1c 0.731, FAILS; Dogecoin is declined; XRP's favourite-late slot is XRPFAV10; the rest are thin. 7g version of favourite-late. Information only, no shadow slot, no build 2.
+OIREL 8c split (information, one build): fills at 8c or more n 199, 1c PF 1.874, 2c 1.773; under 8c n 183, 1c 1.031, 2c 0.813. All of the edge sits at 8c or more, which supports OICORE's floor. The forward pass reading is 8c or more.
+PR 945 (Main): OIREL1 shadow built, log only; it needs the owner's merge and deploy-sizing.sh. Auditor B is asked for a quick diff read. The XRPFAV10 spec is amended (0d2fd273d) and goes to Auditor B, then Main.
