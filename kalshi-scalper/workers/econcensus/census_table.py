@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """ECONCENSUS count table (Desk B, Nov 15, 2026). Usage: census_table.py <landed run folder> [--out DIR]
-Reads a landed ECONCENSUS_LISTS run (manifest.json + answer files). Prints COUNTS per series: settled markets, close dates, events, markets with volume,
-median volume, last price in 10c bands. NEVER reads a market's result. Expected figures: EXPECTED_census_table_nov15.md."""
+Reads a landed ECONCENSUS_LISTS run (manifest.json + answer files). Prints COUNTS per series: settled markets, close dates, events. Reads ONLY ticker-level
+fields close_time and event_ticker: no result, no price, no volume (HELDOUT_PULL_RUNS.md: tickers, close times and series counts only). Expected figures: EXPECTED_census_table_nov15.md."""
 import csv, gzip, json, math, os, sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 import deskb_guard as _dg
 # The ONLY listed runs this reader may open. Empty until the run lands; then a reviewed edit names the one ECONCENSUS_LISTS run folder. No flag or environment variable extends it.
-ALLOWED_RUNS = frozenset()
+ALLOWED_RUNS = frozenset(["2026-11-15T1512Z_43728522567"])   # the one ECONCENSUS_LISTS run (HELDOUT_PULL_RUNS.md, Nov 15): tickers, close times and series counts only
 CUT = "2026-10-17T00:00:00Z"
 FED_CUT = "2025-09-17T00:00:00Z"
 FED = ("KXFED", "KXFEDDECISION")
@@ -42,7 +42,7 @@ def median(v):
 
 def table(rows, outdir=None):
     cut, fcut = ts(CUT), ts(FED_CUT)
-    agg = defaultdict(lambda: {"n": 0, "dropped": 0, "dates": set(), "events": set(), "vol": [], "bands": Counter()})
+    agg = defaultdict(lambda: {"n": 0, "dropped": 0, "dates": set(), "events": set()})
     series_list = []
     for rid, series, body in rows:
         if rid == "series_economics":
@@ -56,19 +56,11 @@ def table(rows, outdir=None):
             except (KeyError, ValueError, TypeError): continue
             if t >= (fcut if series in FED else cut): a["dropped"] += 1; continue
             a["n"] += 1; a["dates"].add(datetime.fromtimestamp(t, timezone.utc).date().isoformat()); a["events"].add(m.get("event_ticker", ""))
-            try: v = float(m.get("volume_fp", m.get("volume")))
-            except (TypeError, ValueError): v = None
-            if v is not None: a["vol"].append(v)
-            try: lp = float(m.get("last_price_dollars", m.get("last_price")))
-            except (TypeError, ValueError): lp = None
-            if lp is not None: a["bands"][min(9, max(0, int(math.floor(lp * 10 + 1e-9))))] += 1
     lines = []
     for s in sorted(agg):
         a = agg[s]; ds = sorted(a["dates"])
-        mv = median(a["vol"])
-        lines.append("%s: settled markets %d, after the cut dropped %d, close dates %d%s, events %d, markets with volume above 0 %d, median volume %s, last price bands: %s" % (
-            s, a["n"], a["dropped"], len(ds), " (%s to %s)" % (ds[0], ds[-1]) if ds else "", len(a["events"]), sum(1 for x in a["vol"] if x > 0),
-            "n/a" if mv is None else ("%g" % mv), ", ".join("[%.1f,%.1f%s %d" % (b / 10, (b + 1) / 10, "]" if b == 9 else ")", a["bands"][b]) for b in range(10) if a["bands"][b]) or "none"))
+        lines.append("%s: settled markets %d, after the cut dropped %d, close dates %d%s, events %d" % (
+            s, a["n"], a["dropped"], len(ds), " (%s to %s)" % (ds[0], ds[-1]) if ds else "", len(a["events"])))
     if outdir and series_list:
         os.makedirs(outdir, exist_ok=True)
         with open(os.path.join(outdir, "series_economics.tsv"), "w", newline="") as f:

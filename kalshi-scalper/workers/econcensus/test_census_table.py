@@ -3,13 +3,14 @@
 import contextlib, io, os, sys, importlib.util
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 spec = importlib.util.spec_from_file_location("ct", os.path.join(here, "census_table.py")); C = importlib.util.module_from_spec(spec); spec.loader.exec_module(C)
+BAN = ("result", "volume", "volume_fp", "last_price", "last_price_dollars")
 class M(dict):
     """A market whose result is never allowed to be read."""
     def __getitem__(self, k):
-        if k == "result": raise AssertionError("result read")
+        if k in BAN: raise AssertionError("banned field read: %r" % (k,))
         return super().__getitem__(k)
     def get(self, k, d=None):
-        if k == "result": raise AssertionError("result read")
+        if k in BAN: raise AssertionError("banned field read: %r" % (k,))
         return super().get(k, d)
 class Trap(dict):
     def __init__(self, close): super().__init__(close_time=close)
@@ -26,8 +27,8 @@ rows = [("settled_KXCPI", "KXCPI", {"markets": p1}), ("settled_KXCPI", "KXCPI", 
         ("series_economics", None, {"series": [{"ticker": "KXZZ", "frequency": "monthly", "title": "t"}]})]
 lines, ns = C.table(rows)
 d = {l.split(":")[0]: l for l in lines}
-ok = [("1 KXCPI line", d["KXCPI"] == "KXCPI: settled markets 7, after the cut dropped 1, close dates 3 (2026-01-15 to 2026-03-12), events 3, markets with volume above 0 6, median volume 20, last price bands: [0.0,0.1) 1, [0.3,0.4) 1, [0.4,0.5) 1, [0.5,0.6) 2, [0.7,0.8) 1, [0.9,1.0] 1"),
-      ("2 KXFED line", d["KXFED"] == "KXFED: settled markets 1, after the cut dropped 1, close dates 1 (2025-06-18 to 2025-06-18), events 1, markets with volume above 0 1, median volume 7, last price bands: [0.6,0.7) 1"),
+ok = [("1 KXCPI line", d["KXCPI"] == "KXCPI: settled markets 7, after the cut dropped 1, close dates 3 (2026-01-15 to 2026-03-12), events 3"),
+      ("2 KXFED line", d["KXFED"] == "KXFED: settled markets 1, after the cut dropped 1, close dates 1 (2025-06-18 to 2025-06-18), events 1"),
       ("3 series list counted", ns == 1)]
 src = open(os.path.join(here, "census_table.py")).read()
 ok.append(("4 source does not read a result key", 'get("result"' not in src and '["result"]' not in src))

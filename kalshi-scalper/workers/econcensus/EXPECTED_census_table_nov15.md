@@ -8,3 +8,6 @@ Expected printed lines:
 - A dropped market is never counted in volume, bands or dates.
 
 Note written when the test ran (before any real data): the printed form of a one-day range is "(2025-06-18 to 2025-06-18)", not "(2025-06-18)"; the figures are as expected above. The test compares the exact printed lines.
+
+## Amendment (Nov 15, 2026, 21:30Z, before the real run): the reader narrows to what the landing note allows
+HELDOUT_PULL_RUNS.md (#946) says the ECONCENSUS run may be opened "only for tickers, close times and series counts, never a price or a result". A settled market's last price sits near its result, so the 10c price bands, the volume count and the median volume are REMOVED. The reader now prints, per series, only: settled markets, after the cut dropped, close dates (first to last), events. The made-up test hands it markets that raise on result, volume, volume_fp, last_price and last_price_dollars; expected lines: KXCPI "settled markets 7, after the cut dropped 1, close dates 3 (2026-01-15 to 2026-03-12), events 3"; KXFED "settled markets 1, after the cut dropped 1, close dates 1 (2025-06-18 to 2025-06-18), events 1". ALLOWED_RUNS names the one run 2026-11-15T1512Z_43728522567. The earlier expected lines above (volume, median, bands) are withdrawn.
