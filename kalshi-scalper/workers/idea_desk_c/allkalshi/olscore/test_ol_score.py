@@ -102,5 +102,17 @@ class MENT(unittest.TestCase):
         self.assertAlmostEqual(o["M"]["raw"]["mean_c"], 10.0)
 
 
+class Sample(unittest.TestCase):
+    def test_md5_sample(self):
+        mk = {("KXTRUMPMENTION-26JUN10-W%04d" % i): {"ticker": "KXTRUMPMENTION-26JUN10-W%04d" % i, "event_ticker": "KXTRUMPMENTION-26JUN10",
+              "occurrence_datetime": "2026-06-10T18:00:00Z", "close_time": "2026-06-10T19:00:00Z", "yes_sub_title": "w"} for i in range(1500)}
+        kept, c, _ = S.select("MENT", mk)
+        self.assertEqual(len(kept), 1400)
+        self.assertEqual(c["not_sampled"], 100)
+        import hashlib
+        want = sorted(mk, key=lambda t: (hashlib.md5(("MENTDRIFT-2026-11-15" + t).encode()).hexdigest(), t))[:1400]
+        self.assertEqual(sorted(kept), sorted(want))
+
+
 if __name__ == "__main__":
     unittest.main()

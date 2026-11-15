@@ -72,6 +72,13 @@
 - If that is too heavy for the shared budget, stage B reads an md5(ticker) sample of 1,400 markets: ordered by md5 only, no price or result used, fixed before any candle.
 - The Head picks which.
 
+**Decided (the Head of R&D, Nov 15, 14:51Z, before stage A lands): the fixed sample of 1,400.**
+- **Pool:** the development markets left after the time-window filter and the "Event does not qualify" drop. Only time fields and the word title are used; no price, volume or result.
+- **Order:** sorted by the lowercase hex of md5(SEED + ticker), ascending, with ticker as the tie break. SEED is the ASCII text `MENTDRIFT-2026-11-15`.
+- **Sample:** the first 1,400 in that order, or all of them if the pool is smaller.
+- **Use:** stage B pulls candles for exactly these, in the same order. The scorer applies the same rule, and markets outside the sample are counted as `not_sampled`.
+- **Later:** if the paper record shows anything, the rest can be pulled later as a second, disclosed sample (positions 1,401 onward in the same order).
+
 ## Order of work
 
 1. This card.

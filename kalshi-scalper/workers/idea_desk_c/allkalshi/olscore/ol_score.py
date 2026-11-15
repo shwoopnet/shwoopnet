@@ -14,6 +14,7 @@ is read only after the window filter; the candle files are opened only for kept 
 Usage: python3 -I ol_score.py <card NBA_O|NBA_L|MENT> <root> [--check-only]
 """
 import calendar
+import hashlib
 import gzip
 import json
 import math
@@ -49,6 +50,8 @@ CARDS = {
     "MENT": {"series": ("KXTRUMPMENTION", "KXTRUMPMENTIONB"), "win_on": "occurrence", "dev": (T("2026-04-17T00:00:00Z"), T("2026-08-06T00:00:00Z")),
              "move_min": 300, "thr": 0.08, "follow": True, "band": (0.30, 0.70), "cap_event": 3, "list_jobs": ("MENTDRIFT_LISTS_A",)},
 }
+MENT_SEED = "MENTDRIFT-2026-11-15"     # the Head of R&D, Nov 15 14:51Z: fixed md5 sample of 1,400
+MENT_SAMPLE_N = 1400
 NBA_TIP_FROM_OCC_S = 3 * 3600        # tip proxy P = occurrence - 3 h
 NBA_BUFFER_S = 30 * 60               # last pre-game mark G = P - 30 min
 NBA_PROXY_MAX_EARLY = 0.02           # stop before any result read if more than 2% of markets close before G
@@ -289,8 +292,17 @@ def select(card_id, mk):
             counts["not_qualify_word"] += 1
             continue
         kept[t] = m
+    if card_id == "MENT":
+        order = sorted(kept, key=lambda t: (hashlib.md5((MENT_SEED + t).encode("ascii")).hexdigest(), t))
+        counts["not_sampled"] = max(0, len(order) - MENT_SAMPLE_N)
+        kept = {t: kept[t] for t in order[:MENT_SAMPLE_N]}
     counts["kept"] = len(kept)
     return kept, counts, ev_occ
+
+
+def ment_sample_order(kept_all):
+    """The sample order for the stage B builder: md5(SEED + ticker) ascending, ticker as the tie break."""
+    return sorted(kept_all, key=lambda t: (hashlib.md5((MENT_SEED + t).encode("ascii")).hexdigest(), t))
 
 
 def score(card_id, root, candle_jobs, check_only=False):
