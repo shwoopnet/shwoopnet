@@ -30,7 +30,11 @@ mkts.append(("B", "KXBTC15M", C(11), "yes")); cd.append(("B", C(11) - 360, .91, 
 near = lambda a, b: abs(a - b) < 1e-9
 with tempfile.TemporaryDirectory() as d:
     p = os.path.join(d, "x.sqlite"); mk(p, mkts, cd); r = f.run(p); c = r["counts"]
-    assert (c["considered"], c["trades"], c["flips"], c["fewearlier"], c["band"], c["badquote"], c["nodecision"], c["excluded_result"], c["other_series_ignored"], c["candles_dropped_after_close"], c["candles_dropped_incomplete"]) == (9, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1), c
+    assert (c["considered"], c["trades"], c["flips"], c["fewearlier"], c["band"], c["badquote"], c["nodecision"], c["excluded_result"], c["other_series_ignored"], c["candles_dropped_after_close"], c["candles_dropped_incomplete"], c["ambiguous_paths"]) == (9, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), c
+    sn = r["sensitivity_literal_float"]; sc = sn["counts"]; assert (sc["considered"], sc["trades"], sc["flips"], sc["fewearlier"], sc["band"], sc["badquote"], sc["nodecision"], sc["ambiguous_paths"]) == (9, 3, 2, 1, 1, 1, 1, 1), sc
+    for key, (spf, snet, h1, n1, h2, n2) in {"h0.00": (1.01 / 9.16, -8.15, math.inf, 0.74, 0.27 / 9.16, -8.89), "h0.01": (0.83 / 9.26, -8.43, math.inf, 0.65, 0.18 / 9.26, -9.08), "h0.02": (0.65 / 9.35, -8.70, math.inf, 0.56, 0.09 / 9.35, -9.26)}.items():
+        b = sn["all"][key]; assert b["n"] == 3 and b["wins"] == 2 and near(b["pf"], spf) and near(b["net"], snet) and b["half1_pf"] == h1 and near(b["half1_net"], n1) and near(b["half2_pf"], h2) and near(b["half2_net"], n2), (key, b)
+    assert sn["counts_toward_20_to_30"] is False and r["flip_move_reading_primary"].startswith("a minute change is ignored when")
     for key, (pfa, neta, h1, n1, h2, n2) in {"h0.00": (1.94 / 9.16, -7.22, math.inf, 1.01, 0.93 / 9.16, -8.23), "h0.01": (1.67 / 9.26, -7.59, math.inf, 0.83, 0.84 / 9.26, -8.42), "h0.02": (1.39 / 9.35, -7.96, math.inf, 0.65, 0.74 / 9.35, -8.61)}.items():
         a = r["all"][key]; assert a["n"] == 4 and a["wins"] == 3 and near(a["pf"], pfa) and near(a["net"], neta) and a["half1_pf"] == h1 and near(a["half1_net"], n1) and near(a["half2_pf"], h2) and near(a["half2_net"], n2), (key, a)
     s = r["by_series_information_only"]; assert near(s["KXXRP15M"]["h0.01"]["net"], 1.49) and s["KXXRP15M"]["h0.01"]["pf"] == math.inf and near(s["KXXRP15M"]["h0.02"]["net"], 1.30) and s["KXDOGE15M"]["h0.01"]["n"] == 1 and near(s["KXDOGE15M"]["h0.01"]["net"], 0.18)
@@ -39,6 +43,9 @@ with tempfile.TemporaryDirectory() as d:
 # flips: the whole earlier path, the 0.004 edge and 0.0041
 assert f.flips([.5, .6, .7]) == 0 and f.flips([.5, .6, .5]) == 1 and f.flips([.5, .6, .5, .6]) == 2 and f.flips([.5, .6, .5961]) == 0 and f.flips([.5, .6, .5959]) == 1 and f.flips([.84, .836, .86, .88]) == 0 and f.flips([.84, .8359, .86, .88]) == 1
 assert f.flips([.5, .6, .6025, .5, .6]) == 2 and f.flips([.5, .5, .5]) == 0
+assert f.flips([.84, .836, .86, .88], literal=True) == 1 and f.flips([.84, .836, .86, .88]) == 0 and f.flips([.84, .8359, .86, .88], literal=True) == 1 and f.flips([.84, .8359, .86, .88]) == 1 and f.flips([.84, .8361, .86, .88]) == 0 and f.flips([.84, .8361, .86, .88], literal=True) == 0
+assert f.flips([.5, .6, .5961], literal=True) == 0 and f.flips([.5, .6, .5959], literal=True) == 1 and f.flips([.5, .6, .6001, .55], literal=True) == 1
+assert f.ambiguous([.84, .836, .86]) and not f.ambiguous([.84, .8361, .86]) and not f.ambiguous([.84, .8375, .86]) and f.ambiguous([.5, .504]) and not f.ambiguous([.5, .5, .5])
 # prices, fees, cap
 assert f.fee_up_order(0.92) == 0.06 and f.fee_up_order(0.93) == 0.05 and f.fee_up_order(0.94) == 0.04 and f.fee_up_order(0.97) == 0.03 and f.fee_up_order(0.98) == 0.02 and f.fee_up_order(0.99) == 0.01 and f.fee_up_order(0.91) == 0.06 and f.fee_up_order(0.9) == 0.07
 assert near(f.cash_of("yes", .98, "yes", .02), 10 * 0.01 - 0.01) and near(f.cash_of("no", .97, "no", 0.0), 0.27)
@@ -49,7 +56,7 @@ def one(mids, dec=(.91, .92), left=360):
     with tempfile.TemporaryDirectory() as d:
         p = os.path.join(d, "o.sqlite"); t = "Z"; rows = [(t, C(1) - l, round(m - .01, 4), round(m + .01, 4), 1, 0) for l, m in zip([720, 660, 600, 540, 480, 420][-len(mids):], mids)]
         rows.append((t, C(1) - left, dec[0], dec[1], 1, 0)); mk(p, [(t, "KXXRP15M", C(1), "yes")], rows); return f.run(p)["counts"]
-assert one(UP)["trades"] == 1 and one(UP, left=361)["nodecision"] == 1 and one(UP, left=359)["nodecision"] == 1 and one([.84, .86, .88, .90])["trades"] == 1 and one([.86, .88, .90])["fewearlier"] == 1
+assert one(UP)["ambiguous_paths"] == 0 and one(UP)["trades"] == 1 and one(UP, left=361)["nodecision"] == 1 and one(UP, left=359)["nodecision"] == 1 and one([.84, .86, .88, .90])["trades"] == 1 and one([.86, .88, .90])["fewearlier"] == 1
 with tempfile.TemporaryDirectory() as d:
     p = os.path.join(d, "n.sqlite"); mk(p, [], []); r = f.run(p); assert r["all"]["h0.01"]["n"] == 0 and r["all"]["h0.01"]["pf"] is None and r["counts_toward_20_to_30"] is False
 assert one([.80, .82, .80, .84, .86, .88])["flips"] == 1 and one([.80, .82, .84, .86, .88, .90], dec=(.87, .89))["flips"] == 1          # an early flip and a flip caused by the decision candle both count

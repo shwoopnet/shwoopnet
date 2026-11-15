@@ -27,10 +27,14 @@ def favourite(b, a):
 def side_mid(c, side): return (c[0] + c[1]) / 2 if side == "yes" else 1 - (c[0] + c[1]) / 2
 
 
-def flips(path):
+def flips(path, literal=False):
+    """literal=False (PRIMARY, the decimal-exact words): a change is ignored when |x| <= 0.004 + 1e-9. literal=True (SENSITIVITY, the research code's plain floats): ignored only when abs(x) > 0.004 is false."""
     ch = [b - a for a, b in zip(path, path[1:])]
-    mv = [x for x in ch if abs(x) > MOVE + TOL]
+    mv = [x for x in ch if abs(x) > (MOVE if literal else MOVE + TOL)]
     return sum(1 for a, b in zip(mv, mv[1:]) if (a > 0) != (b > 0))
+
+
+def ambiguous(path): return any(abs(abs(b - a) - MOVE) <= TOL for a, b in zip(path, path[1:]))
 
 
 def load(path):
@@ -46,17 +50,19 @@ def load(path):
     return sha, markets, cands, dropped, incomplete
 
 
-def decide(cs, close):
+def decide(cs, close, literal=False):
+    """-> (kind, side, price, ambiguous); `ambiguous` is set for every path that reaches the flip test"""
     d = cs.get(close - LEFT)
-    if d is None: return ("nodecision", None, None)
-    if not valid_quote(*d): return ("badquote", None, None)
+    if d is None: return ("nodecision", None, None, False)
+    if not valid_quote(*d): return ("badquote", None, None, False)
     f = favourite(*d)
-    if f is None: return ("band", None, None)
+    if f is None: return ("band", None, None, False)
     side, price = f
     earlier = [cs[k] for k in sorted(cs) if k < close - LEFT]
-    if len(earlier) < MIN_EARLIER: return ("fewearlier", None, None)
-    if flips([side_mid(c, side) for c in earlier] + [side_mid(d, side)]) != 0: return ("flips", None, None)
-    return ("trade", side, price)
+    if len(earlier) < MIN_EARLIER: return ("fewearlier", None, None, False)
+    path = [side_mid(c, side) for c in earlier] + [side_mid(d, side)]; amb = ambiguous(path)
+    if flips(path, literal) != 0: return ("flips", None, None, amb)
+    return ("trade", side, price, amb)
 
 
 def cash_of(side, price, result, h):
@@ -75,26 +81,34 @@ def block(trades, h):
     return {"n": n, "wins": sum(1 for v in cs if v > 0), "net": sum(cs), "pf": pf(cs) if cs else None, "half1_pf": pf(f) if f else None, "half2_pf": pf(s) if s else None, "half1_net": sum(f), "half2_net": sum(s)}
 
 
-def run(path):
-    sha, markets, cands, dropped, incomplete = load(path)
-    cnt = {"markets_in_extract": len(markets), "other_series_ignored": 0, "excluded_result": 0, "considered": 0, "trades": 0, "nodecision": 0, "badquote": 0, "band": 0, "fewearlier": 0, "flips": 0,
-           "candles_dropped_after_close": dropped, "candles_dropped_incomplete": incomplete}
-    trades = []
+def variant(markets, cands, literal):
+    cnt = {"considered": 0, "trades": 0, "nodecision": 0, "badquote": 0, "band": 0, "fewearlier": 0, "flips": 0, "ambiguous_paths": 0}; trades = []
     for tk, series, close, result in markets:
-        if series not in SERIES: cnt["other_series_ignored"] += 1; continue
-        if result not in ("yes", "no"): cnt["excluded_result"] += 1; continue
+        if series not in SERIES or result not in ("yes", "no"): continue
         cnt["considered"] += 1
-        kind, side, price = decide(cands.get(tk, {}), close)
+        kind, side, price, amb = decide(cands.get(tk, {}), close, literal)
+        cnt["ambiguous_paths"] += 1 if amb else 0
         if kind != "trade": cnt[kind] += 1; continue
         trades.append({"close": close, "tk": tk, "series": series, "cash": {h: cash_of(side, price, result, h) for h in HAIRCUTS}})
     trades.sort(key=lambda t: (t["close"], t["tk"])); cnt["trades"] = len(trades)
-    out = {"extract_sha256": sha, "counts": cnt, "label": "upper bound, not fill-checked; fee mode per-order rounded", "all": {"h%.2f" % h: block(trades, h) for h in HAIRCUTS}, "by_series_information_only": {}}
+    out = {"counts": cnt, "all": {"h%.2f" % h: block(trades, h) for h in HAIRCUTS}, "by_series_information_only": {}}
     for s in SERIES:
         ts = [t for t in trades if t["series"] == s]
         if ts: out["by_series_information_only"][s] = {"h0.01": block(ts, 0.01), "h0.02": block(ts, 0.02)}
     ge = lambda x, y: x is not None and x >= y - TOL
     r1, r2 = out["all"]["h0.01"], out["all"]["h0.02"]
     out["counts_toward_20_to_30"] = bool(ge(r1["pf"], BAR_PF1) and ge(r1["half1_pf"], BAR_HALF) and ge(r1["half2_pf"], BAR_HALF) and ge(r2["pf"], BAR_PF2))
+    return out
+
+
+def run(path):
+    sha, markets, cands, dropped, incomplete = load(path)
+    base = {"markets_in_extract": len(markets), "other_series_ignored": sum(1 for m in markets if m[1] not in SERIES), "excluded_result": sum(1 for m in markets if m[1] in SERIES and m[3] not in ("yes", "no")),
+            "candles_dropped_after_close": dropped, "candles_dropped_incomplete": incomplete}
+    prim = variant(markets, cands, False); sens = variant(markets, cands, True)
+    prim["counts"] = {**base, **prim["counts"]}; sens["counts"] = {**base, **sens["counts"]}
+    out = {"extract_sha256": sha, "label": "upper bound, not fill-checked; fee mode per-order rounded", "flip_move_reading_primary": "a minute change is ignored when |x| <= 0.004 + 1e-9 (the decimal-exact words)", **prim,
+           "sensitivity_literal_float": {"reading": "a minute change is ignored only when abs(x) > 0.004 is false in plain floats (the research code)", **sens}}
     out["primary_haircut_note"] = "C8: the decision candle is 360 s before the close, so 1c is primary and 2c is printed; C11: an NC15-type series takes 2c primary, so the per-series rows carry 1c and 2c"
     return out
 
