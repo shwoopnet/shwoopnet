@@ -22,6 +22,6 @@ Expected, bucket 300, band 10, any exit:
 3. side favourite, filter vol3 up: ENTRY (YES, $0.52). side favourite, filter oi6 flat: no entry.
 4. band 9 (45c to 49c): no entry for any side (asks are 52c and 50c); band 10 only.
 5. Spread terciles: SEARCH spreads at this bucket [1, 2, 2, 3, 4, 5] cents: n 6, c1 = the 2nd value = 2, c2 = the 4th value = 3; this window (spread 2) is "low"; a spread of 3 would be "mid" and 4 "high". Rule (cheap, spread low) ENTRY; (cheap, spread high) no entry.
-6. Window W2, the same candles without the candle ending C-600: oi3, oi6, vol3 and mom1 and mom3 still computable; mom5 and vol3 (needs C-600) are not: rules with filter mom5 or vol3 are no entry, counted "missing feature candle" (2 of the 22 filter options; vol3 needs ends C-600, C-540, C-480 for its second sum and C-420, C-360, C-300 for the first, so it needs C-600).
+6. Window W2, the same candles without the candle ending C-600: oi3, oi6, vol3 and mom1 and mom3 still computable; mom5 and vol3 (needs C-600) are not: rules with filter mom5 or vol3 are no entry, counted "missing feature candle" (6 of the 22 filter options: vol3 up, flat, down and mom5 up, flat, down; vol3 needs ends C-600, C-540, C-480 for its second sum and C-420, C-360, C-300 for the first, so it needs C-600).
 7. Counting: 13 x 18 x 4 x 6 x 22 = 123,552 rules for this one series, all tried.
 8. Buckets: with a candle ending at C-240 (bucket 240) there is a separate entry candle for the bucket 240 rules; bucket 300's features never use the C-240 candle (it ends after e).
