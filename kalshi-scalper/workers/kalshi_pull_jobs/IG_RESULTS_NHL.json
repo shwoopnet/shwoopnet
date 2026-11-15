@@ -1,0 +1,63 @@
+{
+ "job_id": "IG_RESULTS_NHL",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/ingame1/INGAME_CARDS_NOV15.md",
+ "purpose": "Settled results of NHL moneyline and totals markets closing 2026-11-08 to 2026-11-12, for the in-game quick reads IGFADE1 (NHL only) and IGUNDER1 (NHL totals).",
+ "heldout": "none read: capped at max_close_ts 1794527999 (2026-11-12T23:59:59Z), before the cards' third 3; NHLOT holds nothing (Desk B, 21:28Z), W-CAT-SPORTS1, FAMSPORTS and USWEEP2 released Nov 13; to be confirmed by Auditor B before dispatch.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNHLGAME",
+  "KXNHLTOTAL"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 6,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "settled_KXNHLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLGAME",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNHLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLTOTAL",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  }
+ ]
+}
