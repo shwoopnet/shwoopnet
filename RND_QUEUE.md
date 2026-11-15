@@ -911,3 +911,13 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 - SOCDERIV: box-edge, side and edge columns, team_total spelling settled; both builds re-freezing; no run yet.
 - Combo: CROWDLEG, NOTAKER, DECLINED QUOTE CLOSED (0 a day against 5). Owner: drop the rebuild; recorder runs to Nov 16 for S3's 3-day count, then off.
 - Tally of unique strategies above the cutoff: 0.
+
+## 2026-11-15 14:45Z, owner direction (via EA): widen research, lighter gate to paper (Head)
+- Goal: 5 live strategies at cash PF 1.3+.
+- 1. The owner's own manual trades first: Main pulls the manual fills (bot orders excluded), kept private (scratch only, never any repo); Refinement turns winners into replayable rules for paper. SPXSCALP and ESLEAD1 run today (Testing Desk, after Auditor B's differentials).
+- 2. Scalp exits everywhere: History Miner; fixed variants beside hold: take profit at 2x entry (or 90c), stop at half entry, time exit 3 min before close; each a try; haircut C1 to C11 with exit at bid minus h.
+- 3. All of Kalshi: Desk C (sports, politics, entertainment, mentions), Desk B (economics, weather), Desk A (price structure across all ladders); underdog bias, overreaction, late drift; census first.
+- 4. LIGHTER GATE (owner): an idea may start a PAPER record after ONE build plus Auditor B's quick sanity check (inputs, held-out cuts, no look-ahead). Two builds, Auditor B CLEAN and the uniqueness ruling apply only before live. Uniqueness is not a filter for paper.
+- Item 2 (old passes) after later verdicts: overturned NHL x3, HRSEAS1 weekend, PUB20 P06, GEN3, FALS3, CPI1, USWEEP, COUNT1. Recomputing from the V2 archive (branch research-data, verified; Forensics sole extractor): OIREL, FLIPS0-X, XRPFAV6/10, SEARCH1, HRSEAS1 night lull, BAND2, SPOTLEAD1. EXITREPLAY1 gold hold: fails the haircut (1c PF 1.005, half 2 0.645; build 1, n 76).
+- WH-NC15 places scoring daily from Nov 13 02:40Z. FOMCTEXT CLOSED (16b equal). OICORE 100 read NOT YET (16b equal; procedure breach recorded).
+- Tally: 0.
