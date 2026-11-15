@@ -24,3 +24,8 @@ The loader is underdog2x.load() reused unchanged (cuts, SOL cut, third-3 drop in
 - **C4:** a negative gap in both thirds is never a buy candidate. Selling is tested only on the mirror side's own row.
 
 **Neighbours:** a candidate at [0.20, 0.25) prints [0.15, 0.20) and [0.25, 0.30) of the same pool, look and side. At the ends ([0.00, 0.05) or [0.95, 1.00)) only the one neighbour exists.
+
+**Null expectation (Amendment 2):**
+- A bucket with 300 rows at ask 0.50 in each third: sd = sqrt(300 x 0.25) / 300 = 0.028868; threshold = fee(0.50) 0.02 + 0.02 = 0.04; z = 1.385641; P(one third) = 1 - Phi(1.385641) = 0.082931; P(both) = 0.006878.
+- A bucket under 300 in either third contributes 0 and is not eligible.
+- **Hand-case slip (disclosed, first test run):** I wrote P(one third) = 0.082931 and P(both) = 0.006878 from a rounded normal tail. The exact values are 1 - Phi(1.385641) = 0.082928 and P(both) = 0.006877. The test asserts the exact values to 1e-6. The example in the card's Amendment 2 (0.0829, 0.0069) stands as rounded.

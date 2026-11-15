@@ -42,3 +42,7 @@ k = "KXBTC15M|600|yes|04"
 assert k in r["candidates"] and set(r["table"][k]["neighbours"]) == {"KXBTC15M|600|yes|03", "KXBTC15M|600|yes|05"}, r["candidates"]
 assert r["table"][k]["third1"]["n"] == 1 and r["table"][k]["third2"]["n"] == 1 and r["buckets_inspected"] == 2400
 print("end to end: ok")
+s300 = C.stats([(0.50, True, 0.01)] * 300)
+assert abs(s300["p_pass_null"] - 0.082928) < 1e-6 and abs(s300["p_pass_null"] ** 2 - 0.006877) < 1e-6, s300["p_pass_null"]
+assert "expected_chance_candidates_null" in r and r["buckets_eligible_300_both"] >= 1
+print("null expectation: ok")

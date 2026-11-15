@@ -46,3 +46,13 @@ The table itself counts no try, but **the number of buckets inspected is printed
 ## Amendment 1 (the Head, 16:05Z: approved as written, GO on conditions)
 - Every candidate bucket is reported WITH its two neighbours (the buckets on either side, same series or pool, same look, same side), so a lone spike reads differently from a smooth slope. The print carries, for each candidate, the neighbours' n, win rate, mean ask and gap in each third.
 - Third 3 stays unread for any later rule card.
+
+## Amendment 2 (2026-11-15 ~16:25Z, Auditor B's points of 16:05Z, before the code is cleared and before any read)
+1. **Third 3 is shared with UNDERDOG2X.**
+   - UNDERDOG2X was FALSIFIED on development (0 of 60, recorded by the Head at 16:04Z), so it has no passing variant and its third 3 is NOT read. A rule card from CALIB1 would therefore be the FIRST read of third 3.
+   - The order is fixed: if UNDERDOG2X's third 3 were ever to be read, every CALIB1 candidate rule must first be registered (dated line, tries counted). After any read of third 3 for another card, a CALIB1 rule's read of it is a RE-USE, stated as such, and judged against a stricter bar set by the Head before that read.
+2. **Expected chance candidates under the null:**
+   - For each bucket with n >= 300 in both thirds, the code computes, assuming calibration (win probability = ask) and independent rows, P(pass third t) = 1 - Phi((fee_t + 0.02) / sd_t), with sd_t = sqrt(sum over rows of a(1 - a)) / n_t, and P(pass both) as the product of the two thirds.
+   - Summed over all such buckets, this is printed as "expected_chance_candidates_null", beside the number of eligible buckets and the number of candidates found.
+   - It UNDERSTATES the chance count, because rows are not independent (both sides of a market, three looks, markets of one window), and it is labelled so.
+   - Example: 300 rows at 0.50 in each third (fee 2c, threshold 4c): sd 0.0289, z 1.386, P(one third) 0.0829, P(both) 0.0069.

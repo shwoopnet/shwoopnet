@@ -48,8 +48,11 @@ def stats(rs):
         return {"n": 0}
     w = sum(1 for r in rs if r[1]); asks = [r[0] for r in rs]
     var = sum(a * (1 - a) for a in asks)
-    return {"n": n, "wins": w, "win_rate": w / n, "mean_ask": sum(asks) / n, "gap": w / n - sum(asks) / n,
-            "mean_fee1": sum(fee1(a) for a in asks) / n, "z": (w - sum(asks)) / math.sqrt(var) if var > 0 else None,
+    mfee = sum(fee1(a) for a in asks) / n
+    sd = math.sqrt(var) / n
+    p_null = 1 - 0.5 * (1 + math.erf(((mfee + 0.02) / sd) / math.sqrt(2))) if sd > 0 else 0.0
+    return {"n": n, "wins": w, "p_pass_null": p_null, "win_rate": w / n, "mean_ask": sum(asks) / n, "gap": w / n - sum(asks) / n,
+            "mean_fee1": mfee, "z": (w - sum(asks)) / math.sqrt(var) if var > 0 else None,
             "median_spread": statistics.median(r[2] for r in rs)}
 
 
@@ -77,6 +80,7 @@ def run(folder):
                 cells[(pool, L, side, bucket(ask), th)].append((ask, won, spr))
     pools = sorted(U.THIRDS) + ["POOLED"]
     table, cands = {}, []
+    eligible, exp_null = 0, 0.0
     for pool in pools:
         for L in LOOKS:
             for side in ("yes", "no"):
@@ -85,6 +89,8 @@ def run(folder):
                     both = stats(cells.get((pool, L, side, b, 1), []) + cells.get((pool, L, side, b, 2), []))
                     key = "%s|%d|%s|%02d" % (pool, L, side, b)
                     table[key] = {"bucket": [b / 20, (b + 1) / 20], "third1": t1, "third2": t2, "thirds12": both}
+                    if t1.get("n", 0) >= MIN_N and t2.get("n", 0) >= MIN_N:
+                        eligible += 1; exp_null += t1["p_pass_null"] * t2["p_pass_null"]
                     if candidate(t1, t2):
                         cands.append(key)
     for key in cands:
@@ -93,7 +99,10 @@ def run(folder):
         table[key]["neighbours"] = {k: table[k] for k in ("%s|%s|%s|%02d" % (pool, L, side, x) for x in (b - 1, b + 1)) if k in table}
     return {"label": "CALIB1 calibration census, thirds 1 and 2 only; descriptive; no try counted; rows not independent (both sides of a market, three looks)",
             "dropped_before_read": dropped, "markets_read": len(mk), "counts": dict(counts),
-            "buckets_inspected": len(pools) * len(LOOKS) * NB * 2, "candidates": cands, "table": table}
+            "buckets_inspected": len(pools) * len(LOOKS) * NB * 2, "buckets_eligible_300_both": eligible,
+            "expected_chance_candidates_null": exp_null,
+            "expected_chance_note": "assumes calibration and independent rows; UNDERSTATES the chance count (rows are not independent)",
+            "candidates": cands, "table": table}
 
 
 if __name__ == "__main__":
