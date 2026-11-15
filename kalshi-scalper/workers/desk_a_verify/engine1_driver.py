@@ -50,9 +50,9 @@ def bh(pvals, m, alpha=ALPHA):
     return {key for key, _ in items[:k]}
 def run(markets_by_source):
     """markets_by_source: {source: {series: [market]}}. Returns a report dict (counts first)."""
-    rep = {"no_split_constant": [], "disclosure": DISCLOSURE, "tried_by_series": {}, "non_whole_cent_entries": 0, "entries_total": 0}
+    rep = {"no_split_constant": [], "disclosure": DISCLOSURE, "tried_by_series": {}, "search_entries_total": 0, "search_non_whole_cent_entries": 0, "validate_entries_total": 0, "validate_non_whole_cent_entries": 0}
     search, valid = {}, {}
-    st = {"entries": 0, "non_whole": 0}; total = 0; seen = set(); rep["duplicate_tickers_dropped"] = 0
+    st = {"entries": 0, "non_whole": 0}; stv = {"entries": 0, "non_whole": 0}; total = 0; seen = set(); rep["duplicate_tickers_dropped"] = 0
     for src, bys in markets_by_source.items():
         for series, mk in bys.items():
             if short(series) not in S.LAST_SEARCH: rep["no_split_constant"].append((src, series)); continue
@@ -68,8 +68,8 @@ def run(markets_by_source):
                 sp = [N.cents(c[2] - c[1]) for m in sm for c in m["candles"] if c[0] == m["close"] - b and 0 < c[1] < c[2] < 1]
                 cuts[b] = N.spread_cuts(sp) if sp else None
             rep["tried_by_series"][(src, series)] = N.RULES_PER_SERIES; total += N.RULES_PER_SERIES
-            search[(src, series)] = (groups(sm, cuts, st), cuts); valid[(src, series)] = vm
-    rep["entries_total"] = st["entries"]; rep["non_whole_cent_entries"] = st["non_whole"]
+            search[(src, series)] = (groups(sm, cuts, st), cuts); valid[(src, series)] = groups(vm, cuts, stv)
+    rep["search_entries_total"] = st["entries"]; rep["search_non_whole_cent_entries"] = st["non_whole"]; rep["validate_entries_total"] = stv["entries"]; rep["validate_non_whole_cent_entries"] = stv["non_whole"]
     rep["combos_tried_m"] = total                                              # printed before any result
     s_pass, s_p = {}, {}
     for key, (g, cuts) in search.items():
@@ -84,7 +84,7 @@ def run(markets_by_source):
     for k, _ in s_pass.items():
         src, series, b, band, rs, filt, x = k
         g, cuts = search[(src, series)]
-        vg = groups(valid[(src, series)], cuts)
+        vg = valid[(src, series)]
         items = vg.get((b, band, rs, filt), [])
         if len(items) < MIN_N: continue
         agg, p = score_group(items, x)
