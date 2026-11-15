@@ -1,0 +1,3 @@
+SPXSCALP build 2 (spxscalp_second.py 4e933a63, commit 62a2f6d3) and ESLEAD1 build 2 (eslead1_second.py a64918ba, commit 630c1816), each run once Nov 15 on lists SPXOI1_LISTS/2026-11-14T0101Z_43537940232, candles SPXOI1_CANDLES/2026-11-14T0107Z_43538584524 plus SPXOI1_CANDLES_PATCH/2026-11-14T0124Z_43540387136, ES file sha256 0142d6e5fda96579951e24eda0bddaea1e0708f0c63b67a21ff31f141d1495c2 (the file itself is Databento-derived and is in no repo).
+sha256 of the SPXSCALP printout (kept in scratch, not in the repo): ed3c68bb822fb38c2bfe9edd626b43ebd0454446cb08f2e46132bd9371550a27
+sha256 of the ESLEAD1 printout (kept in scratch, not in the repo): dde500d905ecd4767fe2135ae11f56ca32fd636ade4a0713ae9cbf19aa2276ef
