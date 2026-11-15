@@ -98,6 +98,7 @@ with tempfile.TemporaryDirectory() as root:
     quotes(root, "2026-11-13", "1230", [row("LT", 0.70, T0 + 1800000, legcell="KXRAINSF-Z:yes")])
     fs = {f["ticker"]: f for f in fills_of(root)}
     assert s.is_weather(fs["WX"]) and not s.is_weather(fs["NW"]) and fs["UK"]["legs"] is None and fs["LT"]["legs"] == ["KXRAINSF-Z"] and fs["NW"]["legs"] == ["KXNBAGAME-A-B", "KXMLBGAME-C-D"]
+    assert fs["NW"]["legs_complete"] is False and fs["WX"]["legs_complete"] is True and fs["LT"]["legs_complete"] is True and fs["UK"]["legs_complete"] is False
 # 13. refusals and 14. printed output
 with tempfile.TemporaryDirectory() as root:
     quotes(root, "2026-11-13", "1200", [row("SECRETTICKER1", 0.79, T0, close_after_s=86400)]); results(root, "2026-11-15", "0000", [("SECRETTICKER1", "no")])
@@ -142,4 +143,21 @@ assert s.WEATHER == ("KXHIGH", "KXLOW", "KXTEMP", "KXRAIN", "KXSNOW", "KXHURR", 
 fs = [dict(cf(-0.5, cost=0.5, i=i, day=i), paper=-2.05) for i in range(20)]; assert s.evaluate(fs, "dev")["kill1_at"] == 20
 fs = [dict(cf(-0.5, cost=0.5, i=i, day=i), paper=-1.9) for i in range(30)]; assert s.evaluate(fs, "dev")["kill1_at"] == 22
 fs = [dict(cf(-0.5, cost=0.5, i=i, day=i), paper=-2.0) for i in range(20)]; assert s.evaluate(fs, "dev")["kill1_at"] is None
+# ---- addendum 1: incomplete leg lists ----
+def lg_case(cells):
+    with tempfile.TemporaryDirectory() as root:
+        for i, cell in enumerate(cells):
+            quotes(root, "2026-11-13", "%02d00" % (12 + i), [row("INC", 0.70, T0 + i * 3600000, legcell=cell)])
+        fs = fills_of(root); assert len(fs) == 1; f = fs[0]
+        known = f["legs"] and f["legs_complete"] and not s.is_weather(f)
+        return f["legs"], f["legs_complete"], bool(known), s.is_weather(f)
+assert lg_case(["KXNBAGAME-A-B:yes|KXMLBGAME-C-D:no|..."]) == (["KXNBAGAME-A-B", "KXMLBGAME-C-D"], False, False, False)          # (a)
+assert lg_case(["KXNBAGAME-A-B:yes|KXMLBGAME-C-D:no|...", "KXNBAGAME-A-B:yes|KXMLBGAME-C-D:no|KXNFLGAME-E-F:yes"]) == (["KXNBAGAME-A-B", "KXMLBGAME-C-D", "KXNFLGAME-E-F"], True, True, False)          # (b)
+assert lg_case(["KXHIGHNY-X:yes|..."]) == (["KXHIGHNY-X"], False, False, True)          # (c)
+assert lg_case(["KXNBAGAME-A-B:yes|KXMLBGAME-C-D:no", "KXNBAGAME-A-B:yes|..."]) == (["KXNBAGAME-A-B", "KXMLBGAME-C-D"], True, True, False)          # (d)
+assert lg_case(["|..."]) == (None, False, False, False) and lg_case([""]) == (None, False, False, False)          # (e)
+with tempfile.TemporaryDirectory() as root:
+    quotes(root, "2026-11-13", "1200", [row("I1", 0.70, T0, legcell="KXNBAGAME-A-B:yes|..."), row("I2", 0.70, T0, legcell="KXNBAGAME-A-B:yes|KXMLBGAME-C-D:no"), row("I3", 0.70, T0), row("I4", 0.70, T0, legcell="KXHIGHNY-X:yes|...")])
+    out = "\n".join(s.run("dev", "2026-11-26T00:00:00Z", root)); assert "legs incomplete (a cut list; in the all-combos line only): 2" in out and "combos with no stored legs (in the all-combos line only): 1" in out
+    assert "paper fills 4," in out.split("COMBOS WITH LEGS KNOWN")[0] and "paper fills 1," in out.split("COMBOS WITH LEGS KNOWN")[1]
 print("s3 build 2 tests passed")

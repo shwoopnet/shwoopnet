@@ -89,7 +89,9 @@ def walk(root, mode):
         rows = read_rows(path, REQ_Q)
         for r in rows:
             tk = (r.get("ticker") or "").strip(); lg = parse_legs(r.get("leg_tickers"))
-            if tk and lg and tk not in legs: legs[tk] = lg
+            if tk and lg:
+                complete = not (r.get("leg_tickers") or "").strip().endswith("...")
+                if tk not in legs or (not legs[tk][1] and complete): legs[tk] = (lg, complete)          # the first complete list wins; with none, the first incomplete one
         cands = []
         for r in rows:
             q = qualify(r)
@@ -104,7 +106,7 @@ def walk(root, mode):
             fills.append({"ticker": tk, "event": ev, "ts": ts, "close": close, "p": p, "cost": cost_of(p)})
     fills = [f for f in fills if f["ts"] >= rs]
     fills.sort(key=lambda f: (f["ts"], f["ticker"]))
-    for f in fills: f["legs"] = legs.get(f["ticker"])
+    for f in fills: f["legs"], f["legs_complete"] = legs.get(f["ticker"], (None, False))
     return fills
 
 
@@ -201,13 +203,14 @@ def run(mode, asof, root):
                 "paper fills %d, due %d, settled %d, unresolved %d, wins among the settled %d, cash PF so far %s, net per dollar so far %s" % (
                     len(fills), sum(1 for f in fills if f["due"]), len(S), sum(1 for f in fills if f["status"] == "unresolved"), sum(1 for f in S if f["net"] > 0),
                     "n/a" if not S else ("inf" if pf([f["net"] for f in S]) == math.inf else "%.6f" % pf([f["net"] for f in S])), "n/a" if not S else "%.6f" % npd(S))]
-    allo = evaluate(fills, mode); known = [f for f in fills if f["legs"] and not is_weather(f)]; nw = evaluate(known, mode)
+    allo = evaluate(fills, mode); known = [f for f in fills if f["legs"] and f["legs_complete"] and not is_weather(f)]; nw = evaluate(known, mode)
     lines = ["S3 build 2, %s read, as-of %s" % (mode, asof)] + render_block("ALL COMBOS (the registered line)", allo) + render_block("COMBOS WITH LEGS KNOWN AND NO WEATHER LEG", nw, tag=True)
     cnt = {}
     for f in fills:
         for l in (f["legs"] or []): cnt[l.split("-")[0]] = cnt.get(l.split("-")[0], 0) + 1
     lines.append("leg series seen over the paper fills (each leg of each fill once): " + (", ".join("%s %d" % (k, cnt[k]) for k in sorted(cnt)) or "none"))
     lines.append("combos with no stored legs (in the all-combos line only): %d" % sum(1 for f in fills if not f["legs"]))
+    lines.append("legs incomplete (a cut list; in the all-combos line only): %d" % sum(1 for f in fills if f["legs"] and not f["legs_complete"]))
     return lines
 
 
