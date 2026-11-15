@@ -21,11 +21,15 @@ def decide(rule, candles, close_ts):
     if pick is None: return ("skip", "no_candle")
     b, a = _num(cs[pick][0]), _num(cs[pick][1])
     if b is None or a is None or b <= 0 or a >= 1 or a <= b: return ("skip", "bad_quote")
-    if R["maxspread"] is not None and a - b > R["maxspread"] + EPS: return ("skip", "spread")
+    tol = 0
+    if R["maxspread"] is not None:
+        if a - b > R["maxspread"] + EPS: return ("skip", "spread")
+        tol += a - b > R["maxspread"]                                                    # traded here only because of the 1e-9 tolerance (regime_b2 skips it)
     ysp, nsp = a, 1 - b
     side, p = ("yes", ysp) if ysp >= nsp else ("no", nsp)
     if not (R["lo"] - EPS <= p <= R["hi"] + EPS): return ("skip", "band")
-    return ("trade", side, p)
+    tol += not (R["lo"] <= p <= R["hi"])
+    return ("trade", side, p, bool(tol))
 def cash(side, result, p, h):
     price = min(0.99, p + h); win = 1 if result == side else 0
     return SIZE * (win - price) - fee_up_order(price)
@@ -34,13 +38,13 @@ def run(db):
     mk = c.execute("select ticker, close_ts, result from market where series='KXXRP15M' order by close_ts").fetchall()
     cand = collections.defaultdict(dict)
     for tk, e, b, a in c.execute("select ticker,end_ts,bid_c,ask_c from candle"): cand[tk][int(e)] = (b, a)
-    out = {"label": "upper bound, not fill-checked; fee mode per-order rounded"}
+    out = {"label": "upper bound, not fill-checked; fee mode per-order rounded; CUT-WINDOW RECOMPUTE, not a reproduction of 481 / 358", "differences_from_regime_b2": "(1) picks the last candle in range THEN skips it if incomplete (regime_b2 drops incomplete candles first); (2) 1e-9 tolerance on spread and band (regime_b2 plain comparisons); (3) no n_candles filter", "excluded_tickers_dropped": "0 of the 28 (none present)"}
     for rule in RULES:
         trades, cnt = [], collections.Counter()
         for tk, close_ts, result in mk:
             if result not in ("yes", "no"): cnt["no_result"] += 1; continue
             d = decide(rule, cand.get(tk, {}), int(close_ts))
-            if d[0] == "trade": trades.append((int(close_ts), d[1], d[2], result)); cnt["trade"] += 1
+            if d[0] == "trade": trades.append((int(close_ts), d[1], d[2], result)); cnt["trade"] += 1; cnt["trade_on_1e-9_tolerance"] += d[3]
             else: cnt[d[1]] += 1
         trades.sort(); res = {"n": len(trades), "counts": dict(cnt)}
         for h in HAIRCUTS:
