@@ -85,3 +85,14 @@ Taken from the cards' own files; they are not re-read here.
 1. Ask the VA which of the three effects on which of these families are not yet covered.
 2. Then write paper cards with a fixed held-out date (the owner's lighter gate: one build plus Auditor B's quick check).
 3. Size the first candle pull at 12 a minute, with files under 470 requests, for Main to dispatch.
+
+## KXNBAPTS (O) and (L): not written (Nov 15, 2026, 14:45Z)
+
+Counts: 2 rules proposed, 0 NEW, 2 VERSION, 0 cards, 0 job files, 0 Kalshi requests, 0 tries.
+- The VA ruled (O), fading a large pre-game move on 40c to 60c rungs, a VERSION of the displacement-fade family (SNAPBACK1, SPIKE1, SWING1, SCALP2, LADFADE). Only the market is new.
+- The VA ruled (L), following the last hour's pre-game move, a VERSION of PREMOVE and the momentum-follow family.
+- Neither counts toward the owner's unique list. The Head's dates for KXNBAPTS stay on record:
+  - development closes Oct 21 to before Nov 6;
+  - Nov 6 to before Nov 13 is PROPUNDER's reserve and is never pulled;
+  - held-out closes Nov 13 to before Dec 4.
+- The Head decides whether either rule goes ahead as a version anyway. If it does, the disclosure lists PROPS1's frozen cut (Oct 3), prints the two-sided share and applies haircut d3b5f24e.
