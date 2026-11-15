@@ -17,3 +17,11 @@ Common: two-sided means 0 < yes_bid < yes_ask < 1. YES ask = yes_ask, NO ask = 1
 - Counterparty: fans buying overs in-game; prediction: NO wins more than its price implies, PF at 2c >= 1.3. Kill: PF at 2c under 1.0.
 
 Tries tonight: 2 (one per card).
+
+## Amendment 1 (2026-11-15 ~21:45Z): Auditor B's dated line (21:23Z), before any read
+- Readable: NBA rows and events before 2026-11-13T00:00:00Z (INGAMELAG1 reserves NBA from then on); NHL and NFL Nov 8 to Nov 15 entire. Nothing else.
+- Thirds, by the market's close time (from the settled listing), the same for both cards and separate from INGAMELAG1's: third 1 = 2026-11-08T00:00Z (1794096000) to 2026-11-11T00:00Z (1794355200); third 2 = to 2026-11-13T00:00Z (1794528000); third 3 = from 2026-11-13T00:00Z, NHL and NFL only, HELD OUT, read once, and NOT listed or read in this quick read. NBA has no third 3 here.
+- Quick read uses thirds 1 and 2 only; recorder rows with t_recv on or after 2026-11-13T00:00Z are dropped before any price is read, and so is any market whose close is on or after that time.
+- Bar replaces the halves: PF at 2c >= 1.3 pooled, and >= 1.0 in third 1 and in third 2 separately, n >= 100 over thirds 1 and 2.
+- Tip-off (IGUNDER1 only): "game live" is the first moneyline poll pair no more than 45 s apart, i.e. the recorder's hot cadence, which starts on a 2c move; never the result or the final price. IGFADE1 uses no tip-off.
+- Results: job IG_RESULTS (settled listing, closes 1794096000 to 1794527999 only), dispatched by Main.
