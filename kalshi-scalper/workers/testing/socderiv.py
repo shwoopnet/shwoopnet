@@ -142,70 +142,77 @@ def p_winner(l1, l2, N=40):
     return h, d, a
 
 
+def pmf3(l, N):
+    """p_n, dp_n/dl = p_(n-1) - p_n, d2p_n/dl2 = p_(n-2) - 2 p_(n-1) + p_n for n = 0..N-1 (p_(-1) = p_(-2) = 0)."""
+    e = math.exp(-l); p = [e * l ** n / _FACT[n] for n in range(N)]
+    d = [(p[n - 1] if n >= 1 else 0.0) - p[n] for n in range(N)]
+    dd = [(p[n - 2] if n >= 2 else 0.0) - 2 * (p[n - 1] if n >= 1 else 0.0) + p[n] for n in range(N)]
+    return p, d, dd
+
+
+def model_derivs(a, b, wm, tm, N=40):
+    """Residuals r (home, draw, away, then P(N > k) per total strike, each minus its mid), the Jacobian rows (dr/da, dr/db) and the Hessian rows (d2r/da2, d2r/dadb, d2r/db2): analytic, on the 40-goal sums (addendum 6)."""
+    p1, d1, e1 = pmf3(a, N); p2, d2, e2 = pmf3(b, N)
+    def cum(x):
+        out, run = [], 0.0
+        for v in x: run += v; out.append(run)
+        return out
+    c2, dc2, ec2 = cum(p2), cum(d2), cum(e2)
+    def hsum(u, w): return sum(u[i] * w[i - 1] for i in range(1, N))          # sum_i u[i] * cum(second)[i-1]
+    def dsum(u, w): return sum(u[i] * w[i] for i in range(N))
+    S1, S2 = sum(p1), sum(p2); dS1, dS2, eS1, eS2 = sum(d1), sum(d2), sum(e1), sum(e2)
+    H = hsum(p1, c2); D = dsum(p1, p2); A = S1 * S2 - H - D
+    Ha, Hb = hsum(d1, c2), hsum(p1, dc2); Da, Db = dsum(d1, p2), dsum(p1, d2); Aa, Ab = dS1 * S2 - Ha - Da, S1 * dS2 - Hb - Db
+    Haa, Hbb, Hab = hsum(e1, c2), hsum(p1, ec2), hsum(d1, dc2); Daa, Dbb, Dab = dsum(e1, p2), dsum(p1, e2), dsum(d1, d2)
+    Aaa, Abb, Aab = eS1 * S2 - Haa - Daa, S1 * eS2 - Hbb - Dbb, dS1 * dS2 - Hab - Dab
+    r = [H - wm[0], D - wm[1], A - wm[2]]; J = [(Ha, Hb), (Da, Db), (Aa, Ab)]; Hs = [(Haa, Hab, Hbb), (Daa, Dab, Dbb), (Aaa, Aab, Abb)]
+    lam = a + b; pl = [math.exp(-lam) * lam ** n / math.factorial(n) for n in range(0, int(max([kk for kk, _ in tm] + [1])) + 2)]
+    for kk, v in tm:
+        k_ = int(kk); tail = 1 - sum(pl[:k_ + 1]); d_ = pl[k_]; dd_ = (pl[k_ - 1] if k_ >= 1 else 0.0) - pl[k_]
+        r.append(tail - v); J.append((d_, d_)); Hs.append((dd_, dd_, dd_))
+    return r, J, Hs
+
+
+def grad_hess(a, b, wm, tm):
+    r, J, Hs = model_derivs(a, b, wm, tm)
+    g = [2 * sum(ri * Ji[0] for ri, Ji in zip(r, J)), 2 * sum(ri * Ji[1] for ri, Ji in zip(r, J))]
+    Hm = [[2 * (sum(Ji[0] * Ji[0] for Ji in J) + sum(ri * h[0] for ri, h in zip(r, Hs))), 2 * (sum(Ji[0] * Ji[1] for Ji in J) + sum(ri * h[1] for ri, h in zip(r, Hs)))],
+          [0.0, 2 * (sum(Ji[1] * Ji[1] for Ji in J) + sum(ri * h[2] for ri, h in zip(r, Hs)))]]; Hm[1][0] = Hm[0][1]
+    return sum(x * x for x in r), g, Hm
+
+
+GRAD_TOL = 1e-12
+
+
 def polish(err, best, wm, tm, NMAX, cap=POLISH_CAP):
-    """Levenberg-Marquardt / Gauss-Newton polish of the least-squares fit from the grid's best point (the same objective as err; rates kept inside [0.01, 6.0]): central-difference Jacobian, a step is never accepted if it raises the sum of squares or leaves the box; stops when the step is under 1e-13, or the SSE improves by less than 1e-13 relative, or after `cap` iterations (default 200). Returns (sse, a, b, iterations, cap_hit). SOCDERIV_FIT_ADDENDUM.md addendum 2."""
-    def resid(a, b):
-        h, d, c = p_winner(a, b); lam = a + b; e = math.exp(-lam); cdf, run = {}, 0.0
-        for n in range(0, NMAX + 1): run += e * lam ** n / math.factorial(n); cdf[n] = run
-        return [h - wm[0], d - wm[1], c - wm[2]] + [(1 - cdf[int(kk)]) - v for kk, v in tm]
-    sse0, a, b = best; mu = 1e-9; iters = 0; stopped = False
-    for _ in range(cap):
-        iters += 1; da = db = 0.0; old = sse0
-        r = resid(a, b); hh = 1e-6
-        ja = [(x - y) / (2 * hh) for x, y in zip(resid(a + hh, b), resid(a - hh, b))]; jb = [(x - y) / (2 * hh) for x, y in zip(resid(a, b + hh), resid(a, b - hh))]
-        saa = sum(x * x for x in ja); sbb = sum(x * x for x in jb); sab = sum(x * y for x, y in zip(ja, jb)); ga = sum(x * y for x, y in zip(ja, r)); gb = sum(x * y for x, y in zip(jb, r))
-        moved = False
+    """SOCDERIV_FIT_ADDENDUM.md addendum 6 (the Head, Nov 15 14:19Z): active-set Newton on the sum of squares with ANALYTIC gradient and Hessian (second-derivative term included), from the grid's best point. A rate exactly at a bound of [0.01, 6.0] whose gradient points out of the box is fixed (1-D Newton on the other); both fixed: stop. Stops only when each free rate's |gradient| is under 1e-12; cap `cap` iterations. A candidate is clipped to the box; a step that raises the SSE by more than 1e-15 relative or a Hessian that is not positive definite is damped (mu on the diagonal, x10, 30 tries). Returns (sse, a, b, iterations, cap_hit, on_bound)."""
+    _, a, b = best; sse0 = grad_hess(a, b, wm, tm)[0]; iters = 0; stopped = False; mu0 = 0.0
+    def fixed_flags(a_, b_, g_):
+        fa = (abs(a_ - BOX_LO) < 1e-15 and g_[0] > 0) or (abs(a_ - BOX_HI) < 1e-15 and g_[0] < 0)
+        fb = (abs(b_ - BOX_LO) < 1e-15 and g_[1] > 0) or (abs(b_ - BOX_HI) < 1e-15 and g_[1] < 0)
+        return fa, fb
+    while True:
+        s_, g, Hm = grad_hess(a, b, wm, tm); fa, fb = fixed_flags(a, b, g)
+        free = [i for i, f in ((0, fa), (1, fb)) if not f]
+        if not free or max(abs(g[i]) for i in free) < GRAD_TOL: stopped = True; break
+        if iters >= cap: break
+        iters += 1; mu = mu0; moved = False
         for _try in range(30):
-            A, B, D = saa * (1 + mu), sab, sbb * (1 + mu); det = A * D - B * B
-            if det <= 0: mu *= 10; continue
-            da, db = -(D * ga - B * gb) / det, -(A * gb - B * ga) / det
-            na, nb = a + da, b + db
-            if BOX_LO <= na <= BOX_HI and BOX_LO <= nb <= BOX_HI:
-                ne = sum(x * x for x in resid(na, nb))
-                if ne <= sse0:
-                    a, b, sse0, mu, moved = na, nb, ne, max(mu / 10, 1e-12), True; break
-            mu *= 10
-        if not moved or max(abs(da), abs(db)) < POLISH_TOL or old <= 0 or (old - sse0) / old < POLISH_TOL: stopped = True; break
-    return boundary_stage(resid, sse0, a, b, iters, not stopped, cap)
-
-
-def boundary_stage(resid, sse2, a, b, iters, cap_hit, cap, stub=None):
-    """SOCDERIV_FIT_ADDENDUM.md addendum 5 (the History Miner's text, confirmed by the Head for both builds): a rate within 1e-12 of 0.01 or 6.0 whose SSE gradient points out of the box is set exactly to that bound and held, and the other rate is polished alone (1-D Levenberg-Marquardt) with the same stops; the cap of `cap` iterations is shared with the 2-D passes; both on bounds: nothing is iterated; used only if its SSE is not above the 2-D SSE + 1e-15. Returns (sse, a, b, iterations, cap_hit, on_bound)."""
-    sse_of = lambda x, y: sum(v * v for v in resid(x, y))
-    def grad(x, y, which):
-        hh = 1e-6; r0 = x if which == 0 else y
-        f = (lambda v: sse_of(v, y)) if which == 0 else (lambda v: sse_of(x, v))
-        if r0 - hh < BOX_LO: return (f(r0 + hh) - f(r0)) / hh
-        if r0 + hh > BOX_HI: return (f(r0) - f(r0 - hh)) / hh
-        return (f(r0 + hh) - f(r0 - hh)) / (2 * hh)
-    def on_bound(r, which):
-        lo, hi = abs(r - BOX_LO) < 1e-12, abs(r - BOX_HI) < 1e-12
-        if not (lo or hi): return None
-        g = grad(a, b, which)
-        if lo and g > 0: return BOX_LO
-        if hi and g < 0: return BOX_HI
-        return None
-    ba, bb = on_bound(a, 0), on_bound(b, 1)
-    if ba is None and bb is None: return (sse2, a, b, iters, cap_hit, False)
-    if ba is not None and bb is not None: return (sse_of(ba, bb), ba, bb, iters, cap_hit, True)
-    free_is_b = ba is not None; fixed = ba if free_is_b else bb; x = b if free_is_b else a
-    rr = (lambda v: resid(fixed, v)) if free_is_b else (lambda v: resid(v, fixed))
-    sse1 = sum(v * v for v in rr(x)); mu = 1e-9; it = iters; stopped = False
-    while it < cap:
-        it += 1; old = sse1; hh = 1e-6; r = rr(x)
-        xp, xm = min(x + hh, BOX_HI), max(x - hh, BOX_LO); j = [(u - w) / (xp - xm) for u, w in zip(rr(xp), rr(xm))]
-        jj = sum(v * v for v in j); g = sum(u * w for u, w in zip(j, r)); moved = False; dx = 0.0
-        for _try in range(30):
-            if jj <= 0: break
-            dx = -g / (jj * (1 + mu)); nx = x + dx
-            if BOX_LO <= nx <= BOX_HI:
-                ne = sum(v * v for v in rr(nx))
-                if ne <= sse1: x, sse1, mu, moved = nx, ne, max(mu / 10, 1e-12), True; break
-            mu *= 10
-        if not moved or abs(dx) < POLISH_TOL or old <= 0 or (old - sse1) / old < POLISH_TOL: stopped = True; break
-    out = (sse1, fixed, x, it, not stopped, True) if free_is_b else (sse1, x, fixed, it, not stopped, True)
-    if stub is not None: out = stub
-    return out if out[0] <= sse2 + 1e-15 else (sse2, a, b, iters, cap_hit, False)
+            if len(free) == 2:
+                A_, B_, D_ = Hm[0][0] * (1 + mu) + mu, Hm[0][1], Hm[1][1] * (1 + mu) + mu; det = A_ * D_ - B_ * B_
+                if det <= 0 or A_ <= 0: mu = max(mu * 10, 1e-9); continue
+                da, db = -(D_ * g[0] - B_ * g[1]) / det, -(A_ * g[1] - B_ * g[0]) / det
+            else:
+                i = free[0]; h_ = Hm[i][i] * (1 + mu) + mu
+                if h_ <= 0: mu = max(mu * 10, 1e-9); continue
+                da, db = (-g[0] / h_, 0.0) if i == 0 else (0.0, -g[1] / h_)
+            na, nb = min(max(a + da, BOX_LO), BOX_HI), min(max(b + db, BOX_LO), BOX_HI)
+            ne = grad_hess(na, nb, wm, tm)[0]
+            if ne <= s_ * (1 + 1e-15) + 1e-300: a, b, sse0, moved = na, nb, ne, True; break
+            mu = max(mu * 10, 1e-9)
+        if not moved: stopped = True; break
+    s_, g, Hm = grad_hess(a, b, wm, tm); fa, fb = fixed_flags(a, b, g)
+    return (s_, a, b, iters, not stopped, fa or fb)
 
 
 def fit_full(win_mid, total_mid, cap=POLISH_CAP):

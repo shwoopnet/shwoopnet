@@ -192,11 +192,58 @@ wm_, tm_ = exact(0.001, 0.002, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_)
 assert fb["l1"] == 0.01 and fb["l2"] == 0.01 and fb["on_bound"] is True and fb["iterations"] == 1 and fb["cap_hit"] is False, fb          # nothing iterated in the 1-D stage
 for (l1_, l2_) in ((1.4, 1.0), (0.012, 1.4)):
     wm_, tm_ = exact(l1_, l2_, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_); assert fb["on_bound"] is False and abs(fb["l1"] - l1_) < 1e-9
-# a rate within 1e-12 of a bound whose gradient points INTO the box is not held
-wm_, tm_ = exact(1.4, 1.0, (1.5, 2.5, 3.5)); res_ = lambda a_, b_: [x_ - y_ for x_, y_ in zip(list(s.p_winner(a_, b_)) + [1 - sum(s.pois(a_ + b_, n_) for n_ in range(int(kk_) + 1)) for kk_ in (1.5, 2.5, 3.5)], list(wm_) + list(tm_.values()))]
-inward = s.boundary_stage(res_, sse_(0.01, 1.0, wm_, tm_), 0.01, 1.0, 5, False, 200); assert inward[5] is False and inward[1] == 0.01 and inward[3] == 5
-# the 1-D result is discarded when its SSE is above the 2-D result's by more than 1e-15 (stub)
-wm_, tm_ = exact(0.5, 0.005, (1.5, 2.5, 3.5)); res_ = lambda a_, b_: [x_ - y_ for x_, y_ in zip(list(s.p_winner(a_, b_)) + [1 - sum(s.pois(a_ + b_, n_) for n_ in range(int(kk_) + 1)) for kk_ in (1.5, 2.5, 3.5)], list(wm_) + list(tm_.values()))]
-base_ = sse_(0.3, 0.01, wm_, tm_); worse = s.boundary_stage(res_, base_, 0.3, 0.01, 7, False, 200, stub=(base_ + 1e-9, 0.3, 0.01, 9, False, True)); assert worse == (base_, 0.3, 0.01, 7, False, False), worse
 print("socderiv addendum 5 tests passed")
+# ---- Addendum 6: gradient stop, analytic Newton, Decimal references ----
+from decimal import Decimal as Dc, getcontext
+getcontext().prec = 60
+def dpois(l_, n_): return (-l_).exp() * l_ ** n_ / Dc(math.factorial(n_))
+def dsse(a_, b_, wm_, tm_):
+    a_, b_ = Dc(a_), Dc(b_); p1_ = [dpois(a_, n_) for n_ in range(80)]; p2_ = [dpois(b_, n_) for n_ in range(80)]
+    h_ = sum((p1_[i_] * p2_[j_] for i_ in range(80) for j_ in range(i_)), Dc(0)); d_ = sum((p1_[i_] * p2_[i_] for i_ in range(80)), Dc(0)); c_ = sum((p1_[i_] * p2_[j_] for i_ in range(80) for j_ in range(i_ + 1, 80)), Dc(0))
+    tot_ = [1 - sum((dpois(a_ + b_, n_) for n_ in range(int(kk_) + 1)), Dc(0)) for kk_ in tm_]
+    return (h_ - Dc(wm_[0])) ** 2 + (d_ - Dc(wm_[1])) ** 2 + (c_ - Dc(wm_[2])) ** 2 + sum(((v_ - Dc(x_)) ** 2 for v_, x_ in zip(tot_, tm_.values())), Dc(0))
+def dgrad(a_, b_, wm_, tm_, which):
+    h_ = Dc("1e-18"); a_, b_ = Dc(a_), Dc(b_)
+    if which == 0: return (dsse(a_ + h_, b_, wm_, tm_) - dsse(a_ - h_, b_, wm_, tm_)) / (2 * h_)
+    return (dsse(a_, b_ + h_, wm_, tm_) - dsse(a_, b_ - h_, wm_, tm_)) / (2 * h_)
+# derivatives: analytic residual Jacobian and Hessian against central differences; gradient against the Decimal reference
+wm_, tm_ = exact(1.4, 1.0, (1.5, 2.5, 3.5)); wm_ = (wm_[0] + .01, wm_[1] - .015, wm_[2] + .005); tml_ = list(tm_.items())
+for (a_, b_) in ((0.3, 0.02), (1.5, 1.2), (5.0, 4.0), (0.012, 1.4), (2.2, 0.6)):
+    r_, J_, Hs_ = s.model_derivs(a_, b_, wm_, tml_); hh_ = 1e-5
+    ra = (s.model_derivs(a_ + hh_, b_, wm_, tml_), s.model_derivs(a_ - hh_, b_, wm_, tml_)); rb = (s.model_derivs(a_, b_ + hh_, wm_, tml_), s.model_derivs(a_, b_ - hh_, wm_, tml_))
+    for k_ in range(len(r_)):
+        fa_ = (ra[0][0][k_] - ra[1][0][k_]) / (2 * hh_); fb_ = (rb[0][0][k_] - rb[1][0][k_]) / (2 * hh_)
+        assert abs(fa_ - J_[k_][0]) < 1e-7 + 1e-7 * abs(fa_) and abs(fb_ - J_[k_][1]) < 1e-7 + 1e-7 * abs(fb_), (a_, b_, k_, fa_, J_[k_], fb_)
+        haa = (ra[0][1][k_][0] - ra[1][1][k_][0]) / (2 * hh_); hab = (rb[0][1][k_][0] - rb[1][1][k_][0]) / (2 * hh_); hbb = (rb[0][1][k_][1] - rb[1][1][k_][1]) / (2 * hh_)
+        assert abs(haa - Hs_[k_][0]) < 1e-6 + 1e-6 * abs(haa) and abs(hab - Hs_[k_][1]) < 1e-6 + 1e-6 * abs(hab) and abs(hbb - Hs_[k_][2]) < 1e-6 + 1e-6 * abs(hbb), (a_, b_, k_)
+    sv_, g_, Hm_ = s.grad_hess(a_, b_, wm_, tml_); assert Hm_[0][1] == Hm_[1][0]
+    assert abs(float(dgrad(a_, b_, wm_, tm_, 0)) - g_[0]) < 1e-10 and abs(float(dgrad(a_, b_, wm_, tm_, 1)) - g_[1]) < 1e-10, (a_, b_, g_)
+# the stop: gradient under 1e-12 on every free rate, checked with the Decimal reference gradient
+for (l1_, l2_, ks_) in ((1.4, 1.0, (1.5, 2.5, 3.5)), (0.9, 1.7, (0.5, 1.5, 2.5, 3.5, 4.5)), (5.2, 0.8, (1.5, 2.5, 3.5))):
+    wx_, tx_ = exact(l1_, l2_, ks_); fx = s.fit_full(wx_, tx_); assert abs(fx["l1"] - l1_) < 1e-9 and abs(fx["l2"] - l2_) < 1e-9 and fx["cap_hit"] is False
+    assert abs(float(dgrad(fx["l1"], fx["l2"], wx_, tx_, 0))) < 1e-12 and abs(float(dgrad(fx["l1"], fx["l2"], wx_, tx_, 1))) < 1e-12
+for (l1_, l2_, ks_, noise_) in ((1.4, 1.0, (1.5, 2.5, 3.5), (.012, -.008, .004)), (0.9, 1.7, (0.5, 1.5, 2.5, 3.5, 4.5), (.012, -.008, .004, .006, -.003)), (1.9, 0.7, (1.5, 2.5, 3.5), (.01, .005, -.006))):
+    wx_, tx_ = exact(l1_, l2_, ks_); wx_ = (wx_[0] + .01, wx_[1] - .015, wx_[2] + .005); tx_ = {kk: v + o_ for (kk, v), o_ in zip(tx_.items(), noise_)}
+    fx = s.fit_full(wx_, tx_); assert fx["cap_hit"] is False and fx["on_bound"] is False
+    assert abs(float(dgrad(fx["l1"], fx["l2"], wx_, tx_, 0))) < 1e-12 and abs(float(dgrad(fx["l1"], fx["l2"], wx_, tx_, 1))) < 1e-12, (fx, float(dgrad(fx["l1"], fx["l2"], wx_, tx_, 0)), float(dgrad(fx["l1"], fx["l2"], wx_, tx_, 1)))
+    # Decimal Newton on the Decimal gradient from the fit's point reaches the same point to 1e-9
+    xa, xb = Dc(fx["l1"]), Dc(fx["l2"]); h_ = Dc("1e-12")
+    for _ in range(6):
+        g0, g1 = dgrad(xa, xb, wx_, tx_, 0), dgrad(xa, xb, wx_, tx_, 1)
+        h00 = (dgrad(xa + h_, xb, wx_, tx_, 0) - dgrad(xa - h_, xb, wx_, tx_, 0)) / (2 * h_); h01 = (dgrad(xa + h_, xb, wx_, tx_, 1) - dgrad(xa - h_, xb, wx_, tx_, 1)) / (2 * h_); h11 = (dgrad(xa, xb + h_, wx_, tx_, 1) - dgrad(xa, xb - h_, wx_, tx_, 1)) / (2 * h_)
+        det_ = h00 * h11 - h01 * h01; xa, xb = xa - (h11 * g0 - h01 * g1) / det_, xb - (h00 * g1 - h01 * g0) / det_
+    assert abs(float(xa) - fx["l1"]) < 1e-9 and abs(float(xb) - fx["l2"]) < 1e-9, (float(xa), fx["l1"], float(xb), fx["l2"])
+# bounds: rate exactly on the bound, the other equal to the Decimal root of its gradient, gradient under 1e-12
+wx_, tx_ = exact(6.8, 1.0, (1.5, 2.5, 3.5)); fx = s.fit_full(wx_, tx_); xb = Dc(fx["l2"])
+for _ in range(6):
+    g1 = dgrad(6.0, xb, wx_, tx_, 1); h_ = Dc("1e-12"); xb = xb - g1 / ((dgrad(6.0, xb + h_, wx_, tx_, 1) - dgrad(6.0, xb - h_, wx_, tx_, 1)) / (2 * h_))
+assert fx["l1"] == 6.0 and fx["on_bound"] is True and abs(float(xb) - fx["l2"]) < 1e-9 and abs(float(dgrad(6.0, fx["l2"], wx_, tx_, 1))) < 1e-12, (fx, float(xb))
+wx_, tx_ = exact(0.5, 0.005, (1.5, 2.5, 3.5)); fx = s.fit_full(wx_, tx_); xa = Dc(fx["l1"])
+for _ in range(6):
+    g0 = dgrad(xa, "0.01", wx_, tx_, 0); h_ = Dc("1e-12"); xa = xa - g0 / ((dgrad(xa + h_, "0.01", wx_, tx_, 0) - dgrad(xa - h_, "0.01", wx_, tx_, 0)) / (2 * h_))
+assert fx["l2"] == 0.01 and fx["on_bound"] is True and abs(float(xa) - fx["l1"]) < 1e-9 and abs(float(dgrad(fx["l1"], "0.01", wx_, tx_, 0))) < 1e-12, (fx, float(xa))
+wx_, tx_ = exact(0.001, 0.002, (1.5, 2.5, 3.5)); fx = s.fit_full(wx_, tx_); assert fx["l1"] == 0.01 and fx["l2"] == 0.01 and fx["on_bound"] is True and fx["iterations"] <= 1
+# cap: one iteration on a noisy fit hits the cap
+wx_, tx_ = exact(1.4, 1.0, (1.5, 2.5, 3.5)); wx_ = (wx_[0] + .01, wx_[1] - .015, wx_[2] + .005); f1 = s.fit_full(wx_, tx_, cap=1); assert f1["cap_hit"] is True and f1["iterations"] == 1 and s.fit_full(wx_, tx_)["cap_hit"] is False
+print("socderiv addendum 6 tests passed")
 print("socderiv synthetic tests passed")
