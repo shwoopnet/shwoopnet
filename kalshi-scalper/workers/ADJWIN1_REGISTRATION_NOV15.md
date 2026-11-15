@@ -22,3 +22,6 @@
 **Plan:** hand case with invented candles first, then the reader (closed by default), Auditor B's quick check, then the Testing Desk input list, then one run committed blind.
 
 **Rule hash:** the reader's sha256 is committed before the first read; each series x arm is one try (22).
+
+## Dated note, 2026-11-15 (appended; no frozen text changed)
+A kept market whose result is void, a scalar or missing is dropped by the loader and counted per series ("no result (dropped): SERIES"); its neighbouring windows then show as "not adjacent" skips. A void would refund the price and keep the fee, so dropping voids is a small optimistic bias, and the result line must say so with the per series counts.

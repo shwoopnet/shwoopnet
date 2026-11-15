@@ -58,4 +58,12 @@ g = Guarded(cutm, {"ticker", "close_time"})
 for bad in ("result", "volume"):
     try: g[bad]; assert False
     except AssertionError as e: assert "touched key" in str(e)
+# no-result rows are counted in total and per series
+put2 = {"ticker": "KXWTI15M-26AUG011215-00", "close_time": "2026-08-01T12:15:00Z", "result": "void"}
+def fake2(base_, run):
+    if run in L.LISTS[:1]: yield {"markets": [dict(early), dict(put2)]}
+    else: yield from orig(base_, run)
+L.run_bodies = fake2
+w3, c3 = L.load(base)
+assert c3["no result (dropped)"] == 1 and c3["no result (dropped): KXWTI15M"] == 1, c3
 print("ALL OK")

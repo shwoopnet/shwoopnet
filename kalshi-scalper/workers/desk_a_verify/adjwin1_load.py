@@ -49,7 +49,7 @@ def load(base):
     for tk, v in kept.items():                                              # (2) result for kept rows only
         r = v[2]["result"] if "result" in v[2] else None
         if r in ("yes", "no"): res[tk] = r
-        else: c["no result (dropped)"] += 1
+        else: c["no result (dropped)"] += 1; c["no result (dropped): " + v[0]] += 1
     cand = collections.defaultdict(dict)
     for run in CANDLES:                                                     # (3) candles for kept markets only
         for b in run_bodies(base, run):
