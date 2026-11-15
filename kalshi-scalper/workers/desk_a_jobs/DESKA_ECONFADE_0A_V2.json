@@ -1,0 +1,63 @@
+{
+ "job_id": "DESKA_ECONFADE_0A_V2",
+ "registration": "kalshi-scalper/workers/ECONFADE_REGISTRATION.md",
+ "purpose": "Settled-market LISTS (ticker, open and close times, event; a reader never reads a result) of KXFEDDECISION and KXFED closing 2024-01-01 to 2025-09-16T23:59:59Z, to count which CPI and payrolls prints have a next-Fed-meeting market (step 0 of ECONFADE). Replaces DESKA_ECONFADE_0A.json (an older job format with no close-time bounds, which reached past FEDIMPL1's frozen holdout).",
+ "heldout": "Nothing at or after 2025-09-17T00:00:00Z is asked (FEDIMPL1's frozen holdout on these series, first decision 2025-09-17, no release). ECONFADE's own held-out (closes 2025-04-01 to 2025-09-16T23:59:59Z) is inside this list's range; the landed run carries results: it goes into HELDOUT_PULL_RUNS.md, readers use heldout_guard_v2 and take ticker, close_time and event only.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXFEDDECISION",
+  "KXFED"
+ ],
+ "max_requests": 10,
+ "requests": [
+  {
+   "id": "econfade_KXFEDDECISION_dev",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFEDDECISION",
+    "status": "settled",
+    "min_close_ts": 1704067200,
+    "max_close_ts": 1758067199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "econfade_KXFED_dev",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFED",
+    "status": "settled",
+    "min_close_ts": 1704067200,
+    "max_close_ts": 1758067199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  }
+ ],
+ "notes": "2 requests, page budget 6 plus 4 retries. Pacing 5.0 s. CAUTION: whether Kalshi's live /markets serves settled markets this old is NOT verified; if the answer is empty or cut, the older markets sit behind a historical endpoint that the current runner does not have, and a runner change (Main's code) would be needed; nothing is assumed.",
+ "owner": "DESK_A",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "status": "active",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
