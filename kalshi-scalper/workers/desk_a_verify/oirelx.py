@@ -26,7 +26,8 @@ def run(db, series_list=None):
     cand = collections.defaultdict(dict)
     for tk, e, b, a, v, oi in c.execute("select ticker,end_ts,bid_c,ask_c,volume,oi from candle"): cand[tk][int(e)] = (b, a, v, oi)
     rows = collections.defaultdict(list)
-    for tk, ser, cl, res in c.execute("select ticker, series, close_ts, result from market order by close_ts"): rows[ser].append((tk, int(cl), res))
+    srcs = collections.defaultdict(collections.Counter)
+    for tk, ser, cl, res, src in c.execute("select ticker, series, close_ts, result, src from market order by close_ts"): rows[ser].append((tk, int(cl), res)); srcs[ser][src] += 1
     out = {"label": "upper bound, not fill-checked; fee mode per-order rounded; rule frozen as OIREL1, no refit; each series is one try", "series": {}}
     for ser in sorted(rows):
         if series_list and ser not in series_list: continue
@@ -38,7 +39,7 @@ def run(db, series_list=None):
         trades.sort()
         st = stats(trades); hi = [t for t in trades if t[3] >= FLOOR - 1e-9]; lo = [t for t in trades if t[3] < FLOOR - 1e-9]
         home = ser == "KXBTC15M"                                  # the rule's home market (the threshold is Bitcoin's discovery quantile): in-sample, never a try
-        out["series"][ser] = {"in_sample_home_market_not_a_try": home, "counts": dict(cnt), "all": st, "fill_0.08_or_more": stats(hi), "fill_under_0.08": stats(lo), "c11_series": ser in C11, "flags": flags(st, ser in C11)}
+        out["series"][ser] = {"in_sample_home_market_not_a_try": home, "counts": dict(cnt), "sources_of_kept_markets": dict(srcs[ser]), "all": st, "fill_0.08_or_more": stats(hi), "fill_under_0.08": stats(lo), "c11_series": ser in C11, "flags": flags(st, ser in C11)}
     out["tries"] = sum(1 for v in out["series"].values() if not v["in_sample_home_market_not_a_try"])
     out["note"] = "each series is one try (the count above); the Head sets the bar for a pooled pass; any claim across series needs day-clustered statistics; platinum and palladium are standard series here but thin non-crypto books: both flags printed, the Head decides which governs"
     return out

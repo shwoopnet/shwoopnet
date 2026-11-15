@@ -19,7 +19,7 @@ c.commit(); c.close()
 r = X.run(db); ok = lambda a, b, t=1e-9: abs(a - b) < t
 assert r["tries"] == 2 and r["series"]["KXBTC15M"]["in_sample_home_market_not_a_try"] is True and not r["series"]["KXZZ15M"]["in_sample_home_market_not_a_try"]
 za, zb = r["series"]["KXZZ15M"], r["series"]["KXSILVER15M"]
-assert za["all"]["n"] == 5 and ok(za["all"]["h0.00"]["pf"], 9.0254, 1e-4) and ok(za["all"]["h0.01"]["net"], 24.78) and ok(za["all"]["h0.02"]["pf"], 8.2202, 1e-4)
+assert za["sources_of_kept_markets"] == {"t": 9} and za["all"]["n"] == 5 and ok(za["all"]["h0.00"]["pf"], 9.0254, 1e-4) and ok(za["all"]["h0.01"]["net"], 24.78) and ok(za["all"]["h0.02"]["pf"], 8.2202, 1e-4)
 assert za["fill_0.08_or_more"]["n"] == 5 and za["fill_under_0.08"]["n"] == 0 and za["flags"]["evidence"] == "no evidence at n = 5" and za["flags"]["pass_standard"] is None and not za["c11_series"]
 assert zb["all"]["n"] == 2 and zb["c11_series"] and ok(zb["all"]["h0.00"]["pf"], 6.34 / 3.66) and ok(zb["all"]["h0.00"]["net"], 2.68) and ok(zb["all"]["h0.01"]["pf"], 6.23 / 3.77) and ok(zb["all"]["h0.02"]["pf"], 6.13 / 3.87) and ok(zb["all"]["h0.02"]["net"], 2.26)
 assert zb["all"]["h0.00"]["half1_pf"] == float("inf") and zb["all"]["h0.00"]["half2_pf"] == 0 and zb["flags"]["evidence"] == "no evidence at n = 2"
