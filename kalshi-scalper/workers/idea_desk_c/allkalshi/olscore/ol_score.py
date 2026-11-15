@@ -50,6 +50,7 @@ CARDS = {
     "MENT": {"series": ("KXTRUMPMENTION", "KXTRUMPMENTIONB"), "win_on": "occurrence", "dev": (T("2026-04-17T00:00:00Z"), T("2026-08-06T00:00:00Z")),
              "move_min": 300, "thr": 0.08, "follow": True, "band": (0.30, 0.70), "cap_event": 3, "list_jobs": ("MENTDRIFT_LISTS_A",)},
 }
+M_SLIP_S = 240                       # M sells at the mark ending at the M time; if it is missing or not sellable, the first sellable mark up to 4 min later (printed as M_late), else held
 MENT_SEED = "MENTDRIFT-2026-11-15"     # the Head of R&D, Nov 15 14:51Z: fixed md5 sample of 1,400
 MENT_SAMPLE_N = 1400
 NBA_TIP_FROM_OCC_S = 3 * 3600        # tip proxy P = occurrence - 3 h
@@ -217,13 +218,13 @@ def exit_for(variant, qt, D, close, M_ts, side, e):
         if M_ts <= D:
             return ("held_no_M", None, None)
         for ts in marks:
-            if ts < M_ts:
+            if ts < M_ts or ts > M_ts + M_SLIP_S:
                 continue
             bid = side_bid(side, *qt[ts])
             if sellable(bid):
-                return ("M", ts, bid)
+                return ("M" if ts == M_ts else "M_late", ts, bid)
         return ("held", None, None)
-    tp = min(2 * e, 0.90)
+    tp = min(2 * e, 0.90)          # e is the RAW ask at D, before the haircut (EXITS3): every haircut line exits at the same mark
     for ts in marks:
         bid = side_bid(side, *qt[ts])
         if not sellable(bid):
@@ -275,6 +276,7 @@ def shown(v):
 
 
 def bar_ok(pf1, h1, h2, pf2):
+    """Judged on unrounded figures with no tolerance: exactly 1.3 or 1.0 passes, anything below fails."""
     z = lambda x: 0.0 if x is None else x
     return z(pf1) >= 1.3 and z(h1) >= 1.0 and z(h2) >= 1.0 and z(pf2) >= 1.0
 

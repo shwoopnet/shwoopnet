@@ -134,6 +134,18 @@ class MentMissingOcc(unittest.TestCase):
         self.assertEqual(c["no_time"], 1)
 
 
+class MExit(unittest.TestCase):
+    def test_slip_bound(self):
+        qt = {100: (.40, .42), 400: (.50, .52)}
+        self.assertEqual(S.exit_for("M", qt, 0, 10000, 200, "yes", .42)[0], "M_late")      # 400 is within 240 s of 200
+        self.assertEqual(S.exit_for("M", qt, 0, 10000, 100, "yes", .42)[0], "M")
+        self.assertEqual(S.exit_for("M", {500: (.5, .52)}, 0, 10000, 200, "yes", .42)[0], "held")   # 500 is 300 s late
+
+    def test_bar_exact(self):
+        self.assertTrue(S.bar_ok(1.3, 1.0, 1.0, 1.0))
+        self.assertFalse(S.bar_ok(1.2999999, 1.0, 1.0, 1.0))
+
+
 class Sample(unittest.TestCase):
     def test_md5_sample(self):
         mk = {("KXTRUMPMENTION-26JUN10-W%04d" % i): {"ticker": "KXTRUMPMENTION-26JUN10-W%04d" % i, "event_ticker": "KXTRUMPMENTION-26JUN10",

@@ -50,6 +50,11 @@
 - **M (adapted):** sell at the mark ending at O - 5 min, before the speech starts. EXITS3's 180 s before the close would be mid-speech, where the word itself settles the market.
 - **Tries:** hold, T, S and M are **4 tries**, all added to the deflation ledger.
 
+**Stated before any read (Auditor B, Nov 15):**
+- **M exit.** It sells at the mark ending exactly at the M time. If that candle is missing or not sellable, it sells at the first sellable mark up to 4 minutes later, printed as `M_late` with its count. With no such mark the trade is held. 4 minutes keeps the NBA M exit pre-game (G is 30 minutes before the tip proxy) and the MENT M exit before the speech (O - 5 min + 4 min).
+- **e is the raw ask at D,** before any haircut. T's level min(2e, 0.90) and S's level e/2 use raw e, so every haircut line exits at the same mark (EXITS3).
+- **Bars** are judged on unrounded figures with no tolerance: exactly 1.3 or 1.0 passes.
+
 ## Costs, printing and the bar
 
 - **Haircut d3b5f24e (C1 to C10).** Entry = raw ask + h; a sale = bid - h, never below 0.01; h = 0, 1c and 2c all printed. The primary is 1c, but 2c when the entry or exit mark is within the last 2 minutes before close_time (C8).
