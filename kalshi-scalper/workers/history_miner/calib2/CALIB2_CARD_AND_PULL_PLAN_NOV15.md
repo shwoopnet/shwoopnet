@@ -65,3 +65,15 @@
 - Auditor B: the per-series held-out list (dated line in section 1) before stage 1 is written; then the job files; then the reader's code and hand case before the read.
 - The Head's go before each stage. Main dispatches.
 - The table is committed blind; figures by message. No try is counted by the table itself.
+
+## Amendment 1 (2026-11-15 ~16:25Z): the Head's rulings (16:15Z, 16:16Z) and Auditor B's end-date tables (16:16Z, 16:18Z), before any job file
+1. **Scope narrowed (the Head):**
+   - A closed card's held-out stays cut for price and result reads, even if unread. Six-day thirds are refused.
+   - CALIB2 is narrowed to series whose clean window runs to about Oct 21. Every other series is "held out, not read". That covers all of Tiers A and C and the rest of Tier B (321 series end 2026-10-03T16:00Z under PRICEMATCH1, RULES1 and STRESSDAY1; mentions end 10-03 00:00Z; index, KXWTIW and KXUSDJPY OUT; esports and KXUE OUT).
+   - Any series that loses its third 2 is out of stage 2.
+2. **The 27 W-CAT-SPORTS1 series (Auditor B, 16:18Z):**
+   - **17 end at 2026-10-03T16:00Z, inside third 2, so they are OUT of CALIB2:** KXMLBGAME, KXNCAAFGAME, KXNBAGAME, KXNHLGAME, KXMLSGAME, KXATPMATCH, KXWTAMATCH, KXATPCHALLENGERMATCH, KXNFLGAME, KXNCAAMBGAME, KXNFLTOTAL, KXNCAAFTOTAL, KXMLBTOTAL, KXNFLSPREAD, KXNCAAFSPREAD, KXMLBSPREAD, KXNHLTOTAL.
+   - **10 keep the window to 2026-10-21T23:59:59Z (epoch 1792627199):** KXNBASPREAD, KXNBATOTAL, KXNHLSPREAD, KXNCAAMBSPREAD, KXNCAAMBTOTAL, KXEPLGAME, KXUCLGAME, KXLALIGAGAME, KXSERIEAGAME, KXBUNDESLIGAGAME.
+   - The five soccer GAME series rest on the Head's 2026-11-13 release of SOCCER1 and SOCCERELO1. **The Head confirms in one line that the release is not limited to SOCDERIV before stage 1 is dispatched.**
+3. **Stage 1 job:** CALIB2_LISTS, 10 requests (one per series: status settled, min_close_ts 1789344000, max_close_ts 1792627199, limit 1000, up to 3 pages), max_requests 30.
+4. **Season note:** NBA and NCAA basketball start late October, so their five series may list few or no markets before Oct 22. That is reported as counted.
