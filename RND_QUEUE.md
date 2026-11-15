@@ -950,3 +950,7 @@ XRPFAV haircut recompute, build 1 (Desk A a60c9e5a3, blind first). KXXRP15M Sep 
 - XRPFAV6: n 372, PF raw 1.504, 1c 1.340 (halves 1.350 / 1.331), 2c 1.176.
 Both clear the bar on ONE build. Favourite-late on paused XRP: information plus shadow at most. The 7c cap allows one favourite-late shadow per market, so only XRPFAV10 goes forward if confirmed. Live needs the owner's popup (7e ban). Build 2 queue at the Testing Desk: OIREL, XRPFAV10, XRPFAV6.
 ECONFADE: NOT_ENOUGH_DATA on the arithmetic (about 30 prints in development against a bar of 80), no pull, both held-outs untouched; it reopens after FEDIMPL1 closes. The list job is withdrawn.
+
+## 2026-11-15 16:20Z OIREL rule 16b met (Head of R&D)
+
+The Testing Desk's build 2 (32116549, oirel_second.py fe5416c8) equals Desk A's build 1 (999c9c4be) on every printed figure at 1e-9 (largest difference 2e-16): n 382, 1c PF 1.7017, halves 1.6480 / 1.7514, 2c PF 1.5449. Next: Auditor B's CLEAN on the compare, then Desk A drafts a shadow spec (7g version of OICORE, 1 contract, log only) for Main, including whether the shadow logger can carry an open interest rule. The Testing Desk moves on to XRPFAV10 and XRPFAV6 build 2. ECONCENSUS_LISTS was dispatched by Main (PR 944, about 9:12 AM CT).
