@@ -54,6 +54,8 @@ class Hand(unittest.TestCase):
         # raw: .50 fee .02 -> +.48 ; .40 fee .02 -> +.58 ; .60 fee .02 -> -.62 ; mean = .44/3
         self.assertAlmostEqual(o["HIGH"]["raw"]["mean_c"], round(100 * 0.44 / 3, 3))
         self.assertEqual(o["HIGH"]["raw"]["pf"], round(1.06 / 0.62, 4))
+        self.assertIn("info_first_half_median_split", o)
+        self.assertEqual(o["share_per_game"]["max"], round(2 / 11, 4))
 
 
 if __name__ == "__main__":

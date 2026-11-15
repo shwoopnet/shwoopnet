@@ -30,6 +30,10 @@
 - **On a fail:** the try is dropped with no write-up (the owner's order).
 - **On a pass:** it goes to the full checks: Verification Analyst, fill check, then the held-out.
 
+**Printed for information (Auditor B, Nov 15), not tries.**
+- S_MED is the median over all 120 development games, so the arm split is in-sample: it is built from close times only, with no price or result. The scorer also prints both arms with the split set at the median of the FIRST half of games in time order.
+- The per-game share is printed as its spread (min, quartiles, max). A rung that closes early for a reason other than a hit (a player ruled out) counts in s.
+
 **Reading order.**
 1. Time fields from the list (ticker, event, close, occurrence) fix the games, the arm and the open rungs.
 2. The candles at T for those rungs.

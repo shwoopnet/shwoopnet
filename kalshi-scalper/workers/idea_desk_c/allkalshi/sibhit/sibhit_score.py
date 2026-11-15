@@ -79,8 +79,13 @@ def sh(v):
     return None if v is None else ("inf" if v == float("inf") else round(v, 4))
 
 
-def main(root):
+def main(root, info_split=True):
     g = L.games(L.list_rows(root))
+    if info_split:
+        # Auditor B (Nov 15), information only, not a try: the arm split with the median of the FIRST half of games in time order
+        import statistics as st
+        order = sorted(g, key=lambda e: (g[e]["T"], e))
+        med1 = st.median([g[e]["s"] for e in order[:len(order) // 2]]) if order else None
     keep = {t for x in g.values() for t in x["open"]}
     q = candles(root, keep)
     cand, drops = [], {"no_quote": 0, "not_two_sided": 0, "out_of_band": 0}
@@ -129,7 +134,25 @@ def main(root):
         z = lambda v: 0.0 if v is None else v
         blk["bar"] = "PASS (paper bar)" if (z(p1) >= 1.3 and z(a1) >= 1.0 and z(b1) >= 1.0 and z(p2) >= 1.0) else "fail"
         out[arm] = blk
-    print(json.dumps(out, indent=1, sort_keys=True))
+    shares = sorted(x["s"] for x in g.values())
+    if shares:
+        import statistics as st
+        qs = st.quantiles(shares, n=4) if len(shares) > 1 else [shares[0]] * 3
+        out["share_per_game"] = {"min": round(shares[0], 4), "q25": round(qs[0], 4), "median": round(qs[1], 4), "q75": round(qs[2], 4), "max": round(shares[-1], 4),
+                                 "note": "share of base rungs closed strictly before T - 240 s; a rung closed for a reason other than a hit (player ruled out) counts"}
+    out["s_med_note"] = "S_MED is the median over all development games: in-sample for the arm split (close times only, no price or result)"
+    if info_split and g:
+        g2 = {e: dict(x, arm="HIGH" if x["s"] >= med1 - L.EPS else "LOW") for e, x in g.items()}
+        saved = L.games
+        L.games = lambda rows: g2
+        try:
+            alt = main(root, info_split=False)
+        finally:
+            L.games = saved
+        out["info_first_half_median_split"] = {"median_first_half": med1, "HIGH": alt.get("HIGH"), "LOW": alt.get("LOW"),
+                                               "note": "information line only, not a try"}
+    if info_split:
+        print(json.dumps(out, indent=1, sort_keys=True))
     return out
 
 
