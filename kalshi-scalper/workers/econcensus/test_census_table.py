@@ -32,6 +32,6 @@ ok = [("1 KXCPI line", d["KXCPI"] == "KXCPI: settled markets 7, after the cut dr
       ("3 series list counted", ns == 1)]
 src = open(os.path.join(here, "census_table.py")).read()
 ok.append(("4 source does not read a result key", 'get("result"' not in src and '["result"]' not in src))
-ok.append(("5 empty ALLOWED_RUNS refuses a listed run", C.ALLOWED_RUNS == frozenset()))
+ok.append(("5 ALLOWED_RUNS names exactly the one landed run", C.ALLOWED_RUNS == frozenset(["2026-11-15T1512Z_43728522567"])))
 for k, v in ok: print("PASS" if v else "FAIL", k)
 sys.exit(0 if all(v for _, v in ok) else 1)
