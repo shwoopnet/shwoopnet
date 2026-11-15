@@ -42,3 +42,7 @@ The table itself counts no try, but **the number of buckets inspected is printed
 ## Gate
 - One build (this desk), a hand case before the code, Auditor B's CLEAN and the held-out reconfirmation, the Head's go.
 - The table is committed blind and figures go by message only. No live figure.
+
+## Amendment 1 (the Head, 16:05Z: approved as written, GO on conditions)
+- Every candidate bucket is reported WITH its two neighbours (the buckets on either side, same series or pool, same look, same side), so a lone spike reads differently from a smooth slope. The print carries, for each candidate, the neighbours' n, win rate, mean ask and gap in each third.
+- Third 3 stays unread for any later rule card.
