@@ -99,7 +99,7 @@ def qualifies(r):
         left = ts(r["close_time"]) - t
     except ValueError:
         return None
-    if not (P_MIN <= p <= P_MAX and size >= MIN_SIZE and vol > 0 and LEGS_MIN <= legs <= LEGS_MAX and CLOSE_MIN_S <= left <= CLOSE_MAX_S):
+    if not (P_MIN - 1e-9 <= p <= P_MAX + 1e-9 and size >= MIN_SIZE and vol > 0 and LEGS_MIN <= legs <= LEGS_MAX and CLOSE_MIN_S <= left <= CLOSE_MAX_S):
         return None
     return {"t": t, "ticker": r["ticker"], "event": r.get("event_ticker", ""), "p": p, "close": ts(r["close_time"]), "legs": int(legs)}
 
@@ -136,7 +136,9 @@ def describe(name, settled, due_n, unresolved, verdict):
     """The registered figures over one set of settled fills. Only the all-combos call carries the registered verdict;
     the no-weather-leg call prints the same figures as information (clarifying line of Nov 13, 2026)."""
     tag = "" if verdict else " [information only; the registered verdict is the all-combos line]"
+    nde = bool(due_n and unresolved / due_n > MAX_UNRESOLVED_SHARE)       # clarifying line of Nov 15, 2026: over 10 percent unresolved, every line is a description
     kill, label = ("KILLED", "LABEL") if verdict else ("would read KILLED", "would read")
+    if nde: kill = "would read KILLED (description only)"
     print(f"== {name}: settled {len(settled)}{tag}")
     # kill 1: running paper net at $2 a fill, in fill order
     run, killed_at = 0.0, None
@@ -175,6 +177,11 @@ def describe(name, settled, due_n, unresolved, verdict):
     boots = sorted(per_dollar([f for k in (rng.choice(keys) for _ in keys) for f in clusters[k]]) for _ in range(BOOT_N))
     p5 = boots[int(0.05 * BOOT_N)]
     print(f"halves net per dollar {h1:+.3f} / {h2:+.3f} | close dates {len(clusters)} | largest close date share of net {top / net_total if net_total > 0 else float('nan'):.0%} | bootstrap 5th percentile by close date {p5:+.3f}")
+    if nde:
+        print(f"{label}: NOT_ENOUGH_DATA, description only")
+        if unresolved:
+            print(f"note: {unresolved} due fills have no recorded result; if every one of them lost, the picture is worse than shown")
+        return
     ok = (ppd >= BAR_PER_DOLLAR and h1 > 0 and h2 > 0 and len(clusters) >= MIN_CLUSTERS and net_total > 0 and top / net_total <= MAX_CLUSTER_SHARE and p5 > 0
           and not (due_n and unresolved / due_n > MAX_UNRESOLVED_SHARE))
     print(f"{label}: " + ("paper edge shown (unproven)" if ok else "bar not met"))
@@ -186,8 +193,8 @@ def main():
     root, read_iso = sys.argv[1], sys.argv[2]
     which = sys.argv[3] if len(sys.argv) > 3 else "dev"
     read_t = ts(read_iso)
-    lo, hi, gate = (ts(START_UTC), ts(HELDOUT_START_UTC), ts(READ1_NOT_BEFORE)) if which == "dev" else (ts(HELDOUT_START_UTC), ts(HELDOUT_END_UTC), ts(READ2_NOT_BEFORE))
-    if read_t < gate:
+    lo, hi, gate = (ts(START_UTC), ts(HELDOUT_START_UTC), ts(READ1_NOT_BEFORE)) if which in ("dev", "monitor") else (ts(HELDOUT_START_UTC), ts(HELDOUT_END_UTC), ts(READ2_NOT_BEFORE))
+    if read_t < gate and which != "monitor":
         print("REFUSED: this read is not allowed before its pinned date")
         return
     snaps, results = load(root)
@@ -215,6 +222,11 @@ def main():
         f["cost"] = f["p"] + fee(f["p"])
         f["net"] = (1.0 - f["cost"]) if res == "no" else -f["cost"]
         settled.append(f)
+    if which == "monitor":
+        wins = sum(1 for f in settled if f["net"] > 0)
+        print("MONITOR, not the registered verdict; the Nov 26 read is the verdict")
+        print(f"monitor: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | wins {wins}" + (f" | cash PF {pf(settled):.2f} | net per dollar {per_dollar(settled):+.3f}" if settled else " | no settled fills yet"))
+        return
     print(f"{which}: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | other result {other}")
     print(f"legs: paper fills with leg tickers stored {sum(1 for f in fl if f['legs_known'])} | leg unknown {sum(1 for f in fl if not f['legs_known'])} | with a weather leg {sum(1 for f in fl if f['weather'])}")
     print("leg series seen in paper fills, with counts: " + (", ".join("%s %d" % kv for kv in sorted(seen.items(), key=lambda kv: (-kv[1], kv[0]))) or "none"))
