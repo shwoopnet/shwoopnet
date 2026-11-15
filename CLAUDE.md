@@ -9,6 +9,10 @@ Alpaca equities server on Render. **It was suspended on Oct 26, 2026 and is
 retired** (see "Alpaca and the Render server" below); nothing on this site
 depends on it.
 
+## EVENT830 and CFRTIK paused for new orders (Nov 15, 2026, the owner: the single goal is now five live strategies at cash profit factor 1.3 or better)
+
+Both were far under 1.3 on their live fills, so the owner cut them from live trading. `SLOT_NO_NEW_ENTRIES` (`functions/kalshiSlotLib.js`, frozen) lists them; `activeSlotStrategies()`, the only list the ENTRY path reads, leaves them out, so no new order for either is sent and the minute function makes none of EVENT830's eight market reads. They stay in `SLOT_STRATEGIES` and `SLOT_HOLD_ALLOWED`, so an order already open keeps its own hold-to-settlement rules and the exit pass and settle sweep still read them (a removed strategy would get the 25c fallback stop instead). Putting one back is a reviewed edit that removes its id from the list. OICORE and gold L1 are unchanged. The activity seats (PR 927, `claude/activity-seats-2-3`) were dropped unmerged. CFRTIK's Nov 20 held-out read can still run on paper. Page: the Start text, the Rules text and the changelog say so. Tests NP1 to NP4 (`test/slotNoNewEntriesGates.test.js`); the registry and wiring gates that pinned three active strategies now pin one. Needs `bash functions/deploy-push.sh` then `bash functions/deploy-sizing.sh` (the exit watch and Flatten carry the slot library).
+
 ## State as of Nov 13, 2026 (a summary; the code is the truth)
 
 Built from the code constants (`functions/kalshiLiveLib.js`, `kalshiSlotLib.js`, `kalshiShadowLib.js`, `kalshiGoldKillLib.js`), not from the dated notes below. **The code is the truth; this block is a summary.** Where a note below disagrees with this block or with the code, the code wins, and a section marked "Superseded" is history. No live figures are given here.

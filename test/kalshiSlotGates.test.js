@@ -68,7 +68,7 @@ gates['the module is admitted with exactly three strategies, OICORE, EVENT830 an
   assert.ok(o.scaleIn.maxSteps * o.contractsPerOrder <= slot.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, 'all steps together fit the open contracts ceiling');
   assert.ok(o.reviewedAt <= slot.SLOT_LAST_REVIEWED_ON, 'reviewedAt is not after the last reviewed date');
   assert.ok(o.series.every((x) => slot.SLOT_SERIES_ALLOWED.includes(x)));
-  assert.deepStrictEqual(slot.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'the production lookup returns exactly the registry entries');
+  assert.deepStrictEqual(slot.activeSlotStrategies().map((x) => x.id), ['OICORE'], 'the production lookup returns the registry minus the ids that may send no new orders (EVENT830 and CFRTIK, Nov 15, 2026)');
   assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
   assert.strictEqual(slot.slotOrderCheck.length, 1);
   // A hand-built or unregistered strategy still cannot enter, whatever it claims.

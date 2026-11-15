@@ -249,7 +249,7 @@ gates['SI9 Flatten bookkeeping closes only the slot orders on markets the accoun
   // The admitted registry itself: Flatten latches every shipped strategy off (OICORE and, since Nov 3, 2026, EVENT830), and only them.
   const d3 = db({});
   await storeLib.slotHooks(d3).afterFlatten({ results: [], now: NOW });
-  assert.deepStrictEqual((await d3.rows('kalshiSlotControl')).killed, { OICORE: { killedAt: NOW, reason: 'flattened by the owner' }, EVENT830: { killedAt: NOW, reason: 'flattened by the owner' }, CFRTIK: { killedAt: NOW, reason: 'flattened by the owner' } }, 'Flatten latches the admitted strategies off');
+  assert.deepStrictEqual((await d3.rows('kalshiSlotControl')).killed, { OICORE: { killedAt: NOW, reason: 'flattened by the owner' } }, 'Flatten latches the strategies that may enter off (EVENT830 and CFRTIK send no new orders since Nov 15, 2026, so they need no latch)');
 };
 
 gates['SI10 the ignore set holds every slot entry and exit order id, so L1\'s sweep never reads a slot fill as a hand sale'] = async () => {
@@ -379,7 +379,7 @@ gates['SI14c the admitted state: exactly three strategies, OICORE, EVENT830 and 
   for (const x of slotLib.SLOT_STRATEGIES) assert.strictEqual(slotLib.validateSlotStrategy(x).ok, true, JSON.stringify(slotLib.validateSlotStrategy(x)));
   const s = slotLib.SLOT_STRATEGIES[0];
   assert.strictEqual(s.id, 'OICORE');
-  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK']);
+  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE']);
   assert.strictEqual(s.contractsPerOrder, 10);
   assert.ok(s.contractsPerOrder <= slotLib.SLOT_MAX_CONTRACTS_PER_ORDER);
   assert.strictEqual(s.exit.holdToSettle, true);
