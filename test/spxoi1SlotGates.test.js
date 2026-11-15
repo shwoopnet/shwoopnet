@@ -29,7 +29,7 @@ gates['SX1 with the threshold null the seat is not registered: nothing can be se
   assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'OIREL1', 'XRPFAV10'], 'the registry is exactly what it was');
   assert.strictEqual(slot.SPXOI1_ENTRY, null);
   for (const bad of [null, undefined, NaN, 0, -5, Infinity, '5000']) assert.strictEqual(slot.spxoiEntry(bad), null, 'no seat for ' + String(bad));
-  assert.ok(slot.activeSlotStrategies().length === 5 && slot.slotActive());
+  assert.ok(slot.activeSlotStrategies().length === 3 && slot.slotActive());
   const r = slot.slotOrderCheck({ strategyId: 'SPXOI1', ticker: TK, side: 'yes', limit: 0.3, step: 1, depthAtTouch: 100, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null, position: 0,
     sizingBase: 500, windowCapFraction: 0.055, secondsLeft: 150, now: NOW, oiRise: 99999 });
   assert.strictEqual(r.allowed, false, 'no active strategy with that id');

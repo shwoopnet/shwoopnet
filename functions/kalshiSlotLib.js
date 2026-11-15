@@ -362,8 +362,12 @@ function activeSlotStrategiesWith(flags) {
   for (const s of registry) { if (!validateSlotStrategy(s).ok || ids.has(s.id)) return []; ids.add(s.id); }
   return registry.slice();
 }
+// Strategies that stay REGISTERED (so open orders keep their own hold-to-settlement exit rules, the settle sweep and the kill history) but send NO new orders. The owner cut EVENT830 and CFRTIK from live trading on
+// Nov 15, 2026 (the new single goal is five live strategies at cash profit factor 1.3 or better; both were far under it). Putting one back is a reviewed edit that removes its id here. Only the ENTRY path reads
+// activeSlotStrategies(); exits and the settle sweep read the full SLOT_STRATEGIES, so an order already open settles exactly as before (it is NOT given the 25c fallback stop a removed strategy gets).
+const SLOT_NO_NEW_ENTRIES = Object.freeze(["EVENT830", "CFRTIK"]);
 // The production entry point: no argument, so nothing a caller passes can change the switch or the registry.
-const activeSlotStrategies = () => activeSlotStrategiesWith({});
+const activeSlotStrategies = () => activeSlotStrategiesWith({}).filter((s) => !SLOT_NO_NEW_ENTRIES.includes(s.id));
 // The ONE gate the wiring uses (docs/SECOND_SLOT_WIRING.md section 0): a pure function of this module's own two constants. Nothing stored, requested or typed on the page can feed it.
 const slotActive = () => SLOT_ENABLED === true && SLOT_STRATEGIES.length > 0;
 // WATCHING is wider than ENTERING. Entering needs slotActive(). But once any slot order has ever existed, turning the slot off (SLOT_ENABLED=false) or deleting a strategy must NOT orphan a live
@@ -780,7 +784,7 @@ module.exports = {
   SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR, SLOT_ENTRY_LEFT_MIN_SEC_REF, SLOT_REF_MODELS,
-  validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
+  validateSlotStrategy, activeSlotStrategies, SLOT_NO_NEW_ENTRIES, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
   openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields, fillCost,
   // Test-only: the flags-taking variants. Production code must call slotOrderCheck and activeSlotStrategies (a gate fails if the wiring references this).
   _testOnly: Object.freeze({ slotOrderCheckWith, activeSlotStrategiesWith }),

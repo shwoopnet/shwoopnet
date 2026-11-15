@@ -141,7 +141,8 @@ gates['EV7 nothing stored can add a date: the calendar is a frozen constant, rea
 };
 
 gates['EV8 the extra markets are read only around a listed window: zero reads on any other minute of Nov and Dec 2026, eight series in the two minutes before each release'] = () => {
-  const strategies = slot.activeSlotStrategies();
+  const strategies = slot.SLOT_STRATEGIES;   // the full registry: EVENT830 stays registered (open orders keep their rules) but sends no new orders since Nov 15, 2026
+  assert.deepStrictEqual(slot.slotCalendarSeriesDue(slot.activeSlotStrategies(), Date.parse('2026-11-05T13:27:00Z')), [], 'production: EVENT830 is paused for new entries, so the minute function reads none of its eight markets');
   let dueMinutes = 0;
   for (let t = Date.parse('2026-11-03T00:00:00Z'); t < Date.parse('2027-01-02T00:00:00Z'); t += 60000) {
     const due = slot.slotCalendarSeriesDue(strategies, t);
