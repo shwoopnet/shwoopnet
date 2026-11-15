@@ -1,0 +1,2 @@
+SEARCH1 chosen-combination haircut recompute build 2 (search1_second.py 42399cb7, commit e9bcdf71), run ONCE Nov 15 on SEARCH1_extract.sqlite (raw sha256 7bbaa62dec48d44b3e690adb96e5245b37a613cfb86dd07142449905ee48e503; xz sha256 979ac4dcd49cb29578cdd2e2af42386f41dabcce344ac973b57610f2c9e316a9), cut 1790467200.
+sha256 of my printout (scratch only): a2eb91f3695d7737336524fa9bf469e78bce31597d4f508d8f11b942d52b9095
