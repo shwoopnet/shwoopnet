@@ -925,3 +925,7 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 ## 2026-11-15 15:05Z SPOTLEAD1 placement (Head of R&D)
 
 SPOTLEAD1 (claude/refine-live, registered 2026-11-11) is Refinement's FORWARD card, not an archive recompute, so it is off the item 2 recompute list. Unseen block: windows closing after 2026-11-11T16:00Z. Re-read at 80 firings or when R6 ends (Dec 15). At the re-read, Refinement prints the C1 to C11 haircut lines (1c, 2c) and the EXITS3 variants as labelled extras. Open: Kraken's terms are not covered by the Nov 12 acceptance (Coinbase and Bitstamp only); the question is with Main. If it is unanswered, the re-read uses Coinbase only.
+
+## 2026-11-15 15:15Z SPOTLEAD1 correction (Head of R&D)
+
+R6 did NOT end on Nov 13. On origin/main, BTC, ETH and gold record to 2026-12-31T23:59Z. The re-read trigger is 80 firings in the unseen block, counted from signal fields only (no result field read), or Jan 1, whichever comes first. Refinement confirms Kraken was registration-time only; the registered score uses Coinbase candles, which are inside the Nov 12 acceptance. No new Kraken request. Order: the owner's manual-trade breakdown first.
