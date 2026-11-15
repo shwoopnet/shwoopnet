@@ -18,8 +18,10 @@ def favorite(b, a):
 def bid_of(c, side): return c[1] if side == "yes" else round(1 - c[2], 4)       # c = (end_ts, bid, ask)
 def decide(candles, close_ts):
     """candles: end_ts -> (bid, ask) of one market (candles ending after the close dropped). Returns ('skip', why) or ('trade', side, entry, exit_bid_or_None)."""
-    cs = sorted((t, v[0], v[1]) for t, v in candles.items() if t <= close_ts)
+    allc = sorted((t, v[0], v[1]) for t, v in candles.items())
+    cs = [c for c in allc if c[0] <= close_ts]
     if any(b is None or a is None for _, b, a in cs): return ("skip", "incomplete_market")
+    if any(b is None or a is None for _, b, a in allc): return ("skip", "incomplete_only_after_close")      # the reference tests ALL of a market's candles, so such a market is out there too
     x = next((c for c in cs if c[0] == close_ts - LEFT), None)
     if x is None: return ("skip", "no_candle")
     fv = favorite(x[1], x[2])
@@ -52,10 +54,12 @@ def run(db, cut=None):
         if d[0] == "trade": trades.append((int(cl), d[1], d[2], res, d[3])); cnt["trade"] += 1
         else: cnt[d[1]] += 1
     trades.sort()
-    out = {"label": "upper bound, not fill-checked; fee mode per-order rounded; cut-window recompute, not a reproduction of confirmation n 361 PF 1.31; 2c primary (exit can fall in the last 2 minutes)", "counts": dict(cnt), "all_days": summarize(trades)}
+    out = {"valid_quote_source": "copied from the research branch kalshi-scalper/src/scalper/analyze.py:77-81 (bid >= 0.001, ask <= 0.999, ask >= bid, ask - bid <= CANDLE_MAX_SPREAD 0.10 from analyze.py:47) as read in text, not diffed by code; cut day 2026-09-27 from studies/search1_result_2026-10-23.txt line 1: discovery before 2026-09-27", "label": "upper bound, not fill-checked; fee mode per-order rounded; cut-window recompute, not a reproduction of confirmation n 361 PF 1.31; 2c primary (exit can fall in the last 2 minutes)", "counts": dict(cnt), "all_days": summarize(trades)}
     if cut is not None:
         out["before_cut_days_(discovery, where the combination was chosen: information only)"] = summarize([t for t in trades if t[0] < cut])
         out["from_cut_days_(surviving confirmation days)"] = summarize([t for t in trades if t[0] >= cut])
+        n2 = out["from_cut_days_(surviving confirmation days)"]["n"]
+        out["confirmation_label"] = "NOT_ENOUGH_DATA (n %d under the card's MIN_CONF 150); the all-days and before-cut rows are information only (the combination was chosen on the before-cut days); the original is FALSIFIED, a pass here is not a verdict" % n2 if n2 < 150 else "n %d at or above MIN_CONF 150; one build, not a verdict" % n2
     return out
 if __name__ == "__main__":
     a = [x for x in sys.argv[1:] if not x.startswith("--")]

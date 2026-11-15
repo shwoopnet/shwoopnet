@@ -15,9 +15,10 @@ mkt(3, "no", [(420, 0.96, 0.97), (360, 0.95, 0.96), (240, 0.94, 0.95)])
 mkt(4, "yes", [(420, 0.50, 0.52), (360, 0.5, 0.52)])
 mkt(5, "yes", [(360, 0.97, 0.98)])
 mkt(7, "yes", [(420, 0.97, 0.98), (360, None, 0.97)])
+mkt(8, "yes", [(420, 0.97, 0.98)]); c.execute("insert into candle values(?,?,?,?,?,?)", ("KXBTC15M-S8", base + 900 * 8 + 120, None, 0.97, 5, 0))   # incomplete only after the close: out, as the reference
 c.commit(); c.close()
 r = S.run(db, cut=base + 900 * 3); a = r["all_days"]; ok = lambda x, y, t=1e-9: abs(x - y) < t
-assert r["counts"] == {"trade": 3, "band_or_quote": 1, "no_candle": 1, "incomplete_market": 1}, r["counts"]
+assert r["counts"] == {"trade": 3, "band_or_quote": 1, "no_candle": 1, "incomplete_market": 1, "incomplete_only_after_close": 1}, r["counts"]
 assert a["n"] == 3 and a["exits"] == 1
 for h, (net, pfv, n2) in {"h0.00": (-15.14, 0.18 / 15.32, -15.32), "h0.01": (-15.42, 0.09 / 15.51, -15.51), "h0.02": (-15.61, 0.09 / 15.70, -15.70)}.items():
     x = a[h]; assert ok(x["net"], net) and ok(x["pf"], pfv) and x["wins"] == 1 and x["losses"] == 2 and x["half1"]["n"] == 1 and x["half1"]["pf"] == float("inf") and x["half2"]["n"] == 2 and x["half2"]["pf"] == 0 and ok(x["half2"]["net"], n2), (h, x)
