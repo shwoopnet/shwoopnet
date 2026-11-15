@@ -11,10 +11,11 @@ CUTS = {"KXCPI": 1758844800, "KXPCECORE": 1758844800}   # 2025-09-26T00:00:00Z: 
 ALLOWED_RUNS = frozenset()                                # a reviewed edit names the one ECONHIST_LISTS run folder after it lands
 
 def table(rows):
-    agg = defaultdict(lambda: {"n": 0, "dropped": 0, "dates": set(), "events": set()})
+    agg = defaultdict(lambda: {"n": 0, "dropped": 0, "dates": set(), "events": set(), "pages": 0, "cursor": ""})
     for rid, series, body in rows:
         if series not in SERIES: continue
         a = agg[series]; cut = CUTS.get(series)
+        a["pages"] += 1; a["cursor"] = body.get("cursor") or ""
         for m in body.get("markets") or []:
             try: t = C.ts(m["close_time"])
             except (KeyError, ValueError, TypeError): continue
@@ -23,13 +24,14 @@ def table(rows):
     out = []
     for s in sorted(agg):
         a = agg[s]; ds = sorted(a["dates"])
-        out.append("%s: settled markets %d, after the held-out date dropped %d, close dates %d%s, events %d" % (s, a["n"], a["dropped"], len(ds), " (%s to %s)" % (ds[0], ds[-1]) if ds else "", len(a["events"])))
+        out.append("%s: settled markets %d, after the held-out date dropped %d, close dates %d%s, events %d, %s" % (s, a["n"], a["dropped"], len(ds), " (%s to %s)" % (ds[0], ds[-1]) if ds else "", len(a["events"]),
+                   ("truncated at %d pages, counts are a floor" if a["cursor"] else "complete at %d pages") % a["pages"]))
     return out
 
 def main(argv=None):
     a = sys.argv[1:] if argv is None else argv
     C.ALLOWED_RUNS = ALLOWED_RUNS; C.guard([a[0]])
-    print("ECONHIST count table (counts only; no result, price or volume read; the endpoint ends 2026-09-10)")
+    print("ECONHIST count table (counts only; no result, price or volume read; the endpoint ends 2026-09-10). KXCPI and KXPCECORE are counted only before 2025-09-26; the held part is not counted.")
     print("\n".join(table(C.rows_of(a[0]))))
 
 if __name__ == "__main__": main()

@@ -21,11 +21,11 @@ mk = lambda ev, c: M(ticker=ev + c, event_ticker=ev, close_time=c, result="yes",
 cpi = [mk("A", "2025-09-25T23:59:59Z"), mk("A", "2025-09-25T23:59:58Z"), Trap("2025-09-26T00:00:00Z"), Trap("2026-03-12T13:30:00Z"), mk("D", "2025-05-13T12:30:00Z"), mk("D", "2025-05-13T12:31:00Z")]
 pay = [mk("P", "2026-08-07T12:30:00Z"), mk("P", "2026-08-07T12:30:01Z")]
 pce = [Trap("2025-09-26T00:00:00Z"), mk("Q", "2025-08-29T12:30:00Z")]
-rows = [("hist_KXCPI", "KXCPI", {"markets": cpi}), ("hist_KXPAYROLLS", "KXPAYROLLS", {"markets": pay}), ("hist_KXPCECORE", "KXPCECORE", {"markets": pce})]
+rows = [("hist_KXCPI", "KXCPI", {"markets": cpi[:3], "cursor": "x"}), ("hist_KXCPI", "KXCPI", {"markets": cpi[3:], "cursor": ""}), ("hist_KXPAYROLLS", "KXPAYROLLS", {"markets": pay, "cursor": "abc"}), ("hist_KXPCECORE", "KXPCECORE", {"markets": pce})]
 got = H.table(rows)
-want = ["KXCPI: settled markets 4, after the held-out date dropped 2, close dates 2 (2025-05-13 to 2025-09-25), events 2",
-        "KXPAYROLLS: settled markets 2, after the held-out date dropped 0, close dates 1 (2026-08-07 to 2026-08-07), events 1",
-        "KXPCECORE: settled markets 1, after the held-out date dropped 1, close dates 1 (2025-08-29 to 2025-08-29), events 1"]
+want = ["KXCPI: settled markets 4, after the held-out date dropped 2, close dates 2 (2025-05-13 to 2025-09-25), events 2, complete at 2 pages",
+        "KXPAYROLLS: settled markets 2, after the held-out date dropped 0, close dates 1 (2026-08-07 to 2026-08-07), events 1, truncated at 1 pages, counts are a floor",
+        "KXPCECORE: settled markets 1, after the held-out date dropped 1, close dates 1 (2025-08-29 to 2025-08-29), events 1, complete at 1 pages"]
 ok = [("1 lines", got == want), ("2 cut constant is 2025-09-26T00:00:00Z for KXCPI and KXPCECORE only", H.CUTS == {"KXCPI": 1758844800, "KXPCECORE": 1758844800}),
       ("3 source names no banned key", not any(('"%s"' % b) in open(os.path.join(here, "econhist_table.py")).read() for b in BAN)),
       ("4 ALLOWED_RUNS empty until landing", H.ALLOWED_RUNS == frozenset())]
