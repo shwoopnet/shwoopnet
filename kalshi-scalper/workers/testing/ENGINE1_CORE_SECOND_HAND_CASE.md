@@ -29,3 +29,5 @@ Aggregate, exit M180, h 0: scored E1 (+4.76), E2 (-2.69), E4 (no C-180 candle: n
 - Rounding of fees: p = 0.5, n = 10: 17.5 -> 18; p = 0.9, n = 10: 6.3 -> 7; the 1e-9 rounding means a value like 6.000000000001 rounds to 6.000000000 and ceils to 6.
 - A bid exactly at a threshold triggers (comparison on 6 decimal places).
 - PF: no loss and a win: infinite; no win and a loss: 0; none: nan.
+
+- CORRECTION (found when the test first ran; code was right): the day-clustered z in the aggregate is 1.673220 (1.67321967), not 1.673203 as written above (a hand rounding slip); every other figure stands.
