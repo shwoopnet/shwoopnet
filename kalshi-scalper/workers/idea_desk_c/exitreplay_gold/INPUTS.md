@@ -2,7 +2,7 @@
 
 - Card: Forensics EXITREPLAY1, gold hold row: claude/forensics-desk kalshi-scalper/workers/forensics/results/EXITREPLAY1_POOLED.json:29 (n 117, PF 1.385). Rule from kalshi-scalper/workers/forensics/exitreplay1.py (hold arm).
 - Data: branch quote-data at 9e8e757b4fe8a74e366875d3df6e3b3da6bef487, folders book15r6/2026-10-29 to book15r6/2026-11-08, files coverage.csv.gz and book.csv.gz only (114 files).
-- Cut: KXGOLD15M closes from 2026-10-29T00:00Z to before 2026-11-07T20:24Z (S-HOLDVSSELL held-out start); later windows counted, never read.
+- Cut (Amendment 1, the Head of R&D, Nov 15 14:37Z): KXGOLD15M closes from 2026-10-29T00:00Z to before 2026-11-05T00:00Z (RESIL1 reserve); later windows counted, never read.
 - sha256 of each file (path relative to the quote-data root):
 
 ```

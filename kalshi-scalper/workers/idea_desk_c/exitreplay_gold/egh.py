@@ -4,7 +4,7 @@
 Independent of Forensics' exitreplay1.py: written from that file's printed rule, using the standard library only.
 The rule and every constant are in HAND_CASE.md (committed first, d487b1a99).
 Reads only R6's book15r6/*/*/coverage.csv.gz (close_time, series, ticker, max_gap_ms, result) and book.csv.gz (t_recv_ms, ticker,
-yes_bid_px_1, no_bid_px_1), for KXGOLD15M windows closing from 2026-10-29T00:00Z to before CUT (S-HOLDVSSELL's held-out start).
+yes_bid_px_1, no_bid_px_1), for KXGOLD15M windows closing from 2026-10-29T00:00Z to before CUT (2026-11-05T00:00Z, Amendment 1).
 A window at or after CUT is counted and never read (its book rows are not loaded). No network. Prints JSON.
 
 Usage: python3 -I egh.py <root holding book15r6/>
@@ -30,7 +30,7 @@ def ms(iso):
     return calendar.timegm(time.strptime(iso, "%Y-%m-%dT%H:%M:%SZ")) * 1000
 
 
-FROM_MS, CUT_MS = ms("2026-10-29T00:00:00Z"), ms("2026-11-07T20:24:00Z")
+FROM_MS, CUT_MS = ms("2026-10-29T00:00:00Z"), ms("2026-11-05T00:00:00Z")   # Amendment 1: RESIL1 reserves R6 closes from Nov 5
 
 
 def fee(p):
@@ -153,7 +153,7 @@ def main(root):
     entries.sort(key=lambda e: (e["close"], e["ticker"]))
     n = len(entries)
     h = n // 2
-    out = {"label": LABEL, "cut": "closes before 2026-11-07T20:24Z (S-HOLDVSSELL held-out start)",
+    out = {"label": LABEL, "cut": "closes before 2026-11-05T00:00Z (RESIL1's reserved R6 window; S-HOLDVSSELL's later start is inside it)",
            "window": "this recompute reads KXGOLD15M closes from 2026-10-29T00:00Z to before the cut; cut_dropped counts only windows from the cut to before 2026-11-09T00:00Z (later closes are not listed at all), so it is not a total",
            "counts": counts}
     raw = {}
