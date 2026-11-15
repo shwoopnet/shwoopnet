@@ -189,7 +189,7 @@ wm_, tm_ = exact(6.8, 1.0, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_)
 ref_ = golden(lambda v_: sse_(6.0, v_, wm_, tm_), 0.01, 6.0)
 assert fb["l1"] == 6.0 and abs(fb["l2"] - ref_) < 1e-7 and sse_(6.0, fb["l2"], wm_, tm_) <= sse_(6.0, ref_, wm_, tm_) + 1e-15 and fb["on_bound"] is True and abs(grad_(6.0, fb["l2"], wm_, tm_, 1)) < 1e-8, (fb, ref_)
 wm_, tm_ = exact(0.001, 0.002, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_)
-assert fb["l1"] == 0.01 and fb["l2"] == 0.01 and fb["on_bound"] is True and fb["iterations"] == 1 and fb["cap_hit"] is False, fb          # nothing iterated in the 1-D stage
+assert fb["l1"] == 0.01 and fb["l2"] == 0.01 and fb["on_bound"] is True and fb["iterations"] <= 1 and fb["cap_hit"] is False, fb          # nothing iterated (addendum 6: both fixed stops at once)
 for (l1_, l2_) in ((1.4, 1.0), (0.012, 1.4)):
     wm_, tm_ = exact(l1_, l2_, (1.5, 2.5, 3.5)); fb = s.fit_full(wm_, tm_); assert fb["on_bound"] is False and abs(fb["l1"] - l1_) < 1e-9
 print("socderiv addendum 5 tests passed")
