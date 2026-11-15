@@ -25,6 +25,9 @@ with tempfile.TemporaryDirectory() as d:
     assert (c["considered"], c["trades"], c["nofire"], c["spread"], c["band"], c["noprevious"], c["nodecision"], c["badquote"], c["excluded_result"], c["candles_dropped_after_close"], c["candles_dropped_incomplete"]) == (9, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1), c
     for key, (pfa, neta, n1, n2) in {"h0.00": (5.83 / 9.55, -3.72, 5.83, -9.55), "h0.01": (5.73 / 9.76, -4.03, 5.73, -9.76), "h0.02": (5.62 / 9.96, -4.34, 5.62, -9.96)}.items():
         a = r["pooled_information_only"][key]; assert a["n"] == 3 and a["wins"] == 1 and near(a["pf"], pfa) and near(a["net"], neta) and a["half1_pf"] == math.inf and near(a["half1_net"], n1) and a["half2_pf"] == 0.0 and near(a["half2_net"], n2), (key, a)
+    zz = r["standard_group"]; assert near(zz["h0.00"]["day_clustered_z"], 0.1544554455445545) and near(zz["h0.01"]["day_clustered_z"], 0.13353115727002973) and near(zz["h0.02"]["day_clustered_z"], 0.11287128712871285) and zz["h0.01"]["trade_days"] == 2
+    assert r["c11_group"]["h0.01"]["day_clustered_z"] is None and r["c11_group"]["h0.01"]["trade_days"] == 1 and near(r["pooled_information_only"]["h0.01"]["day_clustered_z"], -0.3785713459764245) and r["pooled_information_only"]["h0.01"]["trade_days"] == 3
+    assert r["tries_in_deflation_ledger"] == 2 and "second build equal at 1e-9" in r["ledger_note"]
     s = r["standard_group"]; assert s["h0.01"]["n"] == 2 and near(s["h0.01"]["pf"], 5.73 / 4.38) and near(s["h0.01"]["net"], 1.35) and near(s["h0.02"]["pf"], 5.62 / 4.48) and near(s["h0.02"]["net"], 1.14) and s["h0.01"]["half1_pf"] == math.inf and s["h0.01"]["half2_pf"] == 0.0
     cc = r["c11_group"]; assert cc["h0.01"]["n"] == 1 and cc["h0.01"]["wins"] == 0 and s["pass_standard"] is False and cc["pass_c11"] is False and r["PASS"] is False
     f2, l3 = r["first_two_thirds_of_days_information_only"], r["last_third_of_days_information_only"]

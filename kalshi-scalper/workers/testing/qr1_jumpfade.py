@@ -59,7 +59,21 @@ def block(trades, h):
     return {"n": n, "wins": sum(1 for v in cs if v > 0), "net": sum(cs), "pf": pf(cs) if cs else None, "half1_pf": pf(f) if f else None, "half2_pf": pf(s) if s else None, "half1_net": sum(f), "half2_net": sum(s)}
 
 
-def blocks(trades): return {"h%.2f" % h: block(trades, h) for h in HAIRCUTS}
+def zday(trades, h):
+    """day-clustered z of the mean cash per trade (Auditor B): sum cash by UTC close day, mean of the day sums over (sample sd of the day sums / sqrt(days)); n/a under 2 days"""
+    by = {}
+    for t in trades: by[t["day"]] = by.get(t["day"], 0.0) + t["cash"][h]
+    v = list(by.values())
+    if len(v) < 2: return None, len(v)
+    sd = math.sqrt(sum((x - sum(v) / len(v)) ** 2 for x in v) / (len(v) - 1))
+    return (None if sd == 0 else (sum(v) / len(v)) / (sd / math.sqrt(len(v)))), len(v)
+
+
+def blocks(trades):
+    out = {}
+    for h in HAIRCUTS:
+        b = block(trades, h); b["day_clustered_z"], b["trade_days"] = zday(trades, h); out["h%.2f" % h] = b
+    return out
 
 
 def ge(x, y): return x is not None and x >= y - TOL
@@ -85,7 +99,8 @@ def run(path):
         trades.append({"close": close, "tk": tk, "series": series, "day": datetime.fromtimestamp(close, timezone.utc).strftime("%Y-%m-%d"), "cash": {h: cash_of(side, price, result, h) for h in HAIRCUTS}})
     trades.sort(key=lambda t: (t["close"], t["tk"])); cnt["trades"] = len(trades)
     std = [t for t in trades if t["series"] not in C11]; c11 = [t for t in trades if t["series"] in C11]
-    out = {"extract_sha256": sha, "counts": cnt, "label": "upper bound, not fill-checked; fee mode per-order rounded", "tries": "1 rule, read as 2 groups (standard, C11)"}
+    out = {"extract_sha256": sha, "counts": cnt, "label": "upper bound, not fill-checked; fee mode per-order rounded", "tries": "1 rule, read as 2 groups (standard, C11)", "tries_in_deflation_ledger": 2,
+           "ledger_note": "this is a quick read on the OIREL-X extract; other rules read on the same archive and days by other desks (OIREL-X, FAV10-X, UNDERDOG2X) count in the ledger too; a pass is a first-read candidate that needs a second build equal at 1e-9 before rule 16b"}
     out["pooled_information_only"] = blocks(trades)
     b, ps, _ = flags(std); out["standard_group"] = {**b, "pass_standard": ps}
     b, _, pc = flags(c11); out["c11_group"] = {**b, "pass_c11": pc}
