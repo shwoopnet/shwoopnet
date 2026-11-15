@@ -23,7 +23,7 @@ def job():
     return {"job_id": "ECONCENSUS_LISTS", "owner": "DESK_B", "status": "active",
             "registration": "kalshi-scalper/workers/econcensus/ECONCENSUS_NOTE.md",
             "purpose": "Census: settled markets of US macro release series and four hourly temperature series before a fixed cut, plus one Economics series list, to count markets and release dates per series. No candle, no test.",
-            "heldout": "FIXED date constant: closes at or after %s are never requested (every markets request carries max_close_ts = %d, one second before). The held-out window is therefore not read by this job; a later test of these families reads only from %s on, under its own registration." % (HELDOUT_FROM, MAX_CLOSE, HELDOUT_FROM),
+            "heldout": "FIXED date constant: closes at or after %s are never requested (44 markets requests carry max_close_ts = %d, one second before; KXFED and KXFEDDECISION carry %d, 2025-09-16T23:59:59Z, before FEDIMPL1's frozen holdout of the last 10 meetings from 2025-09-17). The held-out windows are therefore not requested by this job; a later test of these families reads only from the cut on, under its own registration." % (HELDOUT_FROM, MAX_CLOSE, FED_MAX_CLOSE),
             "allowed_endpoints": [{"name": "series_list", "method": "GET", "path_pattern": "/series", "params_allowed": ["limit", "category"]},
                                   {"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "min_close_ts", "max_close_ts", "limit", "cursor"]}],
             "series_allowlist": BIG + SMALL + TEMP, "ticker_allowlist": [], "max_requests": cap + 12,
