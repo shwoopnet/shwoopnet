@@ -1,5 +1,5 @@
 """python3 -I engine1_extract_load_test.py : the extract loader on invented sqlite extracts."""
-import os, sys, lzma, sqlite3, tempfile, hashlib
+import os, sys, lzma, sqlite3, tempfile, calendar, time, hashlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import engine1_extract_load as L
 base = tempfile.mkdtemp()
@@ -13,21 +13,36 @@ def arch(con):
 def perps(con):
     con.execute("CREATE TABLE market(ticker, series, close_ts, result, src)"); con.execute("CREATE TABLE candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi)")
     con.executemany("INSERT INTO market VALUES (?,?,?,?,?)", [("KXSPYPERP", "SPY", None, None, "p"), ("KXUS500PERP", "US500", None, None, "p")])
-    con.executemany("INSERT INTO candle VALUES (?,?,?,?,?,?,?)", [("KXSPYPERP", 1793750399, 600.0, 600.1, 600.0, 1, None), ("KXSPYPERP", 1793750460, 601.0, 601.1, 601.0, None, 5), ("KXUS500PERP", 1793750460, 1, 2, 1, 1, 1)])
+    con.executemany("INSERT INTO candle VALUES (?,?,?,?,?,?,?)", [("KXSPYPERP", 1793923199, 600.0, 600.1, 600.0, 1, None), ("KXSPYPERP", 1793923260, 601.0, 601.1, 601.0, None, 5), ("KXUS500PERP", 1793923260, 1, 2, 1, 1, 1)])
 a, b = mk("arch.xz", arch), mk("perps.xz", perps)
-L.ARCHIVE = ("arch.xz", a); L.PERPFILE = ("perps.xz", b)
+nc = mk("nc.xz", arch)
+L.ARCHIVE = ("arch.xz", a); L.PERPFILE = ("perps.xz", b); L.NC15FILE = ("nc.xz", nc)
 allow = os.path.join(base, "H.md"); L.ALLOW_FILE = allow
 try: L.load(base); assert False                                    # 1: no allow line
 except SystemExit as e: assert "REFUSED" in str(e)
-open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\\n" % (L.ALLOW_MARK, "deadbeef", a, b))
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, "deadbeef", a, b, nc))
 try: L.load(base); assert False                                    # 2: wrong loader hash
 except SystemExit as e: assert "REFUSED" in str(e)
-open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b))
-wa, ca, wp, cp = L.load(base)
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b, nc))
+wa, ca, wp, cp, wn, cn = L.load(base)
+assert list(wn) == ["WTI"] and cn["dropped by the cut"] == 2                                              # the NC15 slot reads like the archive
 assert list(wa) == ["WTI"] and len(wa["WTI"]) == 1 and wa["WTI"][0]["ticker"] == "K1" and wa["WTI"][0]["result"] == "yes", wa
 assert [c[0] for c in wa["WTI"][0]["candles"]] == [999940, 1000000], wa                                   # the post-close candle is dropped
 assert ca["dropped by the cut"] == 2 and ca["candle after close (dropped)"] == 1 and ca["no result (dropped)"] == 1 and ca["no result (dropped): WTI"] == 1, ca
 assert list(wp) == ["KXSPYPERP"] and cp["other ticker dropped"] == 1 and cp["perp candle before 2026-11-06 (dropped)"] == 1 and len(wp["KXSPYPERP"]) == 1 and wp["KXSPYPERP"][0][4] is None, (wp, cp)
+assert L.PERP_FROM == calendar.timegm((2026, 11, 6, 0, 0, 0)) == 1793923200 and L.CUT == calendar.timegm((2026, 10, 3, 16, 0, 0))
+def perps2(con):
+    con.execute("CREATE TABLE market(ticker, series, close_ts, result, src)"); con.execute("CREATE TABLE candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi)")
+    con.execute("INSERT INTO market VALUES ('KXSPYPERP','SPY',NULL,NULL,'p')")
+    con.executemany("INSERT INTO candle VALUES (?,?,?,?,?,?,?)", [("KXSPYPERP", 1793923199, 1, 2, 1, 1, 1), ("KXSPYPERP", 1793923200, 1, 2, 1, 1, 1)])
+b2 = mk("perps2.xz", perps2); L.PERPFILE = ("perps2.xz", b2)
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b2, nc))
+wp2 = L.load_perps(base)[0]; assert [c[0] for c in wp2["KXSPYPERP"]] == [1793923200], wp2                 # literal boundary: 1793923199 dropped, 1793923200 kept
+L.NC15FILE = ("nc.xz", "")
+try: L.load(base); assert False                                                                           # an open NC15 sha refuses
+except SystemExit as e: assert "REFUSED" in str(e)
+L.NC15FILE = ("nc.xz", nc); L.PERPFILE = ("perps.xz", b)
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b, nc))
 open(os.path.join(base, "arch.xz"), "ab").write(b"x")                                                      # 3: a changed file is refused
 try: L.load(base); assert False
 except SystemExit as e: assert "sha256" in str(e)
