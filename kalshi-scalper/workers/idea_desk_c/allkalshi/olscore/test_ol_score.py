@@ -123,6 +123,17 @@ class Truncated(unittest.TestCase):
         self.assertEqual(S.list_markets(r, S.CARDS["NBA_O"]), {})
 
 
+class MentMissingOcc(unittest.TestCase):
+    def test_own_occurrence_required(self):
+        mk = {"KXTRUMPMENTION-26JUN10-A": {"ticker": "KXTRUMPMENTION-26JUN10-A", "event_ticker": "KXTRUMPMENTION-26JUN10",
+              "occurrence_datetime": "2026-06-10T18:00:00Z", "close_time": "2026-06-10T19:00:00Z", "yes_sub_title": "a", "result": "yes"},
+              "KXTRUMPMENTION-26JUN10-B": {"ticker": "KXTRUMPMENTION-26JUN10-B", "event_ticker": "KXTRUMPMENTION-26JUN10",
+              "occurrence_datetime": "", "close_time": "2026-06-10T19:00:00Z", "yes_sub_title": "b", "result": "TRAP"}}
+        kept, c, _ = S.select("MENT", mk)
+        self.assertEqual(sorted(kept), ["KXTRUMPMENTION-26JUN10-A"])
+        self.assertEqual(c["no_time"], 1)
+
+
 class Sample(unittest.TestCase):
     def test_md5_sample(self):
         mk = {("KXTRUMPMENTION-26JUN10-W%04d" % i): {"ticker": "KXTRUMPMENTION-26JUN10-W%04d" % i, "event_ticker": "KXTRUMPMENTION-26JUN10",

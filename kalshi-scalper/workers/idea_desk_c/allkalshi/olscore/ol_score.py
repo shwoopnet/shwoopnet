@@ -281,29 +281,36 @@ def bar_ok(pf1, h1, h2, pf2):
 
 # ------------------------------------------------------------------ main
 def select(card_id, mk):
-    """Window filter on time fields only. Returns (kept dict, counts, event occurrence map)."""
+    """Window filter. Returns (kept dict, counts, event occurrence map).
+    MENT (Auditor B, Nov 15): the window is tested on the market's OWN occurrence_datetime before any other field is parsed; a market with a
+    missing or unparsable occurrence is dropped and counted, never kept. NBA: the window is tested on close_time first."""
     card = CARDS[card_id]
     lo, hi = card["dev"]
     counts = {"listed": len(mk), "outside_window": 0, "no_time": 0, "not_qualify_word": 0, "kept": 0}
-    ev_occ = {}
+    first = {}
     for t, m in mk.items():
-        o = iso(m.get("occurrence_datetime"))
-        if o is not None:
-            e = m.get("event_ticker") or ""
-            ev_occ[e] = o if e not in ev_occ else min(ev_occ[e], o)
-    kept = {}
-    for t, m in mk.items():
-        key = iso(m.get("close_time")) if card["win_on"] == "close" else ev_occ.get(m.get("event_ticker") or "")
-        if key is None or iso(m.get("close_time")) is None:
+        key = iso(m.get("occurrence_datetime")) if card["win_on"] == "occurrence" else iso(m.get("close_time"))
+        if key is None:
             counts["no_time"] += 1
             continue
         if not (lo <= key < hi):
             counts["outside_window"] += 1
             continue
+        first[t] = m
+    ev_occ = {}
+    kept = {}
+    for t, m in first.items():
+        if iso(m.get("close_time")) is None:
+            counts["no_time"] += 1
+            continue
         if card_id == "MENT" and "does not qualify" in ((m.get("yes_sub_title") or "") + " " + (m.get("title") or "")).lower():
             counts["not_qualify_word"] += 1
             continue
         kept[t] = m
+        o = iso(m.get("occurrence_datetime"))
+        if o is not None:
+            e = m.get("event_ticker") or ""
+            ev_occ[e] = o if e not in ev_occ else min(ev_occ[e], o)
     if card_id == "MENT":
         order = sorted(kept, key=lambda t: (hashlib.md5((MENT_SEED + t).encode("ascii")).hexdigest(), t))
         counts["not_sampled"] = max(0, len(order) - MENT_SAMPLE_N)

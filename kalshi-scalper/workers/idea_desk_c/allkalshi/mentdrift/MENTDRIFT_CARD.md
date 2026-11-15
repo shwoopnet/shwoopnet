@@ -25,6 +25,8 @@
   - Read once, on the Head's go, after development passes. Its lists and candles are their own job then.
 - **Cut, never pulled:** occurrence from 2026-11-05T00:00Z on. That is TRUMPTOPIC1's forward read, open to 150 trades or 2027-06-30.
 - **Disclosure:** MENTPERSIST1's held 500 markets are earnings-call word series. Before scoring, the scorer prints their overlap with this card's tickers; it is expected to be 0.
+- **Exposure, LOADED not LOOKED AT (Auditor B, Nov 15).** The historical list stops at the Sep 13 cutoff, so this card's held-out and TRUMPTOPIC1's forward window are not in it. It does return the Aug 6 to Sep 12 part of TRUMPTOPIC1's spent held-out, with results, in the raw file. That file stays in scratch and nobody opens it except through `ol_score.py`. The scorer tests each market's OWN occurrence_datetime before parsing any other field; a missing or unparsable occurrence is dropped and counted. The result is read only for kept rows.
+- **Truncation.** If page 10 (KXTRUMPMENTION) or page 5 (KXTRUMPMENTIONB) still has a cursor, the list is not whole and the scorer stops before any result read.
 - **Stage A:** the job `MENTDRIFT_LISTS_A` asks for the historical market lists of the two series, which have no date filter, plus two series reads.
   - Before reading any other field, the scorer drops every market whose event occurrence is outside development.
   - It keeps ticker, event_ticker, close_time, occurrence_datetime, can_close_early and result, in that order of use. The result is read last, only for the development rows.
