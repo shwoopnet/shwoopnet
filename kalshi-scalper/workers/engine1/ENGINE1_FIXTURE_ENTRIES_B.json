@@ -1,0 +1,83 @@
+{
+ "close_ts": 36000,
+ "entries": [
+  {
+   "id": "E12",
+   "exit": "T",
+   "side": "yes",
+   "ask": 0.3,
+   "result": "no",
+   "path": [
+    [
+     35340,
+     0.7,
+     0.72
+    ],
+    [
+     35400,
+     0.65,
+     0.67
+    ],
+    [
+     35500,
+     0.45,
+     0.47
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E13",
+   "exit": "S",
+   "side": "yes",
+   "ask": 0.6,
+   "result": "yes",
+   "path": [
+    [
+     35500,
+     0.5,
+     0.52
+    ],
+    [
+     36000,
+     0.2,
+     0.22
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E14",
+   "exit": "T",
+   "side": "yes",
+   "ask": 0.45,
+   "result": "no",
+   "path": [
+    [
+     35500,
+     0.5,
+     0.52
+    ],
+    [
+     35970,
+     0.96,
+     0.98
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  }
+ ],
+ "note": "addendum after Auditor B's look-ahead check: a path with pre-entry and entry-candle quotes (E12), a quote at the close (E13) and after close-60 (E14) must never trigger a target or stop"
+}

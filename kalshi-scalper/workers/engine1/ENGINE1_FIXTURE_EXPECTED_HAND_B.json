@@ -1,0 +1,13 @@
+{
+ "note": "hand computed before the core change; n=1 net dollars; fee n=1 ceil(round(7p(1-p),9))/100; E12 settles no (pre-entry .70 and entry-candle .65 ignored), E13 settles yes (close quote .20 not a stop mark), E14 settles no (C-30 bid .96 not a target mark); marks capped at close-60",
+ "h0": {
+  "E12": -0.32,
+  "E13": 0.38,
+  "E14": -0.47
+ },
+ "h2": {
+  "E12": -0.34,
+  "E13": 0.36,
+  "E14": -0.49
+ }
+}

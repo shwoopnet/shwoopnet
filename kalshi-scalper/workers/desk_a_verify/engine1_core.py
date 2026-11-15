@@ -2,6 +2,7 @@
 Entry: {id, close_ts, day, series, side 'yes'|'no', ask (side's raw ask), n, entry_end, result 'yes'|'no'|'void', path [[end_ts, yes_bid, yes_ask], ...]}."""
 import math, collections, time
 def fee_up_order(p, n): return math.ceil(round(0.07 * n * p * (1 - p) * 100, 9)) / 100
+TRIG_CUT = 60                                                               # target and stop marks only on candles ending at or before close - 60 (Auditor B, b); a quote at the closing instant is not tradable
 def sellable(c): return 0 < c[1] < c[2] < 1
 def side_bid(side, c): return c[1] if side == "yes" else 1 - c[2]
 def score(e, exit_, h, n):
@@ -12,7 +13,7 @@ def score(e, exit_, h, n):
     if exit_ in ("T", "S", "B"):
         tgt, stp = min(2 * paid, 0.99), paid / 2
         for c in path:
-            if not sellable(c): continue
+            if c[0] > close - TRIG_CUT or not sellable(c): continue
             b = side_bid(e["side"], c)
             hit_t = exit_ in ("T", "B") and b >= tgt - 1e-12
             hit_s = exit_ in ("S", "B") and b <= stp + 1e-12
