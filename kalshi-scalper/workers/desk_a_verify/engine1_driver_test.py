@@ -32,4 +32,10 @@ rep3 = D.run({"arch": {"BTC": sd + vd}, "nc": {"BTC": sd}}); assert rep3["duplic
 assert rep["entries_total"] == 18 and rep["non_whole_cent_entries"] == 0, rep      # SEARCH markets only: 9 markets x 2 sides (yes, no), all whole-cent
 odd = [dict(m, candles=[(m["close"] - 300, .89, .9049, .9, 1, 10)]) for m in sd]
 r4 = D.run({"arch": {"BTC": odd}}); assert r4["non_whole_cent_entries"] == 9 and r4["entries_total"] == 18, r4          # only the YES ask .9049 is not whole-cent; the NO ask 1 - .89 is
+# the REAL series strings map to the split keys (Auditor B, blocker 1)
+real = ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXNATGAS15M", "KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXGOLD15M", "KXSOL15M", "KXNEAR15M", "KXZEC15M", "KXPALLADIUM15M", "KXPLATINUM15M"]
+miss = [r for r in real if D.short(r) not in S.LAST_SEARCH]; assert miss == [], miss
+assert D.short("KXAUDUSD15M") == "AUDUSD" and "AUDUSD" not in S.LAST_SEARCH and D.short("KXUSDCAD15M") == "USDCAD" and "USDCAD" not in S.LAST_SEARCH and D.short("WTI") == "WTI"
+r5 = D.run({"nc": {"KXAUDUSD15M": sd}, "arch": {"KXBTC15M": [dict(m, series="KXBTC15M") for m in sd + vd]}})
+assert r5["no_split_constant"] == [("nc", "KXAUDUSD15M")] and list(r5)[0] == "no_split_constant" and r5["tried_by_series"] == {("arch", "KXBTC15M"): 1} and r5["validate_passes"] >= 1, r5
 print("ALL OK")

@@ -4,7 +4,11 @@ Gate: SEARCH n >= MIN_N scored entries at 10 contracts, PF at 1c >= 1.3 and PF a
 import math, time, collections
 import engine1_core as K, engine1_enum as N, engine1_split as S
 MIN_N = 100; PF1 = 1.3; PF2 = 1.0; ALPHA = 0.05; CONTRACTS = 10
-DISCLOSURE = "upper bound, not fill-checked; sales booked at max(bid - h, 0.01), purchases at min(ask + h, 0.99); fee ceil(round(x, 9)) per order per leg; target and stop only on candles ending at or before close - 60; one-sided p from day-clustered z of the 1c cash at 10 contracts"
+DISCLOSURE = "upper bound, not fill-checked; sales booked at max(bid - h, 0.01), purchases at min(ask + h, 0.99); fee ceil(round(x, 9)) per order per leg; target and stop only on candles ending at or before close - 60; one-sided p from day-clustered z of the 1c cash at 10 contracts; the same ticker appears in several buckets and rules, so the tests are dependent and BH is only approximate"
+def short(series):
+    """The ONE mapping from an extract's series string to engine1_split's key: KXWTI15M -> WTI, KXBTC15M -> BTC; an already short name passes."""
+    x = series[2:] if series.startswith("KX") else series
+    return x[:-3] if x.endswith("15M") else x
 def day_of(ts): return time.strftime("%Y-%m-%d", time.gmtime(ts))
 def pval(z): return 0.5 * math.erfc(z / math.sqrt(2)) if z is not None else 1.0
 def groups(mkts, cuts, stats=None):
@@ -46,19 +50,19 @@ def bh(pvals, m, alpha=ALPHA):
     return {key for key, _ in items[:k]}
 def run(markets_by_source):
     """markets_by_source: {source: {series: [market]}}. Returns a report dict (counts first)."""
-    rep = {"disclosure": DISCLOSURE, "tried_by_series": {}, "no_split_constant": [], "non_whole_cent_entries": 0, "entries_total": 0}
+    rep = {"no_split_constant": [], "disclosure": DISCLOSURE, "tried_by_series": {}, "non_whole_cent_entries": 0, "entries_total": 0}
     search, valid = {}, {}
     st = {"entries": 0, "non_whole": 0}; total = 0; seen = set(); rep["duplicate_tickers_dropped"] = 0
     for src, bys in markets_by_source.items():
         for series, mk in bys.items():
+            if short(series) not in S.LAST_SEARCH: rep["no_split_constant"].append((src, series)); continue
             kept_mk = []
             for m in mk:
                 if m["ticker"] in seen: rep["duplicate_tickers_dropped"] += 1
                 else: kept_mk.append(m)
             mk = kept_mk
             seen.update(m["ticker"] for m in mk)
-            if series not in S.LAST_SEARCH: rep["no_split_constant"].append((src, series)); continue
-            sm = [m for m in mk if S.phase(series, m["close"]) == "search"]; vm = [m for m in mk if S.phase(series, m["close"]) == "validate"]
+            sm = [m for m in mk if S.phase(short(series), m["close"]) == "search"]; vm = [m for m in mk if S.phase(short(series), m["close"]) == "validate"]
             cuts = {}
             for b in N.BUCKETS:
                 sp = [N.cents(c[2] - c[1]) for m in sm for c in m["candles"] if c[0] == m["close"] - b and 0 < c[1] < c[2] < 1]
