@@ -6,10 +6,11 @@ FEATURES = ("oi3", "oi6", "vol3", "mom1", "mom3", "mom5"); CLASSES = ("up", "fla
 FILTERS = (None,) + tuple((f, c) for f in FEATURES for c in CLASSES) + tuple(("spread", c) for c in SPREAD)
 RULES_PER_SERIES = len(BUCKETS) * len(BANDS) * len(SIDES) * len(EXITS) * len(FILTERS)
 def cls(x): return "up" if x > 1e-12 else ("down" if x < -1e-12 else "flat")
-def cents(x): return int(round(100 * x))
+def cents(x): return int(math.ceil(round(100 * x, 6)))        # whole cents, rounded UP (as the shadow logger); used only to pick the band and the cheap/favourite side
 def asks(c):
     """-> (yes ask cents, no ask cents) at a candle."""
     return cents(c[2]), cents(1 - c[1])
+def raw_ask(c, side): return c[2] if side == "yes" else 1 - c[1]
 def side_for(rule_side, ya, na):
     if rule_side in ("yes", "no"): return rule_side
     if rule_side == "cheap": return "yes" if ya <= na else "no"
@@ -21,10 +22,10 @@ def features(by_end, e, side):
     sm = (lambda m: m if side == "yes" else 1 - m)
     for name, lag in (("oi3", 180), ("oi6", 360)):
         t = e - lag
-        if t in by_end: f[name] = c[5] - by_end[t][5]
+        if t in by_end and c[5] is not None and by_end[t][5] is not None: f[name] = c[5] - by_end[t][5]
         else: miss.add(name)
     ts1, ts2 = (e - 120, e - 60, e), (e - 300, e - 240, e - 180)
-    if all(t in by_end for t in ts1 + ts2): f["vol3"] = sum(by_end[t][4] for t in ts1) - sum(by_end[t][4] for t in ts2)
+    if all(t in by_end and by_end[t][4] is not None for t in ts1 + ts2): f["vol3"] = sum(by_end[t][4] for t in ts1) - sum(by_end[t][4] for t in ts2)
     else: miss.add("vol3")
     for name, lag in (("mom1", 60), ("mom3", 180), ("mom5", 300)):
         m0, m1 = mid(e - lag), mid(e)
@@ -46,7 +47,8 @@ def entries(candles, close_ts, bucket, band, rule_side, filt, cuts=None):
     if not (0 < c[1] < c[2] < 1): return None, "one-sided"
     ya, na = asks(c); side = side_for(rule_side, ya, na); a = ya if side == "yes" else na
     if not (5 <= a <= 94) or a // 5 != band: return None, "out of band"
-    if filt is None: return {"side": side, "ask": a / 100, "entry_end": e}, "ok"
+    ra = raw_ask(c, side); ent = {"side": side, "ask": ra, "entry_end": e, "whole_cent": abs(ra * 100 - round(ra * 100)) < 1e-6}   # scored at the RAW ask
+    if filt is None: return ent, "ok"
     f, miss = features(by_end, e, side)
     name, klass = filt
     if name == "spread":
@@ -55,4 +57,4 @@ def entries(candles, close_ts, bucket, band, rule_side, filt, cuts=None):
     else:
         if name in miss: return None, "missing feature candle"
         ok = cls(f[name]) == klass
-    return ({"side": side, "ask": a / 100, "entry_end": e}, "ok") if ok else (None, "filter")
+    return (ent, "ok") if ok else (None, "filter")

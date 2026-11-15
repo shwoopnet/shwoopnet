@@ -25,3 +25,9 @@ Expected, bucket 300, band 10, any exit:
 6. Window W2, the same candles without the candle ending C-600: oi3, oi6, vol3 and mom1 and mom3 still computable; mom5 and vol3 (needs C-600) are not: rules with filter mom5 or vol3 are no entry, counted "missing feature candle" (6 of the 22 filter options: vol3 up, flat, down and mom5 up, flat, down; vol3 needs ends C-600, C-540, C-480 for its second sum and C-420, C-360, C-300 for the first, so it needs C-600).
 7. Counting: 13 x 18 x 4 x 6 x 22 = 123,552 rules for this one series, all tried.
 8. Buckets: with a candle ending at C-240 (bucket 240) there is a separate entry candle for the bucket 240 rules; bucket 300's features never use the C-240 candle (it ends after e).
+
+## Dated notes, 2026-11-15 (after Auditor B's check; hand-case values above are all whole-cent quotes and do not change)
+- The entry is scored at the RAW ask (YES: yes_ask; NO: 1 - yes_bid), never a rounded one. Whole cents are used only to pick the band and the cheap or favourite side, and are rounded UP (ceil(round(100 x ask, 6))), as the shadow logger does: 0.5249 is 53c, band 10. Each entry carries whole_cent (True or False) and the driver prints how many entry candles have a non-whole-cent ask.
+- A NULL (None) volume or open interest in a feature candle makes that feature "missing feature candle", never an error.
+- The spread cut points are computed on the SEARCH dates and also classify SEARCH entries, so SEARCH is in-sample for those cuts; VALIDATE uses them frozen.
+- BH: m is the total number of cells tried over ALL series and sources in the run; a second run adds to the same m.
