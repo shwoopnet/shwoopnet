@@ -37,8 +37,10 @@ def run(db, series_list=None):
             if d[0] == "trade": trades.append((d[3], cl, d[1], d[2], res))
         trades.sort()
         st = stats(trades); hi = [t for t in trades if t[3] >= FLOOR - 1e-9]; lo = [t for t in trades if t[3] < FLOOR - 1e-9]
-        out["series"][ser] = {"counts": dict(cnt), "all": st, "fill_0.08_or_more": stats(hi), "fill_under_0.08": stats(lo), "c11_series": ser in C11, "flags": flags(st, ser in C11)}
-    out["tries"] = len(out["series"])
+        home = ser == "KXBTC15M"                                  # the rule's home market (the threshold is Bitcoin's discovery quantile): in-sample, never a try
+        out["series"][ser] = {"in_sample_home_market_not_a_try": home, "counts": dict(cnt), "all": st, "fill_0.08_or_more": stats(hi), "fill_under_0.08": stats(lo), "c11_series": ser in C11, "flags": flags(st, ser in C11)}
+    out["tries"] = sum(1 for v in out["series"].values() if not v["in_sample_home_market_not_a_try"])
+    out["note"] = "each series is one try (the count above); the Head sets the bar for a pooled pass; any claim across series needs day-clustered statistics; platinum and palladium are standard series here but thin non-crypto books: both flags printed, the Head decides which governs"
     return out
 if __name__ == "__main__":
     a = [x for x in sys.argv[1:] if not x.startswith("--")]

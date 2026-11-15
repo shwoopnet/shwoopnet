@@ -10,3 +10,5 @@ Tries printed: 2 (A and B).
 - standard: PF(1c) 1.5, 1c halves 1.2 / 1.1, PF(2c) 1.1 -> pass. PF(1c) 1.5, halves 1.2 / 0.9 -> no. PF(1c) 1.25 -> no. PF(2c) 0.99 -> no.
 - C11: PF(2c) 1.35, 2c halves 1.1 / 1.0 -> pass. PF(2c) 1.29 -> no. 2c halves 1.4 / 0.99 -> no.
 - n 99 -> no flag whatever the figures.
+## Addendum (2026-11-15, Auditor B's rulings; before any read)
+KXBTC15M is the rule's home market (the threshold is Bitcoin's own discovery quantile): if the extract contains it, the reader tags it "in_sample_home_market_not_a_try" and does not count it in the tries (the test adds an invented KXBTC15M series). The extract must not contain it and its cuts are verified by Auditor B on close_ts before any read (every series before 2026-10-03T00:00Z; KXSOL15M before 1790760600). C11 series = the eleven NC15 recorder series plus INX; platinum, palladium, NEAR and ZEC are standard here, with both flags printed (platinum and palladium are thin non-crypto books: the Head decides). Each series is a try; the pooled bar is the Head's; any claim across series uses day-clustered statistics.

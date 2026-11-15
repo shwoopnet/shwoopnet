@@ -9,7 +9,7 @@ A = {1: (1000, 1300, (0.20, 0.22), (0.23, 0.25), "yes"), 2: (1000, 1100, (0.20, 
 B = {1: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "yes"), 2: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "no")}
 d = tempfile.mkdtemp(); db = os.path.join(d, "x.sqlite"); c = sqlite3.connect(db)
 c.execute("create table market(ticker,series,open_ts,close_ts,result,strike,src)"); c.execute("create table candle(ticker,end_ts,bid_c,ask_c,volume,oi)")
-for ser, W in (("KXZZ15M", A), ("KXSILVER15M", B)):
+for ser, W in (("KXZZ15M", A), ("KXSILVER15M", B), ("KXBTC15M", B)):
     for k, (o0, o1, sg, fl, res) in W.items():
         C = base + 900 * k; tk = "%s-W%d" % (ser, k); c.execute("insert into market values(?,?,?,?,?,?,?)", (tk, ser, C - 900, C, res, 1.0, "t"))
         if o0 is not None: c.execute("insert into candle values(?,?,?,?,?,?)", (tk, C - 360, 0.5, 0.52, 5, o0))
@@ -17,7 +17,7 @@ for ser, W in (("KXZZ15M", A), ("KXSILVER15M", B)):
         if ser == "KXZZ15M" and k == 9: c.execute("insert into candle values(?,?,?,?,?,?)", (tk, C + 60, 0.98, 0.99, 5, o1))
 c.commit(); c.close()
 r = X.run(db); ok = lambda a, b, t=1e-9: abs(a - b) < t
-assert r["tries"] == 2
+assert r["tries"] == 2 and r["series"]["KXBTC15M"]["in_sample_home_market_not_a_try"] is True and not r["series"]["KXZZ15M"]["in_sample_home_market_not_a_try"]
 za, zb = r["series"]["KXZZ15M"], r["series"]["KXSILVER15M"]
 assert za["all"]["n"] == 5 and ok(za["all"]["h0.00"]["pf"], 9.0254, 1e-4) and ok(za["all"]["h0.01"]["net"], 24.78) and ok(za["all"]["h0.02"]["pf"], 8.2202, 1e-4)
 assert za["fill_0.08_or_more"]["n"] == 5 and za["fill_under_0.08"]["n"] == 0 and za["flags"]["evidence"] == "no evidence at n = 5" and za["flags"]["pass_standard"] is None and not za["c11_series"]
