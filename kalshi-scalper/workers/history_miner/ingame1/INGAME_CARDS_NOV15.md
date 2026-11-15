@@ -25,3 +25,8 @@ Tries tonight: 2 (one per card).
 - Bar replaces the halves: PF at 2c >= 1.3 pooled, and >= 1.0 in third 1 and in third 2 separately, n >= 100 over thirds 1 and 2.
 - Tip-off (IGUNDER1 only): "game live" is the first moneyline poll pair no more than 45 s apart, i.e. the recorder's hot cadence, which starts on a 2c move; never the result or the final price. IGFADE1 uses no tip-off.
 - Results: job IG_RESULTS (settled listing, closes 1794096000 to 1794527999 only), dispatched by Main.
+
+## Amendment 2 (2026-11-15 ~21:55Z): Auditor B's hold map (21:26Z), before any read
+- Clear: KXNBATOTAL and KXNFLTOTAL closes Nov 8 to Nov 12. IGUNDER1 runs on NBA and NFL only.
+- Held: KXNBAGAME and KXNFLGAME closes from Nov 1 (SPORTS-PRE outcome set, until 2027-01-01, unless the Head rules a bare result listing is not a read of its test); NHL (NHLOT's held-out unknown, Desk B to state). IGFADE1 waits on both rulings and is not run tonight.
+- IG_RESULTS cut to the two totals series (max 6 requests). The reader is unchanged: a market not in the listing is dropped.
