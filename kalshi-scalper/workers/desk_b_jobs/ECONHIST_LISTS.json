@@ -1,0 +1,135 @@
+{
+ "job_id": "ECONHIST_LISTS",
+ "owner": "DESK_B",
+ "status": "active",
+ "registration": "kalshi-scalper/workers/econcensus/ECONHIST_NOTE.md",
+ "purpose": "Stage 2 of the economics census: the historical markets of 10 US release series (CPI, payrolls, core PCE, two claims series, unemployment, two ISM, PPI, CPI index) to count releases and markets. Lists only, no candle, no Fed series.",
+ "heldout": "The historical endpoint cannot take a date bound, so the raw pages carry every close up to 2026-09-10, including results of windows other cards hold out. The READER cuts by close_time FIRST (before any other field) at every held-out date Auditor B's map names; the raw pages stay in the run's scratch; the run goes on HELDOUT_PULL_RUNS.md as LOADED, read only for tickers, close times and counts. No Fed series is requested.",
+ "allowed_endpoints": [
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXCPI",
+  "KXPAYROLLS",
+  "KXPCECORE",
+  "KXJOBLESSCLAIMS",
+  "KXCONTCLAIMS",
+  "KXUE",
+  "KXISMPMI",
+  "KXUSISMSERV",
+  "KXUSPPIYOY",
+  "KXCPINDEX"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 44,
+ "notes": "At most 32 pages plus 12 for repeats after a 429; at 5 s about 4 minutes. A series with fewer pages stops at its cursor's end.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "hist_KXCPI",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCPI",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXPAYROLLS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXPAYROLLS",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXPCECORE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXPCECORE",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXJOBLESSCLAIMS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXJOBLESSCLAIMS",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXCONTCLAIMS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCONTCLAIMS",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXUE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXUE",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXISMPMI",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXISMPMI",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXUSISMSERV",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXUSISMSERV",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXUSPPIYOY",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXUSPPIYOY",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXCPINDEX",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCPINDEX",
+    "limit": 1000
+   },
+   "max_pages": 3
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+# ECONHIST_LISTS: stage 2 of the economics census (Desk B, Nov 15, 2026; the Head's GO at 21:25Z)
+
+Stage 1 (ECONCENSUS_LISTS) found the live list holds only closes from 2026-09-10; older markets sit behind `/historical/markets`. This job asks that endpoint for 10 US release series: KXCPI, KXPAYROLLS, KXPCECORE, KXJOBLESSCLAIMS, KXCONTCLAIMS, KXUE, KXISMPMI, KXUSISMSERV, KXUSPPIYOY, KXCPINDEX (pages of 1,000; the claims series up to 4 pages, the others up to 3; cap 44 with 12 for repeats; 5.0 s pacing). Lists only. No Fed series, no hourly temperature (closed family).
+
+**Held-out handling (the Head's condition 1).** The historical endpoint takes no date bound, so the landed pages carry every close before 2026-09-10 and the results of any window another card holds out (ECON1 is named as an unreleased hold in CALIB2's map; Auditor B maps every hold on these 10 series before freezing). The reader `econhist_table.py` (to be built after Auditor B's map, with expected figures first) cuts by close_time FIRST, before any other field, at each held-out date the map gives; the raw pages stay in the run's scratch (nothing from them is committed); the run goes on HELDOUT_PULL_RUNS.md as LOADED, read only for tickers, close times and counts.
+
+**What the table will say:** per series, markets, release dates, first and last date after the cuts: enough to pick which release rules (the drift into a print, a fade of the first move after it) have a readable n.
