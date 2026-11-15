@@ -64,3 +64,19 @@ print("entries: ok")
 s = X.summary([{"net": v, "day": "d%d" % i} for i, v in enumerate((0.2, -0.1, 0.3, -0.3))])
 assert A(s["pf"], 1.25) and A(s["pf_half1"], 2.0) and A(s["pf_half2"], 1.0), s
 print("summary: ok")
+
+# --- XRPFAV6 and XRPFAV10 (EXITS3_HAND_CASE_XRPFAV_NOV15.md), c = 1
+x1 = {CL - 400: q(0.86, 0.88), CL - 360: q(0.88, 0.89), CL - 300: q(0.88, 0.90), CL - 240: q(0.90, 0.91), CL - 180: q(0.93, 0.94), CL - 60: q(0.95, 0.96)}
+en = X.ENTRY["XRPFAV6"](x1, CL)
+assert en == {"side": "yes", "e": 0.89, "entry_end": CL - 360}, en
+kT, bT = X.exit_mark(x1, en["entry_end"], CL, "yes", 0.89, "T"); kM, bM = X.exit_mark(x1, en["entry_end"], CL, "yes", 0.89, "M")
+assert kT == CL - 240 and A(bT, 0.90) and A(X.net(0.89, 0.0, bT, "yes", "yes", 1), -0.010), X.net(0.89, 0.0, bT, "yes", "yes", 1)
+assert kM == CL - 180 and A(X.net(0.89, 0.0, bM, "yes", "yes", 1), 0.020) and A(X.net(0.89, 0.0, None, "yes", "yes", 1), 0.100)
+x2 = dict(x1); x2[CL - 360] = q(0.86, 0.89)
+assert X.ENTRY["XRPFAV6"](x2, CL) is None
+x3 = {CL - 360: q(0.10, 0.11)}
+assert X.ENTRY["XRPFAV6"](x3, CL) == {"side": "no", "e": 0.90, "entry_end": CL - 360}
+assert X.ENTRY["XRPFAV6"]({CL - 360: q(0.92, 0.93)}, CL) is None and X.ENTRY["XRPFAV6"]({CL - 360: q(0.87, 0.88)}, CL)["e"] == 0.88
+x5 = {CL - 600: q(0.86, 0.91), CL - 540: q(0.80, 0.85)}
+assert X.ENTRY["XRPFAV10"](x5, CL) == {"side": "yes", "e": 0.91, "entry_end": CL - 600} and X.ENTRY["XRPFAV6"](x5, CL) is None
+print("xrpfav: ok")

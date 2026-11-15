@@ -25,3 +25,7 @@
 - **X3:** NO favourite: decision bid 0.10, ask 0.11, so the NO ask is 0.90 >= YES ask 0.11; NO at e = 0.90.
 - **X4:** favourite price 0.93: no trade. Price 0.88: trade (inclusive).
 - **X5 (XRPFAV10):** the last candle in [570, 640] chosen, with no spread cap: a spread of 0.05 still trades.
+- **Code change for these cards (after the OIREL and OICORE run):**
+  - exits3.py now takes the contract count per card (CONTRACTS: OIREL and OICORE 10, XRPFAV 1), the series per card, and a primary haircut per variant (PRIMARY_H).
+  - Re-running OIREL and OICORE with the new code gives byte-equal variant figures, entries and not-two-sided counts to the committed prints (checked in scratch on the same, already-read extract). Only the print's "primary_h" became a per-variant map, and "contracts" was added.
+- Tests X1 to X5 pass as written above.

@@ -3,7 +3,7 @@
 Spec EXITS3_SPEC_NOV15.md (140aa224); hand case EXITS3_HAND_CASE_NOV15.md. Reads Forensics' cut extracts (sqlite, tables market and candle) only.
 
 Usage (python3 -I, from outside the data folder):
-  python3 -I exits3.py <card> <extract.sqlite> <out.json>      card: OIREL | OICORE
+  python3 -I exits3.py <card> <extract.sqlite> <out.json>      card: OIREL | OICORE | XRPFAV6 | XRPFAV10
 Prints and writes, per variant and haircut, n, PF, halves, mean, z and exits by reason. Upper bound, not fill-checked."""
 import json, math, os, sqlite3, statistics, sys
 from collections import defaultdict
@@ -68,13 +68,13 @@ def exit_mark(cands, entry_end, close, side, e, variant):
     return None, "triggered, not sold"
 
 
-def net(e, h, sale, result, side):
-    """Per contract. sale None = held to settlement."""
+def net(e, h, sale, result, side, c=C):
+    """Per contract. sale None = held to settlement. c = the card's contracts per order (fee rounded per order)."""
     ent = min(0.99, e + h)
-    fin = fee(ent) / C
+    fin = fee(ent, c) / c
     if sale is not None:
         s = max(0.01, sale - h)
-        return s - ent - fin - fee(s) / C
+        return s - ent - fin - fee(s, c) / c
     if result not in ("yes", "no"):
         return -fin                                     # void: price refunded, fee kept
     return (1.0 if result == side else 0.0) - ent - fin
@@ -137,8 +137,38 @@ def oi_entry(card, cands, close):
     return {"side": side, "e": float(fill), "entry_end": close - 120}
 
 
-ENTRY = {"OICORE": lambda cands, close: oi_entry("OICORE", cands, close), "OIREL": lambda cands, close: oi_entry("OIREL", cands, close)}
-PRIMARY_H = {"OICORE": 0.02, "OIREL": 0.02}             # entry and exit in the last 2 minutes (C8)
+XRPFAV = {"XRPFAV6": (330, 400, 0.02), "XRPFAV10": (570, 640, None)}    # regime_b2.py: left window, max spread
+
+
+def fav_entry(card, cands, close):
+    """XRPFAV6/10 (research branch src/scalper/regime_b2.py): the LAST candle with left in [lo, hi]; two-sided; spread cap (XRPFAV6);
+    favourite = YES if ask >= 1 - bid else NO, at that side's ask, kept if 0.88 to 0.92 inclusive."""
+    lo, hi, msp = XRPFAV[card]
+    pick = None
+    for k in sorted(cands):
+        if lo <= close - k <= hi:
+            pick = k
+    if pick is None:
+        return None
+    q = cands[pick]
+    if not two_sided(q):
+        return "not two-sided"
+    b, a = q[0], q[1]
+    if msp is not None and a - b > msp:
+        return None
+    side, p = ("yes", a) if a >= 1 - b else ("no", round(1 - b, 6))
+    if not (0.88 <= p <= 0.92):
+        return None
+    return {"side": side, "e": float(p), "entry_end": pick}
+
+
+ENTRY = {"OICORE": lambda cands, close: oi_entry("OICORE", cands, close), "OIREL": lambda cands, close: oi_entry("OIREL", cands, close),
+         "XRPFAV6": lambda cands, close: fav_entry("XRPFAV6", cands, close), "XRPFAV10": lambda cands, close: fav_entry("XRPFAV10", cands, close)}
+SERIES = {"OICORE": "KXBTC15M", "OIREL": "KXBTC15M", "XRPFAV6": "KXXRP15M", "XRPFAV10": "KXXRP15M"}
+CONTRACTS = {"OICORE": 10, "OIREL": 10, "XRPFAV6": 1, "XRPFAV10": 1}
+# primary haircut per variant: OIREL and OICORE enter and exit in the last 2 minutes (C8); XRPFAV: hold and M 1c, T and S 2c (exit can fall in the last 2 minutes)
+PRIMARY_H = {"OICORE": {"hold": 0.02, "T": 0.02, "S": 0.02, "M": 0.02}, "OIREL": {"hold": 0.02, "T": 0.02, "S": 0.02, "M": 0.02},
+             "XRPFAV6": {"hold": 0.01, "T": 0.02, "S": 0.02, "M": 0.01}, "XRPFAV10": {"hold": 0.01, "T": 0.02, "S": 0.02, "M": 0.01}}
 
 
 def load(db, series):
@@ -160,7 +190,8 @@ def run_card(card, mk, cd):
             skipped += 1
         elif en:
             rows.append((t, close, res, en))
-    out = {"card": card, "entries": len(rows), "not_two_sided": skipped, "primary_h": PRIMARY_H[card], "label": "upper bound, not fill-checked; per-order rounded fee at 10 contracts", "variants": {}}
+    out = {"card": card, "entries": len(rows), "not_two_sided": skipped, "primary_h": PRIMARY_H[card], "contracts": CONTRACTS[card],
+           "label": "upper bound, not fill-checked; per-order rounded fee at %d contract(s)" % CONTRACTS[card], "variants": {}}
     for v in VARIANTS:
         reasons = defaultdict(int)
         exits = []
@@ -170,7 +201,7 @@ def run_card(card, mk, cd):
             exits.append(None if k is None else x)
         out["variants"][v] = {"exits_by_reason": dict(reasons)}
         for h in HS:
-            tr = [{"net": net(en["e"], h, ex, res, en["side"]), "day": datetime.fromtimestamp(close, timezone.utc).strftime("%Y-%m-%d")}
+            tr = [{"net": net(en["e"], h, ex, res, en["side"], CONTRACTS[card]), "day": datetime.fromtimestamp(close, timezone.utc).strftime("%Y-%m-%d")}
                   for (t, close, res, en), ex in zip(rows, exits)]
             out["variants"][v]["h%d" % round(h * 100)] = summary(tr)
     out["voids"] = sum(1 for r in rows if r[2] not in ("yes", "no"))
@@ -182,7 +213,7 @@ if __name__ == "__main__":
     if len(a) != 3 or a[0] not in ENTRY:
         print(__doc__); sys.exit(2)
     hm_guard.refuse_all(a[1:])
-    mk, cd = load(a[1], "KXBTC15M")
+    mk, cd = load(a[1], SERIES[a[0]])
     res = run_card(a[0], mk, cd)
     json.dump(res, open(a[2], "w"), indent=1, sort_keys=True)
     print(json.dumps(res, sort_keys=True)[:3000])
