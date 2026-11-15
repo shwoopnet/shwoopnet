@@ -1,0 +1,403 @@
+{
+ "job_id": "CFRTIK_STRIKES_DAILY",
+ "registration": "kalshi-scalper/workers/DESK_A_FROZEN_WHEEL_DEFINITIONS_NOV13.md",
+ "purpose": "Settled markets of the six CFRTI-K place series (Bitcoin probation seat, silver, copper, WTI, HYPE, BNB) closing 2026-11-14 to 2027-01-02, in 10 day close ranges, to give each window's floor_strike to the CFRTI-K place logger (the strike is in no book or coverage file). A reader takes ticker, close_time and floor_strike only; it never reads a result.",
+ "heldout": "Not a card read. The landed runs hold results of windows other cards may hold out; they go into HELDOUT_PULL_RUNS.md like every pull run, and a reader opens them only through heldout_guard_v2 and takes the strike field only. Nothing before 2026-11-14T00:00Z is asked (Nov 11 to 13 strikes come from the landed NC15 lists runs).",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXBTC15M",
+  "KXSILVER15M",
+  "KXCOPPER15M",
+  "KXWTI15M",
+  "KXHYPE15M",
+  "KXBNB15M"
+ ],
+ "max_requests": 66,
+ "requests": [
+  {
+   "id": "strikes_KXBTC15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "min_close_ts": 1794614400,
+    "max_close_ts": 1795478399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBTC15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "min_close_ts": 1795478400,
+    "max_close_ts": 1796342399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBTC15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "min_close_ts": 1796342400,
+    "max_close_ts": 1797206399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBTC15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "min_close_ts": 1797206400,
+    "max_close_ts": 1798070399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBTC15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "min_close_ts": 1798070400,
+    "max_close_ts": 1798847999,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXSILVER15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1794614400,
+    "max_close_ts": 1795478399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXSILVER15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1795478400,
+    "max_close_ts": 1796342399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXSILVER15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1796342400,
+    "max_close_ts": 1797206399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXSILVER15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1797206400,
+    "max_close_ts": 1798070399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXSILVER15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "min_close_ts": 1798070400,
+    "max_close_ts": 1798847999,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXCOPPER15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1794614400,
+    "max_close_ts": 1795478399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXCOPPER15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1795478400,
+    "max_close_ts": 1796342399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXCOPPER15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1796342400,
+    "max_close_ts": 1797206399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXCOPPER15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1797206400,
+    "max_close_ts": 1798070399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXCOPPER15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "min_close_ts": 1798070400,
+    "max_close_ts": 1798847999,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXWTI15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1794614400,
+    "max_close_ts": 1795478399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXWTI15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1795478400,
+    "max_close_ts": 1796342399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXWTI15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1796342400,
+    "max_close_ts": 1797206399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXWTI15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1797206400,
+    "max_close_ts": 1798070399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXWTI15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "min_close_ts": 1798070400,
+    "max_close_ts": 1798847999,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXHYPE15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHYPE15M",
+    "status": "settled",
+    "min_close_ts": 1794614400,
+    "max_close_ts": 1795478399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXHYPE15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHYPE15M",
+    "status": "settled",
+    "min_close_ts": 1795478400,
+    "max_close_ts": 1796342399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXHYPE15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHYPE15M",
+    "status": "settled",
+    "min_close_ts": 1796342400,
+    "max_close_ts": 1797206399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXHYPE15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHYPE15M",
+    "status": "settled",
+    "min_close_ts": 1797206400,
+    "max_close_ts": 1798070399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXHYPE15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHYPE15M",
+    "status": "settled",
+    "min_close_ts": 1798070400,
+    "max_close_ts": 1798847999,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBNB15M_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBNB15M",
+    "status": "settled",
+    "min_close_ts": 1794614400,
+    "max_close_ts": 1795478399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBNB15M_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBNB15M",
+    "status": "settled",
+    "min_close_ts": 1795478400,
+    "max_close_ts": 1796342399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBNB15M_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBNB15M",
+    "status": "settled",
+    "min_close_ts": 1796342400,
+    "max_close_ts": 1797206399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBNB15M_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBNB15M",
+    "status": "settled",
+    "min_close_ts": 1797206400,
+    "max_close_ts": 1798070399,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "strikes_KXBNB15M_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBNB15M",
+    "status": "settled",
+    "min_close_ts": 1798070400,
+    "max_close_ts": 1798847999,
+    "limit": 1000
+   },
+   "max_pages": 2
+  }
+ ],
+ "notes": "One run a day (Main). 30 requests, at most 60 pages (each range holds at most 960 markets per series at 96 windows a day, so one page of 1000 is normal; the second page is margin). Pacing 5.0 s; the whole job is about 3 minutes. max_requests = pages budget + 6 for 429 retries.",
+ "owner": "DESK_A",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "status": "active",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
