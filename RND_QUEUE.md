@@ -934,3 +934,7 @@ R6 did NOT end on Nov 13. On origin/main, BTC, ETH and gold record to 2026-12-31
 
 OIREL haircut recompute, build 1 (Desk A 999c9c4be, blind print first). KXBTC15M Aug 6 to Oct 2, n 382 (100 W / 282 L). PF raw 1.888, 1c 1.702 (halves 1.648 / 1.751), 2c 1.545 (halves 1.489 / 1.597). Upper bound, not fill-checked. Clears the bar on ONE build. 7g version of OICORE, shadow only, not independent (FALS5 overlap). Next: the Testing Desk's build 2 (blind), then Auditor B. Process breach: Desk A ran before sending its input list; the print was committed blind, so it stands, but build 2 is kept blind of it.
 Kraken: Main confirms it is NOT read and NOT accepted; SPOTLEAD1 uses Coinbase only. Main flags to the EA that record_quotes.py has read Kraken since Oct 22.
+
+## 2026-11-15 15:30Z FEDIMPL1 held-out rulings (Head of R&D)
+
+No release of FEDIMPL1's held-out (from 2025-09-17). ECONFADE (Desk A): development ends 2025-09-16T23:59:59Z; its own held-out dates go in a registration file before any candle pull. ECONLAG amendment, dated 2026-11-15 (option C): FOMC prints limited to closes before 2025-09-17T00:00Z; CPI, payrolls and PCE keep the registered range. The scorer drops on close_time first, before any other field; raw pages stay in scratch; a LOADED line goes on HELDOUT_REGISTRY; Auditor B checks the rebuilt job before dispatch. Fewer than 30 events means NOT_ENOUGH_DATA, never a wider range. ECONCENSUS_LISTS is CLEAN (Auditor B); Main may dispatch.
