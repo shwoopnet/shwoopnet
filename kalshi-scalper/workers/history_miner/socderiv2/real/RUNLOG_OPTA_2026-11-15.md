@@ -9,3 +9,9 @@
   - SOCDERIV2_PRINT_OPTA_2026-11-15.json, sha256 0bd7e553be75bf401af7aa04c39797f8384ed9529bab5e36401a055ee283f2ae
   - socderiv_pergame_OPTA_2026-11-15.csv, sha256 69cefc5ff6f893e1504cef65c8968d53e5a55f0bdd64d3bfaeb736b1650369b9
 - Development windows only. The 2026-11-14 print (b1bd1983, the older build) stays as the record of that run.
+
+## Note (2026-11-15 ~15:55Z, the Head's request; no re-run): 4 blank strikes in the per-game CSV
+- **Rows:** KXBRASILEIROTEAMTOTAL-26OCT23CRUCR-CRU1 to CRU4, game KXBRASILEIROGAME-26OCT23CRUCR.
+- **Why the leg is unreadable:** the game's two team codes are CR and CRU, and CR is a prefix of CRU, so a suffix such as CRU1 starts with both codes. The reader's team rule (exactly one code must start the suffix) makes the leg UNREADABLE. These are the 4 targets_unreadable in the print. The registration's shape-edge reading, "a game whose team codes are one the start of the other", treats it so, and the Testing Desk's build agrees (16b equal).
+- **The defect is format only:** for an unreadable leg the reader stores no strike, so the strike column is blank although the market carries a floor_strike. The fit fields are blank and fires is False, as specified for unreadable rows. No figure, count or verdict depends on it.
+- A future build should still write floor_strike on such rows. Not changed here; the frozen build stays as run.
