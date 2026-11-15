@@ -9,3 +9,5 @@
 **What the census prints.** Per series: settled markets, distinct close dates (release dates), median volume, and the price levels at close (distribution of the last price in 10c bands) so the count says whether an underdog or late-drift test could have 100 independent releases. Counts only. No result is read for the table.
 
 **Not covered:** international and state series (list rows exist for counts only), series needing candles, the hourly temperature's later stages.
+
+**Amendment (Nov 15, 2026, Auditor B's check, before any dispatch).** KXFED and KXFEDDECISION carry `max_close_ts` = 1758067199 (2025-09-16T23:59:59Z) instead of the Oct 17 cut, because FEDIMPL1 has a FROZEN, unread holdout (the last 10 meetings, first decision 2025-09-17; reading needs an amendment). Every other /markets request keeps 1792195199. WXNEW1's validation window (Oct 4 to Oct 16) results for the four hourly temperature series WILL be loaded by this run (not read by the census); the landing pull request logs that in HELDOUT_PULL_RUNS.md. I found no ECONLAG or ECONFADE registration in this branch either; Auditor B asked for their paths if they exist.

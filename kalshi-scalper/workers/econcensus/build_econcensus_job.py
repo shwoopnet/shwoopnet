@@ -5,6 +5,7 @@ import json, os, sys
 from datetime import datetime, timezone
 HELDOUT_FROM = "2026-10-17T00:00:00Z"                 # closes from here on are never requested
 MAX_CLOSE = int(datetime(2026, 10, 17, tzinfo=timezone.utc).timestamp()) - 1
+FED_MAX_CLOSE = int(datetime(2025, 9, 17, tzinfo=timezone.utc).timestamp()) - 1   # FEDIMPL1's frozen holdout (last 10 meetings, first decision 2025-09-17, unread): KXFED and KXFEDDECISION stop before it (Auditor B, Nov 15)
 TEMP_MIN_CLOSE = int(datetime(2026, 9, 17, tzinfo=timezone.utc).timestamp())    # hourly temperature: 30 days of development closes
 BIG = ["KXCPI", "KXPAYROLLS", "KXJOBLESSCLAIMS", "KXCONTCLAIMS", "KXFED", "KXFEDDECISION", "KXMBAAPPS", "KXRATECUT", "KXRATECUTCOUNT", "TBILL"]
 # every US macro release series named in Forensics' Economics rows (workers/forensics/extracts/CENSUS_LISTING_ECONOMICS_SERIES.tsv, 224 rows, a FLOOR),
@@ -15,7 +16,7 @@ SMALL = ["KXCPICOMBO", "KXCPICOREA", "KXCPICOREGOODSMOM", "KXCPINDEX", "KXECONST
 TEMP = ["KXTEMPNYCHS", "KXTEMPMIAH", "KXTEMPLAXHS", "KXTEMPCHIHS"]
 def job():
     req = [{"id": "series_economics", "path": "/series", "params": {"category": "Economics", "limit": 20000}}]
-    for s in BIG: req.append({"id": "settled_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "max_close_ts": MAX_CLOSE, "limit": 1000}, "max_pages": 4})
+    for s in BIG: req.append({"id": "settled_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "max_close_ts": FED_MAX_CLOSE if s in ("KXFED", "KXFEDDECISION") else MAX_CLOSE, "limit": 1000}, "max_pages": 4})
     for s in SMALL: req.append({"id": "settled_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "max_close_ts": MAX_CLOSE, "limit": 1000}, "max_pages": 2})
     for s in TEMP: req.append({"id": "settled_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "min_close_ts": TEMP_MIN_CLOSE, "max_close_ts": MAX_CLOSE, "limit": 1000}, "max_pages": 8})
     cap = 1 + 4 * len(BIG) + 2 * len(SMALL) + 8 * len(TEMP)
