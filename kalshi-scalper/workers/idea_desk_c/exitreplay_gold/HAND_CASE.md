@@ -64,3 +64,20 @@ The rule is EXITREPLAY1's hold arm as printed (Forensics, `exitreplay1.py`), rec
 | 2c | 0.05 / 0.97 = 0.0515 | inf | 0.00 / 0.97 = 0.0 |
 
 - **Bar:** not met, "does not count: fails the haircut".
+
+## Amendment 1 (Nov 15, 2026, 14:37Z, before the run; the Head of R&D's Option A)
+
+**The cut moves to 2026-11-05T00:00Z.** RESIL1 reserves R6 closes from Nov 5. RESIL1 is closed unread, but under the Head's ruling a reserved window stays cut for price and result reads. So only Forensics' D block (Oct 29 to Nov 4) is read.
+
+Expected on the same hand files:
+- **Cut windows:** J (11-05), F (11-06), I and G are at or after the cut and are counted, never read.
+- **Counts:** listed 9, cut_dropped 4, dropped_no_result 0, dropped_gap 1 (C), no_look 1 (D), no_band 1 (E), entries 2 (A and B).
+- **Halves (n = 2):** half 1 = [A], half 2 = [B].
+
+| Basis | PF | Half 1 | Half 2 | Net |
+|---|---|---|---|---|
+| RAW | 0.07 / 0.95 = 0.0737 | inf | 0.0 | -0.88 |
+| 1c | 0.06 / 0.96 = 0.0625 | inf | 0.0 | -0.90 |
+| 2c | 0.05 / 0.97 = 0.0515 | inf | 0.0 | -0.92 |
+
+- **Bar:** "does not count: fails the haircut".
