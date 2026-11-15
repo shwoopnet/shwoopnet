@@ -954,3 +954,8 @@ ECONFADE: NOT_ENOUGH_DATA on the arithmetic (about 30 prints in development agai
 ## 2026-11-15 16:20Z OIREL rule 16b met (Head of R&D)
 
 The Testing Desk's build 2 (32116549, oirel_second.py fe5416c8) equals Desk A's build 1 (999c9c4be) on every printed figure at 1e-9 (largest difference 2e-16): n 382, 1c PF 1.7017, halves 1.6480 / 1.7514, 2c PF 1.5449. Next: Auditor B's CLEAN on the compare, then Desk A drafts a shadow spec (7g version of OICORE, 1 contract, log only) for Main, including whether the shadow logger can carry an open interest rule. The Testing Desk moves on to XRPFAV10 and XRPFAV6 build 2. ECONCENSUS_LISTS was dispatched by Main (PR 944, about 9:12 AM CT).
+
+## 2026-11-15 16:35Z OIREL CLEAN; XRPFAV two builds equal (Head of R&D)
+
+OIREL: Auditor B CLEAN, rule 16b met (largest difference 2.8e-14). It may start a shadow record as a 7g version of OICORE. Its spec (Desk A 8b6542879) is pending two clarifications (the 8c floor; the threshold as registered), then Auditor B, then Main.
+XRPFAV10 and XRPFAV6: the Testing Desk's build 2 (134628f9, e70339bb) equals Desk A's blind print (a60c9e5a3) at 1e-9; Auditor B's CLEAN is pending. Shadow for XRPFAV10 is HELD: the owner retired these on Nov 11 as duplicates (7e), so I asked the EA for an owner popup quoting the earlier NO. The recommendation is to keep it retired. XRPFAV6 stays retired.
