@@ -1,0 +1,338 @@
+tier,family,series,settled_60d,category
+A,commodity_ladder,KXBRENTD,670,Commodities
+A,commodity_ladder,KXBRENTW,160,Commodities
+A,commodity_ladder,KXCOPPERD,1460,Commodities
+A,commodity_ladder,KXCOPPERW,340,Commodities
+A,commodity_ladder,KXGOLDD,1280,Commodities
+A,commodity_ladder,KXGOLDW,320,Commodities
+A,commodity_ladder,KXNATGASD,2000,Commodities
+A,commodity_ladder,KXNATGASW,330,Commodities
+A,commodity_ladder,KXSILVERD,1280,Commodities
+A,commodity_ladder,KXWTI,1000,Commodities
+A,commodity_ladder,KXWTIW,216,Commodities
+A,fx_ladder,KXAUDUSDAD,620,Financials
+A,fx_ladder,KXAUDUSDAW,170,Financials
+A,fx_ladder,KXEURUSD,585,Financials
+A,fx_ladder,KXEURUSDAW,170,Financials
+A,fx_ladder,KXGBPUSDAD,630,Financials
+A,fx_ladder,KXGBPUSDAW,170,Financials
+A,fx_ladder,KXNZDUSDAD,630,Financials
+A,fx_ladder,KXUSDBRLAW,280,Financials
+A,fx_ladder,KXUSDCADAW,160,Financials
+A,fx_ladder,KXUSDJPY,600,Financials
+A,fx_ladder,KXUSDJPYAW,467,Financials
+A,fx_ladder,KXUSDMXNAW,350,Financials
+A,fx_ladder,KXUSDSEKAW,380,Financials
+A,gas_price,KXAAAGASD,1090,Economics
+A,gas_price,KXAAAGASDAK,598,Economics
+A,gas_price,KXAAAGASDAL,469,Economics
+A,gas_price,KXAAAGASDAR,462,Economics
+A,gas_price,KXAAAGASDAZ,955,Economics
+A,gas_price,KXAAAGASDCA,1070,Economics
+A,gas_price,KXAAAGASDCO,1006,Economics
+A,gas_price,KXAAAGASDCT,697,Economics
+A,gas_price,KXAAAGASDDE,502,Economics
+A,gas_price,KXAAAGASDFL,1400,Economics
+A,gas_price,KXAAAGASDGA,1140,Economics
+A,gas_price,KXAAAGASDHI,452,Economics
+A,gas_price,KXAAAGASDIA,499,Economics
+A,gas_price,KXAAAGASDID,452,Economics
+A,gas_price,KXAAAGASDIL,1200,Economics
+A,gas_price,KXAAAGASDIN,817,Economics
+A,gas_price,KXAAAGASDKS,618,Economics
+A,gas_price,KXAAAGASDKY,462,Economics
+A,gas_price,KXAAAGASDLA,452,Economics
+A,gas_price,KXAAAGASDMA,955,Economics
+A,gas_price,KXAAAGASDMD,886,Economics
+A,gas_price,KXAAAGASDME,578,Economics
+A,gas_price,KXAAAGASDMI,1285,Economics
+A,gas_price,KXAAAGASDMN,856,Economics
+A,gas_price,KXAAAGASDMO,717,Economics
+A,gas_price,KXAAAGASDMS,442,Economics
+A,gas_price,KXAAAGASDMT,459,Economics
+A,gas_price,KXAAAGASDNC,1180,Economics
+A,gas_price,KXAAAGASDND,425,Economics
+A,gas_price,KXAAAGASDNE,445,Economics
+A,gas_price,KXAAAGASDNH,459,Economics
+A,gas_price,KXAAAGASDNJ,1060,Economics
+A,gas_price,KXAAAGASDNM,628,Economics
+A,gas_price,KXAAAGASDNV,717,Economics
+A,gas_price,KXAAAGASDNY,1020,Economics
+A,gas_price,KXAAAGASDOH,1540,Economics
+A,gas_price,KXAAAGASDOK,425,Economics
+A,gas_price,KXAAAGASDOR,816,Economics
+A,gas_price,KXAAAGASDPA,1080,Economics
+A,gas_price,KXAAAGASDRI,435,Economics
+A,gas_price,KXAAAGASDSC,886,Economics
+A,gas_price,KXAAAGASDSD,435,Economics
+A,gas_price,KXAAAGASDTN,985,Economics
+A,gas_price,KXAAAGASDTX,1110,Economics
+A,gas_price,KXAAAGASDUT,588,Economics
+A,gas_price,KXAAAGASDVA,955,Economics
+A,gas_price,KXAAAGASDVT,425,Economics
+A,gas_price,KXAAAGASDWA,1020,Economics
+A,gas_price,KXAAAGASDWI,867,Economics
+A,gas_price,KXAAAGASDWV,425,Economics
+A,gas_price,KXAAAGASDWY,469,Economics
+A,gas_price,KXAAAGASW,252,Economics
+A,gas_price,KXAAAGASWNJ,200,Economics
+A,gas_price,KXDIESELD,1380,Economics
+A,gas_price,KXDIESELW,259,Economics
+A,index_ladder,KXDJI,1000,Financials
+A,index_ladder,KXINX,1230,Financials
+A,index_ladder,KXNASDAQ100,1230,Financials
+A,soccer_minor,KXALLSVENSKANSPREAD,300+,Sports?
+A,soccer_minor,KXALLSVENSKANTOTAL,450,Sports
+A,soccer_minor,KXAPFDDHTOTAL,315,Sports
+A,soccer_minor,KXARGNACBGAME,516,Sports
+A,soccer_minor,KXARGNACBSPREAD,300+,Sports?
+A,soccer_minor,KXARGNACBTOTAL,300+,Sports?
+A,soccer_minor,KXARGPREMDIVGAME,360,Sports
+A,soccer_minor,KXARGPREMDIVSPREAD,300+,Sports?
+A,soccer_minor,KXARGPREMDIVTOTAL,769,Sports
+A,soccer_minor,KXBELGIANPLTOTAL,300+,Sports?
+A,soccer_minor,KXBRASILEIROB1H,327,Sports
+A,soccer_minor,KXBRASILEIROB1HTOTAL,327,Sports
+A,soccer_minor,KXBRASILEIROBGAME,345,Sports
+A,soccer_minor,KXBRASILEIROBSPREAD,300+,Sports?
+A,soccer_minor,KXBRASILEIROBTOTAL,711,Sports
+A,soccer_minor,KXBUNDESLIGA2TOTAL,438,Sports
+A,soccer_minor,KXDENSUPERLIGATOTAL,300+,Sports?
+A,soccer_minor,KXDIMAYORGAME,330,Sports
+A,soccer_minor,KXDIMAYORSPREAD,481,Sports
+A,soccer_minor,KXDIMAYORTOTAL,704,Sports
+A,soccer_minor,KXECULPTOTAL,352,Sports
+A,soccer_minor,KXEERSTEDIVSPREAD,300+,Sports?
+A,soccer_minor,KXEERSTEDIVTOTAL,300+,Sports?
+A,soccer_minor,KXEKSTRAKLASATOTAL,300+,Sports?
+A,soccer_minor,KXELITESERIENTOTAL,300+,Sports?
+A,soccer_minor,KXEREDIVISIESPREAD,300+,Sports?
+A,soccer_minor,KXEREDIVISIETOTAL,515,Sports
+A,soccer_minor,KXGER3LTOTAL,300+,Sports?
+A,soccer_minor,KXISRPLTOTAL,300+,Sports?
+A,soccer_minor,KXLALIGA2SPREAD,462,Sports
+A,soccer_minor,KXLALIGA2TOTAL,673,Sports
+A,soccer_minor,KXLIGAEXPSPREAD,300+,Sports?
+A,soccer_minor,KXLIGAEXPTOTAL,300+,Sports?
+A,soccer_minor,KXLIGAPORTUGALTOTAL,384,Sports
+A,soccer_minor,KXLIGUE2TOTAL,300+,Sports?
+A,soccer_minor,KXPERLIGA1SPREAD,300+,Sports?
+A,soccer_minor,KXPERLIGA1TOTAL,473,Sports
+A,soccer_minor,KXSERIEBSPREAD,300+,Sports?
+A,soccer_minor,KXSERIEBTOTAL,300+,Sports?
+A,soccer_minor,KXSERIECGAME,900,Sports
+A,soccer_minor,KXSERIECSPREAD,300+,Sports?
+A,soccer_minor,KXSERIECTOTAL,300+,Sports?
+A,soccer_minor,KXSRBSLTOTAL,300+,Sports?
+A,soccer_minor,KXSUPERLIGSPREAD,300+,Sports?
+A,soccer_minor,KXSUPERLIGTOTAL,440,Sports
+A,soccer_minor,KXTFF1LIGSPREAD,300+,Sports?
+A,soccer_minor,KXTFF1LIGTOTAL,300+,Sports?
+A,soccer_minor,KXTHAIL1TOTAL,300+,Sports?
+A,soccer_minor,KXURYPDSPREAD,300+,Sports?
+A,soccer_minor,KXURYPDTOTAL,300+,Sports?
+A,soccer_minor,KXUSLTOTAL,300+,Sports?
+A,soccer_minor,KXVENFUTVETOTAL,357,Sports
+B,intl_basketball,KXABASPREAD,300+,Sports?
+B,intl_basketball,KXABATOTAL,300+,Sports?
+B,intl_basketball,KXBBLSPREAD,300+,Sports?
+B,intl_basketball,KXBBLTOTAL,300+,Sports?
+B,intl_basketball,KXBSLSPREAD,300+,Sports?
+B,intl_basketball,KXBSLTOTAL,300+,Sports?
+B,intl_basketball,KXNBLSPREAD,300+,Sports?
+B,intl_basketball,KXNBLTOTAL,300+,Sports?
+B,intl_basketball,KXVTBSPREAD,300+,Sports?
+B,intl_basketball,KXVTBTOTAL,300+,Sports?
+B,nba_mls_periods,KXMLS1H,501,Sports
+B,nba_mls_periods,KXMLS1HSPREAD,300+,Sports?
+B,nba_mls_periods,KXMLS1HTOTAL,501,Sports
+B,nba_mls_periods,KXMLS2H,300+,Sports?
+B,nba_mls_periods,KXMLS2HTOTAL,300+,Sports?
+B,nba_mls_periods,KXNBA1H,519,Sports
+B,nfl_periods,KXNFL1H,363,Sports
+B,nfl_periods,KXNFL1HFT,300+,Sports?
+B,nfl_periods,KXNFL1HTOTAL,1000,Sports
+B,nfl_periods,KXNFL1Q,363,Sports
+B,nfl_periods,KXNFL1QSPREAD,300+,Sports?
+B,nfl_periods,KXNFL1QTOTAL,300+,Sports?
+B,nfl_periods,KXNFL2H,363,Sports
+B,nfl_periods,KXNFL2HTOTAL,300+,Sports?
+B,nfl_periods,KXNFL2Q,363,Sports
+B,nfl_periods,KXNFL2QSPREAD,300+,Sports?
+B,nfl_periods,KXNFL2QTOTAL,300+,Sports?
+B,nfl_periods,KXNFL3Q,363,Sports
+B,nfl_periods,KXNFL3QSPREAD,300+,Sports?
+B,nfl_periods,KXNFL3QTOTAL,300+,Sports?
+B,nfl_periods,KXNFL4Q,363,Sports
+B,nfl_periods,KXNFL4QSPREAD,300+,Sports?
+B,nfl_periods,KXNFL4QTOTAL,300+,Sports?
+B,nfl_props,KXNFLBOTH,300+,Sports?
+B,nfl_props,KXNFLESCALATORREC,300+,Sports?
+B,nfl_props,KXNFLESCALATORRECYDS,300+,Sports?
+B,nfl_props,KXNFLFFPTS,300+,Sports?
+B,nfl_props,KXNFLFFPTSLADDER,300+,Sports?
+B,nfl_props,KXNFLFG,300+,Sports?
+B,nfl_props,KXNFLFIRSTTDTEAM,363,Sports
+B,nfl_props,KXNFLLADDERREC,300+,Sports?
+B,nfl_props,KXNFLLADDERRECYDS,300+,Sports?
+B,nfl_props,KXNFLLONGREC,300+,Sports?
+B,nfl_props,KXNFLLONGRSH,300+,Sports?
+B,nfl_props,KXNFLPASSATT,300+,Sports?
+B,nfl_props,KXNFLPASSCOMP,300+,Sports?
+B,nfl_props,KXNFLPASSINT,300+,Sports?
+B,nfl_props,KXNFLPASSTDS,1000,Sports
+B,nfl_props,KXNFLRRYDS,300+,Sports?
+B,nfl_props,KXNFLRSHATT,300+,Sports?
+B,nfl_props,KXNFLTEAMSACK,1000,Sports
+B,nfl_props,KXNFLTEAMYDS,1000,Sports
+B,nfl_props,KXNFLWINMARGIN,300+,Sports?
+B,nhl_periods,KXNHL1P,300+,Sports?
+B,nhl_periods,KXNHL1PSPREAD,300+,Sports?
+B,nhl_periods,KXNHL1PTOTAL,300+,Sports?
+B,nhl_periods,KXNHL2P,300+,Sports?
+B,nhl_periods,KXNHL2PSPREAD,300+,Sports?
+B,nhl_periods,KXNHL2PTOTAL,300+,Sports?
+B,nhl_periods,KXNHL3P,300+,Sports?
+B,nhl_periods,KXNHL3PSPREAD,300+,Sports?
+B,nhl_periods,KXNHL3PTOTAL,300+,Sports?
+B,soccer_extras,KXBRASILEIROTEAMTOTAL,300+,Sports?
+B,soccer_extras,KXBUNDESLIGATEAMTOTAL,300+,Sports?
+B,soccer_extras,KXEPLCORNERS,300+,Sports?
+B,soccer_extras,KXEPLTEAMTOTAL,300+,Sports?
+B,soccer_extras,KXLALIGACORNERS,400,Sports
+B,soccer_extras,KXLALIGATEAMTOTAL,300+,Sports?
+B,soccer_extras,KXLIGAMXTEAMTOTAL,300+,Sports?
+B,soccer_extras,KXLIGUE1TEAMTOTAL,300+,Sports?
+B,soccer_extras,KXMLSTEAMTOTAL,300+,Sports?
+B,soccer_extras,KXSERIEATEAMTOTAL,300+,Sports?
+B,soccer_extras,KXSERIECBTTS,300+,Sports?
+B,soccer_major,KXBUNDESLIGATOTAL,480,Sports
+B,soccer_major,KXEPLSPREAD,328,Sports
+B,soccer_major,KXEPLTOTAL,482,Sports
+B,soccer_major,KXLALIGASPREAD,397,Sports
+B,soccer_major,KXLALIGATOTAL,572,Sports
+B,soccer_major,KXLIGAMXSPREAD,400,Sports
+B,soccer_major,KXLIGAMXTOTAL,610,Sports
+B,soccer_major,KXLIGUE1TOTAL,439,Sports
+B,soccer_major,KXMLSSPREAD,800,Sports
+B,soccer_major,KXMLSTOTAL,1000,Sports
+B,soccer_major,KXSERIEASPREAD,386,Sports
+B,soccer_major,KXSERIEATOTAL,577,Sports
+B,tennis,KXATPCHALLENGERDOUBLES,1000,Sports
+B,tennis,KXATPDOUBLES,474,Sports
+B,tennis,KXATPGSPREAD,300+,Sports?
+B,tennis,KXATPGTOTAL,1000,Sports
+B,tennis,KXATPMATCH,1000,Sports
+B,tennis,KXWTACHALLENGERMATCH,1000,Sports
+B,tennis,KXWTAGTOTAL,300+,Sports?
+B,tennis,KXWTAMATCH,1000,Sports
+B,us_game_winner,KXMLBGAME,724,Sports
+B,us_game_winner,KXMLSGAME,501,Sports
+B,us_game_winner,KXNBAGAME,348,Sports
+B,us_game_winner,KXNCAAFGAME,1000,Sports
+B,us_game_winner,KXNHLGAME,588,Sports
+B,wx_daily_temp,KXHIGHAUS,360,Climate and Weather
+B,wx_daily_temp,KXHIGHCHI,360,Climate and Weather
+B,wx_daily_temp,KXHIGHDEN,360,Climate and Weather
+B,wx_daily_temp,KXHIGHLAX,354,Climate and Weather
+B,wx_daily_temp,KXHIGHMIA,360,Climate and Weather
+B,wx_daily_temp,KXHIGHNY,360,Climate and Weather
+B,wx_daily_temp,KXHIGHPHIL,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTATL,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTBOS,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTDAL,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTDC,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTEWR,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTHOU,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTLV,354,Climate and Weather
+B,wx_daily_temp,KXHIGHTMIN,354,Climate and Weather
+B,wx_daily_temp,KXHIGHTNOLA,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTOKC,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTPHX,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTSAN,348,Climate and Weather
+B,wx_daily_temp,KXHIGHTSATX,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTSDF,360,Climate and Weather
+B,wx_daily_temp,KXHIGHTSEA,354,Climate and Weather
+B,wx_daily_temp,KXHIGHTSFO,354,Climate and Weather
+B,wx_daily_temp,KXHIGHTTTN,360,Climate and Weather
+B,wx_daily_temp,KXLOWTATL,360,Climate and Weather
+B,wx_daily_temp,KXLOWTAUS,360,Climate and Weather
+B,wx_daily_temp,KXLOWTBOS,360,Climate and Weather
+B,wx_daily_temp,KXLOWTCHI,360,Climate and Weather
+B,wx_daily_temp,KXLOWTDAL,360,Climate and Weather
+B,wx_daily_temp,KXLOWTDC,354,Climate and Weather
+B,wx_daily_temp,KXLOWTDEN,360,Climate and Weather
+B,wx_daily_temp,KXLOWTEWR,360,Climate and Weather
+B,wx_daily_temp,KXLOWTHOU,360,Climate and Weather
+B,wx_daily_temp,KXLOWTLAX,354,Climate and Weather
+B,wx_daily_temp,KXLOWTLV,354,Climate and Weather
+B,wx_daily_temp,KXLOWTMIA,360,Climate and Weather
+B,wx_daily_temp,KXLOWTMIN,354,Climate and Weather
+B,wx_daily_temp,KXLOWTNOLA,360,Climate and Weather
+B,wx_daily_temp,KXLOWTNYC,360,Climate and Weather
+B,wx_daily_temp,KXLOWTOKC,354,Climate and Weather
+B,wx_daily_temp,KXLOWTPHIL,360,Climate and Weather
+B,wx_daily_temp,KXLOWTPHX,360,Climate and Weather
+B,wx_daily_temp,KXLOWTSAN,348,Climate and Weather
+B,wx_daily_temp,KXLOWTSATX,360,Climate and Weather
+B,wx_daily_temp,KXLOWTSDF,360,Climate and Weather
+B,wx_daily_temp,KXLOWTSEA,354,Climate and Weather
+B,wx_daily_temp,KXLOWTSFO,354,Climate and Weather
+B,wx_daily_temp,KXLOWTTTN,360,Climate and Weather
+C,ai_share,KXOPENSOURCESHARE,234,Science and Technology
+C,approval_ballot,KXTRUMPAPPROVE,540,Politics
+C,approval_ballot,KXVHGCB,349,Politics
+C,cricket,KXT20MATCH,1000,Sports
+C,crypto_ladder,KXSHIBA,1716,Crypto
+C,crypto_ladder,KXSHIBAD,1716,Crypto
+C,mentions,KXTRUMPMENTION,1000,Mentions
+C,mentions,KXTRUMPMENTIONB,539,Mentions
+C,mentions,KXTRUMPSAY,340,Mentions
+C,minor_hockey,KXAHLGAME,300+,Sports?
+C,minor_hockey,KXKHLGAME,300+,Sports?
+C,mlb_props,KXMLBHA,2000,Sports
+C,music_video_charts,KXALBUMEQUIV,437,Entertainment
+C,music_video_charts,KXBILLBOARDRUNNERUPSONG,263,Entertainment
+C,music_video_charts,KXPUREALBUMS,350,Entertainment
+C,music_video_charts,KXTOPSONG,265,Entertainment
+C,music_video_charts,KXYTTOPVIDEO2D,825,Entertainment
+C,music_video_charts,KXYTTOPVIDEOG2D,825,Entertainment
+C,nascar,KXNASCARRACE,864,Sports
+C,nascar,KXNASCARTOP10,300+,Sports?
+C,nascar,KXNASCARTOP3,300+,Sports?
+C,ncaaf_periods,KXNCAAF1Q,300+,Sports?
+C,ncaaf_periods,KXNCAAF2H,300+,Sports?
+C,ncaaf_periods,KXNCAAF2Q,300+,Sports?
+C,ncaaf_periods,KXNCAAF3Q,300+,Sports?
+C,ncaaf_periods,KXNCAAF4Q,300+,Sports?
+C,ncaaf_periods,KXNCAAFOT,300+,Sports?
+C,ncaaf_props,KXNCAAFFIRSTTDTEAM,300+,Sports?
+C,ncaaf_props,KXNCAAFTEAMRECTD,300+,Sports?
+C,nhl_props,KXNHLSAVE,300+,Sports?
+C,post_counts,KXTRUTHSOCIAL,105,Politics
+C,post_counts,KXTRUTHSOCIALD,264,Politics
+C,power_demand,KXTXERCOTPEAKD,1000,Economics
+C,rates_daily,KX30YMORTW,164,Economics
+C,rates_daily,KXSOFRD,284,Economics
+C,rates_daily,KXUST10A,150,Financials
+C,rates_daily,KXUST2A,160,Financials
+C,rates_daily,KXUST30A,160,Financials
+C,rates_daily,KXUST5A,140,Financials
+C,rates_daily,KXUST7A,140,Financials
+C,streaming_charts,KXNETFLIXRANKMOVIE,113,Entertainment
+C,streaming_charts,KXNETFLIXRANKMOVIEGLOBAL,101,Entertainment
+C,streaming_charts,KXNETFLIXRANKMOVIERUNNERUP,113,Entertainment
+C,streaming_charts,KXNETFLIXRANKSHOW,111,Entertainment
+C,streaming_charts,KXNETFLIXRANKSHOWGLOBAL,101,Entertainment
+C,streaming_charts,KXNETFLIXRANKSHOWGLOBAL2,100,Entertainment
+C,streaming_charts,KXNETFLIXRANKSHOWRUNNERUP,111,Entertainment
+C,truflation,KXTRUEV,630,Economics
+C,volleyball,KXNCAAWVMATCH,300+,Sports?
+C,wx_hazard,KXBIGGESTQUAKE,559,Climate and Weather
+C,wx_rain,KXRAIN,1763,Climate and Weather
+C,wx_rain,KXRAINWKND,231,Climate and Weather
+OUT,esports,KXDOTA2GAME,1000,Sports
+OUT,esports,KXDOTA2MAP,300+,Sports?
+OUT,esports,KXDOTA2TOTALMAPS,300+,Sports?
+OUT,esports,KXVALORANTMAP,300+,Sports?
+OUT,macro_release,KXUE,124,Economics
