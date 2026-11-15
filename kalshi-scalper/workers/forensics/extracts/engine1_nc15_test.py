@@ -38,4 +38,28 @@ def main():
     assert db.execute("select count(*) from market").fetchone()[0] == 2 and db.execute("select count(*) from candle where ticker like '%T2'").fetchone()[0] == 0
     assert db.execute("select yes_bid,yes_ask,last,volume,oi from candle where end_ts=?", (e0,)).fetchone() == (0.4, 0.5, 0.5, 3.0, 10.0)
     print("engine1_nc15 test ok", c)
-main()
+
+class Guard(dict):
+    """A market object that raises on any key but ticker and close_time (a dropped market must never have another key read)."""
+    def __getitem__(self, k):
+        if k not in ("ticker", "close_time"): raise AssertionError("key %r of a dropped market was read" % k)
+        return dict.__getitem__(self, k)
+    def get(self, k, d=None): raise AssertionError("get(%r) on a dropped market" % k)
+    def __contains__(self, k): raise AssertionError("contains(%r) on a dropped market" % k)
+    def keys(self): raise AssertionError("keys() on a dropped market")
+    def items(self): raise AssertionError("items() on a dropped market")
+    def values(self): raise AssertionError("values() on a dropped market")
+    def __iter__(self): raise AssertionError("iter on a dropped market")
+def guard_test():
+    b = tempfile.mkdtemp(); out = os.path.join(b, "out"); allow = os.path.join(b, "H.md")
+    open(allow, "w").write("x engine1_nc15.py %s %s\n" % (X.self_sha(), " ".join(X.LISTS + X.CANDLES)))
+    late = Guard({"ticker": "KXSILVER15M-T9", "close_time": "2026-10-03T16:00:00Z", "result": "yes", "secret": 1})
+    foreign = Guard({"ticker": "KXFOO15M-T8", "close_time": "2026-10-02T00:00:00Z", "result": "yes"})
+    ok = {"ticker": "KXSILVER15M-T1", "close_time": "2026-10-02T00:00:00Z", "result": "yes"}
+    orig = X.run_bodies
+    X.run_bodies = lambda base, run: iter([{"markets": [late, foreign, ok]}] if run in X.LISTS[:1] else ([{"markets": []}] if run in X.LISTS else [{"markets": [{"market_ticker": "KXSILVER15M-T9", "candlesticks": [object()]}, {"market_ticker": "KXSILVER15M-T1", "candlesticks": []}]}]))
+    try: L = X.build(b, out, allow)
+    finally: X.run_bodies = orig
+    c = L["counts"]; assert c["dropped by the cut"] == 1 and c["unknown series or no close"] == 1 and L["markets"] == 1 and c["candle market not kept (not parsed)"] == len(X.CANDLES), c
+    print("guard test ok (dropped markets: only ticker and close_time were read; a non-kept candle market is not parsed)")
+main(); guard_test()
