@@ -1,0 +1,220 @@
+{
+ "close_ts": 36000,
+ "entries": [
+  {
+   "id": "E1",
+   "exit": "H",
+   "side": "yes",
+   "ask": 0.9,
+   "result": "yes",
+   "path": [],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E2",
+   "exit": "H",
+   "side": "no",
+   "ask": 0.9,
+   "result": "yes",
+   "path": [],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E3",
+   "exit": "T",
+   "side": "yes",
+   "ask": 0.3,
+   "result": "no",
+   "path": [
+    [
+     35500,
+     0.45,
+     0.47
+    ],
+    [
+     35560,
+     0.62,
+     0.64
+    ],
+    [
+     35620,
+     0.66,
+     0.68
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E4",
+   "exit": "S",
+   "side": "yes",
+   "ask": 0.6,
+   "result": "yes",
+   "path": [
+    [
+     35500,
+     0.5,
+     0.52
+    ],
+    [
+     35560,
+     0.29,
+     0.31
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E5",
+   "exit": "B",
+   "side": "no",
+   "ask": 0.4,
+   "result": "yes",
+   "path": [
+    [
+     35500,
+     0.68,
+     0.7
+    ],
+    [
+     35560,
+     0.83,
+     0.85
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E6",
+   "exit": "M180",
+   "side": "yes",
+   "ask": 0.8,
+   "result": "yes",
+   "path": [
+    [
+     35500,
+     0.82,
+     0.84
+    ],
+    [
+     35820,
+     0.85,
+     0.87
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E7",
+   "exit": "M60",
+   "side": "yes",
+   "ask": 0.8,
+   "result": "yes",
+   "path": [
+    [
+     35880,
+     0.85,
+     0.87
+    ],
+    [
+     35970,
+     0.9,
+     0.92
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E8",
+   "exit": "M180",
+   "side": "yes",
+   "ask": 0.8,
+   "result": "yes",
+   "path": [
+    [
+     35820,
+     0.0,
+     0.02
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E9",
+   "exit": "H",
+   "side": "yes",
+   "ask": 0.985,
+   "result": "yes",
+   "path": [],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E10",
+   "exit": "S",
+   "side": "yes",
+   "ask": 0.3,
+   "result": "no",
+   "path": [
+    [
+     35500,
+     0.02,
+     0.04
+    ]
+   ],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  },
+  {
+   "id": "E11",
+   "exit": "H",
+   "side": "yes",
+   "ask": 0.5,
+   "result": "void",
+   "path": [],
+   "close_ts": 36000,
+   "day": "1970-01-01",
+   "series": "KXFIX15M",
+   "entry_end": 35400,
+   "n": 1
+  }
+ ]
+}

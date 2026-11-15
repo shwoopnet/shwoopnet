@@ -1,0 +1,42 @@
+{
+ "note": "net dollars per entry, n=1 unless stated, hand computed before any code; null = skipped (no mark). Fee n=1: ceil(round(7*p*(1-p),9))/100",
+ "h0": {
+  "E1": 0.09,
+  "E2": -0.91,
+  "E3": 0.28,
+  "E4": -0.35,
+  "E5": -0.28,
+  "E6": 0.02,
+  "E7": null,
+  "E8": null,
+  "E9": 0.005,
+  "E10": -0.31,
+  "E11": -0.02
+ },
+ "h2": {
+  "E1": 0.07,
+  "E2": -0.93,
+  "E3": 0.28,
+  "E4": -0.39,
+  "E5": -0.32,
+  "E6": -0.02,
+  "E7": null,
+  "E8": null,
+  "E9": 0.0,
+  "E10": -0.34,
+  "E11": -0.02
+ },
+ "n10_h0_total": {
+  "E1": 0.93,
+  "E4": -3.42,
+  "E11": -0.18
+ },
+ "skips": {
+  "E7": "no mark",
+  "E8": "no mark"
+ },
+ "h2_skips": {
+  "E7": "no mark",
+  "E8": "no mark"
+ }
+}
