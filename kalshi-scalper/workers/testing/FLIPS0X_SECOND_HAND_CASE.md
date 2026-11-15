@@ -34,3 +34,5 @@ COUNTS toward the 20 to 30: no.
 - A candle ending after the close is dropped and counted; one ending exactly at the close is kept (never the decision candle).
 - Band edges 0.88 and 0.97 inclusive; entry price cap 0.99.
 - The printout names the extract's raw sha256 and every count; no ticker.
+
+- CORRECTION (found when the test first ran; the code was right): the all-four h 0 net is 1.94 - 9.16 = -7.22, not -6.22 as written above; every other figure stands.
