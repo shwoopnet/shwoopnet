@@ -1,0 +1,465 @@
+{
+ "series_listed": 11070,
+ "categories": {
+  "Crypto": {
+   "series_listed": 302,
+   "series_settled_1110": 29,
+   "markets_settled_1110": 36784,
+   "events_settled_1110": 1027
+  },
+  "(series not in list)": {
+   "series_listed": 0,
+   "series_settled_1110": 308,
+   "markets_settled_1110": 16937,
+   "events_settled_1110": 2496
+  },
+  "Commodities": {
+   "series_listed": 119,
+   "series_settled_1110": 19,
+   "markets_settled_1110": 7699,
+   "events_settled_1110": 762
+  },
+  "Financials": {
+   "series_listed": 1183,
+   "series_settled_1110": 59,
+   "markets_settled_1110": 7513,
+   "events_settled_1110": 764
+  },
+  "Economics": {
+   "series_listed": 895,
+   "series_settled_1110": 75,
+   "markets_settled_1110": 1200,
+   "events_settled_1110": 75
+  },
+  "Elections": {
+   "series_listed": 2515,
+   "series_settled_1110": 27,
+   "markets_settled_1110": 313,
+   "events_settled_1110": 46
+  },
+  "Entertainment": {
+   "series_listed": 2606,
+   "series_settled_1110": 20,
+   "markets_settled_1110": 278,
+   "events_settled_1110": 23
+  },
+  "Mentions": {
+   "series_listed": 465,
+   "series_settled_1110": 9,
+   "markets_settled_1110": 107,
+   "events_settled_1110": 9
+  },
+  "Politics": {
+   "series_listed": 2460,
+   "series_settled_1110": 16,
+   "markets_settled_1110": 75,
+   "events_settled_1110": 16
+  },
+  "Companies": {
+   "series_listed": 193,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "Science and Technology": {
+   "series_listed": 14,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "World": {
+   "series_listed": 137,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "Climate and Weather": {
+   "series_listed": 2,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "Health": {
+   "series_listed": 94,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "Transportation": {
+   "series_listed": 34,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "Sports": {
+   "series_listed": 1,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "Culture": {
+   "series_listed": 2,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  },
+  "Social": {
+   "series_listed": 48,
+   "series_settled_1110": 0,
+   "markets_settled_1110": 0,
+   "events_settled_1110": 0
+  }
+ },
+ "markets_of_series_not_in_list": 16937,
+ "unreadable_files": 2,
+ "hours_cut": [
+  "settled_1110_h00",
+  "settled_1110_h01",
+  "settled_1110_h02",
+  "settled_1110_h03",
+  "settled_1110_h04",
+  "settled_1110_h05",
+  "settled_1110_h06",
+  "settled_1110_h07",
+  "settled_1110_h08",
+  "settled_1110_h09",
+  "settled_1110_h10",
+  "settled_1110_h11",
+  "settled_1110_h12",
+  "settled_1110_h13",
+  "settled_1110_h14",
+  "settled_1110_h15",
+  "settled_1110_h16",
+  "settled_1110_h17",
+  "settled_1110_h18",
+  "settled_1110_h19",
+  "settled_1110_h20",
+  "settled_1110_h21",
+  "settled_1110_h23"
+ ],
+ "families": {
+  "Sports": [],
+  "Politics": [
+   [
+    "KXPANAMAWEEKLY",
+    "weekly",
+    "Traffic through the Panama Canal",
+    9,
+    1
+   ],
+   [
+    "KXHORMUZWEEKLY",
+    "weekly",
+    "Traffic through the Strait of Hormuz",
+    9,
+    1
+   ],
+   [
+    "KXTRUMPAPPROVE",
+    "daily",
+    "Trump approval rating",
+    9,
+    1
+   ],
+   [
+    "KXTRUTHSOCIALD",
+    "daily",
+    "Number of Trump Truth Social posts today?",
+    8,
+    1
+   ],
+   [
+    "KXSUEZWEEKLY",
+    "weekly",
+    "Traffic through the Suez Canal",
+    8,
+    1
+   ],
+   [
+    "KXHORMUZPEAK",
+    "weekly",
+    "Peak traffic through the Strait of Hormuz?",
+    8,
+    1
+   ],
+   [
+    "KXHORMUZMAX",
+    "weekly",
+    "Maximum traffic through the Strait of Hormuz?",
+    7,
+    1
+   ],
+   [
+    "KXEPSTEINFILES",
+    "one_off",
+    "When will the federal government release more Epstein files?",
+    5,
+    1
+   ],
+   [
+    "KXVOTEHEGSETHIMPEACH",
+    "one_off",
+    "Will the House vote on impeaching Pete Hegseth?",
+    3,
+    1
+   ],
+   [
+    "KXSCOTUSCERT",
+    "custom",
+    "SCOTUS writs of cert",
+    2,
+    1
+   ],
+   [
+    "KXNRCCCHAIR",
+    "one_off",
+    "Next NRCC Chair",
+    2,
+    1
+   ],
+   [
+    "KXOMARVOTE",
+    "one_off",
+    "Will Ilhan Omar cast a recorded House vote",
+    1,
+    1
+   ],
+   [
+    "KXUKWEALTHTAX",
+    "one_off",
+    "Which wealth taxes will the UK announce?",
+    1,
+    1
+   ],
+   [
+    "KXTRUMPACTD",
+    "daily",
+    "Will Trump do anything?",
+    1,
+    1
+   ],
+   [
+    "KXMAXSHIPSHORMUZ",
+    "monthly",
+    "Maximum daily count of ships through the Strait of Hormuz?",
+    1,
+    1
+   ],
+   [
+    "KXDEMSCHUMER",
+    "one_off",
+    "Will a Democratic Senator call for Schumer to step down as leader?",
+    1,
+    1
+   ]
+  ],
+  "Entertainment": [
+   [
+    "KXYTVIEWSHIGH",
+    "monthly",
+    "highest daily views in time period",
+    37,
+    3
+   ],
+   [
+    "KXVOICELIMINATION",
+    "one_off",
+    "who will be eliminated from the voice",
+    28,
+    1
+   ],
+   [
+    "KXSTEAMTOPSELLER",
+    "one_off",
+    "STEAM Top Sellers",
+    20,
+    1
+   ],
+   [
+    "KXYTTOPVIDEOG2D",
+    "one_off",
+    "runner up top music video",
+    15,
+    1
+   ],
+   [
+    "KXYTTOPVIDEO2D",
+    "one_off",
+    "Runner up Daily Top Music Video",
+    15,
+    1
+   ],
+   [
+    "KXYTDAILYTOPVIDEOG",
+    "one_off",
+    "top music video global",
+    15,
+    1
+   ],
+   [
+    "KXYTDAILYTOPVIDEO",
+    "daily",
+    "DAILY TOP YOUTUBE VIDEO",
+    15,
+    1
+   ],
+   [
+    "KXNETFLIXRANKSHOWRUNNERUP",
+    "weekly",
+    "RUNNER UP NETFLIX SHOW",
+    13,
+    1
+   ],
+   [
+    "KXNETFLIXRANKSHOWGLOBAL",
+    "weekly",
+    "Netflix TV ranking",
+    13,
+    1
+   ],
+   [
+    "KXNETFLIXRANKSHOWGLOBAL2",
+    "weekly",
+    "RUNNER UP SHOW NETFLIX SHOW GLOBAL",
+    13,
+    1
+   ],
+   [
+    "KXNETFLIXRANKSHOW",
+    "weekly",
+    "Netflix TV ranking",
+    13,
+    1
+   ],
+   [
+    "KXNETFLIXRANKMOVIERUNNERUP",
+    "weekly",
+    "RUNNER UP NETFLIX MOVIE",
+    13,
+    1
+   ],
+   [
+    "KXNETFLIXRANKMOVIEGLOBAL",
+    "weekly",
+    "Netflix movie ranking",
+    12,
+    1
+   ],
+   [
+    "KXNETFLIXRANKMOVIEGLOBAL2",
+    "weekly",
+    "RUNNER UP SHOW NETFLIX MOVIE GLOBAL",
+    12,
+    1
+   ],
+   [
+    "KXNETFLIXRANKMOVIE",
+    "weekly",
+    "Netflix movie ranking",
+    12,
+    1
+   ],
+   [
+    "KXNETFLIXTOPVIEWSTV",
+    "one_off",
+    "NETFLIX TOP SHOW VIEW COUNT",
+    11,
+    1
+   ],
+   [
+    "KXNETFLIXTOPVIEWSMOVIE",
+    "one_off",
+    "NETFLIX TOP MOVIE VIEW COUNT",
+    11,
+    1
+   ],
+   [
+    "KXBOOKERPRIZE",
+    "one_off",
+    "who will win the booker prize",
+    7,
+    1
+   ],
+   [
+    "KXWEEKSNUM1",
+    "one_off",
+    "how many weeks will album be number 1 ",
+    2,
+    2
+   ],
+   [
+    "KXARTISTSTREAMSY",
+    "annual",
+    "Artist Yearly Streams",
+    1,
+    1
+   ]
+  ],
+  "Mentions": [
+   [
+    "KXHEGSETHMENTION",
+    "one_off",
+    "Hegseth",
+    20,
+    1
+   ],
+   [
+    "KXWORLDNEWSMENTION",
+    "one_off",
+    "World News Mention",
+    17,
+    1
+   ],
+   [
+    "KXEARNINGSMENTIONETOR",
+    "one_off",
+    "Etoro",
+    14,
+    1
+   ],
+   [
+    "KXEARNINGSMENTIONZETA",
+    "one_off",
+    "Zeta",
+    13,
+    1
+   ],
+   [
+    "KXEARNINGSMENTIONASTS",
+    "one_off",
+    "AST SpaceMobile",
+    12,
+    1
+   ],
+   [
+    "KXEARNINGSMENTIONTTWO",
+    "one_off",
+    "Take Two Earnings Call",
+    11,
+    1
+   ],
+   [
+    "KXTHEWEEKNIGHTMENTION",
+    "one_off",
+    "Weeknight",
+    9,
+    1
+   ],
+   [
+    "KXTRUMPSAY",
+    "one_off",
+    "What will trump say",
+    6,
+    1
+   ],
+   [
+    "KXLASTWORDMENTION",
+    "one_off",
+    "Last Word",
+    5,
+    1
+   ]
+  ]
+ },
+ "label": "counts only: no price, volume, result or settlement field read"
+}
