@@ -1,0 +1,220 @@
+{
+ "job": {
+  "job_id": "KXNBAPTS_LISTS_A",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/nbapts/KXNBAPTS_OL_CARD.md",
+  "purpose": "KXNBAPTS (O) and (L) VERSION paper cards (Idea Desk C), stage A: settled KXNBAPTS market lists with close times in the development block only, plus the series read for the rules and fee field. No candle.",
+  "heldout": "none read: development block only, close_time from 2026-10-21T00:00Z to 2026-11-05T23:59:59Z (min_close_ts 1792540800, max_close_ts 1793923199). Not requested: PROPUNDER's reserve (closes 2026-11-06 to before 2026-11-13, rule 17) and this card's held-out (closes 2026-11-13 to before 2026-12-04, read once on the Head of R&D's go, its own job after Dec 4). PROPS1's frozen cut 2026-10-03T16:00Z is last season and shares no close.",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor",
+     "min_close_ts",
+     "max_close_ts"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXNBAPTS"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 14,
+  "notes": "Estimate: about 14 game days x 6 to 10 games x about 50 rungs, so 4,000 to 7,000 markets, 4 to 7 pages of 1,000. Up to 12 pages plus 1 series read = 13, cap 14. Pacing 5 s (the shared 12 a minute budget). The scorer keeps ticker, event_ticker, open_time, close_time, occurrence_datetime, can_close_early and result only.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 5.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "dev_KXNBAPTS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNBAPTS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1792540800,
+     "max_close_ts": 1793923199
+    },
+    "max_pages": 12
+   },
+   {
+    "id": "series_KXNBAPTS",
+    "path": "/series/KXNBAPTS",
+    "params": {}
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-15T1457Z",
+ "finished": "2026-11-15T1457Z",
+ "status": "complete",
+ "requests_sent": 7,
+ "bytes_stored": 14841504,
+ "rows": [
+  {
+   "index": 1,
+   "id": "dev_KXNBAPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2539960,
+   "t_send_ms": 1794754642998,
+   "t_recv_ms": 1794754643273,
+   "server_date": "Sun, 15 Nov 2026 14:57:23 GMT",
+   "file": "0001.json.gz",
+   "sha256": "e1c0c4a252cc150044d855c4bcf870682e0e3af73d82c02ae166c29d69693e21",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "dev_KXNBAPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2542037,
+   "t_send_ms": 1794754647998,
+   "t_recv_ms": 1794754648267,
+   "server_date": "Sun, 15 Nov 2026 14:57:28 GMT",
+   "file": "0002.json.gz",
+   "sha256": "169fdec9105f946f81ae4e577437a03fe20f92bccbc2fbf61a98196226fd85a0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "dev_KXNBAPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2542191,
+   "t_send_ms": 1794754652998,
+   "t_recv_ms": 1794754653293,
+   "server_date": "Sun, 15 Nov 2026 14:57:33 GMT",
+   "file": "0003.json.gz",
+   "sha256": "cf271f6612c11c4c11efe4610dfcaa9ee594cb59e8b2ddf0abb2614d40db17eb",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "dev_KXNBAPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2540395,
+   "t_send_ms": 1794754657998,
+   "t_recv_ms": 1794754658278,
+   "server_date": "Sun, 15 Nov 2026 14:57:38 GMT",
+   "file": "0004.json.gz",
+   "sha256": "615446f4515ddbe0b2cc95a15d85edc1342280755481ce5d349fc3d69e41a552",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "dev_KXNBAPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2540786,
+   "t_send_ms": 1794754662998,
+   "t_recv_ms": 1794754663287,
+   "server_date": "Sun, 15 Nov 2026 14:57:43 GMT",
+   "file": "0005.json.gz",
+   "sha256": "ecf39a70464963f0a101f61583107d97c1154276114dcf4fbf996078131f3767",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "dev_KXNBAPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 2134542,
+   "t_send_ms": 1794754667998,
+   "t_recv_ms": 1794754668288,
+   "server_date": "Sun, 15 Nov 2026 14:57:48 GMT",
+   "file": "0006.json.gz",
+   "sha256": "61e06bb12ba7fa43a7c0e1627bd37c2a5db9b3fc021c8ed75f1733ed4e7a5148",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "series_KXNBAPTS",
+   "path": "/series/KXNBAPTS",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1593,
+   "t_send_ms": 1794754672998,
+   "t_recv_ms": 1794754673103,
+   "server_date": "Sun, 15 Nov 2026 14:57:53 GMT",
+   "file": "0007.json.gz",
+   "sha256": "d8fea4c68f5256fd8311809f7cc10274971eff071da55c7f081394a3992a7bbf",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
