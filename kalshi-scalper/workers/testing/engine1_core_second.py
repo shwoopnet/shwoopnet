@@ -27,10 +27,10 @@ def score_entry(e, path, kind, h, n=None):
     paid = min(r6(e["ask"] + h), CAP); fee_in = fee_up_order(paid, n); close = e["close_ts"]; side = e["side"]
     def exit_at(bid, reason):
         px = max(r6(bid - h), FLOOR)
-        return {"status": "scored", "cash": n * px - n * paid - fee_in - fee_up_order(px, n), "reason": reason}
+        return {"status": "scored", "cash": round(n * px - n * paid - fee_in - fee_up_order(px, n), 9), "reason": reason}          # rounded to 9 places so float noise (8.7e-18) is not a win
     def settle():
-        if e["result"] not in ("yes", "no"): return {"status": "scored", "cash": -fee_in, "reason": "settle"}          # a void refunds the price and keeps the entry fee
-        return {"status": "scored", "cash": (n * 1.0 if e["result"] == side else 0.0) - n * paid - fee_in, "reason": "settle"}
+        if e["result"] not in ("yes", "no"): return {"status": "scored", "cash": round(-fee_in, 9), "reason": "settle"}          # a void refunds the price and keeps the entry fee
+        return {"status": "scored", "cash": round((n * 1.0 if e["result"] == side else 0.0) - n * paid - fee_in, 9), "reason": "settle"}
     if kind == "H": return settle()
     if kind in ("T", "S", "B"):
         tgt, stp = r6(min(2 * paid, CAP)), r6(paid / 2)

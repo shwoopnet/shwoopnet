@@ -31,3 +31,5 @@ Aggregate, exit M180, h 0: scored E1 (+4.76), E2 (-2.69), E4 (no C-180 candle: n
 - PF: no loss and a win: infinite; no win and a loss: 0; none: nan.
 
 - CORRECTION (found when the test first ran; code was right): the day-clustered z in the aggregate is 1.673220 (1.67321967), not 1.673203 as written above (a hand rounding slip); every other figure stands.
+
+## ADDENDUM 1 Nov 15 (found on Desk A fixture entry E9 at h 0.02, n 1: float noise 8.7e-18 would count as a win): every entry cash is rounded to 9 decimals (below the 1e-9 tolerance) so a zero-cash entry is neither a win nor a loss. Test: a win at paid 0.99 with 1 contract (0.01 - 0.01) is cash 0.0, wins 0.

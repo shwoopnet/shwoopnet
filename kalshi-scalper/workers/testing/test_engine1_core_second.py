@@ -43,4 +43,6 @@ assert c.score_entry(ex, px, "T", 0.0)["reason"] == "target" and c.score_entry(e
 assert c.score_entry(ex, [cl(9, -540, .90, .90)], "T", 0.0)["reason"] == "settle" and c.score_entry(ex, [cl(9, -540, 0.0, .5)], "S", 0.0)["reason"] == "settle" and c.score_entry(ex, [cl(9, -540, .5, 1.0)], "T", 0.0)["reason"] == "settle"
 # the sale price floor 0.01 and the entry cap 0.99; a void after an early exit changes nothing
 ev = E("V", 9, "yes", .40, "void", "D9", -600); assert near(c.score_entry(ev, px, "T", 0.0)["cash"], c.score_entry(ex, px, "T", 0.0)["cash"]) and near(c.score_entry(ev, px, "H", 0.0)["cash"], -c.fee_up_order(.40, 10))
+# float noise is not a win: a win at paid 0.99 with 1 contract nets 0.01 - 0.01 = 0 exactly after rounding
+ez = E("Z", 9, "yes", .985, "yes", "D9", -600); rz = c.score_entry(ez, [], "H", 0.02, n=1); assert rz["cash"] == 0.0 and c.aggregate([ez], {}, "H", 0.02, n=1)["wins"] == 0
 print("engine1 core build 2 tests passed")
