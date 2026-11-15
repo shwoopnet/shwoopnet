@@ -207,8 +207,8 @@ def polish(err, best, wm, tm, NMAX, cap=POLISH_CAP):
                 if h_ <= 0: mu = max(mu * 10, 1e-9); continue
                 da, db = (-g[0] / h_, 0.0) if i == 0 else (0.0, -g[1] / h_)
             na, nb = min(max(a + da, BOX_LO), BOX_HI), min(max(b + db, BOX_LO), BOX_HI)
-            ne = grad_hess(na, nb, wm, tm)[0]
-            if ne <= s_ * (1 + 1e-15) + 1e-300: a, b, sse0, moved = na, nb, ne, True; break
+            ne, gn, _h = grad_hess(na, nb, wm, tm)
+            if ne <= s_ * (1 + 1e-15) + 1e-300 or max(abs(gn[i]) for i in free) < max(abs(g[i]) for i in free): a, b, sse0, moved = na, nb, ne, True; break          # the SSE cannot see a change under about 1e-19 absolute, so a step that lowers the free gradient is accepted too
             mu = max(mu * 10, 1e-9)
         if not moved: stopped = True; break
     s_, g, Hm = grad_hess(a, b, wm, tm); fa, fb = fixed_flags(a, b, g)
