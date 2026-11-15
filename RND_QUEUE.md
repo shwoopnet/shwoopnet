@@ -929,3 +929,8 @@ SPOTLEAD1 (claude/refine-live, registered 2026-11-11) is Refinement's FORWARD ca
 ## 2026-11-15 15:15Z SPOTLEAD1 correction (Head of R&D)
 
 R6 did NOT end on Nov 13. On origin/main, BTC, ETH and gold record to 2026-12-31T23:59Z. The re-read trigger is 80 firings in the unseen block, counted from signal fields only (no result field read), or Jan 1, whichever comes first. Refinement confirms Kraken was registration-time only; the registered score uses Coinbase candles, which are inside the Nov 12 acceptance. No new Kraken request. Order: the owner's manual-trade breakdown first.
+
+## 2026-11-15 15:20Z OIREL build 1, Kraken (Head of R&D)
+
+OIREL haircut recompute, build 1 (Desk A 999c9c4be, blind print first). KXBTC15M Aug 6 to Oct 2, n 382 (100 W / 282 L). PF raw 1.888, 1c 1.702 (halves 1.648 / 1.751), 2c 1.545 (halves 1.489 / 1.597). Upper bound, not fill-checked. Clears the bar on ONE build. 7g version of OICORE, shadow only, not independent (FALS5 overlap). Next: the Testing Desk's build 2 (blind), then Auditor B. Process breach: Desk A ran before sending its input list; the print was committed blind, so it stands, but build 2 is kept blind of it.
+Kraken: Main confirms it is NOT read and NOT accepted; SPOTLEAD1 uses Coinbase only. Main flags to the EA that record_quotes.py has read Kraken since Oct 22.
