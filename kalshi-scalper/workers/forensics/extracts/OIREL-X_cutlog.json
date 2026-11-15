@@ -1,0 +1,82 @@
+{
+ "card": "OIREL-X",
+ "spec": {
+  "card": "OIREL-X",
+  "sources": [
+   "alts2",
+   "alts3",
+   "alts4",
+   "book",
+   "l1b",
+   "e3b",
+   "fresh",
+   "rep"
+  ],
+  "series": [
+   "KX10YRRATE15M",
+   "KX2YRRATE15M",
+   "KX30YRRATE15M",
+   "KX5YRRATE15M",
+   "KXAUDUSD15M",
+   "KXBNB15M",
+   "KXBRENT15M",
+   "KXCOPPER15M",
+   "KXDOGE15M",
+   "KXETH15M",
+   "KXEURUSD15M",
+   "KXGBPUSD15M",
+   "KXGOLD15M",
+   "KXHYPE15M",
+   "KXNATGAS15M",
+   "KXNEAR15M",
+   "KXPALLADIUM15M",
+   "KXPLATINUM15M",
+   "KXSILVER15M",
+   "KXSOL15M",
+   "KXUSDCAD15M",
+   "KXUSDJPY15M",
+   "KXWTI15M",
+   "KXXRP15M",
+   "KXZEC15M"
+  ],
+  "start_ts": 1785974400,
+  "end_ts": 1790985600,
+  "cuts": [
+   {
+    "card": "SOL own cut",
+    "from_ts": 1790760600,
+    "series": [
+     "KXSOL15M"
+    ],
+    "why": "Desk A: SOL's own cut 2026-09-30T09:30Z"
+   }
+  ],
+  "market_cols": [
+   "ticker",
+   "series",
+   "open_ts",
+   "close_ts",
+   "result",
+   "strike"
+  ],
+  "candle_cols": [
+   "end_ts",
+   "bid_c",
+   "ask_c",
+   "volume",
+   "oi"
+  ],
+  "note": "every 15M series with oi candles except KXBTC15M; window closes before 2026-10-03T00:00Z (the Head's order); sources in hs1 order, then fresh, then rep"
+ },
+ "dropped_or_kept": {
+  "kept": 64040,
+  "own_heldout_or_after_end": 35919,
+  "dup_later_source": 10085,
+  "cut:SOL own cut": 242
+ },
+ "kept_close_range": [
+  1785974400,
+  1790984700
+ ],
+ "extract_sha256": "d9a24e7a37bc81e8296afd9d666b08c63cfa3fb953f4577c0f796875a668cfcf"
+}
