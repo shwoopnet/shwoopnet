@@ -45,3 +45,11 @@ What it bought since Nov 11: V2 POWER2 (9 of 16 queue rows retired by power), ME
 Biggest habit: V2 context is 770k of 784k and about to compact; its handoff should be written first (guidance sent, not a command). The binding constraint is not Claude spend but the shared 25 Kalshi reads an hour.
 Idle chat check: V2 and Desk A, B, Refinement have no workers; all candidates are blocked on reads or dates (Nov 14, 22, 24). No brief passes the checklist to approve; nothing to redirect.
 Calls: none (0 of 5). Nothing for the owner from this run beyond the open items main already holds.
+
+## 2026-11-15 morning US Central (COO run in main, 7:40 AM, Sunday)
+Rate limit: five hour window status allowed, not on overage (main, Refinement). Normal step.
+Lifetime cost (list price): main $1,694.89 (context 288k of 1M; was $1,317.66 on Nov 12, so +$377 in 3 days); Refinement $708.66 (context 733k of the 784k threshold; was $617.82 on Nov 12, +$91); Head of R&D $667.86 (context 565k). V2 archived.
+Output tokens lifetime: main 16.63M (+4.26M since Nov 12), Refinement 6.83M (+0.84M), Head of R&D 2.64M.
+What it bought: Head of R&D read OICORE at 100 fills (1 of 3 windows met, NOT YET, next read at 150 fills about a week out); Auditor B cleared the MMMAP1 NC15 script; Idea Desk C kept HALTWIN closed; main landed the NC15 and OICAND pulls and the activity seat rails.
+Biggest habit: Refinement at 733k context is about to compact at 784k while checked hourly; its handoff should be current first (recommend, not done). Main is the biggest spender, driven by PR and pull work.
+Calls: none (0 of 5). No idle research chat to redirect (credit guard step normal, but every open item waits on a dated read or an owner merge). Trigger trig_01VhDqV1xcCMb69a4LpehMpU shows enabled false; this run was bound to main by trig_01V13Qz5hS4TxKEnMjjESES3.
