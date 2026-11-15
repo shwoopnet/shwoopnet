@@ -1,0 +1,470 @@
+{
+ "label": "upper bound, not fill-checked; fee mode per-order rounded; cut-window recompute, NOT a reproduction of n 536; unadjusted cash (the printed raw PF 1.77), not the series-adjusted mean; 1c primary (entry 360 s before the close)",
+ "counts": {
+  "flips": 7410,
+  "band_or_quote": 16812,
+  "no_candle": 30,
+  "trade": 336
+ },
+ "pooled": {
+  "n": 336,
+  "h0.00": {
+   "net": 79.36,
+   "pf": 1.9601935874168184,
+   "wins": 327,
+   "losses": 9,
+   "half1": {
+    "n": 168,
+    "pf": 1.7993499458288194,
+    "net": 36.89
+   },
+   "half2": {
+    "n": 168,
+    "pf": 2.1635616438356173,
+    "net": 42.47
+   }
+  },
+  "h0.01": {
+   "net": 48.2,
+   "pf": 1.5773146484608938,
+   "wins": 327,
+   "losses": 9,
+   "half1": {
+    "n": 168,
+    "pf": 1.4575289575289574,
+    "net": 21.33
+   },
+   "half2": {
+    "n": 168,
+    "pf": 1.7287767832926502,
+    "net": 26.87
+   }
+  },
+  "h0.02": {
+   "net": 16.77,
+   "pf": 1.198838036518852,
+   "wins": 327,
+   "losses": 9,
+   "half1": {
+    "n": 168,
+    "pf": 1.1184964960713524,
+    "net": 5.58
+   },
+   "half2": {
+    "n": 168,
+    "pf": 1.3004026845637584,
+    "net": 11.19
+   }
+  }
+ },
+ "per_series_information_only": {
+  "KXXRP15M": {
+   "n": 105,
+   "h0.00": {
+    "net": 22.68,
+    "pf": 1.8214415067004714,
+    "wins": 102,
+    "losses": 3,
+    "half1": {
+     "n": 52,
+     "pf": 1.3902702702702705,
+     "net": 7.22
+    },
+    "half2": {
+     "n": 53,
+     "pf": 2.697036223929748,
+     "net": 15.46
+    }
+   },
+   "h0.01": {
+    "net": 12.95,
+    "pf": 1.464490674318508,
+    "wins": 102,
+    "losses": 3,
+    "half1": {
+     "n": 52,
+     "pf": 1.1274089935760172,
+     "net": 2.38
+    },
+    "half2": {
+     "n": 53,
+     "pf": 2.148913043478261,
+     "net": 10.57
+    }
+   },
+   "h0.02": {
+    "net": 3.08,
+    "pf": 1.1093749999999998,
+    "wins": 102,
+    "losses": 3,
+    "half1": {
+     "n": 52,
+     "pf": 0.865394806571277,
+     "net": -2.54
+    },
+    "half2": {
+     "n": 53,
+     "pf": 1.6049515608180838,
+     "net": 5.62
+    }
+   }
+  },
+  "KXDOGE15M": {
+   "n": 110,
+   "h0.00": {
+    "net": 33.67,
+    "pf": 2.7758438818565407,
+    "wins": 108,
+    "losses": 2,
+    "half1": {
+     "n": 55,
+     "pf": 2.885316184351554,
+     "net": 17.59
+    },
+    "half2": {
+     "n": 55,
+     "pf": 2.6697819314641755,
+     "net": 16.08
+    }
+   },
+   "h0.01": {
+    "net": 23.51,
+    "pf": 2.2270354906054286,
+    "wins": 108,
+    "losses": 2,
+    "half1": {
+     "n": 55,
+     "pf": 2.3287380699893956,
+     "net": 12.53
+    },
+    "half2": {
+     "n": 55,
+     "pf": 2.1284686536485107,
+     "net": 10.98
+    }
+   },
+   "h0.02": {
+    "net": 13.27,
+    "pf": 1.6861427094105481,
+    "wins": 108,
+    "losses": 2,
+    "half1": {
+     "n": 55,
+     "pf": 1.7815126050420167,
+     "net": 7.44
+    },
+    "half2": {
+     "n": 55,
+     "pf": 1.5936863543788187,
+     "net": 5.83
+    }
+   }
+  },
+  "KXGOLD15M": {
+   "n": 50,
+   "h0.00": {
+    "net": -2.72,
+    "pf": 0.9,
+    "wins": 47,
+    "losses": 3,
+    "half1": {
+     "n": 25,
+     "pf": 0.7014192139737991,
+     "net": -5.47
+    },
+    "half2": {
+     "n": 25,
+     "pf": 1.309684684684685,
+     "net": 2.75
+    }
+   },
+   "h0.01": {
+    "net": -7.39,
+    "pf": 0.7310771470160118,
+    "wins": 47,
+    "losses": 3,
+    "half1": {
+     "n": 25,
+     "pf": 0.5780659103187467,
+     "net": -7.81
+    },
+    "half2": {
+     "n": 25,
+     "pf": 1.0468227424749166,
+     "net": 0.42
+    }
+   },
+   "h0.02": {
+    "net": -12.05,
+    "pf": 0.5660785019805545,
+    "wins": 47,
+    "losses": 3,
+    "half1": {
+     "n": 25,
+     "pf": 0.4566844919786095,
+     "net": -10.16
+    },
+    "half2": {
+     "n": 25,
+     "pf": 0.7916207276736495,
+     "net": -1.89
+    }
+   }
+  },
+  "KXBNB15M": {
+   "n": 34,
+   "h0.00": {
+    "net": 15.23,
+    "pf": Infinity,
+    "wins": 34,
+    "losses": 0,
+    "half1": {
+     "n": 17,
+     "pf": Infinity,
+     "net": 8.03
+    },
+    "half2": {
+     "n": 17,
+     "pf": Infinity,
+     "net": 7.2
+    }
+   },
+   "h0.01": {
+    "net": 12.05,
+    "pf": Infinity,
+    "wins": 34,
+    "losses": 0,
+    "half1": {
+     "n": 17,
+     "pf": Infinity,
+     "net": 6.43
+    },
+    "half2": {
+     "n": 17,
+     "pf": Infinity,
+     "net": 5.62
+    }
+   },
+   "h0.02": {
+    "net": 8.85,
+    "pf": Infinity,
+    "wins": 34,
+    "losses": 0,
+    "half1": {
+     "n": 17,
+     "pf": Infinity,
+     "net": 4.86
+    },
+    "half2": {
+     "n": 17,
+     "pf": Infinity,
+     "net": 3.99
+    }
+   }
+  },
+  "KXHYPE15M": {
+   "n": 25,
+   "h0.00": {
+    "net": 4.03,
+    "pf": 1.4538288288288288,
+    "wins": 24,
+    "losses": 1,
+    "half1": {
+     "n": 12,
+     "pf": Infinity,
+     "net": 7.69
+    },
+    "half2": {
+     "n": 13,
+     "pf": 0.587837837837838,
+     "net": -3.66
+    }
+   },
+   "h0.01": {
+    "net": 1.73,
+    "pf": 1.192865105908584,
+    "wins": 24,
+    "losses": 1,
+    "half1": {
+     "n": 12,
+     "pf": Infinity,
+     "net": 6.58
+    },
+    "half2": {
+     "n": 13,
+     "pf": 0.45930880713489425,
+     "net": -4.85
+    }
+   },
+   "h0.02": {
+    "net": -0.62,
+    "pf": 0.9316427783902974,
+    "wins": 24,
+    "losses": 1,
+    "half1": {
+     "n": 12,
+     "pf": Infinity,
+     "net": 5.42
+    },
+    "half2": {
+     "n": 13,
+     "pf": 0.33406835722160977,
+     "net": -6.04
+    }
+   }
+  },
+  "KXEURUSD15M": {
+   "n": 3,
+   "h0.00": {
+    "net": 1.19,
+    "pf": Infinity,
+    "wins": 3,
+    "losses": 0,
+    "half1": {
+     "n": 1,
+     "pf": Infinity,
+     "net": 0.65
+    },
+    "half2": {
+     "n": 2,
+     "pf": Infinity,
+     "net": 0.54
+    }
+   },
+   "h0.01": {
+    "net": 0.92,
+    "pf": Infinity,
+    "wins": 3,
+    "losses": 0,
+    "half1": {
+     "n": 1,
+     "pf": Infinity,
+     "net": 0.56
+    },
+    "half2": {
+     "n": 2,
+     "pf": Infinity,
+     "net": 0.36
+    }
+   },
+   "h0.02": {
+    "net": 0.64,
+    "pf": Infinity,
+    "wins": 3,
+    "losses": 0,
+    "half1": {
+     "n": 1,
+     "pf": Infinity,
+     "net": 0.46
+    },
+    "half2": {
+     "n": 2,
+     "pf": Infinity,
+     "net": 0.18
+    }
+   }
+  },
+  "KXGBPUSD15M": {
+   "n": 6,
+   "h0.00": {
+    "net": 2.77,
+    "pf": Infinity,
+    "wins": 6,
+    "losses": 0,
+    "half1": {
+     "n": 3,
+     "pf": Infinity,
+     "net": 1.1
+    },
+    "half2": {
+     "n": 3,
+     "pf": Infinity,
+     "net": 1.67
+    }
+   },
+   "h0.01": {
+    "net": 2.2,
+    "pf": Infinity,
+    "wins": 6,
+    "losses": 0,
+    "half1": {
+     "n": 3,
+     "pf": Infinity,
+     "net": 0.82
+    },
+    "half2": {
+     "n": 3,
+     "pf": Infinity,
+     "net": 1.38
+    }
+   },
+   "h0.02": {
+    "net": 1.64,
+    "pf": Infinity,
+    "wins": 6,
+    "losses": 0,
+    "half1": {
+     "n": 3,
+     "pf": Infinity,
+     "net": 0.54
+    },
+    "half2": {
+     "n": 3,
+     "pf": Infinity,
+     "net": 1.1
+    }
+   }
+  },
+  "KXUSDJPY15M": {
+   "n": 3,
+   "h0.00": {
+    "net": 2.51,
+    "pf": Infinity,
+    "wins": 3,
+    "losses": 0,
+    "half1": {
+     "n": 1,
+     "pf": Infinity,
+     "net": 0.74
+    },
+    "half2": {
+     "n": 2,
+     "pf": Infinity,
+     "net": 1.77
+    }
+   },
+   "h0.01": {
+    "net": 2.23,
+    "pf": Infinity,
+    "wins": 3,
+    "losses": 0,
+    "half1": {
+     "n": 1,
+     "pf": Infinity,
+     "net": 0.65
+    },
+    "half2": {
+     "n": 2,
+     "pf": Infinity,
+     "net": 1.58
+    }
+   },
+   "h0.02": {
+    "net": 1.96,
+    "pf": Infinity,
+    "wins": 3,
+    "losses": 0,
+    "half1": {
+     "n": 1,
+     "pf": Infinity,
+     "net": 0.56
+    },
+    "half2": {
+     "n": 2,
+     "pf": Infinity,
+     "net": 1.4
+    }
+   }
+  }
+ }
+}
