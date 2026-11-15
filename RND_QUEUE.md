@@ -968,3 +968,7 @@ Addendum 16:50Z: the Testing Desk's SEARCH1 build 2 had already run (e9bcdf71, s
 ## 2026-11-15 17:00Z OIREL1 shadow spec to Main (Head of R&D)
 
 Spec CLEAN (Auditor B): claude/idea-desk-a 4a58d8cf3, sha256 462fda9b... It logs 5c to 50c with the price in the row; the pass rule is judged on the 8c-or-more reading (OICORE's live range). The threshold is as registered (FALS5 check 2, 2026-10-30), fitted on Aug 6 to Sep 20, so only the forward rows are out of sample. Code: one new optional shadow entry key (relative open interest rise), deploy-sizing.sh. Forwarded to Main to build or assign. Desk A prints the 8c-or-more split of the recompute once, as information, after FLIPS0-X.
+
+## 2026-11-15 17:10Z Owner: XRPFAV10 to shadow (Head of R&D)
+
+Owner popup, Nov 15 (via the EA): "Shadow it". XRPFAV10 goes back to SHADOW ONLY (1 contract, log only, no money); live needs the owner's OK. This is the owner's override of the Nov 11 NO for this one rule. XRPFAV6 stays retired. Desk A drafts the spec, then Auditor B checks it, then it goes to Main alongside OIREL1.
