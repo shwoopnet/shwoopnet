@@ -14,19 +14,19 @@ def decide(candles, close_ts):
     """candles: end_ts -> (bid_c, ask_c, volume, oi) of ONE market. Returns ('trade', side, fill_ask, fill_ts) | ('nofire',) | ('noside',) | ('nodata', why)."""
     cs = {t: v for t, v in candles.items() if t <= close_ts}                 # standing reader rule: drop candles ending after the close
     s, p, f = cs.get(close_ts - LOOK), cs.get(close_ts - BACK), cs.get(close_ts - FILL)
-    if s is None or p is None: return ("nodata", "signal or back candle missing")
+    if s is None or p is None: return ("nodata", "candle_missing")
     so, po = _num(s[3]), _num(p[3])
-    if not so or not po or po <= 0: return ("nodata", "open interest missing or 0")
+    if not so or not po or po <= 0: return ("nodata", "open_interest_missing_or_0")
     if not (so - po) / po > RTHR: return ("nofire",)
     sb, sa = _num(s[0]), _num(s[1])
-    if sb is None or sa is None or not (0 < sb < sa < 1): return ("nodata", "signal quote not two-sided")
+    if sb is None or sa is None or not (0 < sb < sa < 1): return ("nodata", "signal_not_two_sided")
     side = next((sd for sd in ("yes", "no") if LO - EPS <= side_ask(sb, sa, sd) <= HI + EPS), None)
     if side is None: return ("noside",)
-    if f is None: return ("nodata", "fill candle missing")
+    if f is None: return ("nodata", "candle_missing")
     fb, fa = _num(f[0]), _num(f[1])
-    if fb is None or fa is None or not (0 < fb < fa < 1): return ("nodata", "fill quote not two-sided")
+    if fb is None or fa is None or not (0 < fb < fa < 1): return ("nodata", "fill_not_two_sided")
     ask = side_ask(fb, fa, side)
-    if not 0 < ask < 1: return ("nodata", "fill ask out of range")
+    if not 0 < ask < 1: return ("nodata", "fill_ask_out_of_range")
     return ("trade", side, ask, close_ts - FILL)
 def cash(side, result, ask, h):
     p = min(0.99, ask + h); win = 1 if result == side else 0
@@ -39,13 +39,14 @@ def run(db, split=None):
     mk = c.execute("select ticker, close_ts, result from market where series='KXBTC15M' order by close_ts").fetchall()
     cand = collections.defaultdict(dict)
     for tk, e, b, a, v, oi in c.execute("select ticker,end_ts,bid_c,ask_c,volume,oi from candle"): cand[tk][int(e)] = (b, a, v, oi)
-    trades, cnt = [], collections.Counter()
+    trades, cnt, why = [], collections.Counter(), collections.Counter()
     for tk, close_ts, result in mk:
         if result not in ("yes", "no"): cnt["no result"] += 1; continue
         d = decide(cand.get(tk, {}), int(close_ts)); cnt[d[0]] += 1
+        if d[0] == "nodata": why[d[1]] += 1
         if d[0] == "trade": trades.append((d[3], int(close_ts), d[1], d[2], result))
     trades.sort()
-    out = {"counts": dict(cnt), "n": len(trades), "label": "upper bound, not fill-checked; fee mode per-order rounded"}
+    out = {"counts": dict(cnt), "nodata_reasons": {k: v for k, v in why.items() if v}, "note": "this reader counts a one-sided or crossed signal or fill quote, and a fill ask outside (0,1), as NoData; oirel.py does not, so n can differ from the printed n for that reason (counted apart from candle_missing), as well as for the cut and the per-order fee", "excluded_tickers_dropped": "0 of the 28 (none present; extract checked by Auditor B)", "n": len(trades), "label": "upper bound, not fill-checked; fee mode per-order rounded"}
     for h in HAIRCUTS:
         xs = [cash(s, r, a, h)[0] for _, _, s, a, r in trades]; half = len(xs) // 2
         row = {"net": round(sum(xs), 6), "pf": pf(xs), "wins": sum(x > 0 for x in xs), "losses": sum(x < 0 for x in xs), "half1": {"n": half, "pf": pf(xs[:half]), "net": round(sum(xs[:half]), 6)}, "half2": {"n": len(xs) - half, "pf": pf(xs[half:]), "net": round(sum(xs[half:]), 6)}}

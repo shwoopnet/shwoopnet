@@ -17,6 +17,7 @@ c.commit(); c.close()
 r = R.run(db, split=base + 900 * 4)
 ok = lambda a, b, t=1e-9: abs(a - b) < t
 assert r["counts"] == {"trade": 5, "nofire": 1, "nodata": 1, "noside": 2}, r["counts"]
+assert r["nodata_reasons"] == {"candle_missing": 1}, r["nodata_reasons"]
 exp = {"h0.00": (25.28, 28.43 / 3.15, 13.40 / 3.15, 15.03), "h0.01": (24.78, 28.03 / 3.25, 13.20 / 3.25, 14.83), "h0.02": (24.26, 27.62 / 3.36, 12.99 / 3.36, 14.63)}
 for h, (net, pf, pf2, net1) in exp.items():
     x = r[h]; assert ok(x["net"], net) and ok(x["pf"], pf, 1e-9) and x["wins"] == 4 and x["losses"] == 1, (h, x)
