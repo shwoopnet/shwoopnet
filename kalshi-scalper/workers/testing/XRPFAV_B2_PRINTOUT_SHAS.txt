@@ -1,0 +1,3 @@
+XRPFAV10 and XRPFAV6 haircut recompute build 2 (xrpfav_second.py 6e399a27, commit 134628f9), each run ONCE Nov 15 on XRPFAV_extract.sqlite (raw sha256 04b377f0b8f236dc84c5ba6478a59f426f72549a50fce6d34c0e3af6bd47f1c7; xz sha256 be6bc75f080843492989fb18ca08d2836ceb4465d7af520677cf11075bca7f13).
+sha256 of my XRPFAV10 printout (scratch only): 6212df95fc4cd9ec445fd088b49cd048850f406cacb22226ca8cfa49b3b8a16e
+sha256 of my XRPFAV6 printout (scratch only): af5f3c54ca464b394b7f592ef97abfe2d19c84ecb17dba0a48e44d35e2d60ee4
