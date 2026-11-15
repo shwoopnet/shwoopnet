@@ -45,4 +45,10 @@ assert c.score_entry(ex, [cl(9, -540, .90, .90)], "T", 0.0)["reason"] == "settle
 ev = E("V", 9, "yes", .40, "void", "D9", -600); assert near(c.score_entry(ev, px, "T", 0.0)["cash"], c.score_entry(ex, px, "T", 0.0)["cash"]) and near(c.score_entry(ev, px, "H", 0.0)["cash"], -c.fee_up_order(.40, 10))
 # float noise is not a win: a win at paid 0.99 with 1 contract nets 0.01 - 0.01 = 0 exactly after rounding
 ez = E("Z", 9, "yes", .985, "yes", "D9", -600); rz = c.score_entry(ez, [], "H", 0.02, n=1); assert rz["cash"] == 0.0 and c.aggregate([ez], {}, "H", 0.02, n=1)["wins"] == 0
+# the core filters the path itself: pre-entry, the entry candle and post-close candles are ignored; a candle at the close counts
+ef = E("F", 9, "yes", .40, "yes", "D9", -600); pf_ = [cl(9, -700, .90, .92), cl(9, -600, .95, .96), cl(9, -540, .50, .52), cl(9, 0, .20, .22), cl(9, 60, .99, .995)]
+assert c.score_entry(ef, pf_, "T", 0.0)["reason"] == "settle" and near(c.score_entry(ef, pf_, "T", 0.0)["cash"], 5.83)
+rs = c.score_entry(ef, pf_, "S", 0.0); assert rs["reason"] == "stop" and near(rs["cash"], -2.29)
+assert c.score_entry(ef, [cl(9, -700, .90, .92), cl(9, -600, .95, .96)], "T", 0.0)["reason"] == "settle" and c.score_entry(ef, [cl(9, 60, .20, .22)], "S", 0.0)["reason"] == "settle"
+assert c.score_entry(ef, [cl(9, -60, .90, .92)], "M60", 0.0)["status"] == "scored" and c.score_entry(E("G", 9, "yes", .40, "yes", "D9", -30), [cl(9, -60, .90, .92)], "M60", 0.0)["status"] == "no_mark"
 print("engine1 core build 2 tests passed")

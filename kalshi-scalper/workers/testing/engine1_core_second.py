@@ -24,6 +24,7 @@ def r6(x): return round(x, TOL_DEC)
 
 def score_entry(e, path, kind, h, n=None):
     n = e["n"] if n is None else n
+    path = [c for c in path if e["entry_end"] < c[0] <= e["close_ts"]]          # only candles strictly after the entry candle and at or before the close (Auditor B)
     paid = min(r6(e["ask"] + h), CAP); fee_in = fee_up_order(paid, n); close = e["close_ts"]; side = e["side"]
     def exit_at(bid, reason):
         px = max(r6(bid - h), FLOOR)
