@@ -1,0 +1,165 @@
+{
+ "valid_quote_source": "copied from the research branch kalshi-scalper/src/scalper/analyze.py:77-81 (bid >= 0.001, ask <= 0.999, ask >= bid, ask - bid <= CANDLE_MAX_SPREAD 0.10 from analyze.py:47) as read in text, not diffed by code; cut day 2026-09-27 from studies/search1_result_2026-10-23.txt line 1: discovery before 2026-09-27",
+ "label": "upper bound, not fill-checked; fee mode per-order rounded; cut-window recompute, not a reproduction of confirmation n 361 PF 1.31; 2c primary (exit can fall in the last 2 minutes)",
+ "counts": {
+  "band_or_quote": 10511,
+  "trade": 475
+ },
+ "all_days": {
+  "n": 475,
+  "exits": 4,
+  "h0.00": {
+   "net": 62.8,
+   "pf": 3.1144781144781177,
+   "wins": 471,
+   "losses": 4,
+   "half1": {
+    "n": 237,
+    "pf": 3.179656538969621,
+    "net": 33.0
+   },
+   "half2": {
+    "n": 238,
+    "pf": 3.0467032967032996,
+    "net": 29.8
+   }
+  },
+  "h0.01": {
+   "net": 26.17,
+   "pf": 1.8611385324119798,
+   "wins": 471,
+   "losses": 4,
+   "half1": {
+    "n": 237,
+    "pf": 1.8873056994818675,
+    "net": 13.7
+   },
+   "half2": {
+    "n": 238,
+    "pf": 1.834113712374584,
+    "net": 12.47
+   }
+  },
+  "h0.02": {
+   "net": 11.43,
+   "pf": 1.3691860465116292,
+   "wins": 471,
+   "losses": 4,
+   "half1": {
+    "n": 237,
+    "pf": 1.3462762571610454,
+    "net": 5.44
+   },
+   "half2": {
+    "n": 238,
+    "pf": 1.392786885245903,
+    "net": 5.99
+   }
+  }
+ },
+ "before_cut_days_(discovery, where the combination was chosen: information only)": {
+  "n": 379,
+  "exits": 3,
+  "h0.00": {
+   "net": 53.64,
+   "pf": 3.560381861575183,
+   "wins": 376,
+   "losses": 3,
+   "half1": {
+    "n": 189,
+    "pf": 2.540951122853371,
+    "net": 23.33
+   },
+   "half2": {
+    "n": 190,
+    "pf": 6.216867469879523,
+    "net": 30.31
+   }
+  },
+  "h0.01": {
+   "net": 24.35,
+   "pf": 2.135198135198138,
+   "wins": 376,
+   "losses": 3,
+   "half1": {
+    "n": 189,
+    "pf": 1.5084196891191728,
+    "net": 7.85
+   },
+   "half2": {
+    "n": 190,
+    "pf": 3.7454242928452617,
+    "net": 16.5
+   }
+  },
+  "h0.02": {
+   "net": 11.95,
+   "pf": 1.5459113750571052,
+   "wins": 376,
+   "losses": 3,
+   "half1": {
+    "n": 189,
+    "pf": 1.0712921705919807,
+    "net": 1.12
+   },
+   "half2": {
+    "n": 190,
+    "pf": 2.7524271844660224,
+    "net": 10.83
+   }
+  }
+ },
+ "from_cut_days_(surviving confirmation days)": {
+  "n": 96,
+  "exits": 1,
+  "h0.00": {
+   "net": 9.16,
+   "pf": 2.046857142857145,
+   "wins": 95,
+   "losses": 1,
+   "half1": {
+    "n": 48,
+    "pf": 0.9885714285714297,
+    "net": -0.1
+   },
+   "half2": {
+    "n": 48,
+    "pf": Infinity,
+    "net": 9.26
+   }
+  },
+  "h0.01": {
+   "net": 1.82,
+   "pf": 1.2035794183445203,
+   "wins": 95,
+   "losses": 1,
+   "half1": {
+    "n": 48,
+    "pf": 0.5906040268456383,
+    "net": -3.66
+   },
+   "half2": {
+    "n": 48,
+    "pf": Infinity,
+    "net": 5.48
+   }
+  },
+  "h0.02": {
+   "net": -0.52,
+   "pf": 0.9426681367144443,
+   "wins": 95,
+   "losses": 1,
+   "half1": {
+    "n": 48,
+    "pf": 0.46637265711135656,
+    "net": -4.84
+   },
+   "half2": {
+    "n": 48,
+    "pf": Infinity,
+    "net": 4.32
+   }
+  }
+ },
+ "confirmation_label": "NOT_ENOUGH_DATA (n 96 under the card's MIN_CONF 150); the all-days and before-cut rows are information only (the combination was chosen on the before-cut days); the original is FALSIFIED, a pass here is not a verdict"
+}
