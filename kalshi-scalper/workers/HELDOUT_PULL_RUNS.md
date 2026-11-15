@@ -29,3 +29,7 @@ Notes: no result or price in the POLGAPH run has been read (the structure check 
 The two NC15 lists runs (`NC15_LISTS_A` and `NC15_LISTS_B`) carry result fields: only Desk A's candle builder and Auditor B's structure check open them, and only for tickers and close times. No other reader opens them.
 
 The seven NC15 candle runs (`NC15_CANDLES_A1` to `B4`) are read only by Desk A's NC15 scorer after Auditor B has audited it, under the standing reader rule (drop any candle ending after its market's close).
+
+The `KXNBAPTS_LISTS_A` run (`KXNBAPTS_LISTS_A/2026-11-15T1457Z_43727127463`, development block only, closes 2026-10-21 to 2026-11-05) carries result fields: only Idea Desk C's scorer and Auditor B's structure check open it (tickers, close times and results, no price), under the card's registration.
+
+The `MENTDRIFT_LISTS_A` run (`MENTDRIFT_LISTS_A/2026-11-15T1458Z_43727241819`) carries result fields and the Aug 6 to Sep 12 part of TRUMPTOPIC1's spent held-out (loaded, not looked at, Auditor B's condition): the raw files stay on the data branch and are opened only through Idea Desk C's scorer after Auditor B has audited it.
