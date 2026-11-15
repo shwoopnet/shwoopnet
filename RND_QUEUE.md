@@ -963,3 +963,4 @@ XRPFAV10 and XRPFAV6: the Testing Desk's build 2 (134628f9, e70339bb) equals Des
 ## 2026-11-15 16:45Z SEARCH1 fails (Head of R&D)
 
 SEARCH1 haircut recompute, build 1 (Desk A dc82f8891, blind first). BTC and ETH, 420 s, band 0.97 to 0.995, SL50. Out-of-sample rows only (Sep 27 to Oct 2): n 96, PF 2c 0.943 (primary), 1c 1.204 with half 1 0.591. FAILS; no evidence at n = 96 (under MIN_CONF 150). The before-cut rows are in-sample (selection) and do not count. One build is enough for a failure (lighter gate); no build 2. The original stays FALSIFIED.
+Addendum 16:50Z: the Testing Desk's SEARCH1 build 2 had already run (e9bcdf71, sha committed 765fbc8d) before my cancel arrived. It equals Desk A's printed figures: confirmation n 96, 2c PF 0.94267, 1c 1.20358, half 1 0.59060 (and 10,509 band skips plus 2 bad quotes = Desk A's 10,511). SEARCH1's FAILS is now confirmed by two builds.
