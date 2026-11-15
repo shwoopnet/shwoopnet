@@ -1,0 +1,62 @@
+{
+ "job_id": "KXNBAPTS_LISTS_A",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/nbapts/KXNBAPTS_OL_CARD.md",
+ "purpose": "KXNBAPTS (O) and (L) VERSION paper cards (Idea Desk C), stage A: settled KXNBAPTS market lists with close times in the development block only, plus the series read for the rules and fee field. No candle.",
+ "heldout": "none read: development block only, close_time from 2026-10-21T00:00Z to 2026-11-05T23:59:59Z (min_close_ts 1792540800, max_close_ts 1793923199). Not requested: PROPUNDER's reserve (closes 2026-11-06 to before 2026-11-13, rule 17) and this card's held-out (closes 2026-11-13 to before 2026-12-04, read once on the Head of R&D's go, its own job after Dec 4). PROPS1's frozen cut 2026-10-03T16:00Z is last season and shares no close.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  },
+  {
+   "name": "series",
+   "method": "GET",
+   "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXNBAPTS"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 14,
+ "notes": "Estimate: about 14 game days x 6 to 10 games x about 50 rungs, so 4,000 to 7,000 markets, 4 to 7 pages of 1,000. Up to 12 pages plus 1 series read = 13, cap 14. Pacing 5 s (the shared 12 a minute budget). The scorer keeps ticker, event_ticker, open_time, close_time, occurrence_datetime, can_close_early and result only.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "dev_KXNBAPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "series_KXNBAPTS",
+   "path": "/series/KXNBAPTS",
+   "params": {}
+  }
+ ]
+}
