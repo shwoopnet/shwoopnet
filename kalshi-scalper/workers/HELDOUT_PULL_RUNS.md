@@ -33,3 +33,7 @@ The seven NC15 candle runs (`NC15_CANDLES_A1` to `B4`) are read only by Desk A's
 The `KXNBAPTS_LISTS_A` run (`KXNBAPTS_LISTS_A/2026-11-15T1457Z_43727127463`, development block only, closes 2026-10-21 to 2026-11-05) carries result fields: only Idea Desk C's scorer and Auditor B's structure check open it (tickers, close times and results, no price), under the card's registration.
 
 The `MENTDRIFT_LISTS_A` run (`MENTDRIFT_LISTS_A/2026-11-15T1458Z_43727241819`) carries result fields and the Aug 6 to Sep 12 part of TRUMPTOPIC1's spent held-out (loaded, not looked at, Auditor B's condition): the raw files stay on the data branch and are opened only through Idea Desk C's scorer after Auditor B has audited it.
+
+The `ECONCENSUS_LISTS` run (`ECONCENSUS_LISTS/2026-11-15T1512Z_43728522567`) carries result fields on settled Economics markets with each series' own close-date bound: only Idea Desk B's scorer and Auditor B's structure check open it, and only for tickers, close times and series counts, never a price or a result outside a registered read.
+
+The `CALIB2_LISTS` run (`CALIB2_LISTS/2026-11-15T1621Z_43735038528`, settled lists of 10 sports series, closes up to 2026-10-21T23:59:59Z) carries result fields: nobody opens the raw files before Auditor B's CLEAN of the CALIB2 reader; only that reader and Auditor B's structure, truncation and close-bound checks read it, and only for tickers, close times and series counts until then.

@@ -1,0 +1,167 @@
+{
+ "job_id": "CALIB2_LISTS",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/calib2/CALIB2_CARD_AND_PULL_PLAN_NOV15.md",
+ "purpose": "CALIB2 stage 1: settled markets (tickers, close times, results) of the 10 W-CAT-SPORTS1 series whose clean window runs to 2026-10-21, closes 2026-09-14 to 2026-10-21 only, for the calibration census; the candle job is built from these answers.",
+ "heldout": "none read: every request is capped at max_close_ts 1792627199 (2026-10-21T23:59:59Z), before CALIB2's own third 3 (from 2026-10-22) and before every hold Auditor B listed for these 10 series (16:18Z): W-CAT-SPORTS1 cuts are released and later; SOCCER1 and SOCCERELO1 released 2026-11-13; TIE3 from Oct 27; SOCDERIV from Nov 13; FAMSPORTS from Oct 31.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNBASPREAD",
+  "KXNBATOTAL",
+  "KXNHLSPREAD",
+  "KXNCAAMBSPREAD",
+  "KXNCAAMBTOTAL",
+  "KXEPLGAME",
+  "KXUCLGAME",
+  "KXLALIGAGAME",
+  "KXSERIEAGAME",
+  "KXBUNDESLIGAGAME"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 30,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "settled_KXNBASPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBASPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNBATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBATOTAL",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNHLSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLSPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNCAAMBSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNCAAMBSPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNCAAMBTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNCAAMBTOTAL",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXEPLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXUCLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXLALIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGAGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXSERIEAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEAGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXBUNDESLIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGAGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "max_pages": 3
+  }
+ ]
+}
