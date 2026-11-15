@@ -3,7 +3,7 @@
 import contextlib, datetime, importlib.util, io, os, random, re, sys, tempfile
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 spec = importlib.util.spec_from_file_location("s3", os.path.join(here, "s3_score.py")); s3 = importlib.util.module_from_spec(spec); spec.loader.exec_module(s3)
-from make_s3_fixture import make_tree
+from make_s3_fixture import make_tree, make_lg_tree
 def run(root, read, mode="dev"):
     buf = io.StringIO(); old = sys.argv; sys.argv = ["s3_score.py", root, read, mode]
     try:
@@ -39,5 +39,11 @@ om = run(d["T120"], "2026-11-17T00:00:00Z", "monitor")
 ok.append(("5", "MONITOR, not the registered verdict; the Nov 26 read is the verdict" in om and "due 40 | settled 36 | unresolved 4 | wins 32 | cash PF 1.86 | net per dollar +0.096" in om and "LABEL" not in om and "KILLED" not in om and "bootstrap" not in om))
 # 6 the registered read is still refused early
 ok.append(("6", "REFUSED" in run(d["T120"], "2026-11-17T00:00:00Z")))
+# 7 cut leg lists (Auditor B, line 9)
+ok.append(("7a", s3.leg_series("KXA-1:yes|KXB-2:no") == (["KXA", "KXB"], "complete") and s3.leg_series("KXA-1:yes|KXB-2:no|...") == (["KXA", "KXB"], "incomplete") and s3.leg_series("") == ([], "unknown")))
+s3.LEGS.clear(); lg = tempfile.mkdtemp(); make_lg_tree(lg); ol = run(lg, "2026-11-30T12:00:00Z")
+nw = ol.split("== NO WEATHER")[1]
+ok.append(("7b", "paper fills 4 | due 4 | settled 4" in ol and "paper fills with leg tickers stored 4 | leg unknown 0 | legs incomplete 2 | with a weather leg 1" in ol
+           and "..." not in ol.split("== ALL")[0].split("leg series seen")[1] and "settled 2" in nw.splitlines()[0] and "== ALL COMBOS (the registered line): settled 4" in ol))
 for k, v in ok: print(k, "PASS" if v else "FAIL")
 sys.exit(0 if all(v for _, v in ok) else 1)

@@ -60,16 +60,25 @@ def fee(p):
 
 
 def leg_series(text):
-    """Series tickers of a combo's legs from the recorder's leg_tickers column ("TICKER:side|TICKER:side|...")."""
-    out = []
+    """(series list, state) from the recorder's leg_tickers column ("TICKER:side|TICKER:side|..."). state is "complete",
+    "incomplete" (the recorder cut the cell at 600 characters and ended it with "..."; the "..." is never a leg) or "unknown" (no legs shown).
+    Clarifying line of Nov 15, 2026 (Auditor B's finding on line 9)."""
+    out, cut = [], False
     for part in (text or "").split("|"):
-        tk = part.strip().split(":")[0].strip()
+        part = part.strip()
+        if part == "...":
+            cut = True
+            continue
+        tk = part.split(":")[0].strip()
+        if tk.endswith("..."):
+            cut = True
+            tk = tk[:-3].strip()
         if tk:
             out.append(tk.split("-")[0])
-    return out
+    return out, ("unknown" if not out else ("incomplete" if cut else "complete"))
 
 
-LEGS = {}   # combo ticker -> leg series, from any snapshot that stored them (a combo's legs do not change)
+LEGS = {}   # combo ticker -> (leg series, state); a complete list from any snapshot replaces an incomplete one (a combo's legs do not change)
 
 
 def load(root):
@@ -79,9 +88,9 @@ def load(root):
         if rows:
             snaps.append(rows)
         for r in rows:
-            ls = leg_series(r.get("leg_tickers"))
-            if ls and r.get("ticker"):
-                LEGS.setdefault(r["ticker"], ls)
+            ls, st = leg_series(r.get("leg_tickers"))
+            if ls and r.get("ticker") and (r["ticker"] not in LEGS or (LEGS[r["ticker"]][1] != "complete" and st == "complete")):
+                LEGS[r["ticker"]] = (ls, st)
     for r in sorted(glob.glob(os.path.join(root, "combo", "*", "*", "results.csv.gz"))):
         for row in csv.DictReader(gzip.open(r, "rt", newline="")):
             if row.get("ticker") and row.get("result"):
@@ -202,8 +211,9 @@ def main():
     # weather legs (clarifying line of Nov 13, 2026): known from the recorder's leg_tickers column, by series prefix
     seen = {}
     for f in fl:
-        ls = LEGS.get(f["ticker"])
-        f["legs_known"] = bool(ls)
+        ls, st = LEGS.get(f["ticker"], ([], "unknown"))
+        f["legs_known"] = st == "complete"          # only a complete list can put a combo in the no-weather line
+        f["legs_state"] = st
         f["weather"] = bool(ls) and any(x.startswith(WEATHER_PREFIXES) for x in ls)
         for x in ls or []:
             seen[x] = seen.get(x, 0) + 1
@@ -228,7 +238,7 @@ def main():
         print(f"monitor: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | wins {wins}" + (f" | cash PF {pf(settled):.2f} | net per dollar {per_dollar(settled):+.3f}" if settled else " | no settled fills yet"))
         return
     print(f"{which}: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | other result {other}")
-    print(f"legs: paper fills with leg tickers stored {sum(1 for f in fl if f['legs_known'])} | leg unknown {sum(1 for f in fl if not f['legs_known'])} | with a weather leg {sum(1 for f in fl if f['weather'])}")
+    print(f"legs: paper fills with leg tickers stored {sum(1 for f in fl if f['legs_state'] != 'unknown')} | leg unknown {sum(1 for f in fl if f['legs_state'] == 'unknown')} | legs incomplete {sum(1 for f in fl if f['legs_state'] == 'incomplete')} | with a weather leg {sum(1 for f in fl if f['weather'])}")
     print("leg series seen in paper fills, with counts: " + (", ".join("%s %d" % kv for kv in sorted(seen.items(), key=lambda kv: (-kv[1], kv[0]))) or "none"))
     describe("ALL COMBOS (the registered line)", settled, len(due), unresolved, True)
     nw = [f for f in settled if f["legs_known"] and not f["weather"]]

@@ -26,3 +26,20 @@ def make_tree(root, kind):
     p = os.path.join(root, "combo", "2026-11-17", "0010"); os.makedirs(p, exist_ok=True)
     with gzip.open(os.path.join(p, "results.csv.gz"), "wt", newline="") as f:
         w = csv.writer(f); w.writerow(["ticker", "result"]); w.writerows(sorted(res.items()))
+
+
+def make_lg_tree(root):
+    """Tree LG (case 7): four combos A, B, C, D; leg cells complete / cut without weather / cut with weather / cut then complete."""
+    base = datetime(2026, 11, 13, 12, 0, tzinfo=timezone.utc)
+    cells = {"A": "KXA-1:yes|KXB-2:no", "B": "KXA-1:yes|KXB-2:no|...", "C": "KXHIGHNY-1:yes|KXB-2:no|...", "D": "KXA-1:yes|KXB-2:no|..."}
+    def snap(t, rows):
+        d, hm = t.strftime("%Y-%m-%d"), t.strftime("%H%M"); p = os.path.join(root, "combo", d, hm); os.makedirs(p, exist_ok=True)
+        with gzip.open(os.path.join(p, "quotes.csv.gz"), "wt", newline="") as f:
+            w = csv.writer(f); w.writerow(HDR); w.writerows(rows)
+    row = lambda t, k, cell: [int(t.timestamp() * 1000), "KXMVE-" + k, "E" + k, "2026-11-14T10:00:00Z", 0.19, 0.22, 0.79, 5, 3, 3, cell]
+    snap(base, [row(base, k, c) for k, c in cells.items()])
+    t2 = base + timedelta(hours=2)
+    snap(t2, [row(t2, "D", "KXA-1:yes|KXB-2:no")])
+    p = os.path.join(root, "combo", "2026-11-17", "0010"); os.makedirs(p, exist_ok=True)
+    with gzip.open(os.path.join(p, "results.csv.gz"), "wt", newline="") as f:
+        w = csv.writer(f); w.writerow(["ticker", "result"]); w.writerows([("KXMVE-" + k, "no") for k in "ABCD"])
