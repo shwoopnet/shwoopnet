@@ -22,6 +22,9 @@ def side_bid(c, side): return c[1] if side == "yes" else 1 - c[2]
 def r6(x): return round(x, TOL_DEC)
 
 
+DISCLOSURE = "sale floor 0.01, entry cap 0.99, per-order rounded fee; T/S/B marks only at end_ts <= close - 60"
+
+
 def score_entry(e, path, kind, h, n=None):
     n = e["n"] if n is None else n
     path = [c for c in path if e["entry_end"] < c[0] <= e["close_ts"]]          # only candles strictly after the entry candle and at or before the close (Auditor B)
@@ -36,6 +39,7 @@ def score_entry(e, path, kind, h, n=None):
     if kind in ("T", "S", "B"):
         tgt, stp = r6(min(2 * paid, CAP)), r6(paid / 2)
         for c in path:
+            if c[0] > close - 60: continue          # addendum 3: target and stop marks only on candles ending at or before close - 60 (like M60)
             if not sellable(c): continue
             b = r6(side_bid(c, side))
             hit_s = kind in ("S", "B") and b <= stp
@@ -76,5 +80,5 @@ def aggregate(entries, paths, kind, h, n=None):
         if r["status"] == "scored": rows.append({"id": e["id"], "close_ts": e["close_ts"], "day": e["day"], "cash": r["cash"]})
     rows.sort(key=lambda r: (r["close_ts"], r["id"])); cs = [r["cash"] for r in rows]; k = len(cs); h2 = k // 2
     z, days = day_z(rows)
-    return {"n": k, "wins": sum(1 for v in cs if v > 0), "net": sum(cs), "pf": pf(cs), "half1_pf": pf(cs[:h2]), "half2_pf": pf(cs[h2:]), "half1_net": sum(cs[:h2]), "half2_net": sum(cs[h2:]),
+    return {"disclosure": DISCLOSURE, "n": k, "wins": sum(1 for v in cs if v > 0), "net": sum(cs), "pf": pf(cs), "half1_pf": pf(cs[:h2]), "half2_pf": pf(cs[h2:]), "half1_net": sum(cs[:h2]), "half2_net": sum(cs[h2:]),
             "day_clustered_z": z, "trade_days": days, "exit_counts": counts, "cash_per_contract_mean": (sum(cs) / (k * (e["n"] if n is None else n))) if k and entries else None}
