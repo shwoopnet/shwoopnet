@@ -83,6 +83,7 @@ gates.AB6 = () => {
   const block = idx.slice(i, idx.indexOf('failure = e', i));
   assert.ok(/makeReadBudget/.test(block) && /budget: shadowBudget/.test(block) && /shadowBudget\.take\(\)/.test(block));
   assert.ok(!/submit|liveRequest|keyId|pem|POST/.test(block));
-  assert.ok(sh.SHADOW_RULES.every((r) => !('oiRiseMin' in r.entry) && !('calendar' in r.entry) && !('secondRead' in r.entry)), 'registered GOLDOFF is unchanged');
+  const gold = sh.SHADOW_RULES.find((r) => r.id === 'GOLDOFF');
+  assert.ok(!('oiRiseMin' in gold.entry) && !('calendar' in gold.entry) && !('secondRead' in gold.entry), 'registered GOLDOFF is unchanged (XRPFAV10 opts in to secondRead, Nov 15, 2026)');
 };
 (async () => { for (const [k, f] of Object.entries(gates)) { await f(); console.log('ok   ' + k); } })().catch((e) => { console.error(e); process.exit(1); });

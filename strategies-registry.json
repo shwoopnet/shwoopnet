@@ -148,6 +148,33 @@
    "figures": null
   },
   {
+   "id": "XRPFAV10",
+   "name": "XRP favourite, 10 minutes out",
+   "stage": "Shadow",
+   "rule": "Writes down the XRP trades the bot would have made on the side costing 88c to 92c, about 10 minutes before the close, with no money at risk",
+   "goesLive": "It never trades; it can be proposed for a small live seat only if its paper record wins at least 1.3 times what it loses over 150 checked trades, and then only with the owner's own OK",
+   "label": "UNPROVEN",
+   "startDate": "2026-11-15",
+   "nextRead": "2026-12-13",
+   "nextReadText": "One read, 14 days after the first row and at least 150 checked trades, whichever is later",
+   "n": null,
+   "nBasis": "Shadow rows the bot logs from public quotes; the count is shown from the private log, not stored here",
+   "kill": "Dropped if it loses more than a cent a contract after 50 checked trades, or fewer than 40 signals come in 30 days",
+   "return": "Not applicable: a closed paper test is rerun only by a new written test",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "The owner allowed this one rule back as a paper record only (Nov 15); XRPFAV6 stays retired"
+   ],
+   "code": {
+    "shadow": "XRPFAV10"
+   },
+   "roomTarget": 150,
+   "roomWhat": "checked trades toward the 150 the read needs",
+   "cause": null,
+   "figures": null
+  },
+  {
    "id": "W-SPREAD-CELL1",
    "name": "Sports spread cheap side",
    "stage": "Retired",
