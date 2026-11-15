@@ -938,3 +938,7 @@ Kraken: Main confirms it is NOT read and NOT accepted; SPOTLEAD1 uses Coinbase o
 ## 2026-11-15 15:30Z FEDIMPL1 held-out rulings (Head of R&D)
 
 No release of FEDIMPL1's held-out (from 2025-09-17). ECONFADE (Desk A): development ends 2025-09-16T23:59:59Z; its own held-out dates go in a registration file before any candle pull. ECONLAG amendment, dated 2026-11-15 (option C): FOMC prints limited to closes before 2025-09-17T00:00Z; CPI, payrolls and PCE keep the registered range. The scorer drops on close_time first, before any other field; raw pages stay in scratch; a LOADED line goes on HELDOUT_REGISTRY; Auditor B checks the rebuilt job before dispatch. Fewer than 30 events means NOT_ENOUGH_DATA, never a wider range. ECONCENSUS_LISTS is CLEAN (Auditor B); Main may dispatch.
+
+## 2026-11-15 15:40Z ECONLAG closed (Head of R&D)
+
+ECONLAG is NOT_ENOUGH_DATA. After the FOMC held-out cut (closes before 2025-09-17), at most 30 print days have a usable F (CPI, payrolls and core PCE, 2024-10-01 to 2025-07-31, counted from the release schedules by memory, plus or minus 2), and trade days are certainly under 30. ECONLAG_CALENDAR is withdrawn, so it is not dispatched, nothing is loaded and there is no LOADED line. It reopens only after FEDIMPL1 closes and its held-out is released. Main told not to dispatch.
