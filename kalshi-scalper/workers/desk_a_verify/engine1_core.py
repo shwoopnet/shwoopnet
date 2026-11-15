@@ -24,10 +24,10 @@ def score(e, exit_, h, n):
         if not c or not sellable(c[0]): return None, "no mark"
         ex = (max(side_bid(e["side"], c[0]) - h, 0.01), "time")
     cost = paid * n + fee_up_order(paid, n)
-    if ex is not None: return ex[0] * n - cost - fee_up_order(ex[0], n), ex[1]
+    if ex is not None: return round(ex[0] * n - cost - fee_up_order(ex[0], n), 9), ex[1]
     win = (e["result"] == e["side"])
-    if e["result"] == "void": return -fee_up_order(paid, n), "void"
-    return (n if win else 0) - cost, "settle"
+    if e["result"] == "void": return round(-fee_up_order(paid, n), 9), "void"
+    return round((n if win else 0) - cost, 9), "settle"
 def pf(xs):
     w = sum(x for x in xs if x > 0); l = -sum(x for x in xs if x < 0)
     return float("inf") if l == 0 and w > 0 else (w / l if l else float("nan"))
