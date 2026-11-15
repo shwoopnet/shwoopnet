@@ -1,0 +1,118 @@
+{
+ "label": "upper bound, not fill-checked; fee mode per-order rounded; CUT-WINDOW RECOMPUTE, not a reproduction of 481 / 358",
+ "differences_from_regime_b2": "(1) picks the last candle in range THEN skips it if incomplete (regime_b2 drops incomplete candles first); (2) 1e-9 tolerance on spread and band (regime_b2 plain comparisons); (3) no n_candles filter",
+ "excluded_tickers_dropped": "0 of the 28 (none present)",
+ "XRPFAV6": {
+  "n": 372,
+  "counts": {
+   "band": 2253,
+   "spread": 143,
+   "trade": 372,
+   "trade_on_1e-9_tolerance": 30
+  },
+  "h0.00": {
+   "net": 109.28,
+   "pf": 1.5044546000092318,
+   "wins": 348,
+   "losses": 24,
+   "half1": {
+    "n": 186,
+    "pf": 1.5131117266851333,
+    "net": 55.57
+   },
+   "half2": {
+    "n": 186,
+    "pf": 1.4957998707652538,
+    "net": 53.71
+   }
+  },
+  "h0.01": {
+   "net": 74.52,
+   "pf": 1.3404449723605456,
+   "wins": 348,
+   "losses": 24,
+   "half1": {
+    "n": 186,
+    "pf": 1.3495385177739188,
+    "net": 38.25
+   },
+   "half2": {
+    "n": 186,
+    "pf": 1.3313539192399042,
+    "net": 36.27
+   }
+  },
+  "h0.02": {
+   "net": 38.95,
+   "pf": 1.176108875525613,
+   "wins": 348,
+   "losses": 24,
+   "half1": {
+    "n": 186,
+    "pf": 1.1847698290675581,
+    "net": 20.43
+   },
+   "half2": {
+    "n": 186,
+    "pf": 1.1674502712477388,
+    "net": 18.52
+   }
+  }
+ },
+ "XRPFAV10": {
+  "n": 242,
+  "counts": {
+   "band": 2526,
+   "trade": 242,
+   "trade_on_1e-9_tolerance": 0
+  },
+  "h0.00": {
+   "net": 94.1,
+   "pf": 1.7439911448450345,
+   "wins": 228,
+   "losses": 14,
+   "half1": {
+    "n": 121,
+    "pf": 1.750237868696479,
+    "net": 47.31
+   },
+   "half2": {
+    "n": 121,
+    "pf": 1.7377798801639854,
+    "net": 46.79
+   }
+  },
+  "h0.01": {
+   "net": 71.42,
+   "pf": 1.5588856718053048,
+   "wins": 228,
+   "losses": 14,
+   "half1": {
+    "n": 121,
+    "pf": 1.5637847167738892,
+    "net": 35.93
+   },
+   "half2": {
+    "n": 121,
+    "pf": 1.5540118638776141,
+    "net": 35.49
+   }
+  },
+  "h0.02": {
+   "net": 48.3,
+   "pf": 1.374041663439943,
+   "wins": 228,
+   "losses": 14,
+   "half1": {
+    "n": 121,
+    "pf": 1.3787855257027481,
+    "net": 24.39
+   },
+   "half2": {
+    "n": 121,
+    "pf": 1.3693234476366998,
+    "net": 23.91
+   }
+  }
+ }
+}
