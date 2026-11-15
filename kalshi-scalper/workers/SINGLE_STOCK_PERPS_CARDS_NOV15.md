@@ -28,3 +28,6 @@
 - **Uniqueness:** nearest = EARNPERP1, EARNPERP2 and EARNPERP3 (V2: earnings and perps; EARNPERP1 FALSIFIED on PF under 1.5 in either half or NOT_ENOUGH_DATA under 30 trades or 20 dates, with the season giving about 25 more events in April to May): **the same mechanism, NOT NEW**. Expected n: a handful of events in 10 days; "no evidence".
 ## Summary for the VA (uniqueness, before any read)
 (c) is the only one I rate as new on stocks; (a), (b), (d), (e) are by 7g versions of FUNDP1, CASHGAP2 and OVN, EVM and CFRTI, and EARNPERP and I say so; the Head ordered all five written and breadth first, so the order of first reads should be (c) then (b) step 0 then (a), with (d) and (e) stopping at their step 0 unless the census finds a stock binary or an earnings list. Each name x rule is one try; the count is printed per read.
+
+## Card (a) funding carry: closed on the census alone (Nov 15, 2026, the Head)
+Funding rates are almost always 0 on the census, so there is nothing to earn. No read was made.
