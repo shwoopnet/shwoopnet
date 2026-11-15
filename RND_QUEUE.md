@@ -1003,3 +1003,11 @@ CALIB1 (History Miner 616180d0, descriptive, thirds 1 and 2): 2,400 buckets, 148
 Next for the History Miner: the CALIB2 card plus pull plan (the rest of Kalshi: sports, politics, econ, weather, entertainment, mentions), with no pull until the Head's go.
 CALIB2 (History Miner a5e79b9a): the plan is approved in steps. GO for stage 1 only (listings, 3 files, about 390 requests) after Auditor B confirms the held-out list and the job files; Main dispatches. Stage 2 Tier A (about 7,800 requests, about 11 h) needs a separate go once the exact counts are in. Tiers B and C are not approved. Esports and virtual are out.
 18:55Z CALIB2 ruling: most series are held out from 2026-10-03T16:00Z (PRICEMATCH1, RULES1, STRESSDAY1 catch-alls; finance Oct 20; undated OPEN holds). There is NO release of the closed cards (price and result reads stay cut), and no 6-day thirds. CALIB2 is narrowed to the released sports series (W-CAT-SPORTS1) with their full window Sep 14 to Oct 22; every other series is "held out, not read". The stage 1 go stands for the narrowed list after Auditor B confirms it.
+
+## 2026-11-15 18:40Z OWNER ORDER: cross-market track (Head of R&D)
+
+The owner (via the EA): "unacceptable, do better". Keep all new research running AND add a parallel track: run OIREL and XRPFAV10 on every market with data, scored per market with the same bar and two builds; each pass goes to shadow at 1 contract as a separate strategy toward the 5. Staffed:
+- OIREL-X: OIREL1 rule frozen; every archive market with OI candles; closes before Oct 3. Desk A builds 1, the Testing Desk builds 2.
+- FAV10-X: XRPFAV10 rule frozen; the 19 archive 15 minute series; closes before Oct 3. The History Miner builds 1, Forensics builds 2.
+- Auditor B: rulings on the held-out treatment (no third needed for a frozen rule?), blocked markets and their free dates, and which ladders and NC15 histories qualify.
+Each market is a try; the deflation count is printed. Gold under FAV10 = a version of L1. Tables to the EA tonight. CALIB2 stage 2 is deferred.
