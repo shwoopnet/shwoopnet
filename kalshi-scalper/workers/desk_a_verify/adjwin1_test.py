@@ -29,6 +29,16 @@ assert A.signal(P(cut + 900), W(cut + 1800))[0] == "after the cut"      # case 7
 assert A.signal(P(cut - 900), W(cut))[0] == "after the cut"
 r = A.run({"KXZZ15M": [p1, w1, p2, w2]})["KXZZ15M"]            # hand case stats: n 2, PF .472/.528, no evidence
 for arm in "RM":
-    assert r["arms"][arm]["h0"]["n"] == 2 and ok(r["arms"][arm]["h0"]["pf"], .472 / .528, 1e-9) and r["arms"][arm]["h0"]["evidence"] == "no evidence at n = 2", r
+    assert r["arms"][arm]["h0"]["val"]["n"] == 2 and r["arms"][arm]["h0"]["dev"]["n"] == 0 and ok(r["arms"][arm]["h0"]["val"]["pf"], .472 / .528, 1e-9) and r["arms"][arm]["h0"]["val"]["evidence"] == "no evidence at n = 2", r
 assert r["skips"].get("P incomplete") == 1, r["skips"]                     # (w1, p2): w1 has no usable path
+# Auditor B's three cases, each expects a skip
+pl = P(T); pl["candles"][0] = (T - 600, .49, .51)
+assert A.signal(pl, w1)[0] == "P incomplete"                              # P first candle late
+assert A.signal(p1, dict(w1, candles=[(T + 480, .49, .51)]))[0] == "W incomplete"   # W first candle late
+pm = P(T); pm["candles"] = [c for c in pm["candles"] if c[0] != T - 60] + [(T - 120, .84, .86)]
+assert A.signal(pm, w1)[0] == "P incomplete"                              # t-60 missing, t-120 present
+assert A.fee_up_order(0.51) == 0.18 and A.fee_up_order(0.5) == 0.18
+assert A.trade(p1, W(T + 900, bid=.39, ask=.41), "M", 0.0)[1] == "ok" and A.trade(p1, W(T + 900, bid=.59, ask=.61), "M", 0.0)[1] == "out of band"
+assert A.trade(p1, W(T + 900, bid=.39, ask=.41), "R", 0.0)[1] == "out of band"       # NO ask 0.61
+assert A.day_z([(T, .1), (T + 86400, -.1), (T + 2 * 86400, .1)]) is not None and A.day_z([(T, .1)]) is None
 print("ALL OK")
