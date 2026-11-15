@@ -921,3 +921,7 @@ Run once on development windows (commit 061e967c; reader 77ea2ba7). Soccer deriv
 - Item 2 (old passes) after later verdicts: overturned NHL x3, HRSEAS1 weekend, PUB20 P06, GEN3, FALS3, CPI1, USWEEP, COUNT1. Recomputing from the V2 archive (branch research-data, verified; Forensics sole extractor): OIREL, FLIPS0-X, XRPFAV6/10, SEARCH1, HRSEAS1 night lull, BAND2, SPOTLEAD1. EXITREPLAY1 gold hold: fails the haircut (1c PF 1.005, half 2 0.645; build 1, n 76).
 - WH-NC15 places scoring daily from Nov 13 02:40Z. FOMCTEXT CLOSED (16b equal). OICORE 100 read NOT YET (16b equal; procedure breach recorded).
 - Tally: 0.
+
+## 2026-11-15 15:05Z SPOTLEAD1 placement (Head of R&D)
+
+SPOTLEAD1 (claude/refine-live, registered 2026-11-11) is Refinement's FORWARD card, not an archive recompute, so it is off the item 2 recompute list. Unseen block: windows closing after 2026-11-11T16:00Z. Re-read at 80 firings or when R6 ends (Dec 15). At the re-read, Refinement prints the C1 to C11 haircut lines (1c, 2c) and the EXITS3 variants as labelled extras. Open: Kraken's terms are not covered by the Nov 12 acceptance (Coinbase and Bitstamp only); the question is with Main. If it is unanswered, the re-read uses Coinbase only.
