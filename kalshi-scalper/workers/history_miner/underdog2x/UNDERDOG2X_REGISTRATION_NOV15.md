@@ -88,3 +88,10 @@ Marks are the candles after the entry candle, at or before close - 60. Side bid:
 2. **Bar:** thirds 1 and 2 are the halves. Each needs PF 1.0+ at the primary haircut, and PF 1.3+ pooled over thirds 1 and 2 at the primary haircut, AND PF 1.0+ at 2c. The floor(n/2) halves are printed as information. NC15 series are read at 2c (C11). Variants (b) and (c) on the other series have 2c as primary (C8), so their bar is read at 2c too. (a) on the other series is read at 1c.
 3. **Pre-Oct 3 held-outs:** Auditor B confirms against Desk A's HELDOUT_REGISTRY for all 19 series before any price or result is read. Any window an OPEN card holds is cut, and the cut is listed here by a dated line before the run.
 4. **Thin series:** the FX pairs, platinum and palladium stay in, with n reported per series. A series under 30 entries in any third is "no evidence at n = x" for that series, never a pass on its own.
+
+## Amendment 2 (2026-11-15 ~16:10Z, Auditor B's check of 16:01Z, before any price or result is read)
+1. **KXSOL15M has its own cut: closes before 2026-09-30T09:30:00Z (epoch 1790760600).**
+   - Why: GEN13 is FALSIFIED on development, but its held-out was never read ("Held-out ... NOT read", GEN13_RESULT.md). GEN13_cuts.json starts SOL's held-out at that time, and a closed card's unread held-out is not released.
+   - SOL's thirds 1 and 2 are unchanged (to Sep 1, Sep 1 to Sep 17). Its third 3 is Sep 17 to Sep 30 09:30Z.
+   - Auditor B checked every other card in the registry against the 18 other series: all their held-outs start on or after Oct 3, so the Oct 3 00:00Z cut stands for them.
+2. **The held-out read is one pass.** Every variant (pooled or per series) that met the bar is listed in a dated line BEFORE the pass. Third 3 is then read once for all of them together. Each listed variant is one try already in the 60. Nothing is added to the list after the pass.

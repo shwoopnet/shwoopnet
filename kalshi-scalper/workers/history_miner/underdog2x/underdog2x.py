@@ -21,6 +21,7 @@ THIRDS = {s: _A for s in ("KXBTC15M", "KXETH15M", "KXDOGE15M", "KXXRP15M", "KXNE
 THIRDS.update({"KXSOL15M": (D(9, 1), D(9, 17)), "KXCOPPER15M": (D(9, 8), D(9, 20)), "KXNATGAS15M": (D(9, 8), D(9, 20)),
                "KXPALLADIUM15M": (D(9, 22), D(9, 27)), "KXPLATINUM15M": (D(9, 22), D(9, 27)),
                "KXEURUSD15M": (D(9, 26), D(9, 29)), "KXGBPUSD15M": (D(9, 26), D(9, 29)), "KXUSDJPY15M": (D(9, 26), D(9, 29))})
+SERIES_CUT = {"KXSOL15M": 1790760600}                    # Amendment 2: GEN13's unread held-out on SOL starts 2026-09-30T09:30Z
 NC15 = {"KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXNATGAS15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"}
 HS = (0.0, 0.01, 0.02)
 VARIANTS = ("a", "b", "c")
@@ -156,7 +157,7 @@ def load(folder):
             if t in src:
                 dropped["dup_later_source"] += 1; continue
             src[t] = s
-            if cl >= CUT or ser not in THIRDS:
+            if cl >= CUT or ser not in THIRDS or cl >= SERIES_CUT.get(ser, CUT):
                 dropped["on_or_after_cut"] += 1; continue
             if third(ser, cl) == 3:
                 dropped["third3_heldout"] += 1; continue

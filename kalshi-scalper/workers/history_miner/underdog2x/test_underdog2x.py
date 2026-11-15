@@ -57,3 +57,8 @@ mk, cd, dr = U.load(tmp)
 assert set(mk) == {"A"} and mk["A"][2] == "yes" and dr == {"dup_later_source": 1, "third3_heldout": 1, "on_or_after_cut": 2}, (mk, dr)
 assert list(cd["A"]) == [U.D(8, 10) - 700]                # the after-close candle dropped
 print("loader: ok")
+put("rep", "S1", "KXSOL15M", 1790760600, "yes")           # SOL at its own cut: dropped
+put("rep", "S2", "KXSOL15M", U.D(8, 20), "yes")           # SOL third 1: kept
+mk, cd, dr = U.load(tmp)
+assert set(mk) == {"A", "S2"} and dr["on_or_after_cut"] == 3, (mk, dr)
+print("sol cut: ok")
