@@ -10,4 +10,10 @@ assert (o["raw"]["pf"], o["raw"]["half1"], o["raw"]["half2"], o["raw"]["net"]) =
 assert (o["1c"]["pf"], o["1c"]["half1"], o["1c"]["half2"], o["1c"]["net"]) == (0.0729, "inf", 0.0104, -0.89), o["1c"]
 assert (o["2c"]["pf"], o["2c"]["half1"], o["2c"]["half2"], o["2c"]["net"]) == (0.0515, "inf", 0.0, -0.92), o["2c"]
 assert o["bar"] == "does not count: fails the haircut" and o["label"].startswith("book replay")
+# Auditor B's fix 1: the bar is judged unrounded; 1.29996 rounds to 1.3 but fails, 1.30004 passes
+assert egh.bar_ok(1.29996, 1.2, 1.4, 1.1) is False and egh.shown(1.29996) == 1.3
+assert egh.bar_ok(1.30004, 1.2, 1.4, 1.1) is True
+assert egh.bar_ok(1.30004, 0.99996, 1.4, 1.1) is False and egh.bar_ok(1.30004, 1.2, 1.4, 0.99996) is False
+assert egh.bar_ok(float("inf"), float("inf"), 1.0, 1.0) is True and egh.bar_ok(None, 1.2, 1.4, 1.1) is False
+assert "not a total" in o["window"]
 print("hand case: all expected figures match")

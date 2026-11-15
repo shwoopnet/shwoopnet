@@ -56,12 +56,23 @@ def runs(root):
     return out
 
 
-def pf(xs):
+def pf_raw(xs):
+    """Unrounded PF (None for no entries, inf for no losses). The bar is judged on this (Auditor B, Nov 15)."""
     w = sum(x for x in xs if x > EPS)
     l = -sum(x for x in xs if x < -EPS)
     if not xs:
         return None
-    return "inf" if l == 0 else round(w / l, 4)
+    return float("inf") if l == 0 else w / l
+
+
+def shown(v):
+    return None if v is None else ("inf" if v == float("inf") else round(v, 4))
+
+
+def bar_ok(pf1, h1, h2, pf2):
+    """The counting bar on UNROUNDED figures: PF 1.3 or better at 1c with both halves 1.0 or better, and PF 1.0 or better at 2c."""
+    z = lambda x: 0.0 if x is None else x
+    return z(pf1) >= 1.3 and z(h1) >= 1.0 and z(h2) >= 1.0 and z(pf2) >= 1.0
 
 
 def main(root):
@@ -142,12 +153,15 @@ def main(root):
     entries.sort(key=lambda e: (e["close"], e["ticker"]))
     n = len(entries)
     h = n // 2
-    out = {"label": LABEL, "cut": "closes before 2026-11-07T20:24Z (S-HOLDVSSELL held-out start)", "counts": counts}
+    out = {"label": LABEL, "cut": "closes before 2026-11-07T20:24Z (S-HOLDVSSELL held-out start)",
+           "window": "this recompute reads KXGOLD15M closes from 2026-10-29T00:00Z to before the cut; cut_dropped counts only windows from the cut to before 2026-11-09T00:00Z (later closes are not listed at all), so it is not a total",
+           "counts": counts}
+    raw = {}
     for k in ("raw", "1c", "2c"):
         xs = [e[k] for e in entries]
-        out[k] = {"n": n, "pf": pf(xs), "half1": pf(xs[:h]), "half2": pf(xs[h:]), "net": round(sum(xs), 4)}
-    v = lambda x: float("inf") if x == "inf" else (x or 0.0)
-    ok = v(out["1c"]["pf"]) >= 1.3 and v(out["1c"]["half1"]) >= 1.0 and v(out["1c"]["half2"]) >= 1.0 and v(out["2c"]["pf"]) >= 1.0
+        raw[k] = (pf_raw(xs), pf_raw(xs[:h]), pf_raw(xs[h:]))
+        out[k] = {"n": n, "pf": shown(raw[k][0]), "half1": shown(raw[k][1]), "half2": shown(raw[k][2]), "net": round(sum(xs), 4)}
+    ok = bar_ok(raw["1c"][0], raw["1c"][1], raw["1c"][2], raw["2c"][0])
     out["bar"] = "meets the bar (counting only)" if ok else "does not count: fails the haircut"
     print(json.dumps(out, indent=1, sort_keys=True))
     return out
