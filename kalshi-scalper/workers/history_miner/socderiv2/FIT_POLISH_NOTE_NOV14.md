@@ -156,3 +156,27 @@ The Head, verbatim:
   - side yes or no and edge present on every filled row; side, edge empty and fires False on every blank row;
   - fires True only where edge >= 0.08 - 1e-9;
   - leg_type btts or team_total; sorted.
+
+## Option (a), the owner's pick (the Head, 2026-11-15 14:19Z), before the code
+The Head, verbatim: "BOTH builds stop each fit only when each free rate's SSE gradient is under 1e-12, using a full 2-D Newton step (second-derivative term included), and 1-D on a bound as already ruled; cap 200, iterations and cap-hit printed. The 1e-9 bar stands."
+
+**Why derivatives become exact formulas.** With the central-difference Jacobian (h 1e-6), rounding in the residuals (about 1e-16) gives J entries an error of about 5e-11. Times residuals of about 1e-2, summed over the legs, the SSE gradient carries noise of a few times 1e-12, so a 1e-12 stop could not be judged. So the residuals' first and second derivatives are computed from the Poisson formulas (p_n = P(X = n)):
+- dp_n/dlam = p_{n-1} - p_n; d2p_n/dlam2 = p_{n-2} - 2 p_{n-1} + p_n (p_{-1} = p_{-2} = 0).
+- P(X > j) has first derivative p_j and second derivative p_{j-1} - p_j.
+- home = sum_j pa_j P(H > j), draw = sum_j ph_j pa_j, away = 1 - home - draw, all to 40 goals. Their derivatives come term by term from the lines above.
+- A total-over strike at k + 0.5 is P(T > k) with T Poisson(lh + la). Its derivative in either rate is pT_k; its second derivative (hh, aa and ha alike) is pT_{k-1} - pT_k.
+
+**The polish (replaces the stops of the earlier sections; grid, refinement and box unchanged):**
+- **Gradient** G = 2 J'r; **Hessian** Hs = 2 (J'J + sum_i r_i x H_i), all exact.
+- **Stop:** at the start of each pass, if |G| is under 1e-12 on EVERY free rate, stop (converged). Otherwise take a step. After 200 steps, stop with cap_hit True. There are no other stops: the old step and relative-SSE stops are removed.
+- **2-D step:** d = -Hs^-1 G. If Hs is not positive definite (det <= 0 or a diagonal <= 0), the Gauss-Newton step d = -(J'J)^-1 J'r is used instead for that pass.
+- **Box rule (as ruled):** if the full step puts a rate outside [0.01, 6], only that rate moves, exactly to its bound. It is accepted if SSE is not above the current SSE + 1e-15 x (1 + SSE); the rate is then held for the rest of the polish. Otherwise the step is halved, at most 40 times, inside the box with the same SSE check.
+- **1-D step on the free rate when the other is held:** d = -G_free / Hs_free,free, falling back to Gauss-Newton if Hs_free,free <= 0.
+- If no halving is accepted, the pass ends with the point unchanged. It counts as a step, so a stuck fit reaches the cap and reports cap_hit True; nothing is hidden.
+- iters = steps taken (0 if the refinement point already meets the stop). on_bound and the "not above the refinement's SSE + 1e-15" check as before.
+
+**Expected by hand (test_fit_polish.py):**
+- **G1:** the exact J and second derivatives match central differences (h 1e-6 for J, within 1e-8; h 1e-4 for the second derivatives, within 1e-5) at (1.37, 0.83), (0.4, 3.1) and (5.2, 0.05), lines 0.5 to 4.5.
+- **G2:** P1, P2, P3 and B1, B2, B3 hold as before, and each ends with |G| under 1e-12 on every free rate, without the cap.
+- **G3:** 200 noisy inputs (a fixed seed, rates 0.001 to 7.5, 3 to 6 strikes, noise +-0.01 on every mid). Each fit either meets the gradient stop or hits the cap. The test asserts NO cap hits, and |G| under 1e-12 on every free rate at every result.
+- **23 made-up cases:** counts unchanged. Fit-dependent figures move by at most the size of the earlier stop error (about 1e-8). Every changed field is listed before the outputs are replaced.
