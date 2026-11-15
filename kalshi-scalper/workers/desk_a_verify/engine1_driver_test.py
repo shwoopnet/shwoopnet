@@ -29,4 +29,7 @@ bad = [mk(d, i, "no" if (d + i) % 2 else "yes") for d in (4, 5, 6) for i in rang
 rep2 = D.run({"arch": {"BTC": sd + bad}}); assert not [x for x in rep2["survivors"] if x["exit"] == "H" and x["band"] == 18 and x["side"] == "favourite" and x["filter"] is None], rep2["survivors"]
 # a duplicate ticker in a later source is dropped
 rep3 = D.run({"arch": {"BTC": sd + vd}, "nc": {"BTC": sd}}); assert rep3["duplicate_tickers_dropped"] == 9, rep3
+assert rep["entries_total"] == 18 and rep["non_whole_cent_entries"] == 0, rep      # SEARCH markets only: 9 markets x 2 sides (yes, no), all whole-cent
+odd = [dict(m, candles=[(m["close"] - 300, .89, .9049, .9, 1, 10)]) for m in sd]
+r4 = D.run({"arch": {"BTC": odd}}); assert r4["non_whole_cent_entries"] == 9 and r4["entries_total"] == 18, r4          # only the YES ask .9049 is not whole-cent; the NO ask 1 - .89 is
 print("ALL OK")

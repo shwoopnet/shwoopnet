@@ -7,7 +7,7 @@ MIN_N = 100; PF1 = 1.3; PF2 = 1.0; ALPHA = 0.05; CONTRACTS = 10
 DISCLOSURE = "upper bound, not fill-checked; sales booked at max(bid - h, 0.01), purchases at min(ask + h, 0.99); fee ceil(round(x, 9)) per order per leg; target and stop only on candles ending at or before close - 60; one-sided p from day-clustered z of the 1c cash at 10 contracts"
 def day_of(ts): return time.strftime("%Y-%m-%d", time.gmtime(ts))
 def pval(z): return 0.5 * math.erfc(z / math.sqrt(2)) if z is not None else 1.0
-def groups(mkts, cuts):
+def groups(mkts, cuts, stats=None):
     """-> {(bucket, band, side_rule, filter): [(market, entry dict)]} for ONE phase's markets, using the enumerator's own feature code."""
     g = collections.defaultdict(list)
     for m in mkts:
@@ -22,6 +22,7 @@ def groups(mkts, cuts):
                 side = N.side_for(rs, ya, na); a = ya if side == "yes" else na
                 if not (5 <= a <= 94): continue
                 ra = N.raw_ask(c, side); ent = {"side": side, "ask": ra, "entry_end": e, "whole_cent": abs(ra * 100 - round(ra * 100)) < 1e-6}
+                if stats is not None and rs in ("yes", "no"): stats["entries"] += 1; stats["non_whole"] += 0 if ent["whole_cent"] else 1   # each side counted once
                 band = a // 5; g[(b, band, rs, None)].append((m, ent))
                 f, miss = N.features(by_end, e, side)
                 for name in N.FEATURES:
@@ -47,7 +48,7 @@ def run(markets_by_source):
     """markets_by_source: {source: {series: [market]}}. Returns a report dict (counts first)."""
     rep = {"disclosure": DISCLOSURE, "tried_by_series": {}, "no_split_constant": [], "non_whole_cent_entries": 0, "entries_total": 0}
     search, valid = {}, {}
-    total = 0; seen = set(); rep["duplicate_tickers_dropped"] = 0
+    st = {"entries": 0, "non_whole": 0}; total = 0; seen = set(); rep["duplicate_tickers_dropped"] = 0
     for src, bys in markets_by_source.items():
         for series, mk in bys.items():
             kept_mk = []
@@ -63,7 +64,8 @@ def run(markets_by_source):
                 sp = [N.cents(c[2] - c[1]) for m in sm for c in m["candles"] if c[0] == m["close"] - b and 0 < c[1] < c[2] < 1]
                 cuts[b] = N.spread_cuts(sp) if sp else None
             rep["tried_by_series"][(src, series)] = N.RULES_PER_SERIES; total += N.RULES_PER_SERIES
-            search[(src, series)] = (groups(sm, cuts), cuts); valid[(src, series)] = vm
+            search[(src, series)] = (groups(sm, cuts, st), cuts); valid[(src, series)] = vm
+    rep["entries_total"] = st["entries"]; rep["non_whole_cent_entries"] = st["non_whole"]
     rep["combos_tried_m"] = total                                              # printed before any result
     s_pass, s_p = {}, {}
     for key, (g, cuts) in search.items():
