@@ -1,0 +1,40 @@
+{
+ "card": "XRPFAV",
+ "sources": [
+  "alts2"
+ ],
+ "series": [
+  "KXXRP15M"
+ ],
+ "start_ts": 1785974400,
+ "end_ts": 1793145600,
+ "cuts": [
+  {
+   "card": "XOI1",
+   "from_ts": 1790985600,
+   "series": null,
+   "why": "W3 2026-10-03 to 2026-11-02"
+  },
+  {
+   "card": "QSTALE1/TSLM1",
+   "from_ts": 1791158400,
+   "series": null,
+   "why": "W3 from 2026-10-05"
+  }
+ ],
+ "market_cols": [
+  "ticker",
+  "series",
+  "open_ts",
+  "close_ts",
+  "result",
+  "strike"
+ ],
+ "candle_cols": [
+  "end_ts",
+  "bid_c",
+  "ask_c",
+  "volume",
+  "oi"
+ ]
+}
