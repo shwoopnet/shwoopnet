@@ -36,5 +36,29 @@ Near misses printed with halves, pooled PF under 1.3 (not on the list): GOLD1D l
 ## C. Candidates for the 1c and 2c haircut recompute (raw-only passes in A and B)
 All of section A (none prints a 1c or 2c figure; the NHL cards and FLIPS0-X are priced at the cheap rung's ask with the fee only), OICORE history (the live rule), FALS5 check 2 and all 16 FORWARD_LEDGER rows, HRSEAS1 WEEKEND, TIMEX1. GEN3 and OIGAP already show 1c and stay above 1.3 there on their printed windows.
 
-## D. Where else to look (not scanned)
-`kalshi-scalper/README.md` on the research branch (its long result tables and the deflation ledger rows); `RND_QUEUE.md` lines (31 PF lines, none with halves); result files printed as JSON (`NHLALL1_RESULT.json`, `data/*`). I did not open `HELDOUT_PULL_RUNS.md` runs or any held-out data; no recompute was made.
+## D. Widened scan (Nov 15, 14:50Z; the Head's word): the research README tables, the markdown tables and the JSON results
+
+Added by scanning `kalshi-scalper/README.md` (9,229 lines; 9 lines with PF 1.3 or more and both halves printed), the 15 markdown tables with a PF and a half column, and every JSON result with an `all`, `h1`, `h2` structure (488 cells). Same rules: printed lines only, nothing recomputed. New rows:
+
+| Card | Series | Window | n | PF and halves as printed | Haircut | File:line |
+|---|---|---|---|---|---|---|
+| REGIME-B2: XRPFAV6 (a shadow rule, retired Nov 11) | KXXRP15M favourite, 6 minute look, held | alts2 file, Sep 3 to Oct 13 (41 days) | 481 | PF 1.56; halves 1.67 / 1.45; every regime cut above 1.2 except weekend (PF 1.26, halves 2.62 / 0.81) | cash PF, unrounded fee, no slip (raw); descriptive, no new test spent | `kalshi-scalper/README.md:9192` |
+| REGIME-B2: XRPFAV10 (shadow rule, retired) | KXXRP15M favourite, 10 minute look | same | 358 | PF 1.91; halves 1.81 / 2.02 | raw | `kalshi-scalper/README.md:9192` |
+| OICORE rule history (OEXIT1 parity and holdout) | KXBTC15M cheap side after an open interest rise | history 2026-08-06 to 10-05 | 358 | PF 2.327; H1 2.564, H2 2.170; holdout 2026-10-06 to 11-03 (read once) n 236 PF 1.606 | raw (the file's own parity with 222 / 2.28 and 333 / 1.85) | `kalshi-scalper/README.md:8243`; `workers/OEXIT1_RESULT.md:3` |
+| NHLALL1 first run | NHL ladders, cheap YES rungs, cap 2 per game | 61 fully fetched games | 122 | PF 1.47; halves +7.1c / +6.5c (cents); lower 95% bound -1.2c | raw; fees x1.2 +6.6c | `kalshi-scalper/README.md:8784` (NOT_ENOUGH_DATA) |
+| CPI1 "Core" arm (the pooled claim FALSIFIED at PF 1.11) | Kalshi CPI strikes vs the Cleveland nowcast, core CPI | 42 releases | 102 | PF 1.34 (x1.2 1.32); halves 1.41 / 1.27; mean +4.13c; z +1.07 | fees x1.2 printed | `workers/CPIMENT_RERUN_RESULT.md:23` |
+| COUNT1 weekly | counts ladders (tornado and similar) | 26 development events | 11 | PF 2.53; halves +35.4c (n 4) / +3.5c (n 7); "three winners decide it" | raw | `kalshi-scalper/README.md:8477` |
+| USWEEP1 cells (one row each; none meets the card's LEAD rule: 0 of 281 cells with n 100 or more and 40 or more a half; the README counts 28 of 281 positive in both halves and says luck gives about that) | | | | | | `workers/USWEEP1_RESULT.md:20-40`, `workers/USWEEP1_RESULT.json` |
+| - KXSILVERD, 24 h, tail (ask 5c to 15c) | silver daily | 10 dates | 106 | PF 1.94; halves +5.5c (58) / +7.9c (48); z 1.04; "only 2 traded" | net +6.61c, stress (x1.2) +6.49c | `:20` |
+| - KXNATGASD, 6 h, favourite (85c to 97c) | natural gas daily | 6 dates | 67 | PF 5.27; halves +7.3c (30) / +4.2c (37); z 3.71 | net +5.60c | `:21` |
+| - KXHIGHTSATX, 24 h, fav | weather daily | 32 dates | 52 | PF 2.30; +4.6c / +4.4c; z 1.79 | net +4.49c, stress +4.37c | `:22` |
+| - KXGOLDD, 6 h, fav | gold daily | 10 dates | 48 | PF 3.30; +6.4c / +2.5c; z 2.22 | net +4.44c | `:23` |
+| - KXBRENTD, 1 h, fav | Brent daily | 18 dates | 44 | PF 3.14; +2.8c / +6.1c; z 2.10 | net +4.22c | `:24` |
+| - KXHIGHDEN fav (n 43, PF 1.77), KXHIGHTDAL fav (n 42, PF 1.69), KXLOWTMIN fav (n 29, PF 1.97), KXLOWTNYC fav (n 29, PF 2.20), KXLOWTATL tail (n 31, PF 1.47), KXHIGHLAX tail (n 26, PF 1.49), KXLOWTCHI tail (n 22, PF 1.51) | weather daily | 17 to 28 dates | 22 to 43 | halves positive in cents in all (for example +2.2c / +4.0c; +9.3c / +1.5c) | net +2.9c to +4.6c, stress printed in the JSON | `:26,27,34-40` |
+| USWEEP2 and USWEEP3 cells | KXBUNDESLIGA2TOTAL, KXLIGAMXTOTAL (3 looks), KXTRUTHSOCIAL (tail) | 3 to 60 days | 6 to 11 | PF 2.19 to 4.54, halves all above 1 | stress printed | `workers/USWEEP2_RESULT.json`, `workers/USWEEP3_RESULT.json` (n under 12, nothing) |
+
+Also printed, PF not printed: the Oct 22 history lines "gold +1.6c z 3.3; XRP +1.5c z 3.7 both halves; Dogecoin +1.6c z 3.8 both halves" for the 6 minute entry (`kalshi-scalper/README.md:6147`; the line also carries live figures, which I did not copy). Contrast: BTCHI10 on history PF 0.90, halves 0.90 / 0.90 (README:9193, "Refinement's 1.37 / 1.82 does not reproduce").
+For the haircut recompute these add: XRPFAV6, XRPFAV10, the OICORE history, the NHL first run, CPI1 core, and the USWEEP1 favourite and tail cells (fills at the ask with the fee; stress x1.2 only).
+
+## E. Where else to look (not scanned)
+The deflation ledger rows inside the README beyond the lines above; `RND_QUEUE.md` lines (31 PF lines, none with halves); results printed only in prose paragraphs without the words PF or halves. I did not open `HELDOUT_PULL_RUNS.md` runs or any held-out data; no recompute was made.
