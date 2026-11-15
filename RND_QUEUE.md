@@ -996,3 +996,8 @@ Next for the History Miner: UNDERDOG2X, the owner's manual scalp generalised (di
 
 UNDERDOG2X (History Miner, registration 94f4d88a, dev read fd43b5f6): 19 series, 15,244 entries in thirds 1 and 2 (closes before Oct 3). 0 of 60 tries pass. Pooled 1c PF: (a) 0.56, (b) 0.63, (c) 0.68; every series is under 1.0. FALSIFIED on development, so third 3 stays unread. All 60 tries are counted. Open: confirm that Auditor B cleared the pre-Oct 3 held-out list before the price read.
 Next for the History Miner: write the CALIB1 card (underdog-bias calibration table on held data: 5c buckets at 10, 5 and 2 minutes before the close, thirds 1 and 2, the Oct 3 cut). No run until the Head says go.
+
+## 2026-11-15 18:40Z CALIB1 done; CALIB2 plan asked (Head of R&D)
+
+CALIB1 (History Miner 616180d0, descriptive, thirds 1 and 2): 2,400 buckets, 148 eligible, 0 candidates. Cheap sides at 15c to 30c are overpriced at the ask (gap -2c to -4.5c). The only positive region is favourites at 90c to 95c at the 10 minute look (the L1 family), under fee + 2c. No rule card. A post-CLEAN script change (print only) was disclosed.
+Next for the History Miner: the CALIB2 card plus pull plan (the rest of Kalshi: sports, politics, econ, weather, entertainment, mentions), with no pull until the Head's go.
