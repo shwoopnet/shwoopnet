@@ -63,4 +63,6 @@ assert abs(b1["pf"] - 60 * 5.73 / (60 * 4.27)) < 1e-9 and abs(b2["pf"] - 60 * 5.
 rb = many("KXSILVER15M", 60, 60, alt=True); assert rb["c11_group"]["pass_c11"] is False and rb["PASS"] is False
 rh = many("KXHYPE15M", 99, 21); assert rh["c11_group"]["pass_c11"] is True and rh["standard_group"]["h0.01"]["n"] == 0
 rn = many("KXNEAR15M", 99, 21); assert rn["standard_group"]["pass_standard"] is True and rn["c11_group"]["h0.01"]["n"] == 0
+zt = [{"tk": "a", "day": "d1", "cash": {0.01: 1.0}}, {"tk": "b", "day": "d1", "cash": {0.01: 2.0}}, {"tk": "c", "day": "d2", "cash": {0.01: -1.0}}]; zv, zd = q.zday(zt, 0.01)
+assert zd == 2 and abs(zv - 0.5) < 1e-12          # two trades on one day are one cluster: day sums 3 and -1
 print("qr1 tests passed")
