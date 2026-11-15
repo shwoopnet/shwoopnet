@@ -124,7 +124,7 @@
   }
  ],
  "notes": "Ten requests, one page each; the cap is 10. Fields the reader keeps: ticker, event_ticker, open_time, close_time, title. The two series reads only confirm that the names KXRATECUTCOUNT and KXFED exist (a 404 is an answer). Prices and results in the list answers are not used.",
- "status": "active",
+ "status": "withdrawn",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 1.0,
