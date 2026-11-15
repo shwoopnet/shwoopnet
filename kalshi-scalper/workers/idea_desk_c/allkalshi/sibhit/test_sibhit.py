@@ -54,8 +54,27 @@ class Hand(unittest.TestCase):
         # raw: .50 fee .02 -> +.48 ; .40 fee .02 -> +.58 ; .60 fee .02 -> -.62 ; mean = .44/3
         self.assertAlmostEqual(o["HIGH"]["raw"]["mean_c"], round(100 * 0.44 / 3, 3))
         self.assertEqual(o["HIGH"]["raw"]["pf"], round(1.06 / 0.62, 4))
-        self.assertIn("info_first_half_median_split", o)
+        self.assertNotIn("info_first_half_median_split", o)   # one game: no first half, so no information split
         self.assertEqual(o["share_per_game"]["max"], round(2 / 11, 4))
+
+
+class InfoSplit(unittest.TestCase):
+    def test_two_games(self):
+        root = tempfile.mkdtemp()
+        ms = []
+        for gi, day in enumerate(("24", "25")):
+            occ = L.iso("2026-10-%sT03:00:00" % day)
+            for i in range(10):
+                close = occ - 7000 if i < gi + 1 else occ + 600
+                ms.append({"ticker": "KXNBAPTS-26OCT%sAAA-P%d-10" % (day, i), "event_ticker": "KXNBAPTS-26OCT%sAAA" % day,
+                           "close_time": iso(close), "occurrence_datetime": iso(occ), "result": "no"})
+        put(root, "KXNBAPTS_LISTS_A", "dev_KXNBAPTS", {"markets": ms})
+        put(root, "SIBHIT_CANDLES", "x", {"markets": []})
+        with contextlib.redirect_stdout(io.StringIO()):
+            o = SC.main(root)
+        self.assertAlmostEqual(o["info_first_half_median_split"]["median_first_half"], 0.1)   # first game by time: 1 of 10
+        self.assertEqual(o["share_per_game"]["min"], 0.1)
+        self.assertEqual(o["share_per_game"]["max"], 0.2)
 
 
 if __name__ == "__main__":

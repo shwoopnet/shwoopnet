@@ -21,7 +21,8 @@ def candles(root, keep):
     if not os.path.isdir(base):
         return q
     for run in sorted(os.listdir(base)):
-        man = json.load(open(os.path.join(base, run, "manifest.json")))
+        with open(os.path.join(base, run, "manifest.json")) as fh:
+            man = json.load(fh)
         for r in man["rows"]:
             fn = r.get("file")
             if not fn:
@@ -44,7 +45,8 @@ def results(root, tickers):
     out = {}
     base = os.path.join(root, "pull", "KXNBAPTS_LISTS_A")
     for run in sorted(os.listdir(base)):
-        man = json.load(open(os.path.join(base, run, "manifest.json")))
+        with open(os.path.join(base, run, "manifest.json")) as fh:
+            man = json.load(fh)
         for r in man["rows"]:
             if not r.get("file") or r.get("id") != "dev_KXNBAPTS":
                 continue
@@ -85,7 +87,8 @@ def main(root, info_split=True):
         # Auditor B (Nov 15), information only, not a try: the arm split with the median of the FIRST half of games in time order
         import statistics as st
         order = sorted(g, key=lambda e: (g[e]["T"], e))
-        med1 = st.median([g[e]["s"] for e in order[:len(order) // 2]]) if order else None
+        first = order[:len(order) // 2]
+        med1 = st.median([g[e]["s"] for e in first]) if first else None
     keep = {t for x in g.values() for t in x["open"]}
     q = candles(root, keep)
     cand, drops = [], {"no_quote": 0, "not_two_sided": 0, "out_of_band": 0}
@@ -141,7 +144,7 @@ def main(root, info_split=True):
         out["share_per_game"] = {"min": round(shares[0], 4), "q25": round(qs[0], 4), "median": round(qs[1], 4), "q75": round(qs[2], 4), "max": round(shares[-1], 4),
                                  "note": "share of base rungs closed strictly before T - 240 s; a rung closed for a reason other than a hit (player ruled out) counts"}
     out["s_med_note"] = "S_MED is the median over all development games: in-sample for the arm split (close times only, no price or result)"
-    if info_split and g:
+    if info_split and g and med1 is not None:
         g2 = {e: dict(x, arm="HIGH" if x["s"] >= med1 - L.EPS else "LOW") for e, x in g.items()}
         saved = L.games
         L.games = lambda rows: g2

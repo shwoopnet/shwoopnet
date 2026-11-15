@@ -33,7 +33,8 @@ def list_rows(root):
     out = []
     base = os.path.join(root, "pull", "KXNBAPTS_LISTS_A")
     for run in sorted(os.listdir(base)):
-        man = json.load(open(os.path.join(base, run, "manifest.json")))
+        with open(os.path.join(base, run, "manifest.json")) as fh:
+            man = json.load(fh)
         for r in man["rows"]:
             fn = r.get("file")
             if not fn or r.get("id") != "dev_KXNBAPTS":
