@@ -62,7 +62,7 @@
 - **Tries:** (O) hold, T, S, M and (L) hold, T, S, M. That is **8 tries**, all added to the deflation ledger.
 
 **Stated before any read (Auditor B, Nov 15):**
-- **M exit.** It sells at the mark ending exactly at the M time. If that candle is missing or not sellable, it sells at the first sellable mark up to 4 minutes later, printed as `M_late` with its count. With no such mark the trade is held. 4 minutes keeps the NBA M exit pre-game (G is 30 minutes before the tip proxy) and the MENT M exit before the speech (O - 5 min + 4 min).
+- **M exit (part of this card's rule; EXITS3 as written has no slip).** It sells at the mark ending exactly at the M time. If that candle is missing or not sellable, it sells at the first sellable mark up to 4 minutes later, printed as `M_late` with its count. M and M_late are printed separately for each try. With no such mark the trade is held. 4 minutes keeps the NBA M exit pre-game (G is 30 minutes before the tip proxy) and the MENT M exit before the speech (O - 5 min + 4 min).
 - **e is the raw ask at D,** before any haircut. T's level min(2e, 0.90) and S's level e/2 use raw e, so every haircut line exits at the same mark (EXITS3).
 - **Bars** are judged on unrounded figures with no tolerance: exactly 1.3 or 1.0 passes.
 
