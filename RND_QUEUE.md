@@ -982,3 +982,7 @@ PR 945 (Main): OIREL1 shadow built, log only; it needs the owner's merge and dep
 ## 2026-11-15 17:50Z SOCDERIV closed (Head of R&D)
 
 SOCDERIV option (a), rule 16b MET (Auditor B: History Miner 0bd7e553 / 69cefc5f against the Testing Desk's 5a146e84 / 2d206a51; largest difference 1.7e-15; 4,098 per-game rows equal). Verdict: A_big BTTS EFFICIENT (n 420, 0 fires), A_big team total EFFICIENT (n 2,469, 0 fires), B_small BTTS EFFICIENT (n 252, 5 fires), B_small team total NO EVIDENCE at n = 0. No shadow candidate. A format defect (4 blank strikes in the Miner CSV) is to be explained; no re-run.
+
+## 2026-11-15 18:00Z EXITS3 first results (Head of R&D)
+
+EXITS3 (History Miner 9c66e899, one build, cut window Aug 6 to Oct 2, 2c primary). OIREL n 382: hold 2c PF 1.55, T 1.39, S 1.56, M = hold. OICORE rule history n 323: hold 1.93, T 1.79, S 1.92. No exit beats hold, so this is information only and needs no build 2. The rest is trimmed to XRPFAV10, then BAND2 if its extract is cleared. XRPFAV6, SEARCH1 and FLIPS0X are dropped (they cannot change a decision).
