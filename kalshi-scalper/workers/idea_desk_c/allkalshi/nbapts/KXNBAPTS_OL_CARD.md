@@ -23,7 +23,12 @@
   - Pulled as its own small job after Dec 4.
   - It can be checked against the in-game recorder's books.
 - **Disclosure: PROPS1.** PROPS1 (V2) read this series' cheap side with a frozen cut of 2026-10-03T16:00Z. That is last season, so it shares no closes with this card.
-- **Disclosure: PROPUNDER.** PROPUNDER (mine, closed unread, 0 tries) reserves the week above.
+- **Disclosure: PROPUNDER.** PROPUNDER (mine, closed unread, 0 tries) reserves the week above. Its development block (closes Oct 15 to before Nov 6) overlaps this card's development block, so stage A makes it read-exposed (Auditor B, Nov 15). Its reserve is used for nothing else.
+- **Exposure inside the reserve, times and counts only (Auditor B's note (b), Nov 15).** Two reads touched the reserve week (Nov 6 to Nov 13) before this card; neither read a price, volume or result.
+  - Desk B's Nov 10 listing counts quoted in this card: 389 markets, 8 events, about 6.0 million contracts.
+  - My own read of Nov 9 KXNBAPTS, KXNBAPTSPROT and KXNBAPTSLEADER markets in the CENSUS_LISTING run (Nov 15, about 14:40Z), to design the tip proxy. Fields read: the key names of one market; for each market, ticker, event_ticker, open_time, close_time, occurrence_datetime, expected_expiration_time and can_close_early; and for one KXNBAPTSPROT market also created_time, expiration_time, latest_expiration_time, updated_time, settlement_timer_seconds and rules_primary.
+- **Truncation (Auditor B's note (3)).** If the last stored page of the stage A list still has a cursor, the list is not whole. The scorer stops before any result read and says so (`truncated_lists`).
+- **Raw files (Auditor B's note (a)).** The raw list and candle files carry price and result fields. Nobody opens them for a rule. Only `ol_score.py`, once frozen and CLEAN, reads them, in the order its docstring states.
 - **Stage A:** the job `KXNBAPTS_LISTS_A` lists settled KXNBAPTS markets with close-time bounds of the development block only, plus one series read.
   - The scorer keeps: ticker, event_ticker, open_time, close_time, occurrence_datetime, can_close_early, result.
   - Stage B is sized from stage A's real count: one-minute candles, batched, files under 470 requests at 5 s.

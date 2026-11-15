@@ -86,8 +86,12 @@ def run_dirs(root, job):
 
 
 def bodies(rdir, man):
+    """Stored answers only: a manifest row with no 'file' (a 429 or a failed read) is skipped."""
     for row in man.get("rows", []):
-        f = os.path.join(rdir, "%04d.json.gz" % int(row["index"]))
+        fn = row.get("file")
+        if not fn or os.path.basename(fn) != fn:
+            continue
+        f = os.path.join(rdir, fn)
         if os.path.isfile(f):
             with gzip.open(f, "rt") as fh:
                 yield row, json.load(fh)
@@ -96,14 +100,22 @@ def bodies(rdir, man):
 def list_markets(root, card):
     """Every market of the card's series from its list jobs, keyed by ticker. Time and identity fields only; result kept raw, not read here."""
     out = {}
+    last_cursor = {}
     for job in card["list_jobs"]:
         for rdir, man in run_dirs(root, job):
-            for _row, b in bodies(rdir, man):
+            for row, b in bodies(rdir, man):
+                if isinstance(b, dict) and "markets" in b:
+                    last_cursor[(job, row.get("id"))] = (int(row.get("page", 1)), b.get("cursor") or "")
                 for m in (b.get("markets") or []) if isinstance(b, dict) else []:
                     t = m.get("ticker") or ""
                     if t.split("-")[0] in card["series"]:
                         out.setdefault(t, m)
+    TRUNCATED.clear()
+    TRUNCATED.extend(sorted("%s/%s" % k for k, (pg, cur) in last_cursor.items() if cur))
     return out
+
+
+TRUNCATED = []   # list requests whose last stored page still had a cursor (Auditor B, Nov 15): the list is not whole and is not scored
 
 
 def candle_quotes(root, jobs, keep):
@@ -309,7 +321,10 @@ def score(card_id, root, candle_jobs, check_only=False):
     card = CARDS[card_id]
     mk = list_markets(root, card)
     kept, counts, ev_occ = select(card_id, mk)
-    out = {"card": card_id, "label": LABEL, "counts": counts}
+    out = {"card": card_id, "label": LABEL, "counts": counts, "truncated_lists": list(TRUNCATED)}
+    if TRUNCATED:
+        out["stopped"] = "a list is truncated (its last page has a cursor): not scored as whole, no result read"
+        return out
     clocks = {t: clock(card_id, m, ev_occ.get(m.get("event_ticker") or "")) for t, m in kept.items()}
     if card_id in ("NBA_O", "NBA_L"):
         early = sum(1 for t, m in kept.items() if clocks[t] and iso(m["close_time"]) < clocks[t][2])

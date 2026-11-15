@@ -10,7 +10,7 @@ def put(root, job, rows_bodies):
     os.makedirs(d)
     rows = []
     for i, (row, body) in enumerate(rows_bodies, 1):
-        row = dict(row, index=i)
+        row = dict(row, index=i, file="%04d.json.gz" % i, id=row.get("id", "r%d" % i), page=1)
         rows.append(row)
         with gzip.open(os.path.join(d, "%04d.json.gz" % i), "wt") as f:
             json.dump(body, f)
@@ -100,6 +100,27 @@ class MENT(unittest.TestCase):
         self.assertAlmostEqual(o["hold"]["raw"]["mean_c"], 52.0)
         # M sells at O-5min, yes bid .60: fee ceil(.07*.6*.4*100)=2 -> .02: .60 - .02 - .48 = .10
         self.assertAlmostEqual(o["M"]["raw"]["mean_c"], 10.0)
+
+
+class Truncated(unittest.TestCase):
+    def test_cursor_left_stops(self):
+        r = tempfile.mkdtemp()
+        A = {"ticker": "KXNBAPTS-26OCT24AAABBB-AAAP1-20", "event_ticker": "KXNBAPTS-26OCT24AAABBB", "occurrence_datetime": "2026-10-25T03:00:00Z",
+             "close_time": "2026-10-25T02:30:00Z", "result": "no"}
+        put(r, "KXNBAPTS_LISTS_A", [({"path": "/markets", "id": "dev"}, {"markets": [A], "cursor": "abc"})])
+        o = S.score("NBA_O", r, ())
+        self.assertEqual(o["truncated_lists"], ["KXNBAPTS_LISTS_A/dev"])
+        self.assertIn("stopped", o)
+
+    def test_429_row_skipped(self):
+        r = tempfile.mkdtemp()
+        put(r, "KXNBAPTS_LISTS_A", [({"path": "/markets"}, {"markets": []})])
+        dd = os.path.join(r, "pull", "KXNBAPTS_LISTS_A", "2026-11-20T0000Z_1")
+        man = json.load(open(os.path.join(dd, "manifest.json")))
+        man["rows"].insert(0, {"index": 1, "id": "x", "status": 429})
+        with open(os.path.join(dd, "manifest.json"), "w") as f:
+            json.dump(man, f)
+        self.assertEqual(S.list_markets(r, S.CARDS["NBA_O"]), {})
 
 
 class Sample(unittest.TestCase):
