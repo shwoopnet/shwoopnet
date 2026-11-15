@@ -959,3 +959,7 @@ The Testing Desk's build 2 (32116549, oirel_second.py fe5416c8) equals Desk A's 
 
 OIREL: Auditor B CLEAN, rule 16b met (largest difference 2.8e-14). It may start a shadow record as a 7g version of OICORE. Its spec (Desk A 8b6542879) is pending two clarifications (the 8c floor; the threshold as registered), then Auditor B, then Main.
 XRPFAV10 and XRPFAV6: the Testing Desk's build 2 (134628f9, e70339bb) equals Desk A's blind print (a60c9e5a3) at 1e-9; Auditor B's CLEAN is pending. Shadow for XRPFAV10 is HELD: the owner retired these on Nov 11 as duplicates (7e), so I asked the EA for an owner popup quoting the earlier NO. The recommendation is to keep it retired. XRPFAV6 stays retired.
+
+## 2026-11-15 16:45Z SEARCH1 fails (Head of R&D)
+
+SEARCH1 haircut recompute, build 1 (Desk A dc82f8891, blind first). BTC and ETH, 420 s, band 0.97 to 0.995, SL50. Out-of-sample rows only (Sep 27 to Oct 2): n 96, PF 2c 0.943 (primary), 1c 1.204 with half 1 0.591. FAILS; no evidence at n = 96 (under MIN_CONF 150). The before-cut rows are in-sample (selection) and do not count. One build is enough for a failure (lighter gate); no build 2. The original stays FALSIFIED.
