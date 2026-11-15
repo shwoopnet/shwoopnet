@@ -1,0 +1,303 @@
+{
+ "job": {
+  "job_id": "MENTDRIFT_LISTS_A",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/mentdrift/MENTDRIFT_CARD.md",
+  "purpose": "MENTDRIFT VERSION paper card (Idea Desk C), stage A: historical market lists of KXTRUMPMENTION and KXTRUMPMENTIONB (development events Apr 17 to before Aug 6, 2026) and the two series reads. No candle.",
+  "heldout": "The historical list has no date filter. The scorer drops every market whose event occurrence is not from 2026-04-17T00:00Z to before 2026-08-06T00:00Z before reading any other field. Never read: TRUMPTOPIC1's held-out third (occurrence 2026-08-06 to before 2026-10-03, spent, kept cut by rule 17), this card's held-out (occurrence 2026-10-03 to before 2026-11-05, own job on the Head of R&D's go) and TRUMPTOPIC1's forward window (from 2026-11-05). No live list is requested.",
+  "allowed_endpoints": [
+   {
+    "name": "hist_markets_list",
+    "method": "GET",
+    "path_pattern": "/historical/markets",
+    "params_allowed": [
+     "series_ticker",
+     "limit",
+     "cursor"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXTRUMPMENTION",
+   "KXTRUMPMENTIONB"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 18,
+  "notes": "TRUMPTOPIC1 counted 7,459 KXTRUMPMENTION and 3,098 KXTRUMPMENTIONB markets in all; the historical list holds those closing before the 2026-09-13 cutoff, so at most about 8 and 4 pages of 1,000. Up to 10 + 5 pages plus 2 series reads = 17, cap 18. Pacing 5 s (the shared 12 a minute budget).",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 5.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "hist_KXTRUMPMENTION",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXTRUMPMENTION",
+     "limit": 1000
+    },
+    "max_pages": 10
+   },
+   {
+    "id": "hist_KXTRUMPMENTIONB",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXTRUMPMENTIONB",
+     "limit": 1000
+    },
+    "max_pages": 5
+   },
+   {
+    "id": "series_KXTRUMPMENTION",
+    "path": "/series/KXTRUMPMENTION",
+    "params": {}
+   },
+   {
+    "id": "series_KXTRUMPMENTIONB",
+    "path": "/series/KXTRUMPMENTIONB",
+    "params": {}
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-15T1458Z",
+ "finished": "2026-11-15T1459Z",
+ "status": "complete",
+ "requests_sent": 12,
+ "bytes_stored": 24956469,
+ "rows": [
+  {
+   "index": 1,
+   "id": "hist_KXTRUMPMENTION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 3335786,
+   "t_send_ms": 1794754720848,
+   "t_recv_ms": 1794754721043,
+   "server_date": "Sun, 15 Nov 2026 14:58:40 GMT",
+   "file": "0001.json.gz",
+   "sha256": "b0544e862b49d26cb0e56c8219e29b0bfb1cf2b80ed84d71fb2e0080f6157487",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "hist_KXTRUMPMENTION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 3426170,
+   "t_send_ms": 1794754725848,
+   "t_recv_ms": 1794754726067,
+   "server_date": "Sun, 15 Nov 2026 14:58:45 GMT",
+   "file": "0002.json.gz",
+   "sha256": "62f368dc6a9b8d4d0df2c50e4cad01afd7c270c0906deed53a263dc6cc277d88",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "hist_KXTRUMPMENTION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 3422486,
+   "t_send_ms": 1794754730848,
+   "t_recv_ms": 1794754731031,
+   "server_date": "Sun, 15 Nov 2026 14:58:50 GMT",
+   "file": "0003.json.gz",
+   "sha256": "c3897abcd131eaff40148880a1bc24af118db24e4db3741c4e6ab5531a89cf90",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "hist_KXTRUMPMENTION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 1000
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2602850,
+   "t_send_ms": 1794754735848,
+   "t_recv_ms": 1794754736015,
+   "server_date": "Sun, 15 Nov 2026 14:58:55 GMT",
+   "file": "0004.json.gz",
+   "sha256": "37266ba26c8c20f10703fea850ad1ab4e0f72e353c37787f4cce8e0fcf92377f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "hist_KXTRUMPMENTION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 1000
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2235437,
+   "t_send_ms": 1794754740849,
+   "t_recv_ms": 1794754742055,
+   "server_date": "Sun, 15 Nov 2026 14:59:01 GMT",
+   "file": "0005.json.gz",
+   "sha256": "a7bd0c9008ebb59c3c47ee0b67a63143e34727da2aee093cb68c1182f148b2a2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "hist_KXTRUMPMENTION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 1000
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 2297919,
+   "t_send_ms": 1794754745849,
+   "t_recv_ms": 1794754746025,
+   "server_date": "Sun, 15 Nov 2026 14:59:05 GMT",
+   "file": "0006.json.gz",
+   "sha256": "bbbd1d37efc1a5e82a0921e23b6710912f81947d48b48c912d7795c15523724c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "hist_KXTRUMPMENTION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 1000
+   },
+   "page": 7,
+   "status": 200,
+   "bytes": 73687,
+   "t_send_ms": 1794754750849,
+   "t_recv_ms": 1794754750954,
+   "server_date": "Sun, 15 Nov 2026 14:59:10 GMT",
+   "file": "0007.json.gz",
+   "sha256": "32249edc6dd293ae829e94ac1b371bb2877070a1718f2185b5d8ec4949a66d95",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "hist_KXTRUMPMENTIONB",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTIONB",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 3405728,
+   "t_send_ms": 1794754755849,
+   "t_recv_ms": 1794754756045,
+   "server_date": "Sun, 15 Nov 2026 14:59:15 GMT",
+   "file": "0008.json.gz",
+   "sha256": "d0aae61fae4c58d9e983df62c8fdcf7caef4d3bc4a491e13d42e0aa6df1caedc",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "hist_KXTRUMPMENTIONB",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTIONB",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2747632,
+   "t_send_ms": 1794754760849,
+   "t_recv_ms": 1794754762032,
+   "server_date": "Sun, 15 Nov 2026 14:59:21 GMT",
+   "file": "0009.json.gz",
+   "sha256": "741bcb1ea5da8af4ff4bbd0a4c3d453d5c821083dc641984971153638928b8ef",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "hist_KXTRUMPMENTIONB",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMENTIONB",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1405728,
+   "t_send_ms": 1794754765849,
+   "t_recv_ms": 1794754765973,
+   "server_date": "Sun, 15 Nov 2026 14:59:25 GMT",
+   "file": "0010.json.gz",
+   "sha256": "1fe845487b6614055e146dbb6469456fe1a91620fc55bd517ac3cc3ce12ee36e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "series_KXTRUMPMENTION",
+   "path": "/series/KXTRUMPMENTION",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1525,
+   "t_send_ms": 1794754770849,
+   "t_recv_ms": 1794754770903,
+   "server_date": "Sun, 15 Nov 2026 14:59:30 GMT",
+   "file": "0011.json.gz",
+   "sha256": "4863c50bba33fdf9eb4d99d1ca61ee6c923a70e848e3559bca683126435d5754",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "series_KXTRUMPMENTIONB",
+   "path": "/series/KXTRUMPMENTIONB",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1521,
+   "t_send_ms": 1794754775849,
+   "t_recv_ms": 1794754775914,
+   "server_date": "Sun, 15 Nov 2026 14:59:35 GMT",
+   "file": "0012.json.gz",
+   "sha256": "dc33c4ace8de2b7339cd402331f4a5f59944edcc09fde25aa1148a7d017aeedb",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
