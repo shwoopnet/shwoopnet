@@ -1,0 +1,37 @@
+{
+ "card": "CALIB3",
+ "sources": [
+  "lad1",
+  "lad2"
+ ],
+ "series": [
+  "KXBTCD"
+ ],
+ "start_ts": 1790380800,
+ "end_ts": 1791504000,
+ "cuts": [
+  {
+   "card": "CALIB3 third 3",
+   "from_ts": 1791129600,
+   "series": null,
+   "why": "third 3 = closes from 2026-10-04T16:00Z (Desk A)"
+  }
+ ],
+ "log_dropped": true,
+ "market_cols": [
+  "ticker",
+  "series",
+  "open_ts",
+  "close_ts",
+  "result",
+  "strike"
+ ],
+ "candle_cols": [
+  "end_ts",
+  "bid_c",
+  "ask_c",
+  "volume",
+  "oi"
+ ],
+ "note": "KXBTCD lad1 then lad2, closes 2026-09-26T00:00Z to before 2026-10-09T00:00Z; third 3 cut in the extract, dropped tickers listed in the cut log"
+}

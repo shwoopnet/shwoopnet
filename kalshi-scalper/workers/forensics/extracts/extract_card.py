@@ -16,7 +16,7 @@ def main(a):
     mc, cc = spec["market_cols"], spec["candle_cols"]
     o.execute("create table market(%s)" % ",".join(mc + ["src"]))
     o.execute("create table candle(ticker,%s)" % ",".join(cc))
-    seen = set(); log = collections.OrderedDict(); counts = collections.Counter(); total = collections.Counter()
+    seen = set(); dropped = []; log = collections.OrderedDict(); counts = collections.Counter(); total = collections.Counter()
     for src in spec["sources"]:
         c = sqlite3.connect("file:%s?mode=ro" % os.path.join(arch, src + ".sqlite"), uri=True)
         q = ",".join(mc)
@@ -28,7 +28,8 @@ def main(a):
                 if ct < spec["start_ts"]: counts["before_start"] += 1; continue
                 if ct >= spec["end_ts"]: counts["own_heldout_or_after_end"] += 1; continue
                 cut = next((k for k in spec["cuts"] if ct >= k["from_ts"] and (not k.get("series") or series in k["series"])), None)
-                if cut: counts["cut:" + cut["card"]] += 1; continue
+                if cut:
+                    counts["cut:" + cut["card"]] += 1; dropped.append([t, ct, cut["card"]]); continue
                 o.execute("insert into market values(%s)" % ",".join("?" * (len(mc) + 1)), list(row) + [src])
                 for cr in c.execute("select ticker,%s from candle where ticker=?" % ",".join(cc), (t,)):
                     o.execute("insert into candle values(%s)" % ",".join("?" * (len(cc) + 1)), cr)
@@ -37,6 +38,7 @@ def main(a):
     sha = hashlib.sha256(open(dst, "rb").read()).hexdigest()
     lo, hi = sqlite3.connect(dst).execute("select min(close_ts),max(close_ts) from market").fetchone()
     L = {"card": name, "spec": spec, "dropped_or_kept": dict(counts), "kept_close_range": [lo, hi], "extract_sha256": sha}
+    if spec.get("log_dropped"): L["dropped_by_cut"] = dropped
     json.dump(L, open(os.path.join(out, name + "_cutlog.json"), "w"), indent=1)
     print(name, dict(counts), "range", lo, hi, "sha256", sha)
 

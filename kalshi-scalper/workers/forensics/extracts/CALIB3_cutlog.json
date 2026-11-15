@@ -1,0 +1,8153 @@
+{
+ "card": "CALIB3",
+ "spec": {
+  "card": "CALIB3",
+  "sources": [
+   "lad1",
+   "lad2"
+  ],
+  "series": [
+   "KXBTCD"
+  ],
+  "start_ts": 1790380800,
+  "end_ts": 1791504000,
+  "cuts": [
+   {
+    "card": "CALIB3 third 3",
+    "from_ts": 1791129600,
+    "series": null,
+    "why": "third 3 = closes from 2026-10-04T16:00Z (Desk A)"
+   }
+  ],
+  "log_dropped": true,
+  "market_cols": [
+   "ticker",
+   "series",
+   "open_ts",
+   "close_ts",
+   "result",
+   "strike"
+  ],
+  "candle_cols": [
+   "end_ts",
+   "bid_c",
+   "ask_c",
+   "volume",
+   "oi"
+  ],
+  "note": "KXBTCD lad1 then lad2, closes 2026-09-26T00:00Z to before 2026-10-09T00:00Z; third 3 cut in the extract, dropped tickers listed in the cut log"
+ },
+ "dropped_or_kept": {
+  "kept": 2837,
+  "cut:CALIB3 third 3": 1620,
+  "own_heldout_or_after_end": 5606,
+  "dup_later_source": 4202
+ },
+ "kept_close_range": [
+  1790384400,
+  1791126000
+ ],
+ "extract_sha256": "fb29d1cedddf1db71fad40a3853e8fd663189a2e2dad9bbbc15e2cec3963774d",
+ "dropped_by_cut": [
+  [
+   "KXBTCD-26OCT0412-T85499.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T85399.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T85299.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T85199.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T85399.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T85299.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T85199.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0414-T85499.99",
+   1791136800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0414-T85399.99",
+   1791136800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0414-T85299.99",
+   1791136800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0414-T85199.99",
+   1791136800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T85399.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T85299.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T85199.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85699.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85599.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85499.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85399.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0417-T85749.99",
+   1791147600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0417-T85499.99",
+   1791147600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T86199.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T86099.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85999.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85899.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85799.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85699.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85599.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85499.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86899.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86799.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86699.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86599.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86499.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86399.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86299.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86199.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86099.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85999.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85899.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86999.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86899.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86799.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86699.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86599.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86499.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86399.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86299.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86199.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86599.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86499.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86399.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86299.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86199.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86099.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T85999.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T87099.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86999.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86899.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86799.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86699.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86599.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86499.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86399.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86299.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86799.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86699.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86599.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86499.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86399.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86299.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86199.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86599.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86499.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86399.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86299.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86199.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86099.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86099.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85999.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85899.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85799.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85699.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85599.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85499.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85399.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85299.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85199.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T85099.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85899.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85799.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85699.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85599.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85499.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85399.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85299.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85199.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T86099.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85999.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85899.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85799.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85699.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85599.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86599.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86499.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86399.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86299.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86199.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86099.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85999.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85899.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86599.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86499.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86399.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86299.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86199.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86099.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T85999.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86099.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T85999.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T85899.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T85799.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T85699.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T85599.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T86399.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T86299.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T86199.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T86099.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T85999.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T85899.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T86299.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T86199.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T86099.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T85999.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T85899.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86199.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86099.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T85999.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T85899.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T85799.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T85699.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T85599.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86499.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86399.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86299.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86199.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86099.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85999.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85899.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85799.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85699.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85599.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85499.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85399.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85299.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86499.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86399.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86299.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86199.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86099.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85999.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85899.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85799.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85699.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85599.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85499.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85399.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85299.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85199.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T85099.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T84999.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T84899.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T84799.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T84699.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85699.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85599.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85499.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85399.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85299.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85199.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85099.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T84999.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T84899.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T84799.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T84699.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85599.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85499.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85399.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85299.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85199.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85099.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84999.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84899.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84799.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85599.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85499.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85399.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85299.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85199.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85099.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85799.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85699.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85599.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85499.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85399.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85999.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85899.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85799.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85699.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85599.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85499.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0517-T85749.99",
+   1791234000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T86099.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85999.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85899.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85799.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85699.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T86199.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T86099.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T85999.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T85899.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T85799.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T85699.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T86099.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T85999.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T85899.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T85799.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T85699.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T86099.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85999.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85899.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85799.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85699.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85599.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86099.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T85999.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T85899.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T85799.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T85699.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T85599.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85899.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85799.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85699.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85599.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85499.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85399.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85599.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85499.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85399.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85299.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85199.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85099.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85699.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85599.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85499.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85399.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85799.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85699.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85599.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85499.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85499.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85399.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85299.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85199.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85099.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T85599.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T85499.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T85399.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T85299.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T85199.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T86099.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85999.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85899.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85799.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85699.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85599.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T86199.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T86099.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T85999.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T85899.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T85799.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T85699.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T85599.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86299.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86199.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86099.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85999.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85899.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85799.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T86499.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T86399.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T86299.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T86199.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T86099.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T85999.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86499.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86399.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86299.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86199.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86099.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T85999.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T85899.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86799.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86699.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86599.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86499.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86399.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86299.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86199.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86099.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85999.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85899.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85799.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85699.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86599.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86499.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86399.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86299.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86199.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86099.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85999.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85899.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85799.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85699.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85599.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86899.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86799.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86699.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86599.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86499.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86399.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86299.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86199.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86099.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T85999.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85999.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85899.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85799.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85699.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85599.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85499.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85399.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85299.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85899.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85799.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85699.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85599.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85499.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85399.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85799.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85699.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85599.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85499.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85399.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85699.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85599.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85499.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85399.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85299.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0617-T85749.99",
+   1791320400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0617-T85499.99",
+   1791320400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85699.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85599.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85499.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85699.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85599.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85499.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85399.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0620-T85599.99",
+   1791331200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0620-T85499.99",
+   1791331200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0620-T85399.99",
+   1791331200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0620-T85299.99",
+   1791331200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0620-T85199.99",
+   1791331200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85599.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85499.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85399.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85299.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85599.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85499.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85399.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85299.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85199.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85099.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84599.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84499.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84399.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84299.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84199.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84099.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83999.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83899.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83799.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83699.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83599.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83499.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83399.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84299.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84199.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84099.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83999.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83899.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83799.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83699.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84299.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84199.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84099.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83999.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83899.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83799.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T84399.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T84299.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T84199.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T84099.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T83999.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84499.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84399.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84299.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84199.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84099.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T84399.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T84299.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T84199.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T84099.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T84299.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T84199.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T84099.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83999.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83899.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83799.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T83999.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T83899.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T83799.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T83699.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T83599.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T83499.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T83399.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83999.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83899.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83799.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83699.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83599.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83499.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83399.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83999.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83899.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83799.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83699.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83599.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83499.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83399.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83899.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83799.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83699.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83599.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83499.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83399.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83299.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83199.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83899.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83799.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83699.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83599.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83499.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83399.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83299.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83199.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83099.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82999.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82899.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82799.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82699.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83599.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83499.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83399.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83299.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83199.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83099.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82999.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82899.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82799.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82699.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82599.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83599.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83499.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83399.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83299.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83199.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83099.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82999.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82899.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82799.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83899.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83799.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83699.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83599.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83499.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83399.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83299.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83499.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83399.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83299.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83199.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83099.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T82999.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T82899.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83499.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83399.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83299.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83199.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83099.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T82999.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83699.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83599.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83499.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83399.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83299.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83199.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0717-T83499.99",
+   1791406800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0717-T83249.99",
+   1791406800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83399.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83299.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83199.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83099.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T83399.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T83299.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T83199.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T83099.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T83499.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T83399.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T83299.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T83199.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83399.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83299.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83199.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83099.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T82999.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83499.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83399.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83299.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83199.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83099.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T82999.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T83299.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T83199.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T83099.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82999.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82899.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T83099.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82999.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82899.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82799.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82699.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82599.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82499.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T83099.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82999.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82899.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82799.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82699.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82599.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82499.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82399.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T83299.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T83199.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T83099.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T82999.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T82899.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T82799.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T82999.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T82899.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T82799.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T82699.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T82599.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T82499.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T82399.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82699.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82599.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82499.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82399.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82299.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82199.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82099.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82699.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82599.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82499.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82399.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82299.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82199.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82099.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81999.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81899.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82799.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82699.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82599.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82499.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82399.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82299.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82199.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82099.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81999.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81899.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81799.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81699.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81599.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T83199.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T83099.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82999.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82899.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82799.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82699.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82599.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82499.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82399.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82299.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82199.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82099.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81999.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81899.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81799.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81699.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81599.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81499.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81399.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81299.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81199.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T81099.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T80999.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T80899.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T80799.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T80699.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T80599.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T80499.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81699.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81599.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81499.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81399.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81299.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81199.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81099.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80999.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80899.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80799.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80699.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80599.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80499.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81299.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81199.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81099.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80999.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80899.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80799.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80699.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80599.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80499.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80399.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80299.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80199.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81999.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81899.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81799.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81699.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81599.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81499.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81399.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81299.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81199.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T81099.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80999.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80899.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80799.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T82099.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81999.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81899.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81799.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81699.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81599.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81499.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81399.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81299.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T81999.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T81749.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T81499.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81799.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81699.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81599.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81499.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81399.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81999.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81899.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81799.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81699.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81599.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T85799.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T85699.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T85599.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T85099.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T84999.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0412-T84899.99",
+   1791129600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T85599.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T85499.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T85099.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T84999.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T84899.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0413-T84799.99",
+   1791133200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0414-T85699.99",
+   1791136800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0414-T85599.99",
+   1791136800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0414-T85099.99",
+   1791136800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T85599.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T85499.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T85099.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T84999.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0415-T84899.99",
+   1791140400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85799.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85299.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85199.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0416-T85099.99",
+   1791144000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0417-T85999.99",
+   1791147600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0417-T85249.99",
+   1791147600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0417-T84999.99",
+   1791147600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T86699.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T86399.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T86299.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85399.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85299.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0418-T85199.99",
+   1791151200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T87399.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T87299.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T87199.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T87099.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T86999.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85799.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85699.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85599.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85499.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85399.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85299.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0419-T85199.99",
+   1791154800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T87399.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T87299.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T87199.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T87099.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T86099.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T85999.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T85899.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T85799.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0420-T85699.99",
+   1791158400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T87699.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T87599.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T87399.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T87299.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T87199.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T87099.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86999.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86899.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86799.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T86699.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T85899.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T85799.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T85699.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T85599.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T85499.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0421-T85399.99",
+   1791162000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T87899.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T87699.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T87599.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T87399.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T87299.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T87199.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86199.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T86099.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T85999.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T85899.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T85799.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0422-T85699.99",
+   1791165600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T87599.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T87399.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T87299.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T87199.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T87099.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86999.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86899.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T86099.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T85999.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T85899.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0423-T85799.99",
+   1791169200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T87099.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86999.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86899.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86799.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T86699.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T85999.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T85899.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T85799.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0500-T85599.99",
+   1791172800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86899.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86799.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86699.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86599.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86499.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86399.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86299.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T86199.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T84999.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T84799.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0501-T84699.99",
+   1791176400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T86199.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T86099.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85999.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T85099.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T84999.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T84899.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T84799.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T84699.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0502-T84599.99",
+   1791180000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T86699.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T86599.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T86499.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T86399.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T86299.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T86199.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85499.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85399.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85299.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0503-T85199.99",
+   1791183600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T87599.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T87199.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T87099.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86999.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86899.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86799.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T86699.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85799.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85699.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85599.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85499.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85399.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85299.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0504-T85199.99",
+   1791187200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T87299.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T87199.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T87099.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86999.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86899.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86799.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T86699.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T85899.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T85799.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T85699.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T85599.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0505-T85499.99",
+   1791190800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86799.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86699.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86599.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86499.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86399.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86299.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T86199.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T85499.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0506-T85399.99",
+   1791194400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T86599.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T86499.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T85799.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T85699.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T85599.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0507-T85499.99",
+   1791198000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T86599.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T86499.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T86399.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T85799.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T85699.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T85599.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T85499.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0508-T85399.99",
+   1791201600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86999.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86899.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86799.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86699.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86599.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86499.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86399.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T86299.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T85499.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0509-T85399.99",
+   1791205200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T87099.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86999.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86899.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86799.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86699.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T86599.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85199.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T85099.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T84999.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0510-T84899.99",
+   1791208800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T88799.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T88699.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T88399.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T88299.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T88099.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87999.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87899.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87799.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87699.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87599.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87499.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87399.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87299.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87199.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T87099.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86999.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86899.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86799.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86699.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T86599.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0511-T84599.99",
+   1791212400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T87299.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T87199.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T87099.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86999.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86899.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86799.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86699.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86599.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86499.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86399.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86299.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86199.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T86099.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85999.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85899.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T85799.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T84599.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T84499.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T84099.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0512-T83899.99",
+   1791216000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T86099.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85999.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85899.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85799.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T85699.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84699.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84599.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84499.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84399.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0513-T84299.99",
+   1791219600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85899.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85799.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T85699.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T84999.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T84899.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T84799.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T84699.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0514-T84599.99",
+   1791223200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85899.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85299.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85199.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T85099.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T84999.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0515-T84899.99",
+   1791226800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T86099.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85399.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85299.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85199.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0516-T85099.99",
+   1791230400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0517-T86249.99",
+   1791234000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0517-T85999.99",
+   1791234000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0517-T85499.99",
+   1791234000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0517-T85249.99",
+   1791234000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T86199.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85599.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85499.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85399.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0518-T85299.99",
+   1791237600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T86399.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T86299.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T85599.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0519-T85499.99",
+   1791241200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T86599.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T86499.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T86399.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T86299.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T86199.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0520-T85599.99",
+   1791244800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T86399.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T86299.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T86199.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85499.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85399.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0521-T85299.99",
+   1791248400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T87299.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86899.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86799.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86699.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86599.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86499.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86399.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86299.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T86199.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T85499.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0522-T85399.99",
+   1791252000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T86099.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85999.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85299.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85199.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T85099.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T84999.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0523-T84899.99",
+   1791255600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85999.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85899.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85799.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0600-T85699.99",
+   1791259200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T86099.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85999.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85899.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85799.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85299.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85199.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0601-T85099.99",
+   1791262800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85999.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85899.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85399.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85299.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0602-T85199.99",
+   1791266400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85799.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85699.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T85599.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T84999.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T84899.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0603-T84799.99",
+   1791270000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T85699.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T85099.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T84999.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T84899.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0604-T84799.99",
+   1791273600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T86799.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T86699.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T86499.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T86399.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T86299.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T86199.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85499.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85399.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85299.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0605-T85199.99",
+   1791277200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T86599.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T86499.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T86399.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T86299.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0606-T85499.99",
+   1791280800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86799.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86699.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86599.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86499.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T86399.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85699.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85599.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85499.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85399.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0607-T85299.99",
+   1791284400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T86699.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T86599.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T85899.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T85799.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T85699.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0608-T85599.99",
+   1791288000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86899.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86799.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86699.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T86599.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T85799.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0609-T85699.99",
+   1791291600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T87799.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T87199.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T87099.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86999.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T86899.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85599.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85499.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85399.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85299.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0610-T85199.99",
+   1791295200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T87099.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86999.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86899.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86799.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T86699.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85499.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85399.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0611-T85299.99",
+   1791298800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87999.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87899.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87799.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87699.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87599.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87499.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87399.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87299.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87199.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T87099.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T86999.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T85899.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T85799.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T85699.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0612-T85499.99",
+   1791302400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86799.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86699.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86599.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86499.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86399.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86299.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86199.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T86099.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85199.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T85099.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0613-T84999.99",
+   1791306000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T86199.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T86099.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85999.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85299.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85199.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T85099.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T84999.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0614-T84899.99",
+   1791309600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T86199.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T86099.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85999.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85899.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85299.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0615-T85199.99",
+   1791313200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85999.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85899.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85799.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85199.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T85099.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0616-T84999.99",
+   1791316800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0617-T85999.99",
+   1791320400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0617-T85249.99",
+   1791320400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85999.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85899.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85799.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85399.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85299.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85199.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0618-T85099.99",
+   1791324000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85999.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85899.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85799.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0619-T85299.99",
+   1791327600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0620-T85799.99",
+   1791331200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0620-T85699.99",
+   1791331200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T86099.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85999.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85899.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85799.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85699.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85199.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0621-T85099.99",
+   1791334800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85999.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85899.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85799.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T85699.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0622-T84999.99",
+   1791338400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86799.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86699.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86599.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86499.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86399.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86299.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86199.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T86099.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85999.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85899.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85799.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85699.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85599.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85499.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85399.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85299.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85199.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T85099.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84999.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84899.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84799.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T84699.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83299.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83199.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T83099.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82999.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82899.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82799.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82699.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82599.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82499.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82399.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82299.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82199.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T82099.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T81999.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T81899.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T81799.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T81699.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T81599.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0623-T79999.99",
+   1791342000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84999.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84899.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84799.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84699.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84599.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84499.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T84399.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83599.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83499.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83399.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83299.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83199.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T83099.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T82999.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0700-T82899.99",
+   1791345600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84899.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84699.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84599.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84499.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T84399.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83699.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83599.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83499.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83399.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0701-T83299.99",
+   1791349200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T84699.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T84599.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T84499.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T83899.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T83799.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T83699.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T83599.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0702-T83499.99",
+   1791352800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84899.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84799.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84699.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T84599.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T83999.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T83899.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T83799.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T83699.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0703-T83599.99",
+   1791356400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T84699.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T84599.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T84499.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T83999.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T83899.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T83799.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T83699.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T83599.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0704-T83499.99",
+   1791360000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T84599.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T84499.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T84399.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83699.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83599.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83499.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83399.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0705-T83299.99",
+   1791363600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T84399.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T84299.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T84199.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0706-T84099.99",
+   1791367200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T84799.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T84399.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T84299.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T84199.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T84099.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83299.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83199.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T83099.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0707-T82999.99",
+   1791370800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T84599.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T84499.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T84399.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T84299.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T84199.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T84099.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83299.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83199.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T83099.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T82999.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0708-T82899.99",
+   1791374400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T84299.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T84199.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T84099.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83999.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T83099.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T82999.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T82899.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T82799.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0709-T82699.99",
+   1791378000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T85299.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T85199.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T84699.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T84599.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T84499.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T84399.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T84299.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T84199.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T84099.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T83999.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82599.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82499.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82399.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82299.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T82199.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T81999.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T81699.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T81599.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0710-T81499.99",
+   1791381600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T84499.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T84199.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T84099.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83999.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83899.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83799.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T83699.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82499.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82399.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82299.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82199.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T82099.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T81999.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T81899.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T81799.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T81699.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0711-T81599.99",
+   1791385200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83799.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T83699.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82699.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82599.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82499.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82399.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82299.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82199.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T82099.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T81999.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T81899.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T81799.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0712-T81699.99",
+   1791388800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T84899.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T84799.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T84699.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T84599.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T84299.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T84199.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T84099.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83999.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83199.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T83099.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T82999.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T82899.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T82799.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T82699.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T82599.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0713-T82499.99",
+   1791392400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T84199.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T84099.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83999.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83899.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83799.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83699.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T83599.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T82799.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0714-T82699.99",
+   1791396000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T84099.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83999.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83899.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83799.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83699.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T83599.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T82899.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T82799.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0715-T82699.99",
+   1791399600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83899.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83799.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T83099.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T82999.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T82899.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0716-T82799.99",
+   1791403200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0717-T83999.99",
+   1791406800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0717-T83749.99",
+   1791406800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0717-T82999.99",
+   1791406800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83799.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83699.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83599.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T83499.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T82999.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0718-T82899.99",
+   1791410400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T83599.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T83499.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T82999.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T82899.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0719-T82799.99",
+   1791414000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T83099.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T82999.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T82899.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T82799.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0720-T82699.99",
+   1791417600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83799.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83699.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83599.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T83499.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T82899.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T82799.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0721-T82699.99",
+   1791421200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T84199.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83999.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83899.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83799.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83699.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T83599.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T82899.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0722-T82599.99",
+   1791424800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T83599.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T83499.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T83399.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82799.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82699.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82599.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82499.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82399.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82299.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82199.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T82099.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0723-T81899.99",
+   1791428400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T83399.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T83299.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T83199.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82399.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82299.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0800-T82199.99",
+   1791432000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T83499.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T83399.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T83299.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T83199.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82299.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82199.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T82099.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T81999.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T81899.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0801-T81599.99",
+   1791435600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T83599.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T83499.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T83399.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T82699.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T82599.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T82499.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0806-T82399.99",
+   1791453600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T83499.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T83399.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T83299.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T83199.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0807-T83099.99",
+   1791457200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T83499.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T83099.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82999.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82899.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T82799.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T81999.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T81899.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0808-T81799.99",
+   1791460800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T83299.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T83199.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T83099.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82999.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82899.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T82799.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81799.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81699.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81599.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81499.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81399.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81299.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0809-T81199.99",
+   1791464400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T84099.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T83999.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T83899.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T83799.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T83699.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T83299.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T83199.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T83099.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82999.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T82899.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81499.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81399.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81299.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81199.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T81099.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T80999.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T80899.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T80399.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T80299.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0810-T80199.99",
+   1791468000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T83799.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T83699.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T83499.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T83399.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T83299.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T82099.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81999.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81899.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81799.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81699.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81599.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81499.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81399.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81299.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T81199.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0811-T80799.99",
+   1791471600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T83599.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T83499.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T83299.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T83199.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T83099.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82999.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82899.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82799.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82699.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82599.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82499.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82399.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82299.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0812-T82199.99",
+   1791475200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T82699.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T82599.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T82499.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T82399.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T82199.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T82099.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81999.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81899.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T81799.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80399.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80299.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80199.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T80099.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79999.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79899.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79799.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79699.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79599.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79499.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79399.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79199.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0813-T79099.99",
+   1791478800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T82899.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T82799.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T82699.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T82399.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T82299.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T82199.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T82099.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81999.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81899.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81799.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81699.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81599.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81499.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T81399.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T80099.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79999.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79899.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79799.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79699.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79599.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79499.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79399.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79299.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T79099.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T78899.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T78799.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0814-T78699.99",
+   1791482400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80699.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80599.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80499.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80399.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80299.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80199.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T80099.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T79999.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T79899.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T79799.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T79699.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T79599.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0815-T79099.99",
+   1791486000,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T82199.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81199.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T81099.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80999.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80899.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80799.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80699.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80599.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80499.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80399.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0816-T80299.99",
+   1791489600,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T82749.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T82499.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T82249.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T81249.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0817-T80999.99",
+   1791493200,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T82199.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T82099.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81999.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81899.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81299.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81199.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T81099.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0818-T80999.99",
+   1791496800,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T82299.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T82199.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T82099.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81499.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81399.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81299.99",
+   1791500400,
+   "CALIB3 third 3"
+  ],
+  [
+   "KXBTCD-26OCT0819-T81199.99",
+   1791500400,
+   "CALIB3 third 3"
+  ]
+ ]
+}
