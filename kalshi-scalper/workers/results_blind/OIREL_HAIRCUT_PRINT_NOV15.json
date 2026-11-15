@@ -1,0 +1,87 @@
+{
+ "counts": {
+  "noside": 950,
+  "nofire": 4148,
+  "nodata": 13,
+  "trade": 382
+ },
+ "nodata_reasons": {
+  "signal_not_two_sided": 13
+ },
+ "note": "this reader counts a one-sided or crossed signal or fill quote, and a fill ask outside (0,1), as NoData; oirel.py does not, so n can differ from the printed n for that reason (counted apart from candle_missing), as well as for the cut and the per-order fee",
+ "excluded_tickers_dropped": "0 of the 28 (none present; extract checked by Auditor B)",
+ "n": 382,
+ "label": "upper bound, not fill-checked; fee mode per-order rounded",
+ "h0.00": {
+  "net": 289.76,
+  "pf": 1.888262162410717,
+  "wins": 100,
+  "losses": 282,
+  "half1": {
+   "n": 191,
+   "pf": 1.840282232200128,
+   "net": 131.0
+  },
+  "half2": {
+   "n": 191,
+   "pf": 1.9321824907521579,
+   "net": 158.76
+  },
+  "discovery": {
+   "n": 298,
+   "pf": 1.7325691729608683
+  },
+  "validation": {
+   "n": 84,
+   "pf": 2.5420784188715335
+  }
+ },
+ "h0.01": {
+  "net": 249.82,
+  "pf": 1.7016824424908013,
+  "wins": 100,
+  "losses": 282,
+  "half1": {
+   "n": 191,
+   "pf": 1.6480345774195433,
+   "net": 110.95
+  },
+  "half2": {
+   "n": 191,
+   "pf": 1.751379720809436,
+   "net": 138.87
+  },
+  "discovery": {
+   "n": 298,
+   "pf": 1.5629828102164383
+  },
+  "validation": {
+   "n": 84,
+   "pf": 2.2823015294974507
+  }
+ },
+ "h0.02": {
+  "net": 210.11,
+  "pf": 1.544876948211924,
+  "wins": 100,
+  "losses": 282,
+  "half1": {
+   "n": 191,
+   "pf": 1.4891572732152443,
+   "net": 91.13
+  },
+  "half2": {
+   "n": 191,
+   "pf": 1.5969595103105714,
+   "net": 118.98
+  },
+  "discovery": {
+   "n": 298,
+   "pf": 1.420424957407824
+  },
+  "validation": {
+   "n": 84,
+   "pf": 2.064412238325282
+  }
+ }
+}
