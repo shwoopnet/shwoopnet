@@ -9,15 +9,16 @@ A = {1: (1000, 1300, (0.20, 0.22), (0.23, 0.25), "yes"), 2: (1000, 1100, (0.20, 
 B = {1: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "yes"), 2: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "no")}
 d = tempfile.mkdtemp(); db = os.path.join(d, "x.sqlite"); c = sqlite3.connect(db)
 c.execute("create table market(ticker,series,open_ts,close_ts,result,strike,src)"); c.execute("create table candle(ticker,end_ts,bid_c,ask_c,volume,oi)")
-for ser, W in (("KXZZ15M", A), ("KXSILVER15M", B), ("KXBTC15M", B)):
+Cc = {1: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "yes"), 2: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "no"), 3: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "yes"), 4: (1000, 1300, (0.30, 0.32), (0.33, 0.35), "yes"), 5: (0, 1300, (0.30, 0.32), (0.33, 0.35), "yes")}
+for ser, W in (("KXZZ15M", A), ("KXSILVER15M", B), ("KXBTC15M", B), ("KXZZ2", Cc)):
     for k, (o0, o1, sg, fl, res) in W.items():
-        C = base + 900 * k; tk = "%s-W%d" % (ser, k); c.execute("insert into market values(?,?,?,?,?,?,?)", (tk, ser, C - 900, C, res, 1.0, "t"))
+        C = base + (86400 * k if ser == 'KXZZ2' else 900) * (1 if ser == 'KXZZ2' else k); tk = "%s-W%d" % (ser, k); c.execute("insert into market values(?,?,?,?,?,?,?)", (tk, ser, C - 900, C, res, 1.0, "t"))
         if o0 is not None: c.execute("insert into candle values(?,?,?,?,?,?)", (tk, C - 360, 0.5, 0.52, 5, o0))
         c.execute("insert into candle values(?,?,?,?,?,?)", (tk, C - 180, sg[0], sg[1], 5, o1)); c.execute("insert into candle values(?,?,?,?,?,?)", (tk, C - 120, fl[0], fl[1], 5, o1))
         if ser == "KXZZ15M" and k == 9: c.execute("insert into candle values(?,?,?,?,?,?)", (tk, C + 60, 0.98, 0.99, 5, o1))
 c.commit(); c.close()
 r = X.run(db); ok = lambda a, b, t=1e-9: abs(a - b) < t
-assert r["tries"] == 2 and r["series"]["KXBTC15M"]["in_sample_home_market_not_a_try"] is True and not r["series"]["KXZZ15M"]["in_sample_home_market_not_a_try"]
+assert r["tries"] == 3 and r["series"]["KXBTC15M"]["in_sample_home_market_not_a_try"] is True and not r["series"]["KXZZ15M"]["in_sample_home_market_not_a_try"]
 za, zb = r["series"]["KXZZ15M"], r["series"]["KXSILVER15M"]
 assert za["sources_of_kept_markets"] == {"t": 9} and za["all"]["n"] == 5 and ok(za["all"]["h0.00"]["pf"], 9.0254, 1e-4) and ok(za["all"]["h0.01"]["net"], 24.78) and ok(za["all"]["h0.02"]["pf"], 8.2202, 1e-4)
 assert za["fill_0.08_or_more"]["n"] == 5 and za["fill_under_0.08"]["n"] == 0 and za["flags"]["evidence"] == "no evidence at n = 5" and za["flags"]["pass_standard"] is None and not za["c11_series"]
