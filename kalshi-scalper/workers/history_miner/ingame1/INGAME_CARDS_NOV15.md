@@ -30,3 +30,4 @@ Tries tonight: 2 (one per card).
 - Clear: KXNBATOTAL and KXNFLTOTAL closes Nov 8 to Nov 12. IGUNDER1 runs on NBA and NFL only.
 - Held: KXNBAGAME and KXNFLGAME closes from Nov 1 (SPORTS-PRE outcome set, until 2027-01-01, unless the Head rules a bare result listing is not a read of its test); NHL (NHLOT's held-out unknown, Desk B to state). IGFADE1 waits on both rulings and is not run tonight.
 - IG_RESULTS cut to the two totals series (max 6 requests). The reader is unchanged: a market not in the listing is dropped.
+- Head's ruling (21:27Z): a settled-result listing IS a read of SPORTS-PRE's outcome set, so KXNBAGAME and KXNFLGAME stay out until 2027-01-01 or SPORTS-PRE closes. IGFADE1 is PARKED (not killed); NHL waits on Desk B's NHLOT date. Main dispatches the 2-series IG_RESULTS (sha ad7d5391).
