@@ -1,0 +1,463 @@
+{
+ "job": {
+  "job_id": "CALIB2_LISTS",
+  "status": "active",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/history_miner/calib2/CALIB2_CARD_AND_PULL_PLAN_NOV15.md",
+  "purpose": "CALIB2 stage 1: settled markets (tickers, close times, results) of the 10 W-CAT-SPORTS1 series whose clean window runs to 2026-10-21, closes 2026-09-14 to 2026-10-21 only, for the calibration census; the candle job is built from these answers.",
+  "heldout": "none read: every request is capped at max_close_ts 1792627199 (2026-10-21T23:59:59Z), before CALIB2's own third 3 (from 2026-10-22) and before every hold Auditor B listed for these 10 series (16:18Z): W-CAT-SPORTS1 cuts are released and later; SOCCER1 and SOCCERELO1 released 2026-11-13; TIE3 from Oct 27; SOCDERIV from Nov 13; FAMSPORTS from Oct 31.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 5.0,
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "min_close_ts",
+     "max_close_ts",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXNBASPREAD",
+   "KXNBATOTAL",
+   "KXNHLSPREAD",
+   "KXNCAAMBSPREAD",
+   "KXNCAAMBTOTAL",
+   "KXEPLGAME",
+   "KXUCLGAME",
+   "KXLALIGAGAME",
+   "KXSERIEAGAME",
+   "KXBUNDESLIGAGAME"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 30,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "settled_KXNBASPREAD",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNBASPREAD",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXNBATOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNBATOTAL",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXNHLSPREAD",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNHLSPREAD",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXNCAAMBSPREAD",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNCAAMBSPREAD",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXNCAAMBTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNCAAMBTOTAL",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXEPLGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXEPLGAME",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXUCLGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXUCLGAME",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXLALIGAGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLALIGAGAME",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXSERIEAGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXSERIEAGAME",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXBUNDESLIGAGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBUNDESLIGAGAME",
+     "status": "settled",
+     "min_close_ts": 1789344000,
+     "max_close_ts": 1792627199,
+     "limit": 1000
+    },
+    "max_pages": 3
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-15T1621Z",
+ "finished": "2026-11-15T1622Z",
+ "status": "complete",
+ "requests_sent": 13,
+ "bytes_stored": 12389267,
+ "rows": [
+  {
+   "index": 1,
+   "id": "settled_KXNBASPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBASPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2282937,
+   "t_send_ms": 1794759718908,
+   "t_recv_ms": 1794759718988,
+   "server_date": "Sun, 15 Nov 2026 16:21:58 GMT",
+   "file": "0001.json.gz",
+   "sha256": "a4336f3f85b391a06cad36bbaad6bceaa5f6e10dbfbafa52725033c15e9cfba7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "settled_KXNBASPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBASPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2164076,
+   "t_send_ms": 1794759723908,
+   "t_recv_ms": 1794759724000,
+   "server_date": "Sun, 15 Nov 2026 16:22:03 GMT",
+   "file": "0002.json.gz",
+   "sha256": "adf26e47599c42e765f56dcd46f6b8f1ef7a682a1a96d8312e22cdef43a9d95c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "settled_KXNBATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBATOTAL",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2171827,
+   "t_send_ms": 1794759728908,
+   "t_recv_ms": 1794759728991,
+   "server_date": "Sun, 15 Nov 2026 16:22:08 GMT",
+   "file": "0003.json.gz",
+   "sha256": "c2259a9c520a61ffdb0624c1fbd8e7705b0c7479e78fa7995122cc651352b9dd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "settled_KXNBATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBATOTAL",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1687403,
+   "t_send_ms": 1794759733909,
+   "t_recv_ms": 1794759734010,
+   "server_date": "Sun, 15 Nov 2026 16:22:13 GMT",
+   "file": "0004.json.gz",
+   "sha256": "a326295059061e3ea956ca0efdce6a8d8547cebcd32c8462f656dbcf4ec01de0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "settled_KXNHLSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLSPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2032498,
+   "t_send_ms": 1794759738909,
+   "t_recv_ms": 1794759738990,
+   "server_date": "Sun, 15 Nov 2026 16:22:18 GMT",
+   "file": "0005.json.gz",
+   "sha256": "b80bce774c3eeb3abec399e0b9b43c2339dc32014e85530d4bed03d3ca071224",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "settled_KXNHLSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLSPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 829338,
+   "t_send_ms": 1794759743909,
+   "t_recv_ms": 1794759743971,
+   "server_date": "Sun, 15 Nov 2026 16:22:23 GMT",
+   "file": "0006.json.gz",
+   "sha256": "50520ec7b8b7974a370cde35f2715901ae145a534152c33d5ac009a5c72a38d9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "settled_KXNCAAMBSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNCAAMBSPREAD",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794759748909,
+   "t_recv_ms": 1794759748946,
+   "server_date": "Sun, 15 Nov 2026 16:22:28 GMT",
+   "file": "0007.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "settled_KXNCAAMBTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNCAAMBTOTAL",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794759753909,
+   "t_recv_ms": 1794759753944,
+   "server_date": "Sun, 15 Nov 2026 16:22:33 GMT",
+   "file": "0008.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "settled_KXEPLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 220439,
+   "t_send_ms": 1794759758909,
+   "t_recv_ms": 1794759759001,
+   "server_date": "Sun, 15 Nov 2026 16:22:38 GMT",
+   "file": "0009.json.gz",
+   "sha256": "e72326e89bac563c2aca31648ce4a0d9524dcd9a9361a9116cb76a1818086421",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "settled_KXUCLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 257765,
+   "t_send_ms": 1794759763909,
+   "t_recv_ms": 1794759763960,
+   "server_date": "Sun, 15 Nov 2026 16:22:43 GMT",
+   "file": "0010.json.gz",
+   "sha256": "38df98cd8af7be9939d71bedec643e0569bc92ffaf0fa9bc4f671f7f326a9a4f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "settled_KXLALIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGAGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 293366,
+   "t_send_ms": 1794759768909,
+   "t_recv_ms": 1794759768957,
+   "server_date": "Sun, 15 Nov 2026 16:22:48 GMT",
+   "file": "0011.json.gz",
+   "sha256": "4286d240b720f2fad8c554d3b88bd7aaca9688c2cf231ea1a061eaa297847f55",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "settled_KXSERIEAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEAGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 254947,
+   "t_send_ms": 1794759773909,
+   "t_recv_ms": 1794759773958,
+   "server_date": "Sun, 15 Nov 2026 16:22:53 GMT",
+   "file": "0012.json.gz",
+   "sha256": "7de949b468ba50e0ed712c4ab88735261743d72245972dbe04eaa67aa71af4c8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "settled_KXBUNDESLIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGAGAME",
+    "status": "settled",
+    "min_close_ts": 1789344000,
+    "max_close_ts": 1792627199,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 194617,
+   "t_send_ms": 1794759778910,
+   "t_recv_ms": 1794759778956,
+   "server_date": "Sun, 15 Nov 2026 16:22:58 GMT",
+   "file": "0013.json.gz",
+   "sha256": "d8bc78dd84637a1b7552298ee789fe819251f025aa5adf4b60f0a8095b1d0037",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
