@@ -104,7 +104,7 @@ with tempfile.TemporaryDirectory() as root:
     for mode, asof in (("dev", "2026-11-25T23:59:59Z"), ("held", "2026-12-11T23:59:59Z"), ("dev", "garbage")):
         try: s.run(mode, asof, root); raise AssertionError("not refused")
         except SystemExit as e: assert "STOP" in str(e)
-    out = "\n".join(s.run("dev", "2026-11-26T00:00:00Z", root)); assert "SECRETTICKER1" not in out and "LABEL: no evidence at n = 1" in out and "would read: no evidence at n = 0" in out
+    out = "\n".join(s.run("dev", "2026-11-26T00:00:00Z", root)); assert "ALL COMBOS (the registered line)" in out and "information only; the registered verdict is the all-combos line" in out and "SECRETTICKER1" not in out and "LABEL: no evidence at n = 1" in out and "would read: no evidence at n = 0" in out
     mon = "\n".join(s.run("monitor", "2026-11-14T00:00:00Z", root)); assert mon.startswith("MONITOR, not the registered verdict; the Nov 26 read is the verdict") and "SECRETTICKER1" not in mon and "LABEL" not in mon and "KILL" not in mon
     out2 = "\n".join(s.run("dev", "2026-11-26T00:00:00Z", root)); assert out == out2
 # held mode: blocking from dev fills, window by receive instant
@@ -116,4 +116,30 @@ with tempfile.TemporaryDirectory() as root:
     put(root, "2026-11-13", "1200", "quotes.csv.gz", [{"ticker": "A"}], ["ticker"])
     try: s.walk(root, "dev"); raise AssertionError("not stopped")
     except SystemExit: pass
+# ---- extra pins (mutation survivors) ----
+def cf(net, cost=0.8, day=0, i=0): return {"ticker": "Q%d" % i, "ts": i, "close": 0, "p": 0.8, "cost": cost, "legs": None, "due": True, "status": "settled", "net": net, "paper": net * 2 / cost, "day": day}
+# kill 2 at PF exactly 1.2 (6.0 over 5.0) is NOT killed (strictly under)
+fs = [cf(0.5, i=i) for i in range(12)] + [cf(-1.0, i=20 + i) for i in range(5)] + [cf(0.0, i=40 + i) for i in range(83)]; o = s.evaluate(fs, "dev"); assert o["kill2_pf"] == 1.2 and o["kill2_fired"] is False
+fs = [cf(0.5, i=i) for i in range(11)] + [cf(-1.0, i=20 + i) for i in range(5)] + [cf(0.0, i=40 + i) for i in range(84)]; assert s.evaluate(fs, "dev")["kill2_fired"] is True
+# unresolved exactly 10 percent of due (12 of 120) is NOT over; 13 of 121 is
+def mixed(ns, nu): return [cf(0.2, i=i, day=i % 12) for i in range(ns)] + [{"ticker": "X%d" % i, "ts": 10 ** 6 + i, "close": 0, "p": 0.8, "cost": 0.8, "legs": None, "due": True, "status": "unresolved"} for i in range(nu)]
+assert s.evaluate(mixed(108, 12), "dev")["L1"] is False and s.evaluate(mixed(108, 13), "dev")["L1"] is True
+# odd n: halves are the first floor(n/2) and the rest (n = 101: 50 and 51)
+fs = [cf(0.3 if i < 50 else -0.1, cost=1.0, i=i, day=i % 12) for i in range(101)]; o = s.evaluate(fs, "dev"); assert abs(o["bar"]["halves"][0] - 15.0 / 50) < 1e-12 and abs(o["bar"]["halves"][1] - (-5.1) / 51) < 1e-12, o["bar"]["halves"]
+# date share exactly 0.30 passes (30 of 100 equal nets on one date), 31 does not
+fs = [cf(0.25, cost=1.0, i=i, day=0 if i < 30 else 1 + (i % 20)) for i in range(100)]; o = s.evaluate(fs, "dev"); assert abs(o["bar"]["share"] - 0.30) < 1e-12 and (o["bar"]["share"] <= 0.30) == o["bar"]["share_ok"]
+fs = [cf(0.25, cost=1.0, i=i, day=0 if i < 31 else 1 + (i % 20)) for i in range(100)]; assert s.evaluate(fs, "dev")["bar"]["share_ok"] is False
+# a full pass gives the label; bootstrap index with many varied dates matches an independent draw
+rr = random.Random(5); fs = [cf(rr.choice([0.35, -0.5, 0.30, 0.31]), cost=1.0, i=i, day=i % 37) for i in range(300)]; days = sorted({f["day"] for f in fs}); rng = random.Random(20261112); out = []
+for _ in range(2000):
+    ch = [rng.choice(days) for _ in days]; sel = [f for d in ch for f in fs if f["day"] == d]; out.append(sum(f["net"] for f in sel) / sum(f["cost"] for f in sel))
+out.sort(); assert s.bootstrap(fs) == out[100] and out[100] != out[101] and out[100] != out[99]
+fs = [cf(0.25 if i % 10 else -0.4, cost=1.0, i=i, day=i % 13) for i in range(100)]; o = s.evaluate(fs, "dev"); assert o["bar_met"] and o["label"] == "paper edge shown (unproven)" and s.evaluate(fs, "held")["label"] == "bar met on the held-out read"
+# every weather prefix
+for pre in s.WEATHER: assert s.is_weather({"legs": [pre + "X-1"]}) and not s.is_weather({"legs": ["Q" + pre + "X-1"]})
+assert s.WEATHER == ("KXHIGH", "KXLOW", "KXTEMP", "KXRAIN", "KXSNOW", "KXHURR", "KXTORN", "KXWIND")
+# kill 1 threshold exactly -40: paper -2.05 a loss gives -41 after 20 (fires at 20); paper -1.9 gives -38 after 20 and -39.9 after 21 and -41.8 after 22 (fires at 22)
+fs = [dict(cf(-0.5, cost=0.5, i=i, day=i), paper=-2.05) for i in range(20)]; assert s.evaluate(fs, "dev")["kill1_at"] == 20
+fs = [dict(cf(-0.5, cost=0.5, i=i, day=i), paper=-1.9) for i in range(30)]; assert s.evaluate(fs, "dev")["kill1_at"] == 22
+fs = [dict(cf(-0.5, cost=0.5, i=i, day=i), paper=-2.0) for i in range(20)]; assert s.evaluate(fs, "dev")["kill1_at"] is None
 print("s3 build 2 tests passed")
