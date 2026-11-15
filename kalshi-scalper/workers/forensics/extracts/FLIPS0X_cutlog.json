@@ -1,0 +1,105 @@
+{
+ "card": "FLIPS0X",
+ "spec": {
+  "card": "FLIPS0X",
+  "sources": [
+   "l1b",
+   "book",
+   "e3b",
+   "alts2",
+   "fresh"
+  ],
+  "series": [
+   "KXXRP15M",
+   "KXDOGE15M",
+   "KXGOLD15M",
+   "KXBNB15M",
+   "KXHYPE15M",
+   "KXNEAR15M",
+   "KXZEC15M",
+   "KXSILVER15M",
+   "KXPLATINUM15M",
+   "KXPALLADIUM15M",
+   "KXCOPPER15M",
+   "KXWTI15M",
+   "KXNATGAS15M",
+   "KXEURUSD15M",
+   "KXGBPUSD15M",
+   "KXUSDJPY15M"
+  ],
+  "start_ts": 1785974400,
+  "end_ts": 1792800000,
+  "cuts": [
+   {
+    "card": "XOI1",
+    "from_ts": 1790985600,
+    "series": [
+     "KXXRP15M",
+     "KXHYPE15M",
+     "KXBNB15M",
+     "KXNEAR15M",
+     "KXZEC15M"
+    ],
+    "why": "W3 2026-10-03 on"
+   },
+   {
+    "card": "FXREF1",
+    "from_ts": 1791043200,
+    "series": [
+     "KXWTI15M",
+     "KXEURUSD15M",
+     "KXGBPUSD15M",
+     "KXUSDJPY15M"
+    ],
+    "why": "frozen cut 2026-10-03T16:00Z"
+   },
+   {
+    "card": "TIECOND1/PUB20/SPIKE1/XMET1",
+    "from_ts": 1791158400,
+    "series": [
+     "KXGOLD15M",
+     "KXSILVER15M",
+     "KXCOPPER15M",
+     "KXNATGAS15M",
+     "KXPLATINUM15M",
+     "KXPALLADIUM15M"
+    ],
+    "why": "W3 from 2026-10-05"
+   }
+  ],
+  "market_cols": [
+   "ticker",
+   "series",
+   "open_ts",
+   "close_ts",
+   "result",
+   "strike"
+  ],
+  "candle_cols": [
+   "end_ts",
+   "bid_c",
+   "ask_c",
+   "bid_h",
+   "bid_l",
+   "ask_h",
+   "ask_l",
+   "volume",
+   "oi",
+   "price_c"
+  ],
+  "note": "sources are ideas20.SOURCES exactly as the card loaded them (alts3/alts4 not read by the card); own forward FLIPS0-F from closes 2026-10-24 held out"
+ },
+ "dropped_or_kept": {
+  "kept": 24588,
+  "cut:TIECOND1/PUB20/SPIKE1/XMET1": 5715,
+  "cut:XOI1": 7942,
+  "dup_later_source": 8835,
+  "cut:FXREF1": 5130,
+  "own_heldout_or_after_end": 3311
+ },
+ "kept_close_range": [
+  1785974400,
+  1792799100
+ ],
+ "extract_sha256": "8a9ba2b997e85f26fed264c32b3ecdba9e06c77dab8868a467fb6a8adef68ea3"
+}

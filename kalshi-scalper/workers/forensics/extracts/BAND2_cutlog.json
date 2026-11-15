@@ -1,0 +1,70 @@
+{
+ "card": "BAND2",
+ "spec": {
+  "card": "BAND2",
+  "sources": [
+   "alts2",
+   "alts3",
+   "alts4",
+   "book",
+   "l1b",
+   "e3b",
+   "fresh"
+  ],
+  "series": [
+   "KXGOLD15M",
+   "KXDOGE15M",
+   "KXETH15M",
+   "KXBTC15M",
+   "KXXRP15M"
+  ],
+  "start_ts": 1785974400,
+  "end_ts": 1793145600,
+  "cuts": [
+   {
+    "card": "XOI1",
+    "from_ts": 1790985600,
+    "series": [
+     "KXBTC15M",
+     "KXXRP15M"
+    ],
+    "why": "W3 2026-10-03 on"
+   },
+   {
+    "card": "TIECOND1",
+    "from_ts": 1791158400,
+    "series": [
+     "KXGOLD15M"
+    ],
+    "why": "frozen from 2026-10-05"
+   }
+  ],
+  "market_cols": [
+   "ticker",
+   "series",
+   "open_ts",
+   "close_ts",
+   "result",
+   "strike"
+  ],
+  "candle_cols": [
+   "end_ts",
+   "bid_c",
+   "ask_c",
+   "volume",
+   "oi"
+  ],
+  "note": "history rows only (hs1 sources then fresh; rep.sqlite holds none of the five). Live aggregates are NOT extracted. No registered W3 found for ETH or DOGE, so none cut."
+ },
+ "dropped_or_kept": {
+  "kept": 30851,
+  "cut:XOI1": 4256,
+  "cut:TIECOND1": 1523,
+  "dup_later_source": 8199
+ },
+ "kept_close_range": [
+  1785974400,
+  1793144700
+ ],
+ "extract_sha256": "acaf0ceb5ce7054d0acd86539327377235b959734eeebec42fb8607a9102a7de"
+}
