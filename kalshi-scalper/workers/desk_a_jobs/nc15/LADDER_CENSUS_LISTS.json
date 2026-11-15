@@ -992,7 +992,7 @@
    "max_pages": 6
   }
  ],
- "notes": "79 requests, page budget 306 plus 14 for 429 retries. Pacing 5.0 s (12 a minute). Hourly series are CAPPED SAMPLES (max_pages 3 or 6): the count is a lower bound. Series names are unverified; an unlisted name returns empty.",
+ "notes": "79 requests, page budget 306 plus 14 for 429 retries. Pacing 5.0 s (12 a minute) on EVERY request including each extra page: up to 306 pages is up to about 26 minutes (27 with retries), inside the runner's 40 minute stop. Hourly series are CAPPED SAMPLES (max_pages 3 or 6): the count is a lower bound. Series names are unverified; an unlisted name returns empty.",
  "owner": "DESK_A",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
