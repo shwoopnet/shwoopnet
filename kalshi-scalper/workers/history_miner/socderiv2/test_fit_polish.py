@@ -29,10 +29,10 @@ assert abs(g[0]) < 1e-10 and abs(g[1]) < 1e-10 and v2 <= v2r and not cap2 and it
 # P3 grid-off valley
 wm3, tm3 = mids(2.9137, 0.4071, L3); a3, b3, _, it3, cap3, ob3 = M.fit(wm3, tm3)
 assert abs(a3 - 2.9137) < 1e-9 and abs(b3 - 0.4071) < 1e-9 and not cap3 and it3 < 200 and not ob3, (a3, b3, it3, cap3)
-# P5 cap forced to 1
-M.POLISH_CAP = 1
+# P5 cap forced to 0 (option (a): one Newton step can already converge, so a cap of 1 no longer forces a cap hit; disclosed in the note)
+M.POLISH_CAP = 0
 r5 = M.fit(wm2, tm2)
-assert r5[3] == 1 and r5[4] is True and r5[2] <= v2r, r5
+assert r5[3] == 0 and r5[4] is True and r5[2] <= v2r, r5
 M.POLISH_CAP = 200
 # P6 40-goal sums at (4.0, 0.5)
 h6, d6, a6 = M.winner_probs(4.0, 0.5)
@@ -49,6 +49,46 @@ for true_, lo_hi in (((0.003, 1.5), 0.01), ((6.4, 0.8), 6.0)):
     gy = (M.sse(r[0], r[1] + 1e-6, wb, tb) - M.sse(r[0], r[1] - 1e-6, wb, tb)) / 2e-6
     assert r[0] == lo_hi and r[5] is True and abs(gy) < 1e-10 and not r[4], (true_, r, gy)
 print("B1 to B3: ok")
+# --- option (a): G1 exact derivatives against central differences
+import random
+def free_grad(r_, wm_, tm_):
+    rr, JJ, _ = M.derivs(r_[0], r_[1], wm_, tm_)
+    G = [2 * sum(q * jv[k] for q, jv in zip(rr, JJ)) for k in (0, 1)]
+    return [g_ for g_, at in zip(G, (r_[0], r_[1])) if at not in (M.LO, M.HI)]
+L5 = (0.5, 1.5, 2.5, 3.5, 4.5)
+for (h0, a0) in ((1.37, 0.83), (0.4, 3.1), (5.2, 0.05)):
+    wmg, tmg = mids(h0 * 0.9, a0 * 1.1, L5)
+    _, J, Hr = M.derivs(h0, a0, wmg, tmg)
+    e = 1e-6; f = 1e-4
+    rhp, rhm = M.residuals(h0 + e, a0, wmg, tmg), M.residuals(h0 - e, a0, wmg, tmg)
+    rap, ram = M.residuals(h0, a0 + e, wmg, tmg), M.residuals(h0, a0 - e, wmg, tmg)
+    r0 = M.residuals(h0, a0, wmg, tmg)
+    rhp2, rhm2 = M.residuals(h0 + f, a0, wmg, tmg), M.residuals(h0 - f, a0, wmg, tmg)
+    rap2, ram2 = M.residuals(h0, a0 + f, wmg, tmg), M.residuals(h0, a0 - f, wmg, tmg)
+    rpp, rpm = M.residuals(h0 + f, a0 + f, wmg, tmg), M.residuals(h0 + f, a0 - f, wmg, tmg)
+    rmp, rmm = M.residuals(h0 - f, a0 + f, wmg, tmg), M.residuals(h0 - f, a0 - f, wmg, tmg)
+    for i_ in range(len(r0)):
+        assert abs(J[i_][0] - (rhp[i_] - rhm[i_]) / (2 * e)) < 1e-8 and abs(J[i_][1] - (rap[i_] - ram[i_]) / (2 * e)) < 1e-8, (h0, a0, i_, J[i_])
+        hh = (rhp2[i_] - 2 * r0[i_] + rhm2[i_]) / f ** 2; aa = (rap2[i_] - 2 * r0[i_] + ram2[i_]) / f ** 2; ha = (rpp[i_] - rpm[i_] - rmp[i_] + rmm[i_]) / (4 * f * f)
+        assert abs(Hr[i_][0] - hh) < 1e-5 and abs(Hr[i_][1] - aa) < 1e-5 and abs(Hr[i_][2] - ha) < 1e-5, (h0, a0, i_, Hr[i_], hh, aa, ha)
+print("G1: ok")
+# G2: the earlier cases end with |G| under 1e-12 on every free rate, without the cap
+for (wq, tq) in ((wm, tm), (wm2, tm2), (wm3, tm3), (wb1, tb1)) + tuple(mids(*t_, L3) for t_ in ((0.003, 1.5), (6.4, 0.8))):
+    rq = M.fit(wq, tq)
+    assert not rq[4] and all(abs(g_) < 1e-12 for g_ in free_grad(rq, wq, tq)), (rq, free_grad(rq, wq, tq))
+print("G2: ok")
+# G3: 200 noisy inputs, fixed seed
+rng = random.Random(20261115); worst = 0.0; nb = 0
+for _ in range(200):
+    h0, a0 = rng.uniform(0.001, 7.5), rng.uniform(0.001, 7.5)
+    lines = sorted(rng.sample((0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5), rng.randint(3, 6)))
+    wq, tq = mids(h0, a0, lines)
+    wq = [w_ + rng.uniform(-0.01, 0.01) for w_ in wq]; tq = [(L_, m_ + rng.uniform(-0.01, 0.01)) for L_, m_ in tq]
+    rq = M.fit(wq, tq); nb += rq[5]
+    fg = free_grad(rq, wq, tq)
+    assert not rq[4] and all(abs(g_) < 1e-12 for g_ in fg), (h0, a0, lines, rq, fg)
+    worst = max([worst] + [abs(g_) for g_ in fg])
+print("G3: ok; 200 fits, on a bound", nb, "worst free gradient %.2e" % worst)
 print("P1 to P7: ok; iterations", it, it2, it3, "flags", M.POLISH_FLAGS)
 
 # per-game format (the Head's 02:59Z spec, 06:32Z settlement): booleans True/False, floats repr, blanks empty, fixed column order

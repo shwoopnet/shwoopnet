@@ -96,82 +96,97 @@ def residuals(lh, la, winner_mids, total_mids):
 LO, HI = 0.01, 6.0
 
 
+def derivs(lh, la, winner_mids, total_mids):
+    """Exact first and second derivatives of the residuals in (home rate, away rate) (FIT_POLISH_NOTE_NOV14.md, option (a)).
+    Returns r, J (list of (d/dh, d/da)), Hr (list of (d2/dh2, d2/da2, d2/dhda)), in the order of residuals()."""
+    ph, pa = pmf(lh), pmf(la)
+    g = lambda q, n: q[n] if 0 <= n <= MAXG else 0.0
+    d1 = lambda q, n: g(q, n - 1) - g(q, n)
+    d2 = lambda q, n: g(q, n - 2) - 2 * g(q, n - 1) + g(q, n)
+    hh = ha_ = hd = 0.0
+    H = [0.0] * 5        # home_h, home_a, home_hh, home_aa, home_ha
+    D = [0.0] * 5        # draw_h, draw_a, draw_hh, draw_aa, draw_ha
+    cum = 0.0
+    for jj in range(MAXG + 1):
+        cum += ph[jj]
+        S = 1.0 - cum                                        # P(home > jj), as in winner_probs()
+        H[0] += pa[jj] * ph[jj]; H[1] += d1(pa, jj) * S; H[2] += pa[jj] * (g(ph, jj - 1) - ph[jj]); H[3] += d2(pa, jj) * S; H[4] += d1(pa, jj) * ph[jj]
+        D[0] += d1(ph, jj) * pa[jj]; D[1] += ph[jj] * d1(pa, jj); D[2] += d2(ph, jj) * pa[jj]; D[3] += ph[jj] * d2(pa, jj); D[4] += d1(ph, jj) * d1(pa, jj)
+    A = [-(H[k] + D[k]) for k in range(5)]
+    r = residuals(lh, la, winner_mids, total_mids)
+    J = [(H[0], H[1]), (D[0], D[1]), (A[0], A[1])]
+    Hr = [(H[2], H[3], H[4]), (D[2], D[3], D[4]), (A[2], A[3], A[4])]
+    pt = pmf(lh + la)
+    for line, _mid in total_mids:
+        k = math.floor(line)
+        if k > MAXG:
+            J.append((0.0, 0.0)); Hr.append((0.0, 0.0, 0.0))
+            continue
+        f1 = g(pt, k); f2 = g(pt, k - 1) - g(pt, k)
+        J.append((f1, f1)); Hr.append((f2, f2, f2))
+    return r, J, Hr
+
+
+LO, HI = 0.01, 6.0
+GRAD_STOP = 1e-12
+
+
 def polish(lh, la, v0, winner_mids, total_mids):
-    """Gauss-Newton on the residuals from the refinement point (FIT_POLISH_NOTE_NOV14.md, final spec of the Head's 07:10Z): central-difference Jacobian (h 1e-6).
-    A rate that lands on a bound (by a clipped full step) is held there and the other rate is polished alone. Stops: |step| under 1e-13 before a move, SSE
-    falling by less than 1e-13 relative after a move, or POLISH_CAP passes (2-D and 1-D passes share the cap). Returns (home, away, sse, iters, cap_hit, on_bound);
-    used only if its SSE is not above the refinement's + 1e-15."""
-    H = 1e-6
+    """Option (a) (the owner's pick, the Head 2026-11-15 14:19Z): Newton on SSE with exact derivatives from the refinement point. Stops ONLY when |dSSE/drate| is under
+    1e-12 on every free rate, or after POLISH_CAP steps (cap_hit). A rate that the full step would put outside the box moves alone to its bound and is held; the other
+    rate is then stepped alone. Returns (home, away, sse, iters, cap_hit, on_bound); used only if its SSE is not above the refinement's + 1e-15."""
     x, y, v = lh, la, v0
     held = [x in (LO, HI), y in (LO, HI)]
-    it, stopped = 0, False
+    it = 0
     inbox = lambda a: LO <= a <= HI
     clip = lambda a: min(HI, max(LO, a))
-    while it < POLISH_CAP:
+    while True:
         if held[0] and held[1]:
-            stopped = True
+            break
+        r, J, Hr = derivs(x, y, winner_mids, total_mids)
+        G = [2 * sum(q * jv[k] for q, jv in zip(r, J)) for k in (0, 1)]
+        if all(held[k] or abs(G[k]) < GRAD_STOP for k in (0, 1)):
+            break
+        if it >= POLISH_CAP:
             break
         it += 1
-        r = residuals(x, y, winner_mids, total_mids)
-        jx = jy = None
-        if not held[0]:
-            rp, rm = residuals(x + H, y, winner_mids, total_mids), residuals(x - H, y, winner_mids, total_mids)
-            jx = [(p_ - m) / (2 * H) for p_, m in zip(rp, rm)]
-        if not held[1]:
-            rp, rm = residuals(x, y + H, winner_mids, total_mids), residuals(x, y - H, winner_mids, total_mids)
-            jy = [(p_ - m) / (2 * H) for p_, m in zip(rp, rm)]
-        if jx is not None and jy is not None:
-            a11 = sum(t * t for t in jx); a12 = sum(t * u for t, u in zip(jx, jy)); a22 = sum(u * u for u in jy)
-            g1 = sum(t * q for t, q in zip(jx, r)); g2 = sum(u * q for u, q in zip(jy, r))
-            det = a11 * a22 - a12 * a12
-            if det <= 1e-14 * (a11 + a22) ** 2:
+        jtj = [[sum(jv[a] * jv[b] for jv in J) for b in (0, 1)] for a in (0, 1)]
+        rh = [sum(q * hv[k] for q, hv in zip(r, Hr)) for k in (0, 1, 2)]     # sum r_i x d2r_i: hh, aa, ha
+        Hs = [[2 * (jtj[0][0] + rh[0]), 2 * (jtj[0][1] + rh[2])], [2 * (jtj[1][0] + rh[2]), 2 * (jtj[1][1] + rh[1])]]
+        if not held[0] and not held[1]:
+            det = Hs[0][0] * Hs[1][1] - Hs[0][1] * Hs[1][0]
+            M_ = Hs if (det > 0 and Hs[0][0] > 0 and Hs[1][1] > 0) else [[2 * jtj[0][0], 2 * jtj[0][1]], [2 * jtj[1][0], 2 * jtj[1][1]]]
+            det = M_[0][0] * M_[1][1] - M_[0][1] * M_[1][0]
+            if det <= 0:
                 POLISH_FLAGS["singular"] += 1
-                return lh, la, v0, it, False, lh in (LO, HI) or la in (LO, HI)
-            dx = -(a22 * g1 - a12 * g2) / det; dy = -(a11 * g2 - a12 * g1) / det
+                continue
+            dx = -(M_[1][1] * G[0] - M_[0][1] * G[1]) / det; dy = -(M_[0][0] * G[1] - M_[1][0] * G[0]) / det
         else:
-            jj = jx if jx is not None else jy
-            K = 1e-4                                                 # 1-D Newton: J'J plus the residuals' second-derivative term (FIT_POLISH_NOTE, B3 correction)
-            if jx is not None:
-                rp2, rm2 = residuals(x + K, y, winner_mids, total_mids), residuals(x - K, y, winner_mids, total_mids)
-            else:
-                rp2, rm2 = residuals(x, y + K, winner_mids, total_mids), residuals(x, y - K, winner_mids, total_mids)
-            r2 = [(p_ - 2 * q + m) / (K * K) for p_, q, m in zip(rp2, r, rm2)]
-            a = sum(t * t for t in jj) + sum(q * s2 for q, s2 in zip(r, r2)); g = sum(t * q for t, q in zip(jj, r))
-            if a <= 0:
-                stopped = True
-                break
-            d = -g / a
-            dx, dy = (d, 0.0) if jx is not None else (0.0, d)
-        if abs(dx) < 1e-13 and abs(dy) < 1e-13:
-            stopped = True
-            break
-        moved, newheld = False, list(held)
-        if not (inbox(x + dx) and inbox(y + dy)):                   # the full step leaves the box: try it clipped (a rate lands on its bound)
-            cx = clip(x + dx) if not inbox(x + dx) else x            # only the rate that leaves the box moves, to its bound; the other stays this pass
+            k = 1 if held[0] else 0
+            c = Hs[k][k] if Hs[k][k] > 0 else 2 * jtj[k][k]
+            if c <= 0:
+                POLISH_FLAGS["singular"] += 1
+                continue
+            d = -G[k] / c
+            dx, dy = (0.0, d) if held[0] else (d, 0.0)
+        moved = False
+        if not (inbox(x + dx) and inbox(y + dy)):                   # the full step leaves the box: only the leaving rate moves, to its bound
+            cx = clip(x + dx) if not inbox(x + dx) else x
             cy = clip(y + dy) if not inbox(y + dy) else y
             cv = sse(cx, cy, winner_mids, total_mids)
             if cv <= v + 1e-15 * (1 + v):
-                nx, ny, nv, moved = cx, cy, cv, True
-                newheld = [held[0] or cx in (LO, HI), held[1] or cy in (LO, HI)]
+                x, y, v, moved = cx, cy, cv, True
+                held = [held[0] or cx in (LO, HI), held[1] or cy in (LO, HI)]
         if not moved:
             for _h in range(41):
                 nx, ny = x + dx, y + dy
                 if inbox(nx) and inbox(ny):
                     nv = sse(nx, ny, winner_mids, total_mids)
                     if nv <= v + 1e-15 * (1 + v):
-                        moved = True
+                        x, y, v = nx, ny, nv
                         break
                 dx /= 2; dy /= 2
-        if not moved:
-            stopped = True
-            break
-        small = (v - nv) < 1e-13 * v
-        landed = newheld != held                                   # a rate landed on a bound on this pass: go on to polish the other alone
-        x, y, v, held = nx, ny, nv, newheld
-        if small and not landed:
-            stopped = True
-            break
-    cap_hit = not stopped
+    cap_hit = it >= POLISH_CAP and not (all(held[k] or abs(G[k]) < GRAD_STOP for k in (0, 1)) if not (held[0] and held[1]) else True)
     if v > v0 + 1e-15:
         POLISH_FLAGS["rejected"] += 1
         return lh, la, v0, it, cap_hit, lh in (LO, HI) or la in (LO, HI)

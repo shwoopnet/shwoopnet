@@ -180,3 +180,10 @@ The Head, verbatim: "BOTH builds stop each fit only when each free rate's SSE gr
 - **G2:** P1, P2, P3 and B1, B2, B3 hold as before, and each ends with |G| under 1e-12 on every free rate, without the cap.
 - **G3:** 200 noisy inputs (a fixed seed, rates 0.001 to 7.5, 3 to 6 strikes, noise +-0.01 on every mid). Each fit either meets the gradient stop or hits the cap. The test asserts NO cap hits, and |G| under 1e-12 on every free rate at every result.
 - **23 made-up cases:** counts unchanged. Fit-dependent figures move by at most the size of the earlier stop error (about 1e-8). Every changed field is listed before the outputs are replaced.
+- **Test change disclosed (written with the code, before the test was run):** P5 forced the cap to 1 and expected a cap hit. Under option (a), one Newton step from the refinement point can already meet the 1e-12 stop, so a cap of 1 no longer forces a cap hit. P5 now forces the cap to 0 and expects iters 0, cap_hit True, and SSE not above the refinement's.
+
+## Result on the 23 made-up cases, option (a) (2026-11-15 ~15:00Z)
+- 16,780 fits. Polished SSE above the refinement's: 0. Singular: 0. Rejected: 0. Cap hits 0. fit_on_bound 0. fit_iters_max 1 (one exact Newton step from the refinement point meets the 1e-12 gradient stop).
+- **Against 04e798df's outputs, only fit-dependent figures moved:** gap median, q1, q3 and p90 and placebo quartiles, max 1.51e-9 (the old stop's error, now removed); fit_residual_median, max 7e-17; fit_iters_max 2 became 1 in 40 cells.
+- No count, flag, verdict text or per-game invariant changed. Per-game files: 22 cases, 11,385 rows, every check passes.
+- The hand cases (B1 to B3, G1 to G3, P1 to P7, the per-game format) pass. In G3's 200 noisy inputs (68 on a bound) the worst free gradient is 1.2e-13.
