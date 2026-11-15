@@ -1,0 +1,611 @@
+{
+ "job_id": "ECONCENSUS_LISTS",
+ "owner": "DESK_B",
+ "status": "active",
+ "registration": "kalshi-scalper/workers/econcensus/ECONCENSUS_NOTE.md",
+ "purpose": "Census: settled markets of US macro release series and four hourly temperature series before a fixed cut, plus one Economics series list, to count markets and release dates per series. No candle, no test.",
+ "heldout": "FIXED date constant: closes at or after 2026-10-17T00:00:00Z are never requested (every markets request carries max_close_ts = 1792195199, one second before). The held-out window is therefore not read by this job; a later test of these families reads only from 2026-10-17T00:00:00Z on, under its own registration.",
+ "allowed_endpoints": [
+  {
+   "name": "series_list",
+   "method": "GET",
+   "path_pattern": "/series",
+   "params_allowed": [
+    "limit",
+    "category"
+   ]
+  },
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXCPI",
+  "KXPAYROLLS",
+  "KXJOBLESSCLAIMS",
+  "KXCONTCLAIMS",
+  "KXFED",
+  "KXFEDDECISION",
+  "KXMBAAPPS",
+  "KXRATECUT",
+  "KXRATECUTCOUNT",
+  "TBILL",
+  "KXCPICOMBO",
+  "KXCPICOREA",
+  "KXCPICOREGOODSMOM",
+  "KXCPINDEX",
+  "KXECONSTATCPI",
+  "KXECONSTATU3",
+  "KXEMPLOYMENTCOMBO",
+  "PCECORE",
+  "KXPCECORE",
+  "KXFEDFUNDSYEAR",
+  "KXFEDHIKE",
+  "KXFEDMEET",
+  "KXHOUSESTART",
+  "KXHOME",
+  "KXUSISMSERV",
+  "KXUSMICHCSP",
+  "KXUSPPIYOY",
+  "KXNGDPQ",
+  "KXLFPRATE",
+  "KXEPOP",
+  "KXPSAVERT",
+  "KXREALWAGES",
+  "KXTEMPHELP",
+  "KXUSDEBT",
+  "KXDEFICIT",
+  "KXNFPDELAY",
+  "KXGDP",
+  "KXU3",
+  "KXISMPMI",
+  "KXRETAILSALES",
+  "KXUE",
+  "CPICOREYOY",
+  "KXTEMPNYCHS",
+  "KXTEMPMIAH",
+  "KXTEMPLAXHS",
+  "KXTEMPCHIHS"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 149,
+ "notes": "Requests at most 137 pages plus 12 for repeats after a 429; at 5 s that is about 13 minutes. Hourly temperature: 30 days of closes (2026-09-17 to the cut). A series name that does not exist returns an empty list and costs one request.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "series_economics",
+   "path": "/series",
+   "params": {
+    "category": "Economics",
+    "limit": 20000
+   }
+  },
+  {
+   "id": "settled_KXCPI",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCPI",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXPAYROLLS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPAYROLLS",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXJOBLESSCLAIMS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXJOBLESSCLAIMS",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXCONTCLAIMS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCONTCLAIMS",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXFED",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFED",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXFEDDECISION",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFEDDECISION",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXMBAAPPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMBAAPPS",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXRATECUT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXRATECUT",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXRATECUTCOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXRATECUTCOUNT",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_TBILL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "TBILL",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "settled_KXCPICOMBO",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCPICOMBO",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXCPICOREA",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCPICOREA",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXCPICOREGOODSMOM",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCPICOREGOODSMOM",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXCPINDEX",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCPINDEX",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXECONSTATCPI",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXECONSTATCPI",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXECONSTATU3",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXECONSTATU3",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXEMPLOYMENTCOMBO",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEMPLOYMENTCOMBO",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_PCECORE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "PCECORE",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXPCECORE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPCECORE",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXFEDFUNDSYEAR",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFEDFUNDSYEAR",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXFEDHIKE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFEDHIKE",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXFEDMEET",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFEDMEET",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXHOUSESTART",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHOUSESTART",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXHOME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHOME",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXUSISMSERV",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSISMSERV",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXUSMICHCSP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSMICHCSP",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXUSPPIYOY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSPPIYOY",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXNGDPQ",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNGDPQ",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXLFPRATE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLFPRATE",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXEPOP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPOP",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXPSAVERT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPSAVERT",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXREALWAGES",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXREALWAGES",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXTEMPHELP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPHELP",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXUSDEBT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDEBT",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXDEFICIT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDEFICIT",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXNFPDELAY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNFPDELAY",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXGDP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGDP",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXU3",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXU3",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXISMPMI",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXISMPMI",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXRETAILSALES",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXRETAILSALES",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXUE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUE",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_CPICOREYOY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "CPICOREYOY",
+    "status": "settled",
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "settled_KXTEMPNYCHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPNYCHS",
+    "status": "settled",
+    "min_close_ts": 1789603200,
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "settled_KXTEMPMIAH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "settled",
+    "min_close_ts": 1789603200,
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "settled_KXTEMPLAXHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPLAXHS",
+    "status": "settled",
+    "min_close_ts": 1789603200,
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "settled_KXTEMPCHIHS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTEMPCHIHS",
+    "status": "settled",
+    "min_close_ts": 1789603200,
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 8
+  }
+ ]
+}
