@@ -32,6 +32,7 @@ _refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first
 # ---- pinned constants (the registration carries the same values) ----
 RANGE_START = "2024-10-01T00:00:00Z"
 RANGE_END = "2026-10-31T23:59:59Z"       # the pinned cutoff: no print after this is used
+FOMC_CUT = "2025-09-17T00:00:00Z"        # Head's dated amendment of 2026-11-15: FOMC markets closing at or after this are FEDIMPL1's frozen holdout and are dropped on load
 HIST_CUTOFF = "2026-09-12T00:00:00Z"     # markets settled before this are served by the historical endpoint
 PRINT_SERIES = ("KXCPI", "KXPAYROLLS", "KXPCECORE", "KXFEDDECISION")
 FAST_SERIES = "KXFEDDECISION"
@@ -183,6 +184,7 @@ def candle_req(rid, ticker, hist, start, end, period):
 def cmd_calendar(run, out):
     os.makedirs(out, exist_ok=True)
     lo, hi, cut = ts(RANGE_START), ts(RANGE_END), ts(HIST_CUTOFF)
+    fomc_cut, fomc_dropped = ts(FOMC_CUT), 0
     events = defaultdict(lambda: {"closes": Counter(), "markets": {}})
     for row, body in load_run(run):
         series = row.get("params", {}).get("series_ticker")
@@ -192,6 +194,9 @@ def cmd_calendar(run, out):
             try:
                 t = ts(m["close_time"])
             except (KeyError, ValueError, TypeError):
+                continue
+            if series == FAST_SERIES and t >= fomc_cut:          # close_time is the ONLY field read before this drop (condition 1)
+                fomc_dropped += 1
                 continue
             e = events[(series, m.get("event_ticker", ""))]
             e["closes"][t] += 1
@@ -208,6 +213,7 @@ def cmd_calendar(run, out):
                 off_clock.append((series, ev))
                 continue
             prints.append([series, ev, t_rel, datetime.fromtimestamp(t_rel, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), day(t_rel)])
+    print(f"FOMC markets dropped at or after the cut ({FOMC_CUT}): {fomc_dropped}")
     prints.sort(key=lambda r: r[2])
     write_csv(os.path.join(out, "prints.csv"), ["series", "event", "t", "iso", "day"], prints)
     write_csv(os.path.join(out, "meetings.csv"), ["event", "t_meeting", "ticker", "open_time", "hist"], meetings)

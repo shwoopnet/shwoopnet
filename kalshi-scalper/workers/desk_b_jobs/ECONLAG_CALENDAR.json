@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/IDEA_DESK_B_PROTOCOLS.md",
  "purpose": "ECONLAG stage 1 (slow-family paper screen, try 1): settled market lists of the three release series and the Fed decision series, to verify the count of print days (about 70 expected) before any candle is asked for. No candle is read.",
- "heldout": "none at this stage (lists only; the screen's pinned cutoff is 2026-10-31, in ECONLAG amendment 2)",
+ "heldout": "none for CPI, payrolls and PCE at this stage (lists only; pinned cutoff 2026-10-31, ECONLAG amendment 2). KXFEDDECISION: the live and historical lists carry FEDIMPL1's frozen holdout (last 10 meetings from 2025-09-17) as LOADED exposure, because the historical endpoint takes no date bound; the scorer drops those markets by close_time before any other field (ECONLAG amendment 3). Nobody reads them for a rule.",
  "allowed_endpoints": [
   {
    "name": "markets_list",
