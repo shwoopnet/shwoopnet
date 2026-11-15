@@ -1,0 +1,3 @@
+
+OIREL haircut recompute build 2 (oirel_second.py fe5416c8, commit edefc85a), run ONCE Nov 15 on OIREL_extract.sqlite (raw sha256 53b5e677114635c6862d340cb3ed7263f780337780a5260b95858f68df19654b; from the xz sha256 53f2f8c32b829bc39ce2c647898926eef4a8a3f1fa2ca804895a0a36e6322250), split 1789948800.
+sha256 of my printout (scratch only): 24517a6abf46857883390f81c87626fdba41f6e74dd071d5e902a3b7821971d5
