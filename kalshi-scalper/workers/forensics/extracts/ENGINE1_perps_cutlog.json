@@ -1,0 +1,58 @@
+{
+ "extract": "ENGINE1 perps",
+ "files": [
+  "2026-11-06.csv.gz",
+  "2026-11-08.csv.gz",
+  "2026-11-09.csv.gz",
+  "2026-11-10.csv.gz",
+  "2026-11-11.csv.gz",
+  "2026-11-12.csv.gz",
+  "2026-11-13.csv.gz",
+  "2026-11-14.csv.gz"
+ ],
+ "tickers": [
+  "KXSPYPERP",
+  "KXQQQPERP",
+  "KXNVDAPERP",
+  "KXAAPLPERP"
+ ],
+ "counts": {
+  "candles": 32205,
+  "duplicate_row": 20
+ },
+ "by_ticker": [
+  [
+   "KXAAPLPERP",
+   7877,
+   1793923200,
+   1794607260,
+   0,
+   7877
+  ],
+  [
+   "KXNVDAPERP",
+   8107,
+   1793923200,
+   1794612660,
+   0,
+   8107
+  ],
+  [
+   "KXQQQPERP",
+   8112,
+   1793923200,
+   1794640020,
+   0,
+   8112
+  ],
+  [
+   "KXSPYPERP",
+   8109,
+   1793923200,
+   1794675960,
+   0,
+   8109
+  ]
+ ],
+ "extract_sha256": "d86494499da589a3d8619777c16f93c0fa7366ea599f01d9ed4808f5e2157ab7"
+}
