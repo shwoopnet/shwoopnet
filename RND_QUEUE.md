@@ -1001,3 +1001,4 @@ Next for the History Miner: write the CALIB1 card (underdog-bias calibration tab
 
 CALIB1 (History Miner 616180d0, descriptive, thirds 1 and 2): 2,400 buckets, 148 eligible, 0 candidates. Cheap sides at 15c to 30c are overpriced at the ask (gap -2c to -4.5c). The only positive region is favourites at 90c to 95c at the 10 minute look (the L1 family), under fee + 2c. No rule card. A post-CLEAN script change (print only) was disclosed.
 Next for the History Miner: the CALIB2 card plus pull plan (the rest of Kalshi: sports, politics, econ, weather, entertainment, mentions), with no pull until the Head's go.
+CALIB2 (History Miner a5e79b9a): the plan is approved in steps. GO for stage 1 only (listings, 3 files, about 390 requests) after Auditor B confirms the held-out list and the job files; Main dispatches. Stage 2 Tier A (about 7,800 requests, about 11 h) needs a separate go once the exact counts are in. Tiers B and C are not approved. Esports and virtual are out.
