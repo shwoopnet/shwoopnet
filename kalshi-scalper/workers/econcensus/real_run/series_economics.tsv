@@ -1,0 +1,946 @@
+ticker	frequency	title
+AAAGASD	daily	US gas price up
+AAAGASM	monthly	US gas price
+AAAGASMAX	annual	US highest gas price yearly
+AAAGASMAXCA	annual	California highest gas price yearly
+AAAGASMAXTX	annual	Texas highest gas price yearly
+AAAGASMIN	annual	US lowest gas price yearly
+AAAGASMINCA	annual	California lowest gas price yearly
+AAAGASMINTX	annual	Texas lowest gas price yearly
+AAAGASW	weekly	US gas price up
+AAAGASY	annual	US gas price up
+ACPI	annual	US annual inflation
+ACPICORE	annual	Annual core inflation
+ACPICORE-	annual	US annual core inflation
+ARGINFLATIONM	custom	Argentina inflation
+ARINFLATIONM	monthly	Argentina inflation
+BANKRUPTS	monthly	Companies going bankrupt
+BANKRUPTSY	annual	Companies going bankrupt yearly
+BIGBANKLAYOFF	custom	Big banks layoffs
+BIGTECHLAYOFF	annual	Big tech layoffs
+BOE	custom	Bank of England bank rate
+CHINAUSGDP	one_off	China overtakes US GDP
+CNGDP	one_off	China quarterly GDP change in 2021 Q2
+CNY	weekly	USD/RMB exchange rate
+COIN	custom	Trillion dollar coin minted
+COSTCOHOTDOG	custom	Costco hot dog price increase
+COSTCOMEMBER	custom	Costco membership price increase
+CPI	monthly	CPI
+CPIAPPAREL	monthly	CPI on apparel
+CPIAR	annual	Argentina inflation
+CPICN	annual	China inflation
+CPICORE	monthly	CPI core
+CPICOREYOY	monthly	Core inflation
+CPIDELAY	custom	CPI data released
+CPIEU	annual	Euro area inflation
+CPIFOOD	monthly	CPI on food
+CPIGAS	monthly	CPI on gas
+CPISHELTER	monthly	CPI on shelter
+CPIUSEDCAR	monthly	CPI on used cars
+CPIYOY	monthly	Inflation
+CREDEF	custom	Commercial real estate defaults
+CREDEFMAX	custom	Commercial real estate highest default rate
+CREDEFMINMAX	custom	Commercial real estate lowest default rate
+CREDITCDEF	custom	Credit card defaults up
+CREDITRATING	custom	US credit rating downgrade
+DEFAULT	one_off	US defaults
+DIESEL	weekly	Diesel price this week
+DIESELM	monthly	Diesel price this month
+DOTPLOT	custom	fed dot plot
+ECB	custom	European Central Bank main refinancing rate
+ECONPATH	annual	State of the economy
+EPOP	annual	Employment-population ratio
+ETHETF	custom	ETH ETF listed
+FED	custom	Fed funds rate
+FEDDECISION	custom	Fed meeting
+FEDFACILITY	annual	Fed facility
+FEDHIKE	custom	Next Fed rate hike
+FEDMEET	custom	Fed emergency meeting
+FEDRATEMIN	custom	How low will the Fed rate go
+FRM	weekly	Mortgage 30-yr rate this week
+FRMMAX	annual	Mortgage rate high
+FRMMIN	annual	Mortgage rate low
+FTAPER	custom	Fed tapering
+FXEURO	weekly	Euro/USD exchange rate
+FXPESO	weekly	USD/Mexican peso exchange rate
+GAS	weekly	Gas weekly
+GAS-MONTH	monthly	Gas monthly
+GASD	one_off	Gas daily
+GASMAX	annual	EIA Gas highest price yearly
+GASMIN	annual	EIA Gas lowest price yearly
+GDP	custom	US GDP growth
+GDPCN	annual	China GDP growth
+GDPEU	annual	European Union GDP growth
+GDPUSMAX	annual	US GDP peak 
+GDPUSMIN	annual	Negative US GDP growth
+GDPW	annual	Global GDP growth
+HOME	monthly	New home sales
+HOMEUS	monthly	US housing price up monthly
+HOMEUSY	annual	US housing prices up
+HOUSELENGTH	monthly	US house average sale length
+HOUSESTART	monthly	US housing starts rise
+HPI	monthly	Housing Price Index
+JOBLESS	weekly	Initial jobless claims
+JPY	daily	U.S. Dollar/Japanese yen exchange rate
+KX25U3SEP	custom	september 2025 u3 extension
+KX2YFOMC	custom	2-year Treasury yield move on FOMC day
+KX30YMORTW	weekly	30-year mortgage rate this week
+KX30YUSTW	weekly	Where will the 30Y US Treasury Yield close this week?
+KX3MTBILL	custom	Treasury 3-month yield above/below
+KX4RUNNERMSRP	annual	Toyota 4Runner starting MSRP
+KXAAAEVM	monthly	US EV charging price
+KXAAAGASCDAK	daily	Alaska gas price
+KXAAAGASCDAL	daily	Alabama gas price
+KXAAAGASCDAR	daily	Arkansas gas price
+KXAAAGASCDAZ	daily	Arizona gas price
+KXAAAGASCDCA	daily	California gas price
+KXAAAGASCDCO	daily	Colorado gas price
+KXAAAGASCDCT	daily	Connecticut gas price
+KXAAAGASCDDE	daily	Delaware gas price
+KXAAAGASCDFL	daily	Florida gas price
+KXAAAGASCDGA	daily	Georgia gas price
+KXAAAGASCDHI	daily	Hawaii gas price
+KXAAAGASCDIA	daily	Iowa gas price
+KXAAAGASCDID	daily	Idaho gas price
+KXAAAGASCDIL	daily	Illinois gas price
+KXAAAGASCDIN	daily	Indiana gas price
+KXAAAGASCDKS	daily	Kansas gas price
+KXAAAGASCDKY	daily	Kentucky gas price
+KXAAAGASCDLA	daily	Louisiana gas price
+KXAAAGASCDMA	daily	Massachusetts gas price
+KXAAAGASCDMD	daily	Maryland gas price
+KXAAAGASCDME	daily	Maine gas price
+KXAAAGASCDMI	daily	Michigan gas price
+KXAAAGASCDMN	daily	Minnesota gas price
+KXAAAGASCDMO	daily	Missouri gas price
+KXAAAGASCDMS	daily	Mississippi gas price
+KXAAAGASCDMT	daily	Montana gas price
+KXAAAGASCDNC	daily	North Carolina gas price
+KXAAAGASCDND	daily	North Dakota gas price
+KXAAAGASCDNE	daily	Nebraska gas price
+KXAAAGASCDNH	daily	New Hampshire gas price
+KXAAAGASCDNJ	daily	New Jersey gas price
+KXAAAGASCDNM	daily	New Mexico gas price
+KXAAAGASCDNV	daily	Nevada gas price
+KXAAAGASCDNY	daily	New York gas price
+KXAAAGASCDOH	daily	Ohio gas price
+KXAAAGASCDOK	daily	Oklahoma gas price
+KXAAAGASCDOR	daily	Oregon gas price
+KXAAAGASCDPA	daily	Pennsylvania gas price
+KXAAAGASCDRI	daily	Rhode Island gas price
+KXAAAGASCDSC	daily	South Carolina gas price
+KXAAAGASCDSD	daily	South Dakota gas price
+KXAAAGASCDTN	daily	Tennessee gas price
+KXAAAGASCDTX	daily	Texas gas price
+KXAAAGASCDUT	daily	Utah gas price
+KXAAAGASCDVA	daily	Virginia gas price
+KXAAAGASCDVT	daily	Vermont gas price
+KXAAAGASCDWA	daily	Washington gas price
+KXAAAGASCDWI	daily	Wisconsin gas price
+KXAAAGASCDWV	daily	West Virginia gas price
+KXAAAGASCDWY	daily	Wyoming gas price
+KXAAAGASD	daily	US gas price up
+KXAAAGASDAK	daily	Alaska gas price
+KXAAAGASDAL	daily	Alabama gas price
+KXAAAGASDAR	daily	Arkansas gas price
+KXAAAGASDAZ	daily	Arizona gas price
+KXAAAGASDCA	daily	California gas price
+KXAAAGASDCO	daily	Colorado gas price
+KXAAAGASDCT	daily	Connecticut gas price
+KXAAAGASDDE	daily	Delaware gas price
+KXAAAGASDFL	daily	Florida gas price
+KXAAAGASDGA	daily	Georgia gas price
+KXAAAGASDHI	daily	Hawaii gas price
+KXAAAGASDIA	daily	Iowa gas price
+KXAAAGASDID	daily	Idaho gas price
+KXAAAGASDIL	daily	Illinois gas price
+KXAAAGASDIN	daily	Indiana gas price
+KXAAAGASDKS	daily	Kansas gas price
+KXAAAGASDKY	daily	Kentucky gas price
+KXAAAGASDLA	daily	Louisiana gas price
+KXAAAGASDMA	daily	Massachusetts gas price
+KXAAAGASDMD	daily	Maryland gas price
+KXAAAGASDME	daily	Maine gas price
+KXAAAGASDMI	daily	Michigan gas price
+KXAAAGASDMN	daily	Minnesota gas price
+KXAAAGASDMO	daily	Missouri gas price
+KXAAAGASDMS	daily	Mississippi gas price
+KXAAAGASDMT	daily	Montana gas price
+KXAAAGASDNC	daily	North Carolina gas price
+KXAAAGASDND	daily	North Dakota gas price
+KXAAAGASDNE	daily	Nebraska gas price
+KXAAAGASDNH	daily	New Hampshire gas price
+KXAAAGASDNJ	daily	New Jersey gas prices
+KXAAAGASDNM	daily	New Mexico gas price
+KXAAAGASDNV	daily	Nevada gas price
+KXAAAGASDNY	daily	New York gas price
+KXAAAGASDOH	daily	Ohio gas price
+KXAAAGASDOK	daily	Oklahoma gas price
+KXAAAGASDOR	daily	Oregon gas price
+KXAAAGASDPA	daily	Pennsylvania gas price
+KXAAAGASDRI	daily	Rhode Island gas price
+KXAAAGASDSC	daily	South Carolina gas price
+KXAAAGASDSD	daily	South Dakota gas price
+KXAAAGASDTN	daily	Tennessee gas price
+KXAAAGASDTX	daily	TX gas price
+KXAAAGASDUT	daily	Utah gas price
+KXAAAGASDVA	daily	Virginia gas price
+KXAAAGASDVT	daily	Vermont gas price
+KXAAAGASDWA	daily	Washington gas price
+KXAAAGASDWI	daily	Wisconsin gas price
+KXAAAGASDWV	daily	West Virginia gas price
+KXAAAGASDWY	daily	Wyoming gas price
+KXAAAGASED	one_off	US gas price on Election Day
+KXAAAGASEOYNJ	annual	New Jersey gas price at EOY
+KXAAAGASM	monthly	US gas price
+KXAAAGASMAX	annual	US highest gas price yearly
+KXAAAGASMAXCA	annual	California highest gas price yearly
+KXAAAGASMAXFL	annual	Florida highest gas price yearly
+KXAAAGASMAXM	monthly	US highest gas price monthly
+KXAAAGASMAXNY	annual	NEW YORK highest gas price yearly
+KXAAAGASMAXTX	annual	Texas highest gas price yearly
+KXAAAGASMIN	annual	US lowest gas price yearly
+KXAAAGASMINCA	annual	California lowest gas price yearly
+KXAAAGASMINFL	annual	Florida lowest gas price yearly
+KXAAAGASMINM	monthly	US lowest gas price monthly
+KXAAAGASMINNY	annual	NEW YORK LOWEST gas price yearly
+KXAAAGASMINTX	annual	Texas lowest gas price yearly
+KXAAAGASMTX	monthly	Texas gas price this month
+KXAAAGASW	weekly	US gas price up
+KXAAAGASWNJ	weekly	New Jersey gas price this week
+KXAAAGASY	annual	US gas price up
+KXAAMMCAPEX	one_off	Amazon, Alphabet, Microsoft, and Meta combined capital expenditures for year
+KXACCORDMSRP	annual	Honda Accord starting MSRP
+KXACPI	annual	US annual inflation
+KXACPICORE	annual	Annual core inflation
+KXACPICORE-	annual	US annual core inflation
+KXADP	monthly	ADP employment change
+KXAHEG	one_off	U.S. average hourly earnings growth
+KXAHEMOM	monthly	U.S. hourly earnings growth
+KXAIGROWTHBET	one_off	MacAskill–Moll AI growth bet
+KXAIJOBLOSS	weekly	Total AI-linked job losses this week
+KXAILABDIS	one_off	AI disrupt labor market
+KXAIRFARECPI	monthly	US airline fares CPI in [month]
+KXAKCRUDEOIL	annual	Alaska crude oil production
+KXAKPFD	annual	Alaska Permanent Fund Dividend
+KXAKSALMON	one_off	Alaska salmon harvest
+KXALVEHICLEPROD	annual	Alabama vehicle production
+KXAMERICAPROFIT	annual	America profit
+KXAMSAVO	weekly	Hass avocado prices this week
+KXARBROILER	annual	Arkansas broiler production
+KXARGINFLATIONM	custom	Argentina inflation
+KXARINFLATIONM	monthly	Argentina inflation
+KXARMOMINF	monthly	Argentina inflation MoM in [month]
+KXAUNABCONF	monthly	Australia NAB Business Confidence 
+KXAUSHOME	monthly	Austin home values
+KXAUTODELQ	quarterly	Auto-loan delinquencies in QX?
+KXAUTRADEBAL	monthly	Australia Balance of Trade 
+KXAUWPCC	monthly	Australia Westpac Consumer Confidence Change
+KXAZSEMIJOBS	annual	Arizona semiconductor and electronic-component manufacturing employment
+KXBALANCESHEET	custom	Fed balance sheet
+KXBALTPORTTEU	annual	Port of Baltimore container volume
+KXBANKRUPTCY	one_off	Bankruptcy
+KXBANKRUPTS	monthly	Companies going bankrupt
+KXBANKRUPTSY	annual	Companies going bankrupt yearly
+KXBARRELS	custom	Oil barrels
+KXBARRLES	custom	Oil barrels
+KXBIGLAWSALARY	one_off	Median first-year salary at largest US law firms
+KXBIZAPPS	one_off	U.S. business applications during time period
+KXBKDWHOPPER	monthly	Price of a Burger King Double Whopper this month
+KXBKNUGGETS	monthly	Price of a Burger King 8-piece nuggets this month
+KXBOE	custom	Bank of England bank rate
+KXBOEGOLD	custom	BOE gold withdrawals
+KXBOIPASSENGERS	one_off	Boise Airport annual passengers
+KXBOJDECISION	custom	BOJ decision
+KXBOSHOMEVAL	one_off	Boston typical home value for date
+KXBOZPERMITS	annual	Bozeman housing units authorized
+KXBRAZILGDP	quarterly	Brazilian GDP Growth
+KXBRAZILGRAIN	one_off	Conab grain estimate?
+KXBRAZILINF	monthly	Brazil inflation
+KXBRAZILJOBS	one_off	Brazil New Caged net formal job creation 
+KXBRAZILU	custom	Brazil unemployment
+KXBRINFHIGH	annual	How high will Brazil inflation rate get this year?
+KXBRRATECUT	annual	Number of Brazil rate cuts this year
+KXBUILDPERMS	monthly	Building permits for month
+KXCABUILDPERMITS	annual	California permitted housing units
+KXCACPIYOY	monthly	Canada Inflation Rate YoY
+KXCAFAIRPLAN	one_off	California FAIR Plan policies
+KXCAHPIYOY	one_off	California home prices
+KXCAIVEYPMI	monthly	Canada Ivey PMI s.a
+KXCALHOME	annual	Calgary home price below X in [year]
+KXCANCUTS	annual	Number of BoC rate cuts in [year]?
+KXCANEUINFL	monthly	Canadian inflation above Eurozone inflation?
+KXCANHOME	annual	Will Canada’s national average home price exceed X in [month]?
+KXCANHOUSTART	annual	Canada housing starts above X in [year]?
+KXCANOREOY	annual	Bank of Canada overnight rate on [date]
+KXCANRECESSION	annual	Canada recession in [year]?
+KXCANUSTRIPS	annual	Canadian trips to U.S. down X% in [year]?
+KXCBDCHILE	custom	Central Bank of Chile interest rate decision
+KXCBDCOLOMBIA	custom	Colombia rate decision
+KXCBDCZECH	custom	Czech National Bank interest rate decision
+KXCBDECISIONAUSTRALIA	custom	Bank Of AUSTRALIA policy interest rate decision
+KXCBDECISIONBRAZIL	custom	Brazil Central Bank decision
+KXCBDECISIONCANADA	custom	Bank Of Canada policy interest rate decision
+KXCBDECISIONCHINA	custom	Bank Of CHINA policy interest rate decision
+KXCBDECISIONENGLAND	custom	Bank Of ENGLAND policy interest rate decision
+KXCBDECISIONEU	custom	EU CENTRAL BANK POLICY INTEREST RATE
+KXCBDECISIONINDIA	custom	Bank of India policy interest rate decision
+KXCBDECISIONJAPAN	custom	Bank Of Japan policy interest rate decision
+KXCBDECISIONKOREA	custom	Bank Of KOREA policy interest rate decision
+KXCBDECISIONMEXICO	custom	Bank of Mexico interest rate decision
+KXCBDECISIONNZ	custom	Reserve Bank of New Zealand rate decision
+KXCBDECISIONRUSSIA	custom	Russia
+KXCBDHUNGARY	custom	Hungary interest rate decision
+KXCBDINDONESIA	custom	Bank Indonesia rate decision
+KXCBDISRAEL	custom	Bank of Israel interest rate decision
+KXCBDNORWAY	custom	Norges Bank rate decision
+KXCBDPHILIPPINES	custom	Philippines interest rate decision
+KXCBDPOLAND	custom	Poland interest rate decision
+KXCBDSA	custom	South Africa rate decision
+KXCBDSWEDEN	custom	Sweden Sveriges Riksbank rate decision
+KXCBDSWISS	custom	Swiss National Bank rate decision
+KXCBDTAIWAN	custom	Taiwan interest rate decision
+KXCBDTHAILAND	custom	Bank of Thailand interest rate decision
+KXCBDTURKEY	custom	Central Bank of the Republic of Türkiye rate decision
+KXCBRATECUT	annual	Which central banks will cut this year?
+KXCBRATEHIKE	annual	Which central banks will hike this year?
+KXCBRATEHIKES	annual	Which central banks will hike before 2027?
+KXCCCHGOFF	custom	Credit-card charge-off rate above X% in QX?
+KXCCDELINQ	quarterly	Credit-card delinquency rate
+KXCFACHICKSAND	monthly	Price of a Chick-fil-A chicken sandwich this month
+KXCFNAI	monthly	Chicago Fed National Activity Index
+KXCH11	monthly	Commercial chapter 11 filings per month
+KXCHAICUTS	monthly	Will AI be the #1 reason for job cuts
+KXCHCPIYOY	monthly	China Inflation Rate YoY
+KXCHCUTS	monthly	US Challenger job cuts
+KXCHEXPORTS	monthly	China Exports YoY
+KXCHGDPYOY	custom	China GDP Growth Rate YoY (quarterly)
+KXCHICKENWINGM	monthly	Average U.S. wholesale chicken wing price
+KXCHIHOME	monthly	Chicago home values
+KXCHIMPORTS	monthly	China Imports YoY
+KXCHINACPI	one_off	CPI in China
+KXCHINAOILINV	quarterly	China strategic oil inventories
+KXCHINAUSGDP	one_off	China overtakes US GDP
+KXCHIPBURRITO	monthly	Price of a Chipotle chicken burrito this month
+KXCHIPYOY	monthly	China Industrial Production YoY
+KXCHNBSPMI	monthly	China NBS Manufacturing PMI
+KXCHRETAIL	monthly	China Retail Sales YoY 
+KXCHTRADEBAL	monthly	China Balance of Trade
+KXCITRINI	one_off	Will the Citrini scenario materialize?
+KXCNGDP	one_off	China quarterly GDP change in 2021 Q2
+KXCNIMPORT	one_off	US imports of goods from China
+KXCNUSGDP	annual	Will China’s real GDP growth exceed U.S. real GDP growth by x%?
+KXCNY	weekly	USD/RMB exchange rate
+KXCOBUILDPERMITS	annual	Colorado housing units authorized by building permits
+KXCOHPIYOY	one_off	Colorado home prices
+KXCOIN	custom	Trillion dollar coin minted
+KXCONTCLAIMS	weekly	U.S. continuing jobless claims
+KXCOREUND	one_off	Will Core CPI fall below x.x% in 2026?
+KXCORRPAPERPPI	quarterly	Corrugated paper PPI average
+KXCOSKIVISITS	annual	Colorado ski-area visits
+KXCOSTCOHOTDOG	custom	Costco hot dog price increase
+KXCOWAGE	annual	Colombia wage growth minus inflation
+KXCPI	monthly	CPI
+KXCPIAPPAREL	monthly	CPI on apparel
+KXCPIAR	annual	Argentina inflation
+KXCPICN	annual	China inflation
+KXCPICOMBO	monthly	CPI Combo
+KXCPICORE	monthly	CPI core
+KXCPICORE220	one_off	Will the BLS Core CPI YoY print below 2.20% 
+KXCPICOREA	annual	Core CPI annually
+KXCPICOREGOODSMOM	monthly	Core goods CPI MoM
+KXCPICOREHEAD	monthly	Core CPI inflation above headline CPI inflation in [month]?
+KXCPICOREHEADMOM	monthly	MoM core CPI above headline CPI in [month]
+KXCPICOREYOY	monthly	Core inflation
+KXCPIDELAY	custom	CPI data released
+KXCPIELECYOY	monthly	U.S. electricity inflation YoY
+KXCPIEU	annual	Euro area inflation
+KXCPIFOOD	monthly	CPI on food
+KXCPIGAS	monthly	CPI on gas
+KXCPINDEX	monthly	CPI-U index in [month]
+KXCPISHELTER	monthly	CPI on shelter
+KXCPIUSEDCAR	monthly	CPI on used cars
+KXCPIYOY	monthly	Inflation
+KXCPIYOYBANK	one_off	Inflation
+KXCREDEF	custom	Commercial real estate defaults
+KXCREDEFMAX	custom	Commercial real estate highest default rate
+KXCREDEFMINMAX	custom	Commercial real estate lowest default rate
+KXCREDITC	quarterly	SOFR spike: Credit crunch
+KXCREDITCDEF	custom	Credit card defaults up
+KXCREDITRATING	custom	US credit rating downgrade
+KXCREYOY	annual	US commercial real estate prices YoY
+KXCTINSURANCEJOBS	annual	Connecticut insurance-industry employment
+KXCTMFPERMITS	annual	Connecticut multifamily housing permits
+KXCTMINWAGE	one_off	Connecticut minimum wage on [date]
+KXCYBERMONSPEND	annual	U.S. online spending on Cyber Monday
+KXDALHOME	monthly	Dallas home values
+KXDATACENTCON	monthly	U.S. Data Center Construction Spending
+KXDCHOMEVAL	custom	Washington DC typical home value for date
+KXDDCOLDBREW	monthly	Price of a Dunkin' Medium Cold Brew this month
+KXDEBTGROWTH	custom	U.S. debt growth
+KXDEBTGROWTH25	custom	U.S. debt growth IN 2025
+KXDEBTGROWTH26	custom	U.S. debt growth in 2026
+KXDEBTLEVEL	custom	U.S. debt level
+KXDEBTSHRINK	custom	U.S. debt shrink
+KXDECPIPREL	monthly	Germany Inflation Rate YoY Prel
+KXDECREDITJOBS	annual	Delaware credit-intermediation employment
+KXDEFAULT	one_off	US defaults
+KXDEFGDP	one_off	U.S. federal deficit-to-GDP above/below X% in year
+KXDEFICIT	custom	Deficit size
+KXDEFRANCHISETAX	one_off	Delaware franchise-tax revenue
+KXDEGDPQOQF	custom	Germany GDP Growth Rate QoQ Flash (quarterly)
+KXDEGDPYOYF	custom	Germany GDP Growth Rate YoY Flash (quarterly)
+KXDEGFK	monthly	Germany GfK Consumer Confidence
+KXDEIFO	monthly	Germany Ifo Business Climate
+KXDELTADEVAL	custom	Delta SkyMiles devaluation
+KXDENHOMEVAL	one_off	Denver typical home value for date
+KXDETRADEBAL	monthly	Germany Balance of Trade 
+KXDEZEW	monthly	Germany ZEW Economic Sentiment Index
+KXDIESEL	weekly	Diesel price this week
+KXDIESELD	daily	Daily Diesel Price
+KXDIESELELECT	one_off	Diesel prices on Election Day
+KXDIESELM	monthly	Diesel price this month
+KXDIESELMAXY	annual	Highest U.S. diesel price by year
+KXDIESELMINY	annual	Lowest U.S. diesel price by year
+KXDIESELMON	monthly	Diesel Prices month
+KXDIESELMONAK	monthly	Alaska diesel price this month
+KXDIESELW	weekly	diesel price week
+KXDIESELYE	annual	Diesel prices at year end
+KXDISLANDPRICE	annual	Disneyland ticket prices
+KXDOESPRTENDER	one_off	DOE Strategic Petroleum Reserve tenders
+KXDOTPLOT	quarterly	fed dot plot
+KXDOTPLOTPUB	one_off	Will the Fed publish a dot plot in [month]?
+KXDXYFOMC	custom	U.S. Dollar Index move on FOMC day?
+KXECB	custom	European Central Bank main refinancing rate
+KXECONPATH	annual	State of the economy
+KXECONSTATCORECPIYOY	monthly	year over year core inflation
+KXECONSTATCPI	monthly	month over month inflation
+KXECONSTATCPICORE	monthly	month over month core inflation
+KXECONSTATCPIYOY	monthly	year over year inflation
+KXECONSTATU3	monthly	UNEMPLOYMENT RATE MONTHLY
+KXEDMHOME	annual	Edmonton home price below x in [year]
+KXEFFR	quarterly	Fed Funds (EFFR) above/below
+KXEGGPRICEM	custom	Egg prices monthly
+KXEGGPRICEW	custom	Egg prices weekly
+KXEGGS	monthly	Egg prices
+KXEHSALES	monthly	Existing home sales in time period
+KXEHSHARE	custom	Existing home sales in time period
+KXEIACRUDEW	weekly	U.S. crude oil inventories
+KXEIACRUDEXPM	monthly	U.S. crude oil exports
+KXEIAGASINVM	monthly	U.S. gasoline inventories
+KXEIAREFUTILM	monthly	U.S. refinery utilization
+KXEMERCUTS	custom	Emergency rate cuts
+KXEMPLOYMENTCOMBO	monthly	Employment Combo
+KXEPOP	annual	Employment-population ratio
+KXESGDPQOQF	custom	Spain GDP Growth Rate QoQ Flash (quarterly)
+KXESGDPYOYF	custom	Spain GDP Growth Rate YoY
+KXETHETF	custom	ETH ETF listed
+KXEXUSHOME	monthly	Median Existing US Home Price
+KXEZCPIYOYF	monthly	Euro Area Inflation Rate YoY Flash
+KXEZDEPRATE	custom	Euro Area Deposit Facility Rate (varied dates)
+KXEZGDPQOQF	custom	Euro Area GDP Growth Rate QoQ
+KXEZGDPYOYF	custom	Euro Area GDP Growth Rate YoY Flash
+KXFAOFPI	monthly	FAO Food Price Index in [month]?
+KXFED	custom	Fed funds rate
+KXFEDCHGCOUNT	annual	Number of rate changes
+KXFEDCOMBO	monthly	Fed Combo
+KXFEDCUT	one_off	Next Fed rate cut
+KXFEDDECISION	custom	Fed meeting
+KXFEDDISSENT	custom	Fed Dissent
+KXFEDDISSENTYEAR	annual	Total dissenting FOMC votes in year
+KXFEDEMPLOYEES	custom	Federal government employee count
+KXFEDFACILITY	annual	Fed facility
+KXFEDFREQ	one_off	Will Fed policy meetings be reduced?
+KXFEDFUNDSYEAR	annual	Fed funds rate at year end
+KXFEDHIKE	custom	Next Fed rate hike
+KXFEDMEET	custom	Fed emergency meeting
+KXFEDRATEMIN	custom	How low will the Fed rate go
+KXFEDREFORM	one_off	Which Federal Reserve precedents will be broken in 2026?
+KXFEDTWEETS	weekly	Fed tweets
+KXFERT	one_off	Fertilizer prices
+KXFINDEXACCOUNT	one_off	Global account ownership be in the next Global Findex release
+KXFISHMEAL	monthly	Fish meal price average price
+KXFLVISITORCOUNT	annual	Number of visitors to Florida in [year]
+KXFLVISITORS	annual	Florida visitors
+KXFLYCANCJFK	one_off	JFK flight cancellations
+KXFM30YMTG	one_off	Freddie Mac 30Y mortgage rate
+KXFOMCDISSENTCOUNT	custom	FOMC dissent count
+KXFOMCGUIDE	custom	Will the next FOMC statement include forward guidance?
+KXFRANCEDOWNGRADE	custom	France credit rating downgrade
+KXFRCPIPREL	monthly	France Inflation Rate YoY Prel 
+KXFRGDPQOQP	custom	France GDP Growth Rate QoQ Prel (quarterly)
+KXFRGDPYOYP	custom	France GDP Growth Rate YoY Prel (quarterly)
+KXFRM	weekly	Mortgage 30-yr rate this week
+KXFRMMAX	annual	Mortgage rate high
+KXFRMMIN	annual	Mortgage rate low
+KXFRONTIERAI	one_off	FrontierMath 
+KXFTAPER	custom	Fed tapering
+KXFWFOMC	custom	FedWatch odds move on FOMC day?
+KXFXEURO	weekly	Euro/USD exchange rate
+KXFXPESO	weekly	USD/Mexican peso exchange rate
+KXGAFILMSPEND	annual	Georgia film and television production spending
+KXGAS	weekly	Gas weekly
+KXGAS-MONTH	monthly	Gas monthly
+KXGASD	one_off	Gas daily
+KXGASMAX	annual	EIA Gas highest price yearly
+KXGASMIN	annual	EIA Gas lowest price yearly
+KXGDP	quarterly	US GDP growth
+KXGDPNOM	one_off	Nominal GDP 
+KXGDPSHAREMANU	custom	GDP share manufacturing
+KXGDPUSMAX	annual	US GDP peak 
+KXGDPUSMIN	annual	Negative US GDP growth
+KXGDPYEAR	custom	Annual GDP
+KXGIVINGTUESDAY	custom	GivingTuesday U.S. donations record
+KXGLACIERVISITS	one_off	Glacier National Park annual visitation
+KXGOVBAL	annual	What will [Country]’s government budget balance be in [Year]?
+KXGOVTCUTS	custom	Government budget cuts
+KXGOVTSPEND	custom	Government budget increases
+KXGROCERYCPI	one_off	Grocery CPI YoY
+KXH200CHINA	custom	Nvidia H200 chips delivered to China before 2027?
+KXHALFTRIL	custom	Half-trillionaire
+KXHEALTHCOST	quarterly	US employer health insurance cost growth
+KXHELIUMIMP	one_off	US helium imports
+KXHICP	monthly	Euro Area inflation
+KXHIGHINFLATION	one_off	Highest Inflation
+KXHIVISITORS	annual	Hawaii visitor arrivals
+KXHIVISITORSPEND	annual	Hawaii visitor spending
+KXHKANEKNIGHT	custom	Harry Kane Knighted
+KXHLENDHALT	one_off	BlackRock HLEND suspend repurchases by [date]
+KXHLENDREDM	one_off	Will BlackRock HLEND suspend repurchases by [date]
+KXHOBHOME	monthly	Hoboken home values
+KXHOLIDAYRETAIL	one_off	US retail jobs added this holiday season
+KXHOME	monthly	New home sales
+KXHOMEUS	monthly	US housing price up monthly
+KXHOMEUSY	annual	US housing prices up
+KXHOUHOME	monthly	Houston home values
+KXHOUHOMEVAL	one_off	Houston typical home value for date
+KXHOUSELENGTH	monthly	US house average sale length
+KXHOUSESTART	monthly	US housing starts rise
+KXHOUSINGSTART	monthly	Monthly housing starts
+KXHPI	monthly	Housing Price Index
+KXIACORN	annual	Iowa corn production
+KXIAETHANOL	annual	Iowa ethanol production
+KXIAFARMLAND	annual	Iowa farmland value
+KXIBONDFIX	custom	I bond fixed rate
+KXIDPOTATO	annual	Idaho potato production
+KXILHPIYOY	annual	Illinois home prices
+KXILNUCLEAR	annual	Illinois nuclear electricity generation
+KXILPENDEBT	annual	Illinois pension debt above X in fiscal year X?
+KXIMFRECESS	custom	IMF global recession
+KXIMFTWEETS	weekly	IMF tweets
+KXINCORNYIELD	one_off	Indiana corn yield
+KXINDIAVJAPAN	annual	Higher GDP: India vs Japan
+KXINEQUALITY	custom	US inequality
+KXINTRANSEMP	annual	Indiana transportation equipment manufacturing employment
+KXIRANCPI	monthly	Iran CPI in month
+KXIRANCRUDE	monthly	Iran crude oil production in [month]
+KXIRANIMPORTS	one_off	U.S. imports from Iran in [time period]
+KXIRSCOLLECT	custom	IRS tax collection
+KXISMPMI	monthly	ISM PMI
+KXISMSERVICES	custom	ISM Services PMI
+KXITCPIPREL	monthly	Italy Inflation Rate YoY Prel
+KXITGDPQOQA	custom	Italy GDP Growth Rate QoQ Adv (quarterly)
+KXITGDPYOYA	custom	Italy GDP Growth Rate YoY Adv (quarterly)
+KXJCHOME	monthly	Jersey City home values
+KXJETFUEL	weekly	US Gulf Coast jet fuel price weekly
+KXJFKFLYCAN	one_off	October 21 JFK inbound flight cancellations
+KXJOBLESS	weekly	Initial jobless claims
+KXJOBLESSCLAIMS	weekly	Weekly initial jobless claims
+KXJOBREVISION	custom	Job revisions
+KXJOBREVISIONS	monthly	U.S. jobs revisions
+KXJOBSRELEASE	one_off	When will the BLS release a jobs report?
+KXJOLTSOPEN	monthly	U.S. job openings in [month]
+KXJPCONCONF	monthly	Japan Consumer Confidence
+KXJPCPIYOY	monthly	Japan Inflation Rate YoY
+KXJPMOMINF	monthly	Japan inflation MoM in [month]
+KXJPSGINFL	monthly	Will Japan’s inflation rate be above Singapore’s
+KXJPTRADEBAL	monthly	Japan Balance of Trade
+KXJPY	daily	U.S. Dollar/Japanese yen exchange rate
+KXJPYINT	one_off	Will Japan buy yen in official intervention by [date]?
+KXJUSTATEST	one_off	Just a test
+KXKSWHEAT	annual	Kansas wheat production
+KXKYBOURBONBARRELS	one_off	Kentucky aging Bourbon-barrel inventory
+KXKYCOAL	annual	Kentucky coal production
+KXKYDISTEMP	annual	Kentucky distillery employment
+KXLAHOME	monthly	LA home values
+KXLAOILGASEMP	annual	Louisiana oil and gas extraction employment
+KXLARGECUT	custom	Large cuts
+KXLAYOFFSY	annual	layoffs
+KXLAYOFFSYINFO	annual	Tech layoffs
+KXLAYOFFSYPBS	annual	Professional and Business Services layoffs
+KXLCPIMAX	annual	Inflation surge
+KXLCPIMAXYOY	one_off	Inflation surge this year
+KXLCPIMIN	annual	High inflation ends
+KXLCPIYOY	custom	Inflation surge this year
+KXLFPRATE	annual	U.S. labor force participation rate
+KXLFPRATEEOY	annual	U.S. labor force participation rate at year-end
+KXLOUDOUNWATERDC	monthly	Loudoun Water data center potable water use
+KXLOWESTRATE	annual	Fed funds lowest rate
+KXLUMBERPPIHIGH	annual	Softwood lumber PPI high
+KXM2GROWTH	annual	M2 money supply growth
+KXMANHATTANRENT	monthly	The average Manhattan rent in [month]
+KXMANHEIMUSEDCAR	one_off	Manheim Used Vehicle Value Index
+KXMANOFFVAC	one_off	Manhattan office vacancy rate
+KXMANUCON	one_off	U.S. manufacturing construction spending
+KXMARCELLUSGAS	annual	Marcellus natural gas production
+KXMASCIENRDEMP	annual	Massachusetts scientific R&D employment
+KXMBAAPPS	weekly	U.S. mortgage applications
+KXMCDSBIGMAC	monthly	Price of a McDonald's Big Mac this month
+KXMCDSEGGMCMUFFN	monthly	Price of a McDonald's Egg McMuffin this month
+KXMEDIANRENTCHI	one_off	MEDIAN RENT CHICAGO
+KXMEDIANRENTHOU	one_off	MEDIAN RENT HOUSTON
+KXMEDIANRENTLA	custom	MEDIAN RENT LA
+KXMEDIANRENTMIA	one_off	MEDIAN RENT MIAMI
+KXMELOBSTER	annual	Maine lobster landings
+KXMEMHOME	monthly	Memphis home values
+KXMEXCUBOIL	one_off	Mexico resumes oil exports to Cuba before date
+KXMIAHOME	monthly	Miami home values
+KXMIAHOMEVAL	custom	Miami typical home value for date
+KXMIAUTOEMP	annual	Michigan motor-vehicle and parts manufacturing employment
+KXMNMEDDEVEMP	annual	Minnesota medical-device manufacturing employment
+KXMNTACONITE	annual	Minnesota taconite production
+KXMOBILETEU	annual	Port of Mobile container volume
+KXMOMFGEMP	annual	Missouri manufacturing employment
+KXMORTGAGEDEF	custom	Mortgage defaults
+KXMORTGAGERATE	one_off	Mortgage Rate
+KXMSCATFISH	annual	Mississippi catfish production
+KXMSCOTTON	annual	Mississippi cotton production
+KXMSTRSELL	one_off	Will MicroStrategy sell any Bitcoin before date
+KXMTCATTLE	annual	Montana cattle inventory
+KXMTLHOME	annual	Montreal single-family home price below X in [year]?
+KXMUSKTRILLION	custom	Musk trillionaire
+KXMUSKTRILLION27	one_off	Musk Trillionaire by 2027
+KXMUSKWEALTH	custom	Musk wealth
+KXMUSKX	one_off	Musk Manipulating X
+KXNBERRECESSQ	one_off	Next recession start
+KXNCPHARMAEMP	annual	North Carolina pharmaceutical manufacturing employment
+KXNDEBTSHRINK	custom	national debt shrinking
+KXNDKOIL	annual	North Dakota crude oil production
+KXNECOF	annual	Nebraska cattle on feed
+KXNECORNYIELD	annual	Nebraska corn yield
+KXNERIVISITS	one_off	New River Gorge National Park and Preserve recreation visits
+KXNETWORTHKAICENAT	one_off	WILL KAI CENAT BECOME A BILLIONAIRE THIS YEAR
+KXNETWORTHROYLEE	one_off	Will Roy Lee become a Billionaire by 2029
+KXNEXTATLFED	one_off	Next Atlanta Fed president?
+KXNEXTTRILLIONAIRE	custom	Who will be the world's second trillionaire?
+KXNFCI	monthly	Chicago Fed National Financial Conditions Index
+KXNFPDELAY	custom	Jobs data released
+KXNFPROD	one_off	US nonfarm productivity exceeds X% YoY in any quarter reported during [year]
+KXNGAS	monthly	Natural gas price max and min monthly
+KXNGASMAX	annual	Natural gas price peak
+KXNGASMIN	annual	Natural gas yearly low
+KXNGASW	weekly	Natural gas price max and min weekly
+KXNGDP	annual	Annual NGDP growth
+KXNGDPQ	custom	Quarterly NGDP growth
+KXNHASKIVISITS	annual	New Hampshire alpine skier visits
+KXNHHOMEPRICE	annual	New Hampshire House Price Index
+KXNHMAPLE	annual	New Hampshire maple syrup production
+KXNHSALES	monthly	New home sales in time period
+KXNJDRONES	custom	NJ DRONES
+KXNJONTIME	one_off	Will NJ Transit rail on-time performance reach 90% in November?
+KXNJPHARMAEMP	annual	New Jersey pharmaceutical manufacturing employment
+KXNMCOIL	annual	New Mexico crude oil production
+KXNOBELECON	annual	Nobel Economics prize
+KXNOMGDPGROWTH	annual	Nominal GDP growth in [year]
+KXNVHOMEPRICE	annual	Nevada House Price Index
+KXNVVISIT	annual	Nevada visitor volume
+KXNWSAYLOR	annual	Michael Saylor net worth on [date]
+KXNYCASKRENT	one_off	NYC median asking rent
+KXNYCBILLIONAIRES	custom	Billionaires lost
+KXNYCCBDENTRY	one_off	NYC CBD Vehicle Entries
+KXNYCHOME	monthly	NYC home values
+KXNYCRENTSM	monthly	NYC rent monthly increase
+KXNYCRENTSY	annual	NYC rent yearly increase
+KXNYCSTAT	one_off	NYC statistics
+KXNYCSUBWAY	one_off	NYC subway weekday ridership
+KXNYCSURP	custom	Will New York City report a General Fund surplus for FY[year]?
+KXNYNJPORTTEU	annual	Port of New York and New Jersey container volume
+KXNYSECEEMP	annual	New York securities-industry employment
+KXNYSECIRCUIT	custom	NYSE circuit breaker day
+KXNYSEOPEN	one_off	Will NYSE be open?
+KXOER	monthly	Owners' equivalent rent for [month]
+KXOFAC	custom	New Iran OFAC action by [date]
+KXOHMFGEMP	annual	Ohio manufacturing employment
+KXOIL	monthly	Price of oil monthly
+KXOILRIGS	custom	Oil rigs
+KXOILW	weekly	Price of oil weekly
+KXOKOIL	annual	Oklahoma crude oil production
+KXOPECCUTS	custom	Oil production cuts
+KXORBOFHARVEST	annual	Oregon Board of Forestry Lands timber harvest volume
+KXORDPAX	annual	O’Hare International Airport annual passengers
+KXORLHOTELDEMAND	annual	Orlando hotel room demand
+KXORSEMICONEMP	annual	Oregon semiconductor manufacturing employment
+KXOTTAWAHOME	annual	Ottawa home price below X in [year]?
+KXPAGAS	annual	Pennsylvania natural gas production
+KXPALISADESHOME	monthly	Pacific Palisades home values
+KXPALOHOME	monthly	Palo Alto home values
+KXPAMFGEMP	annual	Pennsylvania manufacturing employment
+KXPANAMATRAFFIC	one_off	Traffic through the Panama Canal?
+KXPAPER	monthly	Paper price index
+KXPAYROLLCANCEL	custom	Payrolls cancelled
+KXPAYROLLS	monthly	Jobs numbers
+KXPAYROLLSREV	monthly	Previous jobs numbers revised above <X> in the next jobs report?
+KXPCECORE	monthly	US Core PCE inflation
+KXPCEHEAD	monthly	U.S. headline PCE inflation
+KXPESO	weekly	USD/Peso exchange rate
+KXPHLHOME	monthly	Philly home values
+KXPHXHOME	monthly	Phoenix home values
+KXPHXHOMEVAL	one_off	Phoenix typical home value for date
+KXPJMEMERGENCY	annual	PJM capacity emergency days
+KXPOPCHICKSAND	monthly	Price of a Popeyes Classic Chicken Sandwich this month
+KXPOWERKWH	monthly	Average US electricity price this month
+KXPPICPI	custom	PPI YoY exceeds CPI YoY for [time period]
+KXPPISEMI	monthly	Semiconductor PPI
+KXPPIVSCPI	custom	PPI YoY exceeds CPI YoY for [time period]
+KXPRIMEPART	one_off	U.S. prime-age labor force participation
+KXPRIMESPEND	annual	Prime Day: total US online spend
+KXPROLLS	monthly	Jobs numbers
+KXPSAVERT	annual	US personal saving rate below x% in [year]?
+KXQATARLNGPROD	one_off	When will Qatar resume production of LNG
+KXQRECESS	custom	Recession start
+KXQTEND	custom	QT ending
+KXRATECUT	annual	Fed rate cut
+KXRATECUTCOUNT	annual	Number of rate cuts
+KXRATECUTE	custom	Rate cut at November 2024 meeting
+KXRATECUTS	annual	Number of rate cuts
+KXRATEHIKE	annual	Number of Fed rate hikes
+KXRAV4MSRP	annual	Toyota RAV4 starting MSRP
+KXRBADECISION	custom	RBA decision
+KXRDUVISITS	annual	Raleigh-Durham International Airport passengers
+KXREALWAGES	custom	Real wage growth
+KXRECSSNBER	annual	Recession
+KXREMITCOST	annual	Remittance Cost
+KXREMITREC	annual	Global remittances received
+KXREMITSENT	annual	Global remittances sent
+KXRENTNYCM	monthly	Rent price increase in NYC monthly
+KXRENTNYCY	annual	Rent price increase in NYC yearly
+KXRETAIL	monthly	Retail sales growth
+KXREVETH	custom	REV ETH
+KXREVSOL	one_off	REV ETH
+KXRIHOMEPRICE	one_off	Rhode Island House Price Index
+KXRIQUAHOG	annual	Rhode Island quahog landings
+KXRIRESPOWER	annual	Rhode Island residential electricity price
+KXRUBLE	weekly	Price of Ruble
+KXRUCRUDEX	one_off	Russia crude exports in [month] below x.x mbpd?
+KXSAGDPQOQ	quarterly	South Africa GDP growth QoQ
+KXSAHM	annual	Will the Sahm Rule trigger in [year]?
+KXSAMOMINF	monthly	South Africa MoM inflation
+KXSANTAMONICAHOME	monthly	Santa Monica home values
+KXSARETAIL	monthly	South Africa retail sales MoM
+KXSATRADEBAL	monthly	South Africa balance of trade for [month]
+KXSAUDICRUDE	monthly	Saudi Arabia crude oil production
+KXSAVTEU	annual	Port of Savannah container volume
+KXSBUXSAR	monthly	Price of a Starbucks Grande Strawberry Açaí Refresher this month
+KXSCFI	one_off	Shanghai Containerized Freight Index
+KXSCPORTTEU	annual	South Carolina Ports container volume
+KXSCTRANSEMP	one_off	South Carolina transportation equipment manufacturing employment
+KXSDCATTLE	one_off	South Dakota cattle inventory
+KXSDCORNYIELD	annual	South Dakota corn yield
+KXSDHOME	monthly	San Diego home values
+KXSDHOMEVAL	one_off	San Diego typical home value on date
+KXSEAHOME	monthly	Seattle home values
+KXSEAHOMEVAL	one_off	Seattle typical home value for date
+KXSEMIPRODH	annual	US Semiconductor production
+KXSFHOMEVAL	custom	San Francisco typical home value on date
+KXSFRENTSY	annual	SF yearly rent growth
+KXSHELTERCPI	monthly	US shelter CPI in [month]
+KXSIENNAMSRP	annual	Toyota Sienna starting MSRP
+KXSKEXPYOY	monthly	South Korea exports YoY
+KXSNOWCRABCATCH	annual	Bering Sea snow crab catch
+KXSOCKEYERUN	annual	Bristol Bay sockeye run forecast
+KXSOFRD	daily	Daily SOFR
+KXSOFTWAREUNEMP	annual	U.S. software developer unemployment in 2027
+KXSOLAR	custom	Solar capcity installation
+KXSONORACATTLE	one_off	Sonora cattle import suspension days
+KXSPR	one_off	SPRMAX
+KXSPRLVL	weekly	SPR level on date
+KXSPRLVLDATE	one_off	When will the US SPR level be above a threshold?
+KXSPRMAX	one_off	SPRMAX
+KXSPRMIN	one_off	SPRMIN
+KXSPRRELEASE	custom	New U.S. SPR release
+KXSPRUSE	custom	SPR use
+KXSPXFOMC	custom	S&P 500 move on [date]?
+KXSSCOLA	annual	Social Security cost-of-living adjustment
+KXSTUDENTDEBT	annual	Student loan debt at end of [year]
+KXSUBWAY	custom	Subway ridership returning
+KXTACOMAMSRP	annual	Toyota Tacoma starting MSRP
+KXTBCRUNCHWRAP	monthly	Taco Bell Crunchwrap Supreme price in [month]
+KXTDEFFICITBY	custom	Deficit Amount by Date
+KXTDEFICITHALF	custom	U.S. BOP
+KXTECHLAYOFF	monthly	Tech layoff rate
+KXTEMPHELP	monthly	Will temporary-help employment increase in [month]?
+KXTERMINALRATE	custom	Fed funds highest rate
+KXTFP	custom	Total factor productivity
+KXTGAW	weekly	U.S. Treasury cash balance
+KXTNTRANSEMP	one_off	Tennessee transportation equipment manufacturing employment
+KXTOBACCPI	monthly	Tobacco CPI higher in [month]?
+KXTOKENUST	one_off	Tokenized Treasuries
+KXTOP3WEALTH	custom	Top 3 wealthiest people
+KXTOPBUSINESS	one_off	CNBC TOP STATES FOR BUSINESS
+KXTORCONDO	annual	Toronto condo price below $X in [year]?
+KXTRADEDEFFICIT	custom	Deficit
+KXTRADEDEFICIT	annual	US annual trade deficit
+KXTRDDEFCN	weekly	US-China trade deficit
+KXTRILLIONAIRE	custom	First trillionaire
+KXTRUEV	daily	Truflation EV
+KXTRUFAIDP	daily	Truflation AI & DePIN Index
+KXTRUFBFST	daily	Truflation Breakfast Commodity Index
+KXTRUFBPPI	daily	Truflation Bitcoin Purchasing Power Index
+KXTRUFCCI	monthly	Truflation US Consumer Confidence Index
+KXTRUFCMC	monthly	"CoinMarketCap Total Market Cap	"
+KXTRUFCPI	daily	Truflation US CPI Inflation Index
+KXTRUFCPIYE	annual	Truflation U.S. CPI Inflation Index EOY
+KXTRUFDEAD	daily	Truflation Deadlift Index
+KXTRUFEGGS	monthly	Truflation US CPI Eggs Index
+KXTRUFGAS	monthly	Truflation US CPI Gasoline Price Index
+KXTRUFHOUCPI	monthly	Truflation US CPI Housing Inflation Index
+KXTRUFPDEBT	monthly	Total Public Debt
+KXTRUFTSA	monthly	Number of Airport Passenger Screened
+KXTRUMPTRADEGAP	annual	Will Trump close the China trade gap?
+KXTSAD	daily	Daily TSA passenger screenings
+KXTSAW	weekly	TSA check-ins this week
+KXTSLAYOFF	one_off	Will Tesla announce layoffs by [date]?
+KXTURKEYS	monthly	US turkey slaughter
+KXTXERCOTPEAK	one_off	Texas ERCOT peak electricity demand
+KXTXERCOTPEAKD	daily	Texas ERCOT peak electricity demand
+KXTXOIL	annual	Texas crude oil production
+KXU3	monthly	Unemployment
+KXU3EOY	annual	U.S. unemployment rate at year-end
+KXU3MAX	annual	Unemployment spike
+KXU3MIN	annual	Unemployment keeps falling
+KXUCTUITION	annual	UC resident undergraduate tuition in [year]
+KXUE	monthly	Monthly Unemployment
+KXUKCPIYOY	monthly	United Kingdom Inflation Rate YoY
+KXUKEAINFL	monthly	Will UK inflation be above Euro Area inflation
+KXUKGDPMOM	monthly	United Kingdom GDP MoM
+KXUKRETAIL	monthly	UK retail sales MoM
+KXUKUNRATE	monthly	United Kingdom Unemployment Rate
+KXUMICHOVR	one_off	Michigan consumer sentiment above X in [year]?
+KXUSCORNYIELD	one_off	U.S. corn yield
+KXUSCPIYEAR	annual	U.S. headline inflation at year end
+KXUSDCCAPACITY	annual	U.S. data center capacity
+KXUSDEBT	custom	U.S. debt to GDP ratio
+KXUSDEBTMON	monthly	US government debt increase in [month]
+KXUSDINTLPAY	annual	U.S. dollar share of international Swift payments
+KXUSDIRR	custom	USD/IRR exchange rate
+KXUSDRESERVE	quarterly	USD share of global foreign exchange reserves
+KXUSDTTBILL	one_off	USDT reserve share in direct U.S. Treasury Bills above [X]%
+KXUSDURABLE	monthly	United States Durable Goods Orders MoM
+KXUSEDCAR	monthly	US CPI print on used cars
+KXUSEDCARCPI	monthly	US used cars and trucks CPI in [month]
+KXUSEDCARPRICE	annual	Average U.S. used car price
+KXUSFLYCAN	weekly	US flight cancellations this week
+KXUSGASCPI	monthly	US gasoline CPI in [month]
+KXUSGBEEF	monthly	US ground beef consumer price in [month]
+KXUSGDPSHARE	annual	U.S. share of global GDP
+KXUSHOME	monthly	Median US New Home Price
+KXUSHOMEINVENT	monthly	US Active Housing Inventory
+KXUSHOMEVAL	one_off	US Metro typical home value for date
+KXUSIPMOM	monthly	US industrial production MoM
+KXUSISMSERV	monthly	United States ISM Services PMI
+KXUSLEI	monthly	U.S. Leading Economic Index change
+KXUSMICHCSP	monthly	United States Michigan Consumer Sentiment Prel 
+KXUSNFP	monthly	US nonfarm payrolls in [month]
+KXUSPINCOME	monthly	United States Personal Income MoM
+KXUSPPI	monthly	United States PPI MoM
+KXUSPPIYOY	monthly	US PPI YoY in [month]
+KXUSPSPEND	monthly	United States Personal Spending MoM
+KXUSRETAIL	monthly	US retail sales MoM
+KXUSTHOLDERS	annual	Foreign U.S. Treasury holdings increase
+KXUSTYLD	one_off	Treasury note yield on date
+KXUSUKCOREINF	monthly	Will U.S. core inflation be above UK core inflation
+KXUTHOMEPRICE	one_off	Utah House Price Index
+KXUTILITYERCOT	one_off	Texas electricity prices
+KXUTILITYNYC	one_off	NYC electricity prices
+KXUTILITYPJMWEST	one_off	PJM West electricity prices
+KXUTILITYSOCAL	one_off	SoCal electricity prices
+KXUTSKIVISITS	annual	Utah ski resort skier visits
+KXVANCONDO	annual	Will the average Vancouver condo price fall below X by year-end?
+KXVAPORTTEU	one_off	Port of Virginia container volume
+KXVENEZCRUDE	monthly	Venezuela crude oil production in [month]
+KXVENICEHOME	monthly	Venice home values
+KXVTMAPLE	annual	Vermont maple syrup production
+KXVTMILK	annual	Vermont milk production
+KXVTPERMITS	annual	Vermont housing units authorized
+KXWAAEROEMP	annual	Washington aerospace manufacturing employment
+KXWAGESAT	custom	Will wage satisfaction hit a new low in [year]?
+KXWAGESBEAT	annual	Wages vs. inflation
+KXWALLSTBONUS	annual	Average Wall Street bonus
+KXWATECHEMP	annual	Washington professional, scientific, and technical services employment
+KXWCPI-RU	annual	Russian inflation
+KXWCPI-TR	annual	Turkey inflation
+KXWEFTWEETS	weekly	WEF tweets
+KXWENBACONATOR	monthly	Average price of a Wendy's Baconator in [month]
+KXWHEAT	monthly	Average wheat price
+KXWICORNYIELD	one_off	Wisconsin corn yield
+KXWILDSHT	one_off	Which wildlife will appear on the BoE banknote shortlist
+KXWIMFGEMP	one_off	Wisconsin manufacturing employment
+KXWIMILK	one_off	Wisconsin milk production
+KXWRECSS	custom	World recessions
+KXWVCOAL	annual	West Virginia coal production
+KXWVPOP	annual	West Virginia population
+KXWYCOAL	one_off	Wyoming coal production
+KXWYUNEMPLOW	one_off	Wyoming unemployment
+KXXINDIA	custom	INDIAN ACCOUNTS X
+KXYELLVISITS	one_off	Yellowstone National Park annual recreation visits
+KXYOUTHUN	one_off	Youth unemployment below X% in [year]?
+KXZERORATE	custom	Zero rates
+LAYOFFSY	annual	layoffs
+LAYOFFSYINFO	annual	Tech layoffs
+LCPIMAX	annual	Inflation surge
+LCPIMAXYOY	one_off	Inflation surge this year
+LCPIMIN	annual	High inflation ends
+LCPIYOY	custom	Inflation surge this year
+LEAVEPOWELL	custom	Powell leaving
+LOWESTRATE	annual	Fed funds lowest rate
+MANHEIMUSEDCAR	one_off	Manheim Used Vehicle Value Index
+MORTGAGEDEF	custom	Mortgage defaults
+NFPDELAY	custom	Jobs data released
+NGAS	monthly	Natural gas price max and min monthly
+NGASMAX	annual	Natural gas price peak
+NGASMIN	annual	Natural gas yearly low
+NGASW	weekly	Natural gas price max and min weekly
+NGDP	annual	Annual NGDP growth
+NGDPQ	custom	Quarterly NGDP growth
+NYCRENTSM	monthly	NYC rent monthly increase
+NYCRENTSY	annual	NYC rent yearly increase
+OIL	monthly	Price of oil monthly
+OILW	weekly	Price of oil weekly
+PAYROLLS	monthly	Jobs numbers
+PCECORE	monthly	US Core PCE inflation
+PESO	weekly	USD/Peso exchange rate
+POWELLLEAVE	custom	Powell leaving
+PPISEMI	monthly	Semiconductor PPI
+PROLLS	monthly	Jobs numbers
+RATECUT	annual	Fed rate cut
+RATECUTCOUNT	annual	Number of rate cuts
+RATECUTS	annual	Number of rate cuts
+RATEHIKE	annual	Number of Fed rate hikes
+REALWAGES	custom	Real wage growth
+RECSSNBER	annual	Recession
+RENTNYCM	monthly	Rent price increase in NYC monthly
+RENTNYCY	annual	Rent price increase in NYC yearly
+RETAIL	monthly	Retail sales growth
+RHIKE	custom	Rate hikes
+RUBLE	weekly	Price of Ruble
+SEMIPRODH	annual	US Semiconductor production
+SFRENTSY	annual	SF yearly rent growth
+SPR	one_off	SPRMAX
+SPRMAX	one_off	SPRMAX
+SPRMIN	one_off	SPRMIN
+TBILL	weekly	Treasury bill rate
+TECHLAYOFF	monthly	Tech layoffs up
+TERMINALRATE	custom	Fed funds highest rate
+TRDDEFCN	weekly	US-China trade deficit
+U3	monthly	Unemployment
+U3MAX	annual	Unemployment spike
+U3MIN	annual	Unemployment keeps falling
+USEDCAR	monthly	US CPI print on used cars
+WCPI-RU	annual	Russian inflation
+WCPI-TR	annual	Turkey inflation
+WEALTH	custom	Person wealthiest
+WEALTHY	annual	Wealthiest person in world
+WHEAT	monthly	Average wheat price
+WRECSS	custom	World recessions
+WTAX	one_off	Wealth tax
+YINVERT	annual	Yield Curve Inversion

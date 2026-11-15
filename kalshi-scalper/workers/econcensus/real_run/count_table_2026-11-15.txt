@@ -1,0 +1,47 @@
+ECONCENSUS count table (counts only; no result read); series in the Economics list answer: 945
+CPICOREYOY: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXCONTCLAIMS: settled markets 66, after the cut dropped 0, close dates 6 (2026-09-10 to 2026-10-15), events 6
+KXCPI: settled markets 29, after the cut dropped 0, close dates 2 (2026-09-11 to 2026-10-14), events 2
+KXCPICOMBO: settled markets 24, after the cut dropped 0, close dates 2 (2026-09-11 to 2026-10-14), events 2
+KXCPICOREA: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXCPICOREGOODSMOM: settled markets 7, after the cut dropped 0, close dates 1 (2026-10-14 to 2026-10-14), events 1
+KXCPINDEX: settled markets 58, after the cut dropped 0, close dates 2 (2026-09-11 to 2026-10-14), events 2
+KXDEFICIT: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXECONSTATCPI: settled markets 21, after the cut dropped 0, close dates 2 (2026-09-11 to 2026-10-14), events 2
+KXECONSTATU3: settled markets 23, after the cut dropped 0, close dates 1 (2026-10-02 to 2026-10-02), events 1
+KXEMPLOYMENTCOMBO: settled markets 12, after the cut dropped 0, close dates 1 (2026-10-02 to 2026-10-02), events 1
+KXEPOP: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXFED: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXFEDDECISION: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXFEDFUNDSYEAR: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXFEDHIKE: settled markets 3, after the cut dropped 0, close dates 1 (2026-09-16 to 2026-09-16), events 1
+KXFEDMEET: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXGDP: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXHOME: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXHOUSESTART: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXISMPMI: settled markets 8, after the cut dropped 0, close dates 1 (2026-10-01 to 2026-10-01), events 1
+KXJOBLESSCLAIMS: settled markets 66, after the cut dropped 0, close dates 6 (2026-09-10 to 2026-10-15), events 6
+KXLFPRATE: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXMBAAPPS: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXNFPDELAY: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXNGDPQ: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXPAYROLLS: settled markets 13, after the cut dropped 0, close dates 1 (2026-10-02 to 2026-10-02), events 1
+KXPCECORE: settled markets 8, after the cut dropped 0, close dates 1 (2026-09-30 to 2026-09-30), events 1
+KXPSAVERT: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXRATECUT: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXRATECUTCOUNT: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXREALWAGES: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXRETAILSALES: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXTEMPCHIHS: settled markets 7070, after the cut dropped 0, close dates 30 (2026-09-17 to 2026-10-16), events 707
+KXTEMPHELP: settled markets 6, after the cut dropped 0, close dates 1 (2026-10-02 to 2026-10-02), events 1
+KXTEMPLAXHS: settled markets 7040, after the cut dropped 0, close dates 30 (2026-09-17 to 2026-10-16), events 704
+KXTEMPMIAH: settled markets 7040, after the cut dropped 0, close dates 30 (2026-09-17 to 2026-10-16), events 704
+KXTEMPNYCHS: settled markets 6930, after the cut dropped 0, close dates 30 (2026-09-17 to 2026-10-16), events 693
+KXU3: settled markets 14, after the cut dropped 0, close dates 1 (2026-10-02 to 2026-10-02), events 1
+KXUE: settled markets 77, after the cut dropped 0, close dates 7 (2026-09-15 to 2026-10-15), events 8
+KXUSDEBT: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXUSISMSERV: settled markets 15, after the cut dropped 0, close dates 1 (2026-10-05 to 2026-10-05), events 1
+KXUSMICHCSP: settled markets 0, after the cut dropped 0, close dates 0, events 0
+KXUSPPIYOY: settled markets 32, after the cut dropped 0, close dates 2 (2026-09-10 to 2026-10-15), events 2
+PCECORE: settled markets 0, after the cut dropped 0, close dates 0, events 0
+TBILL: settled markets 0, after the cut dropped 0, close dates 0, events 0
