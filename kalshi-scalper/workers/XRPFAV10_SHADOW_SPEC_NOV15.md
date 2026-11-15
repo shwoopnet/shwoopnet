@@ -24,3 +24,7 @@ At least 14 days after the first logged row AND 150 fillable signals, whichever 
 `docs/STRATEGY_LIFECYCLE.md` 7c allows ONE favourite-late shadow per underlying market. XRPFAV10 is the one favourite-late shadow on XRP (XRPFAV6 stays a recorded result, not logged). It does not count against gold's GOLDOFF, which is the one written exception for gold's own return evidence.
 ## What the recompute said (information only; figures are in the queue, none here)
 Cut-window recompute, one build, upper bound not fill-checked: passes the haircut bar at 1c and 2c with both halves above 1.0. It rests on 14 losses in 242 trades, shares its markets with XRPFAV6 at another look, and is a retired favourite-late version. Neither the recompute nor this shadow is evidence for live trading.
+
+
+## Dated note, 2026-11-15 (from Main via the Head, owner order "Live now, trial size")
+This strategy is now a LIVE trial seat in PR 945, not a shadow rule. Live orders are priced at the live quote at the look, not at the 120 s candle, so this spec's price and fill statements now describe the paper recompute only. The forward read (see above) now also reads the live fills, and a trial seat's fills are not research evidence on their own. No other change; the frozen definitions above are untouched.

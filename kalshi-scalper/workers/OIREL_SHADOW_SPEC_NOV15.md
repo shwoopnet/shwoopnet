@@ -22,3 +22,7 @@ rule `OIREL1`, ticker, side, price (the ask of the bought side on the candle end
 - **Forward read date:** 14 days after the first logged row, or 60 signals, whichever is LATER (history had about 6.6 firings a day, so 60 signals is about 9 days; the 14 day minimum governs). One read, by the scorer, no peeking before.
 ## What this spec does not decide
 Whether to deploy it (Main, with the Head and the owner's merge); whether the two extra candle reads fit the shared shadow budget (they cannot be shared with OICORE, a slot rule); and that a pass changes OICORE's threshold only by a reviewed edit, never automatically.
+
+
+## Dated note, 2026-11-15 (from Main via the Head, owner order "Live now, trial size")
+This strategy is now a LIVE trial seat in PR 945, not a shadow rule. Live orders are priced at the live quote at the look, not at the 120 s candle, so this spec's price and fill statements now describe the paper recompute only. The forward read (see above) now also reads the live fills, and a trial seat's fills are not research evidence on their own. No other change; the frozen definitions above are untouched.
