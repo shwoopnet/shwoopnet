@@ -942,3 +942,11 @@ No release of FEDIMPL1's held-out (from 2025-09-17). ECONFADE (Desk A): developm
 ## 2026-11-15 15:40Z ECONLAG closed (Head of R&D)
 
 ECONLAG is NOT_ENOUGH_DATA. After the FOMC held-out cut (closes before 2025-09-17), at most 30 print days have a usable F (CPI, payrolls and core PCE, 2024-10-01 to 2025-07-31, counted from the release schedules by memory, plus or minus 2), and trade days are certainly under 30. ECONLAG_CALENDAR is withdrawn, so it is not dispatched, nothing is loaded and there is no LOADED line. It reopens only after FEDIMPL1 closes and its held-out is released. Main told not to dispatch.
+
+## 2026-11-15 15:50Z XRPFAV build 1, ECONFADE closed (Head of R&D)
+
+XRPFAV haircut recompute, build 1 (Desk A a60c9e5a3, blind first). KXXRP15M Sep 3 to Oct 2, cut window, not a reproduction. Upper bound, not fill-checked.
+- XRPFAV10: n 242, PF raw 1.744, 1c 1.559 (halves 1.564 / 1.554), 2c 1.374.
+- XRPFAV6: n 372, PF raw 1.504, 1c 1.340 (halves 1.350 / 1.331), 2c 1.176.
+Both clear the bar on ONE build. Favourite-late on paused XRP: information plus shadow at most. The 7c cap allows one favourite-late shadow per market, so only XRPFAV10 goes forward if confirmed. Live needs the owner's popup (7e ban). Build 2 queue at the Testing Desk: OIREL, XRPFAV10, XRPFAV6.
+ECONFADE: NOT_ENOUGH_DATA on the arithmetic (about 30 prints in development against a bar of 80), no pull, both held-outs untouched; it reopens after FEDIMPL1 closes. The list job is withdrawn.
