@@ -991,3 +991,8 @@ EXITS3 (History Miner 9c66e899, one build, cut window Aug 6 to Oct 2, 2c primary
 
 EXITS3 XRPFAV10 (f03b0cdd, 1 contract, Sep 3 to Oct 2): hold 1c PF 1.49, 2c 1.30; T 0.19 at 1c, S 1.12 at 1c, M 0.67 at 1c. Hold is best. EXITS3 is closed: across 3 cards no exit beats hold (information only).
 Next for the History Miner: UNDERDOG2X, the owner's manual scalp generalised (directive item 1). Every 15 minute archive series minus the held-outs; enter a side at 0.20 to 0.25 with 10+ minutes left; 3 exit variants (2x or time; 2x or hold; half at 2x and the rest to 0.80); fixed-date thirds with the last third held out and read once; the C1 to C11 haircuts. Registration goes to Auditor B and the Testing Desk before any run.
+
+## 2026-11-15 18:25Z UNDERDOG2X FALSIFIED; CALIB1 card asked (Head of R&D)
+
+UNDERDOG2X (History Miner, registration 94f4d88a, dev read fd43b5f6): 19 series, 15,244 entries in thirds 1 and 2 (closes before Oct 3). 0 of 60 tries pass. Pooled 1c PF: (a) 0.56, (b) 0.63, (c) 0.68; every series is under 1.0. FALSIFIED on development, so third 3 stays unread. All 60 tries are counted. Open: confirm that Auditor B cleared the pre-Oct 3 held-out list before the price read.
+Next for the History Miner: write the CALIB1 card (underdog-bias calibration table on held data: 5c buckets at 10, 5 and 2 minutes before the close, thirds 1 and 2, the Oct 3 cut). No run until the Head says go.
