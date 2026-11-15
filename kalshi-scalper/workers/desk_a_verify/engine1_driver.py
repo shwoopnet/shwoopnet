@@ -1,0 +1,94 @@
+"""ENGINE1 driver (Desk A, Nov 15 2026): SEARCH, VALIDATE, Benjamini-Hochberg. Pure; the extract loader supplies the data. Binaries only: the perps block is a separate driver.
+markets: {series: [ {series, ticker, close, result, candles[(end,bid,ask,last,vol,oi)]} ]}. Phases come from engine1_split constants (a series with no constant is counted and skipped).
+Gate: SEARCH n >= MIN_N scored entries at 10 contracts, PF at 1c >= 1.3 and PF at 2c >= 1.0 (h 0.01 and 0.02); VALIDATE the same bar on survivors plus BH at 5% over m = ALL cells tried."""
+import math, time, collections
+import engine1_core as K, engine1_enum as N, engine1_split as S
+MIN_N = 100; PF1 = 1.3; PF2 = 1.0; ALPHA = 0.05; CONTRACTS = 10
+DISCLOSURE = "upper bound, not fill-checked; sales booked at max(bid - h, 0.01), purchases at min(ask + h, 0.99); fee ceil(round(x, 9)) per order per leg; target and stop only on candles ending at or before close - 60; one-sided p from day-clustered z of the 1c cash at 10 contracts"
+def day_of(ts): return time.strftime("%Y-%m-%d", time.gmtime(ts))
+def pval(z): return 0.5 * math.erfc(z / math.sqrt(2)) if z is not None else 1.0
+def groups(mkts, cuts):
+    """-> {(bucket, band, side_rule, filter): [(market, entry dict)]} for ONE phase's markets, using the enumerator's own feature code."""
+    g = collections.defaultdict(list)
+    for m in mkts:
+        by_end = {c[0]: c for c in m["candles"] if c[0] <= m["close"]}
+        for b in N.BUCKETS:
+            e = m["close"] - b
+            if e not in by_end: continue
+            c = by_end[e]
+            if not (0 < c[1] < c[2] < 1): continue
+            ya, na = N.asks(c)
+            for rs in N.SIDES:
+                side = N.side_for(rs, ya, na); a = ya if side == "yes" else na
+                if not (5 <= a <= 94): continue
+                ra = N.raw_ask(c, side); ent = {"side": side, "ask": ra, "entry_end": e, "whole_cent": abs(ra * 100 - round(ra * 100)) < 1e-6}
+                band = a // 5; g[(b, band, rs, None)].append((m, ent))
+                f, miss = N.features(by_end, e, side)
+                for name in N.FEATURES:
+                    if name not in miss: g[(b, band, rs, (name, N.cls(f[name])))].append((m, ent))
+                if cuts.get(b) is not None: g[(b, band, rs, ("spread", N.spread_class(f["spread"], cuts[b])))].append((m, ent))
+    return g
+def to_core(m, ent):
+    return {"id": m["ticker"], "close_ts": m["close"], "day": day_of(m["close"]), "series": m["series"], "side": ent["side"], "ask": ent["ask"], "n": CONTRACTS, "entry_end": ent["entry_end"], "result": m["result"],
+            "path": [(c[0], c[1], c[2]) for c in m["candles"] if c[0] > ent["entry_end"]]}
+def score_group(items, exit_):
+    """-> {h: aggregate} for h 0.01 and 0.02 at CONTRACTS, plus the p-value of the 1c cash."""
+    es = [to_core(m, ent) for m, ent in items]; out = {}
+    for h in (0.01, 0.02): out[h] = K.aggregate(es, exit_, h, CONTRACTS)
+    return out, pval(out[0.01]["day_z"])
+def passes(agg1, agg2): return agg1["n"] >= MIN_N and agg1["pf"] >= PF1 and agg2["pf"] >= PF2
+def bh(pvals, m, alpha=ALPHA):
+    """Benjamini-Hochberg over m tests of which len(pvals) were scored (the rest p = 1). Returns the set of keys that pass."""
+    items = sorted(pvals.items(), key=lambda kv: kv[1]); k = 0
+    for i, (_, p) in enumerate(items, 1):
+        if p <= alpha * i / m: k = i
+    return {key for key, _ in items[:k]}
+def run(markets_by_source):
+    """markets_by_source: {source: {series: [market]}}. Returns a report dict (counts first)."""
+    rep = {"disclosure": DISCLOSURE, "tried_by_series": {}, "no_split_constant": [], "non_whole_cent_entries": 0, "entries_total": 0}
+    search, valid = {}, {}
+    total = 0; seen = set(); rep["duplicate_tickers_dropped"] = 0
+    for src, bys in markets_by_source.items():
+        for series, mk in bys.items():
+            kept_mk = []
+            for m in mk:
+                if m["ticker"] in seen: rep["duplicate_tickers_dropped"] += 1
+                else: kept_mk.append(m)
+            mk = kept_mk
+            seen.update(m["ticker"] for m in mk)
+            if series not in S.LAST_SEARCH: rep["no_split_constant"].append((src, series)); continue
+            sm = [m for m in mk if S.phase(series, m["close"]) == "search"]; vm = [m for m in mk if S.phase(series, m["close"]) == "validate"]
+            cuts = {}
+            for b in N.BUCKETS:
+                sp = [N.cents(c[2] - c[1]) for m in sm for c in m["candles"] if c[0] == m["close"] - b and 0 < c[1] < c[2] < 1]
+                cuts[b] = N.spread_cuts(sp) if sp else None
+            rep["tried_by_series"][(src, series)] = N.RULES_PER_SERIES; total += N.RULES_PER_SERIES
+            search[(src, series)] = (groups(sm, cuts), cuts); valid[(src, series)] = vm
+    rep["combos_tried_m"] = total                                              # printed before any result
+    s_pass, s_p = {}, {}
+    for key, (g, cuts) in search.items():
+        for rule, items in g.items():
+            if len(items) < MIN_N: continue
+            for x in N.EXITS:
+                agg, p = score_group(items, x)
+                if agg[0.01]["n"] >= MIN_N: s_p[key + rule + (x,)] = p
+                if passes(agg[0.01], agg[0.02]): s_pass[key + rule + (x,)] = (agg[0.01], agg[0.02])
+    rep["search_passes"] = len(s_pass)
+    v_res, v_p = {}, {}
+    for k, _ in s_pass.items():
+        src, series, b, band, rs, filt, x = k
+        g, cuts = search[(src, series)]
+        vg = groups(valid[(src, series)], cuts)
+        items = vg.get((b, band, rs, filt), [])
+        if len(items) < MIN_N: continue
+        agg, p = score_group(items, x)
+        if passes(agg[0.01], agg[0.02]): v_res[k] = (agg[0.01], agg[0.02]); v_p[k] = p
+    keep = bh(v_p, total)
+    rep["validate_bar_passes"] = len(v_res); rep["validate_passes"] = len(keep)
+    rep["survivors"] = [{"source": k[0], "series": k[1], "bucket": k[2], "band": k[3], "side": k[4], "filter": k[5], "exit": k[6], "pf_1c": v_res[k][0]["pf"], "pf_2c": v_res[k][1]["pf"], "n": v_res[k][0]["n"], "days": v_res[k][0]["trade_days"], "family": family(k)} for k in sorted(keep, key=str)]
+    return rep
+def family(k):
+    src, series, b, band, rs, filt, x = k
+    if filt and filt[0].startswith("oi"): return "OI (check against OICORE)"
+    if rs in ("favourite", "cheap") and band >= 17 and b <= 600: return "favourite-late (closed family)"
+    return "none identified (lead-lag cannot be seen from this data; check by hand)"
