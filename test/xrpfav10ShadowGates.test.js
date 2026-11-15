@@ -6,10 +6,12 @@ const path = require('path');
 const sh = require('../functions/kalshiShadowLib');
 const gates = {};
 const NOW = Date.parse('2026-11-16T15:00:00Z');
-const rule = () => sh.SHADOW_RULES.find((r) => r.id === 'XRPFAV10');
+// XRPFAV10 went LIVE as a trial seat on Nov 15, 2026 (the owner: "Live now, trial size"), so it is no longer a shadow rule; these gates keep pinning the logger's rounding on the rule as it was registered.
+const RULE = Object.freeze({ id: 'XRPFAV10', readme: 'kalshi-scalper/workers/XRPFAV10_SHADOW_SPEC_NOV15.md', series: Object.freeze(['KXXRP15M']), entry: Object.freeze({ sideRule: 'favourite', priceMin: 0.88, priceMax: 0.92, leftMaxSec: 640, leftMinSec: 570, secondRead: true }), contracts: 1, registeredAt: '2026-11-15', forwardReadDate: '2026-12-13' });
+const rule = () => RULE;
 const q = (bid, ask, closeOffsetSec) => [{ series: 'KXXRP15M', m: { ticker: 'KXXRP15M-26NOV161500-00', status: 'open', close_time: new Date(NOW + closeOffsetSec * 1000).toISOString(), yes_bid_dollars: String(bid), yes_ask_dollars: String(ask), yes_ask_size_fp: '40', yes_bid_size_fp: '30' } }];
 
-gates['XF1 registered once, valid, log only: XRP only, favourite 88c to 92c, 570 to 640 s, 1 contract, second look on'] = () => {
+gates['XF1 the shadow rule shape is valid, log only: XRP only, favourite 88c to 92c, 570 to 640 s, 1 contract, second look on'] = () => {
   const r = rule();
   assert.ok(r && Object.isFrozen(r) && Object.isFrozen(r.entry));
   assert.strictEqual(sh.validateShadowRule(r, sh.SHADOW_ALLOWED_SERIES).ok, true);
@@ -18,10 +20,8 @@ gates['XF1 registered once, valid, log only: XRP only, favourite 88c to 92c, 570
   assert.ok(Date.parse(r.forwardReadDate) - Date.parse(r.registeredAt) >= 28 * 86400000, 'the read is 28 days after the registration');
 };
 
-gates['XF2 the 7c count holds: exactly one favourite-late shadow rule on XRP, and XRPFAV6 stays retired'] = () => {
-  const xrp = sh.SHADOW_RULES.filter((r) => r.series.includes('KXXRP15M') && r.entry.sideRule === 'favourite');
-  assert.deepStrictEqual(xrp.map((r) => r.id), ['XRPFAV10']);
-  assert.ok(!sh.SHADOW_RULES.some((r) => r.id === 'XRPFAV6'));
+gates['XF2 XRPFAV10 is no longer a shadow rule: the production shadow registry holds only GOLDOFF, so the 7c favourite-late shadow count is zero'] = () => {
+  assert.deepStrictEqual(sh.SHADOW_RULES.map((r) => r.id), ['GOLDOFF']);
 };
 
 gates['XF3 a favourite inside the band at the look logs one row at the rounded cent price; outside the band or the look logs nothing'] = () => {

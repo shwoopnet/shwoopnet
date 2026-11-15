@@ -130,8 +130,8 @@ gates.SB8 = () => {
   // the ON DECK ids are the bot's registry, in order: a rule added or removed in the bot without the board fails here
   // Nov 12, 2026: the registry holds ONE rule, GOLDOFF, which is gold L1's own return evidence and not a candidate (test/goldOffShadowGates.test.js). It is left off the board on purpose: a card would score it against the
   // candidate bar (150 signals, 14 days, an incubator slot), which is not its rule (60 rows, 7 days, a reviewed re-arm of gold). The nightly report scores it with its own `returnRule`. Every other registered rule must be on the board.
-  assert.deepStrictEqual(P.KAL_BOARD_SHADOW.map((r) => r.id), shadow.SHADOW_RULES.map((r) => r.id).filter((id) => id !== 'GOLDOFF' && id !== 'OIREL1' && id !== 'XRPFAV10'));   // OIREL1 (Nov 15, 2026) is a registry row (strategies-registry.json code.shadow), drawn by the stage board, not a KAL_BOARD_SHADOW card
-  assert.deepStrictEqual(shadow.SHADOW_RULES.map((r) => r.id), ['GOLDOFF', 'OIREL1', 'XRPFAV10'], 'the registered rules are the written gold exception, the OIREL1 version test and the owners one allowed XRPFAV10 paper record');
+  assert.deepStrictEqual(P.KAL_BOARD_SHADOW.map((r) => r.id), shadow.SHADOW_RULES.map((r) => r.id).filter((id) => id !== 'GOLDOFF'));
+  assert.deepStrictEqual(shadow.SHADOW_RULES.map((r) => r.id), ['GOLDOFF'], 'the only registered rule is the written gold exception');
   P.KAL_BOARD_SHADOW.forEach((r) => assert.ok(r.rule && r.rule.length < 80, 'one line of rule text for ' + r.id));
 };
 gates.SB9 = () => {

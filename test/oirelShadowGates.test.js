@@ -8,7 +8,9 @@ const slot = require('../functions/kalshiSlotLib');
 const root = path.join(__dirname, '..');
 const gates = {};
 const CLOSE = Date.parse('2026-11-16T15:00:00Z'), CS = CLOSE / 1000;
-const rule = () => sh.SHADOW_RULES.find((r) => r.id === 'OIREL1');
+// OIREL1 went LIVE as a trial seat on Nov 15, 2026 (the owner's answer "Live now, trial size"), so it is no longer in SHADOW_RULES; the shadow logger keeps the oiRelMin support, and these gates drive it with the rule as it was registered.
+const RULE = Object.freeze({ id: 'OIREL1', readme: 'kalshi-scalper/workers/OIREL_SHADOW_SPEC_NOV15.md', series: Object.freeze(['KXBTC15M']), entry: Object.freeze({ sideRule: 'cheap', priceMin: 0.05, priceMax: 0.5, leftMaxSec: 125, leftMinSec: 60, oiRelMin: 0.26764675317954373 }), contracts: 1, registeredAt: '2026-11-15', forwardReadDate: '2026-12-01' });
+const rule = () => RULE;
 const cand = (end, oi, bid, ask) => ({ end_period_ts: end, open_interest_fp: String(oi), yes_bid: { close_dollars: String(bid) }, yes_ask: { close_dollars: String(ask) } });
 const good = (level, end, sigBid, sigAsk, fillBid, fillAsk) => [cand(CS - 360, level, 0.2, 0.25), cand(CS - 180, end, sigBid, sigAsk), cand(CS - 120, end, fillBid, fillAsk)];
 const quotes = () => [{ series: 'KXBTC15M', m: { ticker: 'KXBTC15M-26NOV161000-00', status: 'open', close_time: new Date(CLOSE).toISOString(), yes_bid_dollars: '0.40', yes_ask_dollars: '0.45', yes_ask_size_fp: '300', yes_bid_size_fp: '200' } }];
@@ -19,8 +21,9 @@ async function run(candlesFn, extra) {
   return { r, written, reads };
 }
 
-gates['OR1 the rule is registered, valid, log only and a version of OICORE on Bitcoin only'] = () => {
+gates['OR1 the shadow rule shape is valid and log only, on Bitcoin only; the production shadow registry no longer holds it (it is a live seat)'] = () => {
   const r = rule();
+  assert.ok(!sh.SHADOW_RULES.some((x) => x.id === 'OIREL1'), 'OIREL1 runs live now, not as a shadow rule');
   assert.ok(r && Object.isFrozen(r) && Object.isFrozen(r.entry));
   assert.strictEqual(sh.validateShadowRule(r, sh.SHADOW_ALLOWED_SERIES).ok, true);
   assert.deepStrictEqual([r.series, r.contracts, r.entry.sideRule, r.entry.priceMin, r.entry.priceMax, r.entry.oiRelMin], [['KXBTC15M'], 1, 'cheap', 0.05, 0.5, 0.26764675317954373]);

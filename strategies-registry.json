@@ -122,55 +122,59 @@
   },
   {
    "id": "OIREL1",
-   "name": "Open interest jump, relative version",
-   "stage": "Shadow",
-   "rule": "Writes down the Bitcoin trades the bot would have made if the open interest jump were counted as a share of the open interest already there, not as a fixed number of contracts (the cheaper side, 5c to 50c, about 2 minutes before the close), with no money at risk",
-   "goesLive": "It never trades; it replaces its parent only if its paper record beats the open interest jump strategy by at least 0.1 on the same windows over at least 60 signals",
-   "label": "UNPROVEN",
+   "name": "Relative open interest jump",
+   "stage": "Probe",
+   "rule": "Bitcoin: 3 to 2 minutes before the close, buys the cheaper side at 5c to 50c when the open interest rose by more than 26.8% of what was already there, and holds it until the market closes (a version of the open interest jump strategy)",
+   "goesLive": "On trial at 3 contracts; it moves up only after 90 trades that win at least 1.3 times what they lose",
+   "label": null,
    "startDate": "2026-11-15",
    "nextRead": "2026-12-01",
-   "nextReadText": "One read, 14 days after the first row or 60 signals, whichever is later",
+   "nextReadText": "One read, 14 days after the first fill or 60 fills, whichever is later; fills of a trial seat are not research evidence",
    "n": null,
-   "nBasis": "Shadow rows the bot logs from public candles; the count is shown from the private log, not stored here",
-   "kill": "Dropped if it loses more than a cent a contract after 50 signals, or fewer than 40 signals come in 30 days; it closes if its parent is closed",
-   "return": "Not applicable: a closed paper test is rerun only by a new written test",
+   "nBasis": null,
+   "kill": "It stops if it is down $18 after 5 trades, or after 30 losses in a row",
+   "return": "14 days after a stop, when a fresh paper record wins at least 1.3 times what it loses",
    "retiredOn": null,
    "reason": null,
    "notes": [
-    "A version of the open interest jump strategy, not a new strategy; the threshold was fitted before the forward record, so only forward rows count"
+    "Trial seat the owner made live on Nov 15 (\"Live now, trial size\"); no evidence of an edge at the research bar",
+    "OIREL1 shares Bitcoin with OICORE: it cannot add where OICORE already holds contracts past the per-market limit"
    ],
    "code": {
-    "shadow": "OIREL1"
+    "live": "OIREL1",
+    "slot": "OIREL1"
    },
-   "roomTarget": 60,
-   "roomWhat": "signals toward the 60 the read needs",
+   "roomTarget": null,
+   "roomWhat": null,
    "cause": null,
    "figures": null
   },
   {
    "id": "XRPFAV10",
-   "name": "XRP favourite, 10 minutes out",
-   "stage": "Shadow",
-   "rule": "Writes down the XRP trades the bot would have made on the side costing 88c to 92c, about 10 minutes before the close, with no money at risk",
-   "goesLive": "It never trades; it can be proposed for a small live seat only if its paper record wins at least 1.3 times what it loses over 150 checked trades, and then only with the owner's own OK",
-   "label": "UNPROVEN",
+   "name": "XRP favourite",
+   "stage": "Probe",
+   "rule": "XRP: about 10 minutes before the close, buys the favourite side at 88c to 92c, and holds it until the market closes",
+   "goesLive": "On trial at 3 contracts; it moves up only after 90 trades that win at least 1.3 times what they lose",
+   "label": null,
    "startDate": "2026-11-15",
    "nextRead": "2026-12-13",
-   "nextReadText": "One read, 14 days after the first row and at least 150 checked trades, whichever is later",
+   "nextReadText": "One read, 14 days after the first fill or 60 fills, whichever is later; fills of a trial seat are not research evidence",
    "n": null,
-   "nBasis": "Shadow rows the bot logs from public quotes; the count is shown from the private log, not stored here",
-   "kill": "Dropped if it loses more than a cent a contract after 50 checked trades, or fewer than 40 signals come in 30 days",
-   "return": "Not applicable: a closed paper test is rerun only by a new written test",
+   "nBasis": null,
+   "kill": "It stops if it is down $18 after 5 trades, or after 30 losses in a row",
+   "return": "14 days after a stop, when a fresh paper record wins at least 1.3 times what it loses",
    "retiredOn": null,
    "reason": null,
    "notes": [
-    "The owner allowed this one rule back as a paper record only (Nov 15); XRPFAV6 stays retired"
+    "Trial seat the owner made live on Nov 15 (\"Live now, trial size\"); no evidence of an edge at the research bar",
+    "The owner's one exception to the favourite-and-hold ban, for this seat only; XRP stays paused for gold's own rule"
    ],
    "code": {
-    "shadow": "XRPFAV10"
+    "live": "XRPFAV10",
+    "slot": "XRPFAV10"
    },
-   "roomTarget": 150,
-   "roomWhat": "checked trades toward the 150 the read needs",
+   "roomTarget": null,
+   "roomWhat": null,
    "cause": null,
    "figures": null
   },

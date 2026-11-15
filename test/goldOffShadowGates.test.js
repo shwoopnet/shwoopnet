@@ -46,10 +46,10 @@ gates.GO1 = async () => {
   // The rule is the return evidence for gold L1 itself: one frozen, valid rule on gold's own entry window, dated today, with a README entry.
   const r = rule();
   assert.ok(r && Object.isFrozen(r) && Object.isFrozen(r.entry), 'GOLDOFF is registered, frozen');
-  assert.deepStrictEqual([sh.SHADOW_RULES.length, r.series, r.contracts, r.registeredAt], [3, [GOLD], 1, '2026-11-12']);
+  assert.deepStrictEqual([sh.SHADOW_RULES.length, r.series, r.contracts, r.registeredAt], [1, [GOLD], 1, '2026-11-12']);
   assert.deepStrictEqual(r.entry, { sideRule: 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 });
   assert.strictEqual(sh.validateShadowRule(r, live.L1_SERIES).ok, true);
-  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 3, 'the production registry accepts it (GOLDOFF, OIREL1 and XRPFAV10)');
+  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 1, 'the production registry accepts it');
   assert.ok(Date.parse(r.forwardReadDate) - Date.parse(r.registeredAt) >= 7 * 86400000, 'the return review is at least 7 days after the first row');
   const readme = read('kalshi-scalper', 'README.md');
   assert.ok(/## SHADOW-GOLDOFF/.test(readme) && /counterparty/i.test(readme.split('## SHADOW-GOLDOFF')[1].slice(0, 6000)), 'pre-registered in the README before its first row, with a counterparty');

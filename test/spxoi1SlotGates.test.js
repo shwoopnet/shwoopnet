@@ -26,10 +26,10 @@ const spx = slot.spxoiEntry(T_INV);
 gates['SX1 with the threshold null the seat is not registered: nothing can be sent for it, the other seats are untouched, and the config holds no guess'] = async () => {
   assert.strictEqual(cfg.SPXOI1_T, null, 'T is null until it is frozen from the Nov 5 to 13 candles and Auditor B has checked it');
   assert.ok(Object.isFrozen(cfg));
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK'], 'the registry is exactly what it was');
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((s) => s.id), ['OICORE', 'EVENT830', 'CFRTIK', 'OIREL1', 'XRPFAV10'], 'the registry is exactly what it was');
   assert.strictEqual(slot.SPXOI1_ENTRY, null);
   for (const bad of [null, undefined, NaN, 0, -5, Infinity, '5000']) assert.strictEqual(slot.spxoiEntry(bad), null, 'no seat for ' + String(bad));
-  assert.ok(slot.activeSlotStrategies().length === 3 && slot.slotActive());
+  assert.ok(slot.activeSlotStrategies().length === 5 && slot.slotActive());
   const r = slot.slotOrderCheck({ strategyId: 'SPXOI1', ticker: TK, side: 'yes', limit: 0.3, step: 1, depthAtTouch: 100, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null, position: 0,
     sizingBase: 500, windowCapFraction: 0.055, secondsLeft: 150, now: NOW, oiRise: 99999 });
   assert.strictEqual(r.allowed, false, 'no active strategy with that id');
@@ -56,7 +56,7 @@ gates['SX2 the entry is exactly the approved spec, frozen, valid, may hold to se
   assert.ok(!slot.validateSlotStrategy(slot.spxoiEntry(500)).ok);
   // If T is ever set, the seat MUST be registered (a silent drop of a set value is a failure).
   if (cfg.SPXOI1_T !== null) assert.ok(slot.SLOT_STRATEGIES.some((s) => s.id === 'SPXOI1'), 'a set threshold that does not validate (under 1000?) left the seat out');
-  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-13');
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-15');   // moved with the OIREL1 and XRPFAV10 seats (Nov 15, 2026)
 };
 
 const input = (o) => Object.assign({ strategyId: 'SPXOI1', ticker: TK, side: 'yes', limit: 0.3, step: 1, depthAtTouch: 100, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null,

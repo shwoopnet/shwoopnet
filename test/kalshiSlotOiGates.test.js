@@ -40,7 +40,7 @@ gates.OI4 = () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiSlotRunLib.js'), 'utf8').replace(/\/\/.*$/gm, '');
   assert.ok(/sideRule === "cheap" \? slotLib\.slotCheapSide\(s\.id, yesPrice, noPrice\)/.test(src), 'cheap means the side with the lower price (a tie goes NO except for SPXOI1, slotCheapSide)');
   assert.strictEqual(slot.slotCheapSide('OICORE', 0.4, 0.6), 'yes'); assert.strictEqual(slot.slotCheapSide('OICORE', 0.6, 0.4), 'no'); assert.strictEqual(slot.slotCheapSide('OICORE', 0.5, 0.5), 'no');
-  assert.ok(/oiRiseMin/.test(src) && /oiRise,\s*(flow,\s*)?position/.test(src) && /exchangeIndex[^;]*oiRise(?:,|: typeof oiRise)/.test(src), 'the rise is passed to the gate and stored on the order');
+  assert.ok(/oiRiseMin/.test(src) && /oiRise,\s*(oiRel,\s*)?(flow,\s*)?position/.test(src) && /exchangeIndex[^;]*oiRise(?:,|: typeof oiRise)/.test(src), 'the rise is passed to the gate and stored on the order');
 };
 gates.OI5 = () => {
   const hold = (id, ex) => Object.assign(strat({ oiRiseMin: 86300 }), { id, exit: ex });
@@ -48,7 +48,7 @@ gates.OI5 = () => {
   assert.ok(!slot.validateSlotStrategy(hold('OTHERX', { holdToSettle: true })).ok, 'any other strategy may not: the time rule stays for everything else');
   assert.ok(!slot.validateSlotStrategy(hold('OICORE', { holdToSettle: true, stopBid: 0.02 })).ok, 'and it carries no stop or target of its own');
   assert.ok(!slot.validateSlotStrategy(hold('OICORE', { holdToSettle: false })).ok);
-  assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED, ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1'], 'the list is exactly the reviewed ids (EVENT830 added Nov 3, 2026)');
+  assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED, ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1', 'OIREL1', 'XRPFAV10'], 'the list is exactly the reviewed ids (EVENT830 added Nov 3, 2026)');
   const fs = require('fs'), path = require('path');
   const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiSlotRunLib.js'), 'utf8').replace(/\/\/.*$/gm, '');
   assert.ok(/rules\.holdToSettle === true \? null/.test(src) && /hedge" : rules\.holdToSettle/.test(src), 'a held order is still sold when it becomes a hedge, and for no other reason');

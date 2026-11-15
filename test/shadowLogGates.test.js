@@ -85,7 +85,7 @@ gates.SH5 = async () => {
   // Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): the four favourite-late shadow rules were retired. Nov 12, 2026 (the owner: "Make sure gold
   // keeps a shadow record after the latch trips"): ONE rule, GOLDOFF, is registered on purpose as gold's return evidence (test/goldOffShadowGates.test.js). Nothing else is: the registry is exactly that one id, and an
   // EMPTY registry (forced here, as the off-equivalence gates do) still behaves exactly like the registry that shipped before any rule existed: nothing is logged, written, read or requested.
-  assert.deepStrictEqual(sh.SHADOW_RULES.map((r) => r.id), ['GOLDOFF', 'OIREL1', 'XRPFAV10'], 'GOLDOFF (the written exception), OIREL1 (a 7g VERSION of OICORE, Nov 15, 2026, log only) and XRPFAV10 (the owners one allowed paper record, Nov 15, 2026) are registered: a new rule must be a different mechanism or a version (docs/STRATEGY_LIFECYCLE.md sections 7c and 7g)');
+  assert.deepStrictEqual(sh.SHADOW_RULES.map((r) => r.id), ['GOLDOFF'], 'only the written GOLDOFF exception is registered: a new rule must be a different mechanism (docs/STRATEGY_LIFECYCLE.md section 7c)');
   const rules = [];
   assert.deepStrictEqual(sh.activeShadowRules(rules, live.L1_SERIES), [], 'an empty registry is empty');
   const quote = (series) => ({ series, m: { ticker: series + '-26NOV101115-00', status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9300', yes_ask_size_fp: '100.00', yes_bid_size_fp: '100.00' } });

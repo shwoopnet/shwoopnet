@@ -77,7 +77,7 @@ gates.SS6 = () => {
   assert.ok(/liveState\[s\.id\] === 'off'/.test(page), 'the Strategies page lanes read the same state');
   assert.ok(/function kalshiStateChanged\(\)\{ renderStrategiesPage\(\); if\(typeof renderKalshiStatus/.test(html), 'both pages redraw when the latch or registry answers');
   // every KAL_LOOKS entry belongs to a strategy the state can name
-  assert.ok([...looks.matchAll(/sid: '([A-Z0-9]+)'/g)].length === 4, 'four looks, each tied to a strategy id');
+  assert.ok([...looks.matchAll(/sid: '([A-Z0-9]+)'/g)].length === 5, 'five looks, each tied to a strategy id');
 };
 
 let failed = 0;
