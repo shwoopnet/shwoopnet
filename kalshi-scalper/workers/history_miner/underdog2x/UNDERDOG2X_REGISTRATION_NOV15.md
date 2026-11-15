@@ -78,3 +78,13 @@ Marks are the candles after the entry candle, at or before close - 60. Side bid:
 ## 8. Gate
 - One build (this desk), Auditor B's CLEAN of the code and input list, the Testing Desk's input list, and the held-out confirmation in section 1, before any read.
 - Development print committed blind; figures by message only. The held-out is read once on the Head's go.
+
+## Amendment 1 (2026-11-15 ~16:05Z, the Head's rulings of 15:59Z, before any price or result is read)
+1. **Variant (c) runs as a 2-contract position:**
+   - one 2-lot buy at e + h (fee rounded per order at 2 contracts);
+   - one 1-lot sale at the first side bid >= 2e (fee at 1 contract);
+   - the other 1-lot sold at the first later side bid >= 0.80 (fee at 1 contract), else held to settlement.
+   - If 2x never comes, both are held. Net is reported per contract (divided by 2).
+2. **Bar:** thirds 1 and 2 are the halves. Each needs PF 1.0+ at the primary haircut, and PF 1.3+ pooled over thirds 1 and 2 at the primary haircut, AND PF 1.0+ at 2c. The floor(n/2) halves are printed as information. NC15 series are read at 2c (C11). Variants (b) and (c) on the other series have 2c as primary (C8), so their bar is read at 2c too. (a) on the other series is read at 1c.
+3. **Pre-Oct 3 held-outs:** Auditor B confirms against Desk A's HELDOUT_REGISTRY for all 19 series before any price or result is read. Any window an OPEN card holds is cut, and the cut is listed here by a dated line before the run.
+4. **Thin series:** the FX pairs, platinum and palladium stay in, with n reported per series. A series under 30 entries in any third is "no evidence at n = x" for that series, never a pass on its own.
