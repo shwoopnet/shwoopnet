@@ -1,4 +1,4 @@
-# Design count run Nov 15 ~21:40Z on the landed KXNBAPTS_LISTS_A, time fields only. Printed: events 120, share median 0.0818 (exact 0.08179993308798929), q25 0.054, q75 0.12, open at T 5339.
+# SUPERSEDED Nov 15 ~21:30Z: the rule now counts closes strictly before T - 240 s; S_MED is recomputed by sibhit_lib.games on the same list (0.07362240289069558). Original note: design count run Nov 15 on the landed KXNBAPTS_LISTS_A, time fields only. Printed: events 120, share median 0.0818 (exact 0.08179993308798929), q25 0.054, q75 0.12, open at T 5339.
 # TIME FIELDS ONLY: ticker, event_ticker, close_time, occurrence_datetime. Sets SIBHIT's threshold (median share) and the request plan.
 import gzip,json,os,sys,calendar,time,statistics as st,collections
 def iso(s):

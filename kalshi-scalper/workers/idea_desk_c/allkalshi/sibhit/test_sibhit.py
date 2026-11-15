@@ -26,9 +26,9 @@ class Hand(unittest.TestCase):
         occ = L.iso("2026-10-25T03:00:00")
         T = occ - 3600
         ms = []
-        # 11 rungs open at occ-180; 2 hit before T (s = 2/11 = .18 >= median -> HIGH), 9 open after T
+        # 11 rungs open at occ-180; 2 hit well before T, 1 closes exactly at T-240 (NOT counted: strict); s = 2/11 >= median -> HIGH; 8 open after T
         for i in range(11):
-            close = occ - 7000 if i < 2 else occ + 600
+            close = occ - 7000 if i < 2 else (T - 240 if i == 10 else occ + 600)
             ms.append({"ticker": "KXNBAPTS-26OCT24AAABBB-P%d-10" % i, "event_ticker": "KXNBAPTS-26OCT24AAABBB", "close_time": iso(close),
                        "occurrence_datetime": iso(occ), "result": "yes" if i in (2, 3) else "no"})
         ms.append({"ticker": "KXNBAPTS-26NOV08AAABBB-P0-10", "event_ticker": "KXNBAPTS-26NOV08AAABBB", "close_time": "2026-11-08T03:00:00Z",
@@ -37,7 +37,8 @@ class Hand(unittest.TestCase):
         g = L.games(L.list_rows(root))
         self.assertEqual(list(g), ["KXNBAPTS-26OCT24AAABBB"])
         self.assertEqual(g["KXNBAPTS-26OCT24AAABBB"]["arm"], "HIGH")
-        self.assertEqual(len(g["KXNBAPTS-26OCT24AAABBB"]["open"]), 9)
+        self.assertEqual(len(g["KXNBAPTS-26OCT24AAABBB"]["open"]), 8)
+        self.assertAlmostEqual(g["KXNBAPTS-26OCT24AAABBB"]["s"], 2 / 11)
         c = lambda ts, yb, ya: {"end_period_ts": ts, "yes_bid": {"close_dollars": str(yb)}, "yes_ask": {"close_dollars": str(ya)}}
         mk = [{"market_ticker": "KXNBAPTS-26OCT24AAABBB-P2-10", "candlesticks": [c(T, .48, .50)]},       # in band: YES .50, won
               {"market_ticker": "KXNBAPTS-26OCT24AAABBB-P3-10", "candlesticks": [c(T - 120, .38, .40)]}, # latest in window: YES .40, won
@@ -49,7 +50,7 @@ class Hand(unittest.TestCase):
             o = SC.main(root)
         self.assertEqual(o["HIGH"]["n"], 3)
         self.assertEqual(o["drops"]["out_of_band"], 1)
-        self.assertEqual(o["drops"]["no_quote"], 5)    # P6 too old plus P7..P10 with no candle
+        self.assertEqual(o["drops"]["no_quote"], 4)    # P6 too old plus P7..P9 with no candle
         # raw: .50 fee .02 -> +.48 ; .40 fee .02 -> +.58 ; .60 fee .02 -> -.62 ; mean = .44/3
         self.assertAlmostEqual(o["HIGH"]["raw"]["mean_c"], round(100 * 0.44 / 3, 3))
         self.assertEqual(o["HIGH"]["raw"]["pf"], round(1.06 / 0.62, 4))

@@ -2,7 +2,7 @@
 """SIBHIT: shared code for the design count, the stage B job builder and the scorer (Idea Desk C, Nov 15, 2026). Standard library only, no network.
 
 Card: SIBHIT_CARD.md. A KXNBAPTS rung closes the moment it is hit, so the number of rungs of one game already closed is a live pace count.
-At T = occurrence - 60 min: share s = rungs closed in (occurrence - 180 min, T] / rungs still open at occurrence - 180 min.
+At T = occurrence - 60 min: share s = rungs closed after occurrence - 180 min and strictly before T - 240 s / rungs still open at occurrence - 180 min.
 HIGH (s >= S_MED): buy YES on every rung still open after T with YES ask 0.30 to 0.70. LOW (s < S_MED): buy NO on every open rung with NO ask 0.30 to 0.70.
 Held to settlement. S_MED is the median of s over the 120 development games, computed from close times alone before any price was pulled.
 """
@@ -11,7 +11,8 @@ import calendar, gzip, json, math, os, time
 SERIES = "KXNBAPTS"
 DEV = ("2026-10-21T00:00:00", "2026-11-06T00:00:00")     # close_time window; Nov 6 to 13 is PROPUNDER's reserve, never pulled
 A_MIN, T_MIN = 180, 60
-S_MED = 0.08179993308798929                              # median over 120 dev games (time fields only, Nov 15 ~21:40Z)
+COUNT_LEAD_S = 240                                       # the count uses closes strictly before T - 240 s, the start of the earliest allowed entry candle (Head, Nov 15)
+S_MED = 0.07362240289069558                              # median over 120 dev games of the strict count (time fields only, Nov 15 ~21:30Z; was 0.0818 with closes <= T)
 BAND = (0.30, 0.70)
 MIN_BASE = 10
 LOOKBACK_S = 180                                         # candle at T, else the latest ending in [T - 180 s, T]
@@ -59,7 +60,7 @@ def games(rows):
         base = [x for x in L if x[1] > A]
         if len(base) < MIN_BASE:
             continue
-        hits = sum(1 for x in base if x[1] <= T)
+        hits = sum(1 for x in base if x[1] < T - COUNT_LEAD_S)
         s = hits / len(base)
         out[e] = {"T": T, "s": s, "arm": "HIGH" if s >= S_MED - EPS else "LOW", "open": sorted(x[0] for x in base if x[1] > T),
                   "close": {x[0]: x[1] for x in base}}
