@@ -1,7 +1,7 @@
 {
  "job_id": "CFRTIK_STRIKES_DAILY",
  "registration": "kalshi-scalper/workers/DESK_A_FROZEN_WHEEL_DEFINITIONS_NOV13.md",
- "purpose": "Settled markets of the six CFRTI-K place series (Bitcoin probation seat, silver, copper, WTI, HYPE, BNB) closing 2026-11-14 to 2027-01-02, in 10 day close ranges, to give each window's floor_strike to the CFRTI-K place logger (the strike is in no book or coverage file). A reader takes ticker, close_time and floor_strike only; it never reads a result.",
+ "purpose": "Settled markets of the six CFRTI-K place series (Bitcoin probation seat, silver, copper, WTI, HYPE, BNB) closing 2026-11-14T00:00Z to 2027-01-01T23:59:59Z (49 days), in 10 day close ranges (the last is 9 days), to give each window's floor_strike to the CFRTI-K place logger (the strike is in no book or coverage file). A reader takes ticker, close_time and floor_strike only; it never reads a result.",
  "heldout": "Not a card read. The landed runs hold results of windows other cards may hold out; they go into HELDOUT_PULL_RUNS.md like every pull run, and a reader opens them only through heldout_guard_v2 and takes the strike field only. Nothing before 2026-11-14T00:00Z is asked (Nov 11 to 13 strikes come from the landed NC15 lists runs).",
  "allowed_endpoints": [
   {
@@ -389,7 +389,7 @@
    "max_pages": 2
   }
  ],
- "notes": "One run a day (Main). 30 requests, at most 60 pages (each range holds at most 960 markets per series at 96 windows a day, so one page of 1000 is normal; the second page is margin). Pacing 5.0 s; the whole job is about 3 minutes. max_requests = pages budget + 6 for 429 retries.",
+ "notes": "One run a day (Main). 30 requests, at most 60 pages (each range holds at most 960 markets per series at 96 windows a day, so one page of 1000 is normal; the second page is margin). Pacing 5.0 s; the whole job is about 3 minutes. max_requests = pages budget + 6 for 429 retries. Every run re-asks the whole 49 day span, so a run folder repeats the strikes and results of earlier windows: a reader takes the strike field only and REQUIRES all answers for one ticker to agree on floor_strike (a disagreement stops the read).",
  "owner": "DESK_A",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
