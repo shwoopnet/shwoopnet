@@ -77,3 +77,7 @@
    - The five soccer GAME series rest on the Head's 2026-11-13 release of SOCCER1 and SOCCERELO1. **The Head confirms in one line that the release is not limited to SOCDERIV before stage 1 is dispatched.**
 3. **Stage 1 job:** CALIB2_LISTS, 10 requests (one per series: status settled, min_close_ts 1789344000, max_close_ts 1792627199, limit 1000, up to 3 pages), max_requests 30.
 4. **Season note:** NBA and NCAA basketball start late October, so their five series may list few or no markets before Oct 22. That is reported as counted.
+
+## Amendment 2 (2026-11-15 ~21:30Z): closed, no stage 2
+
+Stage 1 landed (CALIB2_LISTS run 43735038528, complete, 13 requests). Counted from ticker, event_ticker and close_time only (no result or price field read): 0 families reach 300 games per third (NHL spread is the largest, with 75 and 135; NBA has none in third 1; NCAA basketball is empty; the five soccer leagues pooled have 53 and 115). Even the cheapest stage 2 (10 minute and 1 hour looks) has no family to read, so CALIB2 is CLOSED as not readable in its window. 0 candle requests. No result was read.
