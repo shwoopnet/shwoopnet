@@ -1021,3 +1021,9 @@ Each market is a try; the deflation count is printed. Gold under FAV10 = a versi
 ## 2026-11-15 21:25Z OWNER ORDER: single-stock perps track (Head of R&D)
 
 Research only. Census and data inventory: Forensics (PERPS_CENSUS_NOV15.md tonight; one test request for how far back the candles go). Data: Main (record-perps-candles already archives kalshi1m and funding since Nov 6; back-pull; one PR if needed). Rule cards: Desk A (funding carry, gap and overnight, 1 minute scalp, perp vs binary, earnings; margin and leverage page; uniqueness against EXDIV1, CFRTI and FUND1). Limits: about 10 days of history; no permitted underlying stock source since Yahoo stopped (Databento is an option, owner and Main). Also: PR 945 (OIREL1 + XRPFAV10 shadow) is CLEAN and waiting on the owner's merge. LADDER_CENSUS was dispatched about 1:48 PM CT. CALIB3: 0 candidates.
+
+## 2026-11-15 21:35Z OWNER ORDER: new strategies only (Head of R&D)
+
+The owner: "stop with searching the same strategy, find more that are profitable." No version, variant, cross-market rerun or recompute work (BAND2 dropped; the index-ladder candle plan dropped); PR 945's shadows just run. Breadth over depth: quick first reads (one build plus a sanity check plus Auditor B's quick check); full checks for passes only. Reports to the EA: passes only (name, market, PF 1c/2c, n) plus a daily "tried N, passed M".
+Lanes: Desk A stock perps; Desk B economics, weather and events; Desk C sports props, mentions, entertainment, politics; History Miner sports games and in-game (CALIB2 stage 2, cheapest form, approved); Testing Desk new mechanisms on index and NC15 15 minute markets plus build 2 for passes; Forensics the perps census and data.
+Daily count from here: tried 0, passed 0 (Nov 15 evening start).
