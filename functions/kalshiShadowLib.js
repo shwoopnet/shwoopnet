@@ -22,6 +22,11 @@ const SHADOW_RULES = Object.freeze([
   // re-arm at half size) could never be met. This logs gold's own entry (the favourite side at 88c to 97c, 330 to 400 s left) whether or not gold is latched, whether or not a session is on (index.js reads gold's public quotes itself then).
   // Pre-registration: kalshi-scalper/README.md#SHADOW-GOLDOFF. forwardReadDate is the earliest return review: 7 days after the first row; the review waits for 60 settled fillable rows if the count is not there yet.
   Object.freeze({ id: "GOLDOFF", readme: "kalshi-scalper/README.md#SHADOW-GOLDOFF", series: Object.freeze(["KXGOLD15M"]), entry: Object.freeze({ sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }), contracts: 1, registeredAt: "2026-11-12", forwardReadDate: "2026-11-19" }),
+  // OIREL1 (Nov 15, 2026, the Head of R&D, Idea Desk A's spec, Auditor B CLEAN as a spec): a 7g VERSION of OICORE, so it is NOT a new strategy and takes no new-strategy slot. Log only, 1 contract, no order. It tests whether a RELATIVE open
+  // interest rise (doi / level strictly above the matched discovery quantile 0.26764675317954373, registered 2026-10-30 in FALS5 check 2, never refit) beats OICORE's fixed 86,300 contract line. Bitcoin only; the cheaper side at 5c to 50c from the candle
+  // ending 180 s before the close; priced from the candle ending 120 s before the close (so the row is written once both candles exist). Unlike OICORE it keeps the whole 5c to 50c band (the scorer reads the 8c split both ways).
+  // Pre-registration, pass and kill rules: kalshi-scalper/workers/OIREL_SHADOW_SPEC_NOV15.md. forwardReadDate is the earliest read (14 days after the first row or 60 signals, whichever is later). If OICORE is closed for cause, OIREL1 closes with it.
+  Object.freeze({ id: "OIREL1", readme: "kalshi-scalper/workers/OIREL_SHADOW_SPEC_NOV15.md", series: Object.freeze(["KXBTC15M"]), entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 125, leftMinSec: 60, oiRelMin: 0.26764675317954373 }), contracts: 1, registeredAt: "2026-11-15", forwardReadDate: "2026-12-01" }),
 ]);
 
 // The markets a shadow rule may name (Nov 13, 2026, shadow scaling P2): a reviewed list in code, NOT "whatever L1 trades". Today it is the four L1 markets, so nothing changes; a new series is a reviewed edit
@@ -33,7 +38,7 @@ const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSe
 // Optional entry fields (Nov 12, 2026, shadow logger A and B): maxSpread; oiRiseMin (open interest at the candle ending 180 s before the close minus the one ending 360 s before it, the slot's definition; a missing
 // candle means NO row); calendar (a non-empty list of close times in ISO form, like SLOT_CALENDARS: only a market closing at one of them is a signal); secondRead (true: a second public read a few seconds after the row
 // records askAfter and wouldFillAfter). A rule without them behaves exactly as before.
-const ENTRY_KEYS_OPTIONAL = ["maxSpread", "oiRiseMin", "calendar", "secondRead"];
+const ENTRY_KEYS_OPTIONAL = ["maxSpread", "oiRiseMin", "oiRelMin", "calendar", "secondRead"];
 const SIDE_RULES = ["yes", "no", "favourite", "cheap"];
 const isNum = (x) => typeof x === "number" && Number.isFinite(x);
 const isObj = (x) => x && typeof x === "object" && !Array.isArray(x);
@@ -58,6 +63,14 @@ function validateShadowRule(r, allowedSeries) {
     if (!isNum(x.leftMaxSec) || !isNum(x.leftMinSec) || x.leftMinSec < 60 || x.leftMaxSec > 840 || !(x.leftMinSec < x.leftMaxSec)) e.push("entry time left must sit inside 60 to 840 seconds");
     if (Object.prototype.hasOwnProperty.call(x, "maxSpread") && !(isNum(x.maxSpread) && x.maxSpread >= 0.01 && x.maxSpread <= 0.2)) e.push("entry.maxSpread must be 0.01 to 0.20");
     if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
+    if (Object.prototype.hasOwnProperty.call(x, "oiRelMin")) {
+      // OIREL1 (Nov 15, 2026): the RELATIVE open interest rise, doi / level from the same two candles oiRiseMin reads, fired when STRICTLY greater than this number. It is its own rule shape: the cheaper side only, priced from the candle
+      // ending 120 s before the close, so it may not be combined with oiRiseMin, and its look must be able to reach that candle.
+      if (!(isNum(x.oiRelMin) && x.oiRelMin >= 0.05 && x.oiRelMin <= 1)) e.push("entry.oiRelMin must be a number from 0.05 to 1");
+      if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin")) e.push("entry.oiRelMin and entry.oiRiseMin cannot be combined");
+      if (x.sideRule !== "cheap") e.push("entry.oiRelMin needs sideRule cheap");
+      if (!(x.leftMinSec <= 120 && x.leftMaxSec >= 120)) e.push("entry.oiRelMin needs a look that includes 120 seconds before the close");
+    }
     if (Object.prototype.hasOwnProperty.call(x, "calendar") && !(Array.isArray(x.calendar) && x.calendar.length > 0 && x.calendar.length <= 100 && x.calendar.every((c) => typeof c === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(c) && Number.isFinite(Date.parse(c))))) e.push("entry.calendar must be a list of ISO close times");
     if (Object.prototype.hasOwnProperty.call(x, "secondRead") && x.secondRead !== true) e.push("entry.secondRead must be true when present");
   }
@@ -88,6 +101,12 @@ function shadowSignals(rules, quotes, nowMs) {
         const left = (closeMs - nowMs) / 1000;
         if (!(left >= r.entry.leftMinSec && left <= r.entry.leftMaxSec)) continue;
         if (Object.prototype.hasOwnProperty.call(r.entry, "calendar") && !r.entry.calendar.some((c) => Date.parse(c) === closeMs)) continue;
+        if (Object.prototype.hasOwnProperty.call(r.entry, "oiRelMin")) {
+          // Side and price come from the two candles in runShadowTick, never from this quote. Plain numbers of the live size are kept only so the row can show the depth at the touch it will use.
+          out.push({ rule: r.id, ticker: String(q.m.ticker), series: String(q.series), side: null, price: null, size: r.contracts, depth: null, wouldFill: null, bid: null, ask: null, spread: null,
+            secondsLeft: Math.round(left), closeTime: String(q.m.close_time), closeMs, settled: false, atMs: nowMs, _depthYes: num(q.m.yes_ask_size_fp), _depthNo: num(q.m.yes_bid_size_fp) });
+          continue;
+        }
         const bid = num(q.m.yes_bid_dollars), ask = num(q.m.yes_ask_dollars);
         if (!(bid > 0 && ask > 0 && ask > bid && ask <= 1 && bid < 1)) continue;
         const spread = r4(ask - bid);
@@ -140,6 +159,30 @@ function oiRiseFromCandles(candles, closeSec) {
   const a = at(closeSec - 180), b = at(closeSec - 360);
   return a === null || b === null ? null : Math.round((a - b) * 100) / 100;
 }
+// OIREL1 (Nov 15, 2026, kalshi-scalper/workers/OIREL_SHADOW_SPEC_NOV15.md): the relative open interest rise and the two quotes, all from one candle list. level = open interest of the candle ending 360 s before the close, doi = the
+// candle ending 180 s before the close minus level, rel = doi / level. The SIGNAL candle (180 s) decides the side, the FILL candle (120 s) gives the price. Any missing candle, an open interest of 0 or missing at either end, or a quote
+// that is not two sided (0 < bid < ask < 1) on either quote candle is NO DATA (null): never a no-trade and never interpolated.
+const OICORE_OI_LINE = 86300;   // OICORE's own absolute line (SLOT_STRATEGIES OICORE entry.oiRiseMin), logged beside the ratio so the two rules compare on identical windows; a gate keeps it equal to the slot library's
+function oiRelFromCandles(candles, closeSec) {
+  if (!Array.isArray(candles) || !Number.isFinite(closeSec)) return null;
+  const at = (sec) => candles.find((x) => x && Number(x.end_period_ts) === sec);
+  const oi = (c) => { const v = c ? num(c.open_interest_fp) : NaN; return Number.isFinite(v) && v > 0 ? v : null; };
+  const q = (c) => { const b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars); return b > 0 && a > b && a < 1 ? { bid: b, ask: a } : null; };
+  const c360 = at(closeSec - 360), c180 = at(closeSec - 180), c120 = at(closeSec - 120);
+  const level = oi(c360), end = oi(c180), sig = q(c180), fill = q(c120);
+  if (level === null || end === null || !sig || !fill) return null;
+  const doi = Math.round((end - level) * 100) / 100;
+  return { level, doi, rel: (end - level) / level, sig, fill };   // the ratio is taken from the raw difference, never from the rounded logged figure
+}
+// The cheaper side by the signal candle: YES when its ask is in the band, else NO at 1 minus the YES bid (the spec's rule); the price is the same side on the fill candle.
+function oiRelSidePrice(o, priceMin, priceMax) {
+  const cents = (x) => Math.round(x * 100) / 100;
+  const inBand = (x) => x >= priceMin - 1e-9 && x <= priceMax + 1e-9;
+  const yesSig = cents(Math.ceil(r4(o.sig.ask) * 100 - 1e-9) / 100), noSig = cents(1 - Math.floor(r4(o.sig.bid) * 100 + 1e-9) / 100);
+  if (inBand(yesSig)) return { side: "yes", price: cents(Math.ceil(r4(o.fill.ask) * 100 - 1e-9) / 100), signalPrice: yesSig };
+  if (inBand(noSig)) return { side: "no", price: cents(1 - Math.floor(r4(o.fill.bid) * 100 + 1e-9) / 100), signalPrice: noSig };
+  return null;
+}
 // The side's price in a fresh market answer, by the same rounding the signal uses; null when the quote is unusable.
 function sidePriceOf(m, side) {
   const bid = num(m && m.yes_bid_dollars), ask = num(m && m.yes_ask_dollars);
@@ -172,7 +215,31 @@ async function runShadowTick(args) {
     for (const d of rows) {
       const key = d.rule + "|" + d.ticker; if (seen.has(key)) continue;
       const rule = byId.get(d.rule);
-      if (rule && Object.prototype.hasOwnProperty.call(rule.entry, "oiRiseMin")) {
+      if (rule && Object.prototype.hasOwnProperty.call(rule.entry, "oiRelMin")) {
+        // OIREL1: one candle list per ticker and window (cached like the absolute rule, under its own key, only a complete answer is kept so a missing 120 s candle is asked again next minute). Missing data means no row and no memory.
+        try {
+          if (typeof args.candles !== "function") continue;
+          const cs = Math.round(d.closeMs / 1000), ck = "rel|" + d.series + "|" + d.ticker + "|" + cs;
+          let o = Object.prototype.hasOwnProperty.call(candleCache, ck) ? candleCache[ck] : undefined;
+          if (o === undefined) {
+            if (!Object.prototype.hasOwnProperty.call(candleReads, ck)) {
+              if (!budget.take()) continue;
+              candleReads[ck] = Promise.resolve(args.candles(d.series, d.ticker, cs)).then((c) => oiRelFromCandles(c, cs));
+            }
+            o = await candleReads[ck];
+            if (o !== null) { if (Object.keys(candleCache).length > 500) for (const k of Object.keys(candleCache)) delete candleCache[k]; candleCache[ck] = o; }
+          }
+          if (o === null) continue;
+          if (!(o.rel > rule.entry.oiRelMin)) { seen.add(key); continue; }
+          const sp = oiRelSidePrice(o, rule.entry.priceMin, rule.entry.priceMax);
+          if (!sp) { seen.add(key); continue; }
+          const depth = num(sp.side === "yes" ? d._depthYes : d._depthNo);
+          d.side = sp.side; d.price = sp.price; d.signalPrice = sp.signalPrice; d.bid = o.fill.bid; d.ask = o.fill.ask; d.spread = r4(o.fill.ask - o.fill.bid);
+          d.sigBid = o.sig.bid; d.sigAsk = o.sig.ask; d.oiLevel = o.level; d.oiDoi = o.doi; d.oiRel = o.rel; d.oicoreCrossed = o.doi >= OICORE_OI_LINE;
+          d.depth = Number.isFinite(depth) ? depth : null; d.wouldFill = Number.isFinite(depth) ? depth >= d.size : null;
+          delete d._depthYes; delete d._depthNo;
+        } catch (e) { continue; }
+      } else if (rule && Object.prototype.hasOwnProperty.call(rule.entry, "oiRiseMin")) {
         // Missing open interest means NO row (and no memory of the look, so a later minute of the window may try again if the budget allows). A rise under the line is no signal.
         try {
           if (typeof args.candles !== "function") continue;
@@ -350,4 +417,4 @@ function returnRule(row) {
   return { met, fillable: Number(r.fillable) || 0, need: 60, days: Number(r.days) || 0, needDays: 7, pf: r.pfFillable === undefined ? null : r.pfFillable, secondHalfPf: r.secondHalfPf === undefined ? null : r.secondHalfPf, needPf: 1.3 };
 }
 
-module.exports = { SHADOW_ALLOWED_SERIES, returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, makeReadBudget, planShadowReads, oiRiseFromCandles, SHADOW_READS_PER_MINUTE, SECOND_LOOK_MS, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, shadowRolling, COLLECTION };
+module.exports = { SHADOW_ALLOWED_SERIES, returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, makeReadBudget, planShadowReads, oiRiseFromCandles, oiRelFromCandles, oiRelSidePrice, OICORE_OI_LINE, SHADOW_READS_PER_MINUTE, SECOND_LOOK_MS, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, shadowRolling, COLLECTION };

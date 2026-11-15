@@ -68,7 +68,7 @@ gates.SC4 = () => {
 };
 gates.SC5 = () => {
   // The registry is unchanged: one rule, GOLDOFF, and the registry file text for rules has no new entry.
-  assert.deepStrictEqual(sh.SHADOW_RULES.map((r) => r.id), ['GOLDOFF']);
+  assert.deepStrictEqual(sh.SHADOW_RULES.map((r) => r.id), ['GOLDOFF', 'OIREL1']);
 };
 gates.SC6 = async () => {
   // With the single registered rule the tick makes exactly the writes it made: one row, no read of any kind, no second-look fields on the row.

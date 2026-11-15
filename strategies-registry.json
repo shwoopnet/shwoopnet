@@ -121,6 +121,33 @@
    "figures": null
   },
   {
+   "id": "OIREL1",
+   "name": "Open interest jump, relative version",
+   "stage": "Shadow",
+   "rule": "Writes down the Bitcoin trades the bot would have made if the open interest jump were counted as a share of the open interest already there, not as a fixed number of contracts (the cheaper side, 5c to 50c, about 2 minutes before the close), with no money at risk",
+   "goesLive": "It never trades; it replaces its parent only if its paper record beats the open interest jump strategy by at least 0.1 on the same windows over at least 60 signals",
+   "label": "UNPROVEN",
+   "startDate": "2026-11-15",
+   "nextRead": "2026-12-01",
+   "nextReadText": "One read, 14 days after the first row or 60 signals, whichever is later",
+   "n": null,
+   "nBasis": "Shadow rows the bot logs from public candles; the count is shown from the private log, not stored here",
+   "kill": "Dropped if it loses more than a cent a contract after 50 signals, or fewer than 40 signals come in 30 days; it closes if its parent is closed",
+   "return": "Not applicable: a closed paper test is rerun only by a new written test",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "A version of the open interest jump strategy, not a new strategy; the threshold was fitted before the forward record, so only forward rows count"
+   ],
+   "code": {
+    "shadow": "OIREL1"
+   },
+   "roomTarget": 60,
+   "roomWhat": "signals toward the 60 the read needs",
+   "cause": null,
+   "figures": null
+  },
+  {
    "id": "W-SPREAD-CELL1",
    "name": "Sports spread cheap side",
    "stage": "Retired",
