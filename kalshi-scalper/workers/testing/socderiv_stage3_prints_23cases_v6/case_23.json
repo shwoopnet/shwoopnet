@@ -1,0 +1,104 @@
+{
+ "counts_first": {
+  "leagues_no_such_series": 52,
+  "games_in_window": 150,
+  "sampled": 150,
+  "kickoff_not_derivable": 0,
+  "no_btts_leg": 0,
+  "teamtotal_unreadable_markets": 0
+ },
+ "candle_requests_answered_whole": "45 of 45 asked",
+ "polish": {
+  "fits": 300,
+  "median_iterations": 2.0,
+  "max_iterations": 2,
+  "fits_on_bound": 0,
+  "cap_hit": 0,
+  "cap": 200
+ },
+ "fit_residual_rmse_median": 0.06532289417732183,
+ "groups": {
+  "A_big": {
+   "games_with_derivable_kickoff": 150,
+   "btts": {
+    "games_with_a_derivable_kickoff_in_the_group": 150,
+    "games_with_a_target_of_this_type": 150,
+    "no_such_market_in_this_group": false,
+    "no_game_of_the_group_has_a_target_of_this_type": false,
+    "filled": 150,
+    "share_filled_of_all_derivable_games": 1.0,
+    "targets": {
+     "n": 150,
+     "median_spread": 0.020000000000000018,
+     "median_round_trip_information_only": 0.05477600000000002,
+     "median_one_way_entry_cost": 0.03000000000000001,
+     "gap_quartiles_p90": [
+      -0.06645541172884317,
+      -0.06126217174557613,
+      -0.04148419652724311,
+      0.07147750323068136
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0,
+     "fires": 0
+    },
+    "placebo": {
+     "n": 150,
+     "median_spread": 0.0050000000000000044,
+     "median_round_trip_information_only": 0.039999125,
+     "median_one_way_entry_cost": 0.022500000000000003,
+     "gap_quartiles_p90": [
+      0.0978510393666342,
+      0.1119301575397742,
+      0.11246517397113098,
+      0.1364860623514239
+     ],
+     "share_gap_ge_8c_spread_le_4c": 1.0,
+     "fires": 150
+    },
+    "verdict": "CLOSED: efficient, move on. The one number: the 90th percentile gap 0.07147750323068136"
+   },
+   "teamtotal": {
+    "games_with_a_derivable_kickoff_in_the_group": 150,
+    "games_with_a_target_of_this_type": 150,
+    "no_such_market_in_this_group": false,
+    "no_game_of_the_group_has_a_target_of_this_type": false,
+    "filled": 150,
+    "share_filled_of_all_derivable_games": 1.0,
+    "targets": {
+     "n": 300,
+     "median_spread": 0.020000000000000018,
+     "median_round_trip_information_only": 0.05324999999999999,
+     "median_one_way_entry_cost": 0.03000000000000001,
+     "gap_quartiles_p90": [
+      0.03528040228985002,
+      0.04369616046437222,
+      0.053222363594936095,
+      0.0579217403681002
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0,
+     "fires": 0
+    },
+    "placebo": {
+     "n": 150,
+     "median_spread": 0.0050000000000000044,
+     "median_round_trip_information_only": 0.039999125,
+     "median_one_way_entry_cost": 0.022500000000000003,
+     "gap_quartiles_p90": [
+      0.0978510393666342,
+      0.1119301575397742,
+      0.11246517397113098,
+      0.1364860623514239
+     ],
+     "share_gap_ge_8c_spread_le_4c": 1.0,
+     "fires": 150
+    },
+    "verdict": "CLOSED: efficient, move on. The one number: the 90th percentile gap 0.0579217403681002"
+   }
+  }
+ },
+ "tries_added": 0,
+ "rule_scored": false,
+ "result_read": false,
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+ "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"
+}
