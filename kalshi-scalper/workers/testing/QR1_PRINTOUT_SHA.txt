@@ -1,0 +1,2 @@
+QR1 JUMPFADE600 (qr1_jumpfade.py 88491fbb, commit f20b013b), run ONCE Nov 15 on OIREL-X_extract.sqlite (raw sha256 d9a24e7a37bc81e8296afd9d666b08c63cfa3fb953f4577c0f796875a668cfcf).
+sha256 of my printout (scratch only): 524098a1965bb3a5a65e8c04b3c996c4220f66f3ab34763f1b0568164c5fe3ba
