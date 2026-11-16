@@ -80,4 +80,23 @@ assert fdr["other ticker dropped"] == 1 and fdr["print before 2026-11-06 (droppe
 open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), pa, px))      # a line without the funding hash refuses pass 2
 try: L.load_pass2(base); assert False
 except SystemExit as e: assert "REFUSED" in str(e)
+# perps pass 3: the back-pull extracts, ticker wall and the window on both ends; the other extracts are not opened
+def bp(con):
+    con.execute("CREATE TABLE market(ticker, series, close_ts, result, src)"); con.execute("CREATE TABLE candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi)")
+    con.executemany("INSERT INTO market VALUES (?,?,?,?,?)", [("KXGOLDPERP", "GOLD", None, None, "p"), ("KXUS500PERP", "US500", None, None, "p"), ("KXWTIFUTURE", "WTI", None, None, "p")])
+    con.executemany("INSERT INTO candle VALUES (?,?,?,?,?,?,?)", [("KXGOLDPERP", L.P3_FROM - 1, 1, 2, 1, 1, 1), ("KXGOLDPERP", L.P3_FROM, 1, 2, 1, 1, 1), ("KXGOLDPERP", L.P3_TO - 1, 1, 2, 1, 1, 1), ("KXGOLDPERP", L.P3_TO, 1, 2, 1, 1, 1), ("KXUS500PERP", L.P3_FROM + 60, 5, 6, 1, 1, 1), ("KXWTIFUTURE", L.P3_FROM + 60, 5, 6, 1, 1, 1)])
+def bpf(con):
+    con.execute("CREATE TABLE funding(ticker, ts, rate)")
+    con.executemany("INSERT INTO funding VALUES (?,?,?)", [("KXGOLDPERP", L.P3_FROM + 3600, 0.0001), ("KXGOLDPERP", L.P3_TO, 0.5), ("KXWTIFUTURE", L.P3_FROM + 3600, 0.3), ("KXUS500PERP", L.P3_FROM - 5, 0.2)])
+b1, b2 = mk("bp.xz", bp), mk("bpf.xz", bpf)
+L.BACKPULL = ("bp.xz", b1); L.BACKPULL_FUNDING = ("bpf.xz", b2)
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), b1, b2))
+p3, d3, f3, fd3 = L.load_pass3(base)
+assert sorted(p3) == ["KXGOLDPERP", "KXUS500PERP"] and [c[0] for c in p3["KXGOLDPERP"]] == [L.P3_FROM, L.P3_TO - 1], p3
+assert d3["other ticker dropped"] == 1 and d3["candle before the window start (dropped)"] == 1 and d3["candle at or after the window end (dropped)"] == 1, d3
+assert f3 == {"KXGOLDPERP": {L.P3_FROM + 3600: 0.0001}, "KXUS500PERP": {}} and fd3["other ticker dropped"] == 1 and fd3["print at or after the window end (dropped)"] == 1 and fd3["print before the window start (dropped)"] == 1, (f3, fd3)
+open(allow, "w").write("x %s engine1_extract_load.py %s %s\n" % (L.ALLOW_MARK, L.self_sha(), b1))              # without the funding hash it refuses
+try: L.load_pass3(base); assert False
+except SystemExit as e: assert "REFUSED" in str(e)
+assert L.P3_FROM == calendar.timegm((2026, 9, 4, 0, 0, 0)) and L.P3_TO == calendar.timegm((2026, 11, 1, 0, 0, 0))
 print("ALL OK")
