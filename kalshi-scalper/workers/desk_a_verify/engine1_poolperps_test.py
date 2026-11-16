@@ -15,9 +15,9 @@ byt = {e: (99.99, 100.00), e + 1800: (100.01, 100.02)}                          
 g, tx, why = W.simulate(byt, e, "long", 2, 2, 30, 0.0002, u); assert why == "time" and tx == e + 1800
 assert W.simulate({e: (99.99, 100.00)}, e, "long", 2, 2, 30, 0.0002, u)[2] == "no mark"                          # exit candle absent
 # funding adjustment from the prints: long pays a positive rate, short receives it; an exit AT the print pays nothing; a 26 h hole = not booked
-f = {e + 90: 0.0001, e + 86400 + 90: 0.0002}
+f = {e - 3600: 0.00005, e + 90: 0.0001, e + 86400 + 90: 0.0002}
 assert W.funding_adj(f, e, e + 180, "long") == (-0.0001, None) and W.funding_adj(f, e, e + 180, "short") == (0.0001, None) and W.funding_adj(f, e, e + 90, "long")[0] == 0.0
-assert W.funding_adj({e - 40 * 3600: 0.0001, e + 40 * 3600: 0.0001}, e, e + 180, "long")[1] == "funding not booked" and W.funding_adj(None, e, e + 180, "long")[1] == "funding not booked"
+assert W.funding_adj({e + 3600: 0.0001, e + 86400: 0.0001}, e, e + 180, "long")[1] == "funding not booked" and W.funding_adj({e - 3600: 0.0001, e + 86400: 0.0001}, e, e + 180, "long") == (0.0, None) and W.funding_adj({e - 40 * 3600: 0.0001, e + 40 * 3600: 0.0001}, e, e + 180, "long")[1] == "funding not booked" and W.funding_adj(None, e, e + 180, "long")[1] == "funding not booked"
 # terciles: N = 7: ceil(7/3) = 3 each; N < 3: none
 t, b = W.tercile_sets({"A": .9, "B": .8, "C": .7, "D": .5, "E": .3, "F": .2, "G": .1}); assert t == {"A", "B", "C"} and b == {"E", "F", "G"} and W.tercile_sets({"A": 1, "B": 2}) == (set(), set())
 # a synthetic pool: 3 names, 3 trading days (Nov 9, 10, 11), minute candles 09:30 to 16:00 ET with a rising price; checks events, cooldown, gate arithmetic, per-name counts

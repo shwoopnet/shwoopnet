@@ -43,10 +43,19 @@ def fixed_exit(by, e, x_end, side, h):
     if not usable(a) or not usable(b): return None, None, "no mark"
     long_ = side == "long"; fill = a[1] * (1 + h) if long_ else a[0] * (1 - h); ex = b[0] * (1 - h) if long_ else b[1] * (1 + h)
     return (ex / fill - 1 if long_ else (fill - ex) / fill), x_end, "time"
+_GC = {}
+def _gaps(fund):
+    """sorted print times and the stretches in which a print cannot be ruled out: EVERYTHING before the first print, two neighbouring prints more than 26 h apart, and everything after the last print plus 26 h (a name with no print: everything). The spec's literal reading, the Testing Desk's R-reading of 'before the first'."""
+    k = id(fund)
+    if k not in _GC or _GC[k][0] is not fund:
+        ps = sorted(fund); big = 10 ** 12
+        gaps = [(-big, big)] if not ps else [(-big, ps[0])] + [(a, b) for a, b in zip(ps, ps[1:]) if b - a > P.GAP] + [(ps[-1] + P.GAP, big)]
+        _GC[k] = (fund, ps, gaps)
+    return _GC[k][1], _GC[k][2]
 def funding_adj(fund, e, tx, side):
-    """-> (adjustment to the gross return, flag): prints strictly between e and tx; long pays a positive rate, short receives it; a gap overlapping the hold = 'funding not booked'."""
+    """-> (adjustment to the gross return, flag): prints strictly between e and tx; long pays a positive rate, short receives it; a hold overlapping a stretch with no print ruled in = 'funding not booked'."""
     if fund is None: return 0.0, "funding not booked"
-    ps, gaps = P._prints(fund); adj = 0.0
+    ps, gaps = _gaps(fund); adj = 0.0
     for t in ps[bisect.bisect_right(ps, e):bisect.bisect_left(ps, tx)]: adj -= fund[t] if side == "long" else -fund[t]
     return adj, ("funding not booked" if any(e < b and tx > a for a, b in gaps) else None)
 def trading_days(cand):
@@ -123,7 +132,7 @@ def events(cand, fund):
     carry = collections.defaultdict(list)                                  # carry: entry at T - 30 min, the side that receives, by |last rate| rank of that day
     for nm, f in fund.items():
         for T in sorted(f):
-            e = T - 1800; lp = last_print(f, e, 36 * 3600)
+            e = T - 1800; lp = last_print(f, e, 10 ** 9)                           # carry: the latest print strictly before the entry, no age limit (the 36 h limit is for the level and change signals only)
             if not lp or lp[1] == 0 or e not in cand.get(nm, {}): continue
             carry[et_date(e)].append((abs(lp[1]), nm, e, T, "short" if lp[1] > 0 else "long"))
     for d, lst in carry.items():
