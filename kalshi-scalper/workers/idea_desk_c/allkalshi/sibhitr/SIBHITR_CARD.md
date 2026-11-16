@@ -46,3 +46,10 @@
 - **Fallback:** closes 2026-11-13 to before 2026-12-04 (SIBHIT's held-out, unread), pulled after Dec 4.
 
 **Window constants:** TO BE FILLED from Auditor B's hold map, before any pull. A dated amendment below will carry them.
+
+## Amendment 1 (Nov 16, 2026, ~15:30Z; the Head of R&D's ruling of 15:23Z; written before any list or candle of this window is pulled)
+
+- **PROPS1 is CLOSED** (the Head of R&D: V2 is archived, nobody is assigned to read it, and its TEST third is already partly read). This is the same kind of closure as RV and EVM4.
+- **Window constants:** KXNBAPTS 2025-26 markets with close_time from **2026-03-01T00:00:00Z** (1772323200) to before **2026-04-14T00:00:00Z** (1776124800). That is the regular season only; the play-in and playoffs are excluded. The scorer tests close_time first and drops everything else before reading any other field.
+- **Exclusion by ticker (the ruling):** the 1,099 markets PROPS1 read candles for. **Open problem, stated before any pull:** that ticker list is not in any committed file. PROPS1's database is git-ignored and its session is archived. PROPS1's sample cannot be rebuilt without its ESPN model (the sample was the first 40 by sha1 among the markets its model scored). The Head is asked how to handle this before the candle job is built. The list job does not depend on it.
+- **What PROPS1's read covered:** pre-game candles only, from 2 h before tip to tip, of at most 1,099 markets across NBA, WNBA and NFL stats. SIBHIT-R's quote is the late fourth-quarter minute T = O - 60.
