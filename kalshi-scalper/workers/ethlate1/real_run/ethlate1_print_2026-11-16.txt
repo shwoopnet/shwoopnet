@@ -1,0 +1,8 @@
+m_total 6290756 | cells selected 96 | primary haircut 2c (C8) | upper bound, not fill-checked
+loader counts: {'missing date directory': 1, 'ticker outside the wall (dropped)': 35799, 'ladder row not active (dropped)': 226, 'ladder row dropped by the cut or no close': 92, 'candle after close (dropped)': 103}
+search_markets 1129
+validate_markets 2102
+search_cells_scored 0
+search_passes 0
+validate_bar_passes 0
+survivors: none
