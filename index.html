@@ -924,12 +924,9 @@
 
   .kal-console [data-card="status"]{ align-self:stretch; }
   /* The Account result line lives inside the Account card (Nov 16, 2026, the owner: one module for Account and Account result), full width under the balance and the strategies table. The chart box has a fixed height instead of the chart's own shape (at full width that shape would be very tall); the drawing stretches to it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
-  .kal-console [data-card="account"] .kal-acct-pnl{ grid-column:1 / -1; grid-row:4; min-width:0; margin-top:6px; padding-top:16px; border-top:1px solid var(--border); }
-  .kal-acct-pnl-h{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; } .kal-acct-pnl-h .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; margin:0; }
   .kal-acct-pnl .kal-plot{ aspect-ratio:auto !important; height:240px; } .kal-acct-pnl .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
   /* Each figure once: at rest the dollar result is the All strategies row's Result in the table above, so the chart's head shows only the percentage; the dollar figure appears while a finger or the pointer is on the line, with its date. */
   .kal-acct-pnl .kal-pnl-head:not(.scrub) b{ display:none; }
-  @media (max-width:900px){ .kal-acct-pnl .kal-plot{ height:180px; } }
   /* Strategies page (Nov 10, 2026, the owner: an entirely new page for strategies, same theme, new visuals). Black and white only, plain text with signs (no green or red, calm view). Prefix sp- for the shared pieces (badge, ring, bar, spark, summary, popup) and lp- / rw- for the stage board (Nov 12, 2026, the owner: "build it into the live page"): .lp the loop of four boxes, .lp-t one box, .lp-p the open box's panel, .rw one strategy row, .rw-d its detail, .rw-more the deepest layer. */
   #page-strategies .sp-lede{ font-size:12px; color:var(--muted); margin:0 0 16px; overflow-wrap:anywhere; }
   .sp-wrap{ container-type:inline-size; container-name:sp; }   /* full page width, the same as the header, the lede and the Bot page, so the top card and the stage bar line up (cleanup, Nov 13, 2026) */
@@ -1103,33 +1100,35 @@
   .kal-console [data-card="trades"]{ align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
-  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1fr); gap:10px 28px; align-items:center; padding:20px 22px; }   /* balance and the loss stop on the left, the strategies table on the right (the owner, Oct 30, 2026: fold Strategies into the Account card) */
-  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; grid-row:1; padding:0; gap:14px; }
-  .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ display:contents; }
-  .kal-console [data-card="account"] .kal-acct-total{ grid-column:1; grid-row:2; margin:0; font-size:46px; line-height:1; }
-  .kal-console [data-card="account"] .kal-today{ grid-column:1; grid-row:3; display:flex; flex-direction:row; align-items:baseline; gap:8px; }
-  .kal-console [data-card="account"] .kal-today{ justify-content:flex-start; } .kal-console [data-card="account"] .kal-today b{ font-size:16px; }
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:6px 14px; align-items:center; padding:20px 22px; }   /* ONE module (Nov 16, 2026, the owner: Account and Account result are one, not two): header, then balance and Today on the left with the period return beside Today and the range buttons on the right, then the chart full width */
+  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1 / -1; grid-row:1; padding:0; gap:14px; }
+  .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows, .kal-console [data-card="account"] #kalPnl, .kal-console [data-card="account"] #kalPnlBody{ display:contents; }
+  .kal-console [data-card="account"] .kal-acct-total{ grid-column:1 / 4; grid-row:2; margin:0; font-size:46px; line-height:1; }
+  .kal-console [data-card="account"] .kal-today{ grid-column:1; grid-row:3; display:flex; flex-direction:row; align-items:baseline; gap:8px; justify-content:flex-start; } .kal-console [data-card="account"] .kal-today b{ font-size:16px; }
+  .kal-console [data-card="account"] .kal-pnl-head{ grid-column:2; grid-row:3; margin:0; align-self:baseline; }
+  .kal-console [data-card="account"] .kal-pnl-ranges{ grid-column:4; grid-row:2 / 4; align-self:end; justify-content:flex-end; }
+  .kal-console [data-card="account"] .kal-plot{ grid-column:1 / -1; grid-row:4; aspect-ratio:auto !important; height:240px; margin-top:8px; } .kal-console [data-card="account"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
+  .kal-console [data-card="account"] .kal-xaxis{ grid-column:1 / -1; grid-row:5; }
+  .kal-console [data-card="account"] #kalPnlBody > .kal-empty, .kal-console [data-card="account"] #kalPnlBody > .kal-note{ grid-column:1 / -1; grid-row:4; }
   .kal-console [data-card="account"] .kal-sub{ font-size:12px; color:var(--muted); }
   .kal-console [data-card="account"] .kal-tile{ grid-row:1 / 4; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
   .kal-console [data-card="account"] .kal-tile b{ font:800 20px/1.15 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
   .kal-console [data-card="account"] .kal-tile .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:none; margin:0; }
-  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1; grid-row:auto; }   /* auto, not a fixed row 5 (Nov 2, 2026, the owner's screenshot): the Order switch row and the loading note both sat in row 5 and printed on top of each other; auto rows stack them under the Loss stop tile */
+  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1 / -1; grid-row:auto; }   /* auto, not a fixed row 5 (Nov 2, 2026, the owner's screenshot): the Order switch row and the loading note both sat in row 5 and printed on top of each other; auto rows stack them under the Loss stop tile */
   .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card], .kal-console > [data-card][data-w]{ grid-column:1 / -1; }   /* the second selector outranks the span rules, so a width set on a desktop never makes extra columns on a phone */
-    .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
-    .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-pnl, .kal-console [data-card="account"] .kal-rows > div, .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
-    .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
-    /* The same order as the desktop left column, then the strategies table (mobile pass, Nov 13, 2026): balance, Today, the loss stop, then the order switch and any notes, then the table. */
-    .kal-console [data-card="account"] .kal-acct-head{ grid-row:1; } .kal-console [data-card="account"] .kal-acct-total{ grid-row:2; } .kal-console [data-card="account"] .kal-rows > div.kal-today{ grid-row:3; }
-    .kal-console [data-card="account"] .kal-acct-pnl{ order:2; }
+    .kal-console [data-card="account"]{ grid-template-columns:auto minmax(0,1fr); gap:10px 12px; }
+    .kal-console [data-card="account"] .kal-acct-total{ grid-column:1 / -1; }
+    .kal-console [data-card="account"] .kal-pnl-head{ grid-column:2; grid-row:3; }
+    .kal-console [data-card="account"] .kal-pnl-ranges{ grid-column:1 / -1; grid-row:4; justify-content:flex-start; }
+    .kal-console [data-card="account"] .kal-plot{ grid-row:5; height:180px; }
+    .kal-console [data-card="account"] .kal-xaxis{ grid-row:6; }
+    .kal-console [data-card="account"] #kalPnlBody > .kal-empty, .kal-console [data-card="account"] #kalPnlBody > .kal-note{ grid-row:5; }
   }
   /* The Account card at less than the full width (a choice since Nov 5, 2026): about 680px is too narrow for the balance beside the strategies table, so its pieces stack, as on a phone. The table keeps its desktop columns. */
-  .kal-console [data-card="account"]:not([data-w="12"]){ grid-template-columns:minmax(0,1fr); gap:12px; }
-  .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-head, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-total, .kal-console [data-card="account"]:not([data-w="12"]) .kal-today, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-pnl, .kal-console [data-card="account"]:not([data-w="12"]) .kal-rows > div, .kal-console [data-card="account"]:not([data-w="12"]) #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
-  .kal-console [data-card="account"]:not([data-w="12"]) .kal-tile{ grid-column:auto; grid-row:auto; }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
   .tf-btn.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-contrast); }
@@ -1680,7 +1679,7 @@
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div></div>
-        <div class="kal-acct-pnl" id="kalPnl"><div class="kal-acct-pnl-h"><span class="kal-k">Account result</span><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div><div id="kalPnlBody"></div></div>
+        <div class="kal-acct-pnl" id="kalPnl"><div class="kal-pnl-ranges" id="kalPnlRanges"></div><div id="kalPnlBody"></div></div>
       </div>
       <div class="kal-card kal-compact" data-w="12" data-card="status">
         <div class="kal-card-title">Bot status</div>
@@ -1840,7 +1839,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 16</div>
                 <ul class="changelog-list">
-                  <li>Bot page: the per strategy table is gone from the Account card (the owner: "i still see the strategies"). The card is now the balance, Today, the Running badge and the Account result chart with its range buttons. Every strategy's results are on the Strategies page. The separate "Order switch OFF" row is gone too; the Running badge already says it.</li>
+                  <li>Bot page: the per strategy table is gone from the Account card (the owner: "i still see the strategies"). The card is now the balance, Today, the Running badge and the Account result chart with its range buttons. Every strategy's results are on the Strategies page. The separate "Order switch OFF" row is gone too; the Running badge already says it. Account and Account result are now one box: one header, the balance and Today on the left with the period return beside Today, the range buttons on the right, and the chart under them with no second title or divider.</li>
                   <li>Bot page: the Account result line now sits inside the Account card, under the strategies table, so there is one module instead of two, and its dollar figure shows only while you touch the chart (the All strategies row already carries it). The separate stop meter tile and the per strategy stop line are gone; each strategy's stop rule stays in its own card. Strategies page: gold's paper record while it is off and the Bitcoin perp model place are no longer drawn as rows of their own (they are part of Closing buy and CFRTIK).</li>
                   <li>Research: the in-game recorder now reads a calm game's spread and total every 5 minutes instead of every 2, so its request budget can serve the 20 second hot tier, and a 2c move on any of its three markets makes a game hot. Public data only, nothing trades.</li>
                   <li>Research: four more public Kalshi data pulls were queued (two in-game results lists, a basketball props candle read and a Trump late word candle read). Public data only, nothing trades. (#950, #954)</li>

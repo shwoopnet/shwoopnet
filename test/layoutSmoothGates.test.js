@@ -135,7 +135,7 @@ gates.L8 = () => {
   const h = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(h.includes('.kal-console > [data-card][data-folded="true"] .kal-card-head > :not(.kal-card-title):not(.kal-botmenu){ display:none !important; }'), 'head controls hide on a folded card');
   assert.ok(/<div class="kal-card-head kal-acct-head">[\s\S]{0,200}<details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill"/.test(h), 'the Running pill sits in the kept .kal-botmenu, a direct child of the Account head');
-  assert.ok(/<div class="kal-acct-pnl" id="kalPnl"><div class="kal-acct-pnl-h"><span class="kal-k">Account result<\/span><div class="kal-pnl-ranges" id="kalPnlRanges">/.test(h), 'the range buttons are inside the Account card body (Nov 16, 2026), so a folded Account card, which shows only its head, hides them');
+  assert.ok(/<div class="kal-acct-pnl" id="kalPnl"><div class="kal-pnl-ranges" id="kalPnlRanges">/.test(h), 'the range buttons are inside the Account card body (Nov 16, 2026), so a folded Account card, which shows only its head, hides them');
 };
 
 // Resizable cards (Nov 5, 2026, the owner: "this should maybe all be adjustable? size wise i guess"; they chose a corner drag, 12 column snapping, height in steps with a minimum, scrolling inside, a phone stays one column).
