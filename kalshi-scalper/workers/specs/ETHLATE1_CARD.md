@@ -32,3 +32,6 @@ The engine enters EVERY market (strike) that falls in a cell, not one per hourly
 
 ## Amendment (Nov 16, 2026, 19:45Z, Auditor B): events and the signal gate
 A survivor also needs at least 40 distinct hourly events in the cell (strikes of one event are correlated; the day-clustered z carries it, the unit is kept visible), and the survivor line prints events. The 3 signals a day gate counts strike entries, not events, so it is easier than "3 events a day" and is kept as the engine has it.
+
+## Dated line (Nov 16, 2026, 19:50Z): the results pull is ETHD_RESULTS2 (a disclosed error of mine)
+ETHD_RESULTS asked for the whole KXETHD series newest first and stopped at its 40 page cap (Auditor B: STRUCTURE FAIL, 40,000 markets covering only Nov 10 to Nov 15, unlisted, unread). My estimate "15 to 35 pages" assumed the series had about the recorder's 40 strikes an event; KXETHD has about 330 strikes an hour. The replacement ETHD_RESULTS2 asks by ticker for only the strikes the recorder stored (the generator reads ticker then close_time from ladder.csv.gz and nothing else). The loader is bound to the new run folder name only; its hash changed.

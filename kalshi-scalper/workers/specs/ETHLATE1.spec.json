@@ -6,7 +6,7 @@
  "card": "kalshi-scalper/workers/specs/ETHLATE1_CARD.md",
  "needs_new_code": [
   "ethlate1_load.py (Desk B's own loader, ticker wall first; replaces extending hourbridge_load.py), audited by Auditor B and allow-listed by Main",
-  "ETHD_RESULTS pull (about 15 to 35 requests, closes 2026-10-28 to 2026-11-15)",
+  "ETHD_RESULTS2 pull (about 130 requests of up to 100 tickers; the first job ETHD_RESULTS hit its page cap and is void: my 15 to 35 page estimate was about 5 times too low, KXETHD has about 330 strikes an hour)",
   "a second loader version for the forward validate window (recorder rows from 2026-11-16T00:00Z to before 2026-12-16T00:00Z): its own date wall, its own sha256 and its own allow line, built only if a development rule survives"
  ],
  "uniqueness": {
@@ -26,10 +26,10 @@
  },
  "data": {
   "loader": "ethlate1_load.py (kalshi-scalper/workers/ethlate1/)",
-  "loader_sha256": "24edf5b7468202619b0194750f4a716818cf03ee9619c0eb5dd756e5b09936b0",
+  "loader_sha256": "0c4d4f05c80b92d9497796da991c67de923a818687d37b87f366dbc259fdd022",
   "extracts": [
    "quote-data checkout: quotes/<date>/<HHMM>/ladder.csv.gz for date directories 2026-10-27 to 2026-11-15 (19 days, 4 hour recorder blocks, some blocks missing: 2 to 6 ladder files a day, 103 files in all)",
-   "ETHD_RESULTS landed run (KXETHD settled markets with results, closes 2026-10-28 to 2026-11-15)"
+   "ETHD_RESULTS2 landed run (the settled results of the strikes the recorder stored, asked by ticker, closes 2026-10-28 to 2026-11-15)"
   ],
   "ticker_wall": [
    "KXETHD"

@@ -1,4 +1,4 @@
-"""ETHLATE1 loader (Desk B, Nov 16 2026). Offline. Reads a checkout of quote-data (quotes/<date>/<HHMM>/ladder.csv.gz) and ONE landed ETHD_RESULTS run folder.
+"""ETHLATE1 loader (Desk B, Nov 16 2026). Offline. Reads a checkout of quote-data (quotes/<date>/<HHMM>/ladder.csv.gz) and ONE landed ETHD_RESULTS2 run folder.
 REFUSES unless HELDOUT_PULL_RUNS.md carries a line with the mark, "ethlate1_load.py" and this file's own sha256 (no flag, no env var).
 Wall: only date directories 2026-10-27 to 2026-11-15 are listed; each row's ticker is read FIRST (KXETHD- only; any other series dropped and counted, nothing else of the row parsed), then close_time (outside [2026-10-28T00:00Z, 2026-11-16T00:00Z) dropped and counted), then status; results from the run only for kept rows: yes, no or void.
 Output: {"KXETHD": [{series, ticker, close, result, candles: [(end_ts, yes_bid, yes_ask, last, volume, oi)]}]} (the last ladder row of each clock minute; last None, volume 0, oi 0).
@@ -11,9 +11,9 @@ DIRS = tuple("2026-10-%02d" % d for d in (27, 28, 29, 30, 31)) + tuple("2026-11-
 ALLOW_FILE = os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md"); ALLOW_MARK = "readable ONLY by Desk B's ETHLATE1 loader"
 def self_sha(): return hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest()
 def check_run_name(run):
-    """the run folder must be <...>/ETHD_RESULTS/<stamp>; returns the stamp."""
+    """the run folder must be <...>/ETHD_RESULTS2/<stamp>; returns the stamp."""
     p = os.path.abspath(run)
-    if os.path.basename(os.path.dirname(p)) != "ETHD_RESULTS": raise SystemExit("REFUSED: %s is not a run folder of ETHD_RESULTS" % run)
+    if os.path.basename(os.path.dirname(p)) != "ETHD_RESULTS2": raise SystemExit("REFUSED: %s is not a run folder of ETHD_RESULTS2" % run)
     return os.path.basename(p)
 def refuse_unless_allowed(run_name):
     try: text = open(ALLOW_FILE, encoding="utf-8").read()

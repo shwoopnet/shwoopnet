@@ -28,12 +28,14 @@ ok = [("1 one market kept, result yes", len(data["KXETHD"]) == 1 and m["result"]
 try: L.refuse_unless_allowed("2026-11-16T2000Z_1"); ok[4] = ("5 refuses without an allow-line", False)
 except SystemExit: pass
 import json, tempfile
-try: L.check_run_name("/x/NOT_ETHD/2026-11-16T2000Z_1"); ok.append(("6 run folder not under ETHD_RESULTS is refused", False))
-except SystemExit: ok.append(("6 run folder not under ETHD_RESULTS is refused", L.check_run_name("/x/ETHD_RESULTS/2026-11-16T2000Z_1") == "2026-11-16T2000Z_1"))
-d = tempfile.mkdtemp(); os.makedirs(d + "/quotes/2026-10-28/0000"); os.makedirs(d + "/ETHD_RESULTS/s1")
-json.dump({"rows": [{"status": 200, "truncated": True, "file": "a"}, {"status": 500, "file": "b"}]}, open(d + "/ETHD_RESULTS/s1/manifest.json", "w"))
+def refused(p):
+    try: L.check_run_name(p); return False
+    except SystemExit: return True
+ok.append(("6 only an ETHD_RESULTS2 run folder is accepted (NOT_ETHD and the old ETHD_RESULTS are refused)", refused("/x/NOT_ETHD/2026-11-16T2000Z_1") and refused("/x/ETHD_RESULTS/2026-11-16T2000Z_1") and L.check_run_name("/x/ETHD_RESULTS2/2026-11-16T2000Z_1") == "2026-11-16T2000Z_1"))
+d = tempfile.mkdtemp(); os.makedirs(d + "/quotes/2026-10-28/0000"); os.makedirs(d + "/ETHD_RESULTS2/s1")
+json.dump({"rows": [{"status": 200, "truncated": True, "file": "a"}, {"status": 500, "file": "b"}]}, open(d + "/ETHD_RESULTS2/s1/manifest.json", "w"))
 L.refuse_unless_allowed = lambda run_name: None
-try: L.load(d, d + "/ETHD_RESULTS/s1"); ok.append(("7 dropped manifest rows void the run", False))
+try: L.load(d, d + "/ETHD_RESULTS2/s1"); ok.append(("7 dropped manifest rows void the run", False))
 except SystemExit as e: ok.append(("7 dropped manifest rows void the run", "RUN VOID: 2 manifest rows" in str(e)))
 for k, v in ok: print("PASS" if v else "FAIL", k)
 sys.exit(0 if all(v for _, v in ok) else 1)
