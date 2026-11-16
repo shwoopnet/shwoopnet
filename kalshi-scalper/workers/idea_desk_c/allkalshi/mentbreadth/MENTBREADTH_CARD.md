@@ -32,3 +32,5 @@
 **Windows.**
 - The held-out is the Trump-word families' window, own occurrence 2026-10-03 to before 2026-11-05. Read once on the Head's go: jointly with the other Trump-word families, or by a split written before any read, as the Head decides.
 - TRUMPTOPIC1's spent Aug 6 to Oct 3 and its forward window from Nov 5 are never pulled.
+
+**Joint held-out (the Head of R&D, Nov 16, 15:46Z).** The window of own occurrence 2026-10-03 to before 2026-11-05 is read ONCE for every Trump-word family that passes development (LATEWORD, MENTTWIN, MENTBREADTH and any later one), in one print, with m counting every family. No family reads it alone.

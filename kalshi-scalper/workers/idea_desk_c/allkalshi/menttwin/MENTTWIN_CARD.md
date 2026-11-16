@@ -40,3 +40,5 @@
 **Data.**
 - `MENTTWIN_CANDLES_P1` and `_P2`: 510 historical single-market reads, windows ending at D.
 - Disclosure: to size this I read time fields and word titles of the landed list only.
+
+**Joint held-out (the Head of R&D, Nov 16, 15:46Z).** The window of own occurrence 2026-10-03 to before 2026-11-05 is read ONCE for every Trump-word family that passes development (LATEWORD, MENTTWIN, MENTBREADTH and any later one), in one print, with m counting every family. No family reads it alone.

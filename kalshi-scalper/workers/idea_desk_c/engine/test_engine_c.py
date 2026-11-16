@@ -65,7 +65,8 @@ class Twin(unittest.TestCase):
         ms = [m("A", "TARIFF", oa, "yes"), m("B", "TARIFF", ob, "yes"),    # gap .30: buy YES on the cheap twin (B at .41), won
               m("A", "CHINA", oa, "no"), m("B", "CHINA", ob, "no"),        # gap .05: no trade
               m("A", "SOLO", oa, "yes")]                                    # no twin
-        put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": ms, "cursor": ""})])
+        put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": ms, "cursor": ""}),
+                                        ({"id": "hist_KXTRUMPMENTIONB", "page": 1}, {"markets": [], "cursor": ""})])
         tk = {x["yes_sub_title"] + x["event_ticker"]: x["ticker"] for x in ms}
         put(root, "MENTTWIN_CANDLES_P1", [({"path": "/historical/markets/%s/candlesticks" % tk["TARIFFEVA"]}, {"candlesticks": [c(D, .69, .71)]}),
                                           ({"path": "/historical/markets/%s/candlesticks" % tk["TARIFFEVB"]}, {"candlesticks": [c(D - 60, .39, .41)]}),
@@ -82,6 +83,15 @@ class Twin(unittest.TestCase):
         self.assertEqual(o["bar"], "no evidence at n = 1")
 
 
+class Void(unittest.TestCase):
+    def test_void_refund_keeps_fee(self):
+        import engine1_core as K
+        ent = {"id": "V", "close_ts": 1000, "day": "d", "series": "S", "side": "no", "ask": 0.55, "n": 10, "entry_end": 500, "path": [], "result": "void"}
+        x, why = K.score(ent, "H", 0.01, 10)
+        # paid .56: refund the price, keep the fee ceil(round(0.07*10*.56*.44*100, 9))/100 = .18
+        self.assertEqual((round(x, 6), why), (-0.18, "void"))
+
+
 class Breadth(unittest.TestCase):
     def test_hand(self):
         root = tempfile.mkdtemp()
@@ -92,7 +102,8 @@ class Breadth(unittest.TestCase):
                "open_time": iso(op), "yes_sub_title": "w%d" % i, "title": "", "result": "no" if i % 2 == 0 else "yes"} for i in range(27)]
         ms += [{"ticker": "KXTRUMPMENTION-26JUN11-N%02d" % i, "event_ticker": "NARROW", "occurrence_datetime": iso(O + 86400), "close_time": iso(O + 90000),
                 "open_time": iso(op), "yes_sub_title": "n%d" % i, "title": "", "result": "no"} for i in range(5)]
-        put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": ms, "cursor": ""})])
+        put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": ms, "cursor": ""}),
+                                        ({"id": "hist_KXTRUMPMENTIONB", "page": 1}, {"markets": [], "cursor": ""})])
         ws, nwide = MB.build(root)
         self.assertEqual(nwide, 27)                                   # the narrow event (5 words) is never wide
         put(root, "MENTBREADTH_CANDLES_P1", [({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-W00/candlesticks"}, {"candlesticks": [c(D, .45, .47)]}),
@@ -106,6 +117,17 @@ class Breadth(unittest.TestCase):
         # 1c: paid .56 x10 = 5.60, fee ceil(0.07*10*.56*.44*100)/100 = ceil(17.248)/100 = .18 -> 5.78; won +4.22, lost -5.78; net -1.56
         self.assertAlmostEqual(o["1c"]["net"], -1.56)
         self.assertTrue(o["kill_fast"])
+
+
+class Cut(unittest.TestCase):
+    def test_refuses_cut_list(self):
+        root = tempfile.mkdtemp()
+        put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": [{"ticker": "KXTRUMPMENTION-X-A", "close_time": "2026-07-01T00:00:00Z"}], "cursor": "c"}),
+                                        ({"id": "hist_KXTRUMPMENTIONB", "page": 1}, {"markets": [], "cursor": ""})])
+        with self.assertRaises(SystemExit):
+            P.entries(root)
+        with self.assertRaises(SystemExit):
+            MB.entries(root)
 
 
 if __name__ == "__main__":

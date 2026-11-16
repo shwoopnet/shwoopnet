@@ -64,7 +64,14 @@ def build(root):
     return mk, pairs(mk)
 
 
+def list_ok(root):
+    """Auditor B (Nov 16): refuse a cut list. Every list request's last stored page must have no cursor, or reach before the window."""
+    return not any(KL.truncated(root, "MENTDRIFT_LISTS_A", rid, DEV[0]) for rid in ("hist_KXTRUMPMENTION", "hist_KXTRUMPMENTIONB"))
+
+
 def entries(root):
+    if not list_ok(root):
+        raise SystemExit("list truncated: not scored")
     mk, ps = build(root)
     cut = {}
     for D, a, b in ps:

@@ -55,3 +55,5 @@
 **Disclosure:** to size this and to check the clock, I read the landed list's time fields (ticker, event_ticker, open_time, occurrence_datetime, close_time) and the word title, for development events only. No price, volume or result was read.
 
 **Files:** `lateword_lib.py`, `build_lateword_candles.py`, `lateword_score.py`, `test_lateword.py` (2 tests: the hand case and the truncation stop).
+
+**Joint held-out (the Head of R&D, Nov 16, 15:46Z).** The window of own occurrence 2026-10-03 to before 2026-11-05 is read ONCE for every Trump-word family that passes development (LATEWORD, MENTTWIN, MENTBREADTH and any later one), in one print, with m counting every family. No family reads it alone.

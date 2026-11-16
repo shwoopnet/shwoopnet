@@ -45,11 +45,12 @@
   "mode": "fixed_dates",
   "search_last_occurrence_exclusive": "2026-08-06T00:00:00Z",
   "validate_first_occurrence": "2026-10-03T00:00:00Z",
-  "validate_last_occurrence_exclusive": "2026-11-05T00:00:00Z"
+  "validate_last_occurrence_exclusive": "2026-11-05T00:00:00Z",
+  "validate_note": "the joint Trump-word held-out (Oct 3 to before Nov 5): one read, all families together, on the Head's go"
  },
  "event": {
   "scorer_plugin": "menttwin.py",
-  "scorer_plugin_sha256": "341bb01c25a287bd05c45ed57c12470b3e68f6cdceec13fcbf7499eaea71f0a7",
+  "scorer_plugin_sha256": "0eab9d021fab387817709421693cfcb8c7d0d06ff7d7bb92629ed14d8bd1bb04",
   "decision_instant": "the later twin's open_time + 30 min",
   "signal_threshold_abs_mid_gap": 0.15,
   "entry_rule": "buy YES on the cheaper twin at its ask, ask 0.30 to 0.70, one per pair",
@@ -82,5 +83,59 @@
  "outputs": {
   "survivor_line": "market, rule, PF 1c and 2c, n, days",
   "family_flag": "parity"
- }
+ },
+ "holds": [
+  {
+   "label": "development (own occurrence), shown by TRUMPTOPIC1's fit third and read for LATEWORD",
+   "start_epoch": 1776384000,
+   "end_epoch": 1785974400,
+   "card": "this spec",
+   "status": "OPEN (development)"
+  },
+  {
+   "label": "TRUMPTOPIC1 held-out third (spent); never pulled",
+   "start_epoch": 1785974400,
+   "end_epoch": 1790985600,
+   "card": "TRUMPTOPIC1",
+   "status": "spent"
+  },
+  {
+   "label": "Trump-word families' joint held-out: ONE read for every Trump-word family that passes development, one print, m counting every family (the Head, Nov 16 15:46Z)",
+   "start_epoch": 1790985600,
+   "end_epoch": 1793836800,
+   "card": "LATEWORD, MENTTWIN, MENTBREADTH (registered by MENTDRIFT)",
+   "status": "OPEN"
+  },
+  {
+   "label": "TRUMPTOPIC1 forward window; never pulled",
+   "start_epoch": 1793836800,
+   "end_epoch": null,
+   "card": "TRUMPTOPIC1",
+   "status": "OPEN"
+  }
+ ],
+ "look_ahead": {
+  "decision_instant": "D = the later twin's open_time + 1800 s (open and close times only)",
+  "entry_quote": "the latest two-sided candle ending in [D - 180, D]; the candle jobs end every window at D",
+  "exit": "hold to settlement: the list's result, read last for traded tickers only",
+  "pair_selection": "word title, ticker date code, open and close times only"
+ },
+ "sources": {
+  "names": [
+   "Kalshi public API through kalshi-pull (api.elections.kalshi.com), landed runs only"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "file": "menttwin.py",
+  "sha256": "0eab9d021fab387817709421693cfcb8c7d0d06ff7d7bb92629ed14d8bd1bb04",
+  "hand_case_file": "test_engine_c.py",
+  "hand_case_sha256": "aae91beeacda6b7354859e619ca1c41aea884cab37e4323d26e9999f75ffb8bc",
+  "auditor_clean_date": null,
+  "note": "unsigned until Auditor B clears this plugin hash; MENTTWIN's earlier build (341bb01c) was CLEAN on 2026-11-16, this revision adds only the cut-list refusal"
+ },
+ "subset_rationale": "one rule, its thresholds (gap 0.15 or breadth 27, band 0.30 to 0.70) fixed before any price of these markets was read; breadth's 27 is the median of open-time counts",
+ "halves": "floor(n/2) in entry order",
+ "fee_form": "ceil(round(0.07 x n x p x (1 - p) x 100, 9)) / 100 per order; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x below 100"
 }
