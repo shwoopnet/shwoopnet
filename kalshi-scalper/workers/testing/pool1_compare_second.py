@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""POOL1 compare: my 220 driver lines (pool1_driver_second.run) against Desk A's printed lines file, rule by rule at 1e-9. Usage: pool1_compare_second.py <fixture.json.gz> <desk A lines file>"""
+"""POOL1 compare: my 220 driver lines (pool1_driver_second.run) against Desk A's printed lines file, rule by rule at 1e-9. Usage: pool1_compare_second.py <fixture.json.gz | my printed lines file .txt> <desk A lines file>   (a .txt first argument is the output of pool1_second_run.py or of pool1_driver_second on a fixture, compared as printed)"""
 import gzip, json, re, sys, math
 import pool1_driver_second as d
 
 def mine(path):
+    if path.endswith(".txt"):
+        out = {}
+        for l in open(path).read().splitlines():
+            if " | trades_lo " in l: out[l.split(" | ")[0].strip()] = l
+        return out, None, None
     J = json.load(gzip.open(path)); data = {n: {int(t): tuple(v) for t, v in s.items()} for n, s in J["data"].items()}; fund = {n: {int(t): r for t, r in f.items()} for n, f in J["funding"].items()}
     out = {}
     for l in d.run(data, fund)[2:]:
