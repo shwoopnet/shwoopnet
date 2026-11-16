@@ -55,7 +55,8 @@ def spread_series(ca, cb):
 def pair_events(cand, kept):
     """-> {id: [(e, a, b, long_name, short_name, u_s)]}. z at e = (s_e - mean) / pop sd of s over the W minutes BEFORE e (candle ends e - 60 W .. e - 60, at least 0.8 W usable points, sd > 0); |z| >= z_in; short the rich leg (z > 0: a), long the cheap leg. u_s = pop sd of the 1-minute spread changes over the 60 minutes ending e (at least 45) x sqrt(30). Window 10:31 to 15:30 ET, same ET date as the 09:31 open for the window's first point is NOT required (the baseline may reach back to the previous day: s is a ratio and continuous)."""
     ev = collections.defaultdict(list)
-    for b, names in kept.items():
+    for b, names0 in kept.items():
+        names = sorted(names0)                                          # pairs (a, c) with a < c by ticker, so ties at one candle break the same way in any build
         for i in range(len(names)):
             for j in range(i + 1, len(names)):
                 a, c = names[i], names[j]; s = spread_series(cand[a], cand[c])
