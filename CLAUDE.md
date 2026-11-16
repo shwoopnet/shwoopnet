@@ -1744,3 +1744,7 @@ One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`: the run `ETHD_RE
 ## Held-out log: PERPSLANE4 second-build line withdrawn (Nov 16, 2026, Auditor B)
 
 Auditor B withdrew the allow line for Forensics' `lane4_extract_b2.py` (sha256 53490d8a...) minutes after it was merged in #1015: the extractor parses `funding_time` as a number but the real funding files hold ISO strings, so it would crash on the real layout (its selftest used numeric epochs). The line and its section were removed in the same change; a corrected extractor needs a new commit, a new sha and a new CLEAN before any line returns. The Testing Desk's `lane4_load.py` line (#1010) is unaffected. Docs only.
+
+## Held-out log: PERPSLANE4 second-build extractor, corrected (Nov 16, 2026, Auditor B's allow line)
+
+The corrected `lane4_extract_b2.py` (sha256 a6b9532d..., commit 9f849955 on `claude/forensics-desk`; I hashed the file before merging) is named in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` with the shared manifest (sha256 1b46f85d...). The fix over the withdrawn version is ISO funding times and digit-only end timestamps, applied after the ticker wall check. The earlier version (53490d8a...) stays unlisted. Docs only.
