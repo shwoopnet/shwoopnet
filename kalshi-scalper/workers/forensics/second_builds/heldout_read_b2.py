@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ENGINE1 HELD-OUT READ, INDEPENDENT SECOND BUILD (Forensics desk, Nov 16, 2026). Written from ENGINE1_HELDOUT_READ_PLAN_NOV16.md (version 3: windows, n floors, verdict, BH at 5% over m = 190 on the one-sided day clustered p of the 1c cash) and ENGINE1_RUN2_BARLIST_NOV16.json (sha256 16049fec...) ONLY. Desk A's held-out loader, scorer and print were not opened before this file was committed.
-Two modes. (1) --dry <barlist> <archive_extract>: runs THIS code on the archive's own VALIDATE markets as if they were the held-out set and requires n, pf_1c, pf_2c to equal the listing (1e-9); nothing held out is opened. (2) --read <barlist> <archive_extract> <heldout_extract> <desk_a_print_sha256>: refuses unless Desk A's print sha256 (64 hex) is given, i.e. after Desk A committed its print hash; prints counts, the SEARCH cut sha256, per rule verdict counts and BH survivors. Needs Auditor B's allow line for this reader before it is pointed at the held-out extract.
+Two modes. (1) --dry <barlist> <archive_extract>: runs THIS code on the archive's own VALIDATE markets as if they were the held-out set and requires n, pf_1c, pf_2c to equal the listing (1e-9); nothing held out is opened. (2) --read <barlist> <archive_extract> <heldout_extract> <desk_a_print_file>: refuses unless the path of Desk A's committed print FILE can be opened and is not empty (the build computes and prints that file's sha256 itself; a typed hash is never accepted); prints counts, the SEARCH cut sha256, per rule verdict counts and BH survivors. Needs Auditor B's allow line for this reader before it is pointed at the held-out extract.
 Floors (plan v3): n floor 74 for KXBTC15M KXETH15M KXXRP15M KXDOGE15M KXGOLD15M, 90 for the rest; holds = n >= floor and pf_1c >= 1.3 and pf_2c >= 1.0; below the floor 'no evidence'; BH over m = 190 on rules with a p (one sided, day clustered, UTC close date, 1c nets at 10 contracts; k < 2 days or sd 0 gives p = 1)."""
 import sys, os, json, sqlite3, hashlib, collections, calendar, re
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -47,7 +47,11 @@ def main(a):
             ok = len(x1) == r["n"] and abs(E.pfv(x1) - r["pf_1c"]) < 1e-9 and abs(E.pfv(x2) - r["pf_2c"]) < 1e-9
             if not ok: bad += 1
         print("DRY on the archive VALIDATE half: rules", len(L), "reproduced", len(L) - bad, "mismatch", bad, "cuts sha256", sha); return
-    if mode != "--read" or len(a) < 5 or not re.fullmatch(r"[0-9a-f]{64}", a[4]): raise SystemExit("REFUSED: --read needs Desk A's print sha256 (64 hex) as the last argument")
+    if mode != "--read" or len(a) < 5: raise SystemExit("REFUSED: --read needs the path of Desk A's committed print FILE as the last argument")
+    try: pb = open(a[4], "rb").read()
+    except OSError: raise SystemExit("REFUSED: Desk A's print file cannot be opened")
+    if not pb.strip(): raise SystemExit("REFUSED: Desk A's print file is empty")
+    a = a[:4] + [hashlib.sha256(pb).hexdigest()]
     held = load(a[3], series); sc = score_rules(L, held, cuts); m_bh = 190; rows = []
     for r, res in sc:
         x1 = [x[1] for x in res[0.01]]; x2 = [x[1] for x in res[0.02]]; floor = 74 if r["series"] in R6 else 90; n = len(x1)
