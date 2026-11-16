@@ -25,3 +25,6 @@
 
 ## Dated note, 2026-11-15 (appended; no frozen text changed)
 A kept market whose result is void, a scalar or missing is dropped by the loader and counted per series ("no result (dropped): SERIES"); its neighbouring windows then show as "not adjacent" skips. A void would refund the price and keep the fee, so dropping voids is a small optimistic bias, and the result line must say so with the per series counts.
+
+## Result, 2026-11-16 (appended; no frozen text changed)
+One blind run, print sha256 27f3eb59d3250011f2c599a2073c90a6e7fa17296da6f78dfd5c57932673af9f (ADJWIN1_PRINT_SHA_NOV16.txt, committed before reading). 22 tries, 0 passed. **The development window (June to August) had NO data in these runs (n = 0 for every series and arm), so only validation (Sep 1 to Oct 3) was informative; this is missing data, not a development window that failed.** On validation at the 2c haircut the best arm was HYPE reversal (PF 1.021, n 798, z 0.30) and every other arm was at or below 1.0 (silver reversal 0.989; momentum arms 0.63 to 0.95). The registered bar needs both windows, so it could not be met; the kill rule fires. CLOSED, no candidate.
