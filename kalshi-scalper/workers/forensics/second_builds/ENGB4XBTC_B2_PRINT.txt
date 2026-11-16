@@ -1,0 +1,5 @@
+series in extract 19 alts scored 18 skipped (no split constant) [] rules 303264
+m 2650752 batch line 4,073,472
+SEARCH passes (bar + 3 a day) 315 VALIDATE passes 33
+BH m 2650752 survivors 0
+BH m 4073472 survivors 0
