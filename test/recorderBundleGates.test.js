@@ -119,7 +119,7 @@ print(json.dumps([a, len(cr) - 1, len(fr) - 1, n, len(urls) == n, b, c, os.path.
   assert.strictEqual(r[9], true, 'at least 1.2 seconds between calls');
   assert.ok(r[10].every((x) => /KXBTCPERP|KXGOLDPERP/.test(x)) && r[10].length === 4, 'no crypto or metals read except the fixed extra Bitcoin and gold perpetuals (candles and funding)');
   const wf = wfs.candles;
-  assert.ok(/cron: "0 2,3,4 \* \* 1-6"/.test(wf), 'after the US session, Sunday night to Friday night UTC');
+  assert.ok(/cron: "0 2,3,4 \* \* \*"/.test(wf), 'every night UTC, so Saturday UTC is archived too (Nov 15, 2026)');
 };
 
 // RB6: SOFR is on the daily recorder: KXSOFRD and the NY Fed row, weekdays 09:00 to 13:00 UTC only, stop 2027-02-26; outside the window nothing is read.

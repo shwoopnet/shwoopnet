@@ -742,9 +742,10 @@ gates['RET2 an open order of a retired strategy still counts in the shared loss 
   }
 };
 gates['RET3 no new XRPYES10 or KESTREL entry can be sent: not in the registry, the hold list, the allowed or reserved series, or the ticker shape; the real tick sends nothing for their markets'] = async () => {
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK']);
-  assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED.slice(), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1']);
-  assert.ok(!slot.SLOT_SERIES_ALLOWED.includes('KXXRP15M') && !slot.SLOT_SERIES_ALLOWED.includes('KXAUDUSD15M') && !('KXAUDUSD15M' in slot.SLOT_SERIES_RESERVED));
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK', 'OIREL1', 'XRPFAV10']);
+  assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED.slice(), ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1', 'OIREL1', 'XRPFAV10']);
+  assert.ok(slot.SLOT_SERIES_ALLOWED.includes('KXXRP15M') && slot.SLOT_STRATEGIES.filter((x) => x.series.includes('KXXRP15M')).map((x) => x.id).join() === 'XRPFAV10', 'XRP is a slot market again only for the XRPFAV10 seat (Nov 15, 2026)');
+  assert.ok(!slot.SLOT_SERIES_ALLOWED.includes('KXAUDUSD15M') && !('KXAUDUSD15M' in slot.SLOT_SERIES_RESERVED));
   assert.strictEqual(typeof slot.slotRollingSeriesDue, 'undefined', 'the rolling quote read for a non-L1 market is gone');
   for (const [id, tk, series, side] of RETIRED) {
     const r = slot.slotOrderCheck({ strategyId: id, ticker: tk, side, limit: 0.93, step: 1, depthAtTouch: 1000, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null, position: 0, sizingBase: 800, windowCapFraction: 0.055, killLatch: null, secondsLeft: 600, now: NOW });
@@ -752,6 +753,7 @@ gates['RET3 no new XRPYES10 or KESTREL entry can be sent: not in the registry, t
     const copy = { id, readme: 'kalshi-scalper/README.md#SLOT-' + id, series: [series], entry: { sideRule: side === 'yes' ? 'yes' : 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, exit: { holdToSettle: true }, contractsPerOrder: 3,
       scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }, killRules: { maxConsecutiveLosses: 3, minNet: { afterFills: 20, net: -15 } }, forwardReadDate: '2026-12-14', reviewedAt: '2026-11-10' };
     assert.ok(!slot.validateSlotStrategy(copy).ok, id + ': even re-adding the old entry is refused until the lists are edited on purpose');
+    if (series === 'KXXRP15M') continue;   // XRP has its own registered seat again (XRPFAV10, Nov 15, 2026): the real tick would rightly order there; the entry gate above still refuses the retired id
     const db = makeDb(), ex = makeExchange(db);
     for (const left of [600, 365]) {
       const q = [{ series, m: { ticker: tk, status: 'active', close_time: iso(NOW + left * 1000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9200' } }];

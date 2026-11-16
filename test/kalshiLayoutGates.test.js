@@ -653,14 +653,16 @@ gates.BS1 = () => {
   assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 200000 }, T0).state, 'quiet', 'over 2.5 minutes is quiet');
   assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 400000 }, T0).state, 'down', 'over 5 minutes means the function is not running');
   assert.strictEqual(f.kalshiHeartbeat({ active: true }, T0).state, 'quiet', 'running with no check recorded yet is waiting, not alive');
-  const a = f.kalshiNextEntry(T0 + 60000);
+  const x = f.kalshiNextEntry(T0 + 60000);
+  assert.deepStrictEqual([x.at, x.name], [T0 + 300000, 'XRP favourite'], 'a minute into a quarter the first look is the XRP trial seat, 10 minutes before the close (Nov 15, 2026)');
+  const a = f.kalshiNextEntry(T0 + 330000);
   assert.deepStrictEqual([a.at, a.name, /^Gold, /.test(a.what), /10 minute|XRP|natural gas|Bitcoin|AUD|CAD/.test(a.what)], [T0 + 540000, 'Closing buy', true, false], 'a minute into a quarter the next look is the Closing buy at minute 9, and it names no paused market');
-  const b = f.kalshiNextEntry(T0 + 330000);
-  assert.deepStrictEqual([b.at, b.name], [T0 + 540000, 'Closing buy'], 'minute 5 has no look of its own: the 10 minute look belonged to paused markets');
+  const b = f.kalshiNextEntry(T0 + 400000);
+  assert.deepStrictEqual([b.at, b.name], [T0 + 540000, 'Closing buy'], 'after the XRP look the next one is the Closing buy at minute 9');
   const c = f.kalshiNextEntry(T0 + 600000);
   assert.deepStrictEqual([c.at, c.name, /Bitcoin/.test(c.what)], [T0 + 720000, 'Open interest jump', true], 'after minute 9 the next look is the open interest jump at minute 12 (the Bitcoin strategy), the card covers every strategy');
   const d = f.kalshiNextEntry(T0 + 800000);
-  assert.deepStrictEqual([d.at, d.name], [T0 + 900000 + 540000, 'Closing buy'], 'after minute 12 it rolls to the next quarter');
+  assert.deepStrictEqual([d.at, d.name], [T0 + 900000 + 300000, 'XRP favourite'], 'after minute 13 it rolls to the first look of the next quarter (the XRP trial seat)');
 };
 gates.BS2 = () => {
   const f = liftBs(['kalshiRiskMeter']);

@@ -10,7 +10,7 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const gates = {};
 const NAMES = { KXGOLD15M: 'gold', KXXRP15M: 'XRP', KXBTC15M: 'Bitcoin', KXDOGE15M: 'Dogecoin', KXETH15M: 'Ethereum', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'natural gas' };
 const nameOf = (s) => { assert.ok(NAMES[s], s + ' is a new series: give it a name in this test and check every line of page text that lists markets'); return NAMES[s]; };
-const pausedNames = live.PAUSED_SERIES.map(nameOf), liveNames = live.L1_SERIES.filter((s) => !live.PAUSED_SERIES.includes(s)).map(nameOf);
+const pausedNames = live.PAUSED_SERIES.map(nameOf), pausedTextNames = live.PAUSED_SERIES.filter((s) => s !== 'KXXRP15M' || !require('../functions/kalshiSlotLib.js').SLOT_STRATEGIES.some((x) => x.id === 'XRPFAV10')).map(nameOf),   /* XRP is paused for L1 but trades through the XRPFAV10 seat (Nov 15, 2026): it may be named in that seat's sentence, the Start confirmation and the next look */ liveNames = live.L1_SERIES.filter((s) => !live.PAUSED_SERIES.includes(s)).map(nameOf);
 const menu = (() => { const i = html.indexOf('id="kalBotMenu"'); return html.slice(i, html.indexOf('L1 failed its own test', i) + 80); })();
 const text = (h) => h.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
 const list = (s) => s.split(/,\s*|\s+and\s+/).map((x) => x.trim()).filter(Boolean);
@@ -40,14 +40,18 @@ gates.SF3 = () => {
   assert.ok(/Bitcoin only/.test(slotSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(slotSpan), 'the slot sentence names Bitcoin and nothing else');
   const cfrtiSpan = (menu.match(/<span id="kalRulesSlotCfrti">[\s\S]*?<\/span>/) || [''])[0];
   assert.ok(/CFRTIK, .*Bitcoin only/.test(cfrtiSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(cfrtiSpan), 'the CFRTIK sentence names Bitcoin and nothing else (Nov 12, 2026)');
+  const oirelSpan = (menu.match(/<span id="kalRulesSlotOirel">[\s\S]*?<\/span>/) || [''])[0];
+  assert.ok(/OIREL1, .*Bitcoin only/.test(oirelSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(oirelSpan), 'the OIREL1 sentence names Bitcoin and nothing else (Nov 15, 2026)');
+  const favSpan = (menu.match(/<span id="kalRulesSlotFav">[\s\S]*?<\/span>/) || [''])[0];
+  assert.ok(/XRPFAV10, .*XRP only/.test(favSpan) && !/Ethereum|Dogecoin|AUD|CAD|natural gas|Bitcoin/i.test(favSpan.replace(/XRP stays paused for gold's own rule \(L1\)\./, '')), 'the XRPFAV10 sentence names XRP and nothing else but its own pause note (Nov 15, 2026)');
   const flowSpan = (menu.match(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/) || [''])[0];
   assert.ok(!flowSpan || (/Bitcoin only/.test(flowSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(flowSpan)), 'the FLOW1 sentence names Bitcoin and nothing else (Nov 4, 2026)');
-  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotCfrti">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotXrp">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotAud">[\s\S]*?<\/span>/, ''));
+  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotCfrti">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotOirel">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFav">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotXrp">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotAud">[\s\S]*?<\/span>/, ''));
   // XRPYES10 and KESTREL were retired Nov 11, 2026: their sentences are gone from the rules and the Start confirmation, so neither name nor 'XRP' or 'AUD/USD' appears outside the paused list.
-  assert.ok(!/kalRulesSlotXrp|kalRulesSlotAud/.test(menu) && !/XRPYES10|KESTREL/.test(menu), 'the rules text no longer describes the retired probes');
-  pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(rest), 'the Account card and its rules never name ' + n + ' as anything but paused'));
+  assert.ok(!/kalRulesSlotXrp"|kalRulesSlotAud/.test(menu) && !/XRPYES10|KESTREL/.test(menu), 'the rules text no longer describes the retired probes');
+  pausedTextNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(rest), 'the Account card and its rules never name ' + n + ' as anything but paused'));
   const open = text((html.match(/id="kalL1Confirm"[\s\S]*?<\/span>/) || [''])[0]);
-  pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(open), 'the Start confirmation does not mention paused ' + n));
+  pausedTextNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(open), 'the Start confirmation does not mention paused ' + n));
 };
 gates.SF4 = () => {
   // The next look names the markets each strategy looks at (the Bot status card covers every strategy, the owner, Oct 31, 2026): the Closing buy names the live L1 markets, the open interest jump names Bitcoin, and no paused market is named.
@@ -56,7 +60,7 @@ gates.SF4 = () => {
   const l1 = /name: 'Closing buy', what: function\(goldClosed\)\{ return ([^;]+); \}/.exec(looks[0]);
   assert.ok(l1, 'the Closing buy look is found');
   liveNames.filter((n) => n !== 'Bitcoin').forEach((n) => assert.ok(new RegExp(n, 'i').test(l1[1]), 'the Closing buy look names ' + n));
-  pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(looks[0].replace(/Bitcoin/g, '')) || n === 'Bitcoin', 'the next look does not name paused ' + n));
+  pausedTextNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(looks[0].replace(/Bitcoin/g, '')) || n === 'Bitcoin', 'the next look does not name paused ' + n));
   assert.ok(/name: 'Open interest jump', what: function\(\)\{ return 'Bitcoin,/.test(looks[0]), 'the open interest jump names Bitcoin (the second strategy trades it through the slot)');
   assert.ok(!/10 minute look/.test(looks[0]) || live.EARLY_PROBE_SERIES.some((s) => !live.PAUSED_SERIES.includes(s)), 'no 10 minute look unless a market with one can trade');
 };
