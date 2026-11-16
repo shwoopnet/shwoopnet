@@ -23,14 +23,19 @@ def allowed_runs():
             if not lists or not cands: raise SystemExit("REFUSED: the allow-list line names no ENGINE1_HELD_LISTS run or no ENGINE1_HELD_CANDLES run")
             return lists, cands
     raise SystemExit("REFUSED: HELDOUT_PULL_RUNS.md has no allow-list line naming engine1_heldout_load.py with this file's sha256 %s (the Head's written acceptance, merged by Main)" % self_sha())
+PARTIAL_OK = {"ENGINE1_HELD_CANDLES_A1": frozenset(("h00048",))}      # Nov 16: run 118 answered h00001 to h00047 and stopped on h00048 (HTTP 400, over the 10,000 minutes x tickers limit); ENGINE1_HELD_CANDLES_A1C (a complete run) carries that request split in two and every request never sent. Only that run and only that id may be unanswered, and only with status 400.
 def run_bodies(base, run):
     folder = os.path.join(base, *run.split("/"))
     try: man = json.load(open(os.path.join(folder, "manifest.json")))
     except Exception as e: raise SystemExit("REFUSED: %s has no readable manifest.json (%s)" % (run, e))
-    if man.get("status") != "complete" or not isinstance(man.get("rows"), list) or not man["rows"]: raise SystemExit("REFUSED: %s is not a complete run" % run)
+    okfail = PARTIAL_OK.get(run.split("/")[0], frozenset())
+    if not isinstance(man.get("rows"), list) or not man["rows"] or man.get("status") != ("complete" if not okfail else "stopped_failures"): raise SystemExit("REFUSED: %s is not a complete run" % run)
     ids = collections.defaultdict(list)
     for r in man["rows"]: ids[r.get("id")].append(r)
     for rid, rs in ids.items():
+        if rid in okfail:
+            if any(r.get("status") == 200 for r in rs) or any(r.get("status") not in (400, 429) for r in rs): raise SystemExit("REFUSED: request %r of %s is not the registered 400" % (rid, run))
+            continue
         if not any(r.get("status") == 200 for r in rs) or any(r.get("status") not in (200, 429) for r in rs): raise SystemExit("REFUSED: request %r of %s was not answered 200" % (rid, run))
     for r in man["rows"]:
         if r.get("status") == 200 and "file" in r: yield json.load(gzip.open(os.path.join(folder, r["file"])))

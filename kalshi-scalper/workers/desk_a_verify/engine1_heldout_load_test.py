@@ -45,4 +45,19 @@ assert [j["job_id"] for j in j3] == ["ENGINE1_HELD_CANDLES_01", "ENGINE1_HELD_CA
 try: G.make(base, ["ENGINE1_HELD_LISTS_A/x1"]); raise AssertionError("generated without an allow line")
 except SystemExit as e: assert "REFUSED" in str(e)
 json.dump(jobs[0], open(os.path.join(base, "ENGINE1_HELD_CANDLES_01.json"), "w"))
+
+# partial A1 run (Nov 16): h00048 unanswered with 400 is accepted ONLY for ENGINE1_HELD_CANDLES_A1; any other failure or any other run refuses
+def putp(base, run, rows_status, st):
+    d = os.path.join(base, *run.split("/")); os.makedirs(d, exist_ok=True); rows = []
+    for i, (rid, stt) in enumerate(rows_status):
+        r = {"id": rid, "status": stt}
+        if stt == 200: fn = "%04d.json.gz" % i; gzip.open(os.path.join(d, fn), "wt").write(json.dumps({"markets": []})); r["file"] = fn
+        rows.append(r)
+    json.dump({"status": st, "rows": rows}, open(os.path.join(d, "manifest.json"), "w"))
+pb = tempfile.mkdtemp()
+putp(pb, "ENGINE1_HELD_CANDLES_A1/p1", [("h00001", 200), ("h00048", 400), ("h00048", 400), ("h00048", 400)], "stopped_failures"); list(L.run_bodies(pb, "ENGINE1_HELD_CANDLES_A1/p1"))
+for bad, nm in ((([("h00001", 200), ("h00049", 400)], "stopped_failures"), "ENGINE1_HELD_CANDLES_A1/p2"), (([("h00001", 200), ("h00048", 200)], "stopped_failures"), "ENGINE1_HELD_CANDLES_A1/p3"), (([("h00001", 200), ("h00048", 500)], "stopped_failures"), "ENGINE1_HELD_CANDLES_A1/p4"), (([("h00001", 200), ("h00048", 400)], "complete"), "ENGINE1_HELD_CANDLES_A1/p5"), (([("h00001", 200), ("h00048", 400)], "stopped_failures"), "ENGINE1_HELD_CANDLES_B1/p6")):
+    putp(pb, nm, *bad)
+    try: list(L.run_bodies(pb, nm)); raise AssertionError("accepted " + nm)
+    except SystemExit: pass
 print("ENGINE1 HELDOUT LOADER AND GENERATOR OK", base)
