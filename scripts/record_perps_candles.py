@@ -31,6 +31,9 @@ ONLY_NEW = "NEW"
 # Nov 16, 2026 (Forensics' map, the Head of R&D): the funding route with NO ticker returns every market's prints in one request. `only` word FUNDING_DAY writes that one day's prints for every market
 # (funding/<date>.all.csv.gz); FUNDING_ALL (no date used) writes each market's whole history, one request (funding/all-history.csv.gz). Candle files are not touched by either.
 FUNDING_DAY, FUNDING_ALL = "FUNDING_DAY", "FUNDING_ALL"
+# Nov 16, 2026 (the History Miner's PERPCRYPTO1 and the Head's FUNDX2): the ticker-less route returns prints with a BLANK ticker, which the loaders refuse, so `only` word FUNDING_BY_TICKER (with the tickers
+# named after it in the same list) asks the funding route ONCE PER NAMED TICKER and labels every row with the ticker the request named (funding/by-ticker.csv.gz). Candle files are not touched.
+FUNDING_BY_TICKER = "FUNDING_BY_TICKER"
 FUNDING_PAGES = 20
 LIST_PAGES = 3   # the public list is read with its cursor, at most this many pages of 200 (the budget and the pacing are unchanged: one call every GAP_S)
 STOP_DATE = dt.date(2027, 2, 26)
@@ -115,6 +118,45 @@ def run_funding(out_dir, day, whole_history, get, sleep):
     return 0
 
 
+def run_funding_by_ticker(out_dir, tickers, get, sleep):
+    """One paged funding read per NAMED ticker (at most FUNDING_PAGES pages each, the same spacing and three-429 stop as the other funding read); every row carries the ticker the request named."""
+    fpath = os.path.join(out_dir, "funding", "by-ticker.csv.gz")
+    if os.path.exists(fpath):
+        print("this funding file already exists; nothing to do")
+        return 0
+    rows, streak = [], 0
+    for t in tickers:
+        cursor = None
+        for _page in range(FUNDING_PAGES):
+            st, body = get("%s/funding_rates/historical?ticker=%s%s" % (BASE, t, ("&cursor=" + cursor) if cursor else ""))
+            sleep(GAP_S)
+            if st == 429:
+                streak += 1
+                if streak >= MAX_429_IN_A_ROW:
+                    print("refused three times in a row; nothing written")
+                    return 1
+                sleep(3.0)
+                continue
+            streak = 0
+            if st != 200 or not isinstance(body, dict):
+                print("the funding read for %s did not answer; nothing written" % t)
+                return 1
+            rows += [funding_row(t, f) for f in (body.get("funding_rates") or []) if isinstance(f, dict)]
+            cursor = body.get("cursor")
+            if not cursor or not isinstance(cursor, str) or not cursor.replace("-", "").replace("_", "").replace("=", "").isalnum():
+                break
+    if not rows:
+        print("no funding prints returned; nothing written")
+        return 1
+    os.makedirs(os.path.dirname(fpath), exist_ok=True)
+    with gzip.open(fpath, "wt", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(FUNDING_COLS)
+        w.writerows(rows)
+    print("wrote %d funding prints for %d tickers (by-ticker.csv.gz)" % (len(rows), len(tickers)))
+    return 0
+
+
 def run(out_dir, now=None, get=None, sleep=time.sleep, day=None, only=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     get = get or http_get
@@ -128,6 +170,12 @@ def run(out_dir, now=None, get=None, sleep=time.sleep, day=None, only=None):
     elif day >= now.date():
         print("that date is not finished; nothing recorded")
         return 1
+    if only and FUNDING_BY_TICKER in only:
+        names = [t for t in only if t != FUNDING_BY_TICKER and t.startswith("KX") and t.endswith("PERP") and t.isalnum()]
+        if not names or len(names) != len(only) - 1:
+            print("FUNDING_BY_TICKER needs perp tickers like KXBTCPERP and nothing else")
+            return 1
+        return run_funding_by_ticker(out_dir, names, get, sleep)
     if only and (FUNDING_DAY in only or FUNDING_ALL in only):
         return run_funding(out_dir, day, FUNDING_ALL in only, get, sleep)
     name = day.isoformat() + (".only" if only else "") + ".csv.gz"
