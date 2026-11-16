@@ -4,7 +4,7 @@ shows only LIVE and cannot back-serve: every 60 seconds (1) the perps list, one 
 open interest, 24 hour volume, leverage estimate and the long and short leverage estimates at each notional size; the static fields (contract size, tick, funding cap, schedule and so on) once per job in static.csv), and (2) the order books of the active markets, depth 5, one request of at most 100 tickers. Candles, funding and the trade tape DO back-serve
 (candles by ticker, funding in one request, trades with time filters) and are NOT recorded here.
 
-Public GET only: no key, no signing, no auth header, no account path, no order, no Firestore. Host kalshi external-api only, redirects refused, a generic User-Agent. At most 2 requests a minute, at least
+Public GET only: no key, no signing, no auth header, no account path, no order, no Firestore. Host kalshi external-api only, redirects refused, a generic User-Agent. At most 2 requests a minute, plus the fast lane's one batched request every 5 seconds inside 14:30 to 21:00 UTC on weekdays (about 14 a minute in the window), at least
 5 seconds between any two requests; a 429 waits 5 seconds doubling up to 60; three 429s in a row end the run. A hard budget of requests per run (REQUEST_BUDGET).
 Rows are written as returned (best first, prices and sizes as numbers); a missing level is empty, never zero. It stops by itself: no poll at or after END_UTC (2027-02-26 23:59 UTC), and a run started after it exits at once.
 usage: python3 record_perps_live.py <out dir> [--cycle-hours 4]"""
@@ -217,9 +217,10 @@ def main(argv):
                 d = FAST_MIN_GAP_S - (time.time() - last_req)
                 if d > 0:
                     time.sleep(d)
-                last_req = time.time(); fast_budget -= 1; next_fast = last_req + FAST_EVERY_S
+                last_req = time.time(); fast_budget -= 1
                 st, _rows = fast_poll(FAST_TICKERS, wf, wcf, get)
                 fast_429 = fast_429 + 1 if st == 429 else 0
+                next_fast = last_req + FAST_EVERY_S * (2 ** fast_429)         # 5 s, then 10 s and 20 s after a 429 in a row
                 if fast_429 >= MAX_429_IN_ROW:        # the fast lane ends for this job; the normal minute poll carries on
                     fast_dead = True; wcf.writerow([now_ms(), 0, 0, 0, "three 429s in a row: fast lane ended for this job"])
                 ff.flush(); fcf.flush()

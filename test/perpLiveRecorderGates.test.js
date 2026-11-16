@@ -33,6 +33,7 @@ console.log('ok   PL2 public GET only');
 
 // PL3: pacing constants.
 assert.ok(/MIN_GAP_S = 5\.0/.test(code) && /POLL_EVERY_S = 60/.test(code) && /BOOK_BATCH_MAX = 100/.test(code) && /BACKOFF_S, BACKOFF_MAX_S, MAX_429_IN_ROW = 5\.0, 60\.0, 3/.test(code), 'PL3 5 s between requests, every 60 s, 100 tickers a batch, three 429s end the run');
+assert.ok(/plus the fast lane's one batched request every 5 seconds/.test(py) && /FAST_EVERY_S \* \(2 \*\* fast_429\)/.test(code), 'PL3 the docstring states the fast lane rate and the fast spacing doubles after a 429');
 assert.ok(/REQUEST_BUDGET = 2 \* \(4 \* 60 \+ 90\)/.test(code), 'PL3 a hard request budget per run');
 console.log('ok   PL3 pacing');
 
