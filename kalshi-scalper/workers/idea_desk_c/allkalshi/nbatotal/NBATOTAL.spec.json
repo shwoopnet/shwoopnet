@@ -5,9 +5,9 @@
  "kind": "event_rule",
  "card": "kalshi-scalper/workers/idea_desk_c/allkalshi/nbatotal/NBATOTAL_CARD.md",
  "needs_new_code": [
-  "engine/nbatotal.py (plugin copied from the audited nbaladder.py with five changes, NOT BUILT)",
-  "KXNBATOTAL_LISTS_A (list job, not built)",
-  "NBATOTAL_CANDLES_P1, P2 (built from the landed list)"
+  "engine/nbatotal.py (plugin copied from the audited nbaladder.py with five changes, BUILT, awaiting audit)",
+  "engine/build_nbatotal_candles.py (builder, awaiting audit)",
+  "NBATOTAL_CANDLES_P1, P2 (to be built from the landed list)"
  ],
  "uniqueness": {
   "closest_existing": [
@@ -30,8 +30,8 @@
   "loader": "deskc_kp_load.py",
   "loader_sha256": "c76c7f7d03aaec243f0f92fe465382a4a4d292f315c5f27e78e139d22e716fea",
   "extracts": [
-   "KXNBATOTAL_LISTS_A (not built)",
-   "NBATOTAL_CANDLES_P1, P2 (not built)"
+   "kalshi-pull-data: KXNBATOTAL_LISTS_A (to be pulled)",
+   "NBATOTAL_CANDLES_P1, P2 (to be built and pulled)"
   ],
   "ticker_wall": [
    "KXNBATOTAL"
@@ -85,6 +85,20 @@
    "end_epoch": null,
    "card": "History Miner's forward IG specs",
    "status": "BLOCKS the validate read until the Head rules"
+  },
+  {
+   "label": "FAMSPORTS read at most 8 KXNBATOTAL games (W1 and W2 pooled with NFL and NHL), W3 unread (Auditor B, 2026-11-16)",
+   "start_epoch": null,
+   "end_epoch": null,
+   "card": "FAMSPORTS",
+   "status": "label on development"
+  },
+  {
+   "label": "H04 narrowed to in-play by the Head 2026-11-16; clause S2 for the joint print (pre-game candles ending at or before each decision plus the result; aggregates only; disclosed on IGDRIFTGRID1, IGDRIFTSPREAD1, IGPERIOD1)",
+   "start_epoch": 1794528000,
+   "end_epoch": null,
+   "card": "History Miner's forward IG specs",
+   "status": "S2: the validate read allowed once Main merges the row"
   }
  ],
  "look_ahead": {
@@ -101,15 +115,15 @@
  },
  "plugin": {
   "file": "nbatotal.py",
-  "sha256": null,
-  "hand_case_file": null,
-  "hand_case_sha256": null,
+  "sha256": "2c18c4b340773a78ed657f618029ad3993fa39390fb35e543937a87f1de0abfc",
+  "hand_case_file": "test_nbatotal.py",
+  "hand_case_sha256": "144526e10403452e7646a9cb8be773726140eae9006c68205d0a5f29ed0af970",
   "auditor_clean_date": null,
-  "note": "not built: waiting on the design review"
+  "note": "BUILT, awaiting audit; base nbaladder.py 965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063; volume extension 98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a"
  },
  "event": {
   "scorer_plugin": "nbatotal.py",
-  "scorer_plugin_sha256": null,
+  "scorer_plugin_sha256": "2c18c4b340773a78ed657f618029ad3993fa39390fb35e543937a87f1de0abfc",
   "decision_instant": "9 h, 5 h or 4 h before the scheduled end",
   "signal_threshold": "the grid's 520 cells",
   "entry_rule": "every rung open at D whose side ask is in the cell's band and passes the cell's filter",
@@ -151,7 +165,9 @@
   "family_flag": "none"
  },
  "tally": {
-  "carried_m": "asked of the Head; the plugin takes it as an argument and prints m_total"
+  "m_carried": 2113449,
+  "m_carried_source": "the Head's ruling A, 2026-11-16: the whole shared strict count in DEFLATION_LEDGER (rnd-queue 25471e1f6, last additions Nov 13)",
+  "header": "m_carried = 2,113,449 (Head's ruling, 2026-11-16), m_new = 1,768 + SIBHIT-R's arms; fixed once printed"
  },
  "exits_rule": "M35: no mark = counted and held to settlement (H); printed both ways"
 }
