@@ -1,0 +1,2 @@
+ENGPERPS_POOL1 pooled stock perps pass, run once Nov 16 2026 from a scratch checkout: engine1_poolperps.py c3ffbf40, loader a13fd79b (line on main), runner ab87ddba, engine1_perps 18b5e140, driver 1281ce0a, spec v3.5.
+sha256 of out_pool1.json, committed BEFORE it was read: 1a38d9d4b1abd34aa818ce0df7dc69fffe9130418927ab98ec029de1337c9666
