@@ -2,7 +2,7 @@
 """PERPSLANE4 real-data extract for the SECOND build (Forensics desk, Nov 16, 2026; the Head's order: both builds on identical files). Reads EXACTLY the 160 files of LANE4_FILES_MANIFEST.txt (sha256 1b46f85d4b1b92d20447240c284236107e64d754e1a6f340c072ad7d2846e369) from a directory holding the perp-data files, checks every file's sha256 against the manifest (any difference refuses) and reads candles from bid_close and ask_close, funding from funding_time and funding_rate of the per-day files (never funding/all-history.csv.gz).
 TICKER WALL first: each row is read as a plain list and its first field compared with the wall BEFORE any other field is parsed: KXGOLDPERP, KXUS500PERP, KXUSTECH100PERP from 2026-09-10T00:00Z (1788998400), the 94 stock perps of the wall list from 2026-11-05T18:39:00Z (1793903940); nothing with end_ts or funding_time at or after 2026-11-17T00:00Z (1794873600); funding rows from 3 days before the name's start; duplicate candles and prints: the first (manifest order) kept, counted.
 Schema as the other extracts: candle(ticker, end_ts, yes_bid, yes_ask) (empty bid or ask = NULL, counted), funding(ticker, ts, rate). usage: python3 -I lane4_extract_b2.py <manifest> <perp-data dir> <out dir>   (self test: python3 -I lane4_extract_b2.py --selftest). REFUSES unless HELDOUT_PULL_RUNS.md carries a line naming this file, its own sha256 and the manifest sha256 ('readable ONLY by Forensics PERPSLANE4 extractor lane4_extract_b2.py'); the wall of 94 names is embedded and pinned."""
-import sys, os, csv, gzip, json, hashlib, sqlite3, collections, tempfile
+import sys, os, re, csv, gzip, json, hashlib, sqlite3, collections, tempfile, calendar
 WALL94 = ["KXAAPLPERP", "KXABBVPERP", "KXABTPERP", "KXACNPERP", "KXADBEPERP", "KXADIPERP", "KXAMATPERP", "KXAMDPERP", "KXAMGNPERP", "KXAMZNPERP", "KXANETPERP", "KXAPHPERP", "KXARMPERP", "KXASMLPERP", "KXAVGOPERP", "KXAXPPERP", "KXBABAPERP", "KXBACPERP", "KXBAPERP", "KXBKNGPERP", "KXBLKPERP", "KXBRKBPERP", "KXCATPERP", "KXCOPPERP", "KXCOSTPERP", "KXCPERP", "KXCRMPERP", "KXCRWDPERP", "KXCSCOPERP", "KXCVXPERP", "KXDELLPERP", "KXDEPERP", "KXDHRPERP", "KXDISPERP", "KXGEPERP", "KXGEVPERP", "KXGILDPERP", "KXGOOGLPERP", "KXGSPERP", "KXHDPERP", "KXIBMPERP", "KXINTCPERP", "KXISRGPERP", "KXJNJPERP", "KXJPMPERP", "KXKLACPERP", "KXKOPERP", "KXLINPERP", "KXLLYPERP", "KXLMTPERP", "KXLRCXPERP", "KXMAPERP", "KXMCDPERP", "KXMETAPERP", "KXMRKPERP", "KXMSFTPERP", "KXMSPERP", "KXMUPERP", "KXNEEPERP", "KXNEMPERP", "KXNFLXPERP", "KXNVDAPERP", "KXORCLPERP", "KXPANWPERP", "KXPEPPERP", "KXPFEPERP", "KXPGPERP", "KXPLDPERP", "KXPLTRPERP", "KXPMPERP", "KXQCOMPERP", "KXQQQPERP", "KXRTXPERP", "KXSBUXPERP", "KXSCHWPERP", "KXSHOPPERP", "KXSKHYPERP", "KXSNDKPERP", "KXSPCXPERP", "KXSPYPERP", "KXTJXPERP", "KXTMOPERP", "KXTMUSPERP", "KXTSLAPERP", "KXTSMPERP", "KXTXNPERP", "KXUNHPERP", "KXUNPPERP", "KXVPERP", "KXVZPERP", "KXWELLPERP", "KXWFCPERP", "KXWMTPERP", "KXXOMPERP"]
 WALL94_SHA = "3958bb6e7f7a604d83cb64c8e2268457826c9de054ac5514a31cb94893f02824"      # sha256 of json.dumps(sorted list): the wall is embedded, not an argument
 MANIFEST_SHA = "1b46f85d4b1b92d20447240c284236107e64d754e1a6f340c072ad7d2846e369"
@@ -10,6 +10,14 @@ HERE = os.path.dirname(os.path.abspath(__file__)); ALLOW_FILE = os.path.join(HER
 CUT = 1794873600; START_IDX = 1788998400; START_STK = 1793903940; IDX = ("KXGOLDPERP", "KXUS500PERP", "KXUSTECH100PERP")
 def sha_of(p): 
     h = hashlib.sha256(); h.update(open(p, "rb").read()); return h.hexdigest()
+def iso(x):
+    """funding_time like 2026-11-06T16:00:00Z or 2026-11-06T16:00:00.000Z -> epoch seconds. Anything else REFUSES (never a silent skip)."""
+    m = re.fullmatch(r"(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?Z", x)
+    if not m: raise SystemExit("REFUSED: funding_time %r is not an ISO UTC time ending in Z" % x)
+    return calendar.timegm(tuple(int(g) for g in m.groups()))
+def ets(x):
+    if not re.fullmatch(r"\d+", x): raise SystemExit("REFUSED: end_period_ts %r is not an integer" % x)
+    return int(x)
 def flt(x):
     try: return float(x) if x != "" else None
     except ValueError: return None
@@ -41,7 +49,7 @@ def build(manifest, base, wall, out, expect_manifest_sha=MANIFEST_SHA, allow_fil
                 for row in rd:
                     t = row[0]
                     if t not in W: c["candle rows of other tickers (dropped)"] += 1; continue
-                    e = int(float(row[ie]))
+                    e = ets(row[ie])
                     if e < start[t]: c["candle before the name's start"] += 1; continue
                     if e >= CUT: c["candle at or after the cut"] += 1; continue
                     b, a = flt(row[ib]), flt(row[ia])
@@ -56,7 +64,7 @@ def build(manifest, base, wall, out, expect_manifest_sha=MANIFEST_SHA, allow_fil
                 for row in rd:
                     t = row[0]
                     if t not in W: c["funding rows of other tickers (dropped)"] += 1; continue
-                    ts = int(float(row[it]))
+                    ts = iso(row[it])
                     if ts < start[t] - 3 * 86400: c["funding before 3 days ahead of the start"] += 1; continue
                     if ts >= CUT: c["funding at or after the cut"] += 1; continue
                     if (t, ts) in fd:
@@ -80,7 +88,8 @@ def selftest():
         return sha_of(p)
     h1 = ["ticker", "end_period_ts", "bid_open", "bid_close", "ask_close"]; hf = ["ticker", "funding_time", "funding_rate", "mark_price"]
     s1 = put("kalshi1m/a.csv.gz", h1, [["KXGOLDPERP", 1788998400, 1, 99.0, 99.1], ["KXGOLDPERP", 1788998399, 1, 1, 2], ["KXGOLDPERP", 1788998400, 1, 5, 6], ["KXOTHERPERP", 1788998460, 1, 5, 6], ["KXGOLDPERP", CUT, 1, 5, 6], ["KXAAPLPERP", 1793903940, 1, "", 7], ["KXAAPLPERP", 1793903939, 1, 1, 2]])
-    s2 = put("funding/a.csv.gz", hf, [["KXAAPLPERP", 1793903940 - 3 * 86400, 0.0001, 1], ["KXAAPLPERP", 1793903940 - 3 * 86400 - 1, 0.0002, 1], ["KXAAPLPERP", CUT, 0.0003, 1], ["KXGOLDPERP", 1789000000, 0.0004, 1], ["KXZZZPERP", 1789000000, 0.1, 1]])
+    Z = lambda t: __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime(t))
+    s2 = put("funding/a.csv.gz", hf, [["KXAAPLPERP", Z(1793903940 - 3 * 86400), 0.0001, 1], ["KXAAPLPERP", Z(1793903940 - 3 * 86400 - 1), 0.0002, 1], ["KXAAPLPERP", Z(CUT), 0.0003, 1], ["KXGOLDPERP", Z(1789000000)[:-1] + ".000Z", 0.0004, 1], ["KXZZZPERP", Z(1789000000), 0.1, 1]])
     s3 = put("funding/all-history.csv.gz", hf, [["KXGOLDPERP", 1789000001, 0.5, 1]])
     man = os.path.join(d, "M.txt"); open(man, "w").write("%s  kalshi1m/a.csv.gz\n%s  funding/a.csv.gz\n%s  funding/all-history.csv.gz\n" % (s1, s2, s3))
     L = build(man, d, ["KXAAPLPERP"], os.path.join(d, "out"), expect_manifest_sha=None); c = L["counts"]
@@ -89,6 +98,13 @@ def selftest():
     open(os.path.join(d, "kalshi1m", "a.csv.gz"), "ab").write(b"x")
     try: build(man, d, ["KXAAPLPERP"], os.path.join(d, "out2"), expect_manifest_sha=None); raise AssertionError("a changed file must refuse")
     except SystemExit: pass
+    assert iso("2026-11-06T16:00:00Z") == calendar.timegm((2026, 11, 6, 16, 0, 0)) and iso("2026-11-06T16:00:00.000Z") == calendar.timegm((2026, 11, 6, 16, 0, 0)) and ets("1794268800") == 1794268800
+    for bad in ("1794268800", "2026-11-06 16:00:00", "2026-11-06T16:00:00+00:00", ""):
+        try: iso(bad); raise AssertionError("a funding_time that is not ISO Z must refuse")
+        except SystemExit: pass
+    for bad in ("1794268800.0", "x", ""):
+        try: ets(bad); raise AssertionError("a non integer end_period_ts must refuse")
+        except SystemExit: pass
     open(os.path.join(d, "A.md"), "w").write("no line\n")
     try: build(man, d, ["KXAAPLPERP"], os.path.join(d, "out3"), expect_manifest_sha=None, allow_file=os.path.join(d, "A.md")); raise AssertionError("no allow line must refuse")
     except SystemExit: pass
