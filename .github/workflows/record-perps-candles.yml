@@ -1,4 +1,4 @@
-# Saves Kalshi's PUBLIC 1 minute candles and funding history for the stock and index perps, one finished UTC date a night (research only, Nov 6, 2026, V2's request, the owner approved).
+# Saves Kalshi's PUBLIC 1 minute candles and funding history for EVERY perp on the public list (all classes since Nov 16, 2026; stock and index perps first), one finished UTC date a night (research only, Nov 6, 2026, V2's request, the owner approved).
 # No secret is used or needed: plain GETs of public endpoints; the built-in GITHUB_TOKEN only pushes gzipped CSV to the `perp-data` branch (under kalshi1m/ and funding/), never to main.
 # Three starts a night, every night UTC (02:00 to 04:00, every day since Nov 15, 2026 so Saturday is archived), each archives the previous UTC date; the script does nothing if that date's files exist. Stops by itself after 2027-02-26.
 name: record-perps-candles
@@ -12,7 +12,7 @@ on:
         required: false
         type: string
       only:
-        description: "Back-pull: comma separated tickers, e.g. KXGOLDPERP,KXUS500PERP,KXUSTECH100PERP (needs a date)"
+        description: "Back-pull: comma separated tickers, e.g. KXGOLDPERP,KXUS500PERP, or the word NEW for every perp not archived before Nov 16 (needs a date)"
         required: false
         type: string
       days:
@@ -27,7 +27,7 @@ concurrency:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - name: Get the recorder scripts from main
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
