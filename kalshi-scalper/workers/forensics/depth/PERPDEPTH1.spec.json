@@ -1,6 +1,6 @@
 {
  "id": "PERPDEPTH1",
- "version": "v3",
+ "version": "v3.1",
  "desk": "FORENSICS (lane 3: order book and liquidation features)",
  "date_registered": "2026-11-16",
  "status": "DRAFT v3, unsigned, nothing run (replaces v2 sha dc21c4e1; the Head's lane order of 2026-11-16 20:44Z changed the features, markets, costs and read date, so v2's sign-off does not carry over)",
@@ -44,7 +44,7 @@
   "mode": "forward_only",
   "start_utc": 1794960000,
   "start_utc_check": "2026-11-18T00:00:00Z",
-  "start_rule": "provisional: 00:00 UTC of the first full UTC day after the first recorder file that carries the fixed book levels. If that file is not written before 2026-11-17T20:00Z the constant moves to the next midnight by a dated amendment BEFORE any outcome column is joined; no amendment after.",
+  "start_rule": "provisional: 00:00 UTC of the first full UTC day after the FIRST recorder file written after the book fix is merged (Auditor B, 2026-11-16 20:46Z). The loader drops every earlier perp-live-data file whose book.csv holds far levels (cut keyed by the file's directory stamp, which Main records in this spec on merge) and COUNTS the dropped files. If that first fixed file is not written before 2026-11-17T20:00Z the start_utc constant moves to the next midnight by a dated amendment BEFORE any outcome column is joined; no amendment after. Rows of dropped files may feed only the trailing medians of F2 (quote spread, which the fix does not touch), never F1 or F4.",
   "warmup": "rows of a ticker before start_utc feed only the trailing medians; no trade is entered before start_utc",
   "first_read_not_before_epoch": 1796688000,
   "first_read_check": "2026-12-08T00:00:00Z",
@@ -179,7 +179,7 @@
  },
  "tries": {
   "rules_this_spec": 666,
-  "prior_m": "6,290,660 (Head ruling 2026-11-16 18:35Z); m_total 6,291,326 = carried + 666"
+  "prior_m": "for a print from 2026-11-17 on: 7,492,484 carried (batch C registered 2026-11-16, Head, Auditor B confirms on Nov 17); m_total = 7,492,484 + 666 = 7,493,150. (Earlier header: 6,290,660 + 666 = 6,291,326.)"
  },
  "read_date": {
   "first": "2026-12-08",
