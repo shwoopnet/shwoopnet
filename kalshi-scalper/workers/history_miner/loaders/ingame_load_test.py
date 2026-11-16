@@ -20,6 +20,8 @@ base = {"event": "KXNHLTOTAL-26NOV10AB", "kind": "total", "yes_bid": "0.4", "yes
 assert L.obs_rows([dict(base, t_recv_ms="1794200000000", ticker="KXNBAGAME-X-A")], cnt) == [] and cnt["row ticker outside the wall (dropped)"] == 1
 assert L.listing_markets([Late("close_time", {"close_time": "2026-11-13T00:00:00Z", "ticker": "KXNHLTOTAL-B", "result": "no"})], cnt) == {}
 assert L.listing_markets([Late("close_time", {"close_time": "2026-11-07T23:59:59Z", "ticker": "KXNHLTOTAL-B"})], cnt) == {} and cnt["market outside the window (dropped)"] == 2
+k2 = collections.Counter(); L.listing_markets([{"close_time": "2026-11-10T00:00:00Z", "ticker": "KXNHLGAME-X-A", "result": ""}], k2)
+assert k2["market result not yes or no, mapped to void: KXNHLGAME"] == 1
 print("guards: ok")
 
 tmp = tempfile.mkdtemp(); lst = os.path.join(tmp, "lst"); os.makedirs(lst)

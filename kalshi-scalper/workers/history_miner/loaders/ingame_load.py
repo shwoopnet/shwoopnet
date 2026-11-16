@@ -75,6 +75,8 @@ def listing_markets(markets, cnt):
         if series_of(tk) not in SERIES:
             cnt["market ticker outside the wall (dropped)"] += 1; continue
         r = m["result"]
+        if r not in ("yes", "no"):
+            cnt["market result not yes or no, mapped to void: %s" % series_of(tk)] += 1
         out[tk] = (series_of(tk), c, r if r in ("yes", "no") else "void")
     return out
 
