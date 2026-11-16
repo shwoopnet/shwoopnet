@@ -1,3 +1,5 @@
+**WITHDRAWN UNRUN, COUNTED (Head, Nov 16, 2026): a version of the pairs family (RV1 to RV3 and lane 6). The Head allowed a dated amendment folding it into the lanes work or withdrawal; I withdraw it, because the cleared lanes spec (pinned shas) keeps index and ETF perps out of its baskets, so a fold would need a new lanes spec version and Auditor B's re-clearance. If the SPY perp against the US500 perp is wanted, it comes back as a basket in a later lanes spec version. Nothing was read or run.**
+
 **RENAMED Nov 16, 2026 (VA flagged a name clash): this card was PERPBASIS1 and is now PERPRVSPY1 (the SPY perp against the US500 perp, a relative-value pair). PERPBASIS1 is the History Miner's perp-spot premium card. The cleared lanes and POOL1 specs still say PERPBASIS1 in one 'closest rows' sentence; they are not edited (their shas are pinned), and that mention means THIS card. VA also reads this card as a version of V2's RV1 to RV3 and the pairs family; that ruling is the Head's.**
 
 # PERPRVSPY1 forward card (Desk A, Nov 16, 2026). Rule, bar and kill written first. NO development: it reads forward on new data only.
