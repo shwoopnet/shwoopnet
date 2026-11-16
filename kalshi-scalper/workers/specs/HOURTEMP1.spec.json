@@ -1,0 +1,107 @@
+{
+ "id": "HOURTEMP1",
+ "desk": "Idea Desk B",
+ "date_registered": "2026-11-16",
+ "kind": "grid15m",
+ "card": "kalshi-scalper/workers/specs/HOURTEMP1_CARD.md",
+ "needs_new_code": [
+  "loader for hourly-directional candles (the 4 KXTEMP*HS series and the older KXTEMP*H series), 60 minute markets, buckets read as seconds before the hour (the grid15m loader assumes 15 minute markets)",
+  "a pull job for the candles of the SERIESCATS2 list's hourly temperature series, 30 closed days, through Main"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "WXDAYEND",
+   "HOURLYTEMP",
+   "WX1",
+   "WXOTHER1"
+  ],
+  "declined_list_rows_checked": [
+   "daily high, low and rain: closed under the three-falsified rule (this is the HOURLY directional series, a different contract: one clock hour, settled by Synoptic, about 22 events a day a city)",
+   "forecast against the price: NOT used; no NWS probability",
+   "favourite-and-hold: NOT used; only the cheap side and prices up to 0.60",
+   "65c to 87c weather NO legs: banned, so no side or band in 0.65 to 0.87 NO is in the grid",
+   "reading-against-bracket (WXDAYEND mechanism): NOT used; candles only"
+  ],
+  "difference": "price-path only (candle momentum and spread filters) on hourly directional temperature markets at the 10 and 14 minute looks, cheap side up to 60c; no weather data, no reading, no forecast; WXOTHER1 called the hourly family a duplicate of the daily weather tests, which this spec disputes only on contract structure (60 minute life, 3c to 4c spreads at the 30 minute look) and asks the Head to rule",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "PENDING (hourly candle loader)",
+  "loader_sha256": "PENDING",
+  "extracts": [
+   "ECONCENSUS_LISTS run 2026-11-15T1512Z_43728522567 (tickers and close times only, to size the pull)",
+   "one-minute candles of the four KXTEMP*HS series, closes 2026-09-17 to 2026-10-16 (a pull job to be built, about 340 requests)"
+  ],
+  "ticker_wall": [
+   "KXTEMPNYCHS",
+   "KXTEMPMIAH",
+   "KXTEMPLAXHS",
+   "KXTEMPCHIHS"
+  ],
+  "window": {
+   "first_close": "2026-09-17T00:00:00Z",
+   "last_close_exclusive": "2026-10-17T00:00:00Z"
+  },
+  "held_out_map_checked_by": "PENDING (Auditor B; WXNEW1's validation window Oct 4 to Oct 16 and its holdout from 2026-10-19 sit next to this window)",
+  "independence_note": "overlaps WXNEW1's validation window (Oct 4 to Oct 16) on the same four series; HOURLYTEMP read Nov 5 to Nov 11 for cost only"
+ },
+ "split": {
+  "mode": "fixed_dates"
+ },
+ "grid": {
+  "buckets": [
+   600,
+   840
+  ],
+  "bands": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "side_rules": [
+   "cheap"
+  ],
+  "filters": [
+   "none",
+   "spread"
+  ],
+  "exits": [
+   "H",
+   "M60"
+  ]
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ]
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 96,
+  "prior_m": "from the TALLY"
+ },
+ "prediction": "cost near 4.4c round trip at the 30 minute look and 5.5c at the 10 minute look against a price-path edge of about 0: cash PF under 1.0 at 1c for every cell; I expect no survivor",
+ "kill": "no cell with PF 1.3 at 1c and 1.0 at 2c, both halves, n 100 and 10 days; kill_fast drops it at PF under 1.0 on the first read",
+ "kill_fast": true,
+ "outputs": {
+  "survivor_line": "market, rule, PF 1c and 2c, n, days",
+  "family_flag": "none"
+ }
+}
