@@ -18,7 +18,7 @@ function make(win){ return new Function('window', m[0] + '; return kalshiKeepScr
   make(top)(function(){ top.pageYOffset = 5; })(); assert.strictEqual(calls, 0, 'at the top, nothing is restored'); }
 
 // SK3: the four redraws are wrapped on the page, and a throwing scroll API cannot break the redraw.
-['renderKalshiBot', 'renderKalshiPnl', 'renderKalshiStatus', 'renderKalshiBooks'].forEach(n => assert(html.includes(n + ' = kalshiKeepScroll(' + n + ');'), n + ' not wrapped'));
+['renderKalshiBot', 'renderKalshiPnl', 'renderKalshiBooks'].forEach(n => assert(html.includes(n + ' = kalshiKeepScroll(' + n + ');'), n + ' not wrapped'));
 { const win = { get pageYOffset(){ throw new Error('x'); }, scrollTo(){ throw new Error('y'); } };
   assert.strictEqual(make(win)(function(){ return 7; })(), 7); }
 console.log('scroll keep gates: ok');

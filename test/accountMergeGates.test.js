@@ -3,10 +3,10 @@ const fs = require('fs'), assert = require('assert');
 const html = fs.readFileSync(__dirname + '/../index.html', 'utf8');
 const gates = {};
 const bot = html.slice(html.indexOf('id="kalTabBot"'), html.indexOf('</main>', html.indexOf('id="kalTabBot"')));
-const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="12" data-card="status">/.exec(bot)[1];
+const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="12" data-card="positions">/.exec(bot)[1];
 // AM1: four cards, no separate Account result card, and the result line (with its ranges) is inside the Account card, after the strategies table.
 gates.AM1 = () => {
-  assert.deepStrictEqual([...bot.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]), ['account', 'status', 'positions', 'trades']);
+  assert.deepStrictEqual([...bot.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]), ['account', 'positions', 'trades']);
   assert.ok(!/data-card="pnl"/.test(html) && !/>Account result<\/div>/.test(html), 'no card titled Account result');
   assert.strictEqual((html.match(/id="kalPnlBody"/g) || []).length, 1, 'one result body');
   assert.strictEqual((html.match(/id="kalPnlRanges"/g) || []).length, 1, 'one set of range buttons');
@@ -26,9 +26,9 @@ gates.AM3 = () => {
 gates.AM4 = () => {
   const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'") - 3000, html.indexOf("var layout = fresh(), migrated = false;"));
   const pure = new Function(iife.slice(iife.indexOf('var OPTIONAL')) + '; return { normalize: normalize };')();
-  const n = pure.normalize({ v: 3, order: ['status', 'pnl', 'account', 'positions', 'trades'], width: { status: 6, pnl: 6 }, folded: { pnl: true } });
-  assert.deepStrictEqual(n.order, ['status', 'account', 'positions', 'trades']);
-  assert.deepStrictEqual(n.width, {}, 'status falls back to full width');
+  const n = pure.normalize({ v: 3, order: ['status', 'pnl', 'account', 'positions', 'trades'], width: { status: 6, pnl: 6 }, folded: { pnl: true, status: true } });
+  assert.deepStrictEqual(n.order, ['account', 'positions', 'trades'], 'the removed Account result and Bot status cards are dropped (Nov 16, 2026)');
+  assert.deepStrictEqual(n.width, {}, 'their saved widths go with them');
   assert.deepStrictEqual(n.folded, {});
 };
 let failed = 0;

@@ -70,11 +70,10 @@ gates.SS5 = () => {
 };
 gates.SS6 = () => {
   // wiring: every consumer reads the one function
-  const status = fnSource('renderKalshiStatus'), tick = fnSource('kalshiStatusTick'), page = fnSource('renderStrategiesPage');
-  assert.ok(/kalshiSilentMarkets\(orders, s, now, liveState\)/.test(status) && /kalshiGoldEnsure\(\)/.test(status), 'Needs a look reads the shared state and the Bot page starts the reads');
-  assert.ok(/kalshiNextEntry\(now, stNow\)/.test(tick) && /kalNextOff/.test(tick), 'the ring reads it and says what is off');
+  const sync = fnSource('kalshiSyncRules'), page = fnSource('renderStrategiesPage');
+  assert.ok(/kalshiGoldEnsure\(\)/.test(sync) && /kalshiLiveStateNow/.test(sync), 'the Bot page starts the latch and registry reads and the Rules text reads the shared state (the Bot status card was removed Nov 16, 2026)');
   assert.ok(/liveState\[s\.id\] === 'off'/.test(page), 'the Strategies page lanes read the same state');
-  assert.ok(/function kalshiStateChanged\(\)\{ renderStrategiesPage\(\); if\(typeof renderKalshiStatus/.test(html), 'both pages redraw when the latch or registry answers');
+  assert.ok(/function kalshiStateChanged\(\)\{ renderStrategiesPage\(\); if\(typeof kalshiSyncRules/.test(html), 'both pages redraw when the latch or registry answers');
   // every KAL_LOOKS entry belongs to a strategy the state can name
   assert.ok([...looks.matchAll(/sid: '([A-Z0-9]+)'/g)].length === 5, 'five looks, each tied to a strategy id');
 };
