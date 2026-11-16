@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Saves Kalshi's PUBLIC 1 minute candles and funding history for the stock and index perps, one UTC date at a time (research only, 2026-11-06, V2's request, the owner approved).
+"""Saves Kalshi's PUBLIC 1 minute candles and funding history for EVERY perp on the public list (stock and index perps first, all classes since Nov 16, 2026), one UTC date at a time (research only, 2026-11-06, V2's request, the owner approved).
 
 Why: V2's stock perp tests need the perp's own minute bars (bid, ask, price, open interest, volume) and the funding paid, and the candle endpoint only helps while the history is
 kept. The universe is every perp the public list marks Equities or Indices (the 19 name design list was not in the repo, so the whole class is taken; a market that is
@@ -21,9 +21,14 @@ import urllib.error
 import urllib.request
 
 BASE = "https://external-api.kalshi.com/trade-api/v2/margin"
-CLASSES = ("Equities", "Indices")
+CLASSES = ("Equities", "Indices")   # the classes the archive took before Nov 16, 2026; kept only so the back-pull can name "the newly added" perps (ONLY_NEW)
 # Nov 13, 2026 (the Head of R&D, the owner's merge): six more fixed tickers, the Kalshi perpetuals on the underlyings of five NC15 series plus Bitcoin, so the frozen CFRTI-K formula can be replayed forward. A ticker not on the public list is simply absent.
 EXTRA_TICKERS = ("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KXHYPEPERP", "KXBNBPERP", "KXGOLDPERP")
+# Nov 16, 2026 (the Head of R&D, the owner's order): EVERY perp on the public list is archived, whatever its asset_class (other crypto, platinum, palladium, aluminum and other metals,
+# energy, any new class). The class filter is gone; the classes seen are printed so a new one is visible. ONLY_NEW is a back-pull word: the perps the archive did NOT take before this change
+# (class not in CLASSES and not in EXTRA_TICKERS), so a missing date can be filled for them without redoing the ones already archived.
+ONLY_NEW = "NEW"
+LIST_PAGES = 3   # the public list is read with its cursor, at most this many pages of 200 (the budget and the pacing are unchanged: one call every GAP_S)
 STOP_DATE = dt.date(2027, 2, 26)
 GAP_S = 1.2
 MAX_429_IN_A_ROW = 3
@@ -99,11 +104,30 @@ def run(out_dir, now=None, get=None, sleep=time.sleep, day=None, only=None):
         return body if st == 200 and isinstance(body, dict) else None
 
     try:
-        listing = call(BASE + "/markets?limit=200")
-        markets = (listing or {}).get("markets") or []
-        tickers = sorted(m["ticker"] for m in markets if (m.get("asset_class") in CLASSES or m.get("ticker") in EXTRA_TICKERS) and m.get("ticker") and (not only or m.get("ticker") in only))
+        markets, cursor = [], None
+        for _page in range(LIST_PAGES):
+            listing = call(BASE + "/markets?limit=200" + ("&cursor=" + cursor if cursor else ""))
+            markets += [m for m in ((listing or {}).get("markets") or []) if isinstance(m, dict)]
+            cursor = (listing or {}).get("cursor")
+            if not cursor or not isinstance(cursor, str) or not cursor.replace("-", "").replace("_", "").replace("=", "").isalnum():
+                break
+        seen = {}
+        for m in markets:
+            seen[m.get("asset_class")] = seen.get(m.get("asset_class"), 0) + 1
+        print("asset classes on the list: " + ", ".join("%s %d" % (k, v) for k, v in sorted(seen.items(), key=lambda kv: str(kv[0]))))
+
+        def wanted(m):
+            t = m.get("ticker")
+            if not t or not isinstance(t, str):
+                return False
+            if not only:
+                return True
+            if ONLY_NEW in only:
+                return m.get("asset_class") not in CLASSES and t not in EXTRA_TICKERS
+            return t in only
+        tickers = sorted({m["ticker"] for m in markets if wanted(m)})
         if not tickers:
-            print("no stock or index perps listed; nothing written")
+            print("no perps matched on the list; nothing written")
             return 1
         crows, frows, ok_c, ok_f = [], [], 0, 0
         for t in tickers:
@@ -134,5 +158,5 @@ def run(out_dir, now=None, get=None, sleep=time.sleep, day=None, only=None):
 if __name__ == "__main__":
     # Usage: record_perps_candles.py OUT_DIR [YYYY-MM-DD [TICKER,TICKER,...]]  (the optional date and ticker list are the back-pull)
     _day = dt.date.fromisoformat(sys.argv[2]) if len(sys.argv) > 2 else None
-    _only = tuple(t for t in sys.argv[3].split(",") if t.replace("_", "").isalnum()) if len(sys.argv) > 3 else None
+    _only = tuple(t for t in sys.argv[3].split(",") if t.replace("_", "").isalnum() and t.upper() == t) if len(sys.argv) > 3 else None
     sys.exit(run(sys.argv[1] if len(sys.argv) > 1 else "perp-data", day=_day, only=_only))

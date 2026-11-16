@@ -170,9 +170,36 @@ let failed = 0;
 gates.RB8 = () => {
   const c = scripts.candles;
   assert.ok(/EXTRA_TICKERS = \("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KXHYPEPERP", "KXBNBPERP", "KXGOLDPERP"\)/.test(c), 'seven fixed extra tickers');
-  assert.ok(/m\.get\("ticker"\) in EXTRA_TICKERS/.test(c), 'selected from the public list, never constructed');
+  assert.ok(/for m in markets if wanted\(m\)/.test(c) && !/f"?\/markets\/KX/.test(c), 'selected from the public list, never constructed');
   assert.ok(/day >= now\.date\(\)/.test(c) && /\.only/.test(c) && /sys\.argv\[3\]/.test(c), 'back-pull: a finished date only, a separate .only file, a ticker list');
   assert.ok(/^CLASSES = \("Equities", "Indices"\)/m.test(c) && /^GAP_S = 1\.2/m.test(c) && /STOP_DATE = dt\.date\(2027, 2, 26\)/.test(c), 'classes, spacing and stop date unchanged');
+};
+// RB9 (Nov 16, 2026, the Head of R&D, the owner's order): every perp on the public list is archived whatever its class; the word NEW in the ticker list means only the perps the archive did not take before; the classes seen are printed; the list is read with its cursor (at most 3 pages); pacing and stop date unchanged.
+gates.RB9 = () => {
+  const r = py('record_perps_candles.py', `
+u = dt.timezone.utc
+def mk(only, day=None):
+    d = tempfile.mkdtemp(); urls = []; sleeps = []
+    def get(url):
+        urls.append(url)
+        if '/markets?limit=200' in url:
+            if 'cursor=' in url:
+                return 200, {"markets": [{"ticker": "KXPLATPERP", "asset_class": "Metals"}], "cursor": ""}
+            return 200, {"markets": [{"ticker": "KXAAPLPERP", "asset_class": "Equities"}, {"ticker": "KXETHPERP", "asset_class": "Crypto"}, {"ticker": "KXBTCPERP", "asset_class": "Crypto"}, {"ticker": "KXNEWTHINGPERP", "asset_class": "Brand New"}], "cursor": "abc"}
+        if 'candlesticks' in url:
+            return 200, {"candlesticks": [{"end_period_ts": 1794000060, "bid": {"close": "1"}, "ask": {"close": "2"}, "price": {"close": None}, "open_interest": "5", "volume": "7"}]}
+        return 200, {"funding_rates": []}
+    now = dt.datetime(2026, 11, 7, 2, 0, 0, tzinfo=u)
+    rc = m.run(d, now, get, sleeps.append, day=day, only=only)
+    cands = sorted({x.split('/markets/')[1].split('/')[0] for x in urls if 'candlesticks' in x})
+    return rc, cands, min(x for x in sleeps if x >= 1.0) >= 1.2
+print(json.dumps([mk(None), mk((m.ONLY_NEW,), dt.date(2026, 11, 5)), mk(('KXETHPERP',), dt.date(2026, 11, 5))]))`);
+  assert.deepStrictEqual(r[0][1], ['KXAAPLPERP', 'KXBTCPERP', 'KXETHPERP', 'KXNEWTHINGPERP', 'KXPLATPERP'], 'every class, across two list pages');
+  assert.deepStrictEqual(r[1][1], ['KXETHPERP', 'KXNEWTHINGPERP', 'KXPLATPERP'], 'NEW: only the perps not archived before (not Equities, Indices or the fixed seven)');
+  assert.deepStrictEqual(r[2][1], ['KXETHPERP'], 'a named ticker list still works');
+  assert.ok(r[0][2] && r[1][2] && r[2][2], 'at least 1.2 s between calls');
+  const c = scripts.candles;
+  assert.ok(/ONLY_NEW = "NEW"/.test(c) && /LIST_PAGES = 3/.test(c) && /asset classes on the list/.test(c) && /^GAP_S = 1\.2/m.test(c));
 };
 
 for (const [name, fn] of Object.entries(gates)) {
