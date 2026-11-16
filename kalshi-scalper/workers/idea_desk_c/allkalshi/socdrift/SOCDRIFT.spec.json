@@ -1,0 +1,174 @@
+{
+ "id": "SOCDRIFT",
+ "desk": "Idea Desk C",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/idea_desk_c/allkalshi/socdrift/SOCDRIFT_CARD.md",
+ "needs_new_code": [
+  "engine/socdrift.py (plugin copied from the signed nbatotal.py c8275094, BUILT, awaiting audit)",
+  "engine/build_socdrift_candles.py (BUILT)",
+  "engine/socdrift_run.py (BUILT, header first)",
+  "engine/test_socdrift.py and test_socdrift_builder.py (BUILT)"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "SOCCER1",
+   "SOCCERELO1",
+   "SOCDERIV",
+   "ESOCTIE",
+   "NBALADDER (pre-game price path, a different sport)"
+  ],
+  "declined_list_rows_checked": [
+   "7e: favourite-and-hold 0.88 to 0.97 is out of every band (top band 0.85); a NO side bought at 0.70 to 0.85 is the favourite hold on the other leg and is deliberately left in (Auditor B)",
+   "not market making, not cheap-side-late (every look is 2 h or more before the estimated kickoff), not a short round trip",
+   "SOCCER1 and SOCCERELO1 (released): cheap side 0.03 to 0.30 against an outside price, held to settlement, 0 of 801 treated, NOT_ENOUGH_DATA"
+  ],
+  "difference": "Kalshi prices only and no outside model: a counted 600-rule search on the winner market's own price path 24 h, 12 h and 6 h before the estimated kickoff, any band to 0.85, both exits, unit the game; SOCDERIV tests model against price across a game's legs 30 to 90 minutes before kickoff",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "deskc_kp_load.py",
+  "loader_sha256": "c76c7f7d03aaec243f0f92fe465382a4a4d292f315c5f27e78e139d22e716fea",
+  "extracts": [
+   "kalshi-pull-data: SOCDERIV_LISTS run 2026-11-13T0806Z_43390567279 (landed; read for time fields and tickers only by socdrift_census.py 787e7674)",
+   "SOCDRIFT_CANDLES_P1, P2 (to be built and pulled)"
+  ],
+  "ticker_wall": [
+   "KXEPLGAME",
+   "KXLALIGAGAME",
+   "KXSERIEAGAME",
+   "KXBUNDESLIGAGAME",
+   "KXLIGUE1GAME",
+   "KXMLSGAME",
+   "KXLIGAMXGAME",
+   "KXBRASILEIROGAME",
+   "KXEFLTROPHYGAME",
+   "KXUCLWGAME",
+   "KXAPFDDHGAME",
+   "KXEERSTEDIVGAME",
+   "KXLIGAPORTUGALGAME",
+   "KXLVAVIRGAME",
+   "KXSERIECGAME"
+  ],
+  "window": {
+   "first_close": "2026-09-18T00:00:00Z",
+   "last_close_exclusive": "2026-10-30T02:53:19Z"
+  },
+  "held_out_map_checked_by": "Auditor B (design review, amendment 1, 2026-11-16)",
+  "independence_note": "development window overlaps SOCCER1 and SOCCERELO1's window to 2026-10-03T16:00Z (released, cheap-side rule only, NOT_ENOUGH_DATA); SOCDERIV's measurement sample (the 60 most recent games per league) shares the list but no price outcome"
+ },
+ "split": {
+  "mode": "fixed_dates",
+  "search_last_close_exclusive": "2026-10-30T02:53:19Z",
+  "validate_first_close": "2026-10-30T02:53:19Z",
+  "validate_last_close_exclusive": "2026-11-13T00:00:00Z",
+  "validate_note": "the frozen third (closes 2026-10-30T02:53:19Z to before 2026-11-13), already in the landed lists, never opened; read once on the Head's go; the forward window from 2026-11-13 is not requested until the Head rules on SOCDERIV's held-out"
+ },
+ "holds": [
+  {
+   "label": "development closes",
+   "start_epoch": 1789689600,
+   "end_epoch": 1793328799,
+   "card": "this spec",
+   "status": "OPEN (development)"
+  },
+  {
+   "label": "frozen third; W-CAT-SPORTS1's third released by the same cut",
+   "start_epoch": 1793328799,
+   "end_epoch": 1794528000,
+   "card": "this spec (frozen); W-CAT-SPORTS1 (released)",
+   "status": "OPEN (frozen, read once on the Head's go)"
+  },
+  {
+   "label": "SOCDERIV held-out (closes from 2026-11-13), not pulled",
+   "start_epoch": 1794528000,
+   "end_epoch": 1796342400,
+   "card": "SOCDERIV registry",
+   "status": "HELD (waiting for the Head's ruling)"
+  }
+ ],
+ "look_ahead": {
+  "decision_instant": "K = occurrence_datetime - 3 h (an estimate of kickoff; close_time is never used for timing or selection); D = the last full hour at or before K - 24 h, K - 12 h or K - 6 h; clock check: one occurrence value across the game's markets on a quarter hour and the ticker date within 2 days; live guard: a game is dropped and counted if any winner market's mid moves 0.15 or more between the candles ending at the last hour boundary at or before K and the hour before it; M2 guard: any two consecutive two-sided candles in (D, mark] moving 0.15 or more on any outcome drops the game from M2 cells only",
+  "features": "each feature uses candles ending at or before D",
+  "entry_quote": "the two-sided hourly candle ending in (D - 1 h, D]",
+  "exit": "H settles on the result, read last for traded rungs; M2 sells at the bid of the hourly candle ending at the last hour boundary at or before K - 2 h"
+ },
+ "sources": {
+  "names": [
+   "Kalshi public API through kalshi-pull (api.elections.kalshi.com), landed runs only"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "file": "socdrift.py",
+  "sha256": "c05711d07fadf78c2e7b0d7799dab4026f142dcdf6fdd75a8776c9b9096ac245",
+  "hand_case_file": "test_socdrift.py",
+  "hand_case_sha256": "a2d157e64a0d16a5f8efd3ba72cadec175054230e9190a0a82da60a3bc8c8372",
+  "auditor_clean_date": null,
+  "note": "BUILT, awaiting audit; base nbatotal.py c8275094d3f0593d91800f7a610a4e6f191a806084c512b904157897f21ef373 (signed); loader deskc_kp_load.py c76c7f7d; volume extension deskc_candles_vol.py 98955e41",
+  "run_script_sha256": "50e589d45eb722251fce5668ceedbcb4a47cc7e5644612b10080b8497a9a4341",
+  "builder_sha256": "dd3bfd6998a6c7e632954f11218b837d1df52f4249a737e6ff07706f04c29342",
+  "builder_test_sha256": "902b85c9a2e024cabacbb13b135e6c319fb738eb68d82004a48b61b2c8a4389a"
+ },
+ "event": {
+  "scorer_plugin": "socdrift.py",
+  "scorer_plugin_sha256": "c05711d07fadf78c2e7b0d7799dab4026f142dcdf6fdd75a8776c9b9096ac245",
+  "decision_instant": "24 h, 12 h or 6 h before the estimated kickoff, on the hour",
+  "signal_threshold": "the grid's 600 cells",
+  "entry_rule": "every winner market open at D whose side ask is in the cell's band (0.10 to 0.85) and passes the cell's filter",
+  "exit": "H or M2 (the candle ending at the last hour boundary at or before K - 2 h; no mark = held, printed both ways)"
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ],
+  "haircuts_stress": [],
+  "fee_taker": null,
+  "fee_maker": null
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "min_signals_per_day": 3,
+  "bh_alpha": 0.05,
+  "unit": "game (z and the BH p from game-level sums; n stated in games first)",
+  "min_games": 40
+ },
+ "tries": {
+  "rules_this_spec": 600,
+  "prior_m": "from the TALLY"
+ },
+ "prediction": "best of 600 cells reaches PF 1.15 to 1.30 by luck on 42 days; P(a rule clears every gate on development and holds on the frozen third) about 3%",
+ "kill": "no rule with 48 or more trades and PF 1.3 or more at 1c with both halves 1.0 or more; or nothing survives BH",
+ "kill_fast": true,
+ "subset_rationale": "the grid values were fixed from round numbers and the feature definitions before any price of these markets was read; 3 x 2 x 5 x 2 x 10 = 600",
+ "halves": "floor(n/2) in entry order",
+ "fee_form": "ceil(round(0.07 x n x p x (1 - p) x 100, 9)) / 100 per order; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x below 100",
+ "outputs": {
+  "survivor_line": "rule, PF 1c and 2c, n in games and rungs, dollars a week at 5 contracts",
+  "family_flag": "none"
+ },
+ "tally": {
+  "m_carried": 6290660,
+  "m_carried_source": "Head's ruling 2026-11-16: SOCDRIFT gets its OWN print with m = 6,290,660 (today's carried) + 600",
+  "header": "m_carried = 6,290,660; m_new = 600; m_total = 6,291,260 (SOCDRIFT's own print, not the joint NBA one)",
+  "siBHIT_R_arms": null
+ },
+ "exits_rule": "M2: no mark = counted and held to settlement (H); printed both ways",
+ "labels": [
+  "overlaps SOCCER1 and SOCCERELO1 (released, rnd-queue 0f7bfccb; cheap-side 0.03 to 0.30 only, windows before 2026-10-03T16:00Z, NOT_ENOUGH_DATA)",
+  "W-CAT-SPORTS1's third (closes from 2026-10-30T02:53:19Z) is released for this card by the same cut",
+  "SOCDERIV: the measurement sample and held-out are the registry's; the forward window from 2026-11-13 waits for the Head's ruling",
+  "the landed SOCDERIV_LISTS run was read for time fields and tickers only (socdrift_census.py 787e7674)",
+  "15 development leagues, Copa del Rey dropped (K wrong by more than 0.5 h)",
+  "K = occurrence - 3 h is an estimate; close_time is a calibration diagnostic only",
+  "a NO side bought at 0.70 to 0.85 is the favourite hold on the other leg and is deliberately left in (Auditor B)"
+ ],
+ "validate_exit_rule": "the frozen third is scored with both exits as registered (M2's mark is a candle ending 2 h or more before the estimated kickoff, so S2-style clauses do not apply); the candles read end at K",
+ "print_order": "header (m_carried, m_new, m_total) first, then the counts block, then the table; the print's sha256 is committed before it is read"
+}
