@@ -2,7 +2,7 @@
 
 ## ingame_fwd_load.py (the forward version of ingame_load.py 6ac835f4, same walls, forward window)
 - Window: poll time and market close in [2026-11-17T00:00Z = 1794873600, 2026-12-15T00:00Z = 1797292800). Date directories 2026-11-17 to 2026-12-14 only.
-- Ticker wall: KXNHLGAME, KXNBATOTAL, KXNFLTOTAL, KXNHLTOTAL, KXNBASPREAD, KXNFLSPREAD, KXNHLSPREAD (no KXNBAGAME or KXNFLGAME: SPORTS-PRE).
+- Ticker wall: KXNHLGAME, KXNBATOTAL, KXNFLTOTAL, KXNHLTOTAL, KXNBASPREAD, KXNHLSPREAD (no KXNBAGAME or KXNFLGAME: SPORTS-PRE).
 - Order: t_recv_ms first; close_time first in a listing market, then the wall, then result and occurrence_datetime for kept markets only.
 - Allow line: the mark "readable ONLY by the History Miner's forward ingame loader", "ingame_fwd_load.py", its own sha256, AND the sha256 of EVERY listing gz file it is given (the listings grow, so each auto-run's files must be named; a file not named refuses the run).
 - Events: one per (league, game suffix, kind): {"key", "league", "kind", "rows": {ticker: [(t, bid, ask)]}, "result": {ticker}, "close": {ticker}, "occ": {ticker: occurrence string}}. Polls after their market's close are dropped and counted.
@@ -19,4 +19,6 @@
 - Summary per spec and haircut: n, pf, half1 and half2 (by entry time), net, day z, evidence ("no evidence at n = x" under 100), kill_fast flag (2c PF under 1.0).
 
 ## IG_FWD_RESULTS (kalshi-pull job, for Main)
-GET /markets, settled, series the seven above, min_close_ts 1794873600, max_close_ts 1797292799, limit 1000, max_pages 10 each, cap 80 requests.
+GET /markets, settled, series the six above, min_close_ts 1794873600, max_close_ts 1797292799, limit 1000, max_pages 10 each, cap 80 requests.
+
+## Amendment 1 (2026-11-16 ~16:45Z, Auditor B 16:20Z, before any forward row): KXNFLSPREAD removed from the loader wall, the listing job and IGFADE2 (BOOKS2 W3 holds it until the Head closes BOOKS2). Nothing else changed.

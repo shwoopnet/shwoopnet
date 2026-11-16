@@ -27,7 +27,7 @@
  },
  "tries": {
   "rules_this_spec": 1,
-  "prior_m": "from the TALLY"
+  "prior_m": "from ENGINE_TALLY.json (sha256 at signing)"
  },
  "kill_fast": true,
  "uniqueness": {
@@ -43,17 +43,17 @@
   "family_flag": "none"
  },
  "data": {
-  "loader": "ingame_load.py (forward version, needs_new_code: window from 2026-11-17T00:00Z, results from a forward kalshi-pull listing, a new allow line)",
-  "loader_sha256": "pending (the forward version is written, audited and listed before the first auto-run)",
+  "loader": "ingame_fwd_load.py",
+  "loader_sha256": "c7f90926a7d1f77f14069387b7ca59d7974b02b5119b35d380822ea484df3c27",
   "extracts": [
-   "sports-data ingame/<date>/<HHMM>/obs.csv.gz for date directories from 2026-11-17",
-   "a forward settled-markets listing of the ticker wall, closes from 2026-11-17T00:00Z (job to be written)"
+   "sports-data ingame/<date>/<HHMM>/obs.csv.gz, date directories 2026-11-17 to 2026-12-14",
+   "kalshi-pull IG_FWD_RESULTS runs (each listing gz named by sha256 in the allow line)"
   ],
   "window": {
    "first_close": "2026-11-17T00:00:00Z",
    "last_close_exclusive": "2026-12-15T00:00:00Z"
   },
-  "held_out_map_checked_by": "pending Auditor B (forward window; SPORTS-PRE holds KXNBAGAME and KXNFLGAME outcomes to 2027-01-01, so those two are outside every wall here)",
+  "held_out_map_checked_by": "Auditor B, 2026-11-16 16:20Z (forward wall and series)",
   "independence_note": "the same games feed all History Miner in-game specs; their rows are one sample of games, n not to be added across specs",
   "ticker_wall": [
    "KXNHLGAME",
@@ -63,8 +63,8 @@
   ]
  },
  "event": {
-  "scorer_plugin": "ingame_events.py (needs_new_code)",
-  "scorer_plugin_sha256": "pending",
+  "scorer_plugin": "ingame_events.py",
+  "scorer_plugin_sha256": "5f5d739a8919bf32123308140e6430a65721668996e160244e342b8f8b9515b1",
   "decision_instant": "tip + 120 min (tip = the listing's occurrence_datetime minus 3 h (schedule-shaped proxy, truth unproven; the PREDRIFT1 schedule test applies, NFL weaker)); quote = the last two-sided poll within the 5 minutes before",
   "signal_threshold_abs_mid_move": 0.08,
   "entry_rule": "drift = mid at the decision minus mid at the last two-sided poll within 5 minutes before (tip + 90 min); buy the side it moved toward at its ask if 0.20 to 0.80; one per game and kind",
@@ -78,8 +78,67 @@
  },
  "card": "kalshi-scalper/workers/history_miner/igspecs/IGSPECS_CARDS_NOV16.md",
  "needs_new_code": [
-  "ingame_load.py forward version",
-  "ingame_events.py scorer plugin (hand case first)",
-  "forward results listing job"
- ]
+  "ingame_fwd_load.py, ingame_events.py and IG_FWD_RESULTS are written (f4438cb15 and later); pending Auditor B's CLEAN and the allow line"
+ ],
+ "holds": [
+  {
+   "label": "this spec's forward window (ingame rows and listing closes)",
+   "start_epoch": 1794873600,
+   "end_epoch": 1797292799,
+   "card": "IGFADE2 IGLATEDRIFT1 IGDOG1",
+   "status": "OPEN (owned by these three specs, Auditor B 2026-11-16 16:20Z)"
+  },
+  {
+   "label": "ingame rows Nov 13 to Nov 16, held and unread by any spec",
+   "start_epoch": 1794528000,
+   "end_epoch": 1794873599,
+   "card": "Auditor B forward wall",
+   "status": "OPEN (never read by this spec; the window starts at 1794873600)"
+  },
+  {
+   "label": "SPORTS-PRE outcomes KXNBAGAME, KXNFLGAME, KXNCAAFGAME closes from 2026-11-01",
+   "start_epoch": 1793491200,
+   "end_epoch": null,
+   "card": "SPORTS-PRE",
+   "status": "OPEN to 2027-01-01 (not in this spec's ticker wall)"
+  },
+  {
+   "label": "BOOKS2 frozen third W3, KXNFLSPREAD games from 2026-10-03T16:00Z",
+   "start_epoch": 1791043200,
+   "end_epoch": null,
+   "card": "BOOKS2",
+   "status": "OPEN until the Head closes BOOKS2 (not in this spec's ticker wall)"
+  },
+  {
+   "label": "INGAMELAG1 NBA recorder reserve from 2026-11-13",
+   "start_epoch": 1794528000,
+   "end_epoch": null,
+   "card": "INGAMELAG1",
+   "status": "OPEN for Nov 13 to 16 rows (held above); rows from 1794873600 owned by these specs per Auditor B 2026-11-16 16:20Z"
+  }
+ ],
+ "sources": {
+  "names": [
+   "sports-data ingame recorder files (record_ingame.py, Kalshi public GETs)",
+   "kalshi-pull IG_FWD_RESULTS listing (Kalshi public GET /markets)"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "file": "ingame_events.py",
+  "sha256": "5f5d739a8919bf32123308140e6430a65721668996e160244e342b8f8b9515b1",
+  "hand_case_file": "IGFWD_HAND_CASE_NOV16.md",
+  "hand_case_sha256": "25bcc5ff81d6169da66f5d9e8b9e8fd601baf1742438977fb77e8bd78df416a9",
+  "auditor_clean_date": "pending"
+ },
+ "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
+ "halves": "by entry time: the first floor(n/2) trades and the rest",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order at c = 10; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x",
+ "look_ahead": {
+  "decision_instant": "tip + 7200 s, tip = occurrence_datetime - 3 h (a schedule field; schedule test applied)",
+  "inputs": "the last two-sided poll in (tip + 5100, tip + 5400] and in (tip + 6900, tip + 7200]; nothing after the decision",
+  "entry_quote": "the second of those polls, its ask",
+  "exit_price": "settlement result from the listing; no later quote"
+ }
 }

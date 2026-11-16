@@ -5,7 +5,7 @@ import collections, csv, gzip, hashlib, io, json, os, sys, calendar, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 START, CUT = 1794873600, 1797292800                 # 2026-11-17T00:00Z, 2026-12-15T00:00Z
 DATES = tuple(time.strftime("%Y-%m-%d", time.gmtime(START + 86400 * i)) for i in range((CUT - START) // 86400))
-SERIES = ("KXNHLGAME", "KXNBATOTAL", "KXNFLTOTAL", "KXNHLTOTAL", "KXNBASPREAD", "KXNFLSPREAD", "KXNHLSPREAD")
+SERIES = ("KXNHLGAME", "KXNBATOTAL", "KXNFLTOTAL", "KXNHLTOTAL", "KXNBASPREAD", "KXNHLSPREAD")
 ALLOW_FILE = os.path.join(HERE, "..", "..", "HELDOUT_PULL_RUNS.md")
 ALLOW_MARK = "readable ONLY by the History Miner's forward ingame loader"
 
