@@ -8,6 +8,8 @@ import hashlib, math, sqlite3, sys, datetime
 NC15 = ("KXGOLD15M", "KXSILVER15M", "KXCOPPER15M", "KXPLATINUM15M", "KXPALLADIUM15M", "KXWTI15M", "KXNATGAS15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M")
 LOOK, HALT, WIN, LO, HI, N, CAP = 600, 1800, 900, 0.35, 0.65, 10, 0.99
 HAIRCUTS = (0.0, 0.01, 0.02)
+CUT_TS = 1791043200          # Auditor B: drop close_ts >= this first (2026-10-03T16:00Z freeze), print the count
+STANDARD = ("KXGOLD15M", "KXPLATINUM15M", "KXPALLADIUM15M")          # C11 standard series: print both the 1c and 2c bars as flags
 
 
 def fee_up_order(p, n=N): return math.ceil(round(0.07 * n * p * (1 - p) * 100, 9)) / 100
@@ -73,10 +75,14 @@ def verdict(b1, b2):
     return b2["n"] >= 80 and b2["pf"] >= 1.5 and b2["h1"] >= 1.0 and b2["h2"] >= 1.0 and b1["pf"] >= 1.5 and b2["z"] is not None and b2["z"] >= 2.0
 
 
+CUT_DROPPED = 0
+
+
 def load(path):
     with open(path, "rb") as fh: sha = hashlib.sha256(fh.read()).hexdigest()
     db = sqlite3.connect("file:%s?mode=ro" % path, uri=True)
-    ms = [m for m in db.execute("select ticker, series, close_ts, result, strike from market") if m[1] in NC15]
+    allm = [m for m in db.execute("select ticker, series, close_ts, result, strike from market") if m[1] in NC15]
+    ms = [m for m in allm if m[2] < CUT_TS]; global CUT_DROPPED; CUT_DROPPED = len(allm) - len(ms)
     close_of = {m[0]: m[2] for m in ms}; cands, dropped = {}, 0
     for tk, end, bid, ask in db.execute("select ticker, end_ts, bid_c, ask_c from candle"):
         if tk not in close_of: continue
@@ -87,13 +93,17 @@ def load(path):
 
 def main(path):
     sha, ms, cands, dropped = load(path)
-    print("GAPFILL1 extract sha256", sha, "markets", len(ms), "series", len(set(m[1] for m in ms)), "candles after close dropped", dropped)
+    print("GAPFILL1 extract sha256", sha, "markets", len(ms), "series", len(set(m[1] for m in ms)), "candles after close dropped", dropped, "markets dropped by the 2026-10-03T16:00Z cut", CUT_DROPPED)
     tr, sk = trades(ms, cands)
     bs = {h: block(tr, h) for h in HAIRCUTS}
     print(f"n {len(tr)} skips {sk}")
     for h in HAIRCUTS:
         b = bs[h]; print(f"  h {h:.2f}: wins {b['wins']} net {b['net']:.2f} PF {b['pf']:.4f} half1 {b['h1']:.4f} half2 {b['h2']:.4f} dayz {b['z'] if b['z'] is None else round(b['z'], 4)}")
-    print(f"  pass: {verdict(bs[0.01], bs[0.02])}")
+    print(f"  pass (2c primary bar): {verdict(bs[0.01], bs[0.02])}   (development data already read for OIREL-X: a pass is a lead for the forward shadow, not a pass; nested with ADJWIN1's momentum arm, not independent)")
+    std = [t for t in tr if t[1].split("-")[0] in STANDARD]
+    if std:
+        sb = {h: block(std, h) for h in HAIRCUTS}
+        print(f"  standard series (gold, platinum, palladium; C11, both bars as flags): n {len(std)} 1c PF {sb[0.01]['pf']:.4f} 2c PF {sb[0.02]['pf']:.4f} halves(2c) {sb[0.02]['h1']:.4f} {sb[0.02]['h2']:.4f}")
 
 
 if __name__ == "__main__":

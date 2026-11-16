@@ -24,4 +24,10 @@ E2 = [("A", "S", 1000, "no", 10.0), ("B", "S", 2799, "no", 11.0), ("C", "S", 370
 assert g.trades(E2, {"B": {2199: (.4, .5)}, "C": {3100: (.4, .5)}})[0] == []
 
 assert g.HAIRCUTS == (0.0, 0.01, 0.02) and g.LOOK == 600 and g.HALT == 1800 and g.WIN == 900
+import sqlite3, tempfile, os
+f = os.path.join(tempfile.mkdtemp(), "t.sqlite"); db = sqlite3.connect(f)
+db.execute("create table market(ticker,series,open_ts,close_ts,result,strike,src)"); db.execute("create table candle(ticker,end_ts,bid_c,ask_c,volume,oi)")
+for r in (("KXGOLD15M-A", "KXGOLD15M", 0, 1791043199, "yes", 1.0), ("KXGOLD15M-B", "KXGOLD15M", 0, 1791043200, "yes", 1.0), ("KXBTC15M-C", "KXBTC15M", 0, 900, "yes", 1.0)): db.execute("insert into market values(?,?,?,?,?,?,'x')", r)
+db.execute("insert into candle values('KXGOLD15M-A', 1791043300, .4, .5, 1, 1)"); db.commit(); db.close()
+sha, ms, cd, dr = g.load(f); assert [m[0] for m in ms] == ["KXGOLD15M-A"] and g.CUT_DROPPED == 1 and dr == 1 and g.CUT_TS == 1791043200
 print("gapfill1 tests passed")
