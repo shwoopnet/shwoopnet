@@ -28,6 +28,6 @@ want = ["KXCPI: settled markets 4, after the held-out date dropped 2, close date
         "KXPCECORE: settled markets 1, after the held-out date dropped 1, close dates 1 (2025-08-29 to 2025-08-29), events 1, complete at 1 pages"]
 ok = [("1 lines", got == want), ("2 cut constant is 2025-09-26T00:00:00Z for KXCPI and KXPCECORE only", H.CUTS == {"KXCPI": 1758844800, "KXPCECORE": 1758844800}),
       ("3 source names no banned key", not any(('"%s"' % b) in open(os.path.join(here, "econhist_table.py")).read() for b in BAN)),
-      ("4 ALLOWED_RUNS empty until landing", H.ALLOWED_RUNS == frozenset())]
+      ("4 ALLOWED_RUNS names exactly the one landed run", H.ALLOWED_RUNS == frozenset(["2026-11-16T1522Z_43895509363"]))]
 for k, v in ok: print("PASS" if v else "FAIL", k)
 sys.exit(0 if all(v for _, v in ok) else 1)

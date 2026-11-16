@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import census_table as C   # the same loaders and guard; ALLOWED_RUNS is replaced below
 SERIES = ["KXCPI", "KXPAYROLLS", "KXPCECORE", "KXJOBLESSCLAIMS", "KXCONTCLAIMS", "KXUE", "KXISMPMI", "KXUSISMSERV", "KXUSPPIYOY", "KXCPINDEX"]
 CUTS = {"KXCPI": 1758844800, "KXPCECORE": 1758844800}   # 2025-09-26T00:00:00Z: NOWCAST1's frozen holdout (forward read 2027-03-01); the other eight have no cut
-ALLOWED_RUNS = frozenset()                                # a reviewed edit names the one ECONHIST_LISTS run folder after it lands
+ALLOWED_RUNS = frozenset(["2026-11-16T1522Z_43895509363"])   # the one ECONHIST_LISTS run (loaded for NOWCAST1; tickers, close times, counts only)
 
 def table(rows):
     agg = defaultdict(lambda: {"n": 0, "dropped": 0, "dates": set(), "events": set(), "pages": 0, "cursor": ""})

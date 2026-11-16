@@ -1,0 +1,11 @@
+ECONHIST count table (counts only; no result, price or volume read; the endpoint ends 2026-09-10). KXCPI and KXPCECORE are counted only before 2025-09-26; the held part is not counted.
+KXCONTCLAIMS: settled markets 33, after the held-out date dropped 0, close dates 3 (2026-08-27 to 2026-09-10), events 3, complete at 1 pages
+KXCPI: settled markets 398, after the held-out date dropped 110, close dates 51 (2021-07-12 to 2025-09-11), events 51, complete at 1 pages
+KXCPINDEX: settled markets 63, after the held-out date dropped 0, close dates 3 (2026-07-14 to 2026-09-11), events 3, complete at 1 pages
+KXISMPMI: settled markets 97, after the held-out date dropped 0, close dates 13 (2025-04-01 to 2026-09-01), events 13, complete at 1 pages
+KXJOBLESSCLAIMS: settled markets 524, after the held-out date dropped 0, close dates 55 (2025-06-12 to 2026-09-10), events 55, complete at 1 pages
+KXPAYROLLS: settled markets 383, after the held-out date dropped 0, close dates 42 (2023-04-07 to 2026-09-04), events 42, complete at 1 pages
+KXPCECORE: settled markets 65, after the held-out date dropped 61, close dates 12 (2022-12-23 to 2025-08-29), events 12, complete at 1 pages
+KXUE: settled markets 516, after the held-out date dropped 0, close dates 45 (2026-03-02 to 2026-09-15), events 54, complete at 1 pages
+KXUSISMSERV: settled markets 45, after the held-out date dropped 0, close dates 3 (2026-05-05 to 2026-09-03), events 3, complete at 1 pages
+KXUSPPIYOY: settled markets 82, after the held-out date dropped 0, close dates 5 (2026-05-13 to 2026-09-10), events 5, complete at 1 pages
