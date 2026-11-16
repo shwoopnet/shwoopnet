@@ -1,0 +1,3 @@
+mode SW series scored 19 tries (spec) 320112 carried 6290660 m 6610772
+SEARCH passes (bar + 3 a day) 276 VALIDATE passes 28
+BH m 6610772 survivors 0
