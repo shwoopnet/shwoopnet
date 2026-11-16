@@ -95,3 +95,10 @@
 - **The obvious substitute does not work.** `expected_expiration_time` is present in 2025-26, one value per game, on :00 or :30. But in the 2026-27 development list it sits either 0 h or 3 h after occurrence, and the two offsets are mixed inside every one of the 120 games. It is not a stable stand-in for SIBHIT's clock. Using it would be a new rule chosen after seeing the list.
 - **Effect:** SIBHIT-R as registered cannot be read on 2025-26. Amendment 5 (the truncation rule) is moot for now.
 - **Next:** the Head chooses between (1) the registered fallback, closes 2026-11-13 to before 2026-12-04, pulled after Dec 4, where occurrence exists, and (2) a new registration with a different clock. No candle is pulled meanwhile.
+
+## Amendment 7 (Nov 16, 2026, ~15:40Z; the Head of R&D's ruling (1))
+
+- SIBHIT-R moves to its registered fallback: closes from 2026-11-13T00:00Z to before 2026-12-04T00:00Z, listed and pulled after Dec 4. The occurrence field exists there.
+- The same md5 split applies: 40 games read, all other games of the window held out and pulled only if the read passes.
+- The 2025-26 window is not used. Its list (SIBHITR_LISTS_A) stays LOADED; only the time fields named in Amendment 6 were seen.
+- Reminder set for Dec 5 to build the list job (live endpoint, close bounds).
