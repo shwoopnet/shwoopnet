@@ -140,4 +140,5 @@ print(json.dumps([m.LADDER_CLOSE_FILTERED, [s in m.LADDER_SERIES for s in m.LADD
   const code = script.replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
   assert.ok(/min_close_ts=%d&max_close_ts=%d&limit=1000/.test(code), 'discovery of the four new series is by the one close time');
   assert.ok(!/PRIVATE|SECRET|Authorization|\/portfolio|\/orders/i.test(code), 'still no key and no order');
+  assert.ok(/":found 0"/.test(code) || /:found 0/.test(code), 'a series with no strike found for a close leaves a coverage row');
 };

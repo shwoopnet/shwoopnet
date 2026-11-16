@@ -340,6 +340,10 @@ class Recorder:
                 await asyncio.sleep(min(wait, 30))
                 continue
             found = await self.ladder_discover(close)
+            stamp0 = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(close))
+            for series in LADDER_SERIES:                                       # Nov 16, 2026 (Auditor B): a series with no strike found for this close leaves a coverage row, so a read can tell "not found" from "not recorded"
+                if series not in found:
+                    self.out.write("coverage", [[stamp0, "ladder:" + series + ":found 0", 0, 0, 0, 0, "", ""]])
             wait = (close - time.time()) - LADDER_LEAD_S
             if wait > 0:
                 await asyncio.sleep(wait)
