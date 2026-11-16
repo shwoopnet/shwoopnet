@@ -1,0 +1,2 @@
+ENGINE1 perps pass 3 (gold, US 500, US Tech 100), run once Nov 16 2026 from a scratch checkout: loader 5c5b0eaa (line PR 970), engine1_perps.py d4a575e4, runner bda1bd91, split 00a94c6e.
+sha256 of out_pass3.json, committed BEFORE it was read: fe48a0ca04209118a8bc6c44e682b551fdd9de39d00684182e173ec16fcdb493
