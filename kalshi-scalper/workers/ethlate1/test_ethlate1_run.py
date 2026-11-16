@@ -42,5 +42,13 @@ big = R.run({"KXETHD": mk8}, m_total=6290756, engine_dir=eng); small = R.run({"K
 ok.append(("8a search cells 8, passes 4, validate bar passes 2", big["search_cells_scored"] == 8 and big["search_passes"] == 4 and big["validate_bar_passes"] == 2))
 ok.append(("8b BH at m_total keeps none", big["survivors"] == []))
 ok.append(("8c the same p-values at m = 2 keep both A cells, not B", len(small["survivors"]) == 2 and all(s["cell"][1] == 6 for s in small["survivors"]) and all(abs(s["pf_2c"] - 2.7667) < 5e-4 for s in small["survivors"])))
+# 9 events < 40: nine strikes of one hourly event share one close (EXPECTED_ethlate1_run_nov16.md, Amendment 3)
+mk9 = []
+for m in mk8:
+    d = (m["close"] - base) // 86400; q = dict(m); q["close"] = base + d * 86400 + 14 * 3600 + (0 if m["ticker"].startswith("KXETHD-A") else 3600)
+    q["candles"] = [(q["close"] - 120, m["candles"][0][1], m["candles"][0][2], None, 0, 0), (q["close"] - 60, m["candles"][1][1], m["candles"][1][2], None, 0, 0)]; mk9.append(q)
+r9 = R.run({"KXETHD": mk9}, m_total=2, engine_dir=eng)
+ok.append(("9 same strikes in 12 events a phase: n 108 and PF pass, events 12 < 40, so nothing passes even at m = 2", r9["search_cells_scored"] >= 4 and r9["search_passes"] == 0 and r9["validate_bar_passes"] == 0 and r9["survivors"] == []))
+ok.append(("10 test 8 survivors carry their events (108)", all(s["events"] == 108 for s in small["survivors"])))
 for k, v in ok: print("PASS" if v else "FAIL", k)
 sys.exit(0 if all(v for _, v in ok) else 1)

@@ -29,3 +29,6 @@ Two statements in my spec did not match the engine's code. (1) The spread filter
 
 ## Correction 2 (Nov 16, 2026, 19:35Z, the Testing Desk's readings E1 to E10; before any outcome read)
 The engine enters EVERY market (strike) that falls in a cell, not one per hourly event; my card's "one entry per hourly event" is withdrawn (several strikes of one event are correlated, which is why the z is day-clustered; the signals-a-day count is therefore per strike entry). Band k = the cheap side's ask in whole cents rounded up, a // 5 == k (bands 1 to 12 = a of 5 to 64). PF at 1c is printed, not gated. Spread pool and cuts as in the spec `rules`.
+
+## Amendment (Nov 16, 2026, 19:45Z, Auditor B): events and the signal gate
+A survivor also needs at least 40 distinct hourly events in the cell (strikes of one event are correlated; the day-clustered z carries it, the unit is kept visible), and the survivor line prints events. The 3 signals a day gate counts strike entries, not events, so it is easier than "3 events a day" and is kept as the engine has it.

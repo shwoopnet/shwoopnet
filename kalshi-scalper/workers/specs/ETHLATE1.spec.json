@@ -98,7 +98,8 @@
   "pf_primary": 1.3,
   "pf_secondary": 1.0,
   "min_trade_days": 10,
-  "bh_alpha": 0.05
+  "bh_alpha": 0.05,
+  "min_events": 40
  },
  "tries": {
   "rules_this_spec": 96,
@@ -110,7 +111,7 @@
  "kill": "no cell with PF 1.3 at 2c and halves 1.0 or more, n 100, 10 days; kill_fast drops the family at PF under 1.0 at 2c on the first read",
  "kill_fast": true,
  "outputs": {
-  "survivor_line": "market, rule, PF 1c and 2c, n, days",
+  "survivor_line": "market, rule, PF 1c and 2c, n, days, events (distinct hourly events of the cell); nobody writes 'survivor' on n alone",
   "family_flag": "none"
  },
  "rules": {
@@ -125,7 +126,7 @@
   "phases": "SEARCH and VALIDATE are the engine's own split inside the development window: the first floor(D/2) distinct UTC close dates are SEARCH, the rest VALIDATE (D = distinct close dates of KXETHD with a quote, at most 19, from the loader's count; a dated constant for series ETHD is added to engine1_split by Desk A before any read); the forward window Nov 16 to Dec 16 is a third, later read by the one survivor",
   "entries": "one entry per MARKET (strike ticker) per rule, as the engine's groups() does, NOT one per hourly event: several strikes of one event can each enter the same cell; they are correlated, which is why the z is day-clustered. Earlier text saying 'one entry per hourly event' is withdrawn",
   "band": "band k = the cheap side's ask in whole cents rounded UP (ceil of 100 x raw ask at 1e-6) with a // 5 == k: band k holds a in [5k, 5k+4], so bands 1 to 12 span a = 5 to 64 (raw ask above 0.04 up to 0.64); entries are scored at the RAW ask",
-  "gate": "C8: n >= 100, PF at 2c >= 1.3, both 2c halves (first and second floor(n/2) by close_ts then ticker) >= 1.0, trade days >= 10, signals a day in SEARCH >= 3; PF at 1c is printed, not gated; BH over m_total on the VALIDATE 2c day-clustered p",
+  "gate": "C8: n >= 100, PF at 2c >= 1.3, both 2c halves (first and second floor(n/2) by close_ts then ticker) >= 1.0, trade days >= 10, distinct hourly EVENTS (UTC close times) of the cell in the phase >= 40 (strikes of one event are correlated; Auditor B, Nov 16), signals a day in SEARCH >= 3; PF at 1c is printed, not gated; BH over m_total on the VALIDATE 2c day-clustered p",
   "spread_pool": "per bucket: every strike in the SEARCH half whose candle ending at close - bucket is two-sided (0 < bid < ask < 1): its YES spread (ask minus bid) in whole cents rounded up; c1 = the ceil(n/3)-th and c2 = the ceil(2n/3)-th sorted value; low <= c1, mid <= c2, high above; the same cuts apply to VALIDATE"
  }
 }

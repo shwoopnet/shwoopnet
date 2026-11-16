@@ -12,7 +12,7 @@ M_TOTAL = 6290756                      # 6,290,660 carried + 96 (the Head's ruli
 BUCKET, BANDS, SIDE = 120, tuple(range(1, 13)), "cheap"
 FILTERS = (None, ("spread", "low"), ("spread", "mid"), ("spread", "high")); EXITS = ("H", "M60")
 CELLS = frozenset((BUCKET, b, SIDE, f, x) for b in BANDS for f in FILTERS for x in EXITS)
-MIN_N, PF_PRIMARY, HALF_MIN, MIN_DAYS, MIN_SPD, ALPHA = 100, 1.3, 1.0, 10, 3.0, 0.05
+MIN_N, PF_PRIMARY, HALF_MIN, MIN_DAYS, MIN_SPD, ALPHA, MIN_EVENTS = 100, 1.3, 1.0, 10, 3.0, 0.05, 40
 def import_engine(engine_dir):
     mods = {}
     for name, want in PINS.items():
@@ -21,7 +21,8 @@ def import_engine(engine_dir):
     sys.path.insert(0, os.path.abspath(engine_dir))
     import engine1_core as K, engine1_enum as N, engine1_split as S, engine1_driver as D
     return K, N, S, D
-def c8_pass(a): return a["n"] >= MIN_N and a["pf"] >= PF_PRIMARY and a["half1"] >= HALF_MIN and a["half2"] >= HALF_MIN and a["trade_days"] >= MIN_DAYS
+def events_of(items): return len({m["close"] for m, _ in items})          # distinct hourly events (UTC close times): the strikes of one event are correlated (Auditor B, Nov 16)
+def c8_pass(a, events): return a["n"] >= MIN_N and a["pf"] >= PF_PRIMARY and a["half1"] >= HALF_MIN and a["half2"] >= HALF_MIN and a["trade_days"] >= MIN_DAYS and events >= MIN_EVENTS
 def run(markets, m_total=M_TOTAL, engine_dir=ENGINE_DIR):
     assert len(CELLS) == 96, "the spec has 96 cells"
     K, N, S, D = import_engine(engine_dir)
@@ -44,16 +45,16 @@ def run(markets, m_total=M_TOTAL, engine_dir=ENGINE_DIR):
             agg, _ = D.score_group(items, x); scored += 1
             a1, a2 = agg[0.01], agg[0.02]
             rep.setdefault("cells", {})[(b, band, rs, filt, x)] = {"n": a2["n"], "pf_1c": a1["pf"], "pf_2c": a2["pf"]}
-            if c8_pass(a2) and sdays and a2["n"] / sdays >= MIN_SPD: s_pass[(b, band, rs, filt, x)] = a2
+            if c8_pass(a2, events_of(items)) and sdays and a2["n"] / sdays >= MIN_SPD: s_pass[(b, band, rs, filt, x)] = a2
     rep["search_cells_scored"] = scored; rep["search_passes"] = len(s_pass)
-    v_res, v_p = {}, {}
+    v_res, v_p, v_ev = {}, {}, {}
     for k in s_pass:
         items = vg.get(k[:4], [])
         if len(items) < MIN_N: continue
         agg, _ = D.score_group(items, k[4])
-        if c8_pass(agg[0.02]): v_res[k] = agg[0.02]; v_p[k] = D.pval(agg[0.02]["day_z"])
+        if c8_pass(agg[0.02], events_of(items)): v_res[k] = agg[0.02]; v_p[k] = D.pval(agg[0.02]["day_z"]); v_ev[k] = events_of(items)
     keep = D.bh(v_p, m_total, ALPHA)
-    rep["validate_bar_passes"] = len(v_res); rep["survivors"] = [{"cell": k, "pf_2c": v_res[k]["pf"], "n": v_res[k]["n"], "days": v_res[k]["trade_days"]} for k in sorted(keep, key=str)]
+    rep["validate_bar_passes"] = len(v_res); rep["survivors"] = [{"cell": k, "pf_2c": v_res[k]["pf"], "n": v_res[k]["n"], "days": v_res[k]["trade_days"], "events": v_ev[k]} for k in sorted(keep, key=str)]
     return rep
 def header(rep): return "m_total %d | cells selected %d | primary haircut %s | upper bound, not fill-checked" % (rep["m_total"], rep["cells_selected"], rep["primary_haircut"])
 def main(argv=None):
