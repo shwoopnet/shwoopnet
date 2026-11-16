@@ -1,0 +1,2 @@
+ENGINE1 held-out read of the 190 (Desk A, Nov 16 2026). sha256 of the output file, committed BEFORE it is opened. Loader 94e25241, run script 4c8d6e84, SHADOW_LIST_V1 ac5a4a8d; engine1_split.py in this run is 9a2e6095 (ETHD amendment, grid constants unchanged).
+b5d8c6e6b0b775584afb123ad922d02c8305fc30636c08bde9fe719c9dfdcad5  heldout_190.json
