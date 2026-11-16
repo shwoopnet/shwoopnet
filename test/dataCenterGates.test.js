@@ -25,7 +25,7 @@ gates.D1 = () => {
   const card = html.slice(html.indexOf('id="kalPnl"'), html.indexOf('data-card="trades"', html.indexOf('id="kalPnl"')));
   assert.ok(card.length > 100);
   assert.ok(!/<(input|select|textarea|form|a )\b/i.test(card), 'the card has no input, select or form');
-  const code = ['kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalshiPnlCardHtml', 'renderKalshiPnl', 'kalshiLineSvg'].map(fnSource).join('\n');
+  const code = ['kalshiPnlSeries', 'kalshiPerpsSteps', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalshiPnlCardHtml', 'renderKalshiPnl', 'kalshiLineSvg'].map(fnSource).join('\n');
   assert.ok(!/fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code.replace(/api\.kalshiOrdersSince/g, '')), 'and its code writes and calls nothing: it draws what the page loaded, plus one read of older orders');
   assert.ok((code.match(/api\.\w+/g) || []).every((c) => c === 'api.kalshiOrdersSince'), 'the only API it touches is the read of older orders');
   const mod = html.slice(html.indexOf('kalshiOrdersSince: function'), html.indexOf('  });\n</script>', html.indexOf('kalshiOrdersSince: function')));
@@ -35,7 +35,7 @@ gates.D1 = () => {
 
 // The account result line: the range cuts the running settled result, and the line starts at zero at the start of the range, so a long range is never drawn from a total the range did not earn.
 gates.PL1 = () => {
-  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalTime', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
+  const f = lift(['kalDayKey', 'kalDateTime', 'kalDate', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPerpsSteps', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalTime', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
   const now = Date.UTC(2026, 9, 24, 18), day = 86400000;
   const o = (d, p) => ({ ts: now - d * day, series: 'KXGOLD15M', settled: true, fillCount: '1.00', settledPnl: p });
   const orders = [o(40, 5), o(20, -1), o(2, 2), o(0.1, 0.5)];
@@ -122,7 +122,7 @@ gates.PL2 = () => {
 
 // PL3: the axes. Consequence: ticks are round numbers that cover the data, zero is always one of them, time ticks land on Central-clock hours or midnights, and the card shows both axes with the y labels in percent of the account.
 gates.PL3 = () => {
-  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPnlRangeStart', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
+  const f = lift(['kalTime', 'kalDate', 'kalDateTime', 'kalDayKey', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPnlSeries', 'kalshiPerpsSteps', 'kalshiPnlRangeStart', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'kalshiPnlGeometry', 'kalshiPnlYTicks', 'kalshiPnlPct', 'kalshiLineSvg', 'kalshiPnlCardHtml'], 'var kalshiPnlScrub = null;');
   const lift2 = f;
   assert.deepStrictEqual(lift2.chartValueTicks(-0.8, 1.2, 5), [-0.5, 0, 0.5, 1], 'round steps inside the data, with zero');
   assert.deepStrictEqual(lift2.chartValueTicks(0, 0, 5), [], 'no range, no ticks');

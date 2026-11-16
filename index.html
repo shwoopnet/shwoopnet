@@ -1819,6 +1819,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 16</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the Account module's balance is now one combined total of predictions and perps (total only, no breakdown), and Today and the result line include the perps change. It is display only: the loss stops and sizing still use the bot's trade results and prediction cash alone. No perps data is connected yet, so the page shows predictions only until it is.</li>
                   <li>Research: a new recorder saves Kalshi's whole perpetual markets list and the order books of the active ones every minute, to its own data branch (public data, nothing trades; the owner approved the extra Actions minutes).</li>
                   <li>Research: the perps recorders now also keep each perp's leverage estimate, and the nightly archive can pull every market's funding payments in one request, including the whole history. Public data only, nothing trades.</li>
                   <li>Bot page: the per strategy table is gone from the Account card (the owner: "i still see the strategies"). The card is now the balance, Today, the Running badge and the Account result chart with its range buttons. Every strategy's results are on the Strategies page. The separate "Order switch OFF" row is gone too; the Running badge already says it. Account and Account result are now one box: one header, the balance and Today on the left with the period return beside Today, the range buttons on the right, and the chart under them with no second title or divider. The whole Bot status card is gone too (the owner: "bot status needs to be pulled too"): the next look ring, the heartbeat line and the "Needs a look" note. The Running badge on the Account card is what shows a stopped bot. The red or green headline under the balance now follows the chart buttons (Today, 1W, 1M and so on) with the range name, dollars and percentage; the separate Today row is gone.</li>
@@ -3039,6 +3040,30 @@
     return out;
   }
 
+  // ONE account total (the owner, Nov 16, 2026: predictions plus perps, total only, no breakdown). DISPLAY ONLY: this figure is drawn in the Account card (the balance line, Today and the result line) and is never read by the 40% hard stop,
+  // the loss limits, the window cap or OICORE's sizing base, which keep using the bot's own trade results and the prediction cash only (the Risk Analyst's rule). Do not wire it into any of them.
+  // Perps have no data source yet: the field names below are placeholders until Main adds the perps total to the hourly balance snapshot. perpsTotal (dollars, the perps account's value now), perpsDay (the perps change since the Central midnight,
+  // dollars) and perpsHistory ([{t, total}] hourly snapshots, oldest first). Nothing in the page fills them yet, so the live page shows predictions only.
+  function kalshiAccountTotal(a){
+    var pred = a && a.balance && a.balance.ok && a.balance.totalDollars !== null && Number.isFinite(Number(a.balance.totalDollars)) ? Number(a.balance.totalDollars) : null;
+    var perps = a && a.perpsTotal !== null && a.perpsTotal !== undefined && Number.isFinite(Number(a.perpsTotal)) ? Number(a.perpsTotal) : null;
+    if(pred === null){ return { total: null, perps: perps !== null, day: 0 }; }
+    var day = a && Number.isFinite(Number(a.perpsDay)) && perps !== null ? Number(a.perpsDay) : 0;
+    return { total: Math.round((pred + (perps || 0)) * 100) / 100, perps: perps !== null, day: day };
+  }
+  // The perps part of the result line: the change between neighbouring hourly snapshots, as steps on the same time axis as the bot's trades. It starts at the FIRST snapshot (earlier history is not invented), and
+  // the range is cut to start there, so the combined line never mixes a window with perps and one without.
+  function kalshiPerpsSteps(hist, since){
+    var h = (hist || []).filter(function(p){ return p && Number.isFinite(Number(p.t)) && Number.isFinite(Number(p.total)); }).sort(function(x, y){ return x.t - y.t; });
+    var out = [];
+    for(var i = 1; i < h.length; i++){
+      if(h[i].t < (since || 0)){ continue; }
+      var d = Math.round((h[i].total - h[i - 1].total) * 10000) / 10000;
+      if(d !== 0){ out.push({ t: h[i].t, p: d, m: 'Perps' }); }
+    }
+    return { first: h.length ? h[0].t : null, steps: out };
+  }
+
   function kalshiLiveTotals(acct, orders){
     if(!acct || !acct.baseline){ return null; }
     var since = acct.baseline.since;
@@ -3273,7 +3298,7 @@
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
       // No stake or reinvest pool tiles (the owner, Oct 30, 2026: "we don't really NEED visibility on that"): the size and the pool rule live in the bot's code and Recent trades shows what was actually bought.
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '');
+      h += '<div class="kal-acct-total">' + (kalshiAccountTotal(a).total === null ? 'unknown' : kalshiMoney(kalshiAccountTotal(a).total)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '');
     }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
@@ -3298,10 +3323,11 @@
       var botOrders = kalshiResolveOrders(kalshiAllOrders(), a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);     // L1 and the second strategy: Today is the sum of the Strategies rows
       var todayKey = kalDayKey(Date.now());
       var todayOrders = botOrders.filter(function(o){ return Number.isFinite(o.ts) && kalDayKey(o.ts) === todayKey; });
-      var botNet = kalshiPerfStats(todayOrders, 0).total;
+      var acctTot = kalshiAccountTotal(a);
+      var botNet = kalshiPerfStats(todayOrders, 0).total + acctTot.day;     // Today includes the perps change (display only, see kalshiAccountTotal)
       var signed = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       totEl.innerHTML = '<div class="kal-rows">' +
-        '<div class="kal-today"><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, a.balance && a.balance.ok ? a.balance.totalDollars : null) + '</b></div></div>';
+        '<div class="kal-today"><span class="kal-k">Today</span><b class="' + (botNet >= 0 ? 'kal-pos' : 'kal-neg') + '">' + signed(botNet) + kalshiTodayPct(botNet, acctTot.total) + '</b></div></div>';
     }
 
     renderKalshiPositions();
@@ -3475,9 +3501,10 @@
     for(var t = Math.ceil((t0 + off) / step) * step - off; t <= t1; t += step){ out.push({ t: t, label: step < 86400000 ? kalTime(t).replace(':00 ', ' ') : kalDate(t) }); }
     return out;
   }
-  function kalshiPnlSeries(orders, since){
+  function kalshiPnlSeries(orders, since, extra){
     var rows = (orders || []).filter(function(o){ return o && o.ts >= (since || 0); })
       .map(function(o){ return { t: o.ts, p: kalshiOrderPnl(o), m: kalshiMarketName(o) }; }).filter(function(r){ return r.p !== null; })
+      .concat(extra || [])
       .sort(function(x, y){ return x.t - y.t; });
     var cum = 0;
     return rows.map(function(r){ cum = Math.round((cum + r.p) * 10000) / 10000; return { t: r.t, pnl: r.p, cum: cum, m: r.m }; });
@@ -3550,8 +3577,10 @@
   var kalshiPnlScrub = null;
   // A result as a share of a starting balance, signed; '' when the start is unknown or not above zero (never a wrong percentage).
   function kalshiPnlPct(net, startBal){ return Number.isFinite(startBal) && startBal > 0 ? (net >= 0 ? '+' : '-') + Math.abs(net / startBal * 100).toFixed(1) + '%' : ''; }
-  function kalshiPnlCardHtml(orders, key, nowMs, esc, money, total){
-    var since = kalshiPnlRangeStart(key, nowMs), pts = kalshiPnlSeries(orders, since);
+  function kalshiPnlCardHtml(orders, key, nowMs, esc, money, total, perpsHist){
+    var since = kalshiPnlRangeStart(key, nowMs), ph = kalshiPerpsSteps(perpsHist, since);
+    if(ph.first !== null){ since = Math.max(since, ph.first); }     // perps history starts at the first snapshot; the line starts there too instead of inventing earlier values
+    var pts = kalshiPnlSeries(orders, since, ph.steps);
     if(pts.length < 2){ return kalshiLineSvg(pts, esc, money); }
     // The result as a share of the account at the start of the range (the total now minus this range's result), so it is a percentage and Privacy view, which masks dollars only, leaves it showing.
     // Nothing when the total is unknown or the start would not be above zero. Deposits and your own trades are in the total, so it is "of the account", not a return on the bot alone.
@@ -3609,7 +3638,7 @@
     source = source.concat(kalshiSlotOrders || []);     // the second strategy's orders are part of the account's result
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var pb = document.getElementById('kalPnlBody'); if(pb){ pb.style.opacity = ''; }
-    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders' + (hit && hit.code ? ' (' + escapeHtml(hit.code) + ')' : '') + '. It tries again in a minute.</div>' : ''));
+    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiAccountTotal(kalshiLiveAcct).total, kalshiLiveAcct && kalshiLiveAcct.perpsHistory) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders' + (hit && hit.code ? ' (' + escapeHtml(hit.code) + ')' : '') + '. It tries again in a minute.</div>' : ''));
   }
   // Touch or hover on the result line (the owner, Oct 24, 2026: "do that with our account balance chart too"): a guide and a dot follow the pointer to the nearest trade, and the figure at the top shows the running result at
   // that trade with its date and time (Central), as dollars (masked in Privacy view) and as a share of the account at the start of the range. It goes back to the range's result when the pointer leaves. Reads only the points drawn.
