@@ -16,13 +16,13 @@ BH = ["ts_event", "rtype", "publisher_id", "instrument_id", "open", "high", "low
 def brow(day, o, cl, sym): return [day + "T00:00:00.000000000Z", 35, 1, 1, o, o, o, cl, 1, sym]
 w("equs_1d.csv", BH, [brow("2026-11-05", 99, 99.5, "QQQ"), brow("2026-11-06", 99.5, 100.0, "QQQ"), brow("2026-11-09", 101.01, 102.0, "QQQ"),
     brow("2026-11-06", 50, 50, "NVDA"), brow("2026-11-09", 52.0, 50.0, "NVDA")])          # NVDA open 50.0 vs bar 52.0 = 385 bps: set missing
-out = os.path.join(d, "u.csv"); rows = c.convert(d, out)
+out = os.path.join(d, "u.csv"); rows = c.convert(d, out, "2026-11-06")
 d5 = tempfile.mkdtemp()
 for n in ("xnas_stat.csv", "arcx_stat.csv"): open(os.path.join(d5, n), "w").write(open(os.path.join(d, n)).read())
 with open(os.path.join(d5, "equs_1d.csv"), "w") as f:
     f.write("ts_event,rtype,publisher_id,instrument_id,open,high,low,close,volume,symbol\n")
     for day in ("2026-11-03", "2026-11-04", "2026-11-05", "2026-11-06"): f.write(day + "T00:00:00.000000000Z,35,1,1,1,1,1,1,1,QQQ\n")
-assert [x["date"] for x in c.convert(d5, os.path.join(d5, "u.csv"))] == ["2026-11-06"]          # events start on 2026-11-06 only
+assert [x["date"] for x in c.convert(d5, os.path.join(d5, "u.csv"), "2026-11-06")] == ["2026-11-06"]          # events start on 2026-11-06 only
 r = {(x["perp"], x["date"]): x for x in rows}
 q = r[("KXQQQPERP", "2026-11-09")]
 assert q["prev_date"] == "2026-11-06" and q["u_open"] == "101.0" and q["u_prev_close"] == "100.0" and q["x_open"] == "101.01" and q["x_prev_close"] == "100.0", q
@@ -45,6 +45,8 @@ for ts, keep in (("2026-11-09T14:31:00.000000000Z", True), ("2026-11-09T14:31:01
     open(os.path.join(d6, "arcx_stat.csv"), "w").write(",".join(SH) + "\n")
     with open(os.path.join(d6, "equs_1d.csv"), "w") as f:
         f.write("ts_event,rtype,publisher_id,instrument_id,open,high,low,close,volume,symbol\n"); [f.write(day + "T00:00:00.000000000Z,35,1,1,101,101,101,100,1,QQQ\n") for day in ("2026-11-06", "2026-11-09")]
-    rr = [x for x in c.convert(d6, os.path.join(d6, "u.csv")) if x["date"] == "2026-11-09"][0]
+    rr = [x for x in c.convert(d6, os.path.join(d6, "u.csv"), "2026-11-06") if x["date"] == "2026-11-09"][0]
     assert (rr["u_open"] == "101.0") == keep, (ts, rr)
+# the first event date is an argument: with 2026-11-09 the Nov 6 row disappears
+assert [x["date"] for x in c.convert(d6, os.path.join(d6, "u2.csv"), "2026-11-09")] == ["2026-11-09"] and [x["date"] for x in c.convert(d6, os.path.join(d6, "u3.csv"), "2026-11-10")] == []
 print("opengap1 convert tests passed")

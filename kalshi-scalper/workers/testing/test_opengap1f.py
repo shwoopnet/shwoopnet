@@ -34,15 +34,21 @@ for h in (0.0, 0.01, 0.02):
 # counting: triggered events are trade + no_exit, integers only
 assert f.triggered(evs) == (4, {"KXSPYPERP": 4})
 # interim: refuses under 50 triggered events; KILL below PF 1.0, CONTINUE at 1.0 or above
-try: f.interim(evs); raise AssertionError("must refuse")
+try: f.interim(evs, (0.0012,), 0.0012); raise AssertionError("must refuse")
 except SystemExit as e: assert "interim look needs 50" in str(e)
 def many(k, win):          # k identical triggered events with a clear win or loss
     base = E3 if win else E1; out = []
     for i in range(k): e = dict(base, day="2026-12-%02d" % (i % 28 + 1), open_ts=1000000 + i * 100000, prev16_ts=1000000 + i * 100000 - 66000, c={}); sh = (1000000 + i * 100000) - base["open_ts"]; e["c"] = {t + sh: q for t, q in base["c"].items()}; out.append(e)
     return out
-r = f.interim(many(50, True), 0.0012); assert r["verdict"] == "CONTINUE" and r["triggers"] == 50 and r["pf"] == math.inf
-r = f.interim(many(50, False), 0.0012); assert r["verdict"] == "KILL" and r["pf"] == 0.0
-try: f.interim(many(49, True)); raise AssertionError("must refuse")
+r = f.interim(many(50, True), (0.0012, 0.0005), 0.0012); assert r["verdict"] == "CONTINUE" and r["triggers"] == 50 and r["pf_by_fee"][0.0012] == math.inf
+r = f.interim(many(50, False), (0.0012, 0.0005), 0.0012); assert r["verdict"] == "KILL" and r["pf_by_fee"][0.0012] == 0.0
+# no verified fee: PF at every fee, no kill; the kill follows the verified fee only (a loss at 12 bps, a win at 5 bps)
+r = f.interim(many(50, False), (0.0012, 0.0005)); assert r["verdict"] == "no kill: fee unverified" and set(r["pf_by_fee"]) == {0.0012, 0.0005}
+wins5 = many(50, True); r = f.interim(wins5, (0.0012, 0.0005), 0.0005); assert r["verdict"] == "CONTINUE"
+mid_ev = [dict(E3, day="2026-12-%02d" % (i % 28 + 1), open_ts=1000000 + i * 100000, prev16_ts=1000000 + i * 100000 - 66000, c={t + (1000000 + i * 100000 - E3["open_ts"]): q for t, q in E3["c"].items()}) for i in range(50)]
+r = f.interim(mid_ev, (0.0012, 0.0100), 0.0100); assert r["verdict"] == "KILL" and r["pf_by_fee"][0.0012] == math.inf          # E3 wins at 12 bps, loses at 100 bps: the verified fee decides
+r = f.interim(mid_ev, (0.0012, 0.0100), 0.0012); assert r["verdict"] == "CONTINUE"
+try: f.interim(many(49, True), (0.0012,), 0.0012); raise AssertionError("must refuse")
 except SystemExit as e: assert "49 triggered" in str(e)
 # the final read: refused under 100 unless --stop and the last event date is the stop date
 try: f.read_ok(many(99, True)); raise AssertionError("must refuse")
@@ -58,11 +64,24 @@ except SystemExit: pass
 real = f.block
 for pfv, want in ((1.0, "CONTINUE"), (1.05, "CONTINUE"), (0.9999, "KILL")):
     f.block = lambda rows, pfv=pfv: {"n": 50, "wins": 1, "pf": pfv, "h1": 1.0, "h2": 1.0, "z": None}
-    assert f.interim(many(50, True), 0.0012)["verdict"] == want, pfv
+    assert f.interim(many(50, True), (0.0012,), 0.0012)["verdict"] == want, pfv
 f.block = real
 # the closure edge (gap closed to exactly half counts), as in the frozen test
 E3e = dict(E3, c=dict(E3["c"])); E3e["c"][300000 + 120] = (20.09, 20.11)
 st, r = f.score_event(E3e, "abs", 0.0, 0.0); assert st == "trade" and near(r["ret"], (20.09 - 20.03) / 20.03, 1e-9), r
+# main: the bar line marks which fee is verified; the interim prints the verdict only on the verified fee
+import io, contextlib
+real_load = f.load; f.load = lambda d, u: many(100, True)
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): f.main("read", "d", "u", [0.0012, 0.0005, 0.0003], False, 0.0003)
+out = buf.getvalue(); assert "fee/side 0.0003 (VERIFIED) bar" in out and "fee/side 0.0012 (assumed, not verified) bar" in out and "(primary)" in out and "(information only)" in out and "triggered events pooled 100" in out
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): f.main("interim", "d", "u", [0.0012, 0.0005], False, None)
+assert "no kill: fee unverified" in buf.getvalue()
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): f.main("count", "d", "u", [0.0012], False, None)
+assert buf.getvalue().strip().startswith("OPENGAP1-F triggered events pooled 100") and "PF" not in buf.getvalue()
+f.load = real_load
 # verdict
 ok = {"n": 100, "pf": 1.3, "h1": 1.0, "h2": 1.0}; assert f.verdict(ok, {"pf": 1.0}) is True and f.verdict(dict(ok, n=99), {"pf": 1.0}) is False and f.verdict(dict(ok, pf=1.29), {"pf": 1.0}) is False and f.verdict(dict(ok, h1=.99), {"pf": 1.0}) is False and f.verdict(dict(ok, h2=.99), {"pf": 1.0}) is False and f.verdict(ok, {"pf": .99}) is False
 # loader: window, ticker wall, FIRST_TS, DST refusal

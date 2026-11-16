@@ -75,11 +75,14 @@ def run(evs, mode, x, fee):
     return [r for st, r in (score_event(e, mode, x, fee) for e in evs) if st == "trade"]
 
 
-def interim(evs, fee=FEES[0]):
+def interim(evs, fees=FEES, verified=None):
+    """PF at the 0.1% line for every fee; the KILL decision only on the verified fee (Kalshi's own page); with none, 'no kill: fee unverified'"""
     n, _ = triggered(evs)
     if n < TRIGGERS_INTERIM: raise SystemExit("REFUSED: %d triggered events, the interim look needs %d" % (n, TRIGGERS_INTERIM))
-    b = block(run(evs, "rel", REL[0], fee))
-    return {"triggers": n, "n": b["n"], "pf": b["pf"], "verdict": "KILL" if b["pf"] < 1.0 else "CONTINUE"}
+    pfs = {fee: block(run(evs, "rel", REL[0], fee))["pf"] for fee in fees}
+    if verified is None: verdict = "no kill: fee unverified"
+    else: verdict = "KILL" if block(run(evs, "rel", REL[0], verified))["pf"] < 1.0 else "CONTINUE"
+    return {"triggers": n, "pf_by_fee": pfs, "verified_fee": verified, "verdict": verdict}
 
 
 def read_ok(evs, stop=False):
@@ -115,13 +118,13 @@ def load(perp_dir, ucsv):
     return evs
 
 
-def main(mode, perp_dir, ucsv, fees, stop):
+def main(mode, perp_dir, ucsv, fees, stop, verified=None):
     evs = load(perp_dir, ucsv)
     n, per = triggered(evs)
     if mode == "count":
         print("OPENGAP1-F triggered events pooled", n, "per name", {PERPS[k]: v for k, v in sorted(per.items())}, "events", len(evs)); return
     if mode == "interim":
-        print("OPENGAP1-F interim", interim(evs, fees[0])); return
+        print("OPENGAP1-F interim", interim(evs, fees, verified)); return
     read_ok(evs, stop)
     print("OPENGAP1-F final read: triggered events pooled", n, "per name", {PERPS[k]: v for k, v in sorted(per.items())}, "events", len(evs), "(upper bound, not fill-checked; paper only; one try)")
     for fee in fees:
@@ -129,11 +132,11 @@ def main(mode, perp_dir, ucsv, fees, stop):
             bl = {("rel", r): block(run(sel, "rel", r, fee)) for r in REL}; bi = {("abs", h): block(run(sel, "abs", h, fee)) for h in ABS}
             for key, b in list(bl.items()) + list(bi.items()):
                 print(f"{label} fee/side {fee} haircut {key[0]} {key[1]}{' (primary)' if key[0] == 'rel' else ' (information only)'}: n {b['n']} wins {b['wins']} PF {b['pf']:.4f} half1 {b['h1']:.4f} half2 {b['h2']:.4f} dayz {b['z'] if b['z'] is None else round(b['z'], 4)}" + ("  no evidence at n = %d (under 100)" % b["n"] if b["n"] < 100 else ""))
-            if label == "pooled": print(f"pooled fee/side {fee} bar (rel 0.1% PF >= 1.3, both halves >= 1.0, rel 0.2% PF >= 1.0, n >= 100): {verdict(bl[('rel', REL[0])], bl[('rel', REL[1])])}")
+            if label == "pooled": print(f"pooled fee/side {fee} ({'VERIFIED' if fee == verified else 'assumed, not verified'}) bar (rel 0.1% PF >= 1.3, both halves >= 1.0, rel 0.2% PF >= 1.0, n >= 100): {verdict(bl[('rel', REL[0])], bl[('rel', REL[1])])}")
 
 
 if __name__ == "__main__":
-    a = sys.argv[1:]; fees = list(FEES)
-    while "--fee" in a: i = a.index("--fee"); fees.append(float(a[i + 1])); del a[i:i + 2]
+    a = sys.argv[1:]; fees = list(FEES); verified = None
+    while "--fee" in a: i = a.index("--fee"); verified = float(a[i + 1]); fees.append(verified); del a[i:i + 2]          # the last --fee is Kalshi's verified fee
     stop = "--stop" in a; a = [x for x in a if x != "--stop"]
-    main(a[0], a[1], a[2], fees, stop)
+    main(a[0], a[1], a[2], fees, stop, verified)

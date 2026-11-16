@@ -4,13 +4,12 @@ Rules (fixed before the pull): STAT_OPEN = 1 (OPENING_PRICE), STAT_CLOSE = 11 (C
 (ts_event in UTC - 5): the open is the FIRST OPENING_PRICE record with price > 0, the close the LAST CLOSE_PRICE record with price > 0. The consolidated daily bar (EQUS.SUMMARY ohlcv-1d)
 gives the cross-check x_open and x_close; if a statistic differs from its bar by more than TOL_BPS the statistic is set missing (the day becomes no_underlying), counted, never guessed. An OPENING_PRICE record stamped after 09:31:00 ET is not known at the entry candle (ends 09:31 ET): the day is missing and counted.
 Trading dates per symbol = the dates present in its ohlcv-1d file; prev_date = the previous such date.
-Usage: opengap1_convert.py <scratch dir with xnas_stat.csv arcx_stat.csv equs_1d.csv> <out underlying.csv>
+Usage: opengap1_convert.py <scratch dir with xnas_stat.csv arcx_stat.csv equs_1d.csv> <out underlying.csv> <first event date YYYY-MM-DD>
 """
 import csv, datetime, os, sys
 
 STAT_OPEN, STAT_CLOSE, TOL_BPS = 1, 11, 25.0
 PERP_OF = {"SPY": "KXSPYPERP", "QQQ": "KXQQQPERP", "NVDA": "KXNVDAPERP", "AAPL": "KXAAPLPERP"}
-FIRST_EVENT_DATE = "2026-11-06"
 
 
 def et_dt(ts):
@@ -45,7 +44,7 @@ def read_bars(path):
     return bo, bc, {k: sorted(v) for k, v in dates.items()}
 
 
-def convert(sdir, out):
+def convert(sdir, out, first_event_date):
     so, sc = {}, {}
     for f in ("xnas_stat.csv", "arcx_stat.csv"):
         o, c = read_stats(os.path.join(sdir, f)); so.update(o); sc.update(c)
@@ -60,7 +59,7 @@ def convert(sdir, out):
     for sym in PERP_OF:
         ds = dates.get(sym, [])
         for i, d in enumerate(ds):
-            if d < FIRST_EVENT_DATE or i == 0: continue
+            if d < first_event_date or i == 0: continue
             pd = ds[i - 1]
             op = so.get((sym, d))
             if op is not None and op[0] > datetime.datetime.strptime(d + " 09:31:00", "%Y-%m-%d %H:%M:%S"): late += 1; op = None          # an opening print stamped after 09:31:00 ET was not known at the entry candle: the day is missing
@@ -73,4 +72,4 @@ def convert(sdir, out):
 
 
 if __name__ == "__main__":
-    convert(sys.argv[1], sys.argv[2])
+    convert(sys.argv[1], sys.argv[2], sys.argv[3])
