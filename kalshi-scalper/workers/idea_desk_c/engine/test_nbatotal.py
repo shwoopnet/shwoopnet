@@ -64,5 +64,19 @@ class Hand(unittest.TestCase):
         self.assertEqual(N.net(d, "yes", 0.52, 10, 0.01, "M35", None, "yes"), (None, "no mark"))
 
 
+class RunPrint(unittest.TestCase):
+    def test_header_first(self):
+        import io, contextlib, json
+        import nbatotal_run as R
+        root, O, D4, D9, Tk = fixture()
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            R.main(root, 6290660, 1250)
+        lines = buf.getvalue().split("\n")
+        h = json.loads(lines[0])
+        self.assertEqual((h["m_carried"], h["m_new"], h["m_total"]), (6290660, 1770, 6292430))     # 520 + 1,250 other rules
+        self.assertIn("counts", json.loads(lines[1]))
+
+
 if __name__ == "__main__":
     unittest.main()

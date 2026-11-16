@@ -110,9 +110,11 @@
   "file": "nbatotal.py",
   "sha256": "2c18c4b340773a78ed657f618029ad3993fa39390fb35e543937a87f1de0abfc",
   "hand_case_file": "test_nbatotal.py",
-  "hand_case_sha256": "144526e10403452e7646a9cb8be773726140eae9006c68205d0a5f29ed0af970",
+  "hand_case_sha256": "4bafa943c9dfaa1deef63ca6010259022e8d1729429bfb50438e07b30b97133c",
   "auditor_clean_date": null,
-  "note": "BUILT, awaiting audit; base nbaladder.py 965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063; volume extension 98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a"
+  "note": "BUILT, awaiting audit; base nbaladder.py 965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063; volume extension 98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a",
+  "run_script_sha256": "9b9c2866e42376cae3c812457d0e486279ea62d29c34735c58dd1e5d95e9d770",
+  "builder_sha256": "609a0ac321cef4ba9d8b3ae719130efbb85e90c9309a92f3e1f2660c4920d4e2"
  },
  "event": {
   "scorer_plugin": "nbatotal.py",
@@ -160,11 +162,14 @@
  "tally": {
   "m_carried": 6290660,
   "m_carried_source": "m_carried = 6,290,660 (Head's ruling, 2026-11-16, the ledger's whole count incl. rows after Nov 13); ledger row on rnd-queue 394153660; Auditor B, 2026-11-16 18:37Z",
-  "header": "m_carried = 6,290,660 (Head's ruling, 2026-11-16, the ledger's whole count incl. rows after Nov 13); m_new = 624 + 624 + 520 + SIBHIT-R's arms; m_total = 6,290,660 + m_new; BH per print over carried plus that print's own m; fixed once printed"
+  "header": "m_carried = 6,290,660 (Head's ruling, 2026-11-16, the ledger's whole count incl. rows after Nov 13); m_new = 624 + 624 + 520 + 2 (SIBHIT-R's arms) = 1,770; m_total = 6,292,430; BH per print over carried plus that print's own m; fixed once printed",
+  "siBHIT_R_arms": 2
  },
  "exits_rule": "M35: no mark = counted and held to settlement (H); printed both ways",
  "labels": [
   "FAMSPORTS read at most 8 KXNBATOTAL games (W1 and W2 pooled with NFL and NHL), W3 unread (Auditor B, 2026-11-16)",
   "development: read for F7 and FAMSPORTS, not independent (F7's window is not mappable from files)"
- ]
+ ],
+ "validate_exit_rule": "the validate read scores exit H only until the Head amends clause S2 to allow candles ending at or before the 3.5 h mark (M35 reads the candle ending exactly at the mark, after D for D of 9 h and 5 h); the development read is not under S2 and scores both",
+ "print_order": "header (m_carried, m_new, m_total) first, then the counts block, then the table; the print's sha256 is committed before it is read"
 }
