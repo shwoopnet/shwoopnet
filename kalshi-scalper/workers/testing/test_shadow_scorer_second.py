@@ -16,4 +16,8 @@ w = m.score("T1", [sg(1, "yes", 0.10, "yes")], T0, T0 + 10**6)["slip"]["cash"]; 
 e = m.score("T1", [], T0, T0 + 10**6)["slip"]["cash"]; assert (e["net"], e["pf"], e["no_losses"]) == (0, None, False)
 rows = [sg(1, "yes", .1, "yes"), sg(1, "yes", .1, "yes", ts=T0 + 5000), sg(2, "yes", .1, "no", fill_checked=False), sg(3, "yes", .1, "no", ts=T0 - 1), sg(4, "yes", .1, None), sg(5, "yes", .1, "no", spec="OTHER"), sg(6, "yes", .1, "yes", ts=T0 + 9 * 10**9)]
 r = m.score("T1", rows, T0, T0 + 10**6); assert (r["signals"], r["settled"], r["wins"]) == (2, 1, 1), r
+v = m.score("T1", [sg(1, "yes", 0.10, "yes"), sg(2, "yes", 0.10, "void"), sg(3, "yes", 0.10, None)], T0, T0 + 10**6)
+assert (v["signals"], v["settled"], v["wins"], v["losses"], v["voids"]) == (3, 2, 1, 1, 1), v
+# hand: win 0.893, void -0.007 (fee only): net 0.886, PF 0.893 / 0.007 = 127.571
+assert v["slip"]["cash"]["net"] == 0.886 and v["slip"]["cash"]["pf"] == 127.571, v
 print("shadow scorer second tests passed")

@@ -9,3 +9,6 @@ Cases:
 - No losses: PF None, noLosses true; empty: net 0, PF None, noLosses false.
 - Filters: fill_checked False dropped; ts before start dropped; ts after now dropped; duplicate ticker+side keeps the earlier; a None result is a signal, not settled; other spec id dropped.
 - Void (known divergence, information): the engine keeps the entry fee on a void (cash -fee); the JS scorer leaves a non-yes/no result out of settled, so a void is unscored there. Not a bug in either, a spec point for the Head.
+
+## Addendum 1 (Head ruling, Nov 16): void follows the engine
+A void (result "void") is a scored settled trade: price refunded, entry fee kept as a loss (-fee). None/pending stays unsettled. Output carries voids as its own count. Hand: a 10c yes win (0.893) plus a 10c void (-0.007) plus a pending: signals 3, settled 2, wins 1, losses 1, voids 1, net 0.886, PF 0.893 / 0.007 = 127.571.

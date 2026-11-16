@@ -15,7 +15,9 @@ def fee(paid):
 
 def pnl(price, side, result, slip):
     paid = min(F(99, 100), F(str(price)) + F(slip, 100)); f = fee(paid)
-    if f is None or side not in ("yes", "no") or result not in ("yes", "no"): return None
+    if f is None or side not in ("yes", "no"): return None
+    if result == "void": return -f          # Head ruling Nov 16: follow the engine, a void is a scored trade, the price refunded and the entry fee kept as a loss
+    if result not in ("yes", "no"): return None
     return (1 - paid - f) if side == result else -(paid + f)
 
 
@@ -31,9 +33,9 @@ def score(spec, signals, start_ms, now_ms):
     for s in mine:
         k = (s["ticker"], s["side"])
         if k not in seen: seen.add(k); uniq.append(s)
-    settled = [s for s in uniq if s["result"] in ("yes", "no")]
+    settled = [s for s in uniq if s["result"] in ("yes", "no", "void")]          # None / pending is unsettled; "void" is settled
     wins = sum(1 for s in settled if s["side"] == s["result"])
-    out = {"signals": len(uniq), "settled": len(settled), "wins": wins, "losses": len(settled) - wins, "slip": {}}
+    out = {"signals": len(uniq), "settled": len(settled), "wins": wins, "voids": sum(1 for s in settled if s["result"] == "void"), "losses": len(settled) - wins, "slip": {}}
     for c in SLIPS:
         vals = [v for v in (pnl(s["price"], s["side"], s["result"], c) for s in settled) if v is not None]
         out["slip"]["cash" if c == 0 else "+%dc" % c] = summarize(vals)
