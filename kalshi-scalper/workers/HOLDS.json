@@ -1,5 +1,5 @@
 {
- "version": "2026-11-16T16Z+7",
+ "version": "2026-11-16T16Z+8",
  "author": "Auditor B",
  "rule": "A cell (ticker pattern, time) is REFUSED if its time is in [from, to) of any row with status OPEN or FROZEN. Time = market close_ts (binary), event occurrence where the row says so, candle end_ts or file date (perps, recorders). 'to' null = open ended. A cell in NO row is NOT cleared: the driver also refuses any time at or after forward_default_deny_from unless the signed spec names that window in its holds table. A row with a 'scope' applies only to that kind of data (archive_binary = ENGINE1 binary-market archive and NC15 extracts); a row without 'scope' applies to every kind.",
  "forward_default_deny_from": 1794787200,
@@ -368,6 +368,33 @@
     "H04 (in-play scope only reads are unaffected)",
     "the forward_default_deny for these cells, for the joint print only"
    ]
+  },
+  {
+   "id": "H23",
+   "name": "SOCDERIV held-out",
+   "tickers": [
+    "KXEPLGAME*",
+    "KXLALIGAGAME*",
+    "KXSERIEAGAME*",
+    "KXBUNDESLIGAGAME*",
+    "KXLIGUE1GAME*",
+    "KXMLSGAME*",
+    "KXLIGAMXGAME*",
+    "KXBRASILEIROGAME*",
+    "KXEFLTROPHYGAME*",
+    "KXUCLWGAME*",
+    "KXAPFDDHGAME*",
+    "KXEERSTEDIVGAME*",
+    "KXLIGAPORTUGALGAME*",
+    "KXLVAVIRGAME*",
+    "KXSERIECGAME*",
+    "KXCOPADELREYGAME*"
+   ],
+   "from": 1794528000,
+   "to": null,
+   "card": "SOCDERIV held-out (Desk B and the Testing Desk); closes from 2026-11-13T00:00Z, never pulled",
+   "status": "OPEN",
+   "note": "soccer KX*GAME series closes from 2026-11-13T00:00Z; the registration (SOCDERIV_REGISTRATION.md) also lists the TOTAL, BTTS and TEAMTOTAL legs of the same leagues: Main to take the exact series list from socderiv_series_frozen.json and add those legs only if the Head confirms; SOCDRIFT's forward validate gets a clause on the S1/S2 pattern when it is requested (Head's ruling 2026-11-16), not now"
   }
  ],
  "released": [
