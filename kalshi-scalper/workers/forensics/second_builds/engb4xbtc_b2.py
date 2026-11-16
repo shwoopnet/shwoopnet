@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import shadow_rank_b2 as P
 from shadow_rank_b2 import Mkt, cents, fee, two, side_ask, side_bid, LAST_SEARCH
 BUCKETS = list(range(120, 841, 60)); SIDES = ("yes", "no", "cheap", "favourite"); EXITS = ("H", "T", "S", "B", "M180", "M60"); CLASSES = ("up", "flat", "down")
-M_PRIOR = 2347488; BTC = "KXBTC15M"
+M_PRIOR = 6290660; BTC = "KXBTC15M"
 def klass(x): return P.klass(x)
 def btcmom3(btc, e):
     if btc is None: return None
@@ -110,7 +110,7 @@ def main(a):
     alts = [s for s in sorted(LAST_SEARCH) if s != BTC and s in mk]; skipped = [s for s in ser_all if s not in LAST_SEARCH]
     ls_of = {s: calendar.timegm(tuple(int(x) for x in LAST_SEARCH[s].split("-")) + (0, 0, 0)) + 86400 for s in alts}
     print("series in extract", len(ser_all), "alts scored", len(alts), "skipped (no split constant)", skipped, "rules", len(alts) * len(BUCKETS) * 18 * 4 * 3 * 6, flush=True)
-    m_all = M_PRIOR + len(alts) * len(BUCKETS) * 18 * 4 * 3 * 6; print("m", m_all, "batch line 4,073,472", flush=True)
+    m_all = M_PRIOR + len(alts) * len(BUCKETS) * 18 * 4 * 3 * 6; print("m", m_all, "(carried 6,290,660 + 303,264; batch B total not stated here)", flush=True)
     with multiprocessing.Pool(min(8, os.cpu_count() or 2)) as pool:
         out = dict(pool.map(work, [(s, mk, btc_by_close, ls_of[s]) for s in alts], chunksize=1))
     rows = []; ns = 0
@@ -131,7 +131,7 @@ def main(a):
                 z, p, k = pval(cn); n = len(y1); spd = n / vdays; e1 = sum(y1) / (n * 10) * 100
                 rows.append({"series": s, "bucket": B, "side": sr, "band": band, "class": cls, "exit": ex, "n": n, "pf1": pfv(y1), "pf2": pfv(y2), "days": k, "p": p, "spd": spd, "edge1c": e1, "dollars_week": spd * e1 / 100 * 35})
     print("SEARCH passes (bar + 3 a day)", ns, "VALIDATE passes", len(rows))
-    for m_ in (m_all, 4073472):
+    for m_ in (m_all,):
         k, o = bh([r["p"] for r in rows], m_); print("BH m", m_, "survivors", k)
         if m_ == m_all:
             for i in o[:k]: r = rows[i]; print("  %s b%d %s band%d btc_%s %s n%d pf1 %.4f pf2 %.4f days%d p %.3e spd %.3f edge %.3fc $/wk %.2f" % (r["series"], r["bucket"], r["side"], r["band"], r["class"], r["exit"], r["n"], r["pf1"], r["pf2"], r["days"], r["p"], r["spd"], r["edge1c"], r["dollars_week"]))

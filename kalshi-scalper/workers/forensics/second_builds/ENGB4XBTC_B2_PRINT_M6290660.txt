@@ -1,0 +1,4 @@
+series in extract 19 alts scored 18 skipped (no split constant) [] rules 303264
+m 6593924 (carried 6,290,660 + 303,264; batch B total not stated here)
+SEARCH passes (bar + 3 a day) 315 VALIDATE passes 33
+BH m 6593924 survivors 0
