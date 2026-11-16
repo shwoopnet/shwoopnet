@@ -26,7 +26,8 @@ def put(job, rows):
         json.dump({"status": "complete", "rows": man}, f)
 
 
-TK = lambda t: t.replace("-T", "-")                      # their invented tickers carry a T before the strike; the landed ones do not
+import re as _re
+TK = lambda t: _re.sub(r"-P(\d+)-T(\d+)$", r"-\2-P\1", t) if _re.search(r"-P\d+-T\d+$", t) else t.replace("-T", "-")   # their invented tickers carry a ladder and a T before the strike; the landed ones are EVENT-STRIKE
 ms = [{"ticker": TK(r["ticker"]), "event_ticker": r["event"], "occurrence_datetime": iso(r["occ"]), "close_time": iso(r["close_time"]),
        "open_time": iso(r["open_time"]), "result": r["result"]} for r in d["rungs"]]
 put("KXNBATOTAL_LISTS_A", [({"id": "dev_KXNBATOTAL", "page": 1}, {"markets": ms, "cursor": ""})])

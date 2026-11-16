@@ -1,6 +1,6 @@
 their header: header m_carried 6290660 m_new 520 m_total 6291180
-their counts: counts [('closed_by_D_4h', 0), ('closed_by_D_5h', 0), ('closed_by_D_9h', 0), ('games_dropped_clock', 1), ('inplay_guard_4', 0), ('inplay_guard_5', 0), ('inplay_guard_9', 1), ('m35_dropped_games', 2), ('no_quote_4h', 0), ('no_quote_5h', 0), ('no_quote_9h', 0), ('not_open_4h', 0), ('not_open_5h', 0), ('not_open_9h', 55)]
-my counts: [('clock_dropped_games', 1), ('closed_by_D', 0), ('decisions', 571), ('games', 19), ('inplay_guard_9', 1), ('listed', 220), ('m35_dropped_games', 2), ('no_quote', 0), ('not_open', 55)]
+their counts: counts [('closed_by_D_4h', 0), ('closed_by_D_5h', 0), ('closed_by_D_9h', 0), ('games_dropped_clock', 1), ('inplay_guard_4', 0), ('inplay_guard_5', 0), ('inplay_guard_9', 1), ('m35_dropped_games', 2), ('no_quote_4h', 0), ('no_quote_5h', 0), ('no_quote_9h', 0), ('not_open_4h', 0), ('not_open_5h', 0), ('not_open_9h', 60)]
+my counts: [('clock_dropped_games', 1), ('closed_by_D', 0), ('decisions', 623), ('games', 19), ('inplay_guard_9', 1), ('listed', 240), ('m35_dropped_games', 2), ('no_quote', 0), ('not_open', 60)]
 first build: m_total 6291180 bh_survivors 0
-cells compared (their n > 0): 500 their empty cells: 20 cells only in mine: 0
+cells compared (their n > 0): 504 their empty cells: 16 cells only in mine: 0
 differences: 0
