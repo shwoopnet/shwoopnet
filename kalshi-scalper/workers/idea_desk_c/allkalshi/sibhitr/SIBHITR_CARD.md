@@ -69,3 +69,15 @@
 - **The window is not untouched.** PROPS1's code read the Kalshi RESULTS of all its TEST markets, 55,098 with a model probability, for model calibration. That covers every KXNBAPTS 2025-26 market in this window. It also read pre-game candles of up to 1,099 sampled markets.
 - **The true statement:** SIBHIT's development data is spent for this rule, and the window's results were read by PROPS1 for a different purpose (a cheap-side calibration). No SIBHIT or SIBHIT-R rule was ever applied to it.
 - **PROPS1 is closed** (the Head of R&D, Nov 16, 15:23Z). The Head chose to accept the 1,099 sampled markets as read, disclosed, with no exclusion (choice (A), 15:24Z).
+
+## Amendment 4 (Nov 16, 2026, ~15:35Z; Auditor B's note; written before the list is opened)
+
+- **Order, all on time fields:**
+  1. The close_time window (2026-03-01 to before 2026-04-14) is tested first.
+  2. SIBHIT's `games()` builds each game (event_ticker) and applies the base of at least 10 rungs and the clock check (one occurrence per game, exactly on :00 or :30). A game failing either is dropped and counted.
+  3. ONLY THEN is the sample drawn, from the passing games. The clock check is applied BEFORE the sample.
+- **Sample rule, fixed in `sibhitr_lib.py` (`SEED`, `N_READ`, `order`, `games`):**
+  - The hashed value is the ASCII string "SIBHITR-2026-11-16" followed immediately by the game's event_ticker.
+  - Games are sorted by the lowercase hex digest of its md5 (string order, which is byte order for hex), ascending, with the event_ticker string as the tie break.
+  - The read sample is the first 40.
+- **How the held-out stays out:** `games(rows, "read")` returns only the 40. The candle builder and the scorer call it that way, so no held-out game reaches a candle request, a quote, a side or a result. The scorer calls `games(rows, "heldout")` once, only to print `heldout_games_unread`, a count built from time fields. The held-out is read only after a pass, by a later reviewed change.
