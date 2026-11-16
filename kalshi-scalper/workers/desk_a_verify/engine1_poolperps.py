@@ -18,10 +18,11 @@ def sigma(by, e):
         if usable(a) and usable(b): rs.append(math.log(mid(b) / mid(a)))
     if len(rs) < 45: return None
     m = sum(rs) / len(rs); return math.sqrt(sum((x - m) ** 2 for x in rs) / len(rs))
-def simulate(by, e, side, kt, ks, T, h, u):
+def simulate(by, e, side, kt, ks, T, h, u, last_end=None):
     """-> (gross return, exit end, why). Long fills at ask x (1 + h) and leaves at bid x (1 - h); short fills at bid x (1 - h) and leaves at ask x (1 + h); target kt x u and stop ks x u from the fill on candle closes (long bid, short ask), stop before target, first hit else the candle ending exactly e + 60 T (must be usable)."""
     c = by.get(e)
     if not usable(c): return None, None, "entry candle unusable"
+    if last_end is not None and e + 60 * T > last_end: return None, None, "no mark"
     long_ = side == "long"; fill = c[1] * (1 + h) if long_ else c[0] * (1 - h)
     tgt = fill * (1 + kt * u) if long_ else fill * (1 - kt * u); stp = fill * (1 - ks * u) if long_ else fill * (1 + ks * u)
     leave = lambda x: x[0] * (1 - h) if long_ else x[1] * (1 + h)
@@ -59,7 +60,7 @@ def prev_close(by, e):
     d0 = day_start(e)
     for k in range(1, 7):
         t = P.et_day0(d0 - 86400 * k + 43200) + 16 * 3600
-        if usable(by.get(t)): return mid(by[t])
+        if t in by: return mid(by[t]) if usable(by[t]) else None            # the latest earlier date whose 16:00 ET key is PRESENT; if it is unusable the gap is skipped (the Testing Desk's R4)
     return None
 def last_print(fund, before, maxage):
     if not fund: return None
@@ -74,28 +75,32 @@ def tercile_sets(vals):
 def events(cand, fund):
     """-> {signal id: [(entry end, name, side)]}, all candidate entries (the cooldown is applied per rule). Signal ids: 'gap:<bp>:<follow|fade>', 'fl:<fade|follow>', 'fc:<fade|follow>', 'tr:<L>:<c>:<trend|rev>', 'carry:<A|B>' (carry carries its own exit end)."""
     ev = collections.defaultdict(list); days = trading_days(cand)
-    open_end = {}                                                        # (date, name) -> the 09:31 ET candle end
+    open_end = {}; day_open_clock = {}                                  # (date, name) -> the 09:31 ET candle end; date -> that clock instant
     for nm, by in cand.items():
         for t in by:
-            if sod(t) == 9 * 3600 + 31 * 60 and usable(by[t]): open_end[(et_date(t), nm)] = t
+            if sod(t) == 9 * 3600 + 31 * 60:
+                day_open_clock[et_date(t)] = t
+                if usable(by[t]): open_end[(et_date(t), nm)] = t
     for d in days:
-        names = sorted(n for (dd, n) in open_end if dd == d)
-        for nm in names:                                                   # opening gap
+        opens = sorted(n for (dd, n) in open_end if dd == d)
+        for nm in opens:                                                   # opening gap
             e = open_end[(d, nm)]; pc = prev_close(cand[nm], e)
             if pc is None: continue
             g = mid(cand[nm][e]) / pc - 1
             for bp in GAP_BP:
-                if abs(g) * 1e4 >= bp:
+                if round(abs(g) * 1e4, 9) >= bp:
                     up = g > 0
                     ev["gap:%d:follow" % bp].append((e, nm, "long" if up else "short")); ev["gap:%d:fade" % bp].append((e, nm, "short" if up else "long"))
-        lv, ch = {}, {}                                                    # funding level and change, each name's own latest print before its 09:31 candle
-        for nm in names:
-            lp = last_print(fund.get(nm), open_end[(d, nm)], 36 * 3600)
+        lv, ch = {}, {}                                                    # funding level and change: ALL names, each name's own latest print before the 09:31 ET clock of that date (a name with an unusable 09:31 candle is ranked but skipped at entry; the Testing Desk's R2)
+        clock = day_open_clock[d]
+        for nm in sorted(cand):
+            lp = last_print(fund.get(nm), clock, 36 * 3600)
             if lp: lv[nm] = lp[1]
             if lp and lp[2] is not None: ch[nm] = lp[2]
         for tag, vals in (("fl", lv), ("fc", ch)):
             top, bot = tercile_sets(vals)
             for nm in top | bot:
+                if (d, nm) not in open_end: continue
                 e = open_end[(d, nm)]; rich = nm in top
                 ev[tag + ":fade"].append((e, nm, "short" if rich else "long")); ev[tag + ":follow"].append((e, nm, "long" if rich else "short"))
     for nm, by in cand.items():                                            # trend and reversion
@@ -121,8 +126,8 @@ def events(cand, fund):
             if not lp or lp[1] == 0 or e not in cand.get(nm, {}): continue
             carry[et_date(e)].append((abs(lp[1]), nm, e, T, "short" if lp[1] > 0 else "long"))
     for d, lst in carry.items():
-        if len(lst) < 3: continue
-        lst.sort(key=lambda x: (-x[0], x[1])); n = len(lst)
+        if len({x[1] for x in lst}) < 3: continue                          # skipped if fewer than 3 distinct names
+        lst.sort(key=lambda x: (-x[0], x[1], x[3])); n = len(lst)             # |rate| descending, then ticker, then print time
         for rank, (mag, nm, e, T, side) in enumerate(lst):
             if rank < math.ceil(n / 3): ev["carry:A"].append((e, nm, side, T + 1800))
             if rank < math.ceil(n / 2): ev["carry:B"].append((e, nm, side, T + 1800))
@@ -130,7 +135,7 @@ def events(cand, fund):
 EXITS = tuple((kt, ks, T) for kt in KS for ks in KS for T in TS_MIN)
 def run_rule(cand, fund, evs, exit_, h, sig_cache):
     """-> rows [(e, name, net_taker, net_maker, hold_s, gross, flag)] at relative haircut h for ONE rule, pooled, cooldown per name = the previous exit end; carry events carry their own exit end (exit_ is None)."""
-    rows, free, cnt = [], {}, collections.Counter()
+    rows, free, cnt = [], {}, collections.Counter(); lasts = {nm: max(by) for nm, by in cand.items()}
     for ev in sorted(evs, key=lambda x: (x[0], x[1])):
         e, nm, side = ev[0], ev[1], ev[2]; by = cand[nm]
         if e < free.get(nm, 0): cnt["cooldown"] += 1; continue
@@ -138,15 +143,17 @@ def run_rule(cand, fund, evs, exit_, h, sig_cache):
         else:
             u = sig_cache(nm, e)
             if u is None: cnt["no vol"] += 1; continue
-            g, tx, why = simulate(by, e, side, exit_[0], exit_[1], exit_[2], h, u)
+            g, tx, why = simulate(by, e, side, exit_[0], exit_[1], exit_[2], h, u, lasts[nm])
         if g is None: cnt[why] += 1; continue
+        if e >= END_EPOCH or tx >= END_EPOCH: cnt["at or after 2026-11-17T00:00Z (dropped)"] += 1; continue
         adj, flag = funding_adj(fund.get(nm), e, tx, side); free[nm] = tx
         rows.append((e, nm, g + adj - 2 * TAKER, g + adj - 2 * MAKER, tx - e, g, flag))
     return rows, cnt
 def pf(xs):
     w = sum(x for x in xs if x > 0); l = -sum(x for x in xs if x < 0)
     return float("inf") if l == 0 and w > 0 else (w / l if l else float("nan"))
-PRIOR_PERPS_M = 102184
+PRIOR_PERPS_M = 103444                 # perps passes 1 to 3 and PERPGEN (Auditor B: pass 3 tried 1,260 more, m 103,444)
+END_EPOCH = 1794873600                   # 2026-11-17T00:00:00Z: a trade whose entry or exit end is at or after it is dropped (the forward days stay unread)
 ALL_SIGNALS = tuple(["gap:%d:%s" % (b, m) for b in GAP_BP for m in ("follow", "fade")] + ["fl:fade", "fl:follow", "fc:fade", "fc:follow"] + ["tr:%d:%d:%s" % (L, c, m) for L in LOOKBACKS for c in CS for m in ("trend", "rev")] + ["carry:A", "carry:B"])
 def stats(rows, days):
     """rows at one haircut -> figures. net = column 2 (taker) or 3 (maker)."""

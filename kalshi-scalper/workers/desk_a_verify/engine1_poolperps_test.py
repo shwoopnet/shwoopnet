@@ -46,4 +46,11 @@ fund = {nm: {U(2026, 11, d, 21, 0, 0): 0.00001 for d in (9, 10, 11)} for nm in c
 res2 = W.evaluate(cand, fund); tr2 = [o for o in res2["rules"] if o["signal"].startswith("tr:") and o["n"] > 0]; assert tr2, "no trend trade with funding prints"
 o = tr2[0]; assert sum(o["per_name_trades"].values()) == o["n"] and o["weekly_pct_of_account"]["5x"] == o["weekly_pct_of_account"]["1x"] * 5 and o["liquidation_distance_pct_approx"]["2x"] == 50.0
 assert res["m_new"] == 218 == len(W.ALL_SIGNALS[:-2]) * 12 + 2 and res["m_total"] == 102402 and len(res["rules"]) == 218, res["m_new"]
+assert W.PRIOR_PERPS_M == 103444 and W.evaluate(cand, fund)["m_total"] == 103662 and W.evaluate(cand, fund)["header"].startswith("BH m = 103662")
+# (Nov 16, Auditor B and the Testing Desk's readings) R4: the previous 16:00 ET key present but unusable skips the gap; R8: e + 60 T after the name's last candle = no mark; the END_EPOCH drop
+assert near(W.prev_close({U(2026, 11, 6, 21, 0, 0): (100.0, 100.02)}, U(2026, 11, 9, 14, 31, 0)), 100.01) and W.prev_close({U(2026, 11, 6, 21, 0, 0): (100.02, 100.0), U(2026, 11, 5, 21, 0, 0): (99.0, 99.02)}, U(2026, 11, 9, 14, 31, 0)) is None
+byl = {e: (99.99, 100.00), e + 60: (100.19, 100.20), e + 120: (100.99, 101.00)}                               # the target would hit at +120 s, but the name's last candle is before e + 30 min
+assert W.simulate(byl, e, "long", 2, 1, 30, 0.0002, u, last_end=e + 120)[2] == "no mark" and W.simulate(byl, e, "long", 1, 1, 2, 0.0002, u, last_end=e + 120)[2] == "target"
+late = {U(2026, 11, 16, 23, 59, 0): (99.99, 100.0), U(2026, 11, 17, 0, 0, 0): (99.99, 100.01)}
+rr, cc = W.run_rule({"KXAAAPERP": late}, {}, [(U(2026, 11, 16, 23, 59, 0), "KXAAAPERP", "long", U(2026, 11, 17, 0, 0, 0))], None, 0.0002, None); assert rr == [] and cc["at or after 2026-11-17T00:00Z (dropped)"] == 1
 print("ENGPERPS_POOL1 ENGINE OK", res["m_new"], res["m_total"])
