@@ -27,3 +27,5 @@
 **Prediction (numeric, before any read).** The same as NBALADDER's: under no edge the best of 624 cells reaches PF 1.15 to 1.30 by luck on 16 days; P(a rule clears every gate on development and holds on the joint read) about 4%. If NBALADDER and NBAREB both produce a development winner with the same cell, that agreement is the only evidence worth a second look; I will say so before I read either.
 
 **Kill fast.** No rule with 48 or more trades and PF 1.3 or more at 1c with both halves 1.0 or more, or nothing survives BH.
+
+**Hold read by Auditor B (Nov 16, 17:27Z).** PROPS1's frozen part (closes from 2026-10-03T16:00Z) was never armed, and PROPS1 is closed; Auditor B treats it as released for the development and joint validate windows, pending the Head's one-word confirmation. KXNBAREB Nov 13 to Dec 4 is in the spec's holds table. The validate read is JOINT with NBALADDER and SIBHIT-R: one print, one m (624 + 624 + SIBHIT-R's tries + the carried tally the Head names). If the list needs more than 8 pages, a second job is cleared separately.

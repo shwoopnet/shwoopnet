@@ -39,7 +39,7 @@
    "first_close": "2026-10-21T00:00:00Z",
    "last_close_exclusive": "2026-11-06T00:00:00Z"
   },
-  "held_out_map_checked_by": "Auditor B (pending: PROPS1's frozen part from 2026-10-03T16:00Z)",
+  "held_out_map_checked_by": "Auditor B, 2026-11-16 (wrapper, list job and hold read)",
   "independence_note": "the same development days as NBALADDER and SIBHIT; rebounds prices on those days were never read"
  },
  "split": {
@@ -47,7 +47,7 @@
   "search_last_close_exclusive": "2026-11-06T00:00:00Z",
   "validate_first_close": "2026-11-13T00:00:00Z",
   "validate_last_close_exclusive": "2026-12-04T00:00:00Z",
-  "validate_note": "pulled after Dec 4; one joint print with NBALADDER and SIBHIT-R, one m; on the Head's go"
+  "validate_note": "pulled after Dec 4; JOINT with NBALADDER and SIBHIT-R: one print, one m = 624 + 624 + SIBHIT-R's tries + the carried tally the Head names; on the Head's go"
  },
  "holds": [
   {
@@ -65,10 +65,10 @@
    "status": "OPEN"
   },
   {
-   "label": "joint validate window with SIBHIT-R",
+   "label": "joint validate window: KXNBAREB, KXNBAPTS closes Nov 13 to before Dec 4, one print",
    "start_epoch": 1794528000,
    "end_epoch": 1796342400,
-   "card": "NBALADDER, NBAREB, SIBHIT, SIBHIT-R",
+   "card": "NBAREB, NBALADDER, SIBHIT, SIBHIT-R",
    "status": "OPEN"
   },
   {
@@ -76,7 +76,14 @@
    "start_epoch": 1791043200,
    "end_epoch": null,
    "card": "PROPS1 (closed)",
-   "status": "closed; release for this window to be confirmed by Auditor B"
+   "status": "closed Nov 16; never armed; frozen third treated as RELEASED by Auditor B for the development and joint validate windows (Head's one-word confirmation pending)"
+  },
+  {
+   "label": "H06 reserve (PROPUNDER's, KXNBAPTS), never pulled; KXNBAREB closes in the same week also never pulled",
+   "start_epoch": 1793923200,
+   "end_epoch": 1794528000,
+   "card": "PROPUNDER (closed unread); this spec",
+   "status": "OPEN"
   }
  ],
  "look_ahead": {
@@ -96,8 +103,8 @@
   "sha256": "01ef1e59b3a34ad53af1ef07ce340efc3ef62fc3a8ed600d8989776cdba8758f",
   "hand_case_file": "test_nbaladder_reb.py",
   "hand_case_sha256": "f83df2a081bb30ea0a9c7b270ef100711c2dc0160cee6e13c5cafcbc984a8b84",
-  "auditor_clean_date": null,
-  "note": "wrapper over the audited nbaladder.py (965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063); awaiting audit of the wrapper"
+  "auditor_clean_date": "2026-11-16",
+  "note": "wrapper CLEAN (Auditor B, 2026-11-16) over nbaladder.py 965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063"
  },
  "event": {
   "scorer_plugin": "nbaladder_reb.py",
