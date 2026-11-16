@@ -1,0 +1,147 @@
+{
+ "id": "IGDRIFTSPREAD1",
+ "desk": "History Miner",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "split": {
+  "mode": "forward_only",
+  "first_close_of_read": "2026-11-17T00:00:00Z",
+  "release_rule": "first read after 3 days of the PR 960 cadence have landed (about 2026-11-19), then on each auto-run; kill_fast on the first read"
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ],
+  "haircuts_stress": [],
+  "fee_taker": null,
+  "fee_maker": null
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 12,
+  "prior_m": "from ENGINE_TALLY.json (sha256 at signing)",
+  "note": "m printed first: 12 this spec, 23 with IGDRIFTGRID1, 24 with IGLATEDRIFT1's cell"
+ },
+ "kill_fast": true,
+ "uniqueness": {
+  "closest_existing": [
+   "IGDRIFTGRID1 (same cells on totals and the NHL moneyline)",
+   "IGLATEDRIFT1"
+  ],
+  "declined_list_rows_checked": [
+   "lead-lag between related markets (one market's own path)",
+   "favourite-and-hold (entries 20c to 80c, either side)",
+   "taker order-flow family (no tape)"
+  ],
+  "difference": "the same audited drift cells on NBA and NHL spread markets, a market IGDRIFTGRID1 does not cover; counted as a 7g related market: 12 tries here, 23 with IGDRIFTGRID1, 24 with IGLATEDRIFT1",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "ingame_fwd_load.py",
+  "loader_sha256": "e639ad63318cdcbdb545f5475c70f2ca44191b1fe7f064af2852d967d6ee8200",
+  "extracts": [
+   "sports-data ingame/<date>/<HHMM>/obs.csv.gz, date directories 2026-11-17 to 2026-12-14",
+   "kalshi-pull IG_FWD_RESULTS runs (accepted by manifest check against the committed job, sha256 d535923d)"
+  ],
+  "window": {
+   "first_close": "2026-11-17T00:00:00Z",
+   "last_close_exclusive": "2026-12-15T00:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B, 2026-11-16 16:20Z (forward wall and series)",
+  "independence_note": "the same games feed all History Miner in-game specs; their rows are one sample of games, n not to be added across specs",
+  "ticker_wall": [
+   "KXNBASPREAD",
+   "KXNHLSPREAD"
+  ]
+ },
+ "event": {
+  "scorer_plugin": "ingame_drift_spread.py",
+  "scorer_plugin_sha256": "e1ffb9fad73e2d9e3509a256533abf1d51b77d5b21b3ed12e61b7eb1e1b51fbe",
+  "decision_instant": "tip + 45, 75 or 120 min (tip = occurrence_datetime - 3 h; schedule test applies)",
+  "signal_threshold_abs_mid_move": [
+   0.05,
+   0.08
+  ],
+  "entry_rule": "the IGDRIFTGRID1 decision applied to a spread event as a totals event; all 12 cells (3 offsets x 2 thresholds x 2 directions, none excluded)",
+  "exit": "H"
+ },
+ "prediction": "at least one cell has 2c PF >= 1.3 at n >= 100 with each half >= 1.0, a measured rate >= 3.0 a day and a BH pass over every cell ever tried",
+ "kill": "a cell is dropped when its rate over the FIRST 7 distinct forward tip days (fixed once, stored) is under 3.0 a day (a rate failure) or when its first read has 2c PF under 1.0 (kill_fast)",
+ "outputs": {
+  "survivor_line": "market, rule, PF 1c and 2c, n, days, measured games a day, dollars a week at 5 contracts",
+  "family_flag": "none"
+ },
+ "card": "kalshi-scalper/workers/history_miner/igdriftspread/IGDRIFTSPREAD1_CARD_NOV16.md",
+ "needs_new_code": [
+  "ingame_drift_spread.py is written (imports the cleared ingame_drift_grid.py 6a4e63c8 and ingame_events.py 4698bae0, both pinned); pending Auditor B's CLEAN and signature"
+ ],
+ "holds": [
+  {
+   "label": "this spec's forward window (ingame rows and listing closes)",
+   "start_epoch": 1794873600,
+   "end_epoch": 1797292799,
+   "card": "IGFADE2 IGLATEDRIFT1 IGDOG1",
+   "status": "OPEN (owned by these three specs, Auditor B 2026-11-16 16:20Z)"
+  },
+  {
+   "label": "ingame rows Nov 13 to Nov 16, held and unread by any spec",
+   "start_epoch": 1794528000,
+   "end_epoch": 1794873599,
+   "card": "Auditor B forward wall",
+   "status": "OPEN (never read by this spec; the window starts at 1794873600)"
+  },
+  {
+   "label": "SPORTS-PRE outcomes KXNBAGAME, KXNFLGAME, KXNCAAFGAME closes from 2026-11-01",
+   "start_epoch": 1793491200,
+   "end_epoch": null,
+   "card": "SPORTS-PRE",
+   "status": "OPEN to 2027-01-01 (not in this spec's ticker wall)"
+  },
+  {
+   "label": "BOOKS2 frozen third W3, KXNFLSPREAD games from 2026-10-03T16:00Z",
+   "start_epoch": 1791043200,
+   "end_epoch": null,
+   "card": "BOOKS2",
+   "status": "OPEN until the Head closes BOOKS2 (not in this spec's ticker wall)"
+  },
+  {
+   "label": "INGAMELAG1 NBA recorder reserve from 2026-11-13",
+   "start_epoch": 1794528000,
+   "end_epoch": null,
+   "card": "INGAMELAG1",
+   "status": "OPEN for Nov 13 to 16 rows (held above); rows from 1794873600 owned by these specs per Auditor B 2026-11-16 16:20Z"
+  }
+ ],
+ "sources": {
+  "names": [
+   "sports-data ingame recorder files (record_ingame.py, Kalshi public GETs)",
+   "kalshi-pull IG_FWD_RESULTS listing (Kalshi public GET /markets)"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "file": "ingame_drift_spread.py",
+  "sha256": "e1ffb9fad73e2d9e3509a256533abf1d51b77d5b21b3ed12e61b7eb1e1b51fbe",
+  "hand_case_file": "IGDRIFTSPREAD1_CARD_NOV16.md",
+  "hand_case_sha256": "85ab970936c89271d4cc852001069b9851a1fa7953644b1f3884529cb7ced127",
+  "auditor_clean_date": "pending"
+ },
+ "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
+ "halves": "by entry time: the first floor(n/2) trades and the rest",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order at c = 10; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x",
+ "look_ahead": {
+  "decision_instant": "tip + D min",
+  "inputs": "the last two-sided poll in (tip + D min - 300 s, tip + D min] and in the same window 30 minutes earlier; nothing after the decision",
+  "entry_quote": "the decision poll's ask",
+  "exit_price": "settlement result from the listing; no later quote"
+ }
+}
