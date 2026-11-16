@@ -12,3 +12,6 @@ def phase(series, ts):
     return "search" if d <= LAST_SEARCH[series] else "validate"
 
 LAST_SEARCH_P3 = {"GOLDPERP": "2026-09-30", "US500PERP": "2026-10-18", "USTECH100PERP": "2026-10-21"}      # perps pass 3 (amendment 3 and its note); passed to run_all(last_search=...)
+# DATED NOTE 2026-11-16 (ETHLATE1, written before any ETHD result or candle was read; only the registered window of Desk B's job ETHD_RESULTS2 was used, no recorded file): the hourly Ethereum ladder KXETHD is not in the archive grid, so it has its OWN constant and does not touch LAST_SEARCH above (the grid's rule_hashes and no-split-constant checks are unchanged). Its registered window is closes 2026-10-28 to 2026-11-15 UTC, 19 calendar dates; by the same rule as every series (SEARCH = the floor(D/2)-th distinct UTC close date and earlier, VALIDATE = every later date) D = 19 gives the 9th date, 2026-11-05. D is the WINDOW's date count, not a cut log's: if the recorder is missing a whole UTC date the 9th distinct date moves, and Auditor B or Desk B must recompute from the ticker list's distinct close dates (dates only) BEFORE any read and tell me; no other change.
+D_ETHD = 19
+LAST_SEARCH_ETHD = {"ETHD": "2026-11-05"}      # ETHLATE1 only; passed like LAST_SEARCH_P3
