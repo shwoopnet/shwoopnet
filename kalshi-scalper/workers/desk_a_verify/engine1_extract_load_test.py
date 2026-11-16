@@ -58,4 +58,26 @@ assert L.load(base)[0]                                                          
 open(os.path.join(base, "arch.xz"), "ab").write(b"x")                                                      # 3: a changed file is refused
 try: L.load(base); assert False
 except SystemExit as e: assert "sha256" in str(e)
+# perps pass 2: SPY and QQQ from the first extract, US 500 and US Tech 100 from the extension, funding for the four; the archive extract is never opened
+def perps_a(con):
+    con.execute("CREATE TABLE market(ticker, series, close_ts, result, src)"); con.execute("CREATE TABLE candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi)")
+    con.executemany("INSERT INTO market VALUES (?,?,?,?,?)", [("KXSPYPERP", "SPY", None, None, "p"), ("KXQQQPERP", "QQQ", None, None, "p"), ("KXNVDAPERP", "NVDA", None, None, "p")])
+    con.executemany("INSERT INTO candle VALUES (?,?,?,?,?,?,?)", [("KXSPYPERP", 1793923200, 1, 2, 1, 1, 1), ("KXQQQPERP", 1793923260, 1, 2, 1, 1, 1), ("KXNVDAPERP", 1793923260, 1, 2, 1, 1, 1)])
+def perps_x(con):
+    con.execute("CREATE TABLE market(ticker, series, close_ts, result, src)"); con.execute("CREATE TABLE candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi)")
+    con.executemany("INSERT INTO market VALUES (?,?,?,?,?)", [("KXUS500PERP", "US500", None, None, "p"), ("KXGOLDPERP", "GOLD", None, None, "p")])
+    con.executemany("INSERT INTO candle VALUES (?,?,?,?,?,?,?)", [("KXUS500PERP", 1793923199, 1, 2, 1, 1, 1), ("KXUS500PERP", 1793923200, 5, 6, 1, 1, 1), ("KXGOLDPERP", 1793923200, 5, 6, 1, 1, 1)])
+def fund(con):
+    con.execute("CREATE TABLE funding(ticker, ts, rate)")
+    con.executemany("INSERT INTO funding VALUES (?,?,?)", [("KXSPYPERP", 1793923200 + 75600, 0.0001), ("KXSPYPERP", 1793923200 - 3600, 0.5), ("KXNVDAPERP", 1793923200 + 75600, 0.2), ("KXUS500PERP", 1793923200 + 75600, -0.0002), ("KXQQQPERP", 1793923200 + 75600, None)])
+pa, px, pf_ = mk("pa.xz", perps_a), mk("px.xz", perps_x), mk("fund.xz", fund)
+L.PERPFILE = ("pa.xz", pa); L.PERPEXT = ("px.xz", px); L.FUNDING = ("fund.xz", pf_)
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), pa, px, pf_))
+pp, dr, ff, fdr = L.load_pass2(base)
+assert sorted(pp) == ["KXQQQPERP", "KXSPYPERP", "KXUS500PERP"] and [c[0] for c in pp["KXUS500PERP"]] == [1793923200] and dr["ext"]["other ticker dropped"] == 1 and dr["perps"]["other ticker dropped"] == 1, (pp, dr)
+assert ff == {"KXSPYPERP": {1793923200 + 75600: 0.0001}, "KXUS500PERP": {1793923200 + 75600: -0.0002}, "KXQQQPERP": {}}, ff
+assert fdr["other ticker dropped"] == 1 and fdr["print before 2026-11-06 (dropped)"] == 1 and fdr["print without a rate (dropped)"] == 1, fdr
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), pa, px))      # a line without the funding hash refuses pass 2
+try: L.load_pass2(base); assert False
+except SystemExit as e: assert "REFUSED" in str(e)
 print("ALL OK")
