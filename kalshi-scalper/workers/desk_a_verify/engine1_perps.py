@@ -8,7 +8,10 @@ RULES_PER_TICKER = len(FILTERS) * len(SIDES) * len(EXITS)
 DST_START = calendar.timegm((2026, 3, 8, 7, 0, 0)); DST_END = calendar.timegm((2026, 11, 1, 6, 0, 0))     # US Eastern DAYLIGHT time (UTC-4) from DST_START to DST_END, else standard (UTC-5); 2026 only
 def et_off(ts): return -4 * 3600 if DST_START <= ts < DST_END else -5 * 3600
 def et_secs(ts): return (ts + et_off(ts)) % 86400
-def et_day0(ts): return ts - et_secs(ts)                         # the UTC epoch of the ET midnight that starts ts's ET day
+def et_day0(ts):
+    """The UTC epoch of 00:00 ET of ts's ET day, with the day's offset read at ITS MIDDAY (Auditor B, Nov 16): so day0 + h * 3600 is h o'clock ET for every h after the 02:00 DST step (a Nov 1 entry at 04:30Z gets TC at 21:00Z, not 20:00Z)."""
+    loc = ts + et_off(ts); day_local = loc - loc % 86400
+    return day_local - et_off(day_local + 17 * 3600)
 def next_et_day0(ts):
     d = et_day0(ts); return et_day0(d + 36 * 3600)           # noon of the next ET day lies safely inside it, whatever the DST step
 def ok(c): return c is not None and c[1] is not None and c[2] is not None and 0 < c[1] < c[2]
@@ -30,7 +33,7 @@ def feature_ok(by, e, filt, cuts):
     if name in ("orb", "sess"):
         day0 = et_day0(e); lo_t = day0 + 9 * 3600 + 31 * 60                          # candles ending 09:31 ET ...
         if name == "orb":
-            if et_secs(e) < 10 * 3600 + 60: return None                             # the entry must end at 10:01 ET or later
+            if et_secs(e) < 10 * 3600 + 60: return False                            # the entry must end at 10:01 ET or later; before it there is no signal (R2: False, not missing)
             win = [by[t] for t in range(lo_t, day0 + 10 * 3600 + 1, 60) if t in by]  # ... to 10:00 ET
             if not win: return None
             hi, lo = max(mid(w) for w in win), min(mid(w) for w in win)
@@ -73,6 +76,9 @@ def _prints(f):
         gaps = [(big * -1, big)] if not ps else [(-big, ps[0] - GAP)] + [(a, b) for a, b in zip(ps, ps[1:]) if b - a > GAP] + [(ps[-1] + GAP, big)]
         _PC[k] = (f, ps, gaps)
     return _PC[k][1], _PC[k][2]
+def clip_of(e, exit_):
+    """The boundary clip horizon (Auditor B ruling R1): the rule's OWN exit time (T3 e+180, T10 e+600, T15 e+900, T30 e+1800 ... TC the 16:00 ET candle, TO the next open, TS exits e+1800); the 1800 s floor is only the cooldown."""
+    t = exit_time(e, exit_); return COOLDOWN if t is None else t - e
 def hold_of(e, exit_):
     t = exit_time(e, exit_); return COOLDOWN if t is None else max(COOLDOWN, t - e)
 def trade_full(by, e, side, exit_, h, funding=None):
@@ -125,10 +131,10 @@ def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None, boundary=Non
     for e in sorted(by):
         if (lo is not None and e < lo) or (hi is not None and e >= hi): continue
         if last is not None and e < last: continue                                  # last = the previous entry's exit time (hold)
-        if boundary is not None and e + hold_of(e, exit_) >= boundary: cnt["exit crosses the boundary"] += 1; continue          # (Auditor B) SEARCH never touches VALIDATE prices
-        f = feature_ok(by, e, filt, cuts)
+        f = feature_ok(by, e, filt, cuts)                                           # R4 order: two sided, cooldown, feature, clip, mark
         if f is None: cnt["missing feature candle"] += 1; continue
         if not f: continue
+        if boundary is not None and e + clip_of(e, exit_) >= boundary: cnt["exit crosses the boundary"] += 1; continue          # (Auditor B) SEARCH never touches VALIDATE prices; counted for a TRUE signal only
         g, why, hold, flag = trade_full(by, e, side, exit_, h, funding)
         if g is None: cnt[why] += 1; continue
         rows.append((e, g, hold, flag)); cnt[why] += 1; last = e + hold_of(e, exit_)

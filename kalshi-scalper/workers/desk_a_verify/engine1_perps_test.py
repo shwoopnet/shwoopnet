@@ -36,7 +36,7 @@ assert all(rows[i + 1][0] - rows[i][0] >= 1800 for i in range(len(rows) - 1))
 # the break filters on the invented series (candle i ends 14:50 UTC + i minutes; here T0 = 14:50 UTC of Nov 9): hand values of ENGINE1_PERPS_HAND_CASE_NOV16.md
 byx = {c[0]: c for c in C}
 E_ = lambda i: T0 + 60 * i
-assert P.feature_ok(byx, E_(10), ("orb", "up"), None) is None                       # i10 ends 15:00: the break needs an entry at 15:01 or later
+assert P.feature_ok(byx, E_(10), ("orb", "up"), None)  is False                       # i10 ends 15:00: the break needs an entry at 15:01 or later
 assert P.feature_ok(byx, E_(11), ("orb", "up"), None) is True and P.feature_ok(byx, E_(11), ("orb", "down"), None) is False and P.feature_ok(byx, E_(12), ("orb", "up"), None) is True
 assert P.feature_ok(byx, E_(10), ("sess", "high"), None) is False and P.feature_ok(byx, E_(11), ("sess", "high"), None) is True and P.feature_ok(byx, E_(12), ("sess", "high"), None) is True
 assert P.feature_ok(byx, E_(13), ("sess", "high"), None) is True and P.feature_ok(byx, E_(14), ("sess", "high"), None) is False
@@ -51,9 +51,9 @@ assert P.trade({c[0]: c for c in bad if P.ok(c)}, e, "long", "T3", h) == (None, 
 s = P.stats([(T0, .0124, 180), (T0 + 86400, -.0026, 300), (T0 + 2 * 86400, .0224, 60)]); assert s["n"] == 3 and near(s["pf"], .03 / .005) and s["evidence"] == "no evidence at n = 3" and near(s["avg_hold_min"], 180 / 60 / 1 * 0 + (180 + 300 + 60) / 3 / 60) and near(s["avg_gross_bp"], (.0124 - .0026 + .0224) / 3 * 1e4)
 sm = P.stats([(T0, .0124, 180)], P.FEE_MAKER); assert near(sm["net"], .0124 - .0010)
 # (1) the boundary: an entry whose e + 1800 reaches the boundary is dropped and counted
-rows, cnt = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=T0 + 2400)
-assert cnt["exit crosses the boundary"] >= 1 and [r[0] for r in rows] == [], (rows, cnt)       # e + 1800 = i40 = the boundary: dropped
-rows2, cnt2 = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=T0 + 2401)
+rows, cnt = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=e + 180)
+assert cnt["exit crosses the boundary"] >= 1 and [r[0] for r in rows] == [], (rows, cnt)       # R1: the clip horizon is the rule's OWN exit (T3 = e + 180) = the boundary: dropped
+rows2, cnt2 = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=e + 181)
 assert [r[0] for r in rows2] == [e]
 # (2) the days floor: a rule with n and PF above the bar but under 10 days cannot pass
 assert P.days([(T0, .01, 0), (T0 + 60, .01, 0)]) == 1 and P.MIN_DAYS == 10
@@ -121,7 +121,7 @@ for i in range(0, 120):
     ts = U(2026, 9, 10, 13, 31, 0) + 60 * i
     m = 100 + 0.01 * i if i < 30 else 100.5 + 0.01 * (i - 30)
     byE[ts] = (ts, m - .005, m + .005, 0, 0, 0)
-assert P.feature_ok(byE, U(2026, 9, 10, 14, 0, 0), ("orb", "up"), None) is None                                         # 14:00 UTC = 10:00 ET: too early
+assert P.feature_ok(byE, U(2026, 9, 10, 14, 0, 0), ("orb", "up"), None)  is False                                         # 14:00 UTC = 10:00 ET: too early
 assert P.feature_ok(byE, U(2026, 9, 10, 14, 1, 0), ("orb", "up"), None) is True and P.feature_ok(byE, U(2026, 9, 10, 14, 1, 0), ("orb", "down"), None) is False
 assert P.feature_ok(byE, U(2026, 9, 10, 14, 1, 0), ("sess", "high"), None) is True
 # run_all with its own split (pass 3): SEARCH to 2026-09-30, VALIDATE from 2026-10-01 for a name the default table lacks
@@ -147,3 +147,12 @@ _far = {_U(2026, 9, 1, 14, 0, 0): 0.001, _U(2026, 9, 20, 14, 0, 0): 0.001}      
 _g, _w, _h, _fl = P.trade_full(_cs, _e0, "long", "T60", 0.0, _far); assert _fl == "funding not booked"
 _g, _w, _h, _fl = P.trade_full(_cs, _e0, "long", "T60", 0.0, {}); assert _fl == "funding not booked"      # no print at all
 print("EXTRACT FUNDING OK")
+
+# (Nov 16, Auditor B rulings) R1 the clip uses the rule's own exit time; fix B the ET day's offset is read at its midday
+import calendar as _c2
+assert P.clip_of(e, "T3") == 180 and P.clip_of(e, "T10") == 600 and P.clip_of(e, "T15") == 900 and P.clip_of(e, "T60") == 3600 and P.clip_of(e, "TS15") == 1800
+nov1 = _c2.timegm((2026, 11, 1, 4, 30, 0))                                   # Sun Nov 1 00:30 EDT, before the 02:00 step
+assert P.et_day0(nov1) + 16 * 3600 == _c2.timegm((2026, 11, 1, 21, 0, 0)) and P.exit_time(nov1, "TC") == _c2.timegm((2026, 11, 1, 21, 0, 0))
+mar = _c2.timegm((2026, 3, 8, 6, 0, 0))                                      # Sun Mar 8 01:00 EST, before the 02:00 step: 16:00 ET that day is EDT 20:00Z
+assert P.et_day0(mar) + 16 * 3600 == _c2.timegm((2026, 3, 8, 20, 0, 0))
+print("RULINGS R1 AND ET-DAY OK")
