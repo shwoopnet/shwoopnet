@@ -20,7 +20,7 @@
    "favourite-and-hold (no favourite side, no band above 60c)",
    "GOLDHOLD (gold is out: 5 events)"
   ],
-  "difference": "Ethereum hourly ladder only, entries in the last 150 seconds on the recorder's near-the-money strikes, cheap side and mid bands with a spread filter; G3H1 and CORR1 use a 50 minute clock, HOURBRIDGE1 uses Bitcoin and the interpolated gap",
+  "difference": "Ethereum hourly ladder only, entries in the last 150 seconds on the recorder's near-the-money strikes, cheap side and mid bands to 60c with a spread filter; G3H1 and CORR1 are Bitcoin hourly only (the Head's record); HOURBRIDGE1 is Bitcoin; LADL1 (falsified) took L1's FAVOURITE at 88c to 97c at the 10 and 6 minute looks on the Bitcoin and Ethereum hourly ladders and gold's daily and weekly ladders: ETHLATE1 overlaps it on Ethereum but differs by the last-150-second clock and by having NO favourite band (nothing above 60c)",
   "family_flag": "none"
  },
  "data": {
@@ -101,7 +101,7 @@
  },
  "tries": {
   "rules_this_spec": 96,
-  "prior_m": "96 new tries (12 bands x 2 sides yes and no x 2 filters x 2 exits x 1 bucket) plus the carried tally the Head names (Auditor B sent the Head options A and B; the number is inserted when named); BH over the total; bars on unrounded figures"
+  "prior_m": "the whole shared strict count from DEFLATION_LEDGER, 2,113,449 as of Nov 13, plus every row added since (Auditor B adds the post-Nov 13 rows, ENGINE1 run 2's 2,347,488, the perps passes and the rest, and writes the final number in before freezing); plus this spec's 96. BH over the total; bars on unrounded figures (the Head's ruling of Nov 16, option A)"
  },
  "prediction": "no survivor: PF under 1.0 at 2c in most cells; most cells will print 'no evidence at n = x' (about 308 events with a quote in the window across 12 bands, so n under 100 in nearly every cell)",
  "kill": "no cell with PF 1.3 at 2c and halves 1.0 or more, n 100, 10 days; kill_fast drops the family at PF under 1.0 at 2c on the first read",
