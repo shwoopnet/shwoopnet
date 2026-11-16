@@ -1,0 +1,2 @@
+PERPSCALP1 print sha256 (committed before reading): ddc12e1ddc4943cff5810c337195937d8b6ef3a41ea6acbce1108452a4b9ead7
+reader d7dd92cbc2706cc3 (3663e2e54), loader 850ac0e81ba364fe via B1, one run, 2026-11-16, extracts archive 9e4bece4 and perps 730fa938. Archive data reaches no part of the reader; no held-out inside the window; any pass is information for the forward shadow only.
