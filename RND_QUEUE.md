@@ -1064,3 +1064,12 @@ Main merged PR 950 (job files; the in-game and SIBHIT pulls dispatched), PR 952 
 - 2026-11-16 16:00Z Line 2 (15 stock perps names) ok from Head; dates end Nov 16 (Auditor B). PR 974 (WH-CFRTIK places retired): nothing in R&D needs them; label to say "paused by the owner" unless a bar read failed.
 - 2026-11-16 16:00Z ENGINE1 perps pass 3 (gold, US 500, US Tech 100): one run, print sha fe48a0ca (Desk A ac8af7e05), BH m 103,444. Tried 1,260, PASSED 0 (taker 12 bp 0, maker 5 bp 0, stress 0, validate 0, BH 0). Funding booked from the extract's own prints. Development window only (dates seen by PERPGEN, OVN4, PBOOK); the real test is ENGINE1-PERPS-F (about Dec 1 to 5). Running total about 2,350,463 tried, 0 passed. Next for Desk A: VOLFAIR1 (build), PERPBASIS1 (forward only).
 - 2026-11-16 16:03Z VOLFAIR1 (Desk A 2efd6289d): sent back. Kraken is not an accepted source; switch to Coinbase or Bitstamp. Develop on Kalshi's public KXBTCD history outside the H02/H03 hold dates, with strikes chosen from the candle about 55 minutes before the close; 9 tries, deflation, correlation with gold L1; then to Auditor B. PERPBASIS1 (5202762f5): forward card only, predicted FALSIFIED (fee larger than the edge); one read at Dec 20, no work before then.
+
+## 2026-11-16 16:12Z OWNER ORDER (via EA): FORWARD SHADOW DOES THE PROVING
+- Shadow admission = search + validate (1c PF 1.3+, 2c PF 1.0+, both halves, n 100+). BH is ranking and the live bar only, not a shadow gate.
+- Every future engine validate survivor joins the shadow list automatically.
+- Automatic rules: forward n 100+, PF 1.3+ at 1c and 1.0+ at 2c, both halves 1.0+ = CANDIDATE for a live trial seat (EA takes it to the owner by popup). Forward PF under 1.0 after 60 = DROPPED. No human step between.
+- Desk A: cluster ENGINE1's 190 validate passes and pick 20 to 30 (at most 3 per market, 5 per mechanism family), frozen specs in SHADOW_LIST_V1.json plus SHADOW_CLUSTER_MAP_NOV16.md. Target about 18:15Z.
+- Main: one PR, a generic log-only shadow runner driven by the spec list (daily public candles and results, engine core, data branch, no orders). Auditor B checks it; the Testing Desk second-builds the scorer before any CANDIDATE goes to the owner.
+- Daily line to the EA: shadows running, forward trades, on track for 100.
+- Expectation stated to the EA: most picks drop; a luck CANDIDATE is possible; the popup and trial size guard against it.
