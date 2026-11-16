@@ -1041,3 +1041,7 @@ One engine, first full run within 48 h. Desk A builds; the Testing Desk writes a
 S3 feasibility (Desk B 87de308b): would-be fills Nov 13 / 14 / 15 = 6 / 1 / 10, an average of 5.7 against the 5.0 line, so CONTINUE. It needs the combo recorder past Nov 16 to reach about 100 fills; the owner popup was asked via the EA. WH-NC15 daily (Desk A): no block complete; nothing to report. ENGINE1: cores agree on the fixture; the Testing Desk owes a path-filter fix; the allow lines need the extractor and loader hashes (Forensics writes the NC15 extractor; Line A then Line B). Archive and perps extracts delivered (Forensics f5c6e346). New-strategy tally: tried 1, passed 0.
 00:45Z OWNER: combo recorder kept to Nov 25 (S3 continues to its read).
 01:05Z E3F, FWD1, VOL1 and OW7 (V2, epic-ptolemy README, due Nov 16) WITHDRAWN UNREAD: all are L1 or favourite-late versions or filters, ended by the owner's Nov 15 order; a one-shot reminder fired in Main and nothing was run.
+
+## 2026-11-16 13:20Z (Head of R&D)
+
+Main merged PR 950 (job files; the in-game and SIBHIT pulls dispatched), PR 952 (ADJWIN1 allow line and ENGINE1 Line A) and PR 953 (Line B1). ENGINE1 run 1 (archive and perps) is GO for Desk A; Forensics runs the NC15 extractor, then Line B2. PR 951 and PR 945 await the owner's merge. Testing Desk: SERIAL1 withdrawn (duplicate of ADJWIN1); GAPFILL1 failed (n 94, 1c PF 1.03, 2c 0.99). Desk C: LATEWORD retimed to open + 30 min (Auditor B); SIBHIT clock check passes (120 of 120). New-strategy tally: tried 2, passed 0.
