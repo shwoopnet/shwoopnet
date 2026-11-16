@@ -1,7 +1,7 @@
 {
  "list": "SHADOW_LIST_V2",
  "date": "2026-11-16",
- "start_utc": "2026-11-17T00:00:00Z",
+ "start_utc": "2026-11-21T00:00:00Z",
  "n": 12,
  "source": "ENGB4XBTC validate-bar list (33 passes; BH survivors 0)",
  "excluded_dogecoin_7e": 6,
@@ -39,9 +39,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "c8f909244e12b34cefd8e36c32a8c55854e829acae12b00b0ce50ebd2d2be373",
+   "spec_sha256": "3602c6ca29181a64a3a79148f5d81dcba102d90dddba8134bf9e3f530e169953",
    "rank": 1,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -91,9 +91,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "bafdd070b77f3445d20bd0981e29093c3fb9da58ca55dd4ad2fc289d6dec3bb1",
+   "spec_sha256": "12df12b610b2d3bb24e3d77e15ae2c958937f6debfd60c534d0d2a02e37d9b2c",
    "rank": 2,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -143,9 +143,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "37396509c50479532f10bd82bbaf1cd919f077454ac94bc41a92991a45bd4dc9",
+   "spec_sha256": "43f118fbe6de922b099c2a037ca081ee323c3cf276d9b76ba003210bb11ec37e",
    "rank": 3,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -195,9 +195,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "eebc73247003b8c31d65946c6564928b526c04757f7d998bdd6272f37199a20f",
+   "spec_sha256": "159e8e919d48b48a4c3ca13a22a532ec580eac4ec34bb2d3409acc413a669c49",
    "rank": 4,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -247,9 +247,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "a3390cf7a34000577be530e437e1c610701c3765b8d1651bd4e7860f9ae18ff6",
+   "spec_sha256": "7378694648b285ee82e21467462d6fa39d736b0fadb2c0abcce80e78813ba3bc",
    "rank": 5,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -299,9 +299,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "0087d3d505efedd0f31d6763c82c42b1398ba671df5901e2461a7d7ea8bc990e",
+   "spec_sha256": "d80e838a0ab874223f2dc4cc3de63941e635958878d8aa2da63a9caacf49613f",
    "rank": 6,
    "admission": "owner_popup",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
@@ -351,9 +351,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "39047dc2743f68dfbb35987f00d683c0de94b05a029c1d2258f56cb55f810e09",
+   "spec_sha256": "a2f07266dd6513028b5a8e5aaac56eb6876fa4dbdf0c856bf08234e034f5e1e5",
    "rank": 7,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -403,9 +403,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "a9619bc48ddd2c4c31fd1ce274271b035f667d0d20cb9075382a866c039abc33",
+   "spec_sha256": "5856b43e5ecc7819f6558706811a5d035e8169cc639cef84bf8cbbb98809276d",
    "rank": 8,
    "admission": "owner_popup",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
@@ -455,9 +455,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "393493a461d85a17bf87a5a366f5af9dac16aff05848f687b30b5e8024821575",
+   "spec_sha256": "525a21a4cf34d0e00b0e0db461fedfd6eb64126d5b3fe344d913b9c2b49b0fef",
    "rank": 9,
    "admission": "owner_popup",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
@@ -507,9 +507,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "b5f9e7cf41bace4b79178ddaa3aa86f3663b5c381b2a03d1a2bc6e0b91ae7ac9",
+   "spec_sha256": "95a62cc7f307170bd39c065819ffddccfe079ca49988763d5fbb1c8078f98802",
    "rank": 10,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -559,9 +559,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "fe7f9441f39ca1e7e6dfdbb15f8b94bd88ff342c97d7122091df2df2e7163837",
+   "spec_sha256": "e44a535720ae45ae499abc29a2aee28f0bb180d83e6ed295c7d6055b863a9143",
    "rank": 11,
    "admission": "owner_popup",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
@@ -611,9 +611,9 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "2026-11-17T00:00:00Z"
+    "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "9e06178e41dd63f6dcc1147a810a048502e12909f8f33e0b6b9c29db849144a9",
+   "spec_sha256": "f7c2a990e22e22141464b419ffdd3c80260a87f5303086064aacfb5044a8b0b4",
    "rank": 12,
    "admission": "owner_popup",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",

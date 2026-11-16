@@ -2,7 +2,7 @@
   python3 -I engine1_shadow_pick_v2.py <out_engb4.json> <out dir>"""
 import sys, os, json, hashlib, collections
 MAX_PER_MARKET, MAX_PER_FAMILY, MIN_SPD = 3, 5, 3.0
-START_UTC = "2026-11-17T00:00:00Z"
+START_UTC = "2026-11-21T00:00:00Z"  # 1795219200; Head and Auditor B: btcmom3 reads the held BTC15M path (H09), so not before Nov 21
 def family(r):
     if r["band"] >= 17 and r["bucket"] <= 600: return "F1 favourite-late shape"
     region = "cheap tail (5c to 35c)" if r["band"] <= 6 else ("middle (35c to 85c)" if r["band"] <= 16 else "high price (85c+)")
