@@ -91,6 +91,7 @@ def run(markets_by_source):
         if passes(agg[0.01], agg[0.02]): v_res[k] = (agg[0.01], agg[0.02]); v_p[k] = p
     keep = bh(v_p, total)
     rep["validate_bar_passes"] = len(v_res); rep["validate_passes"] = len(keep)
+    rep["validate_bar_list"] = [{"source": k[0], "series": k[1], "bucket": k[2], "band": k[3], "side": k[4], "filter": k[5], "exit": k[6], "pf_1c": v_res[k][0]["pf"], "pf_2c": v_res[k][1]["pf"], "n": v_res[k][0]["n"], "days": v_res[k][0]["trade_days"], "p": v_p[k], "family": family(k)} for k in sorted(v_res, key=str)]   # information only: every rule that met the bar on the VALIDATE dates, before BH (added for run 2, listing only)
     rep["survivors"] = [{"source": k[0], "series": k[1], "bucket": k[2], "band": k[3], "side": k[4], "filter": k[5], "exit": k[6], "pf_1c": v_res[k][0]["pf"], "pf_2c": v_res[k][1]["pf"], "n": v_res[k][0]["n"], "days": v_res[k][0]["trade_days"], "family": family(k)} for k in sorted(keep, key=str)]
     return rep
 def family(k):

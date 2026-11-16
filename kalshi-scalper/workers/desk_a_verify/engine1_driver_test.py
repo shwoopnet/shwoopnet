@@ -32,6 +32,8 @@ rep3 = D.run({"arch": {"BTC": sd + vd}, "nc": {"BTC": sd}}); assert rep3["duplic
 assert rep["search_entries_total"] == 18 and rep["search_non_whole_cent_entries"] == 0 and rep["validate_entries_total"] == 18 and rep["validate_non_whole_cent_entries"] == 0, rep      # SEARCH markets only: 9 markets x 2 sides (yes, no), all whole-cent
 odd = [dict(m, candles=[(m["close"] - 300, .89, .9049, .9, 1, 10)]) for m in sd]
 r4 = D.run({"arch": {"BTC": odd}}); assert r4["search_non_whole_cent_entries"] == 9 and r4["search_entries_total"] == 18 and r4["validate_entries_total"] == 0, r4          # only the YES ask .9049 is not whole-cent; the NO ask 1 - .89 is
+bl = rep["validate_bar_list"]; assert len(bl) == rep["validate_bar_passes"] and all(set(x) >= {"series", "bucket", "band", "side", "filter", "exit", "pf_1c", "pf_2c", "n", "days", "p", "family"} for x in bl) and {x["exit"] for x in bl} <= set(N.EXITS), bl[:1]
+assert all(0 <= x["p"] <= 1 for x in bl)
 # the REAL series strings map to the split keys (Auditor B, blocker 1)
 real = ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXNATGAS15M", "KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXGOLD15M", "KXSOL15M", "KXNEAR15M", "KXZEC15M", "KXPALLADIUM15M", "KXPLATINUM15M"]
 miss = [r for r in real if D.short(r) not in S.LAST_SEARCH]; assert miss == [], miss
