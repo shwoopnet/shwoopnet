@@ -1,0 +1,1 @@
+Lanes 1 and 6 compare fixture (Desk A, Nov 16 2026). INPUT sha256 5b8d87042d5e9be5607a0fc699119f5ebf4c08596ead64d856f0502a7e580d25 (LANES_FIXTURE_INPUT_NOV16.json). Desk A OUTPUT lines sha256 2bb1b71e74500b0c3de0e94bff446a1c3e4120585f13de148b1e539c5b69e36f (624 lines), kept closed until the second build commits its own lines; generator engine1_perps_lanes_fixture.py.
