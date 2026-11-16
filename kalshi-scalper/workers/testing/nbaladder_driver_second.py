@@ -9,9 +9,9 @@ def fmt(x):
     if isinstance(x, float) and math.isnan(x): return "nan"
     return "%.12g" % x if isinstance(x, float) else str(x)
 
-def run(rungs, candles, carried=0):
-    cells, cnt, surv = m.search(rungs, candles, carried)
-    lines = ["cells %d m_total %d games_dropped_clock %d survivors %d" % (len(cells), m.N_CELLS + carried, cnt.get("games_dropped_clock", 0), len(surv))]
+def run(rungs, candles, carried=0, m_new=m.N_CELLS):
+    cells, cnt, surv = m.search(rungs, candles, carried, m_new)
+    lines = ["cells %d m_total %d games_dropped_clock %d survivors %d" % (len(cells), m.m_total(carried, m_new), cnt.get("games_dropped_clock", 0), len(surv))]
     for k in sorted(cells, key=lambda c: (c[0], c[1], c[2], c[3], c[4])):
         s = cells[k]
         lines.append("D%d|band%.2f|%s|%s|%s | n %d games %d days %d | pf1 %s h1 %s h2 %s pf2 %s | net1 %s weekly5 %s | z %s p %s | marked_n %d marked_pf %s | pass %s" % (

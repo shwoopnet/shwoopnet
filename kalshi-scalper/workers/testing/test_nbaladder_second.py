@@ -79,4 +79,7 @@ cells = {"x": {"n": 48, "p": 0.1}, "y": {"n": 47, "p": 0.1}}; assert m.eligible(
 assert not m.passes(m.decisions([dict(A, open_time=D - 21600)], cs, O_by, 60)[0][0], "age_young")
 e5 = 0.05 - m.TOL; assert m.passes({"mv": e5}, "move_up") and not m.passes({"mv": e5}, "move_flat") and m.passes({"mv": -e5}, "move_down") and not m.passes({"mv": -e5}, "move_flat")
 cells_, cnt_, surv_ = m.search([A], cs); assert len(cells_) == 624 and surv_ == set() and cells_[(60, 0.40, "yes", "H", "none")]["n"] == 1 and cells_[(60, 0.50, "no", "H", "none")]["n"] == 1 and cells_[(120, 0.40, "yes", "H", "none")]["n"] == 0
+assert m.m_total() == 624 and m.m_total(6290660, 1770) == 6292430
+seen = []; orig_bh = m.bh; m.bh = lambda cells, mt, q=0.05: (seen.append(mt), orig_bh(cells, mt, q))[1]
+m.search([A], cs); m.search([A], cs, carried=6290660, m_new=1770); m.bh = orig_bh; assert seen == [624, 6292430], seen
 print("nbaladder second tests passed")

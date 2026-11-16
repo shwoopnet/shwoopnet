@@ -148,7 +148,10 @@ def bh(cells, m_total, q=0.05):
 def eligible(cells): return {k: s["p"] for k, s in cells.items() if s["n"] >= 48}
 
 
-def search(rungs, candles, carried=0):
+def m_total(carried=0, m_new=N_CELLS): return carried + m_new
+
+
+def search(rungs, candles, carried=0, m_new=N_CELLS):
     """-> {cell: stats}, counts, survivors (the cells that clear the gates and BH)"""
     O_by, cnt = games(rungs); cells = {}
     for D_min in DS:
@@ -165,5 +168,5 @@ def search(rungs, candles, carried=0):
                             tr.append({"game": d["r"]["event"], "day": d["D"] // 86400, "close_time": d["r"]["close_time"], "ticker": d["r"]["ticker"], "cash1": c1, "cash2": c2_, "cashw": cw, "marked": mk})
                         cells[(D_min, band[0], side, ex, f)] = cell_stats(tr)
     elig = eligible(cells)
-    surv = {k for k in bh(elig, N_CELLS + carried) if gate_ok(cells[k])}
+    surv = {k for k in bh(elig, m_total(carried, m_new)) if gate_ok(cells[k])}
     return cells, cnt, surv
