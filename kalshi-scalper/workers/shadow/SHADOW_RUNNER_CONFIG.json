@@ -1,0 +1,16 @@
+{
+ "list_version": "SHADOW_LIST_V1",
+ "list_file": "SHADOW_LIST_V1.json",
+ "list_sha256": "ac5a4a8dbb714ba5a4e96dd0c9748c92d36a0acf6e36aaeb9890103c37cfbf46",
+ "cuts_file": "SHADOW_SPREAD_CUTS_V1.json",
+ "cuts_sha256": "1e9478cc8dcd7347cdc4ae8d68941e52bdc461d2e046821e7238c363e5d91577",
+ "start_utc": 1794873600,
+ "start_utc_note": "2026-11-17T00:00:00Z, fixed by the Head of R&D on Nov 16, 2026, later than the list's freeze commit; written here, never computed from the run date",
+ "modules": {
+  "engine1_core": "53317e4b56a8328fb616d460d5cb4597af13a2b9020d73aefaa37717439694bf",
+  "engine1_enum": "e42ee1a45f67b76e8560cd9cbefac352fce9a765c8300bc04d5ce05a27e4d5a7",
+  "engine1_split": "00a94c6ef569261ec4f649f596075d85e2b407c43a2bbe9b0a593f75743e07fd",
+  "engine1_driver": "1281ce0a1dc0bce7875bbafc4774358f557e45d0897b8099f5615c33cf12640b"
+ },
+ "clause": "S1 of kalshi-scalper/workers/HOLDS.json: per-spec aggregates only; no spec changes after the first result; new specs only as a new list version with its own start_utc"
+}
