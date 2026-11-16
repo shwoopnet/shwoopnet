@@ -1,0 +1,35 @@
+# PERPBASIS1: Kalshi crypto perp premium over Coinbase spot, 1 minute (History Miner, Lane 5, written Nov 16, 2026 ~23:30Z, before any perp price, spot price or premium value is read; the Head's 23:15Z order)
+
+## Question, and a flag the Head must rule on first
+When the perp's premium over spot (BTC, ETH, XRP, 1 minute) is extreme, does it close within 15 to 60 minutes, and does trading the perp side pay after fees?
+FLAG (declined list, 7e): "lead-lag between related markets". A premium against Coinbase spot is another market's price, so this sits closer to that row than PERPCRYPTO1's BASIS did (that one used Kalshi's own reference_price). It is NOT a lead-lag strategy in the closed sense (no order flow, no "spot moves first" signal; the signal is the level of the gap and the bet is that the gap closes), but the Head should rule before a spec is written. Also 7g: this is the same mechanism family as PERPCRYPTO1's 8 BASIS cells (premium convergence, another timescale and source). Proposal: PERPBASIS1 REPLACES those 8 BASIS cells (withdrawn unrun, still counted as tried), so there is one premium strategy, not two. If the Head wants both, PERPBASIS1 is a version of BASIS and not unique.
+
+## Data (what exists; counts and names only, nothing read)
+- Perp 1 minute prices: KXBTCPERP only, the PERPBTC1M run (kalshi-pull-data, run 43252136600), 2026-06-03 to about 2026-11-12, bid.close and ask.close at each minute. No ETH or XRP 1 minute history (PERPETH1M paused). A 60 second recorder with depth 5 books (PR 998) holds all three from about 2026-11-13: its columns and its row spacing are to be confirmed by counts before the plugin is written.
+- Spot: Coinbase 1 minute candles, public, no key (PERPSPOT_BTC1M draft: BTC 2026-06-03 to 2026-11-12, about 777 requests of 300 candles; ETH and XRP for the forward windows only, a few requests a day). Needs the Coinbase route (PR 1020: Auditor B's read, then the owner's typed merge). Research only, a generic user agent, no key.
+- Labelled funding (PR 1021) for the holds that cross a print.
+
+## Cut (date constants)
+- BTC: SEARCH 2026-06-03T00:00Z to before 2026-09-15T00:00Z supplies cut points only and its trades are NEVER opened; VALIDATE 2026-09-15T00:00Z to before 2026-11-12T00:00Z (the run's end; anything after is not read).
+- ETH and XRP have no history: FORWARD-SEARCH 2026-11-17T00:00Z to before 2026-11-24T00:00Z supplies their cut points (premium values only, trades not opened); FORWARD-VALIDATE from 2026-11-24T00:00Z. BTC also has a forward window from 2026-11-17T00:00Z, whose cut points stay the SEARCH ones.
+- The cut points are computed once and committed (PERPBASIS1_THRESHOLDS.json, with print counts and the loader hash) BEFORE any outcome print.
+
+## Premium, signal, entry, exit
+- Premium at minute t = (perp mid - spot) / spot in basis points, perp mid = (bid.close + ask.close) / 2 of the perp minute ending at t; spot = the close of the Coinbase minute candle whose START is t - 60 s (the last COMPLETED candle, never one that closes after t).
+- Signal: the premium crosses from inside to outside a fixed per-ticker cut (upper or lower tail, q in {1 percent, 2.5 percent} of that ticker's SEARCH premiums, nearest rank, at least 5,000 SEARCH minutes). The signal is the FIRST minute outside after a minute inside (re-arm: after a trade, the next signal needs the premium back inside first).
+- Entry: the NEXT minute's far touch (buy at the ask, sell at the bid). Side: CONVERGE (short when the perp is rich, long when cheap) or FOLLOW. Hold H in {15 min, 60 min}; exit at the near touch of the minute at least H later (tolerance 2 minutes, else skipped). One position per ticker.
+- Cells: q {1, 2.5} x side {converge, follow} x hold {15, 60} = 8 rules, tries 8 (plus the 8 withdrawn BASIS cells counted as tried if the Head agrees).
+
+## Costs, funding, margin
+- Taker 12 bps a side (24 round trip), stress 5 bps a side, plus a haircut per fill 0.02 and 0.05 percent. ASSUMED until Kalshi's fee page is read. Candle bid and ask closes are not fill-checked: an upper bound.
+- Funding: a hold that crosses a funding print (05, 13, 21 UTC, every 8 hours) books funding on prints strictly between entry and exit from the labelled file (positive = longs pay). A trade whose hold crosses a print the labelled file lacks is EXCLUDED and counted, never guessed. A 15 or 60 minute hold crosses a print in about 3 to 12 percent of trades.
+- Margin: the margin return, the liquidation share and the fees as a share of margin at 10, 25 and 50 percent of the maximum leverage (BTC 15.4, ETH 10.5 and XRP 5.4, page maxima), maintenance 4.5 percent assumed, liquidation distance printed. A 1 minute path sees intra-hour excursions, so the share is exact on the candle closes (not a lower bound as on hourly rows) but still ignores intra-minute spikes.
+
+## Counterparty, prediction, kill, gate
+- Counterparty (stated, not shown): leveraged perp longs who pay a premium to be long on a thin venue, against arbitrageurs who are too few or too slow to close a gap of a few basis points. Prior VERY LOW: the round trip costs 24 bps and a premium that closes in an hour is typically a few bps; the bet is that the extreme tail is wide enough to pay it.
+- Prediction (numeric): at least one cell has PF 1.3 or better at taker with the 0.02 percent haircut and PF 1.0 or better at 0.05 percent, n 100 or more, 10 or more trade days, a pooled rate of 3 or more a day and a BH pass; the premium at entry must exceed the 24 bps round trip by enough that the median gap closed within the hold is at least 30 bps (if the VALIDATE cut points are all under 24 bps wide the cell is dead on arithmetic and is reported as such).
+- Kill: a cell is dropped when its pooled rate over the first 7 trade days is under 3.0 a day or its first read has PF under 1.0 at the primary haircut (kill_fast).
+- Trades a day (the 3 a day gate): the count of signals (crossings with the re-arm rule) over the first 7 distinct trade days, three names pooled, fixed and committed before any outcome print. Expected rate: not knowable from arithmetic (a crossing rate depends on premium autocorrelation); the measured crossing counts per ticker and q (counts only, from the SEARCH premiums) replace this line in a dated amendment before any outcome print. BTC alone in VALIDATE prints its own rate.
+
+## Uniqueness and the first reads
+Closest existing: PERPCRYPTO1 BASIS (the hourly perp against Kalshi's reference_price, 8 cells), FUNDX2 (the funding print, not the premium), PERP1 to PERP3 (daily trend, FALSIFIED), the declined row on lead-lag (flagged above). Different from FUNDX2: the signal is the level of the premium against an independent price, not a funding print. Needs before any read: the Head's ruling on the flag, the Coinbase route merged, PERPSPOT_BTC1M (and the forward ETH and XRP spot pulls) dispatched, a loader and plugin with hand cases audited once by Auditor B, the thresholds file, and the allow line. Nothing runs until then.
