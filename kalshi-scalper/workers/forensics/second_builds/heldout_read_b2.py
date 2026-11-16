@@ -3,7 +3,29 @@
 Two modes. (1) --dry <barlist> <archive_extract>: runs THIS code on the archive's own VALIDATE markets as if they were the held-out set and requires n, pf_1c, pf_2c to equal the listing (1e-9); nothing held out is opened. (2) --read <barlist> <archive_extract> <heldout_extract> <desk_a_print_file>: refuses unless the path of Desk A's committed print FILE can be opened and is not empty (the build computes and prints that file's sha256 itself; a typed hash is never accepted); prints counts, the SEARCH cut sha256, per rule verdict counts and BH survivors. Needs Auditor B's allow line for this reader before it is pointed at the held-out extract.
 Floors (plan v3): n floor 74 for KXBTC15M KXETH15M KXXRP15M KXDOGE15M KXGOLD15M, 90 for the rest; holds = n >= floor and pf_1c >= 1.3 and pf_2c >= 1.0; below the floor 'no evidence'; BH over m = 190 on rules with a p (one sided, day clustered, UTC close date, 1c nets at 10 contracts; k < 2 days or sd 0 gives p = 1)."""
 import sys, os, json, sqlite3, hashlib, collections, calendar, re
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.dirname(os.path.abspath(__file__))
+PINS = {"shadow_rank_b2.py": "32b9580e094f282b302601e838001f0f152a7c01f9bf8c22e19c6c1392462ab6", "engb4xbtc_b2.py": "36cee8055caa9dc7e8d94367d3decbbe61e521d920a76f96a9bfa21f9a67e9e3"}   # the two imported files, pinned: any change refuses
+EXTRACT_SHA = "20977a1f78c7859f750cc9362e7956da32407d1e1d4b062019e26774f313f6ca"; EXTRACT_XZ_SHA = "f1f6804c9f8a008864113e893e7f05cc062c099651b9a8692e67995dbac9cc54"
+ALLOW_FILE = os.path.join(HERE, "..", "..", "HELDOUT_PULL_RUNS.md")
+def sha_of(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""): h.update(chunk)
+    return h.hexdigest()
+def check_pins(folder=HERE, pins=None):
+    for name, want in (PINS if pins is None else pins).items():
+        try: got = sha_of(os.path.join(folder, name))
+        except OSError: raise SystemExit("REFUSED: %s cannot be read" % name)
+        if got != want: raise SystemExit("REFUSED: %s differs from its pinned sha256" % name)
+def check_allow(extract_path, allow_file=None, self_path=None):
+    allow_file = ALLOW_FILE if allow_file is None else allow_file; self_path = os.path.abspath(__file__) if self_path is None else self_path
+    try: lines = open(allow_file).read().splitlines()
+    except OSError: raise SystemExit("REFUSED: HELDOUT_PULL_RUNS.md cannot be read")
+    need = [os.path.basename(self_path), sha_of(self_path), EXTRACT_SHA, EXTRACT_XZ_SHA]
+    if not any(all(n in l for n in need) for l in lines): raise SystemExit("REFUSED: no line of HELDOUT_PULL_RUNS.md names this reader, its sha256 and the extract's sha256 values")
+    if sha_of(extract_path) != EXTRACT_SHA: raise SystemExit("REFUSED: the extract file does not hash to the allowed sha256")
+check_pins()
+sys.path.insert(0, HERE)
 import shadow_rank_b2 as P
 import engb4xbtc_b2 as E
 R6 = ("KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXGOLD15M")
@@ -52,7 +74,7 @@ def main(a):
     except OSError: raise SystemExit("REFUSED: Desk A's print file cannot be opened")
     if not pb.strip(): raise SystemExit("REFUSED: Desk A's print file is empty")
     a = a[:4] + [hashlib.sha256(pb).hexdigest()]
-    held = load(a[3], series); sc = score_rules(L, held, cuts); m_bh = 190; rows = []
+    check_allow(a[3]); held = load(a[3], series); sc = score_rules(L, held, cuts); m_bh = 190; rows = []
     for r, res in sc:
         x1 = [x[1] for x in res[0.01]]; x2 = [x[1] for x in res[0.02]]; floor = 74 if r["series"] in R6 else 90; n = len(x1)
         z, p, k = E.pval(res[0.01]) if n else (None, 1.0, 0)
