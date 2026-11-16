@@ -29,6 +29,10 @@ assert len(base) == 9 and sum(1 for t in base if v.cash(t, 0) > 0) == 7
 assert v.median([1, 3, 2]) == 2 and v.median([10, 10, 10, 20, 20, 30]) == 15
 assert v.cash((0, "x", "yes", .5, "void"), 0) == -0.18
 assert (v.HAIRCUTS, v.E_LOOK, v.P_LOOK, v.MIN_PRIOR, v.MULT, v.STILL, v.LO, v.HI, v.CUT_TS) == ((0.0, 0.01, 0.02), 600, 660, 5, 3.0, 0.01, 0.50, 0.80, 1791043200)
+b1, b2 = v.block(tr, .01), v.block(tr, .02)
+assert v.verdict({"pf": 2, "n": 90, "h1": 1, "h2": 1, "z": 3}, {"pf": 2, "n": 90, "h1": 1, "h2": 1, "z": 3}) is True
+ok = {"pf": 2, "n": 90, "h1": 1, "h2": 1, "z": 3}
+assert v.verdict(ok, ok, {"pf": 1.49}, {"pf": 1.49}) is True and v.verdict(ok, ok, {"pf": 1.5}, {"pf": 1.2}) is False and v.verdict(ok, ok, {"pf": 1.2}, {"pf": 1.5}) is False
 # exactly 5 positive priors is enough (edge), 4 is not
 for pri, want_n in (([10, 10, 20, 10, 30], 1), ([10, 20, 10, 30], 0)):
     cs = {10000 - 660 - 60 * j: (.60, .62, vol) for j, vol in enumerate(reversed(pri))}; cs[10000 - 600] = (.60, .62, 60)

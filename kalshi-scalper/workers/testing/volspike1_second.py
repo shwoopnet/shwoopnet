@@ -75,7 +75,9 @@ def block(tr, h, day_of=utc_day):
     return {"n": k, "wins": sum(1 for v in cs if v > 0), "net": sum(cs), "pf": pf(cs), "h1": pf(cs[:h2]), "h2": pf(cs[h2:]), "z": day_z([(day_of(t[0]), c) for t, c in zip(tr, cs)])}
 
 
-def verdict(b1, b2):
+def verdict(b1, b2, base1=None, base2=None):
+    """base1, base2: the no-spike baseline blocks at 1c and 2c; a spike result that clears 1.5 while the baseline also clears it is not a spike finding (Auditor B)"""
+    if base1 is not None and (base1["pf"] >= 1.5 or base2["pf"] >= 1.5): return False
     return b2["n"] >= 80 and b2["pf"] >= 1.5 and b1["pf"] >= 1.5 and b2["h1"] >= 1.0 and b2["h2"] >= 1.0 and b2["z"] is not None and b2["z"] >= 2.0
 
 
@@ -107,12 +109,14 @@ def main(path):
     tr, base, sk = trades(ms, cands)
     print("skips", sk)
     bs = show("VOLSPIKE1", tr)
-    print(f"  pass (1c and 2c bars): {verdict(bs[0.01], bs[0.02])}   (development data already read for OIREL-X, no held-out inside: a pass is a lead for the forward shadow, not a pass)")
+    bb = {h: block(base, h) for h in HAIRCUTS}
+    print(f"  baseline (same E candle and band, no spike or still-price condition) n {len(base)}: 1c PF {bb[0.01]['pf']:.4f} 2c PF {bb[0.02]['pf']:.4f}; spike minus baseline PF: 1c {bs[0.01]['pf'] - bb[0.01]['pf']:.4f} 2c {bs[0.02]['pf'] - bb[0.02]['pf']:.4f}")
+    print(f"  pass (1c and 2c bars, and the baseline must not itself clear 1.5): {verdict(bs[0.01], bs[0.02], bb[0.01], bb[0.02])}   (development data already read for OIREL-X, no held-out inside: a pass is a lead for the forward shadow, not a pass; favourite-late family, a closed family, only the spike is new)")
     std = [t for t in tr if t[1].split("-")[0] in STANDARD]
     if std:
         sb = {h: block(std, h) for h in HAIRCUTS}
         print(f"  standard series (gold, platinum, palladium; both bars as flags): n {len(std)} 1c PF {sb[0.01]['pf']:.4f} 2c PF {sb[0.02]['pf']:.4f}")
-    show("baseline (context only, not a pass test)", base)
+    show("baseline detail", base)
 
 
 if __name__ == "__main__":
