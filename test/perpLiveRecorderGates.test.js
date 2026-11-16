@@ -66,6 +66,10 @@ st = list(csv.reader(open(os.path.join(out, "static.csv"))))
 assert st[0] == R.STATIC_COLS and len(st) == 3 and st[1][1] == "KXAAAPERP" and st[1][4] == "0.001" and st[1][13] == "a|b", st
 assert c[0] == R.COVER_COLS and len(c) >= 2 and c[1][1] == "1" and c[1][3] == "1", c
 assert all(p == "/markets" or p.startswith("/markets/orderbooks") for p in calls) and len(calls) <= R.REQUEST_BUDGET
+# the API lists the whole book best level LAST (bids ascending, asks descending): the recorder must keep the five levels nearest the touch, best first
+assert R.levels([["3.1", "96"], ["3.5", "1"], ["3.6", "35"], ["3.7", "5"], ["3.8", "6"], ["3.9", "7"], ["4.0", "8"]], True) == [(4.0, 8.0), (3.9, 7.0), (3.8, 6.0), (3.7, 5.0), (3.6, 35.0)]
+assert R.levels([["4.7", "1"], ["4.4", "2"], ["4.3", "3"], ["4.2", "4"], ["4.1", "5"], ["4.0", "6"]], False) == [(4.0, 6.0), (4.1, 5.0), (4.2, 4.0), (4.3, 3.0), (4.4, 2.0)]
+assert R.levels([], True) == [("", "")] * 5 and R.levels([["3.0", "1"]], False) == [(3.0, 1.0)] + [("", "")] * 4
 print("fixture ok", len(rows) - 1, "market rows", len(b) - 1, "book rows", len(calls), "requests")
 `;
 let r = spawnSync('python3', ['-I', '-c', prog, path.join(t, 'a')], { encoding: 'utf8' });

@@ -75,11 +75,14 @@ def num(x):
         return ""
 
 
-def levels(lv):
+def levels(lv, best_is_high):
+    # The API lists the whole book with the BEST level LAST (bids ascending, asks descending), so the first five entries are the far levels.
+    # Sort by price and keep the five nearest the touch: highest bids first, lowest asks first.
     out = []
-    for p in (lv if isinstance(lv, list) else [])[:DEPTH]:
-        if isinstance(p, (list, tuple)) and len(p) >= 2:
+    for p in (lv if isinstance(lv, list) else []):
+        if isinstance(p, (list, tuple)) and len(p) >= 2 and num(p[0]) != "":
             out.append((num(p[0]), num(p[1])))
+    out.sort(key=lambda x: x[0], reverse=best_is_high); out = out[:DEPTH]
     return out + [("", "")] * (DEPTH - len(out))
 
 
@@ -107,7 +110,7 @@ def static_row(m, t1):
 
 def book_row(e, t0, t1, date):
     ob = e.get("orderbook") if isinstance(e.get("orderbook"), dict) else {}
-    b, a = levels(ob.get("bids")), levels(ob.get("asks"))
+    b, a = levels(ob.get("bids"), True), levels(ob.get("asks"), False)
     return [t0, t1, date, e.get("ticker", "")] + [x[0] for x in b] + [x[1] for x in b] + [x[0] for x in a] + [x[1] for x in a]
 
 
