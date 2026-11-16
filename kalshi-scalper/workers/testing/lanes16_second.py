@@ -19,9 +19,9 @@ def tick_of(s):
     return round(min(d), 9) if d else None
 
 
-def kept_baskets(data, funding):
+def kept_baskets(data, funding, baskets=None):
     names = set(P.pool_names(data, funding)); out, dropped = {}, []
-    for b, ns in BASKETS.items():
+    for b, ns in (baskets or BASKETS).items():
         k = tuple(n for n in ns if n in names)
         if len(k) >= 3: out[b] = k
         else: dropped.append(b)
@@ -181,23 +181,20 @@ def day_p(trades):
 
 
 def margin(trades, lmax, fracs=(0.10, 0.25, 0.50)):
-    """per fraction: mean pct of margin, worst and mean liquidation distance, names with no buffer. Single: 100 x net x f L. Pair: 100 x net_leg / (1/(f L1) + 1/(f L2)). Refuses a name with no page max."""
-    out = {}
+    """per fraction: mean pct of margin, worst and mean liquidation distance, names with no buffer. Single: 100 x net x f L. Pair: 100 x net_leg / (1/(f L1) + 1/(f L2)). A3: a trade that touches a name with no page max is left out of every margin figure and counted (not_shown, names), no default."""
+    out = {}; shown = [t for t in trades if all(n in lmax for (n, _w) in t["legs"])]; hidden = [t for t in trades if t not in shown]
+    hn = sorted(set(n for t in hidden for (n, _w) in t["legs"] if n not in lmax))
     for x in fracs:
         pct = []; liq = []; nobuf = set()
-        for t in trades:
-            ls = []
-            for (n, _w) in t["legs"]:
-                if n not in lmax: raise SystemExit("REFUSED: no page max for %s" % n)
-                ls.append(x * lmax[n])
-            maint = [0.0447 if "GOLD" in n else 0.045 for (n, _w) in t["legs"]]
+        for t in shown:
+            ls = [x * lmax[n] for (n, _w) in t["legs"]]; maint = [0.0447 if "GOLD" in n else 0.045 for (n, _w) in t["legs"]]
             if t["side"] == "pair": pct.append(100 * t["net_leg"] / sum(1 / L for L in ls))
             else: pct.append(100 * t["net"] * ls[0])
             d = [1 / L - m_ for L, m_ in zip(ls, maint)]; liq.append(min(d))
             for (n, _w), dd in zip(t["legs"], d):
                 if dd <= 0: nobuf.add(n)
-        k = len(trades)
-        out["%d%%" % round(x * 100)] = {"mean_pct_of_margin": sum(pct) / k if k else None, "worst_liq": min(liq) if liq else None, "mean_liq": sum(liq) / k if k else None, "no_buffer": sorted(nobuf)}
+        k = len(shown)
+        out["%d%%" % round(x * 100)] = {"mean_pct_of_margin": sum(pct) / k if k else None, "worst_liq": min(liq) if liq else None, "mean_liq": sum(liq) / k if k else None, "no_buffer": sorted(nobuf), "trades_without_page_max_not_shown": len(hidden), "names_without_page_max": hn}
     return out
 
 

@@ -1,0 +1,624 @@
+rs_L30_c1_follow	1	1	15	TT	35	188	43	0	0	-29.7790535945	-1.71871377774	5	False	False
+rs_L30_c1_follow	1	1	15	ME2	26	188	32	0	0	-21.9988055538	-1.31442591886	4	False	False
+rs_L30_c1_follow	1	1	15	ME5	27	188	34	0	0	-20.9969989529	-1.24185618291	4	False	False
+rs_L30_c1_follow	1	1	15	MM2	26	188	32	0.00398383380326	0.00351894208186	-21.7449006274	-1.30242314052	4	False	False
+rs_L30_c1_follow	1	1	15	MM5	27	188	34	0.00961829047196	0.00847912213612	-20.4749247077	-1.19710645622	4	False	False
+rs_L30_c1_follow	1	1	30	TT	29	188	37	0	0	-30.4098402484	-1.75414980308	4	False	False
+rs_L30_c1_follow	1	1	30	ME2	22	188	28	0	0	-25.9540215801	-1.61703787813	3	False	False
+rs_L30_c1_follow	1	1	30	ME5	23	188	30	0	0	-25.0231298259	-1.54534972848	3	False	False
+rs_L30_c1_follow	1	1	30	MM2	22	188	28	0.00399072701758	0.00359145492398	-25.6539521217	-1.60313992427	3	False	False
+rs_L30_c1_follow	1	1	30	MM5	23	188	30	0.00947213350873	0.00852468309279	-24.4102600597	-1.49388754278	3	False	False
+rs_L30_c1_follow	1	1	60	TT	25	188	32	0	0	-32.5809647086	-1.86815647317	4	False	False
+rs_L30_c1_follow	1	1	60	ME2	20	188	26	0	0	-27.4938976108	-1.79022497539	3	False	False
+rs_L30_c1_follow	1	1	60	ME5	21	188	26	0	0	-26.2089419317	-1.70327602824	3	False	False
+rs_L30_c1_follow	1	1	60	MM2	20	188	26	0.0086834518706	0.00792602201951	-26.450339577	-1.75790416509	3	False	False
+rs_L30_c1_follow	1	1	60	MM5	21	188	26	0.014612851225	0.0133296826363	-24.8581973026	-1.63024067459	3	False	False
+rs_L30_c1_follow	1	2	15	TT	35	188	43	0	0	-29.4215951667	-1.70813467462	5	False	False
+rs_L30_c1_follow	1	2	15	ME2	26	188	32	0	0	-21.8185361352	-1.29654278709	4	False	False
+rs_L30_c1_follow	1	2	15	ME5	27	188	34	0	0	-20.6753637816	-1.21779902254	4	False	False
+rs_L30_c1_follow	1	2	15	MM2	26	188	32	0.00401700286292	0.00354479747734	-21.5646312088	-1.28454000875	4	False	False
+rs_L30_c1_follow	1	2	15	MM5	27	188	34	0.0097702932162	0.00859701682778	-20.1532895364	-1.17304929585	4	False	False
+rs_L30_c1_follow	1	2	30	TT	29	188	37	0	0	-30.1108954216	-1.66979555102	4	False	False
+rs_L30_c1_follow	1	2	30	ME2	22	188	28	0	0	-26.3058457766	-1.57937235311	3	False	False
+rs_L30_c1_follow	1	2	30	ME5	23	188	30	0	0	-25.4116684361	-1.51958451917	3	False	False
+rs_L30_c1_follow	1	2	30	MM2	22	188	28	0.00393695024522	0.00354783910773	-26.0057763182	-1.56547439924	3	False	False
+rs_L30_c1_follow	1	2	30	MM5	23	188	30	0.0093251114482	0.00840541509936	-24.79879867	-1.46812233347	3	False	False
+rs_L30_c1_follow	1	2	60	TT	22	188	28	0	0	-34.8328674467	-1.96410713688	4	False	False
+rs_L30_c1_follow	1	2	60	ME2	19	188	24	0	0	-29.1338270257	-1.79579119846	3	False	False
+rs_L30_c1_follow	1	2	60	ME5	20	188	25	0	0	-27.7028689683	-1.70852439685	3	False	False
+rs_L30_c1_follow	1	2	60	MM2	19	188	24	0.00862422525871	0.0079171161351	-28.0353448849	-1.76145033751	3	False	False
+rs_L30_c1_follow	1	2	60	MM5	20	188	25	0.0145123263389	0.0133144944653	-26.2845871078	-1.63119284592	3	False	False
+rs_L30_c1_follow	2	1	15	TT	35	188	43	0	0	-29.9063254504	-1.72465313101	5	False	False
+rs_L30_c1_follow	2	1	15	ME2	26	188	32	0	0	-22.2610561895	-1.32682322164	4	False	False
+rs_L30_c1_follow	2	1	15	ME5	27	188	34	0	0	-21.1619876307	-1.2435566489	4	False	False
+rs_L30_c1_follow	2	1	15	MM2	26	188	32	0	0	-22.2610561895	-1.32682322164	4	False	False
+rs_L30_c1_follow	2	1	15	MM5	27	188	34	0	0	-21.1619876307	-1.2435566489	4	False	False
+rs_L30_c1_follow	2	1	30	TT	29	188	37	0.00297212576222	0	-30.2475985811	-1.72483229701	4	False	False
+rs_L30_c1_follow	2	1	30	ME2	22	188	28	0	0	-26.0951017948	-1.62357211966	3	False	False
+rs_L30_c1_follow	2	1	30	ME5	22	188	29	0.0138108309459	0.00752135253171	-24.7016439222	-1.44941033244	3	False	False
+rs_L30_c1_follow	2	1	30	MM2	22	188	28	0	0	-26.0951017948	-1.62357211966	3	False	False
+rs_L30_c1_follow	2	1	30	MM5	22	188	29	0.0293059276272	0.0262995836689	-24.313529377	-1.40447075353	3	False	False
+rs_L30_c1_follow	2	1	60	TT	24	188	31	0.00395130935795	0	-31.4693095516	-1.80073457861	4	False	False
+rs_L30_c1_follow	2	1	60	ME2	19	188	25	0	0	-28.0109322332	-1.84617332274	3	False	False
+rs_L30_c1_follow	2	1	60	ME5	20	188	25	0.0143398696759	0.00785833546428	-26.1553242455	-1.68481850546	3	False	False
+rs_L30_c1_follow	2	1	60	MM2	19	188	25	0	0	-28.0109322332	-1.84617332274	3	False	False
+rs_L30_c1_follow	2	1	60	MM5	20	188	25	0.0304285226974	0.0274778971163	-25.7283982459	-1.63459191726	3	False	False
+rs_L30_c1_follow	2	2	15	TT	35	188	43	0	0	-29.5488670226	-1.71407402789	5	False	False
+rs_L30_c1_follow	2	2	15	ME2	26	188	32	0	0	-22.0807867709	-1.30894008987	4	False	False
+rs_L30_c1_follow	2	2	15	ME5	27	188	34	0	0	-20.8403524594	-1.21949948852	4	False	False
+rs_L30_c1_follow	2	2	15	MM2	26	188	32	0	0	-22.0807867709	-1.30894008987	4	False	False
+rs_L30_c1_follow	2	2	15	MM5	27	188	34	0	0	-20.8403524594	-1.21949948852	4	False	False
+rs_L30_c1_follow	2	2	30	TT	29	188	37	0.00300170420703	0	-29.9486537543	-1.64047804495	4	False	False
+rs_L30_c1_follow	2	2	30	ME2	22	188	28	0	0	-26.4741693519	-1.58716839238	3	False	False
+rs_L30_c1_follow	2	2	30	ME5	22	188	29	0.0135759028796	0.00740633172666	-25.135086739	-1.42355085724	3	False	False
+rs_L30_c1_follow	2	2	30	MM2	22	188	28	0	0	-26.4741693519	-1.58716839238	3	False	False
+rs_L30_c1_follow	2	2	30	MM5	22	188	29	0.0288074214233	0.0258973954623	-24.7469721938	-1.37861127833	3	False	False
+rs_L30_c1_follow	2	2	60	TT	21	188	27	0.00172957567086	0	-34.7049640821	-1.93542643396	4	False	False
+rs_L30_c1_follow	2	2	60	ME2	18	188	23	0	0	-30.2517129352	-1.87892947485	3	False	False
+rs_L30_c1_follow	2	2	60	ME5	19	188	24	0.0140143324595	0.00773561668624	-28.1807601497	-1.71088719976	3	False	False
+rs_L30_c1_follow	2	2	60	MM2	18	188	23	0	0	-30.2517129352	-1.87892947485	3	False	False
+rs_L30_c1_follow	2	2	60	MM5	19	188	24	0.0297377481784	0.0270487917449	-27.7313643606	-1.6575214498	3	False	False
+rs_L30_c1_revert	1	1	15	TT	38	188	46	0	0	-28.9025607326	-1.57829909879	6	False	False
+rs_L30_c1_revert	1	1	15	ME2	23	188	28	0	0	-19.5107908547	-1.22566946453	4	False	False
+rs_L30_c1_revert	1	1	15	ME5	25	188	30	0	0	-19.3074579477	-1.13337113412	4	False	False
+rs_L30_c1_revert	1	1	15	MM2	23	188	28	0.0119050474774	0.0104031477188	-18.7466291448	-1.16110303885	4	False	False
+rs_L30_c1_revert	1	1	15	MM5	25	188	30	0.0109533793967	0.00955398755233	-18.6366375811	-1.07878822595	4	False	False
+rs_L30_c1_revert	1	1	30	TT	33	188	41	0	0	-27.9919025897	-1.57488460159	4	False	False
+rs_L30_c1_revert	1	1	30	ME2	20	188	25	0	0	-18.1898028092	-1.09913676313	3	False	False
+rs_L30_c1_revert	1	1	30	ME5	22	188	27	0	0	-18.028543284	-1.01444205913	3	False	False
+rs_L30_c1_revert	1	1	30	MM2	20	188	25	0.0333956816382	0.0294647223984	-16.2992842795	-1.01168965964	3	False	False
+rs_L30_c1_revert	1	1	30	MM5	22	188	27	0.03043296304	0.0267473811963	-16.3098900752	-0.936199913897	3	False	False
+rs_L30_c1_revert	1	1	60	TT	29	188	35	0	0	-26.5871451477	-1.38676580469	4	False	False
+rs_L30_c1_revert	1	1	60	ME2	17	188	22	0	0	-15.8800971681	-0.91292459225	3	False	False
+rs_L30_c1_revert	1	1	60	ME5	18	188	23	0	0	-16.2917519152	-0.891455511108	3	False	False
+rs_L30_c1_revert	1	1	60	MM2	17	188	22	0.0938588667568	0.084017131513	-12.2846888922	-0.673052847617	3	False	False
+rs_L30_c1_revert	1	1	60	MM5	18	188	23	0.0861914386904	0.0770041082291	-12.7630394487	-0.651609324752	3	False	False
+rs_L30_c1_revert	1	2	15	TT	35	188	43	0	0	-28.1647291306	-1.57723591973	5	False	False
+rs_L30_c1_revert	1	2	15	ME2	22	188	27	0	0	-19.2396241203	-1.2371478592	4	False	False
+rs_L30_c1_revert	1	2	15	ME5	24	188	29	0	0	-19.3488489832	-1.15341154463	4	False	False
+rs_L30_c1_revert	1	2	15	MM2	22	188	27	0.00574458503448	0.00499058544993	-18.8428564576	-1.18865403375	4	False	False
+rs_L30_c1_revert	1	2	15	MM5	24	188	29	0.00514382671286	0.00447141119031	-19.0186957158	-1.11379315255	4	False	False
+rs_L30_c1_revert	1	2	30	TT	29	188	37	0	0	-28.0630612528	-1.6360802144	4	False	False
+rs_L30_c1_revert	1	2	30	ME2	19	188	24	0	0	-19.0508908887	-1.21260340402	3	False	False
+rs_L30_c1_revert	1	2	30	ME5	21	188	26	0	0	-18.4267447681	-1.09318007232	3	False	False
+rs_L30_c1_revert	1	2	30	MM2	19	188	24	0.0198818509299	0.0174730415648	-17.9520697563	-1.16202277926	3	False	False
+rs_L30_c1_revert	1	2	30	MM5	21	188	26	0.0230933182306	0.0202729600127	-17.047528585	-1.03025076513	3	False	False
+rs_L30_c1_revert	1	2	60	TT	22	188	28	0	0	-26.0850094707	-1.50113441531	4	False	False
+rs_L30_c1_revert	1	2	60	ME2	15	188	20	0	0	-16.2900807404	-1.04047662698	3	False	False
+rs_L30_c1_revert	1	2	60	ME5	16	188	21	0	0	-17.3203598519	-1.03507649656	3	False	False
+rs_L30_c1_revert	1	2	60	MM2	15	188	20	0.0894489088592	0.0803984636766	-12.9324276008	-0.796483403561	3	False	False
+rs_L30_c1_revert	1	2	60	MM5	16	188	21	0.0784257149738	0.0706010200494	-14.0228798019	-0.791429800288	3	False	False
+rs_L30_c1_revert	2	1	15	TT	38	188	46	0	0	-28.8810014058	-1.57573892874	6	False	False
+rs_L30_c1_revert	2	1	15	ME2	23	188	28	0	0	-19.4963035196	-1.2283168234	4	False	False
+rs_L30_c1_revert	2	1	15	ME5	25	188	30	0	0	-19.199458333	-1.12449597471	4	False	False
+rs_L30_c1_revert	2	1	15	MM2	23	188	28	0	0	-19.4963035196	-1.2283168234	4	False	False
+rs_L30_c1_revert	2	1	15	MM5	25	188	30	0	0	-19.199458333	-1.12449597471	4	False	False
+rs_L30_c1_revert	2	1	30	TT	33	188	41	0	0	-27.9250237585	-1.57461908589	4	False	False
+rs_L30_c1_revert	2	1	30	ME2	20	188	25	0.0216071490136	0.0117791947166	-18.2340895599	-1.11565172621	3	False	False
+rs_L30_c1_revert	2	1	30	ME5	22	188	27	0.0198579857396	0.0108029722437	-18.0688039664	-1.02921860504	3	False	False
+rs_L30_c1_revert	2	1	30	MM2	20	188	25	0.041851868555	0.0363011628898	-17.8567932327	-1.09789660493	3	False	False
+rs_L30_c1_revert	2	1	30	MM5	22	188	27	0.0384638347437	0.0332926371071	-17.7258073053	-1.0133324439	3	False	False
+rs_L30_c1_revert	2	1	60	TT	27	188	33	0.0019212686492	0	-25.3208373288	-1.45331341351	4	False	False
+rs_L30_c1_revert	2	1	60	ME2	16	188	21	0.0858848268983	0.0379591196229	-15.5411482944	-0.889217230982	3	False	False
+rs_L30_c1_revert	2	1	60	ME5	17	188	22	0.0797481933347	0.0352253171945	-15.8582594336	-0.851066277322	3	False	False
+rs_L30_c1_revert	2	1	60	MM2	16	188	21	0.140553058816	0.105597179363	-14.6117171634	-0.865998995462	3	False	False
+rs_L30_c1_revert	2	1	60	MM5	17	188	22	0.13051027653	0.0979921076898	-14.9835007221	-0.829506487197	3	False	False
+rs_L30_c1_revert	2	2	15	TT	35	188	43	0	0	-28.4559270317	-1.61120900819	5	False	False
+rs_L30_c1_revert	2	2	15	ME2	22	188	27	0	0	-19.2878272771	-1.24303935613	4	False	False
+rs_L30_c1_revert	2	2	15	ME5	24	188	29	0	0	-19.2944193077	-1.14687998357	4	False	False
+rs_L30_c1_revert	2	2	15	MM2	22	188	27	0	0	-19.2878272771	-1.24303935613	4	False	False
+rs_L30_c1_revert	2	2	15	MM5	24	188	29	0	0	-19.2944193077	-1.14687998357	4	False	False
+rs_L30_c1_revert	2	2	30	TT	29	188	37	0	0	-27.9680367699	-1.64403815013	4	False	False
+rs_L30_c1_revert	2	2	30	ME2	19	188	24	0	0	-19.3838566728	-1.24375208951	3	False	False
+rs_L30_c1_revert	2	2	30	ME5	21	188	26	0	0	-19.0184711251	-1.13442313408	3	False	False
+rs_L30_c1_revert	2	2	30	MM2	19	188	24	0	0	-19.3838566728	-1.24375208951	3	False	False
+rs_L30_c1_revert	2	2	30	MM5	21	188	26	0	0	-19.0184711251	-1.13442313408	3	False	False
+rs_L30_c1_revert	2	2	60	TT	21	188	27	0.00404218728885	0	-23.6334061963	-1.48549350942	4	False	False
+rs_L30_c1_revert	2	2	60	ME2	13	188	18	0.110915185652	0.0432132830487	-12.9697715662	-0.908696317106	3	False	False
+rs_L30_c1_revert	2	2	60	ME5	14	188	19	0.0955843319551	0.0374454593156	-14.2159808522	-0.892859418834	3	False	False
+rs_L30_c1_revert	2	2	60	MM2	13	188	18	0.190729587617	0.140568691957	-11.8054568186	-0.877451836444	3	False	False
+rs_L30_c1_revert	2	2	60	MM5	14	188	19	0.164366674494	0.12180651097	-13.1348314437	-0.864455345505	3	False	False
+rs_L30_c2_follow	1	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	1	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_follow	2	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	1	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L30_c2_revert	2	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c1_follow	1	1	15	TT	48	251	56	0	0	-31.1612565035	-1.47682901345	9	False	False
+rs_L60_c1_follow	1	1	15	ME2	40	251	46	0	0	-22.2878032174	-1.13372620417	9	False	False
+rs_L60_c1_follow	1	1	15	ME5	41	251	47	0	0	-22.4301778785	-1.1385336079	9	False	False
+rs_L60_c1_follow	1	1	15	MM2	40	251	46	0.00254892938066	0.00225198069988	-22.1227650153	-1.12520810341	9	False	False
+rs_L60_c1_follow	1	1	15	MM5	41	251	47	0.00247060611557	0.00218427009955	-22.2691649984	-1.1302816978	9	False	False
+rs_L60_c1_follow	1	1	30	TT	39	251	45	0	0	-31.7970331908	-1.56227705743	9	False	False
+rs_L60_c1_follow	1	1	30	ME2	34	251	39	0	0	-22.5758226577	-1.17792905525	8	False	False
+rs_L60_c1_follow	1	1	30	ME5	34	251	39	0	0	-22.5087418841	-1.16630744123	8	False	False
+rs_L60_c1_follow	1	1	30	MM2	34	251	39	0.0188158249055	0.0168862090164	-21.2075001816	-1.13313916227	8	False	False
+rs_L60_c1_follow	1	1	30	MM5	34	251	39	0.0188317983981	0.0168951091401	-21.1405086937	-1.12151754826	8	False	False
+rs_L60_c1_follow	1	1	60	TT	34	251	40	0	0	-31.0038224561	-1.45790063546	7	False	False
+rs_L60_c1_follow	1	1	60	ME2	31	251	36	0	0	-22.4042394771	-1.08904772062	7	False	False
+rs_L60_c1_follow	1	1	60	ME5	31	251	36	0	0	-22.4547111931	-1.09248001167	7	False	False
+rs_L60_c1_follow	1	1	60	MM2	31	251	36	0.0345650859652	0.0313705032441	-20.1814334109	-0.964471216892	7	False	False
+rs_L60_c1_follow	1	1	60	MM5	31	251	36	0.0344344721252	0.0312587987338	-20.2320030531	-0.96790350795	7	False	False
+rs_L60_c1_follow	1	2	15	TT	47	251	54	0	0	-30.8773702234	-1.46738778166	9	False	False
+rs_L60_c1_follow	1	2	15	ME2	40	251	46	0	0	-22.4829377904	-1.13792086616	9	False	False
+rs_L60_c1_follow	1	2	15	ME5	41	251	47	0	0	-22.6666475928	-1.14495936961	9	False	False
+rs_L60_c1_follow	1	2	15	MM2	40	251	46	0.00252669935387	0.00223461116397	-22.3178995883	-1.1294027654	9	False	False
+rs_L60_c1_follow	1	2	15	MM5	41	251	47	0.00244471058886	0.00216400364191	-22.5056347127	-1.1367074595	9	False	False
+rs_L60_c1_follow	1	2	30	TT	36	251	41	0	0	-31.5563645504	-1.56339435654	8	False	False
+rs_L60_c1_follow	1	2	30	ME2	33	251	38	0	0	-22.4605466098	-1.11471392254	8	False	False
+rs_L60_c1_follow	1	2	30	ME5	33	251	38	0	0	-22.3196201762	-1.09995055879	8	False	False
+rs_L60_c1_follow	1	2	30	MM2	33	251	38	0.0195164013903	0.0175145529777	-21.0507598164	-1.06813243384	8	False	False
+rs_L60_c1_follow	1	2	30	MM5	33	251	38	0.0196010393786	0.0175785311813	-20.909925374	-1.0533690701	8	False	False
+rs_L60_c1_follow	1	2	60	TT	29	251	34	0	0	-29.4899320675	-1.26001556707	7	False	False
+rs_L60_c1_follow	1	2	60	ME2	25	251	30	0	0	-22.4460931814	-0.845069643226	7	False	False
+rs_L60_c1_follow	1	2	60	ME5	25	251	30	0	0	-22.3004237601	-0.824678240281	7	False	False
+rs_L60_c1_follow	1	2	60	MM2	25	251	30	0.0406026928983	0.0371248304391	-19.6624708922	-0.649120297402	7	False	False
+rs_L60_c1_follow	1	2	60	MM5	25	251	30	0.0397084318736	0.036307168197	-19.6807984206	-0.651489383519	7	False	False
+rs_L60_c1_follow	2	1	15	TT	48	251	56	0	0	-31.1612565035	-1.47682901345	9	False	False
+rs_L60_c1_follow	2	1	15	ME2	39	251	45	0	0	-22.1989582004	-1.1371800658	9	False	False
+rs_L60_c1_follow	2	1	15	ME5	41	251	47	0	0	-22.5585282166	-1.14511156273	9	False	False
+rs_L60_c1_follow	2	1	15	MM2	39	251	45	0	0	-22.1989582004	-1.1371800658	9	False	False
+rs_L60_c1_follow	2	1	15	MM5	41	251	47	0	0	-22.5585282166	-1.14511156273	9	False	False
+rs_L60_c1_follow	2	1	30	TT	39	251	45	0	0	-31.586121374	-1.55496310165	9	False	False
+rs_L60_c1_follow	2	1	30	ME2	33	251	38	0.000935860235283	0	-22.9124006923	-1.19325719008	8	False	False
+rs_L60_c1_follow	2	1	30	ME5	33	251	38	0.00094350038913	0	-22.7266898562	-1.18117071151	8	False	False
+rs_L60_c1_follow	2	1	30	MM2	33	251	38	0.000935860235283	0	-22.9124006923	-1.19325719008	8	False	False
+rs_L60_c1_follow	2	1	30	MM5	33	251	38	0.00094350038913	0	-22.7266898562	-1.18117071151	8	False	False
+rs_L60_c1_follow	2	1	60	TT	34	251	40	0	0	-30.9256494536	-1.44158942744	7	False	False
+rs_L60_c1_follow	2	1	60	ME2	31	251	36	0.0133040571122	0.00304473035123	-23.2277099252	-1.13459996353	8	False	False
+rs_L60_c1_follow	2	1	60	ME5	30	251	35	0.0174982791293	0.00639490898089	-22.871683918	-1.13818148464	7	False	False
+rs_L60_c1_follow	2	1	60	MM2	31	251	36	0.0133040571122	0.00304473035123	-23.2277099252	-1.13459996353	8	False	False
+rs_L60_c1_follow	2	1	60	MM5	30	251	35	0.0286315567107	0.0201790782792	-22.6125120505	-1.13818148464	7	False	False
+rs_L60_c1_follow	2	2	15	TT	47	251	54	0	0	-30.8773702234	-1.46738778166	9	False	False
+rs_L60_c1_follow	2	2	15	ME2	39	251	45	0	0	-22.268632681	-1.13473044562	9	False	False
+rs_L60_c1_follow	2	2	15	ME5	41	251	47	0	0	-22.6210459776	-1.14262228683	9	False	False
+rs_L60_c1_follow	2	2	15	MM2	39	251	45	0	0	-22.268632681	-1.13473044562	9	False	False
+rs_L60_c1_follow	2	2	15	MM5	41	251	47	0	0	-22.6210459776	-1.14262228683	9	False	False
+rs_L60_c1_follow	2	2	30	TT	36	251	41	0	0	-31.3278767489	-1.55555797535	8	False	False
+rs_L60_c1_follow	2	2	30	ME2	32	251	37	0.000963361067345	0	-22.9532668557	-1.13600551375	8	False	False
+rs_L60_c1_follow	2	2	30	ME5	32	251	37	0.000974626722849	0	-22.6876954932	-1.12062700985	8	False	False
+rs_L60_c1_follow	2	2	30	MM2	32	251	37	0.000963361067345	0	-22.9532668557	-1.13600551375	8	False	False
+rs_L60_c1_follow	2	2	30	MM5	32	251	37	0.000974626722849	0	-22.6876954932	-1.12062700985	8	False	False
+rs_L60_c1_follow	2	2	60	TT	29	251	34	0	0	-29.5981196047	-1.2304014696	7	False	False
+rs_L60_c1_follow	2	2	60	ME2	25	251	30	0.0219818605513	0.00402321172354	-21.588802643	-0.654213902315	7	False	False
+rs_L60_c1_follow	2	2	60	ME5	25	251	30	0.0273197513231	0.00830758348766	-20.8524611852	-0.657085996535	7	False	False
+rs_L60_c1_follow	2	2	60	MM2	25	251	30	0.0371644870413	0.0215429727458	-21.2536608766	-0.60766643475	7	False	False
+rs_L60_c1_follow	2	2	60	MM5	25	251	30	0.0574598579992	0.0442188826226	-20.2063131777	-0.61053852897	7	False	False
+rs_L60_c1_revert	1	1	15	TT	47	251	54	0	0	-27.2281303346	-1.16069997943	9	False	False
+rs_L60_c1_revert	1	1	15	ME2	28	251	34	0	0	-18.4869638633	-0.664065247748	5	False	False
+rs_L60_c1_revert	1	1	15	ME5	32	251	38	0	0	-18.2233224228	-0.665559941984	6	False	False
+rs_L60_c1_revert	1	1	15	MM2	28	251	34	0.0256470848262	0.0224678566372	-16.9660010129	-0.589984407896	5	False	False
+rs_L60_c1_revert	1	1	15	MM5	32	251	38	0.0250837330588	0.0219464150332	-16.6212852704	-0.586675769707	6	False	False
+rs_L60_c1_revert	1	1	30	TT	39	251	45	0	0	-26.7180024622	-1.16372637268	8	False	False
+rs_L60_c1_revert	1	1	30	ME2	24	251	29	0	0	-16.0957880385	-0.586283494836	5	False	False
+rs_L60_c1_revert	1	1	30	ME5	27	251	32	0	0	-17.0862228539	-0.629647123807	5	False	False
+rs_L60_c1_revert	1	1	30	MM2	24	251	29	0.0514730517202	0.0450490661512	-13.301045721	-0.454018257913	5	False	False
+rs_L60_c1_revert	1	1	30	MM5	27	251	32	0.0431635149282	0.0379077706022	-14.56805636	-0.499639457255	5	False	False
+rs_L60_c1_revert	1	1	60	TT	32	251	38	0	0	-30.6324047973	-1.36239516729	7	False	False
+rs_L60_c1_revert	1	1	60	ME2	23	251	28	0	0	-16.7761477214	-0.638545675976	5	False	False
+rs_L60_c1_revert	1	1	60	ME5	25	251	30	0	0	-16.6688950977	-0.639359951578	5	False	False
+rs_L60_c1_revert	1	1	60	MM2	23	251	28	0.0676714282646	0.0604226133844	-13.1747548467	-0.473277612896	5	False	False
+rs_L60_c1_revert	1	1	60	MM5	25	251	30	0.0710661790377	0.0634501432511	-12.9995079186	-0.473262236676	5	False	False
+rs_L60_c1_revert	1	2	15	TT	47	251	54	0	0	-27.1129828629	-1.15722453108	9	False	False
+rs_L60_c1_revert	1	2	15	ME2	28	251	34	0	0	-18.2923665326	-0.659579052026	5	False	False
+rs_L60_c1_revert	1	2	15	ME5	31	251	37	0	0	-17.9838990439	-0.655740284541	6	False	False
+rs_L60_c1_revert	1	2	15	MM2	28	251	34	0.0259369476673	0.022689931894	-16.7714036822	-0.585498212174	5	False	False
+rs_L60_c1_revert	1	2	15	MM5	31	251	37	0.0263210059412	0.023003103192	-16.3301832737	-0.573700745373	6	False	False
+rs_L60_c1_revert	1	2	30	TT	37	251	42	0	0	-26.3664960954	-1.19325910302	8	False	False
+rs_L60_c1_revert	1	2	30	ME2	24	251	29	0	0	-16.1946680372	-0.574378640678	5	False	False
+rs_L60_c1_revert	1	2	30	ME5	26	251	31	0	0	-16.4091065929	-0.578260470016	5	False	False
+rs_L60_c1_revert	1	2	30	MM2	24	251	29	0.0511126385599	0.0447728414336	-13.3999257197	-0.442113403755	5	False	False
+rs_L60_c1_revert	1	2	30	MM5	26	251	31	0.0471418250609	0.0412281587153	-13.7940875415	-0.442061962199	5	False	False
+rs_L60_c1_revert	1	2	60	TT	30	251	35	0	0	-30.3420019331	-1.44906714783	7	False	False
+rs_L60_c1_revert	1	2	60	ME2	23	251	28	0	0	-15.805855212	-0.602952228995	5	False	False
+rs_L60_c1_revert	1	2	60	ME5	25	251	30	0	0	-16.6622075835	-0.651624929018	5	False	False
+rs_L60_c1_revert	1	2	60	MM2	23	251	28	0.0770386746518	0.0687214625975	-11.9312468013	-0.430701991107	5	False	False
+rs_L60_c1_revert	1	2	60	MM5	25	251	30	0.0748564325579	0.0672442568418	-12.7414621113	-0.479243256789	5	False	False
+rs_L60_c1_revert	2	1	15	TT	47	251	54	0	0	-27.2493674405	-1.16175065731	9	False	False
+rs_L60_c1_revert	2	1	15	ME2	28	251	34	0	0	-18.5372410473	-0.664416512572	5	False	False
+rs_L60_c1_revert	2	1	15	ME5	32	251	38	0	0	-18.27599027	-0.666297768498	6	False	False
+rs_L60_c1_revert	2	1	15	MM2	28	251	34	0	0	-18.5372410473	-0.664416512572	5	False	False
+rs_L60_c1_revert	2	1	15	MM5	32	251	38	0	0	-18.27599027	-0.666297768498	6	False	False
+rs_L60_c1_revert	2	1	30	TT	37	251	43	0	0	-27.6226668354	-1.22885240059	8	False	False
+rs_L60_c1_revert	2	1	30	ME2	24	251	29	0.00386942967624	0	-17.0418834887	-0.716923437368	5	False	False
+rs_L60_c1_revert	2	1	30	ME5	27	251	32	0	0	-18.6024796536	-0.760004018324	5	False	False
+rs_L60_c1_revert	2	1	30	MM2	24	251	29	0.00386942967624	0	-17.0418834887	-0.716923437368	5	False	False
+rs_L60_c1_revert	2	1	30	MM5	27	251	32	0	0	-18.6024796536	-0.760004018324	5	False	False
+rs_L60_c1_revert	2	1	60	TT	30	251	36	0.0041258444616	0	-29.8032991268	-1.43773177562	7	False	False
+rs_L60_c1_revert	2	1	60	ME2	22	251	27	0.0187921555538	0.00462717748667	-19.633408563	-0.901621022133	5	False	False
+rs_L60_c1_revert	2	1	60	ME5	24	251	29	0.025454214662	0.0114063300045	-19.5176069355	-0.891871201069	5	False	False
+rs_L60_c1_revert	2	1	60	MM2	22	251	27	0.0579076848693	0.0509628353878	-18.8507291617	-0.891445232221	5	False	False
+rs_L60_c1_revert	2	1	60	MM5	24	251	29	0.0600575591822	0.0528076418299	-18.8245923156	-0.882766546937	5	False	False
+rs_L60_c1_revert	2	2	15	TT	47	251	54	0	0	-27.128147671	-1.15797479	9	False	False
+rs_L60_c1_revert	2	2	15	ME2	28	251	34	0	0	-18.3426437166	-0.65993031685	5	False	False
+rs_L60_c1_revert	2	2	15	ME5	31	251	37	0	0	-18.0382658539	-0.656507624115	6	False	False
+rs_L60_c1_revert	2	2	15	MM2	28	251	34	0	0	-18.3426437166	-0.65993031685	5	False	False
+rs_L60_c1_revert	2	2	15	MM5	31	251	37	0	0	-18.0382658539	-0.656507624115	6	False	False
+rs_L60_c1_revert	2	2	30	TT	36	251	41	0	0	-26.7161016368	-1.22220041333	8	False	False
+rs_L60_c1_revert	2	2	30	ME2	24	251	29	0.00384719395554	0	-17.1407634874	-0.70501858321	5	False	False
+rs_L60_c1_revert	2	2	30	ME5	26	251	31	0	0	-17.9836809618	-0.7148248357	5	False	False
+rs_L60_c1_revert	2	2	30	MM2	24	251	29	0.00384719395554	0	-17.1407634874	-0.70501858321	5	False	False
+rs_L60_c1_revert	2	2	30	MM5	26	251	31	0	0	-17.9836809618	-0.7148248357	5	False	False
+rs_L60_c1_revert	2	2	60	TT	29	251	34	0.00437547978645	0	-29.0647030565	-1.4879446527	7	False	False
+rs_L60_c1_revert	2	2	60	ME2	22	251	27	0.0196515424277	0.00481251316943	-18.7583708614	-0.898118799617	5	False	False
+rs_L60_c1_revert	2	2	60	ME5	24	251	29	0.0253016275933	0.0113466526361	-19.6383865365	-0.935368243789	5	False	False
+rs_L60_c1_revert	2	2	60	MM2	22	251	27	0.0605558698597	0.0530042689938	-17.9756914601	-0.887943009705	5	False	False
+rs_L60_c1_revert	2	2	60	MM5	24	251	29	0.0596975399464	0.0525313547951	-18.9453719167	-0.926263589656	5	False	False
+rs_L60_c2_follow	1	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	1	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_follow	2	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	1	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	1	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	15	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	15	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	15	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	15	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	15	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	30	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	30	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	30	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	30	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	30	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	60	TT	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	60	ME2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	60	ME5	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	60	MM2	0	0	0	None	None	None	no page max, not shown	0	False	False
+rs_L60_c2_revert	2	2	60	MM5	0	0	0	None	None	None	no page max, not shown	0	False	False
+pair_W120_z2	1	1	15	TT	233	820	310	0	0	-28.6307300969	-0.94650897111	88	False	False
+pair_W120_z2	1	1	15	ME2	22	820	27	0	0	-18.6888015945	-0.577047123538	12	False	False
+pair_W120_z2	1	1	15	ME5	40	820	48	0	0	-17.8753110628	-0.59922713276	20	False	False
+pair_W120_z2	1	1	30	TT	199	820	265	0	0	-28.6375070814	-0.923016374009	72	False	False
+pair_W120_z2	1	1	30	ME2	19	820	24	0	0	-18.7477678916	-0.609192547533	12	False	False
+pair_W120_z2	1	1	30	ME5	34	820	42	0	0	-17.3395092008	-0.550289196346	18	False	False
+pair_W120_z2	1	1	60	TT	136	820	189	0	0	-28.6319976402	-0.994372240202	61	False	False
+pair_W120_z2	1	1	60	ME2	17	820	22	0	0	-19.2801129847	-0.634374446533	11	False	False
+pair_W120_z2	1	1	60	ME5	27	820	35	0	0	-16.9534550267	-0.543897794099	15	False	False
+pair_W120_z2	1	2	15	TT	60	820	73	0	0	-27.8253538862	-0.975924815434	29	False	False
+pair_W120_z2	1	2	15	ME2	20	820	24	0	0	-17.9484163538	-0.602377607965	12	False	False
+pair_W120_z2	1	2	15	ME5	35	820	41	0	0	-17.3841659584	-0.600077842575	17	False	False
+pair_W120_z2	1	2	30	TT	38	820	46	0	0	-27.5400952352	-0.951850064989	20	False	False
+pair_W120_z2	1	2	30	ME2	17	820	21	0	0	-16.4918692489	-0.570132548079	11	False	False
+pair_W120_z2	1	2	30	ME5	27	820	33	0	0	-16.1688633069	-0.536728119964	14	False	False
+pair_W120_z2	1	2	60	TT	23	820	29	0	0	-26.1316730508	-0.896968213365	8	False	False
+pair_W120_z2	1	2	60	ME2	13	820	17	0	0	-15.2862519985	-0.554307783144	9	False	False
+pair_W120_z2	1	2	60	ME5	19	820	25	0	0	-15.8888084392	-0.507888260299	11	False	False
+pair_W120_z2	2	1	15	TT	233	820	310	0	0	-28.6307300969	-0.94650897111	88	False	False
+pair_W120_z2	2	1	15	ME2	22	820	27	0	0	-18.6888015945	-0.577047123538	12	False	False
+pair_W120_z2	2	1	15	ME5	39	820	47	0	0	-17.8690247783	-0.609239713623	19	False	False
+pair_W120_z2	2	1	30	TT	200	820	266	0	0	-28.7422620046	-0.919311609391	71	False	False
+pair_W120_z2	2	1	30	ME2	19	820	24	0	0	-18.9312961828	-0.630532235012	12	False	False
+pair_W120_z2	2	1	30	ME5	32	820	40	0	0	-17.32114718	-0.571252518445	16	False	False
+pair_W120_z2	2	1	60	TT	139	820	192	0	0	-28.7171685873	-0.981965922659	48	False	False
+pair_W120_z2	2	1	60	ME2	17	820	22	0	0	-19.4498539139	-0.631687897212	11	False	False
+pair_W120_z2	2	1	60	ME5	22	820	29	0	0	-16.6650180547	-0.55015201874	10	False	False
+pair_W120_z2	2	2	15	TT	60	820	73	0	0	-27.8253538862	-0.975924815434	29	False	False
+pair_W120_z2	2	2	15	ME2	20	820	24	0	0	-17.9484163538	-0.602377607965	12	False	False
+pair_W120_z2	2	2	15	ME5	34	820	40	0	0	-17.4871634192	-0.611202932422	16	False	False
+pair_W120_z2	2	2	30	TT	37	820	45	0	0	-27.6684285965	-0.94543733437	19	False	False
+pair_W120_z2	2	2	30	ME2	17	820	21	0	0	-16.6346867634	-0.595028850136	11	False	False
+pair_W120_z2	2	2	30	ME5	26	820	31	0	0	-16.4060766661	-0.567604263898	13	False	False
+pair_W120_z2	2	2	60	TT	23	820	29	0	0	-26.3524501126	-0.895857842832	8	False	False
+pair_W120_z2	2	2	60	ME2	13	820	17	0	0	-15.4314521313	-0.550277959162	9	False	False
+pair_W120_z2	2	2	60	ME5	16	820	20	0	0	-15.7777263374	-0.602752626362	8	False	False
+pair_W120_z3	1	1	15	TT	34	60	48	0	0	-28.3542297987	-0.91355698375	12	False	False
+pair_W120_z3	1	1	15	ME2	2	60	2	0	0	-21.0642399475	-0.561713065265	0	False	False
+pair_W120_z3	1	1	15	ME5	4	60	5	0	0	-18.8578650163	-0.569206301037	2	False	False
+pair_W120_z3	1	1	30	TT	33	60	47	0	0	-28.1057925212	-0.896228358695	11	False	False
+pair_W120_z3	1	1	30	ME2	2	60	2	0	0	-21.2165970519	-0.565775921384	0	False	False
+pair_W120_z3	1	1	30	ME5	4	60	5	0	0	-16.5181616007	-0.573269157156	2	False	False
+pair_W120_z3	1	1	60	TT	29	60	43	0	0	-28.4572848749	-0.884272999132	11	False	False
+pair_W120_z3	1	1	60	ME2	2	60	2	0	0	-21.3053805433	-0.568143481156	0	False	False
+pair_W120_z3	1	1	60	ME5	4	60	5	0	0	-16.5625533465	-0.575636716928	2	False	False
+pair_W120_z3	1	2	15	TT	15	60	18	0	0	-26.7547959481	-0.896421692053	7	False	False
+pair_W120_z3	1	2	15	ME2	2	60	2	0	0	-21.1272803945	-0.563394143853	0	False	False
+pair_W120_z3	1	2	15	ME5	4	60	5	0	0	-18.9912182808	-0.576318475142	2	False	False
+pair_W120_z3	1	2	30	TT	13	60	15	0	0	-26.1643681852	-0.893723938791	6	False	False
+pair_W120_z3	1	2	30	ME2	2	60	2	0	0	-21.3258011037	-0.568688029432	0	False	False
+pair_W120_z3	1	2	30	ME5	4	60	5	0	0	-16.674432965	-0.581603629918	2	False	False
+pair_W120_z3	1	2	60	TT	9	60	11	0	0	-26.0499116482	-0.918591709291	3	False	False
+pair_W120_z3	1	2	60	ME2	2	60	2	0	0	-14.8238392209	-0.395302379223	0	False	False
+pair_W120_z3	1	2	60	ME5	4	60	5	0	0	-12.9779621964	-0.38445852226	2	False	False
+pair_W120_z3	2	1	15	TT	34	60	48	0	0	-28.3542297987	-0.91355698375	12	False	False
+pair_W120_z3	2	1	15	ME2	2	60	2	0	0	-21.0642399475	-0.561713065265	0	False	False
+pair_W120_z3	2	1	15	ME5	4	60	5	0	0	-18.8578650163	-0.569206301037	2	False	False
+pair_W120_z3	2	1	30	TT	31	60	45	0	0	-28.1920616255	-0.91790723994	11	False	False
+pair_W120_z3	2	1	30	ME2	2	60	2	0	0	-21.2165970519	-0.565775921384	0	False	False
+pair_W120_z3	2	1	30	ME5	4	60	5	0	0	-16.435455359	-0.573269157156	2	False	False
+pair_W120_z3	2	1	60	TT	29	60	43	0	0	-28.3848532257	-0.884272999132	11	False	False
+pair_W120_z3	2	1	60	ME2	2	60	2	0	0	-21.3053805433	-0.568143481156	0	False	False
+pair_W120_z3	2	1	60	ME5	4	60	5	0	0	-17.430172028	-0.575636716928	2	False	False
+pair_W120_z3	2	2	15	TT	15	60	18	0	0	-26.7547959481	-0.896421692053	7	False	False
+pair_W120_z3	2	2	15	ME2	2	60	2	0	0	-21.1272803945	-0.563394143853	0	False	False
+pair_W120_z3	2	2	15	ME5	4	60	5	0	0	-18.9912182808	-0.576318475142	2	False	False
+pair_W120_z3	2	2	30	TT	12	60	14	0	0	-26.3452659555	-0.947503181474	6	False	False
+pair_W120_z3	2	2	30	ME2	2	60	2	0	0	-21.3258011037	-0.568688029432	0	False	False
+pair_W120_z3	2	2	30	ME5	4	60	5	0	0	-16.5917267233	-0.581603629918	2	False	False
+pair_W120_z3	2	2	60	TT	9	60	11	0	0	-26.2698538473	-0.918591709291	3	False	False
+pair_W120_z3	2	2	60	ME2	2	60	2	0	0	-12.626006271	-0.336693500561	0	False	False
+pair_W120_z3	2	2	60	ME5	4	60	5	0	0	-13.5579495665	-0.369118185646	2	False	False
+pair_W240_z2	1	1	15	TT	122	403	144	0	0	-28.6035459023	-0.971953164668	39	False	False
+pair_W240_z2	1	1	15	ME2	11	403	12	0	0	-17.9214203007	-0.740568371043	4	False	False
+pair_W240_z2	1	1	15	ME5	14	403	17	0	0	-18.357239367	-0.752891058228	6	False	False
+pair_W240_z2	1	1	30	TT	112	403	132	0	0	-28.4881187683	-0.971844823846	32	False	False
+pair_W240_z2	1	1	30	ME2	10	403	11	0	0	-17.509855109	-0.716746510433	4	False	False
+pair_W240_z2	1	1	30	ME5	14	403	17	0	0	-17.0781006826	-0.740990941916	6	False	False
+pair_W240_z2	1	1	60	TT	112	403	128	0	0	-28.6774391898	-0.958551218886	43	False	False
+pair_W240_z2	1	1	60	ME2	9	403	10	0	0	-17.7644103918	-0.6950088238	4	False	False
+pair_W240_z2	1	1	60	ME5	12	403	15	0	0	-16.6244459793	-0.678589797078	6	False	False
+pair_W240_z2	1	2	15	TT	30	403	38	0	0	-26.7747325533	-0.945125806808	14	False	False
+pair_W240_z2	1	2	15	ME2	11	403	12	0	0	-17.2652121445	-0.727377962791	5	False	False
+pair_W240_z2	1	2	15	ME5	13	403	16	0	0	-17.3471188842	-0.754360272177	7	False	False
+pair_W240_z2	1	2	30	TT	20	403	26	0	0	-26.1493607958	-1.12621974793	11	False	False
+pair_W240_z2	1	2	30	ME2	7	403	8	0	0	-17.1098594281	-0.774153776812	3	False	False
+pair_W240_z2	1	2	30	ME5	11	403	14	0	0	-16.5821372478	-0.729559751177	5	False	False
+pair_W240_z2	1	2	60	TT	13	403	17	0	0	-25.3009399934	-1.04399062182	7	False	False
+pair_W240_z2	1	2	60	ME2	6	403	7	0	0	-16.7015057841	-0.678093952133	3	False	False
+pair_W240_z2	1	2	60	ME5	9	403	12	0	0	-15.6541928922	-0.619519125837	5	False	False
+pair_W240_z2	2	1	15	TT	122	403	144	0	0	-28.6035459023	-0.971953164668	39	False	False
+pair_W240_z2	2	1	15	ME2	11	403	12	0	0	-17.9214203007	-0.740568371043	4	False	False
+pair_W240_z2	2	1	15	ME5	14	403	17	0	0	-18.357239367	-0.752891058228	6	False	False
+pair_W240_z2	2	1	30	TT	113	403	133	0	0	-28.5138333987	-0.972782754259	31	False	False
+pair_W240_z2	2	1	30	ME2	10	403	11	0	0	-17.5785027424	-0.729611944392	4	False	False
+pair_W240_z2	2	1	30	ME5	14	403	17	0	0	-17.5315365545	-0.750968232965	6	False	False
+pair_W240_z2	2	1	60	TT	110	403	126	0	0	-28.7438560211	-0.96004883548	45	False	False
+pair_W240_z2	2	1	60	ME2	9	403	10	0	0	-16.9406759248	-0.651451017725	4	False	False
+pair_W240_z2	2	1	60	ME5	11	403	14	0	0	-16.941572023	-0.678293819702	5	False	False
+pair_W240_z2	2	2	15	TT	30	403	38	0	0	-26.7747325533	-0.945125806808	14	False	False
+pair_W240_z2	2	2	15	ME2	11	403	12	0	0	-17.2652121445	-0.727377962791	5	False	False
+pair_W240_z2	2	2	15	ME5	13	403	16	0	0	-17.3471188842	-0.754360272177	7	False	False
+pair_W240_z2	2	2	30	TT	20	403	26	0	0	-26.1493607958	-1.12621974793	11	False	False
+pair_W240_z2	2	2	30	ME2	7	403	8	0	0	-17.3858902165	-0.80175685565	3	False	False
+pair_W240_z2	2	2	30	ME5	11	403	14	0	0	-17.3893832377	-0.756927270817	5	False	False
+pair_W240_z2	2	2	60	TT	13	403	16	0	0	-25.3009399934	-1.04399062182	7	False	False
+pair_W240_z2	2	2	60	ME2	6	403	7	0	0	-15.9688948008	-0.639021366358	3	False	False
+pair_W240_z2	2	2	60	ME5	8	403	10	0	0	-16.3456987845	-0.644191107651	4	False	False
+pair_W240_z3	1	1	15	TT	15	22	18	0	0	-27.5433082682	-1.11350270251	7	False	False
+pair_W240_z3	1	1	15	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	1	1	15	ME5	1	22	1	0	0	-16.6198871238	no page max, not shown	1	False	False
+pair_W240_z3	1	1	30	TT	15	22	18	0	0	-27.2489134487	-1.07901615531	7	False	False
+pair_W240_z3	1	1	30	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	1	1	30	ME5	1	22	1	0	0	-18.3736526718	no page max, not shown	1	False	False
+pair_W240_z3	1	1	60	TT	14	22	17	0	0	-27.3318967269	-1.05024714061	7	False	False
+pair_W240_z3	1	1	60	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	1	1	60	ME5	1	22	1	0	0	-17.3926586531	no page max, not shown	1	False	False
+pair_W240_z3	1	2	15	TT	6	22	8	0	0	-25.3349741407	-1.23075033007	4	False	False
+pair_W240_z3	1	2	15	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	1	2	15	ME5	1	22	1	0	0	-16.6198871238	no page max, not shown	1	False	False
+pair_W240_z3	1	2	30	TT	6	22	8	0	0	-24.9014349986	-1.09040936048	4	False	False
+pair_W240_z3	1	2	30	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	1	2	30	ME5	1	22	1	0	0	-18.3736526718	no page max, not shown	1	False	False
+pair_W240_z3	1	2	60	TT	5	22	7	0	0	-23.7130050985	-0.818549339376	4	False	False
+pair_W240_z3	1	2	60	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	1	2	60	ME5	1	22	1	0	0	-17.3926586531	no page max, not shown	1	False	False
+pair_W240_z3	2	1	15	TT	15	22	18	0	0	-27.5433082682	-1.11350270251	7	False	False
+pair_W240_z3	2	1	15	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	2	1	15	ME5	1	22	1	0	0	-16.6198871238	no page max, not shown	1	False	False
+pair_W240_z3	2	1	30	TT	15	22	18	0	0	-27.2489134487	-1.07901615531	7	False	False
+pair_W240_z3	2	1	30	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	2	1	30	ME5	1	22	1	0	0	-18.3736526718	no page max, not shown	1	False	False
+pair_W240_z3	2	1	60	TT	14	22	17	0	0	-27.1523003619	-1.05024714061	7	False	False
+pair_W240_z3	2	1	60	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	2	1	60	ME5	1	22	1	0	0	-17.3926586531	no page max, not shown	1	False	False
+pair_W240_z3	2	2	15	TT	6	22	8	0	0	-25.3349741407	-1.23075033007	4	False	False
+pair_W240_z3	2	2	15	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	2	2	15	ME5	1	22	1	0	0	-16.6198871238	no page max, not shown	1	False	False
+pair_W240_z3	2	2	30	TT	6	22	8	0	0	-24.9014349986	-1.09040936048	4	False	False
+pair_W240_z3	2	2	30	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	2	2	30	ME5	1	22	1	0	0	-18.3736526718	no page max, not shown	1	False	False
+pair_W240_z3	2	2	60	TT	5	22	7	0	0	-23.2101352765	-0.818549339376	4	False	False
+pair_W240_z3	2	2	60	ME2	0	22	0	None	None	None	no page max, not shown	0	False	False
+pair_W240_z3	2	2	60	ME5	1	22	1	0	0	-17.3926586531	no page max, not shown	1	False	False

@@ -73,7 +73,7 @@ class T(unittest.TestCase):
         r = m.margin(tr, {"A": 10.0, "B": 20.0})["50%"]                           # L_A = 5, L_B = 10
         self.assertAlmostEqual(r["mean_pct_of_margin"], (100 * 0.001 * 5 + 100 * 0.001 / (1 / 5 + 1 / 10)) / 2, 12)
         self.assertAlmostEqual(r["worst_liq"], min(1 / 5 - 0.045, 1 / 5 - 0.045, 1 / 10 - 0.045), 12)
-        with self.assertRaises(SystemExit): m.margin(tr, {"A": 10.0})
+        r1 = m.margin(tr, {"A": 10.0})["50%"]; self.assertEqual((r1["trades_without_page_max_not_shown"], r1["names_without_page_max"]), (1, ["B"])); self.assertAlmostEqual(r1["mean_pct_of_margin"], 100 * 0.001 * 5, 12)   # A3: the pair is left out, nothing refused
         r = m.margin([{"name": "KXGOLDPERP", "side": "long", "net": 0.0, "legs": (("KXGOLDPERP", 1.0),)}], {"KXGOLDPERP": 45.0})["50%"]
         self.assertEqual(r["no_buffer"], ["KXGOLDPERP"]); self.assertAlmostEqual(r["worst_liq"], 1 / 22.5 - 0.0447, 12)    # 4.444 percent less 4.47 percent: no buffer
     def test_tick(self):
