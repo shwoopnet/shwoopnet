@@ -1,0 +1,11 @@
+{
+ "counts": {
+  "candle after close (dropped)": 4748,
+  "candle of a ticker without a kept market (dropped)": 269164,
+  "candles kept": 116052,
+  "markets kept": 1827,
+  "row outside the window (dropped)": 22,
+  "row ticker outside the wall (dropped)": 441150
+ },
+ "loader_sha256": "6ac835f4aa94afc19faed2958c8bd9f96f7758c509fcf05613751bfd1d192dd5"
+}
