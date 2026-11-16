@@ -69,8 +69,8 @@ r3 = m.run(mk3, cd3); assert r3["rules"][(2, "none", "H")][0]["n"] == 100 and r3
 assert res["rules"][(2, "none", "H")][0]["events"] == 100
 flags = []; orig_p = m.passes; m.passes = lambda s, search=True: (flags.append(search), orig_p(s, search))[1]
 m.run(mkts, cds); m.passes = orig_p; assert False in flags and True in flags
-# events count every entry of the cell, M60 included, marked or not
+# events = distinct closes of the SCORED trades (Auditor B): an M60 entry with no mark is in neither n nor events
 ev_es = [{"day": 1, "close_ts": 1000 * (i % 3 + 1), "ticker": "E%d" % i, "result": "yes", "side": "yes", "raw_ask": 0.10} for i in range(6)]
 ev_c = {"E0": {1000 - 60: (0.2, 0.3)}, "E1": {2000 - 60: (0.2, 0.3)}}          # only E0 (close 1000) and E1 (close 2000) have a mark
-assert m.stats(ev_es, "M60", ev_c, 1)["events"] == 3 and m.stats(ev_es, "M60", ev_c, 1)["n"] == 2 and m.stats(ev_es, "H", ev_c, 1)["events"] == 3
+assert m.stats(ev_es, "M60", ev_c, 1)["events"] == 2 and m.stats(ev_es, "M60", ev_c, 1)["n"] == 2 and m.stats(ev_es, "H", ev_c, 1)["events"] == 3
 print("ethlate1 second tests passed")
