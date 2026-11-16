@@ -4,11 +4,11 @@
  "start_utc": "DRAFT_START_AT_FREEZE",
  "start_rule": "non-Bitcoin picks start at the given start (next whole UTC hour after the freeze commit); picks on KXBTC15M start at 2026-11-21T00:00:00Z at the earliest (H09)",
  "record_note": "header m below today's ruling of 6,290,660; BH 0 at both, no count changes",
- "n": 18,
+ "n": 17,
  "source": "batch B2 validate-bar lists (47 passes; BH survivors 0)",
  "excluded_dogecoin_7e": 5,
  "dropped_by_3_a_day_gate": 0,
- "clusters": 40,
+ "clusters": 36,
  "spec_sha256_covers": "the spec object only",
  "no_money_no_orders": true,
  "specs": [
@@ -42,7 +42,7 @@
    "rank": 1,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "family": "spread filter, cheap tail",
    "cluster": 1,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -89,7 +89,7 @@
    "rank": 2,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, middle (35c to 85c)",
+   "family": "spread filter, middle",
    "cluster": 2,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -136,7 +136,7 @@
    "rank": 3,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "family": "spread filter, cheap tail",
    "cluster": 3,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -183,7 +183,7 @@
    "rank": 4,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "family": "spread filter, cheap tail",
    "cluster": 6,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -230,7 +230,7 @@
    "rank": 5,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, middle (35c to 85c)",
+   "family": "spread filter, middle",
    "cluster": 7,
    "cluster_size": 2,
    "heldout_verdict": null,
@@ -277,7 +277,7 @@
    "rank": 6,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, middle (35c to 85c)",
+   "family": "spread filter, middle",
    "cluster": 8,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -326,7 +326,7 @@
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
    "cluster": 9,
-   "cluster_size": 1,
+   "cluster_size": 2,
    "heldout_verdict": null,
    "paper_research": {
     "validate_n": 201,
@@ -371,7 +371,7 @@
    "rank": 8,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "entry volume spike filter, middle (35c to 85c)",
+   "family": "momentum or volume filter, middle",
    "cluster": 10,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -418,7 +418,7 @@
    "rank": 9,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "family": "spread filter, cheap tail",
    "cluster": 11,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -465,7 +465,7 @@
    "rank": 10,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "family": "spread filter, cheap tail",
    "cluster": 13,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -484,54 +484,7 @@
   },
   {
    "spec": {
-    "id": "SH3_11_XRP",
-    "kind": "grid15m",
-    "source": "archive",
-    "market": "KXXRP15M",
-    "entry": {
-     "seconds_left": 540,
-     "price_band_5c": 16,
-     "side_rule": "favourite",
-     "filter": "vspike:low"
-    },
-    "exit": "H",
-    "costs": {
-     "contracts": 10,
-     "haircuts_primary": [
-      0.01,
-      0.02
-     ],
-     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
-    },
-    "size_in_log": 1,
-    "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
-    "found_by_spec": "ENGB2VSPIKE"
-   },
-   "spec_sha256": "47aa12368f0a5791b5eb05f983e25d3b3adbc85e273e73b83b91516df2716e1f",
-   "rank": 11,
-   "admission": "clean",
-   "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "entry volume spike filter, middle (35c to 85c)",
-   "cluster": 15,
-   "cluster_size": 1,
-   "heldout_verdict": null,
-   "paper_research": {
-    "validate_n": 111,
-    "signals_per_day": 3.829,
-    "pf_1c": 1.55,
-    "pf_2c": 1.439,
-    "edge_1c_cents_per_contract": 4.989,
-    "dollars_week_5c_1c": 6.69,
-    "dollars_week_5c_2c": 5.4,
-    "p_day_clustered": 0.05124480752833068,
-    "bh_survivor": false,
-    "label": "validate-window income, upward biased, not a forecast"
-   }
-  },
-  {
-   "spec": {
-    "id": "SH3_12_ETH",
+    "id": "SH3_11_ETH",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXETH15M",
@@ -555,12 +508,12 @@
     "start_utc": "DRAFT_START_AT_FREEZE",
     "found_by_spec": "ENGB2VSPIKE"
    },
-   "spec_sha256": "dd278ea2abd196be5c292bc614c6262959b5eee87b0ea0d2efc800c3b6cfc939",
-   "rank": 12,
+   "spec_sha256": "ceb5b38d9b4cf9b67c454a1bfc09dcb55ebcaee87179777d6993e70bf16cf366",
+   "rank": 11,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "entry volume spike filter, middle (35c to 85c)",
-   "cluster": 16,
+   "family": "momentum or volume filter, middle",
+   "cluster": 15,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -578,7 +531,7 @@
   },
   {
    "spec": {
-    "id": "SH3_13_SOL",
+    "id": "SH3_12_SOL",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXSOL15M",
@@ -602,12 +555,12 @@
     "start_utc": "DRAFT_START_AT_FREEZE",
     "found_by_spec": "ENGB3SPRW"
    },
-   "spec_sha256": "fabb95f2d952d4565573ebc7bf003aab7462d42c5812eb900b7c9e023a8f8274",
-   "rank": 13,
+   "spec_sha256": "493fc55b342596bd1004e431aab7d8a4d8308e9da999513fd2b720d70bc95a23",
+   "rank": 12,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "spread-width change filter, middle (35c to 85c)",
-   "cluster": 18,
+   "family": "spread filter, middle",
+   "cluster": 16,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -625,7 +578,7 @@
   },
   {
    "spec": {
-    "id": "SH3_14_XRP",
+    "id": "SH3_13_XRP",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXXRP15M",
@@ -649,12 +602,12 @@
     "start_utc": "DRAFT_START_AT_FREEZE",
     "found_by_spec": "ENGB3SPRW"
    },
-   "spec_sha256": "1672e145817c31eba70bd840a231863da096055c624c8e5cabdd14bcac641cac",
-   "rank": 14,
+   "spec_sha256": "6eccfdd6eb08286ea8ce23e1887c6eedc87730e6e16f194a24c3da94406f8c00",
+   "rank": 13,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
-   "cluster": 19,
+   "cluster": 17,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -672,7 +625,7 @@
   },
   {
    "spec": {
-    "id": "SH3_15_GOLD",
+    "id": "SH3_14_GOLD",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXGOLD15M",
@@ -696,12 +649,12 @@
     "start_utc": "DRAFT_START_AT_FREEZE",
     "found_by_spec": "ENGB3SPRW"
    },
-   "spec_sha256": "4191b6385753c6bf33b129cf5f161304f9bdd617756dec92cc48057f938ce7ed",
-   "rank": 15,
+   "spec_sha256": "f988eb44a5242819ca1ff74bb886811a0d6e2449f14b86509040e04d032e9069",
+   "rank": 14,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
-   "cluster": 21,
+   "cluster": 19,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -713,6 +666,53 @@
     "dollars_week_5c_1c": 6.04,
     "dollars_week_5c_2c": 3.68,
     "p_day_clustered": 0.04374409222231611,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_15_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 17,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "7c9de9485d48ba209d8fc27daeae43874942051c9909269abef96a2881f17a1f",
+   "rank": 15,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 20,
+   "cluster_size": 2,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 201,
+    "signals_per_day": 6.934,
+    "pf_1c": 1.374,
+    "pf_2c": 1.113,
+    "edge_1c_cents_per_contract": 2.466,
+    "dollars_week_5c_1c": 5.98,
+    "dollars_week_5c_2c": 1.83,
+    "p_day_clustered": 0.031931408627974625,
     "bh_survivor": false,
     "label": "validate-window income, upward biased, not a forecast"
    }
@@ -748,7 +748,7 @@
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
-   "cluster": 26,
+   "cluster": 23,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -794,8 +794,8 @@
    "rank": 17,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "entry volume spike filter, cheap tail (5c to 35c)",
-   "cluster": 27,
+   "family": "momentum or volume filter, cheap tail",
+   "cluster": 24,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -807,53 +807,6 @@
     "dollars_week_5c_1c": 4.65,
     "dollars_week_5c_2c": 3.03,
     "p_day_clustered": 0.12004771992691829,
-    "bh_survivor": false,
-    "label": "validate-window income, upward biased, not a forecast"
-   }
-  },
-  {
-   "spec": {
-    "id": "SH3_18_NEAR",
-    "kind": "grid15m",
-    "source": "archive",
-    "market": "KXNEAR15M",
-    "entry": {
-     "seconds_left": 420,
-     "price_band_5c": 18,
-     "side_rule": "yes",
-     "filter": "swid:down"
-    },
-    "exit": "T",
-    "costs": {
-     "contracts": 10,
-     "haircuts_primary": [
-      0.01,
-      0.02
-     ],
-     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
-    },
-    "size_in_log": 1,
-    "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
-    "found_by_spec": "ENGB3SPRW"
-   },
-   "spec_sha256": "87e69ac92b1ca984e583412c669c9ada83713516d16412f9139e0ef42e50c8a7",
-   "rank": 18,
-   "admission": "owner_override_shadow (standing, Nov 16)",
-   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
-   "family": "F1 favourite-late shape",
-   "cluster": 31,
-   "cluster_size": 1,
-   "heldout_verdict": null,
-   "paper_research": {
-    "validate_n": 106,
-    "signals_per_day": 3.656,
-    "pf_1c": 2.911,
-    "pf_2c": 1.876,
-    "edge_1c_cents_per_contract": 3.329,
-    "dollars_week_5c_1c": 4.26,
-    "dollars_week_5c_2c": 1.98,
-    "p_day_clustered": 0.0029522118431673286,
     "bh_survivor": false,
     "label": "validate-window income, upward biased, not a forecast"
    }

@@ -1,12 +1,12 @@
-"""SHADOW_LIST_V2 (Desk A, Nov 16 2026): the 33 ENGB4XBTC validate-bar passes, same procedure as V1 (engine1_shadow_pick.py): Dogecoin excluded under 7e, 3-a-day gate on validate signals, clusters (same market, side, exit, btcmom3 class, look within 60 s, band within 1), cap 3 per market and 5 per family, rank by dollars a week at 1c, 5 contracts. Favourite-late shapes carry admission "owner_override_shadow (standing, Nov 16)". Each spec carries the cross-series feature (Bitcoin candles at the same close) and a fixed start_utc. Held-out verdict field is null until the registered read runs. Pure bookkeeping on figures already read; m unchanged.
+"""SHADOW_LIST_V2 (Desk A, Nov 16 2026): the 33 ENGB4XBTC validate-bar passes, same procedure as V1 (engine1_shadow_pick.py): Dogecoin excluded under 7e, 3-a-day gate on validate signals, clusters (same series, side and exit, look within 60 s, band within 1, transitive: the WRITTEN spec rule 7, the filter class is NOT in the key), cap 3 per market and 5 per family, rank by dollars a week at 1c, 5 contracts. Favourite-late shapes carry admission "owner_override_shadow (standing, Nov 16)". Each spec carries the cross-series feature (Bitcoin candles at the same close) and a fixed start_utc. Held-out verdict field is null until the registered read runs. Pure bookkeeping on figures already read; m unchanged.
   python3 -I engine1_shadow_pick_v2.py <out_engb4.json> <out dir>"""
 import sys, os, json, hashlib, collections
 MAX_PER_MARKET, MAX_PER_FAMILY, MIN_SPD = 3, 5, 3.0
 START_UTC = "2026-11-21T00:00:00Z"  # 1795219200; Head and Auditor B: btcmom3 reads the held BTC15M path (H09), so not before Nov 21
 def family(r):
+    """WRITTEN ranking spec rule 6 (SHADOW_RANKING_SPEC_NOV16.md; the Head's ruling of Nov 16: the written spec governs): F1 first, else kind x region; btcmom3 is not one of the named filter kinds, so its kind is 'plain band'."""
     if r["band"] >= 17 and r["bucket"] <= 600: return "F1 favourite-late shape"
-    region = "cheap tail (5c to 35c)" if r["band"] <= 6 else ("middle (35c to 85c)" if r["band"] <= 16 else "high price (85c+)")
-    return "Bitcoin 3-minute move filter, %s" % region
+    return "plain band, %s" % ("cheap tail" if r["band"] <= 6 else ("middle" if r["band"] <= 16 else "high price"))
 def main(src, out):
     d = json.load(open(src)); rows = d["validate_bar_list"]
     excl = [r for r in rows if r["series"] == "KXDOGE15M"]; rows = [r for r in rows if r["series"] != "KXDOGE15M"]
@@ -19,12 +19,12 @@ def main(src, out):
     for i, a in enumerate(rows):
         for j in range(i + 1, len(rows)):
             b = rows[j]
-            if a["series"] == b["series"] and a["side"] == b["side"] and a["exit"] == b["exit"] and a["filter"] == b["filter"] and abs(a["bucket"] - b["bucket"]) <= 60 and abs(a["band"] - b["band"]) <= 1: par[find(i)] = find(j)
+            if a["series"] == b["series"] and a["side"] == b["side"] and a["exit"] == b["exit"] and abs(a["bucket"] - b["bucket"]) <= 60 and abs(a["band"] - b["band"]) <= 1: par[find(i)] = find(j)
     cl = collections.defaultdict(list)
     for i, r in enumerate(rows): cl[find(i)].append(r)
-    key = lambda r: (-r["income_1c"]["dollars_week"], -r["pf_2c"], r["bucket"], r["band"])
+    key = lambda r: (-r["income_1c"]["dollars_week"], -r["pf_2c"], r["bucket"], r["band"], str(r["filter"]))
     clusters = [sorted(ms, key=key) for ms in cl.values()]
-    clusters.sort(key=lambda ms: (key(ms[0]), ms[0]["series"], ms[0]["side"], ms[0]["exit"], str(ms[0]["filter"])))
+    clusters.sort(key=lambda ms: (-ms[0]["income_1c"]["dollars_week"], ms[0]["series"], ms[0]["bucket"], ms[0]["band"], ms[0]["side"], ms[0]["exit"], str(ms[0]["filter"])))
     per_m, per_f, picks = collections.Counter(), collections.Counter(), []
     for ci, ms in enumerate(clusters):
         r = ms[0]

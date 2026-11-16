@@ -2,11 +2,11 @@
  "list": "SHADOW_LIST_V2",
  "date": "2026-11-16",
  "start_utc": "2026-11-21T00:00:00Z",
- "n": 12,
+ "n": 11,
  "source": "ENGB4XBTC validate-bar list (33 passes; BH survivors 0)",
  "excluded_dogecoin_7e": 6,
  "dropped_by_3_a_day_gate": 0,
- "clusters": 23,
+ "clusters": 22,
  "spec_sha256_covers": "the spec object only",
  "no_money_no_orders": true,
  "specs": [
@@ -45,7 +45,7 @@
    "rank": 1,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
+   "family": "plain band, cheap tail",
    "cluster": 1,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -97,7 +97,7 @@
    "rank": 2,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "Bitcoin 3-minute move filter, middle (35c to 85c)",
+   "family": "plain band, middle",
    "cluster": 2,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -149,7 +149,7 @@
    "rank": 3,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "Bitcoin 3-minute move filter, middle (35c to 85c)",
+   "family": "plain band, middle",
    "cluster": 3,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -201,7 +201,7 @@
    "rank": 4,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
+   "family": "plain band, cheap tail",
    "cluster": 4,
    "cluster_size": 1,
    "heldout_verdict": null,
@@ -253,9 +253,9 @@
    "rank": 5,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
+   "family": "plain band, cheap tail",
    "cluster": 6,
-   "cluster_size": 1,
+   "cluster_size": 2,
    "heldout_verdict": null,
    "paper_research": {
     "validate_n": 124,
@@ -324,59 +324,7 @@
   },
   {
    "spec": {
-    "id": "SH2_07_HYPE",
-    "kind": "grid15m",
-    "source": "archive",
-    "market": "KXHYPE15M",
-    "entry": {
-     "seconds_left": 480,
-     "price_band_5c": 1,
-     "side_rule": "cheap",
-     "filter": "btcmom3:down"
-    },
-    "cross_series_feature": {
-     "name": "btcmom3",
-     "series": "KXBTC15M",
-     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
-     "needs_bitcoin_candles_at_same_close": true
-    },
-    "exit": "M60",
-    "costs": {
-     "contracts": 10,
-     "haircuts_primary": [
-      0.01,
-      0.02
-     ],
-     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
-    },
-    "size_in_log": 1,
-    "mode": "log_only_forward",
-    "start_utc": "2026-11-21T00:00:00Z"
-   },
-   "spec_sha256": "a2f07266dd6513028b5a8e5aaac56eb6876fa4dbdf0c856bf08234e034f5e1e5",
-   "rank": 7,
-   "admission": "clean",
-   "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
-   "cluster": 8,
-   "cluster_size": 1,
-   "heldout_verdict": null,
-   "paper_research": {
-    "validate_n": 114,
-    "signals_per_day": 3.932,
-    "pf_1c": 1.865,
-    "pf_2c": 1.567,
-    "edge_1c_cents_per_contract": 5.225,
-    "dollars_week_5c_1c": 7.19,
-    "dollars_week_5c_2c": 5.44,
-    "p_day_clustered": 0.016153933492208596,
-    "bh_survivor": false,
-    "label": "validate-window income, upward biased, not a forecast"
-   }
-  },
-  {
-   "spec": {
-    "id": "SH2_08_XRP",
+    "id": "SH2_07_XRP",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXXRP15M",
@@ -405,12 +353,12 @@
     "mode": "log_only_forward",
     "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "5856b43e5ecc7819f6558706811a5d035e8169cc639cef84bf8cbbb98809276d",
-   "rank": 8,
+   "spec_sha256": "61ca906ece87aa69e00cf787be23de0275c540f7403d10000ad12e5087c0ad67",
+   "rank": 7,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
-   "cluster": 10,
+   "cluster": 9,
    "cluster_size": 2,
    "heldout_verdict": null,
    "paper_research": {
@@ -428,7 +376,7 @@
   },
   {
    "spec": {
-    "id": "SH2_09_XRP",
+    "id": "SH2_08_XRP",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXXRP15M",
@@ -457,12 +405,12 @@
     "mode": "log_only_forward",
     "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "525a21a4cf34d0e00b0e0db461fedfd6eb64126d5b3fe344d913b9c2b49b0fef",
-   "rank": 9,
+   "spec_sha256": "5a9feb67f391834f45e30e81eab193d3af2b39af9b3d9f5f093ef7a6f4848db5",
+   "rank": 8,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
-   "cluster": 12,
+   "cluster": 11,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -480,7 +428,7 @@
   },
   {
    "spec": {
-    "id": "SH2_10_SOL",
+    "id": "SH2_09_SOL",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXSOL15M",
@@ -509,12 +457,12 @@
     "mode": "log_only_forward",
     "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "95a62cc7f307170bd39c065819ffddccfe079ca49988763d5fbb1c8078f98802",
-   "rank": 10,
+   "spec_sha256": "f3f788ccd650a22497a5cae0919bf301d3b4444f776482892f9fbbb1168a9177",
+   "rank": 9,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
-   "family": "Bitcoin 3-minute move filter, middle (35c to 85c)",
-   "cluster": 13,
+   "family": "plain band, middle",
+   "cluster": 12,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -532,7 +480,7 @@
   },
   {
    "spec": {
-    "id": "SH2_11_BNB",
+    "id": "SH2_10_BNB",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXBNB15M",
@@ -561,12 +509,12 @@
     "mode": "log_only_forward",
     "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "e44a535720ae45ae499abc29a2aee28f0bb180d83e6ed295c7d6055b863a9143",
-   "rank": 11,
+   "spec_sha256": "4f46c867b7717e966e431418223e0797aa058b233330a7422c294639ca06ebe7",
+   "rank": 10,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
-   "cluster": 14,
+   "cluster": 13,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {
@@ -584,7 +532,7 @@
   },
   {
    "spec": {
-    "id": "SH2_12_NEAR",
+    "id": "SH2_11_NEAR",
     "kind": "grid15m",
     "source": "archive",
     "market": "KXNEAR15M",
@@ -613,12 +561,12 @@
     "mode": "log_only_forward",
     "start_utc": "2026-11-21T00:00:00Z"
    },
-   "spec_sha256": "f7c2a990e22e22141464b419ffdd3c80260a87f5303086064aacfb5044a8b0b4",
-   "rank": 12,
+   "spec_sha256": "48d80f96b9c78522f56d8b7c966a8ffdab01c879bc3592f105697ccbd4d9bf6e",
+   "rank": 11,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
    "family": "F1 favourite-late shape",
-   "cluster": 15,
+   "cluster": 14,
    "cluster_size": 1,
    "heldout_verdict": null,
    "paper_research": {

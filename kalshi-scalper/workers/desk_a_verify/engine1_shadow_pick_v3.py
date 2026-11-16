@@ -1,4 +1,4 @@
-"""SHADOW_LIST_V3 (Desk A, Nov 16 2026): the batch B2 validate-bar passes (ENGB1TIMESTOP, ENGB2VSPIKE, ENGB3SPRW; 47 rules), same procedure as V1 and V2: Dogecoin excluded under 7e, 3-a-day gate on validate signals, clusters (same market, side, exit, filter, look within 60 s, band within 1), cap 3 per market and 5 per family, rank by dollars a week at 1c and 5 contracts. Favourite-late shapes carry admission "owner_override_shadow (standing, Nov 16)". None of these filters reads Bitcoin as an input, so start_utc is a command line argument: the next whole UTC hour after the freeze commit; a pick that TRADES KXBTC15M never starts before 2026-11-21T00:00:00Z (H09). Held-out verdict null until the registered read runs. Pure bookkeeping on read figures; m unchanged.
+"""SHADOW_LIST_V3 (Desk A, Nov 16 2026): the batch B2 validate-bar passes (ENGB1TIMESTOP, ENGB2VSPIKE, ENGB3SPRW; 47 rules), same procedure as V1 and V2: Dogecoin excluded under 7e, 3-a-day gate on validate signals, clusters (same series, side and exit, look within 60 s, band within 1, transitive: the WRITTEN spec rule 7, the filter and the found-by spec are NOT in the key), cap 3 per market and 5 per family, rank by dollars a week at 1c and 5 contracts. Favourite-late shapes carry admission "owner_override_shadow (standing, Nov 16)". None of these filters reads Bitcoin as an input, so start_utc is a command line argument: the next whole UTC hour after the freeze commit; a pick that TRADES KXBTC15M never starts before 2026-11-21T00:00:00Z (H09). Held-out verdict null until the registered read runs. Pure bookkeeping on read figures; m unchanged.
   python3 -I engine1_shadow_pick_v3.py <start_utc> <out dir> <out_ENGB1TIMESTOP.json> <out_ENGB2VSPIKE.json> <out_ENGB3SPRW.json>"""
 import sys, os, json, hashlib, collections
 MAX_PER_MARKET, MAX_PER_FAMILY, MIN_SPD = 3, 5, 3.0
@@ -6,11 +6,11 @@ BTC_HOLD_START = "2026-11-21T00:00:00Z"      # H09 holds KXBTC15M closes to Nov 
 OVERRIDE = "owner_override_shadow (standing, Nov 16)"
 EXIT_DEF = {"TA3": "time exit: sell at the bid of the candle ending exactly 180 s after entry (exit fee paid)", "TA5": "time exit: sell at the bid of the candle ending exactly 300 s after entry (exit fee paid)"}
 def family(r, spec):
+    """The WRITTEN ranking spec (SHADOW_RANKING_SPEC_NOV16.md rule 6): F1 first, else kind x region; vspike counts as 'momentum or volume filter' and swid as 'spread filter' (the Head's ruling, Nov 16: the written spec governs)."""
     f = r["filter"][0] if r["filter"] else "none"
     if r["band"] >= 17 and r["bucket"] <= 600: return "F1 favourite-late shape"
-    region = "cheap tail (5c to 35c)" if r["band"] <= 6 else ("middle (35c to 85c)" if r["band"] <= 16 else "high price (85c+)")
-    kind = {"vspike": "entry volume spike filter", "swid": "spread-width change filter"}.get(f, "momentum, volume or spread filter")
-    return "%s, %s%s" % (kind, region, ", time-stop exit" if r["exit"] in EXIT_DEF else "")
+    kind = {"oi3": "open-interest trigger", "oi6": "open-interest trigger", "mom1": "momentum or volume filter", "mom3": "momentum or volume filter", "mom5": "momentum or volume filter", "vol3": "momentum or volume filter", "vspike": "momentum or volume filter", "spread": "spread filter", "swid": "spread filter"}.get(f, "plain band")
+    return "%s, %s" % (kind, "cheap tail" if r["band"] <= 6 else ("middle" if r["band"] <= 16 else "high price"))
 def main(start, out, *srcs):
     rows = []
     for src in srcs:
@@ -26,12 +26,12 @@ def main(start, out, *srcs):
     for i, a in enumerate(rows):
         for j in range(i + 1, len(rows)):
             b = rows[j]
-            if a["series"] == b["series"] and a["side"] == b["side"] and a["exit"] == b["exit"] and a["filter"] == b["filter"] and a["_spec"] == b["_spec"] and abs(a["bucket"] - b["bucket"]) <= 60 and abs(a["band"] - b["band"]) <= 1: par[find(i)] = find(j)
+            if a["series"] == b["series"] and a["side"] == b["side"] and a["exit"] == b["exit"] and abs(a["bucket"] - b["bucket"]) <= 60 and abs(a["band"] - b["band"]) <= 1: par[find(i)] = find(j)
     cl = collections.defaultdict(list)
     for i, r in enumerate(rows): cl[find(i)].append(r)
-    key = lambda r: (-r["income_1c"]["dollars_week"], -r["pf_2c"], r["bucket"], r["band"])
+    key = lambda r: (-r["income_1c"]["dollars_week"], -r["pf_2c"], r["bucket"], r["band"], str(r["filter"]))
     clusters = [sorted(ms, key=key) for ms in cl.values()]
-    clusters.sort(key=lambda ms: (key(ms[0]), ms[0]["series"], ms[0]["side"], ms[0]["exit"], str(ms[0]["filter"]), ms[0]["_spec"]))
+    clusters.sort(key=lambda ms: (-ms[0]["income_1c"]["dollars_week"], ms[0]["series"], ms[0]["bucket"], ms[0]["band"], ms[0]["side"], ms[0]["exit"], str(ms[0]["filter"])))
     per_m, per_f, picks = collections.Counter(), collections.Counter(), []
     for ci, ms in enumerate(clusters):
         r = ms[0]
