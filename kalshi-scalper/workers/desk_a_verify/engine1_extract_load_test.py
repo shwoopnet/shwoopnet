@@ -24,7 +24,7 @@ open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_M
 try: L.load(base); assert False                                    # 2: wrong loader hash
 except SystemExit as e: assert "REFUSED" in str(e)
 open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b, nc))
-wa, ca, wp, cp, wn, cn = L.load(base)
+wa, ca, wp, cp, wn, cn = L.load(base, with_nc15=True)
 assert list(wn) == ["WTI"] and cn["dropped by the cut"] == 2                                              # the NC15 slot reads like the archive
 assert list(wa) == ["WTI"] and len(wa["WTI"]) == 1 and wa["WTI"][0]["ticker"] == "K1" and wa["WTI"][0]["result"] == "yes", wa
 assert [c[0] for c in wa["WTI"][0]["candles"]] == [999940, 1000000], wa                                   # the post-close candle is dropped
@@ -39,7 +39,11 @@ b2 = mk("perps2.xz", perps2); L.PERPFILE = ("perps2.xz", b2)
 open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b2, nc))
 wp2 = L.load_perps(base)[0]; assert [c[0] for c in wp2["KXSPYPERP"]] == [1793923200], wp2                 # literal boundary: 1793923199 dropped, 1793923200 kept
 L.NC15FILE = ("nc.xz", "")
-try: L.load(base); assert False                                                                           # an open NC15 sha refuses
+try: L.load(base, with_nc15=True); assert False                                                           # an open NC15 sha refuses the NC15 pass
+except SystemExit as e: assert "REFUSED" in str(e)
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b2))
+fa = L.load(base); assert fa[4] == {} and fa[5] == {} and list(fa[0]) == ["WTI"]                           # first pass: two hashes are enough, NC15 is not opened
+try: L.load(base, with_nc15=True); assert False
 except SystemExit as e: assert "REFUSED" in str(e)
 L.NC15FILE = ("nc.xz", nc); L.PERPFILE = ("perps.xz", b)
 open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b, nc))
