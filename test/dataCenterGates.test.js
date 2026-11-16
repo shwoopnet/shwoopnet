@@ -167,7 +167,7 @@ gates.PL4 = () => {
 gates.DS1 = () => {
   assert.ok(!/id="page-data"|data-page="data"/.test(html), 'there is no Data page and no nav button for it (removed Oct 24, 2026 at the owner\'s request)');
   ['dataHead', 'dataVerdict', 'dataTrial', 'dataNote', 'dataTiles', 'dataWeekly', 'dataStats', 'dataMarkets', 'dataLead', 'kalChartPie', 'kalChartBars', 'kalPerf', 'dataQa1', 'dataAgenda', 'dataLine', 'dataDots'].forEach((id) => assert.ok(!html.includes('id="' + id + '"'), id + ' is gone'));
-  assert.ok(/data-card="pnl"[\s\S]*data-card="trades"/.test(html), 'the account result line sits above Recent trades on the Bot page');
+  assert.ok(/data-card="account"[\s\S]*id="kalPnl"[\s\S]*data-card="trades"/.test(html), 'the account result line (inside the Account card since Nov 16, 2026) sits above Recent trades on the Bot page');
 };
 
 let failed = 0;
