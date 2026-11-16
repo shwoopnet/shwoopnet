@@ -39,6 +39,13 @@ def rows(markets, ts):
     return out
 
 
+LEV_COLUMNS = ["ts_utc", "ticker", "leverage_estimate"]   # Nov 16, 2026 (the Head of R&D, the owner's order): leverage_estimate (1 over the margin rate) was dropped; kept in its OWN day file so the main file's one header never changes
+
+
+def lev_rows(markets, ts):
+    return [[ts, m.get("ticker", ""), num(m.get("leverage_estimate"))] for m in markets if isinstance(m, dict)]
+
+
 def main(out_dir):
     req = urllib.request.Request(URL, headers={"User-Agent": "shwoopnet-research-recorder"})
     data = json.load(urllib.request.urlopen(req, timeout=30))
@@ -55,6 +62,13 @@ def main(out_dir):
         if new:
             w.writerow(COLUMNS)
         w.writerows(rows(markets, ts))
+    lpath = os.path.join(out_dir, "perps-lev-" + ts[:10] + ".csv")
+    lnew = not os.path.exists(lpath)
+    with open(lpath, "a", newline="") as f:
+        w = csv.writer(f)
+        if lnew:
+            w.writerow(LEV_COLUMNS)
+        w.writerows(lev_rows(markets, ts))
     print("wrote %d markets to %s" % (len(markets), path))
     return 0
 
