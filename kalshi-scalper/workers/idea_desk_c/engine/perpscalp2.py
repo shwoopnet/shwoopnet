@@ -238,7 +238,7 @@ def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
         f = None
         for k in range(1, N + 1):
             x = t + 60 * k
-            if x in c and ((side > 0 and c[x][1] <= lim - tick + 1e-12) or (side < 0 and c[x][0] >= lim + tick - 1e-12)):
+            if x in c and ((side > 0 and c[x][1] <= lim - tick + 1e-9) or (side < 0 and c[x][0] >= lim + tick - 1e-9)):
                 f = x
                 break
         if f is None:
@@ -255,14 +255,14 @@ def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
             continue
         b, a = c[x][0], c[x][1]
         if side > 0:
-            if col == "MM" and b >= tgt + tick - 1e-12:
+            if col == "MM" and b >= tgt + tick - 1e-9:
                 ex, fee_out, tx = tgt, FEE_M, x; break
             if b <= stp:
                 ex, tx = b * (1 - h), x; break
             if col != "MM" and b >= tgt:
                 ex, tx = b * (1 - h), x; break
         else:
-            if col == "MM" and a <= tgt - tick + 1e-12:
+            if col == "MM" and a <= tgt - tick + 1e-9:
                 ex, fee_out, tx = tgt, FEE_M, x; break
             if a >= stp:
                 ex, tx = a * (1 + h), x; break
