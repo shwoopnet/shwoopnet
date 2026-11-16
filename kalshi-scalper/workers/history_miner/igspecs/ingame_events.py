@@ -111,15 +111,37 @@ def cash(ev, det, h):
     return round(CONTRACTS * (1 - paid) - f, 9) if r == det["side"] else round(-CONTRACTS * paid - f, 9)
 
 
+def pairs_le60(events):
+    """consecutive polls of one ticker no more than 60 s apart, per UTC day: a cadence that cannot signal shows here, not as a quiet rule."""
+    c = collections.Counter()
+    for ev in events:
+        for tk, rows in ev["rows"].items():
+            for (t1, _b1, _a1), (t2, _b2, _a2) in zip(rows, rows[1:]):
+                if t2 - t1 <= 60:
+                    c[time.strftime("%Y-%m-%d", time.gmtime(t2))] += 1
+    return dict(c)
+
+
+LAST2 = 120                                            # conventions C8: an entry in the last 2 minutes needs 2c as the primary haircut
+
+
 def run(events, spec):
-    skips = collections.Counter(); rows = {h: [] for h in HAIRCUTS}
+    skips = collections.Counter(); rows = {h: [] for h in HAIRCUTS}; late = {h: [] for h in HAIRCUTS}
     for ev in events:
         why, det = RULES[spec](ev)
         if why != "ok":
             skips[why] += 1; continue
+        cl = ev["close"].get(det["ticker"])
         for h in HAIRCUTS:
-            rows[h].append((det["t"], cash(ev, det, h)))
+            x = cash(ev, det, h); rows[h].append((det["t"], x))
+            if cl is not None and cl - det["t"] <= LAST2:
+                late[h].append((det["t"], x))
     out = {"spec": spec, "skips": dict(skips)}
+    if spec == "IGFADE2":
+        pr = pairs_le60(events); out["pairs_le60_by_day"] = pr
+        if not pr:
+            out["cadence"] = "no signal: cadence (no pair of polls of one ticker within 60 s)"
+    out["entries_within_120s_of_close"] = {"n": len(late[0.02]), "pf_2c": pf([x for _, x in sorted(late[0.02])]) if late[0.02] else None}
     for h in HAIRCUTS:
         rs = sorted(rows[h]); xs = [x for _, x in rs]; half = len(xs) // 2
         out["h%d" % round(h * 100)] = {"n": len(xs), "pf": pf(xs) if xs else None, "half1": pf(xs[:half]) if half else None, "half2": pf(xs[half:]) if xs else None,

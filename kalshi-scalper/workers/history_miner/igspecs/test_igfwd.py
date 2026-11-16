@@ -35,10 +35,14 @@ w, d = E.dog(ev); assert w == "ok" and d["ticker"] == "A" and A(E.cash(ev, d, 0.
 assert E.dog(mk({"A": [(T + 4400, 0.28, 0.30)], "B": [(T + 4400, 0.20, 0.25)]}, {}, kind="ml"))[0] == "no single underdog"
 assert E.dog(mk({"A": []}, {}, kind="ml", lg="NBA"))[0] == "not in wall" and E.latedrift(mk({"S": []}, {}, kind="spread"))[0] == "not in wall"
 print("plugin: ok")
-# end to end, loader to plugin
-tmp = tempfile.mkdtemp(); lst = os.path.join(tmp, "lst"); os.makedirs(lst)
-page = {"markets": [{"close_time": "2026-11-20T06:00:00Z", "ticker": "KXNHLTOTAL-26NOV19AB-5", "result": "no", "occurrence_datetime": OCC}]}
-raw = gzip.compress(json.dumps(page).encode()); open(os.path.join(lst, "p.json.gz"), "wb").write(raw)
+# end to end, loader to plugin, with a listing RUN folder (Auditor B's note 4)
+tmp = tempfile.mkdtemp(); lst = os.path.join(tmp, "lst"); run = os.path.join(lst, "run1"); os.makedirs(run)
+job = {"job_id": "X", "requests": [{"id": "settled_KXNHLTOTAL"}]}
+jf = os.path.join(tmp, "job.json"); open(jf, "w").write(json.dumps(job)); L.JOB_FILE = jf; L.JOB_SHA256 = hashlib.sha256(open(jf, "rb").read()).hexdigest()
+page = {"markets": [{"close_time": "2026-11-20T06:00:00Z", "ticker": "KXNHLTOTAL-26NOV19AB-5", "result": "no", "occurrence_datetime": OCC}], "cursor": ""}
+body = json.dumps(page).encode(); open(os.path.join(run, "0001.json.gz"), "wb").write(gzip.compress(body))
+man = {"job": job, "rows": [{"id": "settled_KXNHLTOTAL", "page": 1, "status": 200, "truncated": False, "bytes": len(body), "sha256": hashlib.sha256(body).hexdigest(), "file": "0001.json.gz"}]}
+json.dump(man, open(os.path.join(run, "manifest.json"), "w")); open(os.path.join(run, "STATUS"), "w").write("complete")
 d = os.path.join(tmp, "ig", "2026-11-20", "0000"); os.makedirs(d)
 b = io.StringIO(); w = csv.writer(b); w.writerow(["t_recv_ms", "server_date", "event", "kind", "ticker", "strike", "yes_bid", "yes_ask", "bid_size", "ask_size", "last_price", "volume"])
 for t, bb, aa in ((T, 0.40, 0.42), (T + 30, 0.52, 0.54)):
@@ -49,8 +53,28 @@ try:
     L.load(os.path.join(tmp, "ig"), lst); assert False
 except SystemExit as e:
     assert "REFUSED" in str(e)
-open(allow, "w").write("%s ingame_fwd_load.py %s %s\n" % (L.ALLOW_MARK, L.self_sha(), hashlib.sha256(raw).hexdigest()))
+open(allow, "w").write("%s ingame_fwd_load.py %s %s\n" % (L.ALLOW_MARK, L.self_sha(), L.JOB_SHA256))
+def refused(msg):
+    try:
+        L.load(os.path.join(tmp, "ig"), lst); assert False, msg
+    except SystemExit as e:
+        assert msg in str(e), (msg, str(e))
 evs, c = L.load(os.path.join(tmp, "ig"), lst)
 assert len(evs) == 1 and evs[0]["league"] == "NHL" and evs[0]["kind"] == "total"
 r = E.run(evs, "IGFADE2"); assert r["h2"]["n"] == 1 and A(r["h2"]["net"], 4.82) and r["h2"]["evidence"] == "no evidence at n = 1" and r["kill_fast"] is False
+assert r["pairs_le60_by_day"] == {"2026-11-20": 1} and r["entries_within_120s_of_close"]["n"] == 0
+r0 = E.run([{"key": "k", "league": "NHL", "kind": "total", "rows": {"T": [(T, 0.4, 0.42), (T + 120, 0.5, 0.52)]}, "result": {"T": "no"}, "occ": {"T": OCC}, "close": {"T": T + 200}}], "IGFADE2")
+assert r0["cadence"].startswith("no signal: cadence") and r0["pairs_le60_by_day"] == {}
+evl = [{"key": "k", "league": "NHL", "kind": "total", "rows": {"T": [(T, 0.40, 0.42), (T + 30, 0.52, 0.54)]}, "result": {"T": "no"}, "occ": {"T": OCC}, "close": {"T": T + 100}}]
+assert E.run(evl, "IGFADE2")["entries_within_120s_of_close"]["n"] == 1
+assert c["listing runs accepted"] == 1
+# structure failures refuse the run
+import shutil
+for what, edit, msg in (("status", lambda: open(os.path.join(run, "STATUS"), "w").write("running"), "STATUS is not complete"),):
+    edit(); refused(msg); open(os.path.join(run, "STATUS"), "w").write("complete")
+m2 = json.load(open(os.path.join(run, "manifest.json"))); m2["job"]["job_id"] = "Y"; json.dump(m2, open(os.path.join(run, "manifest.json"), "w")); refused("embedded job differs"); json.dump(man, open(os.path.join(run, "manifest.json"), "w"))
+open(os.path.join(run, "0001.json.gz"), "wb").write(gzip.compress(body + b" ")); refused("fails the manifest check"); open(os.path.join(run, "0001.json.gz"), "wb").write(gzip.compress(body))
+open(os.path.join(run, "extra.txt"), "w").write("x"); refused("files differ from the manifest"); os.remove(os.path.join(run, "extra.txt"))
+cur = dict(page, cursor="next"); body2 = json.dumps(cur).encode(); open(os.path.join(run, "0001.json.gz"), "wb").write(gzip.compress(body2))
+m3 = json.loads(json.dumps(man)); m3["rows"][0]["bytes"] = len(body2); m3["rows"][0]["sha256"] = hashlib.sha256(body2).hexdigest(); json.dump(m3, open(os.path.join(run, "manifest.json"), "w")); refused("cursor on its last page")
 print("end to end: ok")

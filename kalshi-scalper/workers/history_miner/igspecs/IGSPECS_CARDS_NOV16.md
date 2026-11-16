@@ -11,3 +11,5 @@ Tip = occurrence_datetime minus 3 h, a schedule-shaped proxy, truth unproven; th
 
 ## Amendment 1 (2026-11-16 ~16:50Z, Auditor B 16:20Z, before any forward row)
 KXNFLSPREAD removed from IGFADE2's wall, the loader and the listing job (BOOKS2 W3 holds it until the Head closes BOOKS2). The specs now carry Desk A's signing fields (c04cdbd89): holds as epochs, look_ahead, sources, plugin hashes, subset_rationale, halves, fee_form, n_floor; spec_check passes, 1 rule each. Loader ingame_fwd_load.py c7f90926, plugin ingame_events.py 5f5d739a, hand case 25bcc5ff.
+
+## Amendment 2 (2026-11-16 ~17:15Z): loader ingame_fwd_load.py and plugin ingame_events.py hashes updated for Auditor B's notes 1, 2 and 4 (see the hand case Amendment 2); the buying rules are unchanged.

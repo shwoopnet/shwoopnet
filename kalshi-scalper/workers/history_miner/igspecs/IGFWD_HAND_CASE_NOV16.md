@@ -22,3 +22,8 @@
 GET /markets, settled, series the six above, min_close_ts 1794873600, max_close_ts 1797292799, limit 1000, max_pages 10 each, cap 80 requests.
 
 ## Amendment 1 (2026-11-16 ~16:45Z, Auditor B 16:20Z, before any forward row): KXNFLSPREAD removed from the loader wall, the listing job and IGFADE2 (BOOKS2 W3 holds it until the Head closes BOOKS2). Nothing else changed.
+
+## Amendment 2 (2026-11-16 ~17:10Z, Auditor B 15:54Z notes 1, 2 and 4, before any forward row)
+- Note 1 (C8): the plugin counts entries within 120 s of the close and prints their 2c profit factor (entries_within_120s_of_close).
+- Note 2: IGFADE2 prints the count of consecutive polls of one ticker no more than 60 s apart, per UTC day; none at all prints 'no signal: cadence'.
+- Note 4: the allow line is bound to the loader's sha256 and the committed job's sha256 (IG_FWD_RESULTS.json), not to every listing file. A listing RUN is accepted only if its STATUS is complete, its manifest's embedded job equals the committed job, every row is 200 and not truncated, every body's sha256 and byte count equal its manifest row, pages are 1..k per request with no cursor on the last, and the folder's files equal the manifest's files plus STATUS and manifest.json. The loader takes a folder of run folders.

@@ -45,10 +45,10 @@
  },
  "data": {
   "loader": "ingame_fwd_load.py",
-  "loader_sha256": "c7f90926a7d1f77f14069387b7ca59d7974b02b5119b35d380822ea484df3c27",
+  "loader_sha256": "e639ad63318cdcbdb545f5475c70f2ca44191b1fe7f064af2852d967d6ee8200",
   "extracts": [
    "sports-data ingame/<date>/<HHMM>/obs.csv.gz, date directories 2026-11-17 to 2026-12-14",
-   "kalshi-pull IG_FWD_RESULTS runs (each listing gz named by sha256 in the allow line)"
+   "kalshi-pull IG_FWD_RESULTS runs (accepted by manifest check against the committed job, sha256 d535923d)"
   ],
   "window": {
    "first_close": "2026-11-17T00:00:00Z",
@@ -67,7 +67,7 @@
  },
  "event": {
   "scorer_plugin": "ingame_events.py",
-  "scorer_plugin_sha256": "5f5d739a8919bf32123308140e6430a65721668996e160244e342b8f8b9515b1",
+  "scorer_plugin_sha256": "4698bae08dca65bebcaac7bad551bad6611099ba71a082b58b0976835f817e0b",
   "decision_instant": "the second of two consecutive polls of one ticker no more than 60 s apart, both two-sided",
   "signal_threshold_abs_mid_move": 0.1,
   "entry_rule": "buy the side that fell at its ask (YES ask, or 1 - yes_bid) if 0.15 to 0.60; the earliest such pair per game and kind",
@@ -129,9 +129,9 @@
  },
  "plugin": {
   "file": "ingame_events.py",
-  "sha256": "5f5d739a8919bf32123308140e6430a65721668996e160244e342b8f8b9515b1",
+  "sha256": "4698bae08dca65bebcaac7bad551bad6611099ba71a082b58b0976835f817e0b",
   "hand_case_file": "IGFWD_HAND_CASE_NOV16.md",
-  "hand_case_sha256": "25bcc5ff81d6169da66f5d9e8b9e8fd601baf1742438977fb77e8bd78df416a9",
+  "hand_case_sha256": "7a032a364505bb53b20a792006a7f163271d2acd05b1909a70722bf431ee0eaa",
   "auditor_clean_date": "pending"
  },
  "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
