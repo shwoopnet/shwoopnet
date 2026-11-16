@@ -76,11 +76,14 @@ def _prints(f):
         gaps = [(big * -1, big)] if not ps else [(-big, ps[0] - GAP)] + [(a, b) for a, b in zip(ps, ps[1:]) if b - a > GAP] + [(ps[-1] + GAP, big)]
         _PC[k] = (f, ps, gaps)
     return _PC[k][1], _PC[k][2]
+FLOOR_EXITS = ("T3", "T10", "T15", "T30", "TS15", "TS30")
 def clip_of(e, exit_):
     """The boundary clip horizon (Auditor B ruling R1): the rule's OWN exit time (T3 e+180, T10 e+600, T15 e+900, T30 e+1800 ... TC the 16:00 ET candle, TO the next open, TS exits e+1800); the 1800 s floor is only the cooldown."""
     t = exit_time(e, exit_); return None if t is None else t - e                  # None: the rule has no exit for this entry (TC after 16:00 ET), so nothing to clip; the mark fails and "no mark" is counted
 def hold_of(e, exit_):
-    t = exit_time(e, exit_); return COOLDOWN if t is None else max(COOLDOWN, t - e)
+    t = exit_time(e, exit_)                                                   # R3 (Auditor B): the 1800 s floor applies ONLY to T3, T10, T15, T30, TS15, TS30; TC and TO end their cooldown at the exit time exactly (T60 and T240 exceed 1800 anyway)
+    if t is None: return COOLDOWN
+    return max(COOLDOWN, t - e) if exit_ in FLOOR_EXITS else t - e
 def trade_full(by, e, side, exit_, h, funding=None):
     """-> (gross return, reason, hold seconds) or (None, 'no mark', 0). Candles in `by` are keyed by end_ts. The fee is applied by the caller."""
     c = by[e]; long_ = side == "long"

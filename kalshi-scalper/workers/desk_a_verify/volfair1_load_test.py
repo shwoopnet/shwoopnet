@@ -18,6 +18,7 @@ def event(cl, n, tag, nobid=False):
         bid, ask = round(mid - 0.01, 2), round(mid + 0.01, 2)
         cs = [{"end_period_ts": cl - 55 * 60, "yes_bid": {"close_dollars": str(bid)}, "yes_ask": {"close_dollars": str(ask)}},
               {"end_period_ts": cl - 54 * 60, "yes_bid": {"close_dollars": "0.50"}, "yes_ask": {"close_dollars": "0.51"}},     # a later candle must never pick a strike
+              {"end_period_ts": cl - 16 * 60, "yes_bid": {"close_dollars": "0.01"}, "yes_ask": {"close_dollars": "0.99"}},     # a -16 candle must never serve as the entry
               {"end_period_ts": cl - 15 * 60, "yes_bid": {"close_dollars": str(bid + .01)}, "yes_ask": {"close_dollars": str(ask + .01)}}]
         cand.append({"market_ticker": tk, "candlesticks": cs})
 event(C_VAL, 10, "VAL"); event(C_DEV, 10, "DEV"); event(C_HELD, 10, "HELD"); event(C_THIN, 5, "THIN"); event(C_BEFORE, 10, "OLD")
@@ -29,7 +30,7 @@ assert c["close with fewer than 7 strikes quoted at -55 (skipped)"] == 1, c     
 v = out[1]["strikes"]; assert len(v) == 7
 # strikes 0..9 have mids 0.05..0.95; nearest 0.50 are j=4 (0.45), 5 (0.55), 3 (0.35), 6 (0.65), 2 (0.25), 7 (0.75), 1 (0.15): the tie between j=4 and j=5 (both 0.05 away) goes to the LOWER strike first
 assert [s["strike"] for s in v] == [100000 + 100 * j for j in (4, 5, 3, 6, 2, 7, 1)], [s["strike"] for s in v]
-assert abs(v[0]["mid55"] - 0.45) < 1e-9 and v[0]["bid15"] is not None and v[0]["result"] in ("yes", "no")
+assert abs(v[0]["mid55"] - 0.45) < 1e-9 and abs(v[0]["bid15"] - 0.45) < 1e-9 and abs(v[0]["ask15"] - 0.47) < 1e-9 and v[0]["result"] in ("yes", "no")
 assert c["candle at another time (discarded unread)"] > 0                                                                      # the -54 candles were never read
 # the loader refuses without its allow line (the real HELDOUT_PULL_RUNS.md has none for this file)
 try: L.load(base); raise AssertionError("loaded without an allow line")
@@ -43,8 +44,8 @@ m["status"] = "complete"; json.dump(m, open(d, "w"))
 jobs, gc, n = G.make(base, "VOLFAIR1_LISTS/x1", check_allow=False)
 assert n == 3 and len(jobs) == 1 and len(jobs[0]["requests"]) == 3, (n, len(jobs))                                             # DEV, VAL, THIN; HELD and OLD dropped
 for r in jobs[0]["requests"]:
-    p = r["params"]; assert p["end_ts"] - p["start_ts"] == 42 * 60 and p["period_interval"] == 1 and len(p["market_tickers"].split(",")) <= 100
-assert all(max(r["params"]["end_ts"] for r in j["requests"]) < L.VAL_TO for j in jobs) and "KXBTCD-HELD-T0" not in jobs[0]["ticker_allowlist"]
+    p = r["params"]; assert p["end_ts"] - p["start_ts"] == 41 * 60 and p["period_interval"] == 1 and len(p["market_tickers"].split(",")) <= 100
+assert all(r["params"]["end_ts"] % 60 == 0 for j in jobs for r in j["requests"]); assert all(max(r["params"]["end_ts"] for r in j["requests"]) < L.VAL_TO for j in jobs) and "KXBTCD-HELD-T0" not in jobs[0]["ticker_allowlist"]
 old = G.MAXREQ; G.MAXREQ = 2; j2, _, _ = G.make(base, "VOLFAIR1_LISTS/x1", check_allow=False); G.MAXREQ = old
 assert [j["job_id"] for j in j2] == ["VOLFAIR1_CANDLES_01", "VOLFAIR1_CANDLES_02"] and [len(j["requests"]) for j in j2] == [2, 1]
 try: G.make(base, "VOLFAIR1_LISTS/x1"); raise AssertionError("generated without an allow line")

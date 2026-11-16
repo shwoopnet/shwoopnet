@@ -162,3 +162,10 @@ _b = _c2.timegm((2026, 9, 10, 20, 0, 0)); _cs = [(_b + 60 * i, 100.0, 100.1, 100
 _r, _n = P.run_rule(_cs, None, "long", "TC", 0.0, None, hi=_b + 60 * 100, boundary=_b + 60 * 100); assert _n["no mark"] == 5 and "exit crosses the boundary" not in _n and _r == [], dict(_n)
 _r, _n = P.run_rule(_cs, None, "long", "TC", 0.0, None); assert _n["no mark"] == 5
 print("NO-EXIT COUNTER OK")
+
+# (Nov 16, R3) TC and TO cooldowns end at the exit time exactly; the 1800 s floor is only for the six short exits
+_e = _c2.timegm((2026, 9, 10, 19, 50, 0))                                    # 15:50 ET
+assert P.hold_of(_e, "TC") == 600 and P.hold_of(_e, "T3") == 1800 and P.hold_of(_e, "T10") == 1800 and P.hold_of(_e, "T15") == 1800 and P.hold_of(_e, "T30") == 1800 and P.hold_of(_e, "TS15") == 1800 and P.hold_of(_e, "T60") == 3600 and P.hold_of(_e, "T240") == 14400
+_cs = [(_e + 60 * i, 100.0, 100.1, 100.0, 1, 1) for i in range(0, 14)]       # 15:50 to 16:03 ET
+_r, _n = P.run_rule(_cs, None, "long", "TC", 0.0, None); assert [r[0] for r in _r] == [_e] and _n["no mark"] == 4, (_r, dict(_n))      # a TC trade at 15:50 exits 16:00; the 16:00 to 16:03 candles have no exit (the cooldown ends AT 16:00): no mark counted, not hidden by a 1800 s cooldown
+print("R3 OK")
