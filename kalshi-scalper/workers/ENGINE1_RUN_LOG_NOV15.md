@@ -7,3 +7,5 @@
 
 - 2026-11-16 run 1 (archive and perps, B1, loader 850ac0e8): attempt 1 computed about 10 minutes and died with a TypeError (a tuple key) in the JSON dump, after compute and before any print; nothing was read from it and its partial output file was deleted unread. Only change: engine1_run.py now writes string keys for tried_by_series (f04e2cf0b); loader, driver, split, enumerator and core are the frozen files (850ac0e8, 87354dab, c1e6f3d9, e42ee1a4, 53317e4b). Attempt 2 is the run.
 - 2026-11-16 PERPSCALP1 one read: Auditor B's CLEAN for the rebuilt reader (d7dd92cb, 3663e2e54) was queued 13:14:07Z; the run started about 13:17Z; the print's sha256 was committed (b4e75df56) before it was read.
+
+- 2026-11-16 run 1 (attempt 2) and run 2 (listing only, same data): m 2,347,488, SEARCH 2,285, VALIDATE bar 190, BH 0, both runs identical in counts (print sha256 94aff033... and 47c3b69a...). NC15 pass 2 SKIPPED by the Head (2026-11-16): NC15 is covered by pass 1, since after the dedup it adds only 163 markets, all Oct 3 closes, and nothing for AUDUSD and USDCAD.
