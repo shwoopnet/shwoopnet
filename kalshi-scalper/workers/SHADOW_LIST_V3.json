@@ -2,6 +2,8 @@
  "list": "SHADOW_LIST_V3",
  "date": "2026-11-16",
  "start_utc": "DRAFT_START_AT_FREEZE",
+ "start_rule": "non-Bitcoin picks start at the given start (next whole UTC hour after the freeze commit); picks on KXBTC15M start at 2026-11-21T00:00:00Z at the earliest (H09)",
+ "record_note": "header m below today's ruling of 6,290,660; BH 0 at both, no count changes",
  "n": 18,
  "source": "batch B2 validate-bar lists (47 passes; BH survivors 0)",
  "excluded_dogecoin_7e": 5,
