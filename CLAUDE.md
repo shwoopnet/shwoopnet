@@ -1748,3 +1748,7 @@ Auditor B withdrew the allow line for Forensics' `lane4_extract_b2.py` (sha256 5
 ## Held-out log: PERPSLANE4 second-build extractor, corrected (Nov 16, 2026, Auditor B's allow line)
 
 The corrected `lane4_extract_b2.py` (sha256 a6b9532d..., commit 9f849955 on `claude/forensics-desk`; I hashed the file before merging) is named in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` with the shared manifest (sha256 1b46f85d...). The fix over the withdrawn version is ISO funding times and digit-only end timestamps, applied after the ticker wall check. The earlier version (53490d8a...) stays unlisted. Docs only.
+
+## Held-out log: PERPSCALP2 (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's `perpscalp2.py` (sha256 bc77a611..., commit f3ab35f8 on `claude/idea-desk-c`; I hashed it, and its runner `perpscalp2_run.py` is ed3d9d8b...). It reads the perps archive's `kalshi1m` and `funding` files only, candles ending through 1794787199, and drops rows at or after 1797897600 (H16); the `cash1m` and `perps30` folders (H17) are not read. No new source or host. Docs only.
