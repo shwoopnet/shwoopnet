@@ -126,9 +126,9 @@
   "exit_price": "the near touch of the first minute at least H later (tolerance 2 minutes, else skipped); funding on prints strictly between entry and exit from the labelled file (positive = longs pay); a trade crossing a print the file lacks is excluded and counted"
  },
  "notes_v2": "approved by the Head 2026-11-16 20:47Z; margin table v2 on page-max leverage and 4.5 percent maintenance; spot accepted for research",
- "card_sha256": "b08a6b5a1917ea0cd3766baade48aa11b0ae7dd4052776bee7024f0329cce306",
+ "card_sha256": "37a752ee8e5833eca351368abe826f6e45021300b01eb490bf7ad6035a9e6b03",
  "rule_count": 8,
- "status": "DRAFT spec: not signed; loader, plugin, allow line and the Verification Analyst's four checks pending",
+ "status": "DROPPED unrun (the Head, 2026-11-16 23:19Z): a version of BASIS, BTC is development on seen data, extremes expected rare; no loader, plugin or read; tries stay counted",
  "fee_form_perps_note": "NOT the binary-contract fee: perps pay 12 bps of notional a side (stress 5 bps) plus a 0.02 or 0.05 percent haircut per fill, and funding; the standing form above is kept only because spec_check requires the field",
  "notes_disclosure": "BTC perp 1 minute candles 2026-06-03 to about 2026-11-12 were already read for CFRTI-K's lead/lag table: BTC SEARCH and VALIDATE are development on seen data; a pass needs the forward windows"
 }
