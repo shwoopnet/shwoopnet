@@ -1,6 +1,6 @@
 {
  "id": "PERPDEPTH1",
- "version": "v3.1",
+ "version": "v3.2",
  "desk": "FORENSICS (lane 3: order book and liquidation features)",
  "date_registered": "2026-11-16",
  "status": "DRAFT v3, unsigned, nothing run (replaces v2 sha dc21c4e1; the Head's lane order of 2026-11-16 20:44Z changed the features, markets, costs and read date, so v2's sign-off does not carry over)",
@@ -145,8 +145,8 @@
  },
  "episodes": "a signal is the first minute a condition holds after it was false for at least 15 minutes; one position per name and rule at a time (no new entry until the hold ends); entry at the first recorded quote AFTER the decision minute (buy at the ask, sell at the bid), exit at the first quote at or after entry + hold (opposite touch); a missing quote within 2 minutes of the exit time voids the trade and counts it; an event whose hold spans a funding print is dropped and counted",
  "grid": {
-  "rules_this_spec": 666,
-  "rules_formula": "F1 8x3x2x4 = 192; F2 8x3x2x4 = 192; F3 8x3x2x4 = 192; F4 5x3x2x3 = 90",
+  "rules_this_spec": 906,
+  "rules_formula": "F1 192 + F2 192 + F3 192 + F4 90 + F1t 240",
   "subset_rationale": "the whole stated grid, fixed before any outcome exists"
  },
  "look_ahead": {
@@ -178,8 +178,8 @@
   "p": "one sided, day clustered (UTC date of entry) on the 5 bps net"
  },
  "tries": {
-  "rules_this_spec": 666,
-  "prior_m": "for a print from 2026-11-17 on: 7,492,484 carried (batch C registered 2026-11-16, Head, Auditor B confirms on Nov 17); m_total = 7,492,484 + 666 = 7,493,150. (Earlier header: 6,290,660 + 666 = 6,291,326.)"
+  "rules_this_spec": 906,
+  "prior_m": "6,290,660 (Head ruling 2026-11-16 18:35Z) for a print today; 7,492,484 carried from 2026-11-17 on (batch C registered 2026-11-16, Auditor B confirms Nov 17); m_total = carried + 906, with the 240 F1t cells counted once here"
  },
  "read_date": {
   "first": "2026-12-08",
@@ -196,5 +196,44 @@
   ],
   "new_host": false
  },
- "fee_form": "perps: bps of notional, assumed; binary per-order rounding is not used"
+ "fee_form": "perps: bps of notional, assumed; binary per-order rounding is not used",
+ "amendment_2026_11_16_late": {
+  "what": "The Head's 7g ruling of 2026-11-16 23:17Z folds PERPIMB1 (touch imbalance, 1 to 5 minute holds, 5 second arm) into PERPDEPTH1 as new cells. Committed BEFORE the 2026-11-18T00:00Z start and before any outcome is joined.",
+  "F1t_touch_imbalance": {
+   "def": "I1 = (bid_sz_1 - ask_sz_1) / (bid_sz_1 + ask_sz_1) from the book row at the decision poll; two sided top required (0 < bid_px_1 < ask_px_1, both sizes > 0), else skipped and counted",
+   "thresholds": [
+    0.5,
+    0.7,
+    0.9
+   ],
+   "direction": "follow or fade (follow = long when I1 >= T, short when I1 <= -T)",
+   "markets": [
+    "KXBTCPERP",
+    "KXETHPERP",
+    "KXGOLDPERP",
+    "KXUSTECH100PERP",
+    "KXUS500PERP"
+   ],
+   "holds_min": [
+    1,
+    2,
+    3,
+    5
+   ],
+   "arms": [
+    "F: book_fast.csv, the 5 second book, 14:30 to 21:00 UTC Monday to Friday, five fast tickers",
+    "S: book.csv, the 60 second book, all hours"
+   ],
+   "cells": "5 x 3 x 2 x 4 x 2 = 240"
+  },
+  "episodes_and_costs": "as the other features of this spec (episode rule, next quote entry, hold exit, taker 5 and 12 bps, maker column flagged and not counted, margin view at 10, 25, 50 percent of page max with the path liquidation test) with ONE addition: an episode needs the condition false for at least 3 polls of the arm in use",
+  "gates": "the PERPDEPTH1 gates (n 100, 10 trade days, 3 entries a day per rule, PF 1.3 at 5 bps and 1.0 at 12 bps, BH 5%); the F1t cells have their own 3 a day count on their arm",
+  "counterparty_and_prediction": "counterparty: makers on the thin side who reprice slowly; numeric prediction as PERPIMB1: mean move after |I1| >= 0.9 under 0.5 bps against a 5 bps fee, PF under 1.0 at 5 bps in at least 4 of 5 markets, about 3 percent that any F1t cell passes; kill: PF under 1.0 at 5 bps in 4 of 5 markets in both arms at the first read",
+  "pre_fix_files": "as already written: files of the 2026-11-16 18:18 UTC job and earlier are dropped (PR 1013 merged 21:16:29Z), the first fixed file decides the start day",
+  "rules_added": 240,
+  "rules_this_spec_total": 906,
+  "rules_formula": "666 + 240",
+  "m": "PERPIMB1's 240 are withdrawn unrun and are counted ONCE, here: from 2026-11-17 m_total = 7,492,484 + 906 = 7,493,390 (for a print today 6,290,660 + 906 = 6,291,566); PERPIMB1 is not counted again",
+  "overlap_note": "F1t is the touch slice of F1 (the top 5 levels); a survivor of F1 and a survivor of F1t are one idea and are reported together with their correlation (7d, 0.3 or more is a duplicate)"
+ }
 }

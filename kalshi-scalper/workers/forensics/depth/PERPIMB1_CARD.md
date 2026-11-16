@@ -15,3 +15,6 @@
 **Gates and trades a day.** n 100, 10 trade days, 3 entries a day (per rule), PF 1.3 at 5 bps and 1.0 at 12 bps taker, BH 5% over m = carried + 240 (6,290,900 today; 7,492,724 from Nov 17), kill fast. Arm S at 60 s polling cannot see a signal that decays in seconds, so its 3 a day gate may be met and the edge absent; that is the point of running both arms.
 
 **Prediction (numeric).** Mean mid move after |I1| >= 0.9 under 0.5 bps against a 5 bps fee: PF under 1.0 at the 5 bps taker line in at least 4 of 5 markets; about 3 percent that any rule passes; maker-only passes likely, not counted. **Kill:** PF under 1.0 at 5 bps taker in 4 of 5 markets in both arms at the first read, or no rule reaching 3 entries a day.
+
+
+**WITHDRAWN UNRUN (Nov 16, 2026 23:17Z, Head's 7g ruling).** PERPIMB1 is the touch slice of PERPDEPTH1 F1, so it is a version, not a new strategy. Its holds and the 5 second arm were folded into PERPDEPTH1 v3.2 as cells F1t (dated amendment, committed before the Nov 18 start); the 240 rules are counted once there. Nothing was read.

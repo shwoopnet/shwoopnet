@@ -3,7 +3,7 @@
  "version": "v1",
  "desk": "FORENSICS (lane 3, scalping)",
  "date_registered": "2026-11-16",
- "status": "DRAFT, unsigned, nothing run, no data after the cut exists yet",
+ "status": "WITHDRAWN UNRUN 2026-11-16 23:17Z by the Head's 7g ruling: folded into PERPDEPTH1 v3.2 as cells F1t (same rules, same constants); its 240 rules stay counted in m once, there",
  "kind": "event_rule",
  "card": "kalshi-scalper/workers/forensics/depth/PERPIMB1_CARD.md",
  "needs_new_code": [
@@ -118,5 +118,6 @@
   ],
   "new_host": false
  },
- "fee_form": "perps: bps of notional, assumed"
+ "fee_form": "perps: bps of notional, assumed",
+ "withdrawn": true
 }
