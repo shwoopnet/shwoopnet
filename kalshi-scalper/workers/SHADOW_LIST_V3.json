@@ -1,0 +1,860 @@
+{
+ "list": "SHADOW_LIST_V3",
+ "date": "2026-11-16",
+ "start_utc": "DRAFT_START_AT_FREEZE",
+ "n": 18,
+ "source": "batch B2 validate-bar lists (47 passes; BH survivors 0)",
+ "excluded_dogecoin_7e": 5,
+ "dropped_by_3_a_day_gate": 0,
+ "clusters": 40,
+ "spec_sha256_covers": "the spec object only",
+ "no_money_no_orders": true,
+ "specs": [
+  {
+   "spec": {
+    "id": "SH3_01_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 180,
+     "price_band_5c": 5,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "546cd4916eb26b4656dada24672506bac55754cc1cf5fda7acc9a94dabff546c",
+   "rank": 1,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "cluster": 1,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 148,
+    "signals_per_day": 5.105,
+    "pf_1c": 1.381,
+    "pf_2c": 1.316,
+    "edge_1c_cents_per_contract": 7.101,
+    "dollars_week_5c_1c": 12.69,
+    "dollars_week_5c_2c": 10.87,
+    "p_day_clustered": 0.050485727976478684,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_02_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 180,
+     "price_band_5c": 7,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "178e849fa675c111e9d21b30834019b8f54bfa73d58aee8b1e373fbf08094a8d",
+   "rank": 2,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, middle (35c to 85c)",
+   "cluster": 2,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 110,
+    "signals_per_day": 3.794,
+    "pf_1c": 1.358,
+    "pf_2c": 1.302,
+    "edge_1c_cents_per_contract": 7.445,
+    "dollars_week_5c_1c": 9.89,
+    "dollars_week_5c_2c": 8.56,
+    "p_day_clustered": 0.08191797498257743,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_03_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 120,
+     "price_band_5c": 2,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "dee5f67acf06ed031c3c12f563d0e088b259d6221ef0c1e04e9dac923b2cd915",
+   "rank": 3,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "cluster": 3,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 175,
+    "signals_per_day": 6.037,
+    "pf_1c": 1.419,
+    "pf_2c": 1.301,
+    "edge_1c_cents_per_contract": 4.657,
+    "dollars_week_5c_1c": 9.84,
+    "dollars_week_5c_2c": 7.6,
+    "p_day_clustered": 0.05199825627419233,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_04_BNB",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBNB15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "b2e36a7137d6245c90b8db5acbc263de9b229761346da7aa096fe0e4cc44297e",
+   "rank": 4,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "cluster": 6,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 107,
+    "signals_per_day": 3.691,
+    "pf_1c": 2.275,
+    "pf_2c": 1.871,
+    "edge_1c_cents_per_contract": 6.752,
+    "dollars_week_5c_1c": 8.72,
+    "dollars_week_5c_2c": 7.0,
+    "p_day_clustered": 0.038647420710817296,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_05_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 16,
+     "side_rule": "yes",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "127506a6d172e6858a68000030be2d50257d7bb35461fc7f023d304151482811",
+   "rank": 5,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, middle (35c to 85c)",
+   "cluster": 7,
+   "cluster_size": 2,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 136,
+    "signals_per_day": 4.691,
+    "pf_1c": 1.547,
+    "pf_2c": 1.439,
+    "edge_1c_cents_per_contract": 5.044,
+    "dollars_week_5c_1c": 8.28,
+    "dollars_week_5c_2c": 6.72,
+    "p_day_clustered": 0.025053887723344152,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_06_SOL",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXSOL15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "6512a25c14f02bb54a19a1bedd1c5f8e8b4670ff500ea94a468cef79a14b1240",
+   "rank": 6,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, middle (35c to 85c)",
+   "cluster": 8,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 116,
+    "signals_per_day": 5.182,
+    "pf_1c": 1.487,
+    "pf_2c": 1.379,
+    "edge_1c_cents_per_contract": 4.565,
+    "dollars_week_5c_1c": 8.28,
+    "dollars_week_5c_2c": 6.52,
+    "p_day_clustered": 0.06422366942524806,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_07_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 17,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "9baac16feeb00a448c00877ca510cbd93cd0be48edbac736fbd857f05a4dbe44",
+   "rank": 7,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 9,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 201,
+    "signals_per_day": 6.934,
+    "pf_1c": 1.46,
+    "pf_2c": 1.323,
+    "edge_1c_cents_per_contract": 3.242,
+    "dollars_week_5c_1c": 7.87,
+    "dollars_week_5c_2c": 5.58,
+    "p_day_clustered": 0.012938372834207026,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_08_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 14,
+     "side_rule": "favourite",
+     "filter": "vspike:mid"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB2VSPIKE"
+   },
+   "spec_sha256": "9f0e20a6531673d0894127eebc45bfcf17896d4ba601ac8954365cbfffe6fbb3",
+   "rank": 8,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "entry volume spike filter, middle (35c to 85c)",
+   "cluster": 10,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 104,
+    "signals_per_day": 3.587,
+    "pf_1c": 1.431,
+    "pf_2c": 1.359,
+    "edge_1c_cents_per_contract": 6.19,
+    "dollars_week_5c_1c": 7.77,
+    "dollars_week_5c_2c": 6.57,
+    "p_day_clustered": 0.08913520900228192,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_09_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 300,
+     "price_band_5c": 2,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "1cb89ebbc4b8c1940ccefcd1b5e9a769ffa6604167324a7a07dab66280ae44e9",
+   "rank": 9,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "cluster": 11,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 133,
+    "signals_per_day": 4.588,
+    "pf_1c": 1.535,
+    "pf_2c": 1.337,
+    "edge_1c_cents_per_contract": 4.733,
+    "dollars_week_5c_1c": 7.6,
+    "dollars_week_5c_2c": 5.3,
+    "p_day_clustered": 0.03712441779719483,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_10_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 300,
+     "price_band_5c": 1,
+     "side_rule": "yes",
+     "filter": "swid:flat"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "8f820dee365dc8604a9a1c308cd5917366f6c27e571c45eb8de05fe9d8bb928e",
+   "rank": 10,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, cheap tail (5c to 35c)",
+   "cluster": 13,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 123,
+    "signals_per_day": 4.243,
+    "pf_1c": 1.79,
+    "pf_2c": 1.49,
+    "edge_1c_cents_per_contract": 4.615,
+    "dollars_week_5c_1c": 6.85,
+    "dollars_week_5c_2c": 4.92,
+    "p_day_clustered": 0.009632721216536773,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_11_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "vspike:low"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB2VSPIKE"
+   },
+   "spec_sha256": "47aa12368f0a5791b5eb05f983e25d3b3adbc85e273e73b83b91516df2716e1f",
+   "rank": 11,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "entry volume spike filter, middle (35c to 85c)",
+   "cluster": 15,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 111,
+    "signals_per_day": 3.829,
+    "pf_1c": 1.55,
+    "pf_2c": 1.439,
+    "edge_1c_cents_per_contract": 4.989,
+    "dollars_week_5c_1c": 6.69,
+    "dollars_week_5c_2c": 5.4,
+    "p_day_clustered": 0.05124480752833068,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_12_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 14,
+     "side_rule": "favourite",
+     "filter": "vspike:mid"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB2VSPIKE"
+   },
+   "spec_sha256": "dd278ea2abd196be5c292bc614c6262959b5eee87b0ea0d2efc800c3b6cfc939",
+   "rank": 12,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "entry volume spike filter, middle (35c to 85c)",
+   "cluster": 16,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 104,
+    "signals_per_day": 3.587,
+    "pf_1c": 1.37,
+    "pf_2c": 1.261,
+    "edge_1c_cents_per_contract": 5.313,
+    "dollars_week_5c_1c": 6.67,
+    "dollars_week_5c_2c": 4.77,
+    "p_day_clustered": 0.12039882982424327,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_13_SOL",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXSOL15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "fabb95f2d952d4565573ebc7bf003aab7462d42c5812eb900b7c9e023a8f8274",
+   "rank": 13,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread-width change filter, middle (35c to 85c)",
+   "cluster": 18,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 116,
+    "signals_per_day": 5.182,
+    "pf_1c": 1.377,
+    "pf_2c": 1.205,
+    "edge_1c_cents_per_contract": 3.535,
+    "dollars_week_5c_1c": 6.41,
+    "dollars_week_5c_2c": 3.53,
+    "p_day_clustered": 0.11592846153726208,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_14_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 360,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "1672e145817c31eba70bd840a231863da096055c624c8e5cabdd14bcac641cac",
+   "rank": 14,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 19,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 323,
+    "signals_per_day": 11.142,
+    "pf_1c": 1.353,
+    "pf_2c": 1.147,
+    "edge_1c_cents_per_contract": 1.631,
+    "dollars_week_5c_1c": 6.36,
+    "dollars_week_5c_2c": 2.68,
+    "p_day_clustered": 0.08334916740249632,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_15_GOLD",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXGOLD15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "4191b6385753c6bf33b129cf5f161304f9bdd617756dec92cc48057f938ce7ed",
+   "rank": 15,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 21,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 204,
+    "signals_per_day": 7.065,
+    "pf_1c": 1.594,
+    "pf_2c": 1.358,
+    "edge_1c_cents_per_contract": 2.442,
+    "dollars_week_5c_1c": 6.04,
+    "dollars_week_5c_2c": 3.68,
+    "p_day_clustered": 0.04374409222231611,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_16_NEAR",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXNEAR15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "yes",
+     "filter": "swid:down"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "8001249678ed6900dc72a00389aa253eb765061dc893f6ba9669928acc2b3870",
+   "rank": 16,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 26,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 106,
+    "signals_per_day": 3.656,
+    "pf_1c": 2.427,
+    "pf_2c": 2.055,
+    "edge_1c_cents_per_contract": 3.737,
+    "dollars_week_5c_1c": 4.78,
+    "dollars_week_5c_2c": 3.57,
+    "p_day_clustered": 0.004361389897156977,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_17_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "vspike:low"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB2VSPIKE"
+   },
+   "spec_sha256": "590725f9cf8594f7b98edb9a82039f10b857a826d5ade8399dd598053620093e",
+   "rank": 17,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "entry volume spike filter, cheap tail (5c to 35c)",
+   "cluster": 27,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 105,
+    "signals_per_day": 3.622,
+    "pf_1c": 1.607,
+    "pf_2c": 1.341,
+    "edge_1c_cents_per_contract": 3.67,
+    "dollars_week_5c_1c": 4.65,
+    "dollars_week_5c_2c": 3.03,
+    "p_day_clustered": 0.12004771992691829,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_18_NEAR",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXNEAR15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "yes",
+     "filter": "swid:down"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "87e69ac92b1ca984e583412c669c9ada83713516d16412f9139e0ef42e50c8a7",
+   "rank": 18,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 31,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 106,
+    "signals_per_day": 3.656,
+    "pf_1c": 2.911,
+    "pf_2c": 1.876,
+    "edge_1c_cents_per_contract": 3.329,
+    "dollars_week_5c_1c": 4.26,
+    "dollars_week_5c_2c": 1.98,
+    "p_day_clustered": 0.0029522118431673286,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  }
+ ]
+}
