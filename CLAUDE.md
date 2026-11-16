@@ -1716,3 +1716,7 @@ The first `ETHD_RESULTS` run hit its 40 page cap (newest first, so it covered on
 ## kalshi-pull jobs: SOCDRIFT_CANDLES_P1 and _P2 (Nov 16, 2026, Idea Desk C, Auditor B CLEAN by hash)
 
 Two job files copied byte for byte from `claude/idea-desk-c` commit ca2a65e5 after checking each sha256 (P1 starts 4fe89a58, P2 starts 56d21334), with the card and spec in `kalshi-scalper/workers/idea_desk_c/allkalshi/socdrift/`: 388 requests each, cap 400, 776 games and 1,164 tickers each, 5 second pacing, elections host, GET only, no key, owner MAIN. Run P1 then P2, after `HISTCUTOFF1`: if the historical cutoff is later than 2026-09-18, Desk C rebuilds with a later start. Runner and workflow unchanged. Gates: `test/kalshiPullGates.test.js` job lists. Nothing trades.
+
+## Held-out log: ENGINE1 held-out candle set complete (Nov 16, 2026, Auditor B's loader line)
+
+The ENGINE1 held-out read is complete and listed in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` in one line, readable ONLY by Desk A's ENGINE1 held-out loader (`engine1_heldout_load.py`, sha256 c42b5426...; the mark text equals the loader's `ALLOW_MARK`): lists A and B, the partial A1 run, the A1C completion run and the corrected B1 run. Auditor B read every run's structure CLEAN (A1C 14 of 14, B1 14 of 14; A's 10,777 tickers split disjointly between A1 and A1C, B's 18,768 equal). The failed first A1 attempt is covered only through its 47 landed answers, as the line names it. The Forensics extractor line is not here yet. Docs only.
