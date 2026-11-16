@@ -102,7 +102,8 @@
   "bh_alpha": 0.05,
   "min_events": 40,
   "min_signals_per_day": 3,
-  "signals_per_day_note": "Nov 16 amendment: n divided by the cell's SEARCH trade days must be at least 3, counted on the SEARCH span only (the Testing Desk's build counts each half on its own span; the spec says SEARCH only). min_events 40 counts the cell's distinct hourly close times, applied to the cell as a whole."
+  "signals_per_day_note": "Nov 16 amendment: n divided by the cell's SEARCH trade days must be at least 3, counted on the SEARCH span only (the Testing Desk's build counts each half on its own span; the spec says SEARCH only). min_events 40 counts the cell's distinct hourly close times, applied to the cell as a whole.",
+  "events_note": "Nov 16 amendment (Testing Desk's question): in an M60 cell an entry with no mark at close minus 60 s is NOT scored by the engine (no trade, so it is not in n, days or the PF); min_events still counts its hourly close, i.e. events = distinct hourly closes of every entry of the cell in the half being gated, marked or not; n = entries with a mark. This replaces the loose wording 'none = held to settlement' in rules.exit_M60 for scoring; the engine file (pinned) is the authority."
  },
  "tries": {
   "rules_this_spec": 96,
