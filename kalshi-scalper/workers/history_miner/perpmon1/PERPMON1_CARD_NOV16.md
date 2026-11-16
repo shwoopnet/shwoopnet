@@ -16,3 +16,6 @@ Rule (one try):
 
 ## Amendment 1 (2026-11-16 ~16:15Z, the Head 15:29Z, before any read)
 Costs now match the perps grid, replacing the 0.10 percent round trip: taker 12 bps a side and maker 5 bps a side, both printed and both ASSUMED until Kalshi's fee page is read; plus a per-fill haircut ladder of 0.02 percent and 0.05 percent on each leg. Every figure is printed at the four combinations (taker or maker, 0.02 or 0.05 percent). The bar is judged at taker with the 0.05 percent haircut; a rule that clears only at maker is flagged, not passed. Everything else stands.
+
+## Amendment 2 (2026-11-16 ~16:20Z, the Head 15:30Z, before any read)
+The bar replaces Amendment 1's single judging point (the 1c and 2c analogue): PF after cost >= 1.3 at taker with the 0.02 percent haircut, with the first 4 and the last 4 Mondays each >= 1.0 at that cost, AND PF >= 1.0 at taker with the 0.05 percent haircut. n >= 100, day-clustered z >= 2.0 (at taker 0.02 percent) and the perps Bonferroni-Holm pass still apply. A pass only at maker is flagged, not counted.
