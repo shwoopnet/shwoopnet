@@ -75,9 +75,21 @@ def decisions(root):
             cut[r["ticker"]] = x["O"] - MARK_S
             rec[r["ticker"]] = (e, x["O"], r)
     q = CV.candles(root, CANDLE_JOBS, cut)
-    out, c = [], {"listed": listed, "clock_dropped_games": len(clock_drops), "games": len(g), "closed_by_D": 0, "no_quote": 0}
+    out, c = [], {"listed": listed, "clock_dropped_games": len(clock_drops), "games": len(g), "closed_by_D": 0, "no_quote": 0, "m35_dropped_games": 0}
     for e, x in g.items():
         O = x["O"]
+        # the Head's guard (Nov 16, 18:40Z): a game whose real tip came more than 3.5 h before the scheduled end shows an in-play jump at the 3.5 h mark.
+        # If ANY rung's last two two-sided candles ending at or before the mark differ in mid by 0.15 or more, the whole game is counted and dropped from M35 (it stays in H).
+        mark_inplay = False
+        for r in x["rungs"]:
+            tw = sorted(k for k, v in q.get(r["ticker"], {}).items() if k <= O - MARK_S and two(v[0], v[1]))
+            if len(tw) >= 2:
+                a_, b_ = q[r["ticker"]][tw[-1]], q[r["ticker"]][tw[-2]]
+                if abs((a_[0] + a_[1]) / 2 - (b_[0] + b_[1]) / 2) >= GUARD_T - EPS:
+                    mark_inplay = True
+                    break
+        if mark_inplay:
+            c["m35_dropped_games"] += 1
         for D_off in DS:
             D = O - D_off
             qs = {r["ticker"]: at(q.get(r["ticker"], {}), D) for r in x["rungs"] if r["close_time"] > D}
@@ -121,7 +133,7 @@ def decisions(root):
                 f["age_lt24"], f["age_ge24"] = (None, None) if age is None else (age < AGE_S, age >= AGE_S)
                 mark = qt.get(O - MARK_S)
                 mk = (mark[0], mark[1]) if mark and two(mark[0], mark[1]) and r["close_time"] > O - MARK_S else None
-                out.append({"t": t, "game": e, "O": O, "D": D, "D_off": D_off, "close": r["close_time"], "yb": qq[0], "ya": qq[1], "f": f, "mark": mk})
+                out.append({"t": t, "game": e, "O": O, "D": D, "D_off": D_off, "close": r["close_time"], "yb": qq[0], "ya": qq[1], "f": f, "mark": mk, "m35_ok": not mark_inplay})
     c["decisions"] = len(out)
     return out, c, g
 
@@ -209,7 +221,7 @@ def run(root, m_carried=0, days_window=16):
                 if d["f"].get(fl) is not True:
                     continue
                 for ex in EXITS:
-                    if ex == "M35" and d["D_off"] not in M_VALID:
+                    if ex == "M35" and (d["D_off"] not in M_VALID or not d["m35_ok"]):
                         continue
                     cells.setdefault((d["D_off"], bi, side, ex, fl), []).append((d, ask, r))
     table, no_mark = [], {}

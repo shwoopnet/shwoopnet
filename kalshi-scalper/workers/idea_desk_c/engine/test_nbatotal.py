@@ -9,7 +9,7 @@ import test_nbaladder as T
 put, cd, iso = T.put, T.cd, T.iso
 
 
-def fixture():
+def fixture(jump=True):
     root = tempfile.mkdtemp()
     O = KL.iso("2026-10-25T03:00:00")
     D4, D9 = O - 14400, O - 32400
@@ -25,7 +25,7 @@ def fixture():
         {"market_ticker": Tk(210), "candlesticks": [cd(D4 - 3600, .44, .48, 0), cd(D4 - 1500, .47, .51, 4), cd(D4 - 300, .48, .52, 10), cd(D4, .48, .52, 0),
                                                     cd(D9 - 0, .60, .62, 0), cd(O - 12600, .60, .64, 0)]},
         {"market_ticker": Tk(215), "candlesticks": [cd(D4, .28, .32, 0)]},
-        {"market_ticker": Tk(220), "candlesticks": [cd(D4 - 120, .20, .24, 0), cd(D4, .43, .47, 0)]},
+        {"market_ticker": Tk(220), "candlesticks": [cd(D4 - 120, .20 if jump else .43, .24 if jump else .47, 0), cd(D4, .43, .47, 0)]},
     ]
     put(root, "NBATOTAL_CANDLES_P1", [({"path": "/markets/candlesticks"}, {"markets": mk})])
     return root, O, D4, D9, Tk
@@ -62,6 +62,36 @@ class Hand(unittest.TestCase):
         x, why = N.net(d, "yes", 0.52, 10, 0.01, "M35", mark, "yes")
         self.assertEqual((round(x, 6), why), (0.25, "time"))
         self.assertEqual(N.net(d, "yes", 0.52, 10, 0.01, "M35", None, "yes"), (None, "no mark"))
+
+
+class Mark(unittest.TestCase):
+    def test_game_dropped_from_m35_not_from_h(self):
+        root, O, D4, D9, Tk = fixture(False)
+        # add rung 205's candles at the 3.5 h mark: .30/.34 a minute before, .60/.64 at the mark: a .30 jump = the game was already in play
+        import gzip, json, glob
+        f = glob.glob(os.path.join(root, "pull", "NBATOTAL_CANDLES_P1", "r1", "0001.json.gz"))[0]
+        b = json.load(gzip.open(f, "rt"))
+        for m in b["markets"]:
+            if m["market_ticker"] == Tk(205):
+                m["candlesticks"] += [cd(O - 12660, .30, .34, 0), cd(O - 12600, .60, .64, 0)]
+        with gzip.open(f, "wt") as fh:
+            json.dump(b, fh)
+        dec, c, g = N.decisions(root)
+        self.assertEqual(c["m35_dropped_games"], 1)
+        self.assertTrue(all(d["m35_ok"] is False for d in dec))
+        cap = []
+        orig = N.metrics
+        N.metrics = lambda rows: (cap.append(orig(rows)) or cap[-1])
+        try:
+            N.run(root, 0)
+        finally:
+            N.metrics = orig
+        self.assertTrue(cap)                                    # the game stays in the H cells
+        cells = [m["cell"] for m in cap if "cell" in m]
+        self.assertTrue(cells and all(cl[3] == "H" for cl in cells))     # and no M35 cell exists for it
+        root2, _O, _a, _b, Tk2 = fixture(False)
+        dec2, c2, _ = N.decisions(root2)
+        self.assertEqual(c2["m35_dropped_games"], 0)            # the clean fixture: jump at the mark is below 0.15
 
 
 class RunPrint(unittest.TestCase):
