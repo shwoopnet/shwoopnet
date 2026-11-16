@@ -29,7 +29,8 @@ BASE = "https://external-api.kalshi.com/trade-api/v2"
 # and the hourly and daily LADDERS are recorded in the last LADDER_LEAD_S seconds before each hourly close (ladder.csv): Bitcoin and Ethereum hourly strikes, gold's daily and weekly strikes (they close at 21:00 UTC).
 # Only the strikes near the money are polled (a ladder has 40 to 200 strikes and most are at 0c or 100c), about every 3 seconds, so the read rate stays well under the limit and the 15 minute windows are not starved.
 SERIES = {"KXBTC15M": "BTC", "KXETH15M": "ETH", "KXSOL15M": "SOL", "KXXRP15M": "XRP", "KXDOGE15M": "DOGE", "KXGOLD15M": "GOLD"}
-LADDER_SERIES = ["KXBTCD", "KXETHD", "KXGOLDD", "KXGOLDW"]
+LADDER_SERIES = ["KXBTCD", "KXETHD", "KXGOLDD", "KXGOLDW", "KXINXU", "KXNASDAQ100U", "KXWTIH", "KXGOLDH"]
+LADDER_CLOSE_FILTERED = ("KXINXU", "KXNASDAQ100U", "KXWTIH", "KXGOLDH")   # Nov 16, 2026: these ladders have 50 to 400 strikes an event and several events open at once, so discovery asks for the one close time (min_close_ts = max_close_ts) instead of paging the open list
 LADDER_LEAD_S = 150
 LADDER_DISCOVER_LEAD_S = 190
 LADDER_EVERY_S = 3.0
@@ -284,7 +285,10 @@ class Recorder:
         for series in LADDER_SERIES:
             markets, cursor = [], ""
             for _page in range(3):
-                url = "%s/markets?series_ticker=%s&status=open&limit=200%s" % (BASE, series, ("&cursor=" + cursor) if cursor else "")
+                if series in LADDER_CLOSE_FILTERED:
+                    url = "%s/markets?series_ticker=%s&status=open&min_close_ts=%d&max_close_ts=%d&limit=1000%s" % (BASE, series, int(close), int(close), ("&cursor=" + cursor) if cursor else "")
+                else:
+                    url = "%s/markets?series_ticker=%s&status=open&limit=200%s" % (BASE, series, ("&cursor=" + cursor) if cursor else "")
                 st, d = await loop.run_in_executor(None, http_get, url)
                 if st != 200 or not d:
                     break

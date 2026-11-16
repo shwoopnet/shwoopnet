@@ -93,7 +93,7 @@ print(json.dumps([m.pick_near_money(ms, '2026-10-28T14:00'), m.pick_near_money(m
   assert.deepStrictEqual(out[1], ['B', 'C'], 'at most `limit`');
   assert.deepStrictEqual(out[2], ['E'], 'gold\'s ladder closes at 21:00 UTC and is picked only then');
   assert.strictEqual(out[3], 'GOLD', 'gold\'s 15 minute market is recorded with the others');
-  assert.deepStrictEqual(out[4], ['KXBTCD', 'KXETHD', 'KXGOLDD', 'KXGOLDW']);
+  assert.deepStrictEqual(out[4], ['KXBTCD', 'KXETHD', 'KXGOLDD', 'KXGOLDW', 'KXINXU', 'KXNASDAQ100U', 'KXWTIH', 'KXGOLDH']);
   assert.strictEqual(out[5], 'close_time');
 };
 gates.Q8 = () => {
@@ -129,3 +129,15 @@ for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
 }
 process.exit(failed ? 1 : 0);
+
+// Q19 (Nov 16, 2026, the Head's order for the index and commodity ladder spec): the ladder list gained four hourly series (S&P 500 and Nasdaq above/below, WTI, gold). They are discovered by the one close time, not by paging the open list.
+gates.Q19 = () => {
+  const out = JSON.parse(py(`
+print(json.dumps([m.LADDER_CLOSE_FILTERED, [s in m.LADDER_SERIES for s in m.LADDER_CLOSE_FILTERED], m.LADDER_MAX_STRIKES, m.LADDER_CHUNK, m.LADDER_EVERY_S]))`));
+  assert.deepStrictEqual(out[0], ['KXINXU', 'KXNASDAQ100U', 'KXWTIH', 'KXGOLDH']);
+  assert.ok(out[1].every(Boolean), 'every filtered series is in the ladder list');
+  assert.strictEqual(out[2], 40); assert.strictEqual(out[3], 40); assert.strictEqual(out[4], 3.0);
+  const code = script.replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
+  assert.ok(/min_close_ts=%d&max_close_ts=%d&limit=1000/.test(code), 'discovery of the four new series is by the one close time');
+  assert.ok(!/PRIVATE|SECRET|Authorization|\/portfolio|\/orders/i.test(code), 'still no key and no order');
+};
