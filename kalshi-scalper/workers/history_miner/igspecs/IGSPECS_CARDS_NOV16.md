@@ -15,3 +15,7 @@ KXNFLSPREAD removed from IGFADE2's wall, the loader and the listing job (BOOKS2 
 ## Amendment 2 (2026-11-16 ~17:15Z): loader ingame_fwd_load.py and plugin ingame_events.py hashes updated for Auditor B's notes 1, 2 and 4 (see the hand case Amendment 2); the buying rules are unchanged.
 
 ## Amendment 3 (2026-11-16 ~16:25Z): Auditor B cleared loader e639ad63, plugin 4698bae0 and the job d535923d; plugin.auditor_clean_date set to 2026-11-16. Two non-blocking notes (with-blocks in the loader; a 429 manifest row should be a clean REFUSED) are left for the next change to the loader.
+
+## Head's rulings (2026-11-16 ~16:12Z, the rate rule, not a failed bar)
+- IGDOG1: PARKED (40 to 80 days to 100 trades). A note, not a result: nothing was read.
+- IGFADE2 and IGLATEDRIFT1: KEPT on probation. Each needs a measured forward rate of 3.3 or more trades a day in the first 7 days of forward data (from about Nov 19), or it is cut that day. The measured rate goes in the first forward line.

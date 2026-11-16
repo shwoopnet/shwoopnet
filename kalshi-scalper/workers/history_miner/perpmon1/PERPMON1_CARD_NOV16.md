@@ -19,3 +19,5 @@ Costs now match the perps grid, replacing the 0.10 percent round trip: taker 12 
 
 ## Amendment 2 (2026-11-16 ~16:20Z, the Head 15:30Z, before any read)
 The bar replaces Amendment 1's single judging point (the 1c and 2c analogue): PF after cost >= 1.3 at taker with the 0.02 percent haircut, with the first 4 and the last 4 Mondays each >= 1.0 at that cost, AND PF >= 1.0 at taker with the 0.05 percent haircut. n >= 100, day-clustered z >= 2.0 (at taker 0.02 percent) and the perps Bonferroni-Holm pass still apply. A pass only at maker is flagged, not counted.
+
+## PARKED (2026-11-16 ~16:12Z, the Head): over 30 days to 100 trades by the rate rule, not a failed bar. Nothing was read. The Jan 4 forward read stands on the card if the Head un-parks it.
