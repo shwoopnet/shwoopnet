@@ -1,0 +1,68 @@
+{
+ "job_id": "NCAAMB_CENSUS",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/ncaamb/NCAAMB_CENSUS_NOTE_NOV16.md",
+ "purpose": "Census, counts only: the OPEN markets of the three NCAA men's basketball series (moneyline, spread, total): how many games and markets, and their close and schedule times. Open markets carry no result; no price is read.",
+ "heldout": "none read: status open only (no settled market, no result); the three series are named in no hold I know of (Auditor B to confirm; PRICEMATCH1, RULES1 and STRESSDAY1 ended KXNCAAMBGAME at 2026-10-03T16:00Z on closed windows).",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNCAAMBGAME",
+  "KXNCAAMBSPREAD",
+  "KXNCAAMBTOTAL"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 12,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "open_KXNCAAMBGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNCAAMBGAME",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "open_KXNCAAMBSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNCAAMBSPREAD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "open_KXNCAAMBTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNCAAMBTOTAL",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 4
+  }
+ ]
+}
