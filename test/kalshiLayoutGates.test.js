@@ -303,7 +303,7 @@ gates.Y9 = () => {
 gates.Y10 = () => {
   const acct = html.slice(html.indexOf('// No stake or reinvest pool tiles'), html.indexOf("    el.innerHTML = h;"));
   assert.ok(!/BOT_SHARDS|shardLow|DATA_SHARD_LOW/.test(html) && !/Shard '|shardRows/.test(acct), 'no shard balances or low-shard warning on the page (removed Oct 24, 2026, the owner: the shard stuff can go)');
-  assert.ok(/a\.liveSwitch \? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
+  assert.ok(!/Order switch<\/span>/.test(acct) && /switchOff \? 'Order switch OFF'/.test(html), 'no order switch row in the Account card (Nov 16, 2026, the owner); the Running badge says Order switch OFF');
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');

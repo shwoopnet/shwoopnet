@@ -1840,7 +1840,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 16</div>
                 <ul class="changelog-list">
-                  <li>Bot page: the per strategy table is gone from the Account card (the owner: "i still see the strategies"). The card is now the balance, Today, the Running badge and the Account result chart with its range buttons. Every strategy's results are on the Strategies page.</li>
+                  <li>Bot page: the per strategy table is gone from the Account card (the owner: "i still see the strategies"). The card is now the balance, Today, the Running badge and the Account result chart with its range buttons. Every strategy's results are on the Strategies page. The separate "Order switch OFF" row is gone too; the Running badge already says it.</li>
                   <li>Bot page: the Account result line now sits inside the Account card, under the strategies table, so there is one module instead of two, and its dollar figure shows only while you touch the chart (the All strategies row already carries it). The separate stop meter tile and the per strategy stop line are gone; each strategy's stop rule stays in its own card. Strategies page: gold's paper record while it is off and the Bitcoin perp model place are no longer drawn as rows of their own (they are part of Closing buy and CFRTIK).</li>
                   <li>Research: the in-game recorder now reads a calm game's spread and total every 5 minutes instead of every 2, so its request budget can serve the 20 second hot tier, and a 2c move on any of its three markets makes a game hot. Public data only, nothing trades.</li>
                   <li>Research: four more public Kalshi data pulls were queued (two in-game results lists, a basketball props candle read and a Trump late word candle read). Public data only, nothing trades. (#950, #954)</li>
@@ -3287,8 +3287,7 @@
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
       // No stake or reinvest pool tiles (the owner, Oct 30, 2026: "we don't really NEED visibility on that"): the size and the pool rule live in the bot's code and Recent trades shows what was actually bought.
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') +
-        (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
+      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '');
     }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
