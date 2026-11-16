@@ -169,7 +169,7 @@ def run_cell(data, funding, ticks, cell, col, cap=None):
             if ex is None: cnt["no_exit_candle"] += 1; continue
             x, xp, xf, kind_x = ex; last_exit, last_entry = x, e
             fs, spans = spanning(funding.get(name), e, x); gross = xp / ep - 1 if d > 0 else (ep - xp) / ep
-            trades.append({"name": name, "e": e, "x": x, "side": d, "day": day_of(e), "gross": gross, "net": gross - ef - xf - d * fs, "ef": ef, "xf": xf, "span": spans > 0, "t": t, "U": U, "kind": kind_x})
+            trades.append({"name": name, "e": e, "x": x, "side": d, "day": day_of(e), "gross": gross, "ep": ep, "xp": xp, "net": gross - ef - xf - d * fs, "ef": ef, "xf": xf, "span": spans > 0, "t": t, "U": U, "kind": kind_x})
     return trades, cnt
 
 
