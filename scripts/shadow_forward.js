@@ -31,7 +31,9 @@ function validateSpecs(specs) {
 function signalPnl(sig, slipCents) {
   const p = Math.min(0.99, Number(sig.price) + slipCents / 100);
   const fee = shadowFee(p);
-  if (!(p > 0 && p < 1) || !Number.isFinite(fee) || (sig.side !== 'yes' && sig.side !== 'no') || (sig.result !== 'yes' && sig.result !== 'no')) return null;
+  if (!(p > 0 && p < 1) || !Number.isFinite(fee) || (sig.side !== 'yes' && sig.side !== 'no') || (sig.result !== 'yes' && sig.result !== 'no' && sig.result !== 'void')) return null;
+  // The Head of R&D's void ruling (Nov 16, 2026, as the engine core does): a void is scored as a settled trade with the entry fee as the loss (the price is refunded, the fee is kept).
+  if (sig.result === 'void') return Math.round(-fee * 10000) / 10000;
   return Math.round((sig.side === sig.result ? 1 - p - fee : -(p + fee)) * 10000) / 10000;
 }
 
@@ -53,11 +55,12 @@ function scoreSpecs(specs, signals, nowMs) {
       .sort((a, b) => Number(a.tsMs) - Number(b.tsMs) || String(a.ticker).localeCompare(String(b.ticker)));
     const seen = new Set(), uniq = [];
     for (const x of mine) { const k = x.ticker + '|' + x.side; if (!seen.has(k)) { seen.add(k); uniq.push(x); } }
-    const settled = uniq.filter((x) => x.result === 'yes' || x.result === 'no');
+    const settled = uniq.filter((x) => x.result === 'yes' || x.result === 'no' || x.result === 'void');
+    const voids = settled.filter((x) => x.result === 'void').length;
     const wins = settled.filter((x) => x.side === x.result).length;
     const slip = {};
     for (const c of SLIPS) slip[c === 0 ? 'cash' : '+' + c + 'c'] = pfNet(settled.map((x) => signalPnl(x, c)).filter((x) => x !== null));
-    out[s.id] = { id: s.id, fillCheckedSignals: uniq.length, settled: settled.length, wins, losses: settled.length - wins, slip };
+    out[s.id] = { id: s.id, fillCheckedSignals: uniq.length, settled: settled.length, wins, voids, losses: settled.length - wins, slip };
   }
   return out;
 }
@@ -65,8 +68,8 @@ function scoreSpecs(specs, signals, nowMs) {
 // The counts-only feed: counts and dates, never a price, a dollar figure or a profit factor.
 function countsFeed(specs, scores, nowMs) {
   const asOf = new Date(nowMs).toISOString();
-  return { asOf, specs: specs.map((s) => { const r = scores[s.id] || { fillCheckedSignals: 0, settled: 0, wins: 0 };
-    return { id: s.id, signals: r.fillCheckedSignals, settled: r.settled, wins: r.wins, target: s.target || 60, start_utc: s.startUtc, as_of_utc: asOf }; }) };
+  return { asOf, specs: specs.map((s) => { const r = scores[s.id] || { fillCheckedSignals: 0, settled: 0, wins: 0, voids: 0 };
+    return { id: s.id, signals: r.fillCheckedSignals, settled: r.settled, wins: r.wins, voids: r.voids || 0, target: s.target || 60, start_utc: s.startUtc, as_of_utc: asOf }; }) };
 }
 
 module.exports = { SPEC_KEYS, SLIPS, validateSpecs, signalPnl, scoreSpecs, countsFeed };

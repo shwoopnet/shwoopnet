@@ -58,7 +58,7 @@ gates.SH5 = () => {
   // Consequence: the counts feed carries counts and dates only. No price, dollar figure or profit factor can reach the Strategies page through it.
   const scores = M.scoreSpecs([SPEC], [sig(1, 'yes', 0.10, 'yes'), sig(2, 'yes', 0.10, 'no')], T0 + 1e6);
   const f = M.countsFeed([SPEC], scores, T0 + 1e6);
-  assert.deepStrictEqual(f.specs[0], { id: 'T1', signals: 2, settled: 2, wins: 1, target: 60, start_utc: '2026-11-17T00:00:00Z', as_of_utc: new Date(T0 + 1e6).toISOString() });
+  assert.deepStrictEqual(f.specs[0], { id: 'T1', signals: 2, settled: 2, wins: 1, voids: 0, target: 60, start_utc: '2026-11-17T00:00:00Z', as_of_utc: new Date(T0 + 1e6).toISOString() });
   assert.ok(!/pnl|net|pf|price|slip|\$/i.test(JSON.stringify(f).replace(/start_utc|as_of_utc/g, '')), 'counts and dates only');
 };
 
@@ -67,6 +67,17 @@ gates.SH6 = () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'shadow_forward.js'), 'utf8').replace(/\/\/.*$/gm, '');
   assert.deepStrictEqual([...src.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ["'../functions/kalshiShadowLib.js'"]);
   assert.ok(!/fetch|http|process\.|Date\.now|Math\.random|writeFile|fs\.|firebase|orders?\b|promote|PASS/.test(src), 'no network, clock, file, order or promote word');
+};
+
+gates.SH7 = () => {
+  // Consequence (the Head of R&D's void ruling, Nov 16, 2026): a void is a settled trade at minus the entry fee (price refunded, fee kept), counted in `settled` and as a loss, and in its own `voids` count.
+  // Hand case: a 10c yes buy that wins (+0.893), and a 10c yes buy that is void (fee(0.10) = 0.007, so -0.007): net 0.886, gross loss 0.007, PF 127.571 (0.893 / 0.007 = 127.571).
+  const s = M.scoreSpecs([SPEC], [sig(1, 'yes', 0.10, 'yes'), sig(2, 'yes', 0.10, 'void')], T0 + 1e6).T1;
+  assert.deepStrictEqual([s.settled, s.wins, s.losses, s.voids], [2, 1, 1, 1]);
+  assert.strictEqual(s.slip.cash.net, 0.886);
+  assert.strictEqual(s.slip.cash.pf, 127.571);
+  assert.strictEqual(M.signalPnl(sig(3, 'no', 0.50, 'void'), 0), -0.018, 'a void on a 50c buy costs its 1.8c fee, not the price');
+  assert.strictEqual(M.countsFeed([SPEC], M.scoreSpecs([SPEC], [sig(1, 'yes', 0.10, 'void')], T0 + 1e6), T0 + 1e6).specs[0].voids, 1, 'the counts feed carries the voids count');
 };
 
 let failed = 0;
