@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PERPSLANE4 fixture (first build): 8 invented perps (6 stock-like, KXGOLDPERP, KXUS500PERP) over ET weekdays 2026-10-26 to 2026-11-18 (EDT then EST, DST ends Nov 1), minute candles 09:20 to 17:05 ET, a daily print at 16:00 ET (DST aware), underlyings for the gap rules, a few missing and crossed candles, a name with no prints, a name with a shifted print time. Invented numbers only.
+"""PERPSLANE4 fixture (first build): 8 invented perps (6 stock-like, KXGOLDPERP, KXUS500PERP) over ET weekdays 2026-10-26 to 2026-11-18 (EDT then EST, DST ends Nov 1), minute candles 09:20 to 17:05 ET, a print every calendar day (weekends included, as the real funding files) at 16:00 ET (DST aware), underlyings for the gap rules, a few missing and crossed candles, a name with no prints, a name with a shifted print time. Invented numbers only.
 Usage: lane4_fixture_second.py <out.json.gz>"""
 import calendar, gzip, json, math, random, sys
 import engine1_perps_second as p
@@ -22,9 +22,9 @@ def build():
                 bid, ask = (mid + sp, mid - sp) if r < 0.02 else (mid - sp, mid + sp)
                 data[n][str(t)] = [round(bid, 4), round(ask, 4)]
             prev_close = mid
-            if n != "KXFFFPERP":
-                tp = et0 + 16 * 3600 + (1800 if n == "KXEEEPERP" else 0)
-                funding[n][str(tp)] = round(rng.gauss(0, 0.0003), 6)
+    for n in NAMES:          # the real funding files hold one print per name every calendar day (Saturday and Sunday too) at 16:00 ET; KXFFFPERP has none; KXEEEPERP prints 30 minutes late
+        if n == "KXFFFPERP": continue
+        for L in range(days[0], days[-1] + 2): funding[n][str(p.day_start_of_local(L) + 16 * 3600 + (1800 if n == "KXEEEPERP" else 0))] = round(rng.gauss(0, 0.0003), 6)
     return {"data": data, "funding": funding, "under": under}
 if __name__ == "__main__":
     with gzip.open(sys.argv[1], "wt") as fh: json.dump(build(), fh, sort_keys=True)
