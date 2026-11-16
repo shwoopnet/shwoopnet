@@ -1,0 +1,13 @@
+# VOLSPIKE1: volume spike with no price move, NC15 markets. Registered Nov 16, 2026, BEFORE any read (Testing Desk)
+
+Mechanism (not favourite-late, open interest, lead-lag, jump-fade, previous-window result or restart gap): a large burst of trading that leaves the quote unchanged means a patient counterparty absorbed the flow at that level; the level then tends to hold into the close. Prediction: when the entry candle shows a volume spike with no price move, the side that is ahead (mid above 0.50) wins more often than its mid-priced ask implies. Counterparty guess: the aggressive flow that hit the absorbed level. One variant, tried 1. A baseline row (same side rule, no spike, no still-price condition) is printed beside it for context only; it is not a pass test.
+
+Data: the OIREL-X extract already held; the ten non-crypto series (KXGOLD15M, KXSILVER15M, KXCOPPER15M, KXPLATINUM15M, KXPALLADIUM15M, KXWTI15M, KXNATGAS15M, KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M). The reader refuses any selected market with close_ts >= 1791043200 (prints min and max). Candles ending after the close are dropped first.
+
+Rule (per market, close C): entry candle E = the candle ending exactly 600 s before C; previous candle P = the candle ending exactly 660 s before C. Both must be two-sided (0 < bid < ask < 1). Prior volumes = the volumes of the market's candles ending at or before C - 660 (including P) with volume > 0. Spike: at least 5 prior positive volumes, and volume(E) >= 3 x median(prior positive volumes). No price move: |mid(E) - mid(P)| <= 0.01 where mid = (bid + ask) / 2, compared on 6 decimals. Side: YES if mid(E) >= 0.50, else NO. The side's ask (YES ask, or 1 - YES bid for NO) must be 0.50 to 0.80 inclusive. Hold to settlement, 10 contracts; void: price refunded, entry fee kept.
+
+Haircut and cash: C1 to C11 as in the standing rules (price = ask + h capped at 0.99, h in {0, 0.01, 0.02}, per-order rounded fee ceil(round(0.07 x 10 x p x (1-p) x 100, 9)) / 100, cash = 10 x (win - price) - fee). 2c primary for the NC15 set (silver, copper, WTI, natgas, EURUSD, GBPUSD, USDJPY); gold, platinum and palladium are standard series (C11): both the 1c and 2c bars printed as flags. Label "upper bound, not fill-checked".
+
+Pass bar: n >= 80 trades; 1c and 2c PF >= 1.5, both halves (floor(n/2) by close time, ticker) >= 1.0 at 2c; day-clustered z >= 2.0 at 2c. The result line says: development data already read for OIREL-X, no held-out inside, a pass is a lead for the forward shadow. Daily line: tried N, passed M.
+
+Process: hand case before code; one build; Auditor B check; run once; commit the print sha256 before reading it; figures by message only; no extract data in the repo. SPREAD1 (spread widening) follows as its own registration after this read.
