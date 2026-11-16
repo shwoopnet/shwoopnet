@@ -1,5 +1,5 @@
 {
- "version": "2026-11-16T16Z+6",
+ "version": "2026-11-16T16Z+7",
  "author": "Auditor B",
  "rule": "A cell (ticker pattern, time) is REFUSED if its time is in [from, to) of any row with status OPEN or FROZEN. Time = market close_ts (binary), event occurrence where the row says so, candle end_ts or file date (perps, recorders). 'to' null = open ended. A cell in NO row is NOT cleared: the driver also refuses any time at or after forward_default_deny_from unless the signed spec names that window in its holds table. A row with a 'scope' applies only to that kind of data (archive_binary = ENGINE1 binary-market archive and NC15 extracts); a row without 'scope' applies to every kind.",
  "forward_default_deny_from": 1794787200,
@@ -357,10 +357,10 @@
    "card": "joint NBA print (NBATOTAL with NBALADDER, NBAREB, SIBHIT-R); Head of R&D 2026-11-16",
    "status": "APPROVED",
    "terms": [
-    "read ONLY KXNBATOTAL candles ending at or before the 3.5 hour mark before the scheduled end (pre-game on the schedule proxy: tip about 2.5 to 3 hours before the end), plus the settled result, ONLY to score NBATOTAL's frozen rules (spec sha256 8092258768fcabb2cd7bd26a5f011721bcd93e55dc53e0b51372c61675ac4a30 once signed)",
+    "read ONLY KXNBATOTAL candles ending at or before the 3.5 hour mark before the scheduled end (pre-game on the schedule proxy: tip about 2.5 to 3 hours before the end), plus the settled result, ONLY to score NBATOTAL's frozen rules (spec sha256 14360ed7b8f3a3b3b9831dbce277bbf5d46fa99f7e3572fc5a3a0c9ca7d7bcd1 once signed)",
     "per-rule aggregates only (n in games, PF at 1c and 2c, net, days); no per-game or per-feature tables",
     "no in-play row or candle at or after the scheduled start is read",
-    "any game whose real tip ran more than 2.5 hours before the scheduled end is counted and dropped from M35 scoring (in-play prices could fall inside the 3.5 hour mark)",
+    "a game is excluded from M35 scoring if its real tip came more than 3.5 hours before the scheduled end (in-play prices could fall at or before the mark); such games are counted and dropped; with no tip field the first in-play price jump or the first recorder in-play row is used",
     "disclosed on IGDRIFTGRID1, IGDRIFTSPREAD1 and IGPERIOD1 as 'outcomes seen in aggregate by the NBA pre-game print'; their frozen rules are unchanged and this is never a held-out verdict for them",
     "one joint print, one m, read once on or after 2026-12-04"
    ],
