@@ -1,0 +1,97 @@
+{
+ "job": {
+  "job_id": "SERIESCATS2_LISTS",
+  "owner": "DESK_B",
+  "status": "active",
+  "registration": "kalshi-scalper/workers/econcensus/ECONCENSUS_NOTE.md",
+  "purpose": "Series metadata of the Climate and Weather and Science and Technology categories (ticker, frequency, title), to find event-driven families (earnings, mentions, snow, hurricanes, launches) for engine specs. No market, price or result.",
+  "heldout": "none (series metadata only: ticker, frequency, title; no market list, no price, no result, no date window)",
+  "allowed_endpoints": [
+   {
+    "name": "series_list",
+    "method": "GET",
+    "path_pattern": "/series",
+    "params_allowed": [
+     "limit",
+     "category"
+    ]
+   }
+  ],
+  "series_allowlist": [],
+  "ticker_allowlist": [],
+  "max_requests": 4,
+  "notes": "Two requests (one category each); the earlier all-category list was cut by the runner's 5 MB cap, so one category at a time. Titles and frequencies only are read.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 5.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "series_Climate_and_Weather",
+    "path": "/series",
+    "params": {
+     "category": "Climate and Weather",
+     "limit": 20000
+    }
+   },
+   {
+    "id": "series_Science_and_Technology",
+    "path": "/series",
+    "params": {
+     "category": "Science and Technology",
+     "limit": 20000
+    }
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-16T1631Z",
+ "finished": "2026-11-16T1631Z",
+ "status": "complete",
+ "requests_sent": 2,
+ "bytes_stored": 899150,
+ "rows": [
+  {
+   "index": 1,
+   "id": "series_Climate_and_Weather",
+   "path": "/series",
+   "params": {
+    "category": "Climate and Weather",
+    "limit": 20000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 494715,
+   "t_send_ms": 1794846714602,
+   "t_recv_ms": 1794846714815,
+   "server_date": "Mon, 16 Nov 2026 16:31:54 GMT",
+   "file": "0001.json.gz",
+   "sha256": "a227bbb29b5cb6af0a1682ebe5006bf49e140245cc688d0234847effad7ae38a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "series_Science_and_Technology",
+   "path": "/series",
+   "params": {
+    "category": "Science and Technology",
+    "limit": 20000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 404435,
+   "t_send_ms": 1794846719603,
+   "t_recv_ms": 1794846719784,
+   "server_date": "Mon, 16 Nov 2026 16:31:59 GMT",
+   "file": "0002.json.gz",
+   "sha256": "4d24fe43d53779a3e4c98c8ceecb332f35e7b48016b120ecc0f4bcd332b79337",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
