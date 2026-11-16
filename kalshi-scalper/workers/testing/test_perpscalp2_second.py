@@ -72,3 +72,22 @@ class T2(unittest.TestCase):
     def test_cap_10min(self):
         s = fx(); L2 = m.day_of(o); end = m.session_end(L2)
         self.assertTrue(m.in_window("W3", end - 10 * 60)); self.assertFalse(m.in_window("W3", end - 10 * 60 + 60))
+
+class T3(unittest.TestCase):
+    def test_margin_hand(self):
+        tr = [{"name": "KXNVDAPERP", "gross": 0.002, "net": 0.0, "U": 0.0015811}, {"name": "KXNVDAPERP", "gross": -0.001, "net": -0.003, "U": 0.02}]
+        r = m.margin(tr)[0.5]                          # L = 0.5 x 4.5 = 2.25; liq = 1/2.25 - 0.045 = 0.399444...
+        ld = 1 / 2.25 - 0.045
+        self.assertAlmostEqual(r["mean_liq_dist"], ld, 12); self.assertAlmostEqual(r["mean_ret_on_margin_gross"], (0.002 - 0.001) / 2 * 2.25, 12)
+        self.assertAlmostEqual(r["mean_ret_on_margin_net"], -0.0015 * 2.25, 12); self.assertEqual(r["flagged"], 0)
+        r = m.margin(tr, {"KXNVDAPERP": 40.0})[0.5]      # L = 20, liq = 0.05 - 0.045 = 0.005: the second trade (U 0.02) is flagged, the first (0.0015811) is not
+        self.assertEqual(r["flagged"], 1); self.assertAlmostEqual(r["mean_liq_dist"], 0.005, 12)
+    def test_stress(self):
+        self.assertAlmostEqual(m.stress_net({"net": 0.001, "ef": m.TAKER, "xf": m.TAKER}), 0.001 - 0.0004, 12)
+        self.assertAlmostEqual(m.stress_net({"net": 0.001, "ef": m.MAKER, "xf": m.TAKER}), 0.001, 12)
+    def test_adverse(self):
+        s = fx(); cell = (("E3", "orb", 5), "W0", 1, 600); t, d = m.signals(s, "orb", 5)[0]
+        a = m.adverse({"X": s}, {}, {"X": 0.02}, cell, "MT2"); self.assertEqual(a["signals"], 1)
+        tn = m.taker_net(s, "X", {}, 0.02, cell, t, d); self.assertIsNotNone(tn)
+        if a["filled"]: self.assertAlmostEqual(a["mean_taker_net_filled"], tn, 12)
+        else: self.assertAlmostEqual(a["mean_taker_net_unfilled"], tn, 12)
