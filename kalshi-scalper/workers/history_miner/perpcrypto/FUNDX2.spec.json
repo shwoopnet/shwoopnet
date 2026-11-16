@@ -1,0 +1,130 @@
+{
+ "id": "FUNDX2",
+ "desk": "History Miner",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "split": {
+  "mode": "search_validate",
+  "search": "funding prints 2026-06-03T00:00Z to before 2026-09-15T00:00Z (thresholds only)",
+  "validate": "2026-09-15T00:00Z to before 2026-11-17T00:00Z",
+  "forward": "2026-11-17T00:00Z on, untouched",
+  "release_rule": "12 cut points computed once from SEARCH and committed (FUNDX2_THRESHOLDS.json) before any outcome print; gate fixed on the first 7 distinct trade days, committed before the first outcome print"
+ },
+ "costs": {
+  "contracts": 5,
+  "haircuts_primary": [
+   0.0002,
+   0.0005
+  ],
+  "haircuts_stress": [],
+  "fee_taker": 0.0012,
+  "fee_maker": 0.0005,
+  "note": "fees ASSUMED, per side, of notional; haircuts per fill, relative"
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 8,
+  "prior_m": "6,290,660 + 16 (PERPCRYPTO1, whose 8 FUNDX cells are withdrawn unrun but counted) + 8 = 6,290,684 for a print on 2026-11-16; 7,492,484 + 24 = 7,492,508 from 2026-11-17 (Auditor B to confirm)",
+  "note": "FUNDX2 8 cells"
+ },
+ "kill_fast": true,
+ "uniqueness": {
+  "closest_existing": [
+   "PERP1 to PERP3 (daily trend on perps, FALSIFIED)",
+   "PERPMON1 (stock perps, parked)"
+  ],
+  "declined_list_rows_checked": [
+   "lead-lag between related markets (the basis is a perp against its own reference price, not another market's move)",
+   "favourite-and-hold",
+   "taker order-flow family (no tape)"
+  ],
+  "difference": "funding extremes and the perp-versus-reference basis on the six crypto perps; 7g: follow and fade cells inside each family are versions and counted as tries",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "perps_crypto_load.py",
+  "loader_sha256": "2dc464836765a96b21c69378c7e5b4264e0a546fd2d9948defcf44215afd6fd7",
+  "extracts": [
+   "perp-data perps/ HOURLY snapshots only (six crypto perps, from 2026-10-21; spacing 60 minutes)",
+   "the PERPBTC1M 1 minute candles read at the top of each hour (BTC only; its own allow line first)",
+   "Coinbase hourly spot (PERPSPOT_HOURLY, 26 requests, draft)",
+   "a labelled funding pull (6 requests, Main, not yet existing)"
+  ],
+  "ticker_wall": [
+   "KXBTCPERP",
+   "KXETHPERP",
+   "KXSOLPERP",
+   "KXXRPPERP",
+   "KXDOGEPERP",
+   "KXHYPEPERP"
+  ],
+  "window": {
+   "first_close": "pending Auditor B and the first labelled-funding day",
+   "last_close_exclusive": "pending"
+  },
+  "held_out_map_checked_by": "pending Auditor B",
+  "independence_note": "no other card reads the crypto perps; the BTC perp 1 minute pull is read only by registered readers (the held-out log)"
+ },
+ "event": {
+  "scorer_plugin": "perps_crypto_events.py (a fixed-cut-point function still to be written and audited)",
+  "scorer_plugin_sha256": "pending",
+  "decision_instant": "the first price row strictly after a funding print at or beyond the SEARCH cut point",
+  "signal_threshold_abs_mid_move": null,
+  "entry_rule": "q {5,10} percent x side {fade,follow} x hold {8,24} h = 8 cells; cut points per ticker from SEARCH prints only; far touch; one position per ticker",
+  "exit": "H"
+ },
+ "prediction": "at least one cell has PF >= 1.3 at taker with the 0.02 percent haircut and PF >= 1.0 at the 0.05 percent haircut on VALIDATE, n >= 100, a pooled rate >= 3 a day and a BH pass; prior low",
+ "kill": "a cell is dropped when its pooled rate over the first 7 trade days is under 3.0 a day or its first read has PF under 1.0 at the primary haircut (kill_fast)",
+ "outputs": {
+  "survivor_line": "market, rule, PF at taker 0.02 and 0.05 percent, n, days, rate a day, margin return and liquidation share at 10, 25 and 50 percent of the maximum leverage",
+  "family_flag": "none"
+ },
+ "card": "kalshi-scalper/workers/history_miner/perpcrypto/FUNDX2_CARD_NOV16.md",
+ "needs_new_code": [
+  "labelled funding pull for the six tickers, or crypto in the daily funding recorder (Main)",
+  "a Coinbase route row in scripts/kalshi_pull.py (Main; needs the owner's typed merge and Auditor B's runner read)",
+  "the loader's file-level readers (they open files only after the allow line; walls and refusals are tested in perps_crypto_load.py)",
+  "Auditor B's CLEAN of perps_crypto_load.py, perps_crypto_events.py and test_perps_crypto.py",
+  "the owner's list of page maximum leverage for SOL, DOGE and HYPE (API estimate used meanwhile)"
+ ],
+ "holds": [
+  {
+   "label": "crypto perp tickers KXBTCPERP, KXETHPERP, KXSOLPERP, KXXRPPERP, KXDOGEPERP, KXHYPEPERP: no hold names them",
+   "start_epoch": 0,
+   "end_epoch": null,
+   "card": "none (Auditor B 2026-11-16 20:48Z); read by CFRTI-K, EVM1, PBOOK1 to 3, PERPBIN1, PERPOI1, SNAPBACK1 on KXBTCPERP and PBOOK1 to 3, SNAPBACK1 on KXETHPERP; H09 forbids joining BTC perp prices to KXBTC15M inside Nov 9 to Nov 20 (this spec does not)",
+   "status": "no hold; PERPBTC1M is a registered-readers-only run (own allow line first)"
+  }
+ ],
+ "sources": {
+  "names": [
+   "Kalshi public perps list, funding history and candles (recorders and pulls)",
+   "Coinbase public spot candles (research only, public, generic user agent, no key; the standing list, the Head 2026-11-16 20:47Z)"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "sha256": "pending",
+  "hand_case_sha256": "pending"
+ },
+ "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
+ "halves": "by entry time: the first floor(n/2) trades and the rest",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order at c = 10; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x",
+ "look_ahead": {
+  "decision_instant": "the funding print's time (FUNDX) or the snapshot's time (BASIS)",
+  "inputs": "FUNDX: the market's own earlier funding prints only (expanding decile, at least 60 prints) and the print itself; BASIS: the snapshot's own price and reference_price",
+  "entry_quote": "FUNDX: the first price after the print; BASIS: the NEXT recorded hourly row's far touch after the row whose price and reference_price gave the signal; the hold counts from that row",
+  "exit_price": "the price at the hold's end; funding booked from the prints inside the hold"
+ },
+ "notes_v2": "approved by the Head 2026-11-16 20:47Z; margin table v2 on page-max leverage and 4.5 percent maintenance; spot accepted for research",
+ "card_sha256": "7554d7f6d9617551394676e03af4c4bf85c928573c8b6ae2f721e4c00fa05bf9",
+ "rule_count": 8,
+ "status": "DRAFT spec: not signed; plugin, labelled funding file and allow line pending"
+}

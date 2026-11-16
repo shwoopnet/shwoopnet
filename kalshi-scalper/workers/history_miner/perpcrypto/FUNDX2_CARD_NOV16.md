@@ -1,0 +1,32 @@
+# FUNDX2: crypto perp funding extremes with a threshold fixed on SEARCH only (History Miner, Lane 5, written Nov 16, 2026 ~21:30Z, before any funding value or price outcome is read; the Head's 21:19Z order)
+
+## What it replaces
+PERPCRYPTO1's FUNDX cells (8, expanding decile or clamp) are WITHDRAWN UNRUN and replaced by the 8 cells below. They stay counted as tried (conservative, Auditor B to confirm). The BASIS cells of PERPCRYPTO1 are untouched. No ETH or BTC hourly ladder against the perp (ETHLATE1 NOT_ENOUGH_DATA, the Head's order).
+
+## SEARCH and VALIDATE cut (date constants, fixed now)
+- SEARCH: funding prints with time from 2026-06-03T00:00Z to before 2026-09-15T00:00Z. VALIDATE: from 2026-09-15T00:00Z to before 2026-11-17T00:00Z. From 2026-11-17 on is forward, untouched by this card.
+- Honest limit: price history is BTC 1 minute candles (read at the top of the hour) from 2026-06-03 and hourly snapshots for all six from 2026-10-21 only. So trades are possible on BTC over the whole span and on ETH, SOL, XRP, DOGE and HYPE from 2026-10-21 only. SEARCH holds NO outcome of any trade on the five others; for them SEARCH supplies only the threshold (from the funding prints), and every one of their trades is in VALIDATE. Said in every print.
+
+## Entry (thresholds fixed on SEARCH funding prints only)
+- For each ticker, from its SEARCH prints only (labelled; a blank ticker refuses the file), the signed rates' upper and lower tail cut points: q in {5 percent, 10 percent} (nearest rank, ceil(q n) on the sorted rates, upper cut = value at rank n - ceil(q n) + 1, lower cut = value at rank ceil(q n)). A print is an extreme when its rate is at or beyond the upper cut and above 0 (longs pay) or at or beyond the lower cut and below 0 (shorts pay). A ticker with fewer than 120 SEARCH prints has no threshold and no trades. The 12 cut points (6 tickers x 2 q, 2 tails each) are computed once, written to FUNDX2_THRESHOLDS.json with the date, the print counts and the loader hash, and COMMITTED BEFORE any outcome print. Nothing in VALIDATE or forward is used to set them.
+- Entry is the first price row strictly after the print (a quote at the print instant is never used), at the far touch (buy at the ask, sell at the bid), one position per ticker at a time.
+
+## Side, hold, exit
+- Side: FADE (short when longs pay, long when shorts pay) or FOLLOW (the opposite). Hold H in {8 h, 24 h}; exit at the near touch of the first row at least H hours after entry, tolerance 30 minutes or the trade is skipped. Funding paid or received between entry and exit is booked from the labelled prints (sign ASSUMED: positive = paid by longs).
+- Cells: q {5, 10} x side {fade, follow} x hold {8, 24} = 8 rules, tries 8.
+
+## Costs and what is printed
+- Taker 12 bps a side (24 bps round trip), stress 5 bps a side (10 bps round trip; the maker rate, a stress only, a pass there is flagged not counted), plus the per fill haircut ladder 0.02 and 0.05 percent. All ASSUMED until Kalshi's fee page is read.
+- Printed in price terms (PF of notional, mean net basis points per trade, half 1 and half 2 by time) and as a percent of margin at 10, 25 and 50 percent of the maximum leverage (MARGIN_TABLE.md; page maximum for BTC, ETH, XRP, API estimate for SOL, DOGE, HYPE printed apart and labelled), with the liquidation distance of each (maintenance 4.5 percent assumed) and the share of trades whose adverse excursion reaches it (a lower bound on hourly rows, stated). Fees as a share of margin are printed. SEARCH and VALIDATE are printed in separate tables; only VALIDATE (and later forward) counts toward a pass.
+
+## The 3 a day gate and the expected trades a day
+- The gate is the Head's: pooled rate of at least 3 trades a day over the first 7 distinct trade days, a COUNT of decisions only, fixed and committed before any outcome print (as PERPCRYPTO1).
+- Expected rate, from arithmetic not outcomes: signals per ticker per day = prints per day x 2q, and a ticker holds one position at a time, so it is capped at 24 / H entries per day (3 a day at 8 h, 1 a day at 24 h). The prints per day are NOT known until the labelled file exists (a count, measured before any rate or price is read): at an 8 hourly print (3 a day) q = 10 percent gives about 0.6 signals per ticker-day, about 3.6 a day over six tickers; q = 5 percent about 1.8 a day over six; the VALIDATE price history covers only BTC before 2026-10-21, so before then the rate is the BTC share alone. The measured counts replace this paragraph in a dated line before any outcome print; a cell under 3 a day pooled is dropped by kill_fast.
+
+## Kill, bar, prior
+- Bar (the perps convention): PF 1.3 or better at taker with the 0.02 percent haircut, both halves 1.0 or better, AND PF 1.0 or better at taker with the 0.05 percent haircut, n 100 or more, 10 or more trade days, a BH pass over the 8 cells. Kill_fast: a cell is dropped when its pooled rate over the first 7 trade days is under 3.0 a day or its first VALIDATE read has PF under 1.0 at the primary haircut.
+- Mechanism and counterparty (stated, not shown): at a funding extreme one side pays heavily to hold a crowded position; fade bets the crowd unwinds, follow that it trends. Prior low: Kalshi's perps are thin and the rule is Kalshi's own; PERP1 to PERP3 found no edge after costs.
+- Uniqueness: not lead-lag, not favourite-and-hold, not taker order flow; closest PERP1 to PERP3 and PERPCRYPTO1's own FUNDX (replaced). Follow and fade are versions of each other and are counted as tries.
+
+## Needs before any run
+(1) Main's labelled funding pull (Forensics is building it); (2) a plugin function with FIXED cut points (the existing expanding-decile function is not used) and hand cases, audited once by Auditor B; (3) the loader's allow line with the labelled file's sha256. Nothing runs until all three and Auditor B's CLEAN.
