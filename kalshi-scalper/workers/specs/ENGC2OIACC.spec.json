@@ -1,0 +1,179 @@
+{
+ "id": "ENGC2OIACC",
+ "desk": "DESK_A",
+ "date_registered": "2026-11-16",
+ "kind": "grid15m",
+ "card": "ENGC2",
+ "needs_new_code": [
+  "own-market feature oiacc in the driver and enumerator: the change in the 3 minute open interest change, (oi at e minus oi at e - 180) minus (oi at e - 180 minus oi at e - 360), from the candles' open_interest_fp (else open_interest), all three candles ending at or before e and present; classes up, flat, down by cls(); a market with a missing candle has no feature and no entry"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "ENGINE1 oi3 and oi6 (the level of the change, not its change)",
+   "OICORE (Bitcoin open interest rise, 180 to 120 s before the close)"
+  ],
+  "declined_list_rows_checked": [
+   "Dogecoin (7e: removed from the bot; any DOGE pass is dropped from a shadow list, the market stays in the grid as data)",
+   "Favourite-and-hold ban (Charter item 5; any favourite-late shape that passes is flagged, not claimed unique)",
+   "Gold L1 variants (maker entries, 94.5c floor, GOLDHOLD)",
+   "Bitcoin, Ethereum, XRP as L1 (shadow only)"
+  ],
+  "difference": "the second difference of open interest: is the open interest change speeding up or fading. oi3 and oi6 give the change over 3 or 6 minutes; oiacc compares two consecutive 3 minute changes, so a market with a steady rise reads flat here and flat in neither oi3 class. Its passes are checked against OICORE (Bitcoin, cheap side) and flagged as an open-interest trigger.",
+  "family_flag": "open-interest trigger family (flagged by the driver's family function; a Bitcoin cheap side pass is compared with OICORE before any step beyond shadow)"
+ },
+ "data": {
+  "loader": "engine1_extract_load.py",
+  "loader_sha256": "5c5b0eaabdcb02371518e277ac74ec5f7557b649f1b06e9361768a4fd517b5c3",
+  "extracts": [
+   "ENGINE1_archive_extract.sqlite.xz sha256 9e4bece477ee5c5caec5b024b1cb86c1b6538061a2bb2092faa1e091bef06820 (Line B1), the archive extract: closes before 2026-10-03T16:00Z (1791043200); the same SEARCH and VALIDATE split constants as run 2"
+  ],
+  "ticker_wall": [
+   "KXBTC15M",
+   "KXETH15M",
+   "KXGOLD15M",
+   "KXDOGE15M",
+   "KXXRP15M",
+   "KXBNB15M",
+   "KXHYPE15M",
+   "KXSOL15M",
+   "KXNEAR15M",
+   "KXZEC15M",
+   "KXSILVER15M",
+   "KXWTI15M",
+   "KXCOPPER15M",
+   "KXNATGAS15M",
+   "KXEURUSD15M",
+   "KXGBPUSD15M",
+   "KXUSDJPY15M",
+   "KXPALLADIUM15M",
+   "KXPLATINUM15M"
+  ],
+  "window": {
+   "first_close": "2026-06-01T00:00:00Z",
+   "last_close_exclusive": "2026-10-03T16:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B (to be checked before any run; the window is the archive's own, H01 starts at its end)",
+  "independence_note": "NOT independent of ENGINE1 run 1 and run 2: the same SEARCH and VALIDATE data, read before for 2,347,488 other rules. Every new rule here adds to m, so run 2's 190 face a larger m if BH is redone over the union; survivors need the held-out read."
+ },
+ "split": {
+  "mode": "fixed_dates"
+ },
+ "grid": {
+  "buckets": [
+   120,
+   180,
+   240,
+   300,
+   360,
+   420,
+   480,
+   540,
+   600,
+   660,
+   720,
+   780,
+   840
+  ],
+  "bands": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18
+  ],
+  "side_rules": [
+   "yes",
+   "no",
+   "cheap",
+   "favourite"
+  ],
+  "filters": [
+   "new:oiacc"
+  ],
+  "exits": [
+   "H",
+   "T",
+   "S",
+   "B",
+   "M180",
+   "M60"
+  ]
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ]
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05,
+  "min_signals_per_day": 3.0,
+  "income": "signals a day, cash edge at 1c and dollars a week at 5 contracts, ranked (engine1_driver 1281ce0a)"
+ },
+ "tries": {
+  "rules_this_spec": 320112,
+  "rules_per_series": 16848,
+  "series_in_wall": 19,
+  "prior_m": "6,290,660 (the Head's ruling of Nov 16 for every print) plus the earlier specs of this batch C, from the TALLY; counted per series: 16848 rules x 19 series; every rule counts whether it passes the gate or not"
+ },
+ "prediction": "Open interest rose into the entry is what OICORE uses; prediction: the acceleration adds nothing over oi3 and no rule survives.",
+ "kill": "No rule passes both bars at 3 a day and n 100, or none after BH: closed (a pass would still need the held-out read).",
+ "kill_fast": true,
+ "outputs": {
+  "survivor_line": "x",
+  "family_flag": "x"
+ },
+ "holds": [
+  {
+   "label": "ENGINE1 archive freeze H01 (binary closes from 2026-10-03T16:00Z; this spec stays before it)",
+   "start_epoch": 1791043200,
+   "end_epoch": null,
+   "card": "ENGINE1 global freeze",
+   "status": "FROZEN"
+  },
+  {
+   "label": "H09 held KXBTC15M price path (Bitcoin closes to Nov 20; a shadow start on a pick that trades KXBTC15M is not before 2026-11-21T00:00Z)",
+   "start_epoch": 1791043200,
+   "end_epoch": 1795219200,
+   "card": "H09",
+   "status": "HELD (the Head and Auditor B, Nov 16: BTC15M closes held to 2026-11-21T00:00Z; the start is the archive freeze H01 and the table row itself is for Auditor B to confirm). Batch C never reads or trades a BTC15M close in this window: it reads archive closes before 2026-10-03T16:00Z only, and a shadow start on any pick that trades KXBTC15M is not before 2026-11-21T00:00Z. ETH and gold inputs are archive closes before H01, so no further hold applies"
+  }
+ ],
+ "look_ahead": {
+  "features": "candles ending at or before the entry candle end e (oi at e, e - 180 and e - 360 of the series own market)",
+  "exit_price": "candles after e up to close - 60 for target, stop and the new time stops; the result only for a held trade"
+ },
+ "sources": {
+  "names": [
+   "quote-data recorder files (Kalshi public GETs recorded by record-quotes.yml)"
+  ],
+  "new_host": false
+ },
+ "subset_rationale": "open interest acceleration as a filter on all 19 series, 16,848 rules a series; own-market candles only.",
+ "halves": "by order of the hourly close: the first floor(n/2) trades and the rest",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x",
+ "spec_note": "written for the Head's batch C order of 2026-11-16 (specs only, frozen and hashed before any read); not run; the code change needs Auditor B's CLEAN and a second build (rule 16b) first. Batch A and B features checked: oi3, oi6, vol3, mom1, mom3, mom5, spread (run 2), btcmom3 (ENGB4XBTC), vspike, swid and TA3 or TA5 time stops (B2)",
+ "heldout_read_registered": {
+  "date": "2026-11-16",
+  "rule": "each batch C survivor (VALIDATE bar passed) is read ONCE on the held-out window of its market (closes 2026-10-03T16:00Z to before 2026-10-28T00:00Z for BTC, ETH, XRP, DOGE, GOLD; to before 2026-11-03T16:00Z for the other series) with the held-out plan v3 bar, after the 190's read; a cross-series input reads the other market's held candles of the same close"
+ }
+}
