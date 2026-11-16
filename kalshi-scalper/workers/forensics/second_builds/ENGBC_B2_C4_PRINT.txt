@@ -1,0 +1,4 @@
+mode C4 targets 9 rules 151632 spec tries 151632 m (carried + spec) 6442292 m (carried + all of batch C) 7492484
+no-feature skips (market-bucket windows) 962804 | SEARCH passes (bar + 3 a day) 149 VALIDATE passes 9
+BH m 6442292 (carried + spec) survivors 0
+BH m 7492484 (carried + all of batch C) survivors 0
