@@ -34,7 +34,7 @@ EVERY_S = 30
 STOP_DATE = dt.date(2027, 2, 26)   # about 110 weekdays of data for V2's 150 trade reads (was 2026-12-07, extended Nov 6, 2026 at the owner's word); a reviewed edit to extend again
 
 
-EXTRA_COLUMNS = ["halt_sources", "is_open"]   # added Nov 6, 2026 (V2): the market's own halt list ("|" joined) and its schedule flag; empty when the field is absent
+EXTRA_COLUMNS = ["halt_sources", "is_open", "leverage_estimate"]   # halt list and schedule flag added Nov 6, 2026 (V2); leverage_estimate (1 over the margin rate) added Nov 16, 2026 (the Head of R&D, the owner's order). Each window's file is created with its header, so only files started after the change carry the third column; empty when the field is absent
 
 
 def flags(m):
@@ -42,7 +42,7 @@ def flags(m):
     halt = "|".join(str(x) for x in h) if isinstance(h, (list, tuple)) else base.num(h)
     sched = m.get("schedule")
     o = sched.get("is_open") if isinstance(sched, dict) else None
-    return [halt, "" if o is None else str(bool(o)).lower()]
+    return [halt, "" if o is None else str(bool(o)).lower(), base.num(m.get("leverage_estimate"))]
 
 
 def rows_with_flags(markets, ts):

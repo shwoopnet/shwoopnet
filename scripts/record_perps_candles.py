@@ -28,6 +28,10 @@ EXTRA_TICKERS = ("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KX
 # energy, any new class). The class filter is gone; the classes seen are printed so a new one is visible. ONLY_NEW is a back-pull word: the perps the archive did NOT take before this change
 # (class not in CLASSES and not in EXTRA_TICKERS), so a missing date can be filled for them without redoing the ones already archived.
 ONLY_NEW = "NEW"
+# Nov 16, 2026 (Forensics' map, the Head of R&D): the funding route with NO ticker returns every market's prints in one request. `only` word FUNDING_DAY writes that one day's prints for every market
+# (funding/<date>.all.csv.gz); FUNDING_ALL (no date used) writes each market's whole history, one request (funding/all-history.csv.gz). Candle files are not touched by either.
+FUNDING_DAY, FUNDING_ALL = "FUNDING_DAY", "FUNDING_ALL"
+FUNDING_PAGES = 20
 LIST_PAGES = 3   # the public list is read with its cursor, at most this many pages of 200 (the budget and the pacing are unchanged: one call every GAP_S)
 STOP_DATE = dt.date(2027, 2, 26)
 GAP_S = 1.2
@@ -70,6 +74,47 @@ def funding_row(ticker, f):
     return [ticker, f.get("funding_time", ""), num(f.get("funding_rate")), num(f.get("mark_price"))]
 
 
+def run_funding(out_dir, day, whole_history, get, sleep):
+    """One request (a few pages if the answer pages) of the ticker-less funding route; writes one file and nothing else. Spacing and the three-429 stop are the same as the candle run."""
+    name = "all-history.csv.gz" if whole_history else day.isoformat() + ".all.csv.gz"
+    fpath = os.path.join(out_dir, "funding", name)
+    if os.path.exists(fpath):
+        print("this funding file already exists; nothing to do")
+        return 0
+    start = int(dt.datetime(day.year, day.month, day.day, tzinfo=dt.timezone.utc).timestamp())
+    base_url = BASE + "/funding_rates/historical" + ("" if whole_history else "?start_ts=%d&end_ts=%d" % (start, start + 86400))
+    streak, rows, cursor = 0, [], None
+    for _page in range(FUNDING_PAGES):
+        url = base_url + (("&" if "?" in base_url else "?") + "cursor=" + cursor if cursor else "")
+        st, body = get(url)
+        sleep(GAP_S)
+        if st == 429:
+            streak += 1
+            if streak >= MAX_429_IN_A_ROW:
+                print("refused three times in a row; nothing written")
+                return 1
+            sleep(3.0)
+            continue
+        streak = 0
+        if st != 200 or not isinstance(body, dict):
+            print("the funding read did not answer; nothing written")
+            return 1
+        rows += [funding_row(f.get("ticker", ""), f) for f in (body.get("funding_rates") or []) if isinstance(f, dict)]
+        cursor = body.get("cursor")
+        if not cursor or not isinstance(cursor, str) or not cursor.replace("-", "").replace("_", "").replace("=", "").isalnum():
+            break
+    if not rows:
+        print("no funding prints returned; nothing written")
+        return 1
+    os.makedirs(os.path.dirname(fpath), exist_ok=True)
+    with gzip.open(fpath, "wt", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(FUNDING_COLS)
+        w.writerows(rows)
+    print("wrote %d funding prints (%s)" % (len(rows), name))
+    return 0
+
+
 def run(out_dir, now=None, get=None, sleep=time.sleep, day=None, only=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     get = get or http_get
@@ -83,6 +128,8 @@ def run(out_dir, now=None, get=None, sleep=time.sleep, day=None, only=None):
     elif day >= now.date():
         print("that date is not finished; nothing recorded")
         return 1
+    if only and (FUNDING_DAY in only or FUNDING_ALL in only):
+        return run_funding(out_dir, day, FUNDING_ALL in only, get, sleep)
     name = day.isoformat() + (".only" if only else "") + ".csv.gz"
     cpath, fpath = os.path.join(out_dir, "kalshi1m", name), os.path.join(out_dir, "funding", name)
     if os.path.exists(cpath) and os.path.exists(fpath):
