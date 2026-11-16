@@ -24,7 +24,7 @@ const OLD = () => ({ id: 'XRPYES10', readme: 'kalshi-scalper/README.md#SLOT-XRPY
 
 gates['XR1 XRPYES10 is out of the registry, the hold list, the allowed series and the slot ticker shape, so the entry gate refuses it whatever the market does'] = () => {
   assert.ok(!slot.SLOT_STRATEGIES.some((s) => s.id === 'XRPYES10') && !slot.SLOT_HOLD_ALLOWED.includes('XRPYES10'));
-  assert.ok(!slot.SLOT_SERIES_ALLOWED.includes('KXXRP15M'), 'XRP is not a slot market any more');
+  assert.ok(slot.SLOT_SERIES_ALLOWED.includes('KXXRP15M') && slot.SLOT_STRATEGIES.filter((s) => s.series.includes('KXXRP15M')).map((s) => s.id).join() === 'XRPFAV10', 'XRP is a slot market again (Nov 15, 2026) ONLY for XRPFAV10, the owner\'s live trial seat');
   for (const side of ['yes', 'no']) for (const limit of [0.88, 0.92, 0.97]) {
     const r = slot.slotOrderCheck(input({ side, limit }));
     assert.strictEqual(r.allowed, false, 'refused: ' + side + ' ' + limit + ' ' + JSON.stringify(r.reasons));
@@ -39,7 +39,7 @@ gates['XR2 the minute function reads no XRP quote for the slot and the slot neve
   const idx = code(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8'));
   assert.ok(!/XRPYES10|KESTREL/.test(idx), 'index.js names no strategy: the registry is the only place');
   const lib = code(fs.readFileSync(path.join(root, 'functions', 'kalshiSlotLib.js'), 'utf8'));
-  assert.ok(!/KXXRP15M|XRPYES10/.test(lib), 'the slot library names neither XRP nor XRPYES10 in code');
+  assert.ok(!/XRPYES10/.test(lib), 'the slot library does not name the retired XRPYES10 in code');
 };
 gates['XR3 an XRPYES10 order already open is not stranded: it is sold or settled and still counts in the shared stop (the engine gates RET1 to RET3 prove it end to end)'] = () => {
   const run = fs.readFileSync(path.join(root, 'test', 'kalshiSlotRunGates.test.js'), 'utf8');

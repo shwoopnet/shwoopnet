@@ -121,6 +121,64 @@
    "figures": null
   },
   {
+   "id": "OIREL1",
+   "name": "Relative open interest jump",
+   "stage": "Probe",
+   "rule": "Bitcoin: 3 to 2 minutes before the close, buys the cheaper side at 5c to 50c when the open interest rose by more than 26.8% of what was already there, and holds it until the market closes (a version of the open interest jump strategy)",
+   "goesLive": "On trial at 3 contracts; it moves up only after 90 trades that win at least 1.3 times what they lose",
+   "label": null,
+   "startDate": "2026-11-15",
+   "nextRead": "2026-12-01",
+   "nextReadText": "One read, 14 days after the first fill or 60 fills, whichever is later; fills of a trial seat are not research evidence",
+   "n": null,
+   "nBasis": null,
+   "kill": "It stops if it is down $18 after 5 trades, or after 30 losses in a row",
+   "return": "14 days after a stop, when a fresh paper record wins at least 1.3 times what it loses",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "Trial seat the owner made live on Nov 15 (\"Live now, trial size\"); no evidence of an edge at the research bar",
+    "OIREL1 shares Bitcoin with OICORE: it cannot add where OICORE already holds contracts past the per-market limit"
+   ],
+   "code": {
+    "live": "OIREL1",
+    "slot": "OIREL1"
+   },
+   "roomTarget": null,
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
+  },
+  {
+   "id": "XRPFAV10",
+   "name": "XRP favourite",
+   "stage": "Probe",
+   "rule": "XRP: about 10 minutes before the close, buys the favourite side at 88c to 92c, and holds it until the market closes",
+   "goesLive": "On trial at 3 contracts; it moves up only after 90 trades that win at least 1.3 times what they lose",
+   "label": null,
+   "startDate": "2026-11-15",
+   "nextRead": "2026-12-13",
+   "nextReadText": "One read, 14 days after the first fill or 60 fills, whichever is later; fills of a trial seat are not research evidence",
+   "n": null,
+   "nBasis": null,
+   "kill": "It stops if it is down $18 after 5 trades, or after 30 losses in a row",
+   "return": "14 days after a stop, when a fresh paper record wins at least 1.3 times what it loses",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "Trial seat the owner made live on Nov 15 (\"Live now, trial size\"); no evidence of an edge at the research bar",
+    "The owner's one exception to the favourite-and-hold ban, for this seat only; XRP stays paused for gold's own rule"
+   ],
+   "code": {
+    "live": "XRPFAV10",
+    "slot": "XRPFAV10"
+   },
+   "roomTarget": null,
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
+  },
+  {
    "id": "W-SPREAD-CELL1",
    "name": "Sports spread cheap side",
    "stage": "Retired",
