@@ -21,7 +21,9 @@ def import_engine(engine_dir):
     sys.path.insert(0, os.path.abspath(engine_dir))
     import engine1_core as K, engine1_enum as N, engine1_split as S, engine1_driver as D
     return K, N, S, D
-def events_of(items): return len({m["close"] for m, _ in items})          # distinct hourly events (UTC close times): the strikes of one event are correlated (Auditor B, Nov 16)
+def events_of(items, exit_, K, D):
+    """Distinct hourly events (UTC close times) of the cell's SCORED trades only (Auditor B, Nov 16): an entry the engine drops for 'no mark' or 'too late' is in neither n nor events. Uses the pinned engine's own score() on the same core entries score_group builds; the drop reasons do not depend on the haircut, so 0.02 is used."""
+    return len({m["close"] for m, ent in items if K.score(D.to_core(m, ent), exit_, 0.02, D.CONTRACTS)[0] is not None})
 def c8_pass(a, events): return a["n"] >= MIN_N and a["pf"] >= PF_PRIMARY and a["half1"] >= HALF_MIN and a["half2"] >= HALF_MIN and a["trade_days"] >= MIN_DAYS and events >= MIN_EVENTS
 def run(markets, m_total=M_TOTAL, engine_dir=ENGINE_DIR):
     assert len(CELLS) == 96, "the spec has 96 cells"
@@ -45,14 +47,15 @@ def run(markets, m_total=M_TOTAL, engine_dir=ENGINE_DIR):
             agg, _ = D.score_group(items, x); scored += 1
             a1, a2 = agg[0.01], agg[0.02]
             rep.setdefault("cells", {})[(b, band, rs, filt, x)] = {"n": a2["n"], "pf_1c": a1["pf"], "pf_2c": a2["pf"]}
-            if c8_pass(a2, events_of(items)) and sdays and a2["n"] / sdays >= MIN_SPD: s_pass[(b, band, rs, filt, x)] = a2
+            if c8_pass(a2, events_of(items, x, K, D)) and sdays and a2["n"] / sdays >= MIN_SPD: s_pass[(b, band, rs, filt, x)] = a2
     rep["search_cells_scored"] = scored; rep["search_passes"] = len(s_pass)
     v_res, v_p, v_ev = {}, {}, {}
     for k in s_pass:
         items = vg.get(k[:4], [])
         if len(items) < MIN_N: continue
         agg, _ = D.score_group(items, k[4])
-        if c8_pass(agg[0.02], events_of(items)): v_res[k] = agg[0.02]; v_p[k] = D.pval(agg[0.02]["day_z"]); v_ev[k] = events_of(items)
+        ev = events_of(items, k[4], K, D)
+        if c8_pass(agg[0.02], ev): v_res[k] = agg[0.02]; v_p[k] = D.pval(agg[0.02]["day_z"]); v_ev[k] = ev
     keep = D.bh(v_p, m_total, ALPHA)
     rep["validate_bar_passes"] = len(v_res); rep["survivors"] = [{"cell": k, "pf_2c": v_res[k]["pf"], "n": v_res[k]["n"], "days": v_res[k]["trade_days"], "events": v_ev[k]} for k in sorted(keep, key=str)]
     return rep

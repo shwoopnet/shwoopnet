@@ -103,7 +103,7 @@
   "min_events": 40,
   "min_signals_per_day": 3,
   "signals_per_day_note": "Nov 16 amendment: n divided by the cell's SEARCH trade days must be at least 3, counted on the SEARCH span only (the Testing Desk's build counts each half on its own span; the spec says SEARCH only). min_events 40 counts the cell's distinct hourly close times, applied to the cell as a whole.",
-  "events_note": "Nov 16 amendment (Testing Desk's question): in an M60 cell an entry with no mark at close minus 60 s is NOT scored by the engine (no trade, so it is not in n, days or the PF); min_events still counts its hourly close, i.e. events = distinct hourly closes of every entry of the cell in the half being gated, marked or not; n = entries with a mark. This replaces the loose wording 'none = held to settlement' in rules.exit_M60 for scoring; the engine file (pinned) is the authority."
+  "events_note": "Nov 16 amendment (Auditor B): events counts the distinct hourly close times of the cell's SCORED trades in the half being gated; an M60 entry with no mark at close minus 60 s is not scored (the pinned engine returns 'no mark'), so it is in neither n nor events."
  },
  "tries": {
   "rules_this_spec": 96,
@@ -122,7 +122,7 @@
   "two_sided": "0 < bid < ask < 1 for the side taken (rule 18)",
   "cheap_side": "the lower ask of the two sides at the look (the YES ask against 1 minus the YES bid); a tie goes to YES",
   "look": "the candle ending exactly at close minus 120 s (end_ts); none = no entry for that event (a candle exists only if the minute had a ladder row; its quote can be up to 59 s older than the candle end); no earlier candle is used",
-  "exit_M60": "the bid of the candle ending exactly at close minus 60 s; none = held to settlement (both printed); a missing candle at exactly that minute is not replaced by the previous one",
+  "exit_M60": "the bid of the candle ending exactly at close minus 60 s; a missing candle at exactly that minute is not replaced by the previous one, and the entry is NOT scored and NOT held (engine1_core returns 'no mark'; the pinned engine is the authority)",
   "spread_filter": "the engine's own: the spread (ask minus bid, whole cents rounded up) of the entry candle in three classes low, mid, high, with the two cuts computed from the SEARCH phase spreads (engine1_enum.spread_cuts: the ceil(n/3)-th and ceil(2n/3)-th sorted value); no fixed 0.03 cutoff (that earlier wording is withdrawn)",
   "z": "day-clustered",
   "void": "a void result is passed through by the loader and scored: the price is refunded and the fee kept",

@@ -50,5 +50,11 @@ for m in mk8:
 r9 = R.run({"KXETHD": mk9}, m_total=2, engine_dir=eng)
 ok.append(("9 same strikes in 12 events a phase: n 108 and PF pass, events 12 < 40, so nothing passes even at m = 2", r9["search_cells_scored"] >= 4 and r9["search_passes"] == 0 and r9["validate_bar_passes"] == 0 and r9["survivors"] == []))
 ok.append(("10 test 8 survivors carry their events (108)", all(s["events"] == 108 for s in small["survivors"])))
+# 11 events are the SCORED trades' hourly closes (Auditor B, Nov 16): 45 markets on 45 closes, only 30 have the close-60 candle
+mk11 = []
+for i in range(45):
+    close = base + i * 3600; cs = [(close - 120, 0.28, 0.30, None, 0, 0)] + ([(close - 60, 0.29, 0.31, None, 0, 0)] if i < 30 else [])
+    mk11.append(({"series": "KXETHD", "ticker": "KXETHD-E%02d" % i, "close": close, "result": "no", "candles": cs}, {"side": "yes", "ask": 0.30, "entry_end": close - 120, "whole_cent": True}))
+ok.append(("11 events: H counts all 45 closes, M60 counts the 30 with a mark (so it is under 40 although the cell spans 45 hours)", R.events_of(mk11, "H", K, D) == 45 and R.events_of(mk11, "M60", K, D) == 30))
 for k, v in ok: print("PASS" if v else "FAIL", k)
 sys.exit(0 if all(v for _, v in ok) else 1)

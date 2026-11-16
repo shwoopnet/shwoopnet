@@ -23,7 +23,7 @@ def mine(g, band, filt, x):
     items = g.get((120, band, "cheap", filt), [])
     if not items: return {"n": 0, "days": 0, "pf2": 0.0, "h1": 0.0, "h2": 0.0, "pf1": 0.0, "z": None, "events": 0}
     agg, _ = D.score_group(items, x); a2, a1 = agg[0.02], agg[0.01]
-    return {"n": a2["n"], "days": a2["trade_days"], "pf2": a2["pf"], "h1": a2["half1"], "h2": a2["half2"], "pf1": a1["pf"], "z": a2["day_z"], "events": R.events_of(items)}
+    return {"n": a2["n"], "days": a2["trade_days"], "pf2": a2["pf"], "h1": a2["half1"], "h2": a2["half2"], "pf1": a1["pf"], "z": a2["day_z"], "events": R.events_of(items, x, K, D)}
 def parse(seg):
     t = seg.split(); out = {}
     for i in range(0, len(t), 2): out[t[i]] = t[i + 1]
