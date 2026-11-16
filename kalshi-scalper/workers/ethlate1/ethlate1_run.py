@@ -7,7 +7,7 @@ import os, sys, hashlib, collections
 HERE = os.path.dirname(os.path.abspath(__file__))
 ENGINE_DIR = os.path.join(HERE, "..", "desk_a_verify")
 PINS = {"engine1_enum": "e42ee1a45f67b76e8560cd9cbefac352fce9a765c8300bc04d5ce05a27e4d5a7", "engine1_driver": "1281ce0a1dc0bce7875bbafc4774358f557e45d0897b8099f5615c33cf12640b",
-        "engine1_split": "00a94c6ef569261ec4f649f596075d85e2b407c43a2bbe9b0a593f75743e07fd", "engine1_core": "53317e4b56a8328fb616d460d5cb4597af13a2b9020d73aefaa37717439694bf"}
+        "engine1_split": "9a2e609542b86ebb0ded23ea8cb8933e2937ad83e30f87bc525f19cffa610963", "engine1_core": "53317e4b56a8328fb616d460d5cb4597af13a2b9020d73aefaa37717439694bf"}
 M_TOTAL = 6290756                      # 6,290,660 carried + 96 (the Head's ruling of Nov 16, 18:35Z; Auditor B)
 BUCKET, BANDS, SIDE = 120, tuple(range(1, 13)), "cheap"
 FILTERS = (None, ("spread", "low"), ("spread", "mid"), ("spread", "high")); EXITS = ("H", "M60")
@@ -21,6 +21,10 @@ def import_engine(engine_dir):
     sys.path.insert(0, os.path.abspath(engine_dir))
     import engine1_core as K, engine1_enum as N, engine1_split as S, engine1_driver as D
     return K, N, S, D
+def ethd_split(S):
+    """Desk A put the ETHD constant in LAST_SEARCH_ETHD (like LAST_SEARCH_P3), but S.phase() reads LAST_SEARCH: copy it in memory only (no engine file is edited); refuse if the pinned file has none (Auditor B, Nov 16)."""
+    if "ETHD" not in getattr(S, "LAST_SEARCH_ETHD", {}): raise SystemExit("REFUSED: engine1_split has no LAST_SEARCH_ETHD (Desk A adds it before any read)")
+    S.LAST_SEARCH.setdefault("ETHD", S.LAST_SEARCH_ETHD["ETHD"])
 def events_of(items, exit_, K, D):
     """Distinct hourly events (UTC close times) of the cell's SCORED trades only (Auditor B, Nov 16): an entry the engine drops for 'no mark' or 'too late' is in neither n nor events. Uses the pinned engine's own score() on the same core entries score_group builds; the drop reasons do not depend on the haircut, so 0.02 is used."""
     return len({m["close"] for m, ent in items if K.score(D.to_core(m, ent), exit_, 0.02, D.CONTRACTS)[0] is not None})
@@ -29,7 +33,7 @@ def run(markets, m_total=M_TOTAL, engine_dir=ENGINE_DIR):
     assert len(CELLS) == 96, "the spec has 96 cells"
     K, N, S, D = import_engine(engine_dir)
     rep = {"m_total": m_total, "cells_selected": len(CELLS), "primary_haircut": "2c (C8)"}
-    mk = markets["KXETHD"]; series = D.short("KXETHD")
+    ethd_split(S); mk = markets["KXETHD"]; series = D.short("KXETHD")
     if series not in S.LAST_SEARCH: raise SystemExit("REFUSED: engine1_split has no dated constant for %s (Desk A adds it before any read)" % series)
     sm = [m for m in mk if S.phase(series, m["close"]) == "search"]; vm = [m for m in mk if S.phase(series, m["close"]) == "validate"]
     cuts = {}
