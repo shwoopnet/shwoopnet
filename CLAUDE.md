@@ -1720,3 +1720,7 @@ Two job files copied byte for byte from `claude/idea-desk-c` commit ca2a65e5 aft
 ## Held-out log: ENGINE1 held-out candle set complete (Nov 16, 2026, Auditor B's loader line)
 
 The ENGINE1 held-out read is complete and listed in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` in one line, readable ONLY by Desk A's ENGINE1 held-out loader (`engine1_heldout_load.py`, sha256 c42b5426...; the mark text equals the loader's `ALLOW_MARK`): lists A and B, the partial A1 run, the A1C completion run and the corrected B1 run. Auditor B read every run's structure CLEAN (A1C 14 of 14, B1 14 of 14; A's 10,777 tickers split disjointly between A1 and A1C, B's 18,768 equal). The failed first A1 attempt is covered only through its 47 landed answers, as the line names it. The Forensics extractor line is not here yet. Docs only.
+
+## Held-out log: ENGINE1 Forensics extractor line (Nov 16, 2026, Auditor B CLEAN)
+
+A second ENGINE1 line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`, separate from Desk A's loader line: readable ONLY by Forensics' extractor `engine1_heldout.py` (sha256 34badbec..., commit 670ddc9b on `claude/forensics-desk`, read in full by Auditor B), naming the same five runs (lists A and B, candles A1, A1C and B1). The extractor refuses unless the log carries a line with its file name, its own sha256 and every run name. I checked the file's sha256 and the five names before merging. Docs only.
