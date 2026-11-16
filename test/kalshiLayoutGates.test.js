@@ -48,10 +48,8 @@ gates.Y4 = () => {
 // Console layout: a rail (account, positions) beside one main column (books, the bot card with its performance, trades, detail, log), books tiles on top.
 // Y5b: the owner could not move the Strategies card ("it doesnt unlock", Oct 30, 2026) because it sat outside the layout. It is a layout card now, and its render must never override the Layout menu's hide.
 gates.Y5b = () => {
-  assert.ok(!/data-card="strategies"/.test(html) && /<div class="kal-strats" id="kalStrategies">/.test(html), 'the Strategies table lives inside the Account card (the owner, Oct 30, 2026), not as a card of its own');
-  const r = /function renderKalshiStrategies\(\)\{[\s\S]*?\n  \}\n/.exec(html); assert.ok(r, 'the render is found');
-  assert.ok(!/\.hidden\s*=/.test(r[0]), 'the render never sets hidden: that is the Layout menu\'s to set');
-  assert.ok(/\[data-card="account"\] #kalStrategies\{ grid-column:2; grid-row:1 \/ 7/.test(html), 'it sits in the right column of the Account card beside the balance');
+  // Nov 16, 2026 (the owner: "i still see the strategies"): the per-strategy table is gone from the Account card; strategy results live on the Strategies page.
+  assert.ok(!/data-card="strategies"/.test(html) && !/id="kalStrategies"|renderKalshiStrategies|kalshiStrategiesTableHtml|kal-strat-tbl/.test(html), 'no per-strategy table on the Bot page');
 };
 gates.Y5 = () => {
   const i = html.indexOf('id="kalTabBot"');

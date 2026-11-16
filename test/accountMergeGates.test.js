@@ -10,7 +10,7 @@ gates.AM1 = () => {
   assert.ok(!/data-card="pnl"/.test(html) && !/>Account result<\/div>/.test(html), 'no card titled Account result');
   assert.strictEqual((html.match(/id="kalPnlBody"/g) || []).length, 1, 'one result body');
   assert.strictEqual((html.match(/id="kalPnlRanges"/g) || []).length, 1, 'one set of range buttons');
-  assert.ok(acct.indexOf('id="kalStrategies"') > -1 && acct.indexOf('id="kalPnl"') > acct.indexOf('id="kalStrategies"') && acct.indexOf('id="kalPnlBody"') > acct.indexOf('id="kalPnlRanges"'), 'the result line sits in the Account card under the strategies table, ranges above the chart');
+  assert.ok(acct.indexOf('id="kalPnl"') > -1 && acct.indexOf('id="kalPnlBody"') > acct.indexOf('id="kalPnlRanges"') && acct.indexOf('id="kalStrategies"') < 0, 'the result line sits in the Account card, ranges above the chart, and there is no strategies table');
 };
 // AM2: the Loss stop tile, its meter and the own stops line are gone, from the markup, the script and the styles.
 gates.AM2 = () => {
