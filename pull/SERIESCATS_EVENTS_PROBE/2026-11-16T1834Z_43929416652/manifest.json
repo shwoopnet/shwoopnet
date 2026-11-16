@@ -1,0 +1,223 @@
+{
+ "job": {
+  "job_id": "SERIESCATS_EVENTS_PROBE",
+  "registration": "kalshi-scalper/workers/testing/SERIESCATS_EVENTS_REGISTRATION.md",
+  "purpose": "Probe: events list of 3 series with and without status, to see whether the default returns settled events. Metadata only.",
+  "heldout": "none (event metadata only: event ticker, series, category, strike or close date; no market, no price, no result)",
+  "allowed_endpoints": [
+   {
+    "name": "events_list",
+    "method": "GET",
+    "path_pattern": "/events",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "AAPLCEOCHANGE",
+   "KX60MINMENTION",
+   "KXTOKENUSED"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 6,
+  "requests": [
+   {
+    "id": "p_all_KXTOKENUSED",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXTOKENUSED",
+     "limit": 200
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "p_settled_KXTOKENUSED",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KXTOKENUSED",
+     "status": "settled",
+     "limit": 200
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "p_all_KX60MINMENTION",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KX60MINMENTION",
+     "limit": 200
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "p_settled_KX60MINMENTION",
+    "path": "/events",
+    "params": {
+     "series_ticker": "KX60MINMENTION",
+     "status": "settled",
+     "limit": 200
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "p_all_AAPLCEOCHANGE",
+    "path": "/events",
+    "params": {
+     "series_ticker": "AAPLCEOCHANGE",
+     "limit": 200
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "p_settled_AAPLCEOCHANGE",
+    "path": "/events",
+    "params": {
+     "series_ticker": "AAPLCEOCHANGE",
+     "status": "settled",
+     "limit": 200
+    },
+    "max_pages": 1
+   }
+  ],
+  "notes": "6 requests, 1 page each; nothing is read before the registration's reader step.",
+  "owner": "MAIN",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "status": "active",
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-16T1834Z",
+ "finished": "2026-11-16T1834Z",
+ "status": "complete",
+ "requests_sent": 6,
+ "bytes_stored": 14204,
+ "rows": [
+  {
+   "index": 1,
+   "id": "p_all_KXTOKENUSED",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOKENUSED",
+    "limit": 200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 512,
+   "t_send_ms": 1794854087070,
+   "t_recv_ms": 1794854087102,
+   "server_date": "Mon, 16 Nov 2026 18:34:47 GMT",
+   "file": "0001.json.gz",
+   "sha256": "af6f5f4e0f0b6a266a3abbb06299d220f343a9bc2275f04675f08ef7448884bb",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "p_settled_KXTOKENUSED",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOKENUSED",
+    "status": "settled",
+    "limit": 200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 42,
+   "t_send_ms": 1794854088070,
+   "t_recv_ms": 1794854088100,
+   "server_date": "Mon, 16 Nov 2026 18:34:48 GMT",
+   "file": "0002.json.gz",
+   "sha256": "911bfc23385421a80349ad4759bd64904153e23f752cc59140f20eb07c201e90",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "p_all_KX60MINMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KX60MINMENTION",
+    "limit": 200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 6783,
+   "t_send_ms": 1794854089070,
+   "t_recv_ms": 1794854089098,
+   "server_date": "Mon, 16 Nov 2026 18:34:49 GMT",
+   "file": "0003.json.gz",
+   "sha256": "045f343ae1ada3b48a66b3449d62dcf560a4acbec5e9587a35404dd13e9a1313",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "p_settled_KX60MINMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KX60MINMENTION",
+    "status": "settled",
+    "limit": 200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 6783,
+   "t_send_ms": 1794854090070,
+   "t_recv_ms": 1794854090101,
+   "server_date": "Mon, 16 Nov 2026 18:34:50 GMT",
+   "file": "0004.json.gz",
+   "sha256": "045f343ae1ada3b48a66b3449d62dcf560a4acbec5e9587a35404dd13e9a1313",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "p_all_AAPLCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AAPLCEOCHANGE",
+    "limit": 200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 42,
+   "t_send_ms": 1794854091070,
+   "t_recv_ms": 1794854091100,
+   "server_date": "Mon, 16 Nov 2026 18:34:51 GMT",
+   "file": "0005.json.gz",
+   "sha256": "911bfc23385421a80349ad4759bd64904153e23f752cc59140f20eb07c201e90",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "p_settled_AAPLCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AAPLCEOCHANGE",
+    "status": "settled",
+    "limit": 200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 42,
+   "t_send_ms": 1794854092071,
+   "t_recv_ms": 1794854092103,
+   "server_date": "Mon, 16 Nov 2026 18:34:52 GMT",
+   "file": "0006.json.gz",
+   "sha256": "911bfc23385421a80349ad4759bd64904153e23f752cc59140f20eb07c201e90",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
