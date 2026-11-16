@@ -1107,3 +1107,12 @@ Main merged PR 950 (job files; the in-game and SIBHIT pulls dispatched), PR 952 
 - 2026-11-16 21:00Z Ledger note: SIBHIT-R arms = 2 (Desk C), counted in the joint NBA print (m_new 1,770 = 624 + 624 + 520 + 2), added as a row when it prints. SOCDERIV held-out row H23 (closes from Nov 13, soccer KX*GAME) patched to Main; SOCDRIFT forward validate gets an S-clause when requested. Held-out: A1C landed (14 of 14), B1 running; extractor line waits on Forensics run names. SOCDRIFT and ETHD_RESULTS2 cleared; ETHLATE1 spec bdb7e171 signed, waits on Desk A split constant.
 - 2026-11-16 21:05Z Batch C registered as specs (Desk A 75f4affed): ENGC1ETHMOM 303,264, ENGC2OIACC 320,112, ENGC3TOD 426,816, ENGC4GOLDX 151,632 = 1,201,824 tries; carried m after it 7,492,484 (counted at registration). Index filter dropped (no data). H09 attached for BTC-market picks.
 - 2026-11-16 21:20Z Held-out extract done (Forensics fc81e519: 29,545 markets, 12 series, 443,175 candles, no holes). Desk A runs the one read after the allow line (190 incl. the 17, then batch B 33 and 47). V3: Desk A 18 vs Forensics 17; the difference is Desk A cluster key and family labels departing from the written spec; the spec governs (rebuild to 17). SOCDRIFT second build agrees (fixture). Batch C registered.
+
+## 2026-11-16 21:35Z OWNER ORDER (via EA): PERPS IS THE MAIN LANE
+- Lane 1 cross-sectional and pairs (baskets: semis, mega-cap tech, energy, metals, crypto): Desk A (engine), after the held-out read; Desk C joins after its NBA and soccer prints.
+- Lane 2 perps vs Kalshi binaries (hourly S&P, Nasdaq, WTI, gold ladders vs perps, forward; ETH hourly ladder vs ETH perp now): Desk B.
+- Lane 3 order book and liquidation (PERPDEPTH1, forward on the 60 s recorder): Forensics.
+- Lane 4 gaps, sessions, 4 PM ET funding timing (Databento underlyings): Testing Desk; also second builder for all lanes.
+- Lane 5 crypto funding extremes and basis (BTC, ETH, HYPE, XRP): History Miner.
+- Lane 6 execution (maker 5 vs taker 12 with a fill model; balance interest as carry): Desk A.
+- Every result in price terms and percent of margin at 10, 25, 50% of the size-specific max with liquidation distance. A perps shadow list (forward, log-only) collects survivors. Specs due about 23:30Z.
