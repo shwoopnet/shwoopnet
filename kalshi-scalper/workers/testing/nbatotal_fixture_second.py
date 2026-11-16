@@ -10,7 +10,7 @@ def build():
         for pi in range(3):
             line = 215 + 6 * pi
             for k in range(4):
-                strike = line - 6 + 4 * k; tk = "%s-T%d" % (ev, strike); p = min(0.95, max(0.05, 0.5 + (line - strike) * 0.03 + rng.uniform(-0.1, 0.1)))
+                strike = line - 6 + 4 * k; tk = "%s-P%d-T%d" % (ev, pi, strike); p = min(0.95, max(0.05, 0.5 + (line - strike) * 0.03 + rng.uniform(-0.1, 0.1)))
                 close = O + rng.choice([3600, 3600, 3600, -12000, -13000]); res = rng.choice(["yes", "no"]) if rng.random() > 0.03 else "void"
                 rungs.append({"ticker": tk, "event": ev, "player": "T", "strike": strike, "open_time": O - (70 * 3600 if (g == 8 and k == 2 and pi == 1) else rng.choice([8 * 3600, 20 * 3600, 40 * 3600, 70 * 3600])), "close_time": close, "occ": O + (60 if g == 5 and pi == 0 and k == 0 else 0), "result": res})
                 s = {}; mid = p
