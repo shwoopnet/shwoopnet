@@ -20,6 +20,9 @@ BACKOFF_S = 2.0
 BACKOFF_MAX_S = 30.0
 HOT_POLL_S = 20.0
 COLD_POLL_S = 120.0
+# Nov 16, 2026 (the Head of R&D's go, option 2): one stream cannot poll ~100 open games' three markets every 120 s AND serve a 20 s hot tier (about 1.45 requests a second is all it carries),
+# so a cold game's spread and total are read every 5 minutes (its moneyline stays at 120 s) and a game is hot when ANY of its three kinds moves 2c; a hot game reads all three every 20 s.
+COLD_SIDE_POLL_S = 300.0
 HOT_FOR_S = 3 * 3600
 HOT_MOVE = 0.02
 LIST_EVERY_S = 300
@@ -62,13 +65,26 @@ def choose(kind, markets):
     return [t for _d, t in sorted(quoted)[:2]]
 
 
-def next_poll(state, now_s, new_mid):
-    """Cadence: 20 s while hot (a moneyline move of 2c or more since the last poll starts three hot hours), else 120 s. Returns (hot_until, seconds to the next poll)."""
+def next_poll(state, now_s, new_mid, moved=None):
+    """Cadence: 20 s while hot (a quoted move of 2c or more since the last poll starts three hot hours), else 120 s. `moved` (True or False) overrides the single moneyline test when the caller
+    has compared every followed market. Returns (hot_until, seconds to the next poll)."""
     hot_until = state.get("hot_until", 0)
     last = state.get("last_mid")
-    if new_mid is not None and last is not None and abs(new_mid - last) >= HOT_MOVE:
+    if moved is None:
+        moved = new_mid is not None and last is not None and abs(new_mid - last) >= HOT_MOVE
+    if moved:
         hot_until = now_s + HOT_FOR_S
     return hot_until, (HOT_POLL_S if now_s < hot_until else COLD_POLL_S)
+
+
+def any_moved(prev, now_mids):
+    """True when a market quoted in both polls moved HOT_MOVE or more (compared by ticker, so a changed list order never looks like a move)."""
+    return any(t in prev and prev[t] is not None and m is not None and abs(m - prev[t]) >= HOT_MOVE for t, m in now_mids.items())
+
+
+def side_due(state, now_s):
+    """A hot game reads spread and total at every poll; a cold game reads them only every COLD_SIDE_POLL_S (the first poll reads all three)."""
+    return now_s < state.get("hot_until", 0) or now_s >= state.get("side_due", 0)
 
 
 def http_get(url):
@@ -153,11 +169,15 @@ def run(outdir, cycle_hours=4, stream=None, now_fn=time.time):
             cold = [g for _d, g in ready if g not in hot]
             for g in (hot[:MAX_HOT] + cold[:4]) or []:
                 ev = games[g]
-                st_info = follow.setdefault(g, {"tickers": {}, "hot_until": 0, "last_mid": None})
+                st_info = follow.setdefault(g, {"tickers": {}, "hot_until": 0, "last_mid": None, "mids": {}, "side_due": 0})
                 cv = cover.setdefault(g, [0, 0, 0, None, None])
                 ml_mid = None
+                poll_sides = side_due(st_info, now_fn())
+                seen_mids = {}
                 for kind in ("ml", "spread", "total"):
                     if kind not in ev:
+                        continue
+                    if kind != "ml" and not poll_sides:
                         continue
                     cv[0] += 1
                     st, body, date, t_ms = stream.get("%s/markets?event_ticker=%s" % (BASE, ev[kind]))
@@ -175,10 +195,14 @@ def run(outdir, cycle_hours=4, stream=None, now_fn=time.time):
                     for m in markets:
                         if m.get("ticker") in keep:
                             obs.writerow(row(t_ms, date, ev[kind], kind, m))
+                            seen_mids[m.get("ticker")] = mid(m)
                             if kind == "ml" and ml_mid is None:
                                 ml_mid = mid(m)
-                st_info["hot_until"], wait = next_poll(st_info, now_fn(), ml_mid)
+                st_info["hot_until"], wait = next_poll(st_info, now_fn(), ml_mid, moved=any_moved(st_info["mids"], seen_mids))
                 st_info["last_mid"] = ml_mid if ml_mid is not None else st_info["last_mid"]
+                st_info["mids"].update({t: v for t, v in seen_mids.items() if v is not None})
+                if poll_sides:
+                    st_info["side_due"] = now_fn() + COLD_SIDE_POLL_S
                 due[g] = now_fn() + wait
             obs_f.flush()
             time.sleep(1.0)
