@@ -93,6 +93,18 @@ gates.SR6 = () => {
   assert.deepStrictEqual(o.first_two.map((t) => t[0]), [8.2, 8.2, -1.8], 'the tie at one close is ordered by ticker (TB before TC)');
   assert.ok(/def cache_key/.test(runnerSrc) && /list_sha256/.test(runnerSrc.slice(runnerSrc.indexOf('def cache_key'), runnerSrc.indexOf('def cache_key') + 500)) && /HOLDS\.json/.test(runnerSrc.slice(runnerSrc.indexOf('def cache_key'), runnerSrc.indexOf('def cache_key') + 500)));
 };
+gates.SR7 = () => {
+  // Consequence (Auditor B S1 state): the daily workflow keeps the private state only in the Actions cache (never uploaded, committed or printed), pushes only the two aggregate files to its own shadow-data branch, never main, and stops by itself.
+  const wf = fs.readFileSync(path.join(root, '.github', 'workflows', 'shadow-forward.yml'), 'utf8');
+  const steps = wf.replace(/^#.*$/gm, '');
+  assert.ok(/actions\/cache\/restore@/.test(steps) && /actions\/cache\/save@/.test(steps) && !/upload-artifact/.test(steps), 'state in the cache only, no artifact');
+  assert.ok(/--print-key/.test(steps) && /restore-keys/.test(steps));
+  assert.ok(/git add shadow_results\.json shadow_counts\.json/.test(steps) && !/git add (-A|\.)/.test(steps) && !/state\//.test(steps.slice(steps.indexOf('git add'))), 'only the two aggregate files are added');
+  assert.ok(/git push -q origin shadow-data/.test(steps) && !/git push[^\n]*\bmain\b/.test(steps));
+  assert.ok(/ref: main/.test(steps) && /persist-credentials: false/.test(steps) && /2027-01-31T23:59:00Z/.test(steps));
+  assert.ok(!/\bcat\b[^\n]*state|echo[^\n]*state\/|ls[^\n]*state/.test(steps), 'the state is never printed');
+  assert.ok(/python3 -I code\/scripts\/shadow_runner\.py/.test(steps) && !/secrets\.(?!GITHUB_TOKEN)/.test(steps), 'no secret but the built-in token');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message.split('\n')[0]); } }
 process.exit(failed ? 1 : 0);

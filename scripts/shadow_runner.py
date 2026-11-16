@@ -302,10 +302,13 @@ def main(argv):
     import argparse
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".")
-    ap.add_argument("--state", required=True, help="state directory (kept in the Actions cache, never published)")
-    ap.add_argument("--out", required=True, help="where shadow_results.json and shadow_counts.json are written (the data branch checkout)")
+    ap.add_argument("--state", default="state", help="state directory (kept in the Actions cache, never published)")
+    ap.add_argument("--out", default="out", help="where shadow_results.json and shadow_counts.json are written (the data branch checkout)")
     ap.add_argument("--now", type=int, default=None)
+    ap.add_argument("--print-key", action="store_true", help="print the state cache key (list, runner and holds shas) and stop; reads no network")
     a = ap.parse_args(argv)
+    if a.print_key:
+        print(cache_key(load_config(os.path.abspath(a.root)), os.path.abspath(a.root))); return 0
     now = a.now if a.now is not None else int(time.time())
     sp = os.path.join(a.state, "shadow_state.json")
     state = json.load(open(sp)) if os.path.exists(sp) else {}

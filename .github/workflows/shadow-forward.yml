@@ -1,0 +1,69 @@
+# Nov 16, 2026 (the Head of R&D's go, Auditor B's S1 clause and state decision): the generic forward shadow runner. Once a day it reads PUBLIC Kalshi candles and settled markets for the 17 specs of SHADOW_LIST_V1
+# (start 2026-11-17T00:00Z), scores them through Desk A's audited ENGINE1 modules (pinned by sha256 in kalshi-scalper/workers/shadow/SHADOW_RUNNER_CONFIG.json) behind the held-out guard (HOLDS.json, S1 row),
+# and publishes per-spec AGGREGATES only (shadow_results.json, shadow_counts.json) to its OWN orphan branch `shadow-data` (never main). Research only: no key, no order, no Firestore.
+# State (Auditor B, option B): the per-spec ordered net amounts live only in the GitHub Actions cache, keyed by the list sha, the runner sha and the HOLDS.json sha; a miss rebuilds from the public pulls to the identical sequence
+# (test SR6). The cache is never printed, committed, uploaded as an artifact or logged. Public GETs only, one host, at most 1 request a second, 1,200 requests a run is not exceeded (the puller stops on three 429s).
+# Nothing else may be added to this file without a new check. Stops by itself: from 2027-01-31 23:59 UTC every run exits at once. NOTE for the reviewer: the actions/cache pin below could not be verified from the build sandbox; check it before merge.
+name: shadow-forward
+on:
+  schedule:
+    - cron: "41 3 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: shadow-forward
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Stop for good after the end date (2027-01-31 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to do"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the code from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+          persist-credentials: false
+      - name: State cache key (list, runner and holds shas)
+        id: key
+        if: steps.gate.outputs.go == 'true'
+        run: echo "k=$(python3 -I code/scripts/shadow_runner.py --root code --print-key)" >> "$GITHUB_OUTPUT"
+      - name: Restore the private state (a miss rebuilds from the public pulls)
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/cache/restore@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: state
+          key: ${{ steps.key.outputs.k }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ steps.key.outputs.k }}-
+      - name: Run the shadow runner (aggregates to out, private state to state)
+        id: run
+        if: steps.gate.outputs.go == 'true'
+        run: python3 -I code/scripts/shadow_runner.py --root code --state state --out out
+      - name: Save the private state
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/cache/save@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: state
+          key: ${{ steps.key.outputs.k }}-${{ github.run_id }}
+      - name: Open the shadow-data branch (created empty the first time) and push only the two aggregate files
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir pub && cd pub
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin shadow-data; then git checkout -q -b shadow-data FETCH_HEAD; else git checkout -q --orphan shadow-data; fi
+          cp ../out/shadow_results.json shadow_results.json
+          cp ../out/shadow_counts.json shadow_counts.json
+          git config user.name "shadow-forward"
+          git config user.email "shadow-forward@users.noreply.github.com"
+          git add shadow_results.json shadow_counts.json
+          git commit -q -m "shadow aggregates $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin shadow-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin shadow-data || true; done
+          exit 1
