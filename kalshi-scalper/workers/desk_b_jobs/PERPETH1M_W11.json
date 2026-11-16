@@ -1,0 +1,134 @@
+{
+ "job_id": "PERPETH1M_W11",
+ "status": "active",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/specs/PERPLEAD1_CARD.md",
+ "purpose": "Kalshi's Ethereum perpetual KXETHPERP, public 1 minute candles, one UTC day per request, 2026-11-05 to 2026-11-15 (the 11 days of the ladder window the nightly archive's back-pull (PR 993) did not carry for Ethereum when checked on 2026-11-16), to score PERPLEAD1 part (b). Data pull only.",
+ "heldout": "FIXED window: 2026-11-05T00:00Z to before 2026-11-16T00:00Z; nothing from Nov 16 on. HOLDS.json rows naming KXETHPERP: none active (Auditor B, Nov 16); the reader of this run is PERPLEAD1's loader only.",
+ "route": "perps",
+ "allowed_endpoints": [
+  {
+   "name": "perp_candlesticks",
+   "method": "GET",
+   "path_pattern": "/markets/(?P<ticker>KXBTCPERP|KXETHPERP)/candlesticks",
+   "params_allowed": [
+    "period_interval",
+    "start_ts",
+    "end_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [
+  "KXETHPERP"
+ ],
+ "pacing_seconds": 1.0,
+ "max_requests": 23,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "KXETHPERP_8",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793836800,
+    "end_ts": 1793923200
+   }
+  },
+  {
+   "id": "KXETHPERP_9",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793923200,
+    "end_ts": 1794009600
+   }
+  },
+  {
+   "id": "KXETHPERP_10",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794009600,
+    "end_ts": 1794096000
+   }
+  },
+  {
+   "id": "KXETHPERP_11",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794096000,
+    "end_ts": 1794182400
+   }
+  },
+  {
+   "id": "KXETHPERP_12",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794182400,
+    "end_ts": 1794268800
+   }
+  },
+  {
+   "id": "KXETHPERP_13",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794268800,
+    "end_ts": 1794355200
+   }
+  },
+  {
+   "id": "KXETHPERP_14",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794355200,
+    "end_ts": 1794441600
+   }
+  },
+  {
+   "id": "KXETHPERP_15",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794441600,
+    "end_ts": 1794528000
+   }
+  },
+  {
+   "id": "KXETHPERP_16",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794528000,
+    "end_ts": 1794614400
+   }
+  },
+  {
+   "id": "KXETHPERP_17",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794614400,
+    "end_ts": 1794700800
+   }
+  },
+  {
+   "id": "KXETHPERP_18",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794700800,
+    "end_ts": 1794787200
+   }
+  }
+ ],
+ "notes": "11 requests, one per UTC day; de-duplicate on end_period_ts. Use ONLY if the archive still has no KXETHPERP rows for 2026-11-05 to 2026-11-15 when W8 is dispatched (on 2026-11-16 20:50Z the kalshi1m files for those days held none)."
+}
