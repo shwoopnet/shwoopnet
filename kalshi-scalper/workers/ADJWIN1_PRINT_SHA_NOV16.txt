@@ -1,0 +1,2 @@
+ADJWIN1 blind read, run once Nov 16 2026, from origin/main allow line 41 (loader cbfe997b312f5949c7835793ec736e2cba4777c9d1a9d1429d4d9fa86ac540f5, adjwin1.py 12d24785..., adjwin1_run.py 29ca9448...).
+sha256 of the printed table (adjwin1_out.txt, 11003 bytes), committed BEFORE it was read: 27f3eb59d3250011f2c599a2073c90a6e7fa17296da6f78dfd5c57932673af9f
