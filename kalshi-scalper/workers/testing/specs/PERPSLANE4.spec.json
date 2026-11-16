@@ -1,0 +1,161 @@
+{
+ "id": "PERPSLANE4",
+ "desk": "Testing Desk",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/testing/PERPSLANE4_CARD.md",
+ "needs_new_code": [
+  "testing/lane4_plugin.py (event builder, entries, exits, cash; first build, hand case first, Auditor B CLEAN)",
+  "a loader for the perps archive kalshi1m files and the funding extract with a wall and allow line (Auditor B)",
+  "Databento daily bars of SPY, QQQ, GLD and the stock underlyings for the gap size filter only (derived results only, nothing Databento in the repo)",
+  "a second build of the plugin (rule 16b): the Head names who (Desk A or Auditor B)"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "PERPS-FAM-F F1 and F3",
+   "OPENGAP1 and OPENGAP2",
+   "ENGPERPS_POOL1 (gap, funding carry)",
+   "ENGINE1 perps passes 1 to 3"
+  ],
+  "declined_list_rows_checked": [
+   "7e: no row for session or weekend structure on perps",
+   "favourite-and-hold and cheap-side-late do not apply to perps"
+  ],
+  "difference": "splits the overnight hold by weekend and weeknight, adds open and close session rules on the perp's own path, and times a position around the 4 PM ET funding print with fixed windows, pooled across stock, gold and index perps; a version of F1, F3 and POOL1's carry where it overlaps (7g), counted in m",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "lane4_load.py (PENDING: new loader, ticker wall first, allow line)",
+  "loader_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "extracts": [
+   "perp-data kalshi1m files (candles end_period_ts, bid and ask OHLC) for the stock perps (Forensics extract 20261116 for Nov 5 18:39Z to before Nov 17) and for KXGOLDPERP, KXUS500PERP, KXUSTECH100PERP from 2026-09-10",
+   "perp-data funding files (prints, own timestamps)",
+   "Databento EQUS.SUMMARY ohlcv-1d for SPY, QQQ, GLD and the stock underlyings (gap size filter of the A2 rules only)"
+  ],
+  "ticker_wall": [
+   "stock perps (the 94 names of Forensics' wall, pool = names with at least 5 trading days and 2 prints)",
+   "KXGOLDPERP",
+   "KXUS500PERP",
+   "KXUSTECH100PERP"
+  ],
+  "window": {
+   "first_close": "2026-09-10T00:00:00Z",
+   "last_close_exclusive": "2026-11-17T00:00:00Z"
+  },
+  "held_out_map_checked_by": "PENDING (Auditor B)",
+  "independence_note": "DEVELOPMENT: the stock perps days Nov 6 to 16 have been read five times (OPENGAP1, OPENGAP2, PERPSCALP1, ENGINE1 read 1, POOL1) and gold, US 500 and US Tech 100 by ENGINE1 perps passes and PERPGEN; every development figure reads 'development, read 6 times, not independent'. The forward read from 2026-11-17 is the test."
+ },
+ "split": {
+  "mode": "fixed_dates",
+  "development": "2026-09-10 to before 2026-11-17 (gold and the two indices from Sep 10, the stocks from Nov 5 18:39Z); no SEARCH and VALIDATE split inside it: one development sample with halves by entry order",
+  "validate_forward": {
+   "first_close": "2026-11-17T00:00:00Z",
+   "last_close_exclusive": "2026-12-07T00:00:00Z",
+   "rule": "read ONCE on the weekly pulls, on the Head's go, by the survivors of the development read only (about 14 trading days)"
+  }
+ },
+ "rules": {
+  "A_overnight": "entry at the candle ending 16:00 ET, exit at the candle ending 09:31 ET of the next ET weekday (Friday entries exit Monday); class weekend (Friday entry) or weeknight (Monday to Thursday entry) x side long or short = 4 rules",
+  "A2_gap": "the OPENGAP entry at the candle ending 09:31 ET: g = (U_open/U_prev - 1) - (P_0925/P_prev1600 - 1), trigger |g| above 2 x the half spread fraction AND above a threshold of 40 or 100 bp; class Monday or Tuesday to Friday; mode follow or fade; exit T30, T60 or TC (the candle ending 16:00 ET) = 2 x 2 x 2 x 3 = 24 rules",
+  "B1_open": "open move over N minutes: m = mid(candle ending 09:31 + N) / mid(candle ending 09:31) - 1 for N = 5, 15, 30; fires when |m| is at least 20 or 40 bp; entry at the candle ending 09:31 + N; follow or fade; exit T30, T60 or TC = 3 x 2 x 2 x 3 = 36 rules",
+  "B2_close": "close move: m = mid(candle ending 15:30 ET) / mid(candle ending 15:00 ET) - 1; fires when |m| is at least 20 or 40 bp; entry at 15:30; follow or fade; exit at the candle ending 16:01 ET or at the next 09:31 ET (TO) = 2 x 2 x 2 = 8 rules",
+  "B3_closedrift": "unconditional: entry at the candle ending 15:30 ET, exit at the candle ending 16:01 ET, long or short = 2 rules",
+  "C_funding": "entry at the candle ending T - 60, 30 or 15 minutes, exit at the candle ending T + 15, 30 or 60 minutes, side long, short or the side that RECEIVES the print (short if the last rate is above 0, long if below, no trade at exactly 0); T = the name's own print timestamp of the day (the 4 PM ET print: 21:00Z in EST for the stocks) = 3 x 3 x 3 = 27 rules",
+  "common": "one position per name per rule at a time (the next entry needs e >= the previous exit end); DST aware ET clocks (the offset read at the ET day's midday: EDT 2026-03-08T07:00Z to 2026-11-01T06:00Z); boundary: no trade whose entry or exit end is at or after 2026-11-17T00:00Z in the development read; funding booked from the prints (long pays a positive rate), a trade without booked funding is out of the gates and counted; entry fills at the ask (long) or bid (short) times (1 +- h), exits at the bid or ask times (1 -+ h), h relative 0.0002 and 0.0005 primary, 0.001 and 0.002 stress counted apart"
+ },
+ "grid": {
+  "note": "event_rule: no engine grid; the cell list above is the plugin's own enumeration"
+ },
+ "event": {
+  "scorer_plugin": "lane4_plugin.py",
+  "scorer_plugin_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "decision_instant": "the entry candle end of each rule (16:00 ET, 09:31 ET, 09:31 + N, 15:30 ET, or T minus x)",
+  "signal_threshold": "the rules above (A and B3 unconditional, A2 gap size, B1 and B2 move size, C fixed windows)",
+  "entry_rule": "the first qualifying candle of the day for the name, pooled over names",
+  "exit": "the rule's own exit candle"
+ },
+ "plugin": {
+  "file": "lane4_plugin.py",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "hand_case_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "auditor_clean_date": null,
+  "note": "NOT BUILT: hand case first, then code, then Auditor B CLEAN; the spec is unsigned until then"
+ },
+ "holds": [
+  {
+   "label": "stock perps development (Forensics extract 20261116: candles and prints from 2026-11-05T18:39Z to before 2026-11-17T00:00Z)",
+   "start_epoch": 1793903940,
+   "end_epoch": 1794873600,
+   "card": "OPENGAP1, OPENGAP2, PERPSCALP1, ENGINE1, ENGPERPS_POOL1",
+   "status": "spent (development, read 5 times)"
+  },
+  {
+   "label": "gold, US 500, US Tech 100 perps development (kalshi1m from 2026-09-10 to before 2026-11-17)",
+   "start_epoch": 1788998400,
+   "end_epoch": 1794873600,
+   "card": "ENGINE1 perps passes 1 to 3, PERPGEN",
+   "status": "spent (development)"
+  },
+  {
+   "label": "forward read window (weekly pulls)",
+   "start_epoch": 1794873600,
+   "end_epoch": 1796601600,
+   "card": "PERPSLANE4, PERPS-FAM-F, OPENGAP1-F",
+   "status": "OPEN (forward, read once on the Head's go)"
+  }
+ ],
+ "look_ahead": {
+  "A": "entry candle ending 16:00 ET (uses nothing after it), exit candle ending 09:31 ET next weekday",
+  "A2": "the gap uses the underlying's official open and previous close (known at 09:30 ET) and the perp candles ending at or before 09:31 ET; entry at the 09:31 candle",
+  "B1": "m uses candles ending at or before the entry candle (09:31 + N); entry at that candle",
+  "B2": "m uses the candles ending 15:00 and 15:30 ET; entry at 15:30",
+  "C": "T is the name's own print timestamp of the day (a schedule fact: the previous print's time of day, read from timestamps and never from a rate); the receiving side uses the last rate strictly before the entry candle end",
+  "exit": "every exit price is the leave quote of the candle ending at the exit instant, never an earlier or later candle",
+  "fill": "entry at the quote of the entry candle"
+ },
+ "sources": {
+  "names": [
+   "perp-data kalshi1m and funding files (Kalshi public perps data, recorded)",
+   "Databento daily bars (research only, derived results only, $25 cap) via the proxy"
+  ],
+  "new_host": false
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.0002,
+   0.0005
+  ],
+  "haircuts_stress": [
+   0.001,
+   0.002
+  ],
+  "fee_taker": 0.0012,
+  "fee_maker": 0.0005,
+  "fee_note": "12 and 5 bps a side both ASSUMED until Kalshi's published perps fee is read (Desk A); neither is the headline; $870 notional at 1x and a 2x line in messages only"
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "min_signals_per_day": 3,
+  "bh_alpha": 0.05,
+  "unit": "pooled over all names; day clustered z and p (one-sided upper tail) of the 0.02% net; n and trade days counted pooled"
+ },
+ "tries": {
+  "rules_this_spec": 101,
+  "prior_m": "from the TALLY (m_carried, the day's number) + 101"
+ },
+ "prediction": "most rules fail (round trip 24 bp taker plus 8 bp haircuts against session moves of 10 to 40 bp); P(any rule clears the gates on development and holds on the forward read) about 3%; the weekend rules (A, class weekend) and the funding window C are the best chance",
+ "kill": "no rule with n 100 or more pooled, 10 trade days and PF 1.3 at 0.02% with both halves 1.0 or more and PF 1.0 at 0.05%, or nothing survives BH; kill fast at PF under 1.0 at 0.02% on the first read",
+ "kill_fast": true,
+ "subset_rationale": "the 101 cells were fixed from round numbers (windows of 15, 30 and 60 minutes, thresholds of 20, 40, 100 bp) and the Head's three topics before any figure of these rules was read; no cell was removed or added after a read",
+ "halves": "floor(n/2) in entry order (entry end, ticker)",
+ "fee_form": "perps: relative fee a side on the notional (12 and 5 bps), a haircut h relative to the fill price; binaries are not used; the standing ceil(round(0.07 x n x p x (1 - p) x 100, 9)) / 100 form and the void rule do not apply to perps (no settlement)",
+ "n_floor": "no evidence at n = x below 100",
+ "outputs": {
+  "survivor_line": "rule, pooled n, trade days, PF at 0.02% and 0.05% for 12 and 5 bps, day clustered z, dollars at $870 notional (1x and 2x), margin terms at 10, 25 and 50 percent of the maximum with liquidation distance",
+  "family_flag": "none"
+ }
+}
