@@ -29,7 +29,7 @@ open(allow, "w").write(line(N.self_sha(), csha) + "\n")
 obj = N.run("ROOT", out, "2026-11-16T17:00:00Z", core_file=core, core_sha=csha, func="count_places", allow_file=allow)
 assert json.load(open(out)) == obj and list(obj) == ["places"]
 assert [(r["id"], r["fill_checked_signals"]) for r in obj["places"]] == [("WH-NC15-SILVER", 7), ("WH-NC15-COPPER", 0), ("WH-NC15-WTI", 12), ("WH-NC15-HYPE", 61), ("WH-NC15-BNB", 3), ("WH-NC15-USDCAD", 1), ("WH-NC15-NATGAS", 25)]          # HYPE above the target is not capped
-assert all(set(r) == {"id", "fill_checked_signals", "target", "start_utc", "as_of_utc"} and r["target"] == 60 and r["start_utc"] == "2026-11-13T02:40:00Z" and r["as_of_utc"] == "2026-11-16T17:00:00Z" for r in obj["places"])
+assert all(set(r) == {"id", "fill_checked_signals", "status", "target", "start_utc", "as_of_utc"} and r["target"] == 60 and r["start_utc"] == "2026-11-13T02:40:00Z" and r["as_of_utc"] == "2026-11-16T17:00:00Z" for r in obj["places"])
 text = open(out).read(); assert "KX" not in text and "EUR" not in text and "windows" not in text and "cell" not in text          # no ticker, no other series, no other counter in the file
 # the core was called with the folder and the start time, once
 assert open(core + '.calls').read() == repr(("ROOT", 1794537600)) + '\n'
@@ -56,3 +56,6 @@ except SystemExit as e: assert "cannot be read" in str(e)
 # atomic write: the temp name is not left behind
 assert not os.path.exists(out + ".tmp")
 print("nc15 place counts tests passed")
+
+assert {r["id"]: r["status"] for r in obj["places"]} == {"WH-NC15-SILVER": "parked", "WH-NC15-COPPER": "active", "WH-NC15-WTI": "active", "WH-NC15-HYPE": "active", "WH-NC15-BNB": "active", "WH-NC15-USDCAD": "parked", "WH-NC15-NATGAS": "active"}
+print("status ok")

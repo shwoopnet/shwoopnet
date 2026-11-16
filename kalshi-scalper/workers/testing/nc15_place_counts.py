@@ -39,6 +39,9 @@ def load_core(core_file=None, core_sha=None, func=None):
     return fn
 
 
+PARKED = ("WH-NC15-SILVER", "WH-NC15-USDCAD")          # Head ruling Nov 16: parked under the rate rule; kept in the file
+
+
 def build(counts, as_of):
     if not ASOF_RE.fullmatch(as_of or ""): raise SystemExit("REFUSED: as_of must be YYYY-MM-DDTHH:MM:SSZ")
     rows = []
@@ -46,7 +49,7 @@ def build(counts, as_of):
         if series not in counts: raise SystemExit("REFUSED: the core's answer has no %s" % series)
         n = counts[series].get("fill-checked", 0)          # the core's Counters hold only the keys that were incremented: an absent "fill-checked" is a true 0
         if not (type(n) is int and n >= 0): raise SystemExit("REFUSED: %s fill-checked is not a non-negative integer" % series)
-        rows.append({"id": pid, "fill_checked_signals": n, "target": TARGET, "start_utc": START_UTC, "as_of_utc": as_of})
+        rows.append({"id": pid, "fill_checked_signals": n, "status": "parked" if pid in PARKED else "active", "target": TARGET, "start_utc": START_UTC, "as_of_utc": as_of})
     return {"places": rows}
 
 
