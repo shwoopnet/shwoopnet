@@ -133,3 +133,17 @@ rep3 = P.run_all({"KXGOLDPERP": cs3}, last_search={"GOLDPERP": "2026-09-30"})
 assert rep3["tried"] == 420 and rep3["no_split_constant"] == [] and rep3["by_ticker"]["KXGOLDPERP"]["search_days_max"] >= 10, rep3
 assert P.run_all({"KXGOLDPERP": cs3})["no_split_constant"] == ["KXGOLDPERP"]
 print("ALL OK")
+# (Nov 16, Auditor B) funding booked from the extract's own print timestamps
+import calendar as _c
+_U = lambda *a: _c.timegm(a)
+_e0 = _U(2026, 9, 10, 13, 0, 0)
+_cs = {t: (t, 100.0, 100.0001, 100.0, 1, 1) for t in range(_e0, _e0 + 3 * 3600 + 60, 60)}
+_f = {_U(2026, 9, 9, 14, 0, 0): 0.001, _U(2026, 9, 10, 14, 0, 0): 0.001, _U(2026, 9, 11, 14, 0, 0): 0.001}
+_g, _w, _h, _fl = P.trade_full(_cs, _e0, "long", "T60", 0.0, _f)      # one print at 14:00 (gold's real hour) inside 13:00 to 14:00? exit AT print pays nothing
+assert _fl is None and abs(_g) < 1e-5, (_g, _fl)
+_g, _w, _h, _fl = P.trade_full(_cs, _e0, "long", "T60", 0.0, {_U(2026, 9, 10, 13, 30, 0): 0.002, **_f}); assert abs(_g + 0.002) < 1e-4 and _fl is None   # a print at 13:30 is booked, whatever the hour
+_g, _w, _h, _fl = P.trade_full(_cs, _e0, "short", "T60", 0.0, {_U(2026, 9, 10, 13, 30, 0): 0.002, **_f}); assert abs(_g - 0.002) < 1e-4      # a short receives it
+_far = {_U(2026, 9, 1, 14, 0, 0): 0.001, _U(2026, 9, 20, 14, 0, 0): 0.001}                           # a 19 day hole around the trade
+_g, _w, _h, _fl = P.trade_full(_cs, _e0, "long", "T60", 0.0, _far); assert _fl == "funding not booked"
+_g, _w, _h, _fl = P.trade_full(_cs, _e0, "long", "T60", 0.0, {}); assert _fl == "funding not booked"      # no print at all
+print("EXTRACT FUNDING OK")

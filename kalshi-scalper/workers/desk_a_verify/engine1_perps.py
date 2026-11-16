@@ -1,5 +1,5 @@
 """ENGINE1 perps block (Desk A, Nov 16 2026), built to ENGINE1_PERPS_HAND_CASE_NOV16.md. Pure functions on one ticker's candles [(end, bid, ask, last, vol, oi)]. Fee 12 bps a leg ASSUMED. Upper bound, not fill-checked, funding not booked."""
-import math, time, collections, calendar
+import bisect, math, time, collections, calendar
 FEE = 0.0012; FEE_MAKER = 0.0005; HAIRCUTS = (0.0002, 0.0005); STRESS = (0.001, 0.002); COOLDOWN = 1800      # fees per side, ASSUMED; haircuts relative to price (0.1% and 0.2%)
 MOMS = (1, 3, 5, 15); TODS = ("pre", "open", "mid", "close", "post")
 FILTERS = (None,) + tuple(("mom%d" % k, c) for k in MOMS for c in ("up", "down")) + tuple(("spread", c) for c in ("low", "mid", "high")) + tuple(("tod", c) for c in TODS) + (("orb", "up"), ("orb", "down"), ("sess", "high"), ("sess", "low"))
@@ -63,6 +63,16 @@ def funding_times(e, tx):
         if t > e: out.append(t)
         d = next_et_day0(d)
     return out
+GAP = 26 * 3600
+_PC = {}
+def _prints(f):
+    """-> (sorted print times, gaps with no print). A gap is two neighbouring prints more than 26 h apart, everything before the first print and after the last print plus 26 h (and everything, for a ticker with no print)."""
+    k = id(f)
+    if k not in _PC or _PC[k][0] is not f:
+        ps = sorted(f); big = 10 ** 12
+        gaps = [(big * -1, big)] if not ps else [(-big, ps[0] - GAP)] + [(a, b) for a, b in zip(ps, ps[1:]) if b - a > GAP] + [(ps[-1] + GAP, big)]
+        _PC[k] = (f, ps, gaps)
+    return _PC[k][1], _PC[k][2]
 def hold_of(e, exit_):
     t = exit_time(e, exit_); return COOLDOWN if t is None else max(COOLDOWN, t - e)
 def trade_full(by, e, side, exit_, h, funding=None):
@@ -87,9 +97,13 @@ def trade_full(by, e, side, exit_, h, funding=None):
         ex, why, hold = leave(x), "time", tx - e
     gross = (ex / fill - 1) if long_ else (fill - ex) / fill
     flag = None
-    for t in funding_times(e, e + hold):                 # a positive rate: longs pay shorts; the rate is a fraction of notional
-        if funding is not None and t in funding: gross -= funding[t] if long_ else -funding[t]
-        else: flag = "funding not booked"
+    if funding is None:                                  # no extract given (hand cases): the 16:00 ET schedule, every crossing labelled unbooked
+        if funding_times(e, e + hold): flag = "funding not booked"
+    else:                                                # (Auditor B, Nov 16) book from the extract's OWN print timestamps, no schedule constant
+        ps, gaps = _prints(funding); tx2 = e + hold
+        for t in ps[bisect.bisect_right(ps, e):bisect.bisect_left(ps, tx2)]:      # entry end < print < exit end; an exit AT the print pays nothing
+            gross -= funding[t] if long_ else -funding[t]     # a positive rate: longs pay shorts; the rate is a fraction of notional
+        if any(e < b and tx2 > a for a, b in gaps): flag = "funding not booked"   # the position overlaps a stretch with no print in the extract
     return gross, why, hold, flag
 def trade(by, e, side, exit_, h):
     """-> (net return at the taker fee, reason) or (None, reason); kept for the hand case."""
@@ -151,7 +165,7 @@ def run_all(perps, funding=None, m_prior=0, last_search=None):
                 for x in EXITS:
                     m += 1
                     r1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, hi=first_val, boundary=first_val, funding=fund); r2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, hi=first_val, boundary=first_val, funding=fund)
-                    rep["funding_unbooked_trades"] += stats(r1, FEE)["funding_unbooked"]
+                    rep["funding_unbooked_trades"] += stats(r1, FEE)["funding_unbooked"]; bt["funding_unbooked_trades"] = bt.get("funding_unbooked_trades", 0) + stats(r1, FEE)["funding_unbooked"]
                     a_t, b_t = stats(r1, FEE), stats(r2, FEE); a_m, b_m = stats(r1, FEE_MAKER), stats(r2, FEE_MAKER)
                     bt["search_days_max"] = max(bt["search_days_max"], days(r1))
                     if a_t["n"] >= MIN_N: bt["cells_n100"] += 1
