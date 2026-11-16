@@ -1,0 +1,638 @@
+{
+ "list": "SHADOW_LIST_V2",
+ "date": "2026-11-16",
+ "start_utc": "2026-11-17T00:00:00Z",
+ "n": 12,
+ "source": "ENGB4XBTC validate-bar list (33 passes; BH survivors 0)",
+ "excluded_dogecoin_7e": 6,
+ "dropped_by_3_a_day_gate": 0,
+ "clusters": 23,
+ "spec_sha256_covers": "the spec object only",
+ "no_money_no_orders": true,
+ "specs": [
+  {
+   "spec": {
+    "id": "SH2_01_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 3,
+     "side_rule": "cheap",
+     "filter": "btcmom3:down"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "c8f909244e12b34cefd8e36c32a8c55854e829acae12b00b0ce50ebd2d2be373",
+   "rank": 1,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
+   "cluster": 1,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 129,
+    "signals_per_day": 4.45,
+    "pf_1c": 1.659,
+    "pf_2c": 1.508,
+    "edge_1c_cents_per_contract": 7.978,
+    "dollars_week_5c_1c": 12.42,
+    "dollars_week_5c_2c": 10.19,
+    "p_day_clustered": 0.012818325852700777,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_02_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 16,
+     "side_rule": "yes",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "bafdd070b77f3445d20bd0981e29093c3fb9da58ca55dd4ad2fc289d6dec3bb1",
+   "rank": 2,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "Bitcoin 3-minute move filter, middle (35c to 85c)",
+   "cluster": 2,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 162,
+    "signals_per_day": 5.588,
+    "pf_1c": 1.723,
+    "pf_2c": 1.601,
+    "edge_1c_cents_per_contract": 5.983,
+    "dollars_week_5c_1c": 11.7,
+    "dollars_week_5c_2c": 9.84,
+    "p_day_clustered": 0.009082569996372802,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_03_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 16,
+     "side_rule": "yes",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "37396509c50479532f10bd82bbaf1cd919f077454ac94bc41a92991a45bd4dc9",
+   "rank": 3,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "Bitcoin 3-minute move filter, middle (35c to 85c)",
+   "cluster": 3,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 162,
+    "signals_per_day": 5.588,
+    "pf_1c": 1.693,
+    "pf_2c": 1.471,
+    "edge_1c_cents_per_contract": 5.377,
+    "dollars_week_5c_1c": 10.52,
+    "dollars_week_5c_2c": 7.23,
+    "p_day_clustered": 0.008197289180787225,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_04_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 660,
+     "price_band_5c": 6,
+     "side_rule": "yes",
+     "filter": "btcmom3:down"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "eebc73247003b8c31d65946c6564928b526c04757f7d998bdd6272f37199a20f",
+   "rank": 4,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
+   "cluster": 4,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 122,
+    "signals_per_day": 4.208,
+    "pf_1c": 1.346,
+    "pf_2c": 1.246,
+    "edge_1c_cents_per_contract": 6.237,
+    "dollars_week_5c_1c": 9.19,
+    "dollars_week_5c_2c": 6.8,
+    "p_day_clustered": 0.05606940080871442,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_05_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "a3390cf7a34000577be530e437e1c610701c3765b8d1651bd4e7860f9ae18ff6",
+   "rank": 5,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
+   "cluster": 6,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 124,
+    "signals_per_day": 4.277,
+    "pf_1c": 1.96,
+    "pf_2c": 1.618,
+    "edge_1c_cents_per_contract": 5.399,
+    "dollars_week_5c_1c": 8.08,
+    "dollars_week_5c_2c": 6.1,
+    "p_day_clustered": 0.043007567151695354,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_06_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "0087d3d505efedd0f31d6763c82c42b1398ba671df5901e2461a7d7ea8bc990e",
+   "rank": 6,
+   "admission": "owner_popup",
+   "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 7,
+   "cluster_size": 3,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 182,
+    "signals_per_day": 6.278,
+    "pf_1c": 2.084,
+    "pf_2c": 1.769,
+    "edge_1c_cents_per_contract": 3.333,
+    "dollars_week_5c_1c": 7.32,
+    "dollars_week_5c_2c": 5.25,
+    "p_day_clustered": 0.007343055566873842,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_07_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 480,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "btcmom3:down"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "39047dc2743f68dfbb35987f00d683c0de94b05a029c1d2258f56cb55f810e09",
+   "rank": 7,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "Bitcoin 3-minute move filter, cheap tail (5c to 35c)",
+   "cluster": 8,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 114,
+    "signals_per_day": 3.932,
+    "pf_1c": 1.865,
+    "pf_2c": 1.567,
+    "edge_1c_cents_per_contract": 5.225,
+    "dollars_week_5c_1c": 7.19,
+    "dollars_week_5c_2c": 5.44,
+    "p_day_clustered": 0.016153933492208596,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_08_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "yes",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "a9619bc48ddd2c4c31fd1ce274271b035f667d0d20cb9075382a866c039abc33",
+   "rank": 8,
+   "admission": "owner_popup",
+   "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 10,
+   "cluster_size": 2,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 152,
+    "signals_per_day": 5.243,
+    "pf_1c": 2.085,
+    "pf_2c": 1.77,
+    "edge_1c_cents_per_contract": 3.339,
+    "dollars_week_5c_1c": 6.13,
+    "dollars_week_5c_2c": 4.39,
+    "p_day_clustered": 0.006147604405725384,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_09_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 17,
+     "side_rule": "yes",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "393493a461d85a17bf87a5a366f5af9dac16aff05848f687b30b5e8024821575",
+   "rank": 9,
+   "admission": "owner_popup",
+   "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 12,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 131,
+    "signals_per_day": 4.519,
+    "pf_1c": 1.502,
+    "pf_2c": 1.359,
+    "edge_1c_cents_per_contract": 3.39,
+    "dollars_week_5c_1c": 5.36,
+    "dollars_week_5c_2c": 3.88,
+    "p_day_clustered": 0.09637167312963445,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_10_SOL",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXSOL15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "S",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "b5f9e7cf41bace4b79178ddaa3aa86f3663b5c381b2a03d1a2bc6e0b91ae7ac9",
+   "rank": 10,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "Bitcoin 3-minute move filter, middle (35c to 85c)",
+   "cluster": 13,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 105,
+    "signals_per_day": 4.691,
+    "pf_1c": 1.31,
+    "pf_2c": 1.191,
+    "edge_1c_cents_per_contract": 3.122,
+    "dollars_week_5c_1c": 5.13,
+    "dollars_week_5c_2c": 3.27,
+    "p_day_clustered": 0.14833095172000987,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_11_BNB",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBNB15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "S",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "fe7f9441f39ca1e7e6dfdbb15f8b94bd88ff342c97d7122091df2df2e7163837",
+   "rank": 11,
+   "admission": "owner_popup",
+   "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 14,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 219,
+    "signals_per_day": 7.554,
+    "pf_1c": 1.406,
+    "pf_2c": 1.174,
+    "edge_1c_cents_per_contract": 1.8,
+    "dollars_week_5c_1c": 4.76,
+    "dollars_week_5c_2c": 2.09,
+    "p_day_clustered": 0.06702976355149566,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH2_12_NEAR",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXNEAR15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "yes",
+     "filter": "btcmom3:up"
+    },
+    "cross_series_feature": {
+     "name": "btcmom3",
+     "series": "KXBTC15M",
+     "definition": "mid (bid+ask)/2 of the Bitcoin market at the same close at end_period 0 s minus the one 180 s earlier; class up, down or flat",
+     "needs_bitcoin_candles_at_same_close": true
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T00:00:00Z"
+   },
+   "spec_sha256": "9e06178e41dd63f6dcc1147a810a048502e12909f8f33e0b6b9c29db849144a9",
+   "rank": 12,
+   "admission": "owner_popup",
+   "admission_note": "favourite-late shape (band 17+, 10 minutes or less left): same mechanism as gold L1, needs the owner's popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 15,
+   "cluster_size": 1,
+   "heldout_verdict": null,
+   "paper_research": {
+    "validate_n": 148,
+    "signals_per_day": 5.105,
+    "pf_1c": 1.637,
+    "pf_2c": 1.382,
+    "edge_1c_cents_per_contract": 2.399,
+    "dollars_week_5c_1c": 4.29,
+    "dollars_week_5c_2c": 2.6,
+    "p_day_clustered": 0.054858188323630354,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  }
+ ]
+}
