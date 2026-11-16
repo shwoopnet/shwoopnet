@@ -1,0 +1,7 @@
+S3 feasibility count, counts only (no result read)
+2026-11-13: snapshots 45 | rows 18000 | two-sided rows 455 | qualifying rows (S3 rule) 6 | would-be fills 6 (two-sided on both sides: 1) | full day
+2026-11-14: snapshots 48 | rows 19200 | two-sided rows 30 | qualifying rows (S3 rule) 1 | would-be fills 1 (two-sided on both sides: 0) | full day
+2026-11-15: snapshots 48 | rows 19200 | two-sided rows 78 | qualifying rows (S3 rule) 10 | would-be fills 10 (two-sided on both sides: 3) | full day
+2026-11-16: snapshots 1 | rows 400 | two-sided rows 0 | qualifying rows (S3 rule) 1 | would-be fills 1 (two-sided on both sides: 0)
+ignored before 2026-11-13T00:00Z: 2 snapshots, 800 rows
+verdict: continue to the registered read (average 5.7 would-be fills a full day over 3 full days, threshold 5.0)
