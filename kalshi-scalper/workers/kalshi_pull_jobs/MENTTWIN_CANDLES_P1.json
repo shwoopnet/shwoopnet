@@ -1,0 +1,4638 @@
+{
+ "job_id": "MENTTWIN_CANDLES_P1",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/menttwin/MENTTWIN_CARD.md",
+ "purpose": "MENTTWIN quick first read (Idea Desk C, engine spec): 1 minute candles of twin Trump mention words at D = later open + 30 min, development only, part 1 of 2.",
+ "heldout": "none read: development events only (own occurrence 2026-04-17 to before 2026-08-06). Never requested: TRUMPTOPIC1's spent held-out (2026-08-06 to before 2026-10-03), the MENTTWIN held-out (2026-10-03 to before 2026-11-05, read once on the Head of R&D's go) and TRUMPTOPIC1's forward window (from 2026-11-05).",
+ "allowed_endpoints": [
+  {
+   "name": "hist_market_candlesticks",
+   "method": "GET",
+   "path_pattern": "/historical/markets/(?P<ticker>[A-Z0-9][A-Z0-9._-]{0,63})/candlesticks",
+   "params_allowed": [
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXTRUMPMENTION",
+  "KXTRUMPMENTIONB"
+ ],
+ "ticker_allowlist": [
+  "KXTRUMPMENTION-26APR21-BIDE",
+  "KXTRUMPMENTION-26APR21-BLOC",
+  "KXTRUMPMENTION-26APR21-CEAS",
+  "KXTRUMPMENTION-26APR21-CRYP",
+  "KXTRUMPMENTION-26APR21-DEMO",
+  "KXTRUMPMENTION-26APR21-HOTT",
+  "KXTRUMPMENTION-26APR21-ISRA",
+  "KXTRUMPMENTION-26APR21-OIL",
+  "KXTRUMPMENTION-26APR21-PEAC",
+  "KXTRUMPMENTION-26APR21-STOC",
+  "KXTRUMPMENTION-26APR28-250",
+  "KXTRUMPMENTION-26APR28-BALL",
+  "KXTRUMPMENTION-26APR28-CHUR",
+  "KXTRUMPMENTION-26APR28-CRYP",
+  "KXTRUMPMENTION-26APR28-HOTT",
+  "KXTRUMPMENTION-26APR28-IRAN",
+  "KXTRUMPMENTION-26APR28-KEIR",
+  "KXTRUMPMENTION-26APR28-NATO",
+  "KXTRUMPMENTION-26APR28-OIL",
+  "KXTRUMPMENTION-26APR28-PALA",
+  "KXTRUMPMENTION-26APR28-PEAC",
+  "KXTRUMPMENTION-26APR28-TARI",
+  "KXTRUMPMENTION-26APR28-UKRA",
+  "KXTRUMPMENTION-26JUL08-AI",
+  "KXTRUMPMENTION-26JUL08-BARA",
+  "KXTRUMPMENTION-26JUL08-BIDE",
+  "KXTRUMPMENTION-26JUL08-CEAS",
+  "KXTRUMPMENTION-26JUL08-CHIN",
+  "KXTRUMPMENTION-26JUL08-CRYP",
+  "KXTRUMPMENTION-26JUL08-DRON",
+  "KXTRUMPMENTION-26JUL08-ELEC",
+  "KXTRUMPMENTION-26JUL08-HORM",
+  "KXTRUMPMENTION-26JUL08-HOTT",
+  "KXTRUMPMENTION-26JUL08-ISRA",
+  "KXTRUMPMENTION-26JUL08-NEGO",
+  "KXTRUMPMENTION-26JUL08-PUTI",
+  "KXTRUMPMENTION-26JUL08-SPAI",
+  "KXTRUMPMENTION-26JUL08-STOC",
+  "KXTRUMPMENTION-26JUL08-TARI",
+  "KXTRUMPMENTION-26JUL08-TRAN",
+  "KXTRUMPMENTION-26JUL08-WORL",
+  "KXTRUMPMENTION-26JUL14-AFFO",
+  "KXTRUMPMENTION-26JUL14-BIDE",
+  "KXTRUMPMENTION-26JUL14-UKRA",
+  "KXTRUMPMENTION-26JUL23-BIDE",
+  "KXTRUMPMENTION-26JUL23-ELEC",
+  "KXTRUMPMENTION-26JUL23-STOC",
+  "KXTRUMPMENTION-26JUL24-AFFO",
+  "KXTRUMPMENTION-26JUL24-BARA",
+  "KXTRUMPMENTION-26JUL24-CRYP",
+  "KXTRUMPMENTION-26JUL24-DEMO",
+  "KXTRUMPMENTION-26JUL24-DUMB",
+  "KXTRUMPMENTION-26JUL24-FAKE",
+  "KXTRUMPMENTION-26JUL24-HOAX",
+  "KXTRUMPMENTION-26JUL24-HORM",
+  "KXTRUMPMENTION-26JUL24-HOTT",
+  "KXTRUMPMENTION-26JUL24-IRAN",
+  "KXTRUMPMENTION-26JUL24-ISRA",
+  "KXTRUMPMENTION-26JUL24-OIL",
+  "KXTRUMPMENTION-26JUL24-RADI",
+  "KXTRUMPMENTION-26JUL24-STOC",
+  "KXTRUMPMENTION-26JUL24-SUPR",
+  "KXTRUMPMENTION-26JUL24-TRAN",
+  "KXTRUMPMENTION-26JUL24-VENE",
+  "KXTRUMPMENTION-26JUL28D-DEMO",
+  "KXTRUMPMENTION-26JUL28D-OIL",
+  "KXTRUMPMENTION-26JUN11-250",
+  "KXTRUMPMENTION-26JUN11-AFFO",
+  "KXTRUMPMENTION-26JUN11-AI",
+  "KXTRUMPMENTION-26JUN11-AMER",
+  "KXTRUMPMENTION-26JUN11-BIDE",
+  "KXTRUMPMENTION-26JUN11-CEAS",
+  "KXTRUMPMENTION-26JUN11-CHEA",
+  "KXTRUMPMENTION-26JUN11-CRYP",
+  "KXTRUMPMENTION-26JUN11-DEMO",
+  "KXTRUMPMENTION-26JUN11-FAKE",
+  "KXTRUMPMENTION-26JUN11-FRAU",
+  "KXTRUMPMENTION-26JUN11-HOTT",
+  "KXTRUMPMENTION-26JUN11-ILLE",
+  "KXTRUMPMENTION-26JUN11-IRAN",
+  "KXTRUMPMENTION-26JUN11-KNIC",
+  "KXTRUMPMENTION-26JUN11-LAND",
+  "KXTRUMPMENTION-26JUN11-MAGA",
+  "KXTRUMPMENTION-26JUN11-OIL",
+  "KXTRUMPMENTION-26JUN11-SAVE",
+  "KXTRUMPMENTION-26JUN11-STOC",
+  "KXTRUMPMENTION-26JUN11-TRAN",
+  "KXTRUMPMENTION-26JUN16-250",
+  "KXTRUMPMENTION-26JUN16-AI",
+  "KXTRUMPMENTION-26JUN16-BIBI",
+  "KXTRUMPMENTION-26JUN16-BIDE",
+  "KXTRUMPMENTION-26JUN16-CRYP",
+  "KXTRUMPMENTION-26JUN16-DEAL",
+  "KXTRUMPMENTION-26JUN16-DEMO",
+  "KXTRUMPMENTION-26JUN16-ELEC",
+  "KXTRUMPMENTION-26JUN16-FAKE",
+  "KXTRUMPMENTION-26JUN16-FIRS",
+  "KXTRUMPMENTION-26JUN16-HORM",
+  "KXTRUMPMENTION-26JUN16-HOTT",
+  "KXTRUMPMENTION-26JUN16-IRAN",
+  "KXTRUMPMENTION-26JUN16-ISRA",
+  "KXTRUMPMENTION-26JUN16-NATO",
+  "KXTRUMPMENTION-26JUN16-NEGO",
+  "KXTRUMPMENTION-26JUN16-OIL",
+  "KXTRUMPMENTION-26JUN16-PUTI",
+  "KXTRUMPMENTION-26JUN16-RARE",
+  "KXTRUMPMENTION-26JUN16-RUSS",
+  "KXTRUMPMENTION-26JUN16-STOC",
+  "KXTRUMPMENTION-26JUN16-TARI",
+  "KXTRUMPMENTION-26JUN16-UKRA",
+  "KXTRUMPMENTION-26JUN16-WORL",
+  "KXTRUMPMENTION-26JUN17-250",
+  "KXTRUMPMENTION-26JUN17-BIBI",
+  "KXTRUMPMENTION-26JUN17-BIDE",
+  "KXTRUMPMENTION-26JUN17-CRYP",
+  "KXTRUMPMENTION-26JUN17-DUMB",
+  "KXTRUMPMENTION-26JUN17-FIRS",
+  "KXTRUMPMENTION-26JUN17-HORM",
+  "KXTRUMPMENTION-26JUN17-HOTT",
+  "KXTRUMPMENTION-26JUN17-IRAN",
+  "KXTRUMPMENTION-26JUN17-ISRA",
+  "KXTRUMPMENTION-26JUN17-NEGO",
+  "KXTRUMPMENTION-26JUN17-NUCL",
+  "KXTRUMPMENTION-26JUN17-OIL",
+  "KXTRUMPMENTION-26JUN17-PEAC",
+  "KXTRUMPMENTION-26JUN17-STOC",
+  "KXTRUMPMENTION-26JUN17-TRIL",
+  "KXTRUMPMENTION-26JUN17-WORL",
+  "KXTRUMPMENTION-26JUN17C-250",
+  "KXTRUMPMENTION-26JUN17C-AI",
+  "KXTRUMPMENTION-26JUN17C-BARA",
+  "KXTRUMPMENTION-26JUN17C-BIDE",
+  "KXTRUMPMENTION-26JUN17C-CHIN",
+  "KXTRUMPMENTION-26JUN17C-CRYP",
+  "KXTRUMPMENTION-26JUN17C-DUMB",
+  "KXTRUMPMENTION-26JUN17C-FAKE",
+  "KXTRUMPMENTION-26JUN17C-HORM",
+  "KXTRUMPMENTION-26JUN17C-HOTT",
+  "KXTRUMPMENTION-26JUN17C-INVE",
+  "KXTRUMPMENTION-26JUN17C-IRAN",
+  "KXTRUMPMENTION-26JUN17C-ISRA",
+  "KXTRUMPMENTION-26JUN17C-NEGO",
+  "KXTRUMPMENTION-26JUN17C-NUCL",
+  "KXTRUMPMENTION-26JUN17C-OIL",
+  "KXTRUMPMENTION-26JUN17C-STOC",
+  "KXTRUMPMENTION-26JUN17C-TARI",
+  "KXTRUMPMENTION-26JUN17C-TRIL",
+  "KXTRUMPMENTION-26JUN17C-UKRA",
+  "KXTRUMPMENTION-26JUN17D-AI",
+  "KXTRUMPMENTION-26JUN17D-CHIN",
+  "KXTRUMPMENTION-26JUN17D-DRON",
+  "KXTRUMPMENTION-26JUN17D-FAKE",
+  "KXTRUMPMENTION-26JUN17D-TARI",
+  "KXTRUMPMENTION-26JUN17D-WORL",
+  "KXTRUMPMENTION-26JUN24-AI",
+  "KXTRUMPMENTION-26JUN24-AMERD",
+  "KXTRUMPMENTION-26JUN24-BALL",
+  "KXTRUMPMENTION-26JUN24-CRYP",
+  "KXTRUMPMENTION-26JUN24-DUMB",
+  "KXTRUMPMENTION-26JUN24-FAKE",
+  "KXTRUMPMENTION-26JUN24-FIRS",
+  "KXTRUMPMENTION-26JUN24-HOTT",
+  "KXTRUMPMENTION-26JUN24-REFL",
+  "KXTRUMPMENTION-26JUN24-SAVE",
+  "KXTRUMPMENTION-26JUN24-STOC",
+  "KXTRUMPMENTION-26JUN24-TRAN",
+  "KXTRUMPMENTION-26JUN24-WORL",
+  "KXTRUMPMENTION-26JUN25-250",
+  "KXTRUMPMENTION-26JUN25-BARA",
+  "KXTRUMPMENTION-26JUN25-BIDE",
+  "KXTRUMPMENTION-26JUN25-CRYP",
+  "KXTRUMPMENTION-26JUN25-HOTT",
+  "KXTRUMPMENTION-26JUN25-OIL",
+  "KXTRUMPMENTION-26JUN25-STOC",
+  "KXTRUMPMENTION-26JUN25-TRAN",
+  "KXTRUMPMENTION-26MAY01-LAND",
+  "KXTRUMPMENTION-26MAY01C-AI",
+  "KXTRUMPMENTION-26MAY01C-AMER",
+  "KXTRUMPMENTION-26MAY01C-BALL",
+  "KXTRUMPMENTION-26MAY01C-BIDE",
+  "KXTRUMPMENTION-26MAY01C-CRYP",
+  "KXTRUMPMENTION-26MAY01C-DEMO",
+  "KXTRUMPMENTION-26MAY01C-DESA",
+  "KXTRUMPMENTION-26MAY01C-FRAU",
+  "KXTRUMPMENTION-26MAY01C-GOLF",
+  "KXTRUMPMENTION-26MAY01C-GULF",
+  "KXTRUMPMENTION-26MAY01C-HEAL",
+  "KXTRUMPMENTION-26MAY01C-HOTT",
+  "KXTRUMPMENTION-26MAY01C-TARI",
+  "KXTRUMPMENTION-26MAY11-BIDE",
+  "KXTRUMPMENTION-26MAY11-CRYP",
+  "KXTRUMPMENTION-26MAY11-DEMO",
+  "KXTRUMPMENTION-26MAY11-ELEC",
+  "KXTRUMPMENTION-26MAY11-HOTT",
+  "KXTRUMPMENTION-26MAY11-IRAN",
+  "KXTRUMPMENTION-26MAY11-STOC",
+  "KXTRUMPMENTION-26MAY11-SUPR",
+  "KXTRUMPMENTION-26MAY11-TRAN",
+  "KXTRUMPMENTION-26MAY14-AI",
+  "KXTRUMPMENTION-26MAY14-BIDE",
+  "KXTRUMPMENTION-26MAY14-CEAS",
+  "KXTRUMPMENTION-26MAY14-CRYP",
+  "KXTRUMPMENTION-26MAY14-FENT",
+  "KXTRUMPMENTION-26MAY14-HOTT",
+  "KXTRUMPMENTION-26MAY14-INVE",
+  "KXTRUMPMENTION-26MAY14-IRAN",
+  "KXTRUMPMENTION-26MAY14-MANU",
+  "KXTRUMPMENTION-26MAY14-NUCL",
+  "KXTRUMPMENTION-26MAY14-OIL",
+  "KXTRUMPMENTION-26MAY14-RARE",
+  "KXTRUMPMENTION-26MAY14-SOYB",
+  "KXTRUMPMENTION-26MAY14-STOC",
+  "KXTRUMPMENTION-26MAY14-TAIW",
+  "KXTRUMPMENTION-26MAY14-TARI",
+  "KXTRUMPMENTION-26MAY14-TRIL",
+  "KXTRUMPMENTION-26MAY14C-BIDE",
+  "KXTRUMPMENTION-26MAY14C-BOEI",
+  "KXTRUMPMENTION-26MAY14C-CEAS",
+  "KXTRUMPMENTION-26MAY14C-INVE",
+  "KXTRUMPMENTION-26MAY14C-RARE",
+  "KXTRUMPMENTION-26MAY14C-TRIL",
+  "KXTRUMPMENTION-26MAY18-AI",
+  "KXTRUMPMENTION-26MAY18-BIDE",
+  "KXTRUMPMENTION-26MAY18-CRYP",
+  "KXTRUMPMENTION-26MAY18-DEMO",
+  "KXTRUMPMENTION-26MAY18-HOTT",
+  "KXTRUMPMENTION-26MAY18-IRAN",
+  "KXTRUMPMENTION-26MAY18-STOC",
+  "KXTRUMPMENTION-26MAY22-AFFO",
+  "KXTRUMPMENTION-26MAY22-AMER",
+  "KXTRUMPMENTION-26MAY22-BARA",
+  "KXTRUMPMENTION-26MAY22-BIDE",
+  "KXTRUMPMENTION-26MAY22-CEAS",
+  "KXTRUMPMENTION-26MAY22-CHIN",
+  "KXTRUMPMENTION-26MAY22-CRYP",
+  "KXTRUMPMENTION-26MAY22-DEMO",
+  "KXTRUMPMENTION-26MAY22-ELEC",
+  "KXTRUMPMENTION-26MAY22-FIRS",
+  "KXTRUMPMENTION-26MAY22-HOTT",
+  "KXTRUMPMENTION-26MAY22-ISRA",
+  "KXTRUMPMENTION-26MAY22-NUCL",
+  "KXTRUMPMENTION-26MAY22-STOC",
+  "KXTRUMPMENTION-26MAY22-TARI",
+  "KXTRUMPMENTION-26MAY22-TRAN",
+  "KXTRUMPMENTION-26MAY22-TRIL",
+  "KXTRUMPMENTIONB-26APR21-BIDE",
+  "KXTRUMPMENTIONB-26APR21-BLOC",
+  "KXTRUMPMENTIONB-26APR21-CEAS",
+  "KXTRUMPMENTIONB-26APR21-CRYP",
+  "KXTRUMPMENTIONB-26APR21-DEMO",
+  "KXTRUMPMENTIONB-26APR21-HOTT",
+  "KXTRUMPMENTIONB-26APR21-ISRA",
+  "KXTRUMPMENTIONB-26APR21-OIL",
+  "KXTRUMPMENTIONB-26APR21-PEAC",
+  "KXTRUMPMENTIONB-26APR21-STOC",
+  "KXTRUMPMENTIONB-26APR28-250",
+  "KXTRUMPMENTIONB-26APR28-BALL",
+  "KXTRUMPMENTIONB-26APR28-CHUR",
+  "KXTRUMPMENTIONB-26APR28-CRYP",
+  "KXTRUMPMENTIONB-26APR28-HOTT",
+  "KXTRUMPMENTIONB-26APR28-IRAN",
+  "KXTRUMPMENTIONB-26APR28-KEIR",
+  "KXTRUMPMENTIONB-26APR28-NATO",
+  "KXTRUMPMENTIONB-26APR28-OIL",
+  "KXTRUMPMENTIONB-26APR28-PALA",
+  "KXTRUMPMENTIONB-26APR28-PEAC",
+  "KXTRUMPMENTIONB-26APR28-TARI",
+  "KXTRUMPMENTIONB-26APR28-UKRA",
+  "KXTRUMPMENTIONB-26JUL08-AI",
+  "KXTRUMPMENTIONB-26JUL08-BARA",
+  "KXTRUMPMENTIONB-26JUL08-BIDE",
+  "KXTRUMPMENTIONB-26JUL08-CEAS",
+  "KXTRUMPMENTIONB-26JUL08-CHIN",
+  "KXTRUMPMENTIONB-26JUL08-CRYP",
+  "KXTRUMPMENTIONB-26JUL08-DRON",
+  "KXTRUMPMENTIONB-26JUL08-ELEC",
+  "KXTRUMPMENTIONB-26JUL08-HORM",
+  "KXTRUMPMENTIONB-26JUL08-HOTT",
+  "KXTRUMPMENTIONB-26JUL08-ISRA",
+  "KXTRUMPMENTIONB-26JUL08-NEGO",
+  "KXTRUMPMENTIONB-26JUL08-PUTI",
+  "KXTRUMPMENTIONB-26JUL08-SPAI",
+  "KXTRUMPMENTIONB-26JUL08-STOC",
+  "KXTRUMPMENTIONB-26JUL08-TARI",
+  "KXTRUMPMENTIONB-26JUL08-TRAN",
+  "KXTRUMPMENTIONB-26JUL08-WORL",
+  "KXTRUMPMENTIONB-26JUL14-AFFO",
+  "KXTRUMPMENTIONB-26JUL14-BIDE",
+  "KXTRUMPMENTIONB-26JUL14-UKRA",
+  "KXTRUMPMENTIONB-26JUL23-BIDE",
+  "KXTRUMPMENTIONB-26JUL23-ELEC",
+  "KXTRUMPMENTIONB-26JUL23-STOC",
+  "KXTRUMPMENTIONB-26JUL24-AFFO",
+  "KXTRUMPMENTIONB-26JUL24-BARA",
+  "KXTRUMPMENTIONB-26JUL24-CRYP",
+  "KXTRUMPMENTIONB-26JUL24-DEMO",
+  "KXTRUMPMENTIONB-26JUL24-DUMB",
+  "KXTRUMPMENTIONB-26JUL24-FAKE",
+  "KXTRUMPMENTIONB-26JUL24-HOAX",
+  "KXTRUMPMENTIONB-26JUL24-HORM",
+  "KXTRUMPMENTIONB-26JUL24-HOTT",
+  "KXTRUMPMENTIONB-26JUL24-IRAN",
+  "KXTRUMPMENTIONB-26JUL24-ISRA",
+  "KXTRUMPMENTIONB-26JUL24-OIL",
+  "KXTRUMPMENTIONB-26JUL24-RADI",
+  "KXTRUMPMENTIONB-26JUL24-STOC",
+  "KXTRUMPMENTIONB-26JUL24-SUPR",
+  "KXTRUMPMENTIONB-26JUL24-TRAN",
+  "KXTRUMPMENTIONB-26JUL24-VENE",
+  "KXTRUMPMENTIONB-26JUL28-AFFO",
+  "KXTRUMPMENTIONB-26JUL28-AI",
+  "KXTRUMPMENTIONB-26JUL28-AMER",
+  "KXTRUMPMENTIONB-26JUL28-BARA",
+  "KXTRUMPMENTIONB-26JUL28-BIDE",
+  "KXTRUMPMENTIONB-26JUL28-CEAS",
+  "KXTRUMPMENTIONB-26JUL28-CHIN",
+  "KXTRUMPMENTIONB-26JUL28-COMM",
+  "KXTRUMPMENTIONB-26JUL28-CRYP",
+  "KXTRUMPMENTIONB-26JUL28-FAKE",
+  "KXTRUMPMENTIONB-26JUL28-HOTT",
+  "KXTRUMPMENTIONB-26JUL28-NATO",
+  "KXTRUMPMENTIONB-26JUL28-RADI",
+  "KXTRUMPMENTIONB-26JUL28-STOC",
+  "KXTRUMPMENTIONB-26JUL28-TARI",
+  "KXTRUMPMENTIONB-26JUL28-TRAN",
+  "KXTRUMPMENTIONB-26JUL28C-AFFO",
+  "KXTRUMPMENTIONB-26JUL28C-AI",
+  "KXTRUMPMENTIONB-26JUL28C-AMER",
+  "KXTRUMPMENTIONB-26JUL28C-BARA",
+  "KXTRUMPMENTIONB-26JUL28C-BIDE",
+  "KXTRUMPMENTIONB-26JUL28C-CEAS",
+  "KXTRUMPMENTIONB-26JUL28C-CHIN",
+  "KXTRUMPMENTIONB-26JUL28C-COMM",
+  "KXTRUMPMENTIONB-26JUL28C-CRYP",
+  "KXTRUMPMENTIONB-26JUL28C-DEMO",
+  "KXTRUMPMENTIONB-26JUL28C-FAKE",
+  "KXTRUMPMENTIONB-26JUL28C-HOTT",
+  "KXTRUMPMENTIONB-26JUL28C-NATO",
+  "KXTRUMPMENTIONB-26JUL28C-OIL",
+  "KXTRUMPMENTIONB-26JUL28C-RADI",
+  "KXTRUMPMENTIONB-26JUL28C-STOC",
+  "KXTRUMPMENTIONB-26JUL28C-TARI",
+  "KXTRUMPMENTIONB-26JUL28C-TRAN",
+  "KXTRUMPMENTIONB-26JUL29-AI",
+  "KXTRUMPMENTIONB-26JUL29-AMER",
+  "KXTRUMPMENTIONB-26JUL29-BIDE",
+  "KXTRUMPMENTIONB-26JUL29-COMM",
+  "KXTRUMPMENTIONB-26JUL29-CRYP",
+  "KXTRUMPMENTIONB-26JUL29-DEMO",
+  "KXTRUMPMENTIONB-26JUL29-DUMB",
+  "KXTRUMPMENTIONB-26JUL29-FAKE",
+  "KXTRUMPMENTIONB-26JUL29-HOTT",
+  "KXTRUMPMENTIONB-26JUL29-OIL",
+  "KXTRUMPMENTIONB-26JUL29-STOC",
+  "KXTRUMPMENTIONB-26JUL29-TARI",
+  "KXTRUMPMENTIONB-26JUL29-TRAN",
+  "KXTRUMPMENTIONB-26JUL29B-AI",
+  "KXTRUMPMENTIONB-26JUL29B-AMER",
+  "KXTRUMPMENTIONB-26JUL29B-BIDE",
+  "KXTRUMPMENTIONB-26JUL29B-COMM",
+  "KXTRUMPMENTIONB-26JUL29B-CRYP",
+  "KXTRUMPMENTIONB-26JUL29B-DEMO",
+  "KXTRUMPMENTIONB-26JUL29B-DUMB",
+  "KXTRUMPMENTIONB-26JUL29B-FAKE",
+  "KXTRUMPMENTIONB-26JUL29B-HOTT",
+  "KXTRUMPMENTIONB-26JUL29B-OIL",
+  "KXTRUMPMENTIONB-26JUL29B-STOC",
+  "KXTRUMPMENTIONB-26JUL29B-TARI",
+  "KXTRUMPMENTIONB-26JUL29B-TRAN",
+  "KXTRUMPMENTIONB-26JUN11-250",
+  "KXTRUMPMENTIONB-26JUN11-AFFO",
+  "KXTRUMPMENTIONB-26JUN11-AI",
+  "KXTRUMPMENTIONB-26JUN11-AMER",
+  "KXTRUMPMENTIONB-26JUN11-BIDE",
+  "KXTRUMPMENTIONB-26JUN11-CEAS",
+  "KXTRUMPMENTIONB-26JUN11-CHEA",
+  "KXTRUMPMENTIONB-26JUN11-CRYP",
+  "KXTRUMPMENTIONB-26JUN11-DEMO",
+  "KXTRUMPMENTIONB-26JUN11-FAKE",
+  "KXTRUMPMENTIONB-26JUN11-FRAU",
+  "KXTRUMPMENTIONB-26JUN11-HOTT",
+  "KXTRUMPMENTIONB-26JUN11-ILLE",
+  "KXTRUMPMENTIONB-26JUN11-IRAN",
+  "KXTRUMPMENTIONB-26JUN11-KNIC",
+  "KXTRUMPMENTIONB-26JUN11-LAND",
+  "KXTRUMPMENTIONB-26JUN11-MAGA",
+  "KXTRUMPMENTIONB-26JUN11-OIL",
+  "KXTRUMPMENTIONB-26JUN11-SAVE",
+  "KXTRUMPMENTIONB-26JUN11-STOC",
+  "KXTRUMPMENTIONB-26JUN11-TRAN",
+  "KXTRUMPMENTIONB-26JUN16-250",
+  "KXTRUMPMENTIONB-26JUN16-AI",
+  "KXTRUMPMENTIONB-26JUN16-BIBI",
+  "KXTRUMPMENTIONB-26JUN16-BIDE",
+  "KXTRUMPMENTIONB-26JUN16-CRYP",
+  "KXTRUMPMENTIONB-26JUN16-DEAL",
+  "KXTRUMPMENTIONB-26JUN16-DEMO",
+  "KXTRUMPMENTIONB-26JUN16-ELEC",
+  "KXTRUMPMENTIONB-26JUN16-FAKE",
+  "KXTRUMPMENTIONB-26JUN16-FIRS",
+  "KXTRUMPMENTIONB-26JUN16-HORM",
+  "KXTRUMPMENTIONB-26JUN16-HOTT",
+  "KXTRUMPMENTIONB-26JUN16-IRAN",
+  "KXTRUMPMENTIONB-26JUN16-ISRA",
+  "KXTRUMPMENTIONB-26JUN16-NATO",
+  "KXTRUMPMENTIONB-26JUN16-NEGO",
+  "KXTRUMPMENTIONB-26JUN16-OIL",
+  "KXTRUMPMENTIONB-26JUN16-PUTI",
+  "KXTRUMPMENTIONB-26JUN16-RARE",
+  "KXTRUMPMENTIONB-26JUN16-RUSS",
+  "KXTRUMPMENTIONB-26JUN16-STOC",
+  "KXTRUMPMENTIONB-26JUN16-TARI",
+  "KXTRUMPMENTIONB-26JUN16-UKRA",
+  "KXTRUMPMENTIONB-26JUN16-WORL",
+  "KXTRUMPMENTIONB-26JUN17-BARA",
+  "KXTRUMPMENTIONB-26JUN17-BIBI",
+  "KXTRUMPMENTIONB-26JUN17-DRON",
+  "KXTRUMPMENTIONB-26JUN17-FIRS",
+  "KXTRUMPMENTIONB-26JUN17-INVE",
+  "KXTRUMPMENTIONB-26JUN17-PEAC",
+  "KXTRUMPMENTIONB-26JUN17-UKRA",
+  "KXTRUMPMENTIONB-26JUN24-AI",
+  "KXTRUMPMENTIONB-26JUN24-AMER",
+  "KXTRUMPMENTIONB-26JUN24-BALL",
+  "KXTRUMPMENTIONB-26JUN24-BIDE",
+  "KXTRUMPMENTIONB-26JUN24-CRYP",
+  "KXTRUMPMENTIONB-26JUN24-DEMO",
+  "KXTRUMPMENTIONB-26JUN24-DUMB",
+  "KXTRUMPMENTIONB-26JUN24-FAKE",
+  "KXTRUMPMENTIONB-26JUN24-FIRS",
+  "KXTRUMPMENTIONB-26JUN24-HORM",
+  "KXTRUMPMENTIONB-26JUN24-HOTT",
+  "KXTRUMPMENTIONB-26JUN24-OIL",
+  "KXTRUMPMENTIONB-26JUN24-REFL",
+  "KXTRUMPMENTIONB-26JUN24-SAVE",
+  "KXTRUMPMENTIONB-26JUN24-STOC",
+  "KXTRUMPMENTIONB-26JUN24-TRAN",
+  "KXTRUMPMENTIONB-26JUN24-WORL",
+  "KXTRUMPMENTIONB-26JUN24C-BIDE",
+  "KXTRUMPMENTIONB-26JUN24C-DEMO",
+  "KXTRUMPMENTIONB-26JUN24C-HORM",
+  "KXTRUMPMENTIONB-26JUN24C-OIL",
+  "KXTRUMPMENTIONB-26JUN25-250",
+  "KXTRUMPMENTIONB-26JUN25-BARA",
+  "KXTRUMPMENTIONB-26JUN25-BIDE",
+  "KXTRUMPMENTIONB-26JUN25-CRYP",
+  "KXTRUMPMENTIONB-26JUN25-HOTT",
+  "KXTRUMPMENTIONB-26JUN25-OIL",
+  "KXTRUMPMENTIONB-26JUN25-STOC",
+  "KXTRUMPMENTIONB-26JUN25-TRAN",
+  "KXTRUMPMENTIONB-26MAY01-AI",
+  "KXTRUMPMENTIONB-26MAY01-AMER",
+  "KXTRUMPMENTIONB-26MAY01-BALL",
+  "KXTRUMPMENTIONB-26MAY01-BIDE",
+  "KXTRUMPMENTIONB-26MAY01-CRYP",
+  "KXTRUMPMENTIONB-26MAY01-DEMO",
+  "KXTRUMPMENTIONB-26MAY01-DESA",
+  "KXTRUMPMENTIONB-26MAY01-FRAU",
+  "KXTRUMPMENTIONB-26MAY01-GOLF",
+  "KXTRUMPMENTIONB-26MAY01-GULF"
+ ],
+ "max_requests": 460,
+ "notes": "Built by build_menttwin_candles.py from MENTDRIFT_LISTS_A (time fields and word titles only): 255 twin pairs, 510 requests in 2 files; each window ends at D.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-BLOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-BLOC/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-OIL/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-PEAC",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-PEAC/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR21-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR21-STOC/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-250",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-250/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-BALL",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-BALL/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-CHUR",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-CHUR/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-KEIR",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-KEIR/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-NATO",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-NATO/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-OIL/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-PALA",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-PALA/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-PEAC",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-PEAC/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-TARI/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26APR28-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26APR28-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-AI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-BARA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-BARA/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-CHIN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-CHIN/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-DRON",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-DRON/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-HORM",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-HORM/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-NEGO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-NEGO/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-PUTI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-PUTI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-SPAI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-SPAI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-STOC/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-TARI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL08-WORL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL08-WORL/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL14-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL14-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1784002320,
+    "end_ts": 1784002500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL14-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL14-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1784002320,
+    "end_ts": 1784002500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL14-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL14-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1784002320,
+    "end_ts": 1784002500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL23-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL23-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1784775180,
+    "end_ts": 1784775360,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL23-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL23-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1784775180,
+    "end_ts": 1784775360,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL23-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL23-STOC/candlesticks",
+   "params": {
+    "start_ts": 1784775180,
+    "end_ts": 1784775360,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-BARA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-BARA/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-HOAX",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-HOAX/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-HORM",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-HORM/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1784863620,
+    "end_ts": 1784863800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-OIL/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-RADI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-RADI/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-STOC/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-SUPR",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-SUPR/candlesticks",
+   "params": {
+    "start_ts": 1784900520,
+    "end_ts": 1784900700,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL24-VENE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL24-VENE/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL28D-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL28D-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1785253200,
+    "end_ts": 1785253380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUL28D-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUL28D-OIL/candlesticks",
+   "params": {
+    "start_ts": 1785253200,
+    "end_ts": 1785253380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-250",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-250/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-AI/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-AMER",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-AMER/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-CHEA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-CHEA/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-FRAU",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-FRAU/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-ILLE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-ILLE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-KNIC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-KNIC/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-LAND",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-LAND/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-MAGA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-MAGA/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-OIL/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-SAVE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-SAVE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-STOC/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN11-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN11-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-250",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-250/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-AI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-BIBI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-BIBI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-DEAL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-DEAL/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-FIRS",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-FIRS/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-HORM",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-HORM/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-NATO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-NATO/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-NEGO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-NEGO/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-OIL/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-PUTI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-PUTI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-RARE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-RARE/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-RUSS",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-RUSS/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-STOC/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-TARI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN16-WORL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN16-WORL/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-250",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-250/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-BIBI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-BIBI/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-FIRS",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-FIRS/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-HORM",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-HORM/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-NEGO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-NEGO/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-NUCL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-NUCL/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-OIL/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-PEAC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-PEAC/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-STOC/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-TRIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-TRIL/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17-WORL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17-WORL/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-250",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-250/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-AI/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-BARA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-BARA/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-CHIN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-CHIN/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-HORM",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-HORM/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-INVE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-INVE/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-NEGO",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-NEGO/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-NUCL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-NUCL/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-OIL/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-STOC/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-TARI/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-TRIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-TRIL/candlesticks",
+   "params": {
+    "start_ts": 1781638500,
+    "end_ts": 1781638680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17C-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17C-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17D-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17D-AI/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17D-CHIN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17D-CHIN/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17D-DRON",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17D-DRON/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17D-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17D-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17D-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17D-TARI/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN17D-WORL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN17D-WORL/candlesticks",
+   "params": {
+    "start_ts": 1781639400,
+    "end_ts": 1781639580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-AI/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-AMERD",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-AMERD/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-BALL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-BALL/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-FIRS",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-FIRS/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-REFL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-REFL/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-SAVE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-SAVE/candlesticks",
+   "params": {
+    "start_ts": 1782313020,
+    "end_ts": 1782313200,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-STOC/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN24-WORL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN24-WORL/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-250",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-250/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-BARA",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-BARA/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-OIL/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-STOC/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26JUN25-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26JUN25-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01-LAND",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01-LAND/candlesticks",
+   "params": {
+    "start_ts": 1777651920,
+    "end_ts": 1777652100,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-AI/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-AMER",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-AMER/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-BALL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-BALL/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-DESA",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-DESA/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-FRAU",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-FRAU/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-GOLF",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-GOLF/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-GULF",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-GULF/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-HEAL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-HEAL/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY01C-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY01C-TARI/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-STOC/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-SUPR",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-SUPR/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY11-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY11-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1778468220,
+    "end_ts": 1778468400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-AI/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-FENT",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-FENT/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-INVE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-INVE/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-MANU",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-MANU/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-NUCL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-NUCL/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-OIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-OIL/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-RARE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-RARE/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-SOYB",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-SOYB/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-STOC/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-TAIW",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-TAIW/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-TARI/candlesticks",
+   "params": {
+    "start_ts": 1778684220,
+    "end_ts": 1778684400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14-TRIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14-TRIL/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14C-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14C-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14C-BOEI",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14C-BOEI/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14C-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14C-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14C-INVE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14C-INVE/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14C-RARE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14C-RARE/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY14C-TRIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY14C-TRIL/candlesticks",
+   "params": {
+    "start_ts": 1778774220,
+    "end_ts": 1778774400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY18-AI",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY18-AI/candlesticks",
+   "params": {
+    "start_ts": 1779110820,
+    "end_ts": 1779111000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY18-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY18-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1779110820,
+    "end_ts": 1779111000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY18-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY18-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1779110820,
+    "end_ts": 1779111000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY18-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY18-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1779110820,
+    "end_ts": 1779111000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY18-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY18-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1779110820,
+    "end_ts": 1779111000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY18-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY18-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1779110820,
+    "end_ts": 1779111000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY18-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY18-STOC/candlesticks",
+   "params": {
+    "start_ts": 1779110820,
+    "end_ts": 1779111000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-AMER",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-AMER/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-BARA",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-BARA/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-CHIN",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-CHIN/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-FIRS",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-FIRS/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-NUCL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-NUCL/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-STOC",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-STOC/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-TARI",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-TARI/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTION-26MAY22-TRIL",
+   "path": "/historical/markets/KXTRUMPMENTION-26MAY22-TRIL/candlesticks",
+   "params": {
+    "start_ts": 1779458820,
+    "end_ts": 1779459000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-BLOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-BLOC/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-OIL/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-PEAC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-PEAC/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR21-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR21-STOC/candlesticks",
+   "params": {
+    "start_ts": 1776735720,
+    "end_ts": 1776735900,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-250",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-250/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-BALL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-BALL/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-CHUR",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-CHUR/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-KEIR",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-KEIR/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-NATO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-NATO/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-OIL/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-PALA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-PALA/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-PEAC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-PEAC/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-TARI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-TARI/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26APR28-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26APR28-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1777391820,
+    "end_ts": 1777392000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-AI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-BARA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-BARA/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-CHIN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-CHIN/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-DRON",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-DRON/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-HORM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-HORM/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-NEGO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-NEGO/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-PUTI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-PUTI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-SPAI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-SPAI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-STOC/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-TARI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-TARI/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL08-WORL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL08-WORL/candlesticks",
+   "params": {
+    "start_ts": 1783446300,
+    "end_ts": 1783446480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL14-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL14-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1784002320,
+    "end_ts": 1784002500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL14-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL14-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1784002320,
+    "end_ts": 1784002500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL14-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL14-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1784002320,
+    "end_ts": 1784002500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL23-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL23-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1784775180,
+    "end_ts": 1784775360,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL23-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL23-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1784775180,
+    "end_ts": 1784775360,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL23-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL23-STOC/candlesticks",
+   "params": {
+    "start_ts": 1784775180,
+    "end_ts": 1784775360,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-BARA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-BARA/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-HOAX",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-HOAX/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-HORM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-HORM/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1784863620,
+    "end_ts": 1784863800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-OIL/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-RADI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-RADI/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-STOC/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-SUPR",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-SUPR/candlesticks",
+   "params": {
+    "start_ts": 1784900520,
+    "end_ts": 1784900700,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL24-VENE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL24-VENE/candlesticks",
+   "params": {
+    "start_ts": 1784863500,
+    "end_ts": 1784863680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-AI/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-AMER",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-AMER/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-BARA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-BARA/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-CHIN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-CHIN/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-COMM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-COMM/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-NATO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-NATO/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-RADI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-RADI/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-STOC/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-TARI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-TARI/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-AI/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-AMER",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-AMER/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-BARA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-BARA/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-CHIN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-CHIN/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-COMM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-COMM/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1785253200,
+    "end_ts": 1785253380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-NATO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-NATO/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-OIL/candlesticks",
+   "params": {
+    "start_ts": 1785253200,
+    "end_ts": 1785253380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-RADI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-RADI/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-STOC/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-TARI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-TARI/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL28C-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL28C-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1785205740,
+    "end_ts": 1785205920,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-AI/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-AMER",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-AMER/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-COMM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-COMM/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-OIL/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-STOC/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-TARI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-TARI/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-AI/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-AMER",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-AMER/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-COMM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-COMM/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-OIL/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-STOC/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-TARI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-TARI/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUL29B-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUL29B-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1785336900,
+    "end_ts": 1785337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-250",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-250/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-AFFO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-AFFO/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-AI/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-AMER",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-AMER/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-CEAS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-CEAS/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-CHEA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-CHEA/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-FRAU",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-FRAU/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-ILLE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-ILLE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-KNIC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-KNIC/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-LAND",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-LAND/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-MAGA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-MAGA/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-OIL/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-SAVE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-SAVE/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-STOC/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN11-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN11-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1781203320,
+    "end_ts": 1781203500,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-250",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-250/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-AI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-BIBI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-BIBI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-DEAL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-DEAL/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-ELEC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-ELEC/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-FIRS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-FIRS/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-HORM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-HORM/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-IRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-IRAN/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-ISRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-ISRA/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-NATO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-NATO/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-NEGO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-NEGO/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-OIL/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-PUTI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-PUTI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-RARE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-RARE/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-RUSS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-RUSS/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-STOC/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-TARI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-TARI/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN16-WORL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN16-WORL/candlesticks",
+   "params": {
+    "start_ts": 1781533620,
+    "end_ts": 1781533800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN17-BARA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN17-BARA/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN17-BIBI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN17-BIBI/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN17-DRON",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN17-DRON/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN17-FIRS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN17-FIRS/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN17-INVE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN17-INVE/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN17-PEAC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN17-PEAC/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN17-UKRA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN17-UKRA/candlesticks",
+   "params": {
+    "start_ts": 1781639820,
+    "end_ts": 1781640000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-AI/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-AMER",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-AMER/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-BALL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-BALL/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1782332820,
+    "end_ts": 1782333000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1782332820,
+    "end_ts": 1782333000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-DUMB",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-DUMB/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-FAKE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-FAKE/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-FIRS",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-FIRS/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-HORM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-HORM/candlesticks",
+   "params": {
+    "start_ts": 1782332820,
+    "end_ts": 1782333000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-OIL/candlesticks",
+   "params": {
+    "start_ts": 1782332880,
+    "end_ts": 1782333060,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-REFL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-REFL/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-SAVE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-SAVE/candlesticks",
+   "params": {
+    "start_ts": 1782313020,
+    "end_ts": 1782313200,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-STOC/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24-WORL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24-WORL/candlesticks",
+   "params": {
+    "start_ts": 1782266580,
+    "end_ts": 1782266760,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24C-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24C-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1782332820,
+    "end_ts": 1782333000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24C-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24C-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1782332820,
+    "end_ts": 1782333000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24C-HORM",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24C-HORM/candlesticks",
+   "params": {
+    "start_ts": 1782332820,
+    "end_ts": 1782333000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN24C-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN24C-OIL/candlesticks",
+   "params": {
+    "start_ts": 1782332880,
+    "end_ts": 1782333060,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-250",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-250/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-BARA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-BARA/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-HOTT",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-HOTT/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-OIL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-OIL/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-STOC",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-STOC/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26JUN25-TRAN",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26JUN25-TRAN/candlesticks",
+   "params": {
+    "start_ts": 1782354540,
+    "end_ts": 1782354720,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-AI",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-AI/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-AMER",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-AMER/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-BALL",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-BALL/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-BIDE",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-BIDE/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-CRYP",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-CRYP/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-DEMO",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-DEMO/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-DESA",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-DESA/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-FRAU",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-FRAU/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-GOLF",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-GOLF/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "h_KXTRUMPMENTIONB-26MAY01-GULF",
+   "path": "/historical/markets/KXTRUMPMENTIONB-26MAY01-GULF/candlesticks",
+   "params": {
+    "start_ts": 1777650120,
+    "end_ts": 1777650300,
+    "period_interval": 1
+   }
+  }
+ ]
+}
