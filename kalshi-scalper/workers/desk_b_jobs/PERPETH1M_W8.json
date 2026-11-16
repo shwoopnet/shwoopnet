@@ -1,0 +1,107 @@
+{
+ "job_id": "PERPETH1M_W8",
+ "status": "active",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/specs/PERPLEAD1_CARD.md",
+ "purpose": "Kalshi's Ethereum perpetual KXETHPERP, public 1 minute candles, one UTC day per request, 2026-10-28 to 2026-11-04 (the 8 days of the ladder window BEFORE the nightly archive's back-pull from 2026-11-05, PR 993), to score PERPLEAD1 part (b). Data pull only.",
+ "heldout": "FIXED window: 2026-10-28T00:00Z to before 2026-11-05T00:00Z; nothing from Nov 5 on (those days come from the nightly archive's back-pull). HOLDS.json rows naming KXETHPERP: SNAPBACK1 only (Auditor B to confirm); the reader of this run is PERPLEAD1's loader only.",
+ "route": "perps",
+ "allowed_endpoints": [
+  {
+   "name": "perp_candlesticks",
+   "method": "GET",
+   "path_pattern": "/markets/(?P<ticker>KXBTCPERP|KXETHPERP)/candlesticks",
+   "params_allowed": [
+    "period_interval",
+    "start_ts",
+    "end_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [
+  "KXETHPERP"
+ ],
+ "pacing_seconds": 1.0,
+ "max_requests": 20,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "KXETHPERP_0",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793145600,
+    "end_ts": 1793232000
+   }
+  },
+  {
+   "id": "KXETHPERP_1",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793232000,
+    "end_ts": 1793318400
+   }
+  },
+  {
+   "id": "KXETHPERP_2",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793318400,
+    "end_ts": 1793404800
+   }
+  },
+  {
+   "id": "KXETHPERP_3",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793404800,
+    "end_ts": 1793491200
+   }
+  },
+  {
+   "id": "KXETHPERP_4",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793491200,
+    "end_ts": 1793577600
+   }
+  },
+  {
+   "id": "KXETHPERP_5",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793577600,
+    "end_ts": 1793664000
+   }
+  },
+  {
+   "id": "KXETHPERP_6",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793664000,
+    "end_ts": 1793750400
+   }
+  },
+  {
+   "id": "KXETHPERP_7",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793750400,
+    "end_ts": 1793836800
+   }
+  }
+ ],
+ "notes": "8 requests, one per UTC day; adjacent windows may share a boundary candle: de-duplicate on end_period_ts. Replaces PERPETH1M_W19 (the Head, Nov 16: request only the dates the back-pull does not cover). If the back-pull does not carry KXETHPERP for 2026-11-05 to 2026-11-15, a second job for those dates is needed."
+}
