@@ -88,12 +88,17 @@ def run(ingame, results):
     sched_dropped = defaultdict(int)
     L = load_listing(results, sched_dropped)
     trs = []
+    marks = defaultdict(lambda: defaultdict(int))     # league_kind -> listed markets with no M6 / no M1 quote (print only)
     for (lg, g, kind) in sorted(per):
         for tk, rows in sorted(pick(per[(lg, g, kind)], kind, lg).items()):
             if tk not in L:
                 continue
             cl, res, tip = L[tk]
-            en = entry(sorted(rows), tip)
+            srt = sorted(rows); key = "%s_%s" % (lg, kind)
+            marks[key]["listed"] += 1
+            marks[key]["no_m6"] += quote_at(srt, tip - 6 * 3600) is None
+            marks[key]["no_m1"] += quote_at(srt, tip - 3600) is None
+            en = entry(srt, tip)
             if not en:
                 continue
             trs.append({"league": lg, "kind": kind, "ticker": tk, "side": en[0], "e": en[1], "d": en[2], "close": cl,
@@ -102,6 +107,9 @@ def run(ingame, results):
     S = I.summarise(trs); S["verdict"] = I.verdict(S)
     S["by_league_kind"] = {"%s_%s" % (lg, k): I.summarise([x for x in trs if x["league"] == lg and x["kind"] == k])
                            for lg in ("NBA", "NFL", "NHL") for k in ("total", "ml")}
+    S["mark_coverage"] = {k: dict(v) for k, v in marks.items()}
+    S["notes"] = ["tip = occurrence - 3 h, a schedule-shaped proxy; truth unproven",
+                  "occurrence and result come from the same post-settlement listing; every listed market's result in the window is read, not only traded games"]
     S["schedule_test_dropped_games"] = dict(sched_dropped)
     S["yes_share"] = sum(1 for x in trs if x["side"] == "yes") / len(trs) if trs else None
     return {"label": "PREDRIFT1 quick read, thirds 1 and 2 only; tip = occurrence_datetime - 3 h; upper bound, not fill-checked",

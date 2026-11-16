@@ -19,3 +19,6 @@ A game is kept only if its listing markets carry ONE occurrence_datetime, on min
 
 ## Amendment 2 (2026-11-16 ~15:55Z, the Head 15:24Z, before any read)
 NFL only: minutes :15, :20 and :25 are also allowed (real NFL kickoff minutes); one value per game is still required. NBA and NHL unchanged (:00, :30, :05).
+
+## Amendment 3 (2026-11-16 ~16:00Z, Auditor B 15:24Z, print only, before any read)
+Prints per league and kind the count of listed markets with no quote at M6 and at M1 (mark_coverage), and two notes: the tip is a schedule-shaped proxy, truth unproven; occurrence and result come from the same post-settlement listing. Rule unchanged.
