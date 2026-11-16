@@ -13,3 +13,7 @@ Both commands: `python3 -I <scorer> <root>`, exit 0, empty stderr.
 - **SIBHIT:** fails on both arms. Its 120 development games are spent, including for any reversed rule. SIBHIT-R (`sibhitr/`) is a new registration, to be scored only on a window no one has read.
 - **LATEWORD:** "no evidence at n = 0" is a design outcome. Of the 272 late words, 197 were priced outside 0.30 to 0.70 at open + 30 min, so late listings open cheap or lopsided. Any band change would be a new registration.
 - **Tally:** Auditor B counts SIBHIT as 1 try, where the card registered its two arms as 2. The Head decides which count the ledger keeps.
+
+## MENTBREADTH, development read, run once (Nov 16, 2026, ~17:25Z; the print's hash committed BEFORE reading)
+
+Run: `python3 -I family_run.py <root> mentbreadth`, exit 0, empty stderr. Plugin mentbreadth.py 1e77d23e, loader c76c7f7d, engine1_core 53317e4b, family_run.py d46be747, test d7f86d00 (all as signed by Auditor B). Inputs: MENTDRIFT_LISTS_A/2026-11-15T1458Z_43727241819 and MENTBREADTH_CANDLES_P1/2026-11-16T1633Z_43908751268 (complete, 460 requests). Print sha256: add5b158934270ea804f46c30d1b44de96428fb4f26344770a85b0a730cd4386. Label: development; this block was shown by TRUMPTOPIC1's fit third and read for LATEWORD; candle replay, upper bound, not fill-checked; control not run. Figures by message only.
