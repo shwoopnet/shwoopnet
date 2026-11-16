@@ -1,7 +1,7 @@
 {
  "list": "SHADOW_LIST_V4",
  "date": "2026-11-16",
- "start_utc": "DRAFT_START_AT_FREEZE",
+ "start_utc": "2026-11-17T00:00:00Z",
  "start_rule": "picks on KXBTC15M start no earlier than 2026-11-21T00:00:00Z (H09); others at start_utc (the next whole UTC hour after the freeze commit)",
  "n": 12,
  "source": "batch C VALIDATE-bar passes (68; BH survivors 0 at carried 6,290,660 + own tries and at 7,492,484)",
@@ -17,6 +17,11 @@
  "clusters": 24,
  "spec_sha256_covers": "the spec object only",
  "no_money_no_orders": true,
+ "notes": [
+  "Strict C1 day-correlation rule as written (the Head, Nov 16): every C1 pass at 0.3 or more against ANY ENGB4XBTC pass is dropped (31 of 36). 19 of those 31 are same-market copies (up to 0.99); 12 reach 0.3 only against a different market (0.31 to 0.60).",
+  "PROPOSAL FOR FUTURE SPECS, NOT APPLIED NOW: a cross-market 0.3 to 0.4 is the maximum over about 33 comparisons on 29 days (noise per correlation about +/-0.19), so it is plausibly chance; a future spec may use same-market only, or a threshold adjusted for the number of comparisons, written before any pass is seen.",
+  "Held-out: not read for batch C; a plan comes after the freeze."
+ ],
  "specs": [
   {
    "spec": {
@@ -41,14 +46,14 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-21T00:00:00Z",
     "found_by_spec": "ENGC2OIACC",
     "feature_definition": {
      "name": "oiacc",
      "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
     }
    },
-   "spec_sha256": "4b97c501eb8e67d91505b0fea16984f755e5db6b57274f89660017744aac8740",
+   "spec_sha256": "5689a486c4c3025ebc285de39d1b92d2a88f3d9ba038307438ffc09c7d95cc42",
    "rank": 1,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -92,14 +97,14 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC2OIACC",
     "feature_definition": {
      "name": "oiacc",
      "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
     }
    },
-   "spec_sha256": "890d8c00e43d06b3077a3fde4e0b276fb2904a0d867ef1d89f7b20827233ab95",
+   "spec_sha256": "28e20071152c5d85b630643a0911888abb350616a4bf9eb547010765be9196c9",
    "rank": 2,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
@@ -143,14 +148,14 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC2OIACC",
     "feature_definition": {
      "name": "oiacc",
      "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
     }
    },
-   "spec_sha256": "a66673ee5b025eb47b11500319df2c90ee1af5c84efbb29581953d1f9a521198",
+   "spec_sha256": "ad4384ea6f422f193a2ed18e3a358c514173d17a34fb82f19798aca7e23f6718",
    "rank": 3,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -194,14 +199,14 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC2OIACC",
     "feature_definition": {
      "name": "oiacc",
      "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
     }
    },
-   "spec_sha256": "6e829d495e729cfc13eecf31b1282c4375d67495172454d6b459003a758b9595",
+   "spec_sha256": "b85f483036ba3e61e21f8749ec96980d62176ed2228d0244068c7f33020d3f26",
    "rank": 4,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
@@ -245,14 +250,14 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-21T00:00:00Z",
     "found_by_spec": "ENGC2OIACC",
     "feature_definition": {
      "name": "oiacc",
      "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
     }
    },
-   "spec_sha256": "56ea71e5bdb4946426f2a198701e05e9344aa0d518bba75f493b5f03fdd819e8",
+   "spec_sha256": "ca0d84223be1ade6c39ebbf15a0ae5472b6e841e9745b4b6f4bff6c6790980cc",
    "rank": 5,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -296,7 +301,7 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC1ETHMOM",
     "cross_series_feature": {
      "series": "KXETH15M",
@@ -304,7 +309,7 @@
      "name": "ethmom3"
     }
    },
-   "spec_sha256": "bfcd8de4bd62be9d7e577ce346ebad499c1c6ec4fe61a255397962b48c5b8ea9",
+   "spec_sha256": "5e13ff80a9ea2a7927e7b5a8a10dec1a4ca4bc7d6b27f9a2b4aa6b9fa9e21ffc",
    "rank": 6,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -348,14 +353,14 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC2OIACC",
     "feature_definition": {
      "name": "oiacc",
      "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
     }
    },
-   "spec_sha256": "07f966909ac3894a36d5daed46f937702f4bacd07c81ab709ce3011bc5255a5c",
+   "spec_sha256": "3698c524c11b8329c56285e0d422e775d968456fb852b6a67c8bb08ae4f37920",
    "rank": 7,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
@@ -399,7 +404,7 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC1ETHMOM",
     "cross_series_feature": {
      "series": "KXETH15M",
@@ -407,7 +412,7 @@
      "name": "ethmom3"
     }
    },
-   "spec_sha256": "618b84df3ceb7094860d48eb656936e2cd99957cfcc3b1ddd0bbfa0e716c1541",
+   "spec_sha256": "71a806b038cb0bdac2fd0f7a1c4615e34f0b8962f036911dc8ebb6d541308fc8",
    "rank": 8,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -451,7 +456,7 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC4GOLDX",
     "cross_series_feature": {
      "series": "KXGOLD15M",
@@ -459,7 +464,7 @@
      "name": "goldmom3"
     }
    },
-   "spec_sha256": "980c3844c25693069d3aec014165039762c20e480d2e76481b00228ecc386931",
+   "spec_sha256": "cecaf7809fa5a1a132b36c4f55e5ecc0f57dba07273f07d68c675e5aad794b67",
    "rank": 9,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
@@ -503,7 +508,7 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC4GOLDX",
     "cross_series_feature": {
      "series": "KXGOLD15M",
@@ -511,7 +516,7 @@
      "name": "goldmom3"
     }
    },
-   "spec_sha256": "f155c1dceecc4fe4bd06fec44deddd9d115c1b029a3cc17d956448b58a52a304",
+   "spec_sha256": "2073606023247a6e81ffe531f52ce8c23e16b001ee6618a3949c0f89e756e763",
    "rank": 10,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
@@ -555,14 +560,14 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC2OIACC",
     "feature_definition": {
      "name": "oiacc",
      "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
     }
    },
-   "spec_sha256": "ab3d7fa964ebbe5b82e69b27094df6d6eedf73c3ffc425ac13ea1ad8a8a09e05",
+   "spec_sha256": "01016cf8cbeb2e2c89dad208d10b411e23b54e655cdbd366b68b74952680b86f",
    "rank": 11,
    "admission": "owner_override_shadow (standing, Nov 16)",
    "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
@@ -606,7 +611,7 @@
     },
     "size_in_log": 1,
     "mode": "log_only_forward",
-    "start_utc": "DRAFT_START_AT_FREEZE",
+    "start_utc": "2026-11-17T00:00:00Z",
     "found_by_spec": "ENGC4GOLDX",
     "cross_series_feature": {
      "series": "KXGOLD15M",
@@ -614,7 +619,7 @@
      "name": "goldmom3"
     }
    },
-   "spec_sha256": "5504f64072e86aa132c02f4514f7ac3d9a52a5ac037fc38dce38e8604d6e8ae0",
+   "spec_sha256": "e5c1de82a57a66a83bdcc7324da9307892644a9754be30c3c6b7e18892f8b02e",
    "rank": 12,
    "admission": "clean",
    "admission_note": "search plus validate bar; no 7e row touched",
