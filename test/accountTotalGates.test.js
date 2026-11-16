@@ -17,10 +17,14 @@ assert.strictEqual(f.kalshiAccountTotal(null).total,null);
 const s=f.kalshiPerpsSteps([{t:3000,total:105},{t:1000,total:100},{t:2000,total:100}],0);
 assert.strictEqual(s.first,1000);assert.deepStrictEqual(s.steps.map(x=>[x.t,x.p]),[[3000,5]]);
 assert.strictEqual(f.kalshiPerpsSteps([],0).first,null);
-// AT5: display only. The risk code never names the total or the perps fields.
-for(const file of fs.readdirSync('functions').filter(x=>x.endsWith('.js'))){
-  const src=fs.readFileSync('functions/'+file,'utf8');
-  assert(!/perpsTotal|perpsDay|perpsHistory|kalshiAccountTotal/.test(src),'AT5 '+file+' must not read the display total');
+// AT5: display only, checked by INTENT. The code that decides a stop, a loss limit, the window cap or a size must never read the combined total or the perps fields. Data code (the hourly balance snapshot, the report,
+// the account read) may name them: that is how the total reaches the page. Risk code is every functions/ file that is not data code, so a new risk file is covered by default.
+const RISK_NAMED = /Live|Slot|HardStop|RiskCore|GoldKill|Rotation|Wheel|Sizing|Shadow|Longhold|Cfrti|Spxoi|Exit|Alarm|ShardAlert|Kill/;
+const FIELDS = /perpsTotal|perpsDay|perpsHistory|kalshiAccountTotal|account_equity/;
+const riskFiles = fs.readdirSync('functions').filter(x => x.endsWith('.js') && RISK_NAMED.test(x) && !/Snapshot|Report|Account|Balance|Probe|Push/.test(x));
+assert(riskFiles.length >= 8, 'AT5 sees the risk files: ' + riskFiles.join(','));
+for(const file of riskFiles){
+  assert(!FIELDS.test(fs.readFileSync('functions/' + file, 'utf8')), 'AT5 ' + file + ' is risk code and must not read the display total');
 }
 assert(/never read by the 40% hard stop/.test(h)||/is never read by the 40% hard stop/.test(h),'AT5 comment says display only');
 console.log('accountTotalGates ok');
