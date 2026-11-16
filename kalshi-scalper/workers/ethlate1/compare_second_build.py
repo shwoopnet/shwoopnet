@@ -21,9 +21,9 @@ sg, vg = D.groups(sm, cuts, None), D.groups(vm, cuts, None)
 print("my header: SEARCH markets %d VALIDATE markets %d cuts(120) %s last_search %s" % (len(sm), len(vm), cuts[120], S.LAST_SEARCH["ETHD"])); print("their header:", lines[0][:200])
 def mine(g, band, filt, x):
     items = g.get((120, band, "cheap", filt), [])
-    if not items: return {"n": 0, "days": 0, "pf2": 0.0, "h1": 0.0, "h2": 0.0, "pf1": 0.0, "z": None}
+    if not items: return {"n": 0, "days": 0, "pf2": 0.0, "h1": 0.0, "h2": 0.0, "pf1": 0.0, "z": None, "events": 0}
     agg, _ = D.score_group(items, x); a2, a1 = agg[0.02], agg[0.01]
-    return {"n": a2["n"], "days": a2["trade_days"], "pf2": a2["pf"], "h1": a2["half1"], "h2": a2["half2"], "pf1": a1["pf"], "z": a2["day_z"]}
+    return {"n": a2["n"], "days": a2["trade_days"], "pf2": a2["pf"], "h1": a2["half1"], "h2": a2["half2"], "pf1": a1["pf"], "z": a2["day_z"], "events": R.events_of(items)}
 def parse(seg):
     t = seg.split(); out = {}
     for i in range(0, len(t), 2): out[t[i]] = t[i + 1]
@@ -34,15 +34,16 @@ def eq(a, b):
     if b == "inf": return a == float("inf")
     if a is None or (isinstance(a, float) and (math.isnan(a) or math.isinf(a))): return False
     return abs(float(a) - float(b)) <= 1e-9 * max(1.0, abs(float(b)))
-diffs = 0; total = 0
+diffs = 0; total = 0; empty = 0
 for ln in lines[1:]:
     head, s, v = [p.strip() for p in ln.split("|")[:1]] + [None, None]
     parts = ln.split(" | "); key = parts[0].split("|"); band = int(key[0][4:]); filt = key[1]; x = key[2].strip()
     S_, V_ = parse(parts[1][2:].strip()), parse(parts[2][2:].split(" search ")[0].strip())
     for ph, g, th in (("S", sg, S_), ("V", vg, V_)):
         mm = mine(g, band, fmap[filt], x)
-        for f in ("n", "days", "pf2", "h1", "h2", "pf1", "z"):
+        for f in ("n", "days", "events", "pf2", "h1", "h2", "pf1", "z"):
             total += 1
-            ok = (int(th[f]) == mm[f]) if f in ("n", "days") else eq(mm[f], th[f])
+            ok = (int(th[f]) == mm[f]) if f in ("n", "days", "events") else eq(mm[f], th[f])
+            if not ok and mm["n"] == 0 and f in ("pf2", "h1", "h2", "pf1", "z"): empty += 1; continue
             if not ok: diffs += 1; print("DIFF band%d %s %s %s %s mine %r theirs %s" % (band, filt, x, ph, f, mm[f], th[f])) 
-print("fields compared %d, differing %d" % (total, diffs))
+print("fields compared %d, differing %d (plus %d empty-cell nan vs 0.0, display only)" % (total, diffs, empty))
