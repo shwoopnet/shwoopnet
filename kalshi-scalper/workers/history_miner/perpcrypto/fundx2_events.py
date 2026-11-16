@@ -30,7 +30,7 @@ def extreme(rate, cuts):
 
 def fundx2_trades(rows_by_ticker, prints_by_ticker, cell, window="validate", cnt=None):
     """cell = (q, side, hold_h). window 'validate' trades only prints in [SEARCH_END, VALIDATE_END); 'search' only prints in [SEARCH_START, SEARCH_END) (printed apart, never counted toward a pass).
-    The signal row is the first row at or after the print; ENTRY is the NEXT row (execute()). One position per ticker. Funding booked on prints after the entry up to the exit."""
+    The signal row is the LAST row at or before the print; ENTRY is the first row STRICTLY after the print (execute() enters on row i+1). One position per ticker (a print strictly inside an open hold is skipped; a print exactly at the exit instant may signal). Funding booked on prints STRICTLY between the entry and the exit instants (a print exactly at either instant is not booked)."""
     q, di, h = cell; out = []; skips = cnt if cnt is not None else collections.Counter()
     if not prints_by_ticker:
         raise SystemExit("REFUSED: no labelled funding prints")
@@ -45,13 +45,13 @@ def fundx2_trades(rows_by_ticker, prints_by_ticker, cell, window="validate", cnt
             ext = extreme(rate, cuts)
             if not ext:
                 continue
-            i = next((j for j, r in enumerate(rows) if r[0] >= ts), None)
-            if i is None or rows[i][0] <= busy_until:
-                skips["no row at the print / busy"] += 1; continue
+            i = max((j for j, r in enumerate(rows) if r[0] <= ts), default=None)      # signal row = the LAST row at or before the print
+            if i is None or ts < busy_until or i + 1 >= len(rows) or rows[i + 1][0] <= ts:
+                skips["no row at or before the print / busy / no row strictly after"] += 1; continue
             tr = E.execute(rows, i, -ext if di == "fade" else ext, h)
             if isinstance(tr, str):
                 skips[tr] += 1; continue
-            fund = sum(r for t, r in pr if tr["entry_ts"] < t <= tr["exit_ts"])
+            fund = sum(r for t, r in pr if tr["entry_ts"] < t < tr["exit_ts"])
             out.append({"ticker": tk, "signal_ts": ts, "trade": tr, "funding": fund}); busy_until = tr["exit_ts"]
     return out
 

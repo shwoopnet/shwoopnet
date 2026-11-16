@@ -47,4 +47,18 @@ cc = F.extreme_counts({"KXBTCPERP": tied + [(V0 + 1, 0.01), (V0 + 2, 0.0)]})["KX
 # n = 200, k = 20: upper = s[180] = 0.01 (ranks 1..190 are 0.01), so every 0.01 print is at or above the cut and above 0: 200 SEARCH extremes
 assert cc["search_prints"] == 200 and cc["search_extremes"] == 200 and cc["validate_prints"] == 2 and cc["validate_extremes"] == 1 and cc["has_threshold"]
 assert F.extreme_counts({"KXETHPERP": pr[:50]})["KXETHPERP"][0.05]["has_threshold"] is False
+# (1) entry row: a row exactly at the print instant vs a row 90 s after it (signal row = last row at or before the print; entry = first row strictly after)
+rowsb = [(V0 + k * H, 99.0, 101.0, None, None, None) for k in range(40)]
+rowsb.insert(6, (V0 + 5 * H + 90, 95.0, 97.0, None, None, None))                 # a row 90 s after the print, between the 5H and 6H rows
+rowsb.append((V0 + 13 * H + 90, 99.0, 101.0, None, None, None)); rowsb = sorted(rowsb)   # an exit row 8 h after the 90 s entry
+ta = F.fundx2_trades({"KXBTCPERP": rowsb}, {"KXBTCPERP": sp + [(V0 + 5 * H, 0.5)]}, (0.05, "fade", 8))[0]["trade"]
+assert ta["entry_ts"] == V0 + 5 * H + 90 and A(ta["entry"], 95.0)               # print AT 5H: signal row = the 5H row, entry = the 90 s row (strictly after)
+tb = F.fundx2_trades({"KXBTCPERP": rowsb}, {"KXBTCPERP": sp + [(V0 + 5 * H + 30, 0.5)]}, (0.05, "fade", 8))[0]["trade"]
+assert tb["entry_ts"] == V0 + 5 * H + 90                                         # print 30 s after the 5H row, still before the 90 s row: same entry
+tc = F.fundx2_trades({"KXBTCPERP": rowsb}, {"KXBTCPERP": sp + [(V0 + 5 * H + 120, 0.5)]}, (0.05, "fade", 8))[0]["trade"]
+assert tc["entry_ts"] == V0 + 6 * H                                              # print 120 s after the 90 s row: signal row = the 90 s row, entry = the 6H row
+assert F.fundx2_trades({"KXBTCPERP": rowsb[:6]}, {"KXBTCPERP": sp + [(V0 + 5 * H + 120, 0.5)]}, (0.05, "fade", 8)) == []   # no row strictly after the print
+# (2) funding boundary: strict at both instants (entry 6H, exit 14H for a print at 5H)
+fb = F.fundx2_trades({"KXBTCPERP": rows}, {"KXBTCPERP": prints + [(V0 + 6 * H, 0.0005), (V0 + 10 * H, 0.0007), (V0 + 14 * H, 0.0011)]}, (0.05, "fade", 8))[0]
+assert A(fb["funding"], 0.0007)                                                  # not the print at the entry instant, not the print at the exit instant
 print("fundx2: ok")

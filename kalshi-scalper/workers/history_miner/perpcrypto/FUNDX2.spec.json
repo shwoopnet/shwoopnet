@@ -66,7 +66,7 @@
  },
  "event": {
   "scorer_plugin": "fundx2_events.py",
-  "scorer_plugin_sha256": "15ef806a954ec64c6d2e77f6040f07f680050bc58bc97ed9d5b6a72924eda71a",
+  "scorer_plugin_sha256": "67d049b5c105efab788cac4e9a4ef9a04473261fe4f58aca6a9d90f9fecef718",
   "decision_instant": "the first price row strictly after a funding print at or beyond the SEARCH cut point",
   "signal_threshold_abs_mid_move": null,
   "entry_rule": "q {5,10} percent x side {fade,follow} x hold {8,24} h = 8 cells; cut points per ticker from SEARCH prints only; far touch; one position per ticker",
@@ -105,9 +105,9 @@
  },
  "plugin": {
   "file": "fundx2_events.py",
-  "sha256": "15ef806a954ec64c6d2e77f6040f07f680050bc58bc97ed9d5b6a72924eda71a",
+  "sha256": "67d049b5c105efab788cac4e9a4ef9a04473261fe4f58aca6a9d90f9fecef718",
   "hand_case": "test_fundx2.py",
-  "hand_case_sha256": "cbe17f5e052282024a37f7c2309c32d3da72696a45abd18836946c58110911d7",
+  "hand_case_sha256": "29b64d13c3c8aa6e6cbf5dc0a9f61355bb4f29a78000a62e6d1ab53738595c34",
   "auditor_clean_date": "pending",
   "imports": "perps_crypto_events.py 8427becd (CLEAN)"
  },
@@ -118,11 +118,11 @@
  "look_ahead": {
   "decision_instant": "the funding print's time; the signal row is the first price row at or after it",
   "inputs": "FUNDX2: the print itself and FIXED per-ticker cut points computed once from SEARCH funding prints only (2026-06-03 to before 2026-09-15, nearest rank, at least 120 prints); nothing from VALIDATE or forward sets them",
-  "entry_quote": "the NEXT price row after the signal row, far touch (a quote at the print instant is never used); one position per ticker",
-  "exit_price": "the near touch of the first row at least H hours after entry (tolerance 30 minutes, else skipped); funding paid or received on every print after the entry up to the exit is booked from the labelled rates (positive = longs pay)"
+  "entry_quote": "the FIRST price row strictly after the print (signal row = the last row at or before it), far touch; one position per ticker",
+  "exit_price": "the near touch of the first row at least H hours after entry (tolerance 30 minutes, else skipped); funding on prints STRICTLY between the entry and exit instants is booked from the labelled rates (positive = longs pay)"
  },
  "notes_v2": "approved by the Head 2026-11-16 20:47Z; margin table v2 on page-max leverage and 4.5 percent maintenance; spot accepted for research",
- "card_sha256": "25fb761d8815de61fef21ad9d95fc54bd140ee08433a77f1b513a002f3edf19d",
+ "card_sha256": "b9fb706050ed3c890c1d144f496c6fe6c88528495fee18e111ea318bcbdc4e09",
  "rule_count": 8,
  "status": "DRAFT spec: not signed; plugin, labelled funding file and allow line pending",
  "fee_form_perps_note": "NOT the binary-contract fee: perps pay 12 bps of notional a side (stress 5 bps) plus a 0.02 or 0.05 percent haircut per fill, and funding; the standing form above is kept only because spec_check requires the field"
