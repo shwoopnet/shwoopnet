@@ -1764,3 +1764,7 @@ The PERPSCALP2 line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` now names t
 ## Held-out log: PERPSCALP2 second reader (Nov 16, 2026, Auditor B's allow line)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the Testing Desk's `perpscalp2_second_load.py` (sha256 6235e740..., commit 8eeaa5351 on `claude/testing-desk`; I hashed it, its run script a18addde... and `perpscalp2_second.py` 86a91086... before merging). Same sources and cutoff as Desk C's PERPSCALP2 line; no new source or host. Docs only.
+
+## Held-out log: ENGPERPS lanes 1 and 6 (Nov 16, 2026, Auditor B's corrected allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk A's lanes 1 and 6 runner `engine1_perps_lanes_run.py` (sha256 2b18e74e..., with `engine1_perps_lanes.py` d7c7a1ec..., commit 34d107160 on `claude/idea-desk-a`; I hashed both before merging). It replaces Auditor B's earlier text (older shas never logged) and reads only through the already listed POOL1 loader; no new source. The line is not a go: Desk A still needs the blind second build and Auditor B's fixture compare. Docs only.
