@@ -18,8 +18,8 @@ const pure = new Function(consts + '\n' + ['fresh', 'isOptional', 'complete', 'm
 
 // L1: the account card can never be hidden. Consequence if it fails: the Running pill (Start, Pause, Flatten) could vanish from the page while the bot trades real money.
 gates.L1 = () => {
-  const l = pure.normalize({ v: 2, order: ['account'], hidden: { account: true, status: true, bogus: true } });
-  assert.ok(!('account' in l.hidden) && l.hidden.status === true && !('bogus' in l.hidden), 'a saved "hide account" is dropped; a real optional card stays hidden');
+  const l = pure.normalize({ v: 2, order: ['account'], hidden: { account: true, trades: true, bogus: true } });
+  assert.ok(!('account' in l.hidden) && l.hidden.trades === true && !('bogus' in l.hidden), 'a saved "hide account" is dropped; a real optional card stays hidden');
   assert.ok(!pure.isOptional('account'), 'account is not an optional card');
   assert.ok(/c\.hidden = isOptional\(k\) && layout\.hidden\[k\] === true;/.test(iife), 'apply only ever hides an optional card, whatever the layout holds');
   assert.ok(!/data-card-toggle="account"/.test(html) && !/OPTIONAL = \[[^\]]*'account'/.test(iife), 'and the Layout menu has no switch for it');
@@ -30,16 +30,16 @@ gates.L1 = () => {
 gates.L2 = () => {
   // The old code dealt the markup order (rail: account, status, positions; main: pnl, trades) into the slots rail, rail, main, rail, main.
   const def = pure.normalize({ cols: 'auto', hidden: {}, order: ['account', 'status', 'positions', 'pnl', 'trades'] });
-  assert.deepStrictEqual(def.order, ['account', 'status', 'positions', 'trades'], 'the old default reads as the default look, without the Account result card that moved into the Account card on Nov 16, 2026');
+  assert.deepStrictEqual(def.order, ['account', 'positions', 'trades'], 'the old default reads as the default look, without the Account result card (moved into the Account card) and the Bot status card (removed), Nov 16, 2026');
   const moved = pure.normalize({ cols: '3', hidden: { trades: true }, order: ['positions', 'account', 'status', 'trades', 'pnl'] });
-  assert.deepStrictEqual(moved.order, ['positions', 'account', 'trades', 'status'], 'an old custom order lands where the old page showed it (the Account result card is dropped, Nov 16, 2026)');
+  assert.deepStrictEqual(moved.order, ['positions', 'account', 'trades'], 'an old custom order lands where the old page showed it (the Account result and Bot status cards are dropped, Nov 16, 2026)');
   assert.deepStrictEqual(moved.hidden, { trades: true }, 'a hidden card stays hidden');
   assert.ok(!('cols' in moved) && moved.v === 3, 'the dead column count is dropped and the copy carries the new version');
   const partial = pure.normalize({ order: ['status', 'nope'] });
-  assert.deepStrictEqual(partial.order.slice().sort(), ['account', 'positions', 'status', 'trades'], 'a partial or corrupt old order still yields every card exactly once');
-  const v2 = pure.normalize({ v: 2, order: ['trades', 'account', 'status', 'pnl', 'positions'], width: { status: 'full', pnl: 'wide' }, folded: { pnl: true, x: true } });
-  assert.deepStrictEqual(v2.order, ['trades', 'account', 'status', 'positions'], 'a new copy keeps its order as saved (a card that no longer exists is dropped)');
-  assert.deepStrictEqual(v2.width, { status: 12 }, 'a version 2 Full reads as a span of 12, and a width that never existed is dropped (changed Nov 5, 2026: widths are spans now)');
+  assert.deepStrictEqual(partial.order.slice().sort(), ['account', 'positions', 'trades'], 'a partial or corrupt old order still yields every card exactly once');
+  const v2 = pure.normalize({ v: 2, order: ['trades', 'account', 'status', 'pnl', 'positions'], width: { positions: 'full', pnl: 'wide' }, folded: { pnl: true, x: true } });
+  assert.deepStrictEqual(v2.order, ['trades', 'account', 'positions'], 'a new copy keeps its order as saved (a card that no longer exists is dropped)');
+  assert.deepStrictEqual(v2.width, { positions: 12 }, 'a version 2 Full reads as a span of 12, and a width that never existed is dropped (changed Nov 5, 2026: widths are spans now)');
   assert.deepStrictEqual(v2.folded, {}, 'only known cards fold (the old Account result card is gone)');
   assert.ok(/if\(migrated\)\{ save\(true\); \}/.test(iife), 'the migrated copy is written back in the new shape');
 };
@@ -76,8 +76,8 @@ gates.L4 = () => {
   assert.ok(/@media \(max-width:900px\)\{ \.kal-move \[data-width\], \.kal-move \[data-height\], \.kal-resize\{ display:none; \}/.test(css), 'the size controls are not offered where they mean nothing');
   assert.ok(/\.kal-console > \[data-card\]\[data-w="12"\]\{ grid-column:1 \/ -1; \}/.test(css) && !/grid-auto-flow:row dense/.test(css), 'on a wide screen a full width card spans every column, and there is no dense packing to reorder cards behind the owner\'s back');
   // The defaults reproduce the look before the rebuild.
-  assert.ok(/var WIDTHS = \{ account: 12, status: 12, positions: 12, trades: 12 \};/.test(iife), 'default widths');
-  for (const [k, w] of [['account', '12'], ['status', '12'], ['positions', '12'], ['trades', '12']]) assert.ok(new RegExp('data-w="' + w + '" data-card="' + k + '"').test(html), k + ' starts at a span of ' + w + ' in the markup, so the first paint already has the right shape');
+  assert.ok(/var WIDTHS = \{ account: 12, positions: 12, trades: 12 \};/.test(iife), 'default widths');
+  for (const [k, w] of [['account', '12'], ['positions', '12'], ['trades', '12']]) assert.ok(new RegExp('data-w="' + w + '" data-card="' + k + '"').test(html), k + ' starts at a span of ' + w + ' in the markup, so the first paint already has the right shape');
 };
 
 // L5: Cancel restores the layout from before editing, Done keeps it, and nothing is saved while editing. Consequence: a slip in Edit layout can always be taken back.
@@ -135,7 +135,7 @@ gates.L8 = () => {
   const h = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(h.includes('.kal-console > [data-card][data-folded="true"] .kal-card-head > :not(.kal-card-title):not(.kal-botmenu){ display:none !important; }'), 'head controls hide on a folded card');
   assert.ok(/<div class="kal-card-head kal-acct-head">[\s\S]{0,200}<details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill"/.test(h), 'the Running pill sits in the kept .kal-botmenu, a direct child of the Account head');
-  assert.ok(/<div class="kal-acct-pnl" id="kalPnl"><div class="kal-acct-pnl-h"><span class="kal-k">Account result<\/span><div class="kal-pnl-ranges" id="kalPnlRanges">/.test(h), 'the range buttons are inside the Account card body (Nov 16, 2026), so a folded Account card, which shows only its head, hides them');
+  assert.ok(/<div class="kal-acct-pnl" id="kalPnl"><div class="kal-pnl-ranges" id="kalPnlRanges">/.test(h), 'the range buttons are inside the Account card body (Nov 16, 2026), so a folded Account card, which shows only its head, hides them');
 };
 
 // Resizable cards (Nov 5, 2026, the owner: "this should maybe all be adjustable? size wise i guess"; they chose a corner drag, 12 column snapping, height in steps with a minimum, scrolling inside, a phone stays one column).
@@ -159,10 +159,10 @@ gates.L9 = () => {
 
 // L10: a version 2 layout (Half or Full) keeps its look. Consequence: the owner's arrangement from this morning does not change shape after the update.
 gates.L10 = () => {
-  const old = { v: 2, order: ['trades', 'account', 'status', 'positions'], hidden: { status: true }, width: { status: 'full', positions: 'half' }, folded: { trades: true } };
+  const old = { v: 2, order: ['trades', 'account', 'positions'], hidden: { positions: true }, width: { trades: 'full', positions: 'half' }, folded: { trades: true } };
   const n = pure.normalize(old);
   assert.deepStrictEqual(n.order, old.order, 'the order is kept as saved (no re-dealing)');
-  assert.deepStrictEqual(n.width, { status: 12, positions: 6 }, 'half is 6 and full is 12');
+  assert.deepStrictEqual(n.width, { trades: 12, positions: 6 }, 'half is 6 and full is 12');
   assert.deepStrictEqual(n.hidden, old.hidden, 'hidden cards stay hidden');
   assert.deepStrictEqual(n.folded, old.folded, 'folded cards stay folded');
   assert.deepStrictEqual(n.height, {}, 'and nothing gets a height it did not have');
@@ -187,7 +187,7 @@ gates.L11 = () => {
 // L12: the Account card is width only. Consequence: its Start, Pause and Flatten menu (a panel that hangs below its head) can never be cut off by a set height or an inner scroll.
 gates.L12 = () => {
   assert.ok(/var NO_HEIGHT = \{ account: true \};/.test(iife), 'the account card takes no height');
-  assert.deepStrictEqual(pure.normalize({ v: 3, height: { account: 400, status: 400 } }).height, { status: 400 }, 'a saved height for it is dropped');
+  assert.deepStrictEqual(pure.normalize({ v: 3, height: { account: 400, trades: 400 } }).height, { trades: 400 }, 'a saved height for it is dropped');
   assert.ok(/function heightOf\(k\)\{ return NO_HEIGHT\[k\] \? null :/.test(iife), 'so apply never sets one');
   assert.ok(/if\(!c \|\| NO_HEIGHT\[k\] \|\| c\.querySelector\(':scope > \.kal-card-body'\)\)\{ return; \}/.test(iife), 'its pieces are not wrapped in a scrolling body');
   assert.ok(/\(NO_HEIGHT\[k\] \? '' : '<button type="button" class="kal-mini" data-height="/.test(iife), 'it has no height button');
