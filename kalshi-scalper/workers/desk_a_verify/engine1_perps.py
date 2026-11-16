@@ -78,7 +78,7 @@ def _prints(f):
     return _PC[k][1], _PC[k][2]
 def clip_of(e, exit_):
     """The boundary clip horizon (Auditor B ruling R1): the rule's OWN exit time (T3 e+180, T10 e+600, T15 e+900, T30 e+1800 ... TC the 16:00 ET candle, TO the next open, TS exits e+1800); the 1800 s floor is only the cooldown."""
-    t = exit_time(e, exit_); return COOLDOWN if t is None else t - e
+    t = exit_time(e, exit_); return None if t is None else t - e                  # None: the rule has no exit for this entry (TC after 16:00 ET), so nothing to clip; the mark fails and "no mark" is counted
 def hold_of(e, exit_):
     t = exit_time(e, exit_); return COOLDOWN if t is None else max(COOLDOWN, t - e)
 def trade_full(by, e, side, exit_, h, funding=None):
@@ -134,7 +134,7 @@ def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None, boundary=Non
         f = feature_ok(by, e, filt, cuts)                                           # R4 order: two sided, cooldown, feature, clip, mark
         if f is None: cnt["missing feature candle"] += 1; continue
         if not f: continue
-        if boundary is not None and e + clip_of(e, exit_) >= boundary: cnt["exit crosses the boundary"] += 1; continue          # (Auditor B) SEARCH never touches VALIDATE prices; counted for a TRUE signal only
+        if boundary is not None and clip_of(e, exit_) is not None and e + clip_of(e, exit_) >= boundary: cnt["exit crosses the boundary"] += 1; continue          # (Auditor B) SEARCH never touches VALIDATE prices; counted for a TRUE signal only
         g, why, hold, flag = trade_full(by, e, side, exit_, h, funding)
         if g is None: cnt[why] += 1; continue
         rows.append((e, g, hold, flag)); cnt[why] += 1; last = e + hold_of(e, exit_)

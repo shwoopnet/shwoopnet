@@ -156,3 +156,9 @@ assert P.et_day0(nov1) + 16 * 3600 == _c2.timegm((2026, 11, 1, 21, 0, 0)) and P.
 mar = _c2.timegm((2026, 3, 8, 6, 0, 0))                                      # Sun Mar 8 01:00 EST, before the 02:00 step: 16:00 ET that day is EDT 20:00Z
 assert P.et_day0(mar) + 16 * 3600 == _c2.timegm((2026, 3, 8, 20, 0, 0))
 print("RULINGS R1 AND ET-DAY OK")
+
+# (Nov 16) a rule with no exit for this entry (TC after 16:00 ET) is not clipped: "no mark" is counted for every such true, out-of-cooldown candle, boundary or not
+_b = _c2.timegm((2026, 9, 10, 20, 0, 0)); _cs = [(_b + 60 * i, 100.0, 100.1, 100.0, 1, 1) for i in range(1, 6)]    # 16:01 to 16:05 ET, after the TC candle
+_r, _n = P.run_rule(_cs, None, "long", "TC", 0.0, None, hi=_b + 60 * 100, boundary=_b + 60 * 100); assert _n["no mark"] == 5 and "exit crosses the boundary" not in _n and _r == [], dict(_n)
+_r, _n = P.run_rule(_cs, None, "long", "TC", 0.0, None); assert _n["no mark"] == 5
+print("NO-EXIT COUNTER OK")
