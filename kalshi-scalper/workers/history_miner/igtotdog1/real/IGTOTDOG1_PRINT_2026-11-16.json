@@ -1,0 +1,193 @@
+{
+ "card": {
+  "by_league": {
+   "NBA": {
+    "c10_h0": {
+     "n_third1": 7,
+     "pf": 0.9006419201786213,
+     "pf_third1": 0.0,
+     "pf_third2": 1.4361370716510902
+    },
+    "c10_h1": {
+     "n_third1": 7,
+     "pf": 0.8421052631578947,
+     "pf_third1": 0.0,
+     "pf_third2": 1.3417614833544036
+    },
+    "c10_h2": {
+     "n_third1": 7,
+     "pf": 0.7893018583626319,
+     "pf_third1": 0.0,
+     "pf_third2": 1.257703081232493
+    },
+    "c1_h0": {
+     "n_third1": 7,
+     "pf": 0.8648648648648649,
+     "pf_third1": 0.0,
+     "pf_third2": 1.3852813852813852
+    },
+    "c1_h1": {
+     "n_third1": 7,
+     "pf": 0.8061224489795918,
+     "pf_third1": 0.0,
+     "pf_third2": 1.2845528455284554
+    },
+    "c1_h2": {
+     "n_third1": 7,
+     "pf": 0.7591240875912411,
+     "pf_third1": 0.0,
+     "pf_third2": 1.2093023255813953
+    },
+    "n": 23,
+    "voids": 0,
+    "wins": 4
+   },
+   "NFL": {
+    "c10_h0": {
+     "n_third1": 1,
+     "pf": 0.0,
+     "pf_third1": 0.0,
+     "pf_third2": null
+    },
+    "c10_h1": {
+     "n_third1": 1,
+     "pf": 0.0,
+     "pf_third1": 0.0,
+     "pf_third2": null
+    },
+    "c10_h2": {
+     "n_third1": 1,
+     "pf": 0.0,
+     "pf_third1": 0.0,
+     "pf_third2": null
+    },
+    "c1_h0": {
+     "n_third1": 1,
+     "pf": 0.0,
+     "pf_third1": 0.0,
+     "pf_third2": null
+    },
+    "c1_h1": {
+     "n_third1": 1,
+     "pf": 0.0,
+     "pf_third1": 0.0,
+     "pf_third2": null
+    },
+    "c1_h2": {
+     "n_third1": 1,
+     "pf": 0.0,
+     "pf_third1": 0.0,
+     "pf_third2": null
+    },
+    "n": 1,
+    "voids": 0,
+    "wins": 0
+   },
+   "NHL": {
+    "c10_h0": {
+     "n_third1": 3,
+     "pf": 0.2753319357092942,
+     "pf_third1": 2.010204081632653,
+     "pf_third2": 0.0
+    },
+    "c10_h1": {
+     "n_third1": 3,
+     "pf": 0.25778661365142475,
+     "pf_third1": 1.883777239709443,
+     "pf_third2": 0.0
+    },
+    "c10_h2": {
+     "n_third1": 3,
+     "pf": 0.2414227258419893,
+     "pf_third1": 1.7672811059907831,
+     "pf_third2": 0.0
+    },
+    "c1_h0": {
+     "n_third1": 3,
+     "pf": 0.26440677966101694,
+     "pf_third1": 1.95,
+     "pf_third2": 0.0
+    },
+    "c1_h1": {
+     "n_third1": 3,
+     "pf": 0.24600638977635783,
+     "pf_third1": 1.7906976744186045,
+     "pf_third2": 0.0
+    },
+    "c1_h2": {
+     "n_third1": 3,
+     "pf": 0.23100303951367782,
+     "pf_third1": 1.688888888888889,
+     "pf_third2": 0.0
+    },
+    "n": 16,
+    "voids": 0,
+    "wins": 1
+   }
+  },
+  "c10_h0": {
+   "n_third1": 11,
+   "pf": 0.6031245305693256,
+   "pf_third1": 0.4061855670103093,
+   "pf_third2": 0.684121263514946
+  },
+  "c10_h1": {
+   "n_third1": 11,
+   "pf": 0.5643070787637089,
+   "pf_third1": 0.3808125305922663,
+   "pf_third2": 0.6396143029329048
+  },
+  "c10_h2": {
+   "n_third1": 11,
+   "pf": 0.5289502164502164,
+   "pf_third1": 0.35674418604651165,
+   "pf_third2": 0.599580312857688
+  },
+  "c1_h0": {
+   "n_third1": 11,
+   "pf": 0.5793304221251819,
+   "pf_third1": 0.3880597014925374,
+   "pf_third2": 0.6584362139917695
+  },
+  "c1_h1": {
+   "n_third1": 11,
+   "pf": 0.5398351648351648,
+   "pf_third1": 0.3632075471698113,
+   "pf_third2": 0.6124031007751938
+  },
+  "c1_h2": {
+   "n_third1": 11,
+   "pf": 0.5078534031413613,
+   "pf_third1": 0.3423423423423424,
+   "pf_third2": 0.5756457564575646
+  },
+  "entry_mix": {
+   "NBA": {
+    "entry_no_result_dropped": 1,
+    "median_mins_after_live": 2027.1729666670165,
+    "n": 23,
+    "yes_share": 0.2608695652173913
+   },
+   "NFL": {
+    "entry_no_result_dropped": 1,
+    "median_mins_after_live": 1561.6236333330473,
+    "n": 1,
+    "yes_share": 1.0
+   },
+   "NHL": {
+    "entry_no_result_dropped": 3,
+    "median_mins_after_live": 1426.8612916668255,
+    "n": 16,
+    "yes_share": 0.6875
+   }
+  },
+  "n": 40,
+  "note": "tail strike at tip-off: ties by ticker order; same games as IGUNDER1, one sample, do not add n",
+  "verdict": "no evidence at n = 40",
+  "voids": 0,
+  "wins": 5
+ },
+ "games": 161,
+ "label": "IGTOTDOG1 quick read, thirds 1 and 2 only; upper bound, not fill-checked; live = first hot poll (may precede tip-off)",
+ "tries": 1
+}

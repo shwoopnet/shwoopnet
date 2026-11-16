@@ -1,0 +1,343 @@
+{
+ "cards": {
+  "IGFADE1": {
+   "by_league": {
+    "NBA": {
+     "c10_h0": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c10_h1": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c10_h2": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h0": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h1": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h2": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "n": 0,
+     "voids": 0,
+     "wins": 0
+    },
+    "NFL": {
+     "c10_h0": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c10_h1": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c10_h2": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h0": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h1": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h2": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "n": 0,
+     "voids": 0,
+     "wins": 0
+    },
+    "NHL": {
+     "c10_h0": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c10_h1": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c10_h2": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h0": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h1": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "c1_h2": {
+      "n_third1": 0,
+      "pf": null,
+      "pf_third1": null,
+      "pf_third2": null
+     },
+     "n": 0,
+     "voids": 0,
+     "wins": 0
+    }
+   },
+   "c10_h0": {
+    "n_third1": 0,
+    "pf": null,
+    "pf_third1": null,
+    "pf_third2": null
+   },
+   "c10_h1": {
+    "n_third1": 0,
+    "pf": null,
+    "pf_third1": null,
+    "pf_third2": null
+   },
+   "c10_h2": {
+    "n_third1": 0,
+    "pf": null,
+    "pf_third1": null,
+    "pf_third2": null
+   },
+   "c1_h0": {
+    "n_third1": 0,
+    "pf": null,
+    "pf_third1": null,
+    "pf_third2": null
+   },
+   "c1_h1": {
+    "n_third1": 0,
+    "pf": null,
+    "pf_third1": null,
+    "pf_third2": null
+   },
+   "c1_h2": {
+    "n_third1": 0,
+    "pf": null,
+    "pf_third1": null,
+    "pf_third2": null
+   },
+   "n": 0,
+   "verdict": "no evidence at n = 0",
+   "voids": 0,
+   "wins": 0
+  },
+  "IGUNDER1": {
+   "by_league": {
+    "NBA": {
+     "c10_h0": {
+      "n_third1": 8,
+      "pf": 0.3748341860905818,
+      "pf_third1": 0.6051660516605166,
+      "pf_third2": 0.17688513037350245
+     },
+     "c10_h1": {
+      "n_third1": 8,
+      "pf": 0.36042402826855124,
+      "pf_third1": 0.5809562073121736,
+      "pf_third2": 0.1703601108033241
+     },
+     "c10_h2": {
+      "n_third1": 8,
+      "pf": 0.3465400766843162,
+      "pf_third1": 0.5574803149606299,
+      "pf_third2": 0.1641130405175349
+     },
+     "c1_h0": {
+      "n_third1": 8,
+      "pf": 0.3716981132075472,
+      "pf_third1": 0.6,
+      "pf_third2": 0.17543859649122806
+     },
+     "c1_h1": {
+      "n_third1": 8,
+      "pf": 0.3574074074074074,
+      "pf_third1": 0.576,
+      "pf_third2": 0.16896551724137931
+     },
+     "c1_h2": {
+      "n_third1": 8,
+      "pf": 0.34363636363636363,
+      "pf_third1": 0.5529411764705882,
+      "pf_third2": 0.16271186440677965
+     },
+     "n": 14,
+     "voids": 0,
+     "wins": 4
+    },
+    "NFL": {
+     "c10_h0": {
+      "n_third1": 1,
+      "pf": Infinity,
+      "pf_third1": Infinity,
+      "pf_third2": null
+     },
+     "c10_h1": {
+      "n_third1": 1,
+      "pf": Infinity,
+      "pf_third1": Infinity,
+      "pf_third2": null
+     },
+     "c10_h2": {
+      "n_third1": 1,
+      "pf": Infinity,
+      "pf_third1": Infinity,
+      "pf_third2": null
+     },
+     "c1_h0": {
+      "n_third1": 1,
+      "pf": Infinity,
+      "pf_third1": Infinity,
+      "pf_third2": null
+     },
+     "c1_h1": {
+      "n_third1": 1,
+      "pf": Infinity,
+      "pf_third1": Infinity,
+      "pf_third2": null
+     },
+     "c1_h2": {
+      "n_third1": 1,
+      "pf": Infinity,
+      "pf_third1": Infinity,
+      "pf_third2": null
+     },
+     "n": 1,
+     "voids": 0,
+     "wins": 1
+    },
+    "NHL": {
+     "c10_h0": {
+      "n_third1": 4,
+      "pf": 3.5245707519242155,
+      "pf_third1": Infinity,
+      "pf_third2": 2.1752516281823566
+     },
+     "c10_h1": {
+      "n_third1": 4,
+      "pf": 3.3794100636205897,
+      "pf_third1": Infinity,
+      "pf_third2": 2.084441873915558
+     },
+     "c10_h2": {
+      "n_third1": 4,
+      "pf": 3.2389830508474575,
+      "pf_third1": Infinity,
+      "pf_third2": 1.996610169491525
+     },
+     "c1_h0": {
+      "n_third1": 4,
+      "pf": 3.488235294117647,
+      "pf_third1": Infinity,
+      "pf_third2": 2.152941176470588
+     },
+     "c1_h1": {
+      "n_third1": 4,
+      "pf": 3.3448275862068964,
+      "pf_third1": Infinity,
+      "pf_third2": 2.0632183908045976
+     },
+     "c1_h2": {
+      "n_third1": 4,
+      "pf": 3.2078651685393256,
+      "pf_third1": Infinity,
+      "pf_third2": 1.9775280898876402
+     },
+     "n": 15,
+     "voids": 0,
+     "wins": 11
+    }
+   },
+   "c10_h0": {
+    "n_third1": 13,
+    "pf": 1.210594315245478,
+    "pf_third1": 1.7453874538745386,
+    "pf_third2": 0.9224652087475149
+   },
+   "c10_h1": {
+    "n_third1": 13,
+    "pf": 1.1642274134534196,
+    "pf_third1": 1.6781840096424265,
+    "pf_third2": 0.8871561620099632
+   },
+   "c10_h2": {
+    "n_third1": 13,
+    "pf": 1.119497723195805,
+    "pf_third1": 1.6129921259842517,
+    "pf_third2": 0.853197365625664
+   },
+   "c1_h0": {
+    "n_third1": 13,
+    "pf": 1.2,
+    "pf_third1": 1.730612244897959,
+    "pf_third2": 0.9142857142857144
+   },
+   "c1_h1": {
+    "n_third1": 13,
+    "pf": 1.1540616246498598,
+    "pf_third1": 1.6640000000000001,
+    "pf_third2": 0.8793103448275861
+   },
+   "c1_h2": {
+    "n_third1": 13,
+    "pf": 1.10989010989011,
+    "pf_third1": 1.5999999999999999,
+    "pf_third2": 0.8456659619450316
+   },
+   "n": 30,
+   "verdict": "no evidence at n = 30",
+   "voids": 0,
+   "wins": 16
+  }
+ },
+ "games": 161,
+ "label": "IGFADE1 and IGUNDER1 quick reads, thirds 1 and 2 only (closes Nov 8 to Nov 12); upper bound, not fill-checked",
+ "markets_in_listing": 1827,
+ "rows_read": 639226,
+ "tries": 2
+}
