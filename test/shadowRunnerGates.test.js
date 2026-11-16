@@ -84,6 +84,15 @@ gates.SR5 = () => {
   assert.ok(/validate-window income, upward biased, not a forecast/.test(r[0]) && /calendar days, weekends included/.test(r[1]));
   assert.ok(!/state/.test(JSON.stringify(Object.keys(o.counts))), 'no state in the counts file');
 };
+gates.SR6 = () => {
+  // Consequence (Auditor B, S1 state): the private state is only ordered net amounts plus a day counter; building it day by day gives the IDENTICAL ordered sequence as a rebuild from scratch (ties on close broken by ticker), so a lost cache loses nothing; the cache key moves with the runner, list and holds.
+  const o = JSON.parse(execFileSync('python3', [path.join(__dirname, 'shadowRunnerStateCase.py')], { encoding: 'utf8' }).trim().split('\n').pop());
+  assert.ok(o.seq_equal && o.days_equal && o.agg_equal && o.n === 12, JSON.stringify(o));
+  assert.ok(o.no_identifiers, 'no ticker, time or price in the per-spec state');
+  assert.deepStrictEqual(o.state_keys, ['last_day', 'n_days', 'seq']);
+  assert.deepStrictEqual(o.first_two.map((t) => t[0]), [8.2, 8.2, -1.8], 'the tie at one close is ordered by ticker (TB before TC)');
+  assert.ok(/def cache_key/.test(runnerSrc) && /list_sha256/.test(runnerSrc.slice(runnerSrc.indexOf('def cache_key'), runnerSrc.indexOf('def cache_key') + 500)) && /HOLDS\.json/.test(runnerSrc.slice(runnerSrc.indexOf('def cache_key'), runnerSrc.indexOf('def cache_key') + 500)));
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message.split('\n')[0]); } }
 process.exit(failed ? 1 : 0);

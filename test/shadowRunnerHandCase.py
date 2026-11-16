@@ -48,10 +48,10 @@ got = {k: a[k] for k in want}
 # the guard: M6 (Z) is inside H09 which S1 does not override; M5 (E) closes before the start so it is never read as a trade and never counted as refused
 out = {"match": got == want, "got": got, "want": want,
        "all_get": all(u.startswith("https://api.elections.kalshi.com/trade-api/v2/") for u in urls), "min_close_is_start": any("min_close_ts=%d" % START in u for u in urls),
-       "counts": cnt["specs"][0], "labels": sorted(res["labels"]), "keys_ok": sorted(a.keys()) , "state_has_trades": len(st["trades"]["T_01"]), "pulled_until": st["pulled_until"]["KXTEST15M"], "max_close": NOW - R.SETTLE_LAG_S,
+       "counts": cnt["specs"][0], "labels": sorted(res["labels"]), "keys_ok": sorted(a.keys()) , "state_has_trades": len(st["trades"]["T_01"]["seq"]), "pulled_until": st["pulled_until"]["KXTEST15M"], "max_close": NOW - R.SETTLE_LAG_S,
        "second_run_requests": None}
 n1 = len(urls)
 res2, cnt2, st2 = R.run_once(tmp, NOW + 60, R.Puller(get=get, sleep=lambda s: None), st, cfg)
-out["second_run_same_n"] = res2["specs"]["T_01"]["n"] == 3 and len(st2["trades"]["T_01"]) == 3
+out["second_run_same_n"] = res2["specs"]["T_01"]["n"] == 3 and len(st2["trades"]["T_01"]["seq"]) == 3
 out["second_run_new_requests"] = len(urls) - n1
 print(json.dumps(out))

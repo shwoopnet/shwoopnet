@@ -155,6 +155,11 @@ def fetch_markets(puller, series, min_close, max_close):
     return ms
 
 
+def cache_key(cfg, root):
+    """The state's cache key: the list version, the runner's own sha256 and the HOLDS.json sha, so a changed runner, list or hold table never reuses an old sequence (Auditor B's condition 1)."""
+    return "shadow-state-%s-%s-%s" % (cfg.get("list_sha256", "")[:12], sha_of(os.path.abspath(__file__))[:12], sha_of(os.path.join(root, "kalshi-scalper", "workers", "HOLDS.json"))[:12])
+
+
 def day_of(ts):
     return time.strftime("%Y-%m-%d", time.gmtime(ts))
 
@@ -183,20 +188,19 @@ def score_spec(mods, spec, cut, markets, start_utc, guard, series_in_list, sha25
     return trades, refused
 
 
-def aggregate(mods, trades, start_utc, now):
-    """Per-spec aggregates from the stored trades, with the engine core's own pf and day-based figures. PF is None (with no_losses true) when there are no losses."""
+def aggregate(mods, seq, n_days, start_utc, now):
+    """Per-spec aggregates from the private ordered sequence [[net at 1c, net at 2c, void flag], ...] (order = (close, ticker), the engine's own), with the engine core's pf. PF is None (with no_losses true) when there are no losses."""
     K = mods["engine1_core"]
-    ts = sorted(trades, key=lambda t: (t["c"], t["t"]))
-    n = len(ts); half = n // 2
-    out = {"n": n, "wins": sum(1 for t in ts if t["x1"] > 0), "voids": sum(t["v"] for t in ts)}
-    for tag, key in (("1c", "x1"), ("2c", "x2")):
-        xs = [t[key] for t in ts]
+    n = len(seq); half = n // 2
+    out = {"n": n, "wins": sum(1 for t in seq if t[0] > 0), "voids": sum(t[2] for t in seq)}
+    for tag, i in (("1c", 0), ("2c", 1)):
+        xs = [t[i] for t in seq]
         v = K.pf(xs); out["net_" + tag] = round(sum(xs), 4)
         out["pf_" + tag] = None if (v != v or v == float("inf")) else round(v, 3); out["no_losses_" + tag] = bool(xs) and v == float("inf")
-    xs = [t["x1"] for t in ts]
+    xs = [t[0] for t in seq]
     for name, part in (("half1", xs[:half]), ("half2", xs[half:])):
         v = K.pf(part); out["pf_%s_1c" % name] = None if (v != v or v == float("inf")) else round(v, 3); out["no_losses_%s_1c" % name] = bool(part) and v == float("inf")
-    out["trade_days"] = len({t["d"] for t in ts})
+    out["trade_days"] = n_days
     days = max(1.0, (now - start_utc) / 86400.0)
     out["days"] = round(days, 2)
     out["signals_per_day"] = round(n / days, 3)
@@ -258,7 +262,7 @@ def cut_for(cuts, spec):
 
 
 def run_once(root, now, puller, state, cfg=None):
-    """One daily run. `state` is {pulled_until: {series: epoch}, trades: {spec_id: [trade]}} (private; the caller loads and saves it). Returns (results, counts, state). Any refusal leaves the state as it was."""
+    """One daily run. `state` is {pulled_until: {series: epoch}, trades: {spec_id: {seq: [[x1, x2, void]], n_days, last_day}}, refused} (private: net amounts in close order and a day counter, no ticker, price or feature; the caller loads and saves it). Returns (results, counts, state). Any refusal leaves the state as it was."""
     cfg = cfg or load_config(root)
     lst, cuts, mods, table, H = verified_inputs(root, cfg)
     start = cfg["start_utc"]
@@ -275,11 +279,13 @@ def run_once(root, now, puller, state, cfg=None):
     results, counts = {}, []
     for item in lst["specs"]:
         spec, sha = item["spec"], item["spec_sha256"]
-        mine = st["trades"].setdefault(spec["id"], [])
-        seen = {t["t"] for t in mine}
+        mine = st["trades"].setdefault(spec["id"], {"seq": [], "n_days": 0, "last_day": ""})
         new, refused = score_spec(mods, spec, cut_for(cuts, spec), fetched.get(spec["market"], []), start, guard, series_in_list, sha)
-        mine += [t for t in new if t["t"] not in seen]
-        a = aggregate(mods, mine, start, now)
+        for t in sorted(new, key=lambda t: (t["c"], t["t"])):
+            mine["seq"].append([t["x1"], t["x2"], t["v"]])
+            if t["d"] != mine["last_day"]:
+                mine["n_days"] += 1; mine["last_day"] = t["d"]
+        a = aggregate(mods, mine["seq"], mine["n_days"], start, now)
         a["status"] = status_of(a); a["days_to_100"] = days_to_100(a)
         a["refused_by_guard"] = st.setdefault("refused", {}).get(spec["id"], 0) + refused
         st["refused"][spec["id"]] = a["refused_by_guard"]
