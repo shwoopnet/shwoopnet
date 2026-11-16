@@ -63,6 +63,7 @@ TICKER_RE = re.compile(r"[A-Z0-9][A-Z0-9._-]{0,63}")
 SERIES_RE = re.compile(r"[A-Z0-9]{2,32}")
 CURSOR_RE = re.compile(r"[A-Za-z0-9_=.-]{1,512}")
 REG_RE = re.compile(r"kalshi-scalper/[A-Za-z0-9_./-]{1,120}\.md")
+CATEGORY_RE = re.compile(r"[A-Za-z]+(?: [A-Za-z]+){0,3}")   # Nov 16, 2026 (the Head of R&D): Kalshi category names carry spaces ("Climate and Weather"), so the `category` value alone may hold single spaces between words; urlencode sends them as +
 BAD_CHARS = re.compile(r"[\\/?&#%=@:\s]|\.\.|[^\x21-\x7e]")     # applied to every value except a comma list of tickers (commas are checked per ticker)
 STATUS_VALUES = {"open", "closed", "settled", "unopened"}
 
@@ -214,6 +215,9 @@ def check_request(r, eps, tk, sr):
             parts = s.split(",")
             if not 1 <= len(parts) <= 100 or not all(TICKER_RE.fullmatch(p) and p in tk for p in parts):
                 raise Refused("%s must be 1 to 100 allowlisted tickers" % k)
+        elif k == "category":
+            if len(s) > 40 or not CATEGORY_RE.fullmatch(s):
+                raise Refused("category must be words of letters separated by single spaces")
         elif BAD_CHARS.search(s) or not s:
             raise Refused("param %s has a forbidden character" % k)
         if k == "status" and s not in STATUS_VALUES:

@@ -35,13 +35,12 @@ def closure(i, name, marker, src, date, cause, reason, ret, rule='', notes=None)
 
 NEVER = "Never as written (a new, differently registered rule would start from zero)"
 CATALOG = [
-    wheel('WH-CFRTIK-BTC', 'Perp-model longshot, wheel place (Bitcoin)',
-          "Bitcoin 15 minute: the Kalshi-only cheap side with a model edge from the Bitcoin perpetual; replay of the R6 books plus public candles", r'CFRTI-K on Bitcoin',
-          counting='cfrti', basis="Replay of the R6 books; the count is read from the private log, not stored here"),
-    *[wheel('WH-CFRTIK-' + k, 'Perp-model longshot, wheel place (%s)' % n,
-            "%s 15 minute: the CFRTI-K model edge, listed; admission waits on the perps archive files" % n, r'five further CFRTI-K places', counting='waiting',
-            wait="Listed; the nightly perps archive takes this perpetual from Nov 12, 2026 (PR 861); admission is the Head of R&D's call once its first files land", basis="Replay of recorded books; the count is read from the private log, not stored here")
-      for k, n in (('SILVER', 'Silver'), ('COPPER', 'Copper'), ('WTI', 'WTI oil'), ('HYPE', 'HYPE'), ('BNB', 'BNB'))],
+    # Nov 16, 2026 (the owner: "clean up our shadow list"): CFRTIK was paused for new orders by the owner (Nov 15), so its six wheel places are retired (cause: superseded, not a failed read). Its Nov 20 held-out research read can still run on paper without them.
+    *[wheel(i, 'Perp-model longshot, wheel place (%s)' % n, "%s 15 minute: the CFRTI-K model edge from the %s perpetual" % (n, n), m, retire=True, date='2026-11-16', cause='superseded',
+            reason="Retired Nov 16: paused by the owner. CFRTIK was paused for new orders on Nov 15, so its wheel places no longer count; its Nov 20 held-out read can still run on paper",
+            ret="Not as listed; a new place would start again from a fresh paper record once CFRTIK trades again")
+      for i, n, m in (('WH-CFRTIK-BTC', 'Bitcoin', r'CFRTI-K on Bitcoin'), ('WH-CFRTIK-SILVER', 'Silver', r'five further CFRTI-K places'), ('WH-CFRTIK-COPPER', 'Copper', r'five further CFRTI-K places'),
+                      ('WH-CFRTIK-WTI', 'WTI oil', r'five further CFRTI-K places'), ('WH-CFRTIK-HYPE', 'HYPE', r'five further CFRTI-K places'), ('WH-CFRTIK-BNB', 'BNB', r'five further CFRTI-K places'))],
     *[wheel('WH-NC15-' + k, 'Depth cell, wheel place (%s)' % n, NC15_RULE, r'silver, copper, WTI, HYPE, BNB, USD/CAD', counting='batch2', basis=NC15_BASIS,
             extra=("Marginal: re-counted once on 2026-11-19, withdrawn if under 60 fill-checked signals per 21 days" if k in ('SILVER', 'USDCAD') else None))
       for k, n in (('SILVER', 'silver'), ('COPPER', 'copper'), ('WTI', 'WTI oil'), ('HYPE', 'HYPE'), ('BNB', 'BNB'), ('USDCAD', 'USD/CAD'), ('NATGAS', 'natural gas'))],
@@ -106,6 +105,8 @@ def build(spec, text, batch, start=None):
     row.update(stage='Shadow', label='UNPROVEN', goesLive=SHADOW_LIVE, kill=SHADOW_KILL, nBasis=spec['basis'], **{'return': SHADOW_RETURN})
     row['notes'] = [spec['extra']] if spec.get('extra') else []
     c = spec['counting']
+    if c == 'batch2':   # Nov 16, 2026: the NC15 places show their fill-checked signal count toward 60 (the count file on the nc15-counts branch; it reads no result)
+        row['roomTarget'], row['roomWhat'] = 60, 'signals toward 60'
     if c in ('batch2', 'cfrti') and batch:
         # The NC15 places count from the START TIME line of the admit list when there is one (it was moved twice after the batch 2 admission, Nov 13, 2026), else from the admission.
         stamp = (start or batch) if c == 'batch2' else batch

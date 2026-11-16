@@ -97,6 +97,43 @@ print(json.dumps({'hdr': rows[0], 'n': len(rows) - 1, 'tickers': sorted({r[4] fo
   assert.ok(r.cov.length === 1 && Number(r.cov[0][1]) >= 3, 'a coverage row for the game');
 };
 
+// IG5 (Nov 16, 2026, the Head of R&D's go): the request budget. A calm game reads its moneyline every poll but its spread and total only every 5 minutes; a game whose price moves 2c on ANY followed market is hot and reads all three every poll; moves are compared by ticker.
+gates.IG5 = () => {
+  const r = py(`
+import tempfile
+def go(prices):
+    calls = []
+    def fetch(url):
+        calls.append(url)
+        if '/events?' in url:
+            s = url.split('series_ticker=')[1].split('&')[0]
+            return 200, {'events': [{'event_ticker': s + '-26NOV08LALDET'}]}, 'D'
+        if 'GAME-' in url:
+            p = prices(len(calls))
+            return 200, {'markets': [{'ticker': 'G-LAL', 'yes_bid_dollars': '%.2f' % p, 'yes_ask_dollars': '%.2f' % (p + 0.02)}, {'ticker': 'G-DET', 'yes_bid_dollars': '0.58', 'yes_ask_dollars': '0.60'}]}, 'D'
+        pre = 'S' if 'SPREAD' in url else 'T'
+        return 200, {'markets': [{'ticker': pre + '%d' % i, 'floor_strike': i, 'yes_bid_dollars': '%.2f' % (0.1 * i), 'yes_ask_dollars': '%.2f' % (0.1 * i + 0.02)} for i in range(1, 9)]}, 'D'
+    clock = [1000.0]
+    def now():
+        clock[0] += 3.0
+        return clock[0]
+    m.time.sleep = lambda s: None
+    st = m.Stream(fetch=fetch, clock=now, sleep=lambda s: None)
+    m.run(tempfile.mkdtemp(), 4, stream=st, now_fn=now)
+    mk = [c for c in calls if '/markets?event_ticker=' in c]
+    return {'ml': len([c for c in mk if 'GAME-' in c]), 'sp': len([c for c in mk if 'SPREAD-' in c]), 'tot': len([c for c in mk if 'TOTAL-' in c])}
+calm = go(lambda n: 0.40)
+moving = go(lambda n: 0.40 if n % 2 else 0.45)
+print(json.dumps({'calm': calm, 'moving': moving, 'moved': [m.any_moved({'A': 0.50}, {'A': 0.52}), m.any_moved({'A': 0.50}, {'B': 0.90}), m.any_moved({'A': 0.50}, {'A': 0.51}), m.any_moved({}, {'A': None})],
+  'due': [m.side_due({'hot_until': 0, 'side_due': 0}, 10), m.side_due({'hot_until': 0, 'side_due': 400}, 100), m.side_due({'hot_until': 5000, 'side_due': 400}, 100), m.side_due({'hot_until': 0, 'side_due': 400}, 400)]}))`);
+  assert.ok(r.calm.ml >= 20, JSON.stringify(r.calm));
+  assert.ok(r.calm.sp >= 1 && r.calm.sp * 2 < r.calm.ml, 'a calm game reads its spread far less often than its moneyline: ' + JSON.stringify(r.calm));
+  assert.strictEqual(r.calm.sp, r.calm.tot);
+  assert.ok(r.moving.ml - r.moving.sp <= 2 && r.moving.sp === r.moving.tot, 'a moving game is hot and reads all three kinds at every poll after the move that made it hot: ' + JSON.stringify(r.moving));
+  assert.deepStrictEqual(r.moved, [true, false, false, false], 'moves are compared by ticker, a 1c step or a missing quote is no move');
+  assert.deepStrictEqual(r.due, [true, false, true, true], 'the first poll reads all three, a hot game always, a cold one when its 5 minutes are up');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
