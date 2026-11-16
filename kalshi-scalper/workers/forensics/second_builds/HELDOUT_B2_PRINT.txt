@@ -1,0 +1,16 @@
+label: unread by ENGINE1, seen by earlier development cards
+held-out markets 29545 cuts sha256 da352c9b450f5c21663539ea6de59c32c265b82e8d892ed5dd8fbf79cd45e3ba desk_a_print_sha256 b5d8c6e6b0b775584afb123ad922d02c8305fc30636c08bde9fe719c9dfdcad5
+verdicts {'holds': 61, 'does not hold': 119, 'no evidence': 10}
+holds and BH survivor 13 BH survivors (any verdict) 17
+KXBNB15M rules 3 holds 1 no evidence 1
+KXBTC15M rules 44 holds 6 no evidence 0
+KXDOGE15M rules 35 holds 9 no evidence 3
+KXETH15M rules 25 holds 0 no evidence 0
+KXGOLD15M rules 17 holds 12 no evidence 0
+KXHYPE15M rules 12 holds 6 no evidence 6
+KXNEAR15M rules 3 holds 0 no evidence 0
+KXSILVER15M rules 1 holds 1 no evidence 0
+KXSOL15M rules 6 holds 1 no evidence 0
+KXWTI15M rules 5 holds 3 no evidence 0
+KXXRP15M rules 38 holds 22 no evidence 0
+KXZEC15M rules 1 holds 0 no evidence 0
