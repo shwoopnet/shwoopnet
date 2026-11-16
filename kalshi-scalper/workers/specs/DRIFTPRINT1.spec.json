@@ -1,0 +1,32 @@
+{
+ "id": "DRIFTPRINT1",
+ "desk": "Idea Desk B",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/econcards/ECON_RELEASE_CARDS_NOV16.md",
+ "needs_new_code": ["loader for the ECONHIST_LISTS run plus the KXJOBLESSCLAIMS candle pull (History Miner is building the ECONHIST loader)", "scorer plugin driftprint.py (event builder, decision, cash; hand case first)"],
+ "uniqueness": {
+  "closest_existing": ["ECONLAG", "ECONFADE", "NOWCAST1"],
+  "declined_list_rows_checked": ["favourite-and-hold (the rule buys the side that drifted, at 0.15 to 0.85, not a favourite at 0.88 to 0.97)", "forecast against the market (declined; no forecast is used, only the market's own price path)", "daily high and low temperature and rain (closed; not used)"],
+  "difference": "acts BEFORE a scheduled release from the ladder's own 5 minute price path T-3h to T-30min; ECONLAG used a Fed fast market after the print, ECONFADE the shock after it, NOWCAST1 a nowcast model",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "TO BE WRITTEN (ECONHIST loader, History Miner)",
+  "loader_sha256": "PENDING",
+  "extracts": ["ECONHIST_LISTS landed run (not dispatched yet) for the weekly release calendar", "5 minute candles of KXJOBLESSCLAIMS markets, T-3h to T+10min, pulled through Main after the lists land"],
+  "ticker_wall": ["KXJOBLESSCLAIMS"],
+  "window": {"first_close": "PENDING (first weekly claims close in the endpoint)", "last_close_exclusive": "2026-09-10T00:00:00Z"},
+  "held_out_map_checked_by": "Auditor B, 2026-11-15 (hold map for the 10 series: KXJOBLESSCLAIMS has no hold before 2026-09-10; ECONNEW1 holds from 2026-10-17)",
+  "independence_note": "claims series only; ECONNEW1 used KXJOBLESSCLAIMS validation window (spent), not these closes"
+ },
+ "split": {"mode": "forward_only", "first_close_of_read": "2026-09-10T00:00:00Z", "release_rule": "development read on closes before 2026-09-10 (the whole ECONHIST range) once; the forward read opens from 2026-09-10 on the live list only after this read is committed"},
+ "event": {"scorer_plugin": "driftprint.py", "scorer_plugin_sha256": "PENDING", "decision_instant_seconds_before_close": 1800, "signal_threshold_abs_gap": 0.05, "entry_rule": "among markets with mid 0.20 to 0.80 at T-3h, the largest 5 minute rise to T-30min (at least 0.05); buy the side that rose at the T-30min ask plus 1c if 0.15 to 0.85; one per release", "exit": "H (hold to settlement); the early exit at the T+5min bid minus 1c is reported beside it"},
+ "costs": {"contracts": 10, "haircuts_primary": [0.01, 0.02], "haircuts_stress": [], "fee_taker": null, "fee_maker": null},
+ "gates": {"min_n": 100, "pf_primary": 1.3, "pf_secondary": 1.0, "min_trade_days": 10, "bh_alpha": 0.05},
+ "tries": {"rules_this_spec": 1, "prior_m": "from the TALLY"},
+ "prediction": "n 60 to 90 usable releases, cash PF near 1.0 at 1c and under 1.0 at 2c; under 100 events reads no evidence at n = x",
+ "kill": "under 100 usable events, or 2c PF under 1.0 in either half",
+ "kill_fast": true,
+ "outputs": {"survivor_line": "market, rule, PF 1c and 2c, n, days", "family_flag": "none"}
+}
