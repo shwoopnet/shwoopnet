@@ -1,5 +1,5 @@
 {
- "version": "2026-11-16T16Z+4",
+ "version": "2026-11-16T16Z+5",
  "author": "Auditor B",
  "rule": "A cell (ticker pattern, time) is REFUSED if its time is in [from, to) of any row with status OPEN or FROZEN. Time = market close_ts (binary), event occurrence where the row says so, candle end_ts or file date (perps, recorders). 'to' null = open ended. A cell in NO row is NOT cleared: the driver also refuses any time at or after forward_default_deny_from unless the signed spec names that window in its holds table. A row with a 'scope' applies only to that kind of data (archive_binary = ENGINE1 binary-market archive and NC15 extracts); a row without 'scope' applies to every kind.",
  "forward_default_deny_from": 1794787200,
@@ -59,7 +59,8 @@
    "to": null,
    "card": "sports-data ingame forward window",
    "status": "OPEN",
-   "note": "History Miner's forward IG specs own it from 2026-11-17T00:00Z; any other reader refused"
+   "scope": "in_play",
+   "note": "History Miner's forward IG specs own it from 2026-11-17T00:00Z; any other reader refused; in-play reads only (rows and candles at or after the game's scheduled start, tip proxy = scheduled end minus 3 h; pre-game candles are not in scope); narrowed by the Head 2026-11-16 18:30Z"
   },
   {
    "id": "H05",
@@ -342,6 +343,29 @@
     "H02",
     "H20",
     "H22 and the forward_default_deny for these cells, for the shadow runner only"
+   ]
+  },
+  {
+   "id": "S2",
+   "name": "NBA pre-game joint print clause",
+   "kind": "clearance",
+   "tickers": [
+    "KXNBATOTAL*"
+   ],
+   "from": 1794528000,
+   "to": 1796342400,
+   "card": "joint NBA print (NBATOTAL with NBALADDER, NBAREB, SIBHIT-R); Head of R&D 2026-11-16",
+   "status": "APPROVED",
+   "terms": [
+    "read ONLY KXNBATOTAL candles ending at or before each decision time (at most 4 hours before the scheduled end, which is pre-game) plus the settled result, ONLY to score NBATOTAL's frozen rules (spec sha256 385c3b4a53d0967d6e425f9ef4dad25f1c9ea3ec63282c33bcbbb5887e43dc4a once signed)",
+    "per-rule aggregates only (n in games, PF at 1c and 2c, net, days); no per-game or per-feature tables",
+    "no in-play row or candle at or after the scheduled start is read",
+    "disclosed on IGDRIFTGRID1, IGDRIFTSPREAD1 and IGPERIOD1 as 'outcomes seen in aggregate by the NBA pre-game print'; their frozen rules are unchanged and this is never a held-out verdict for them",
+    "one joint print, one m, read once on or after 2026-12-04"
+   ],
+   "overrides": [
+    "H04 (in-play scope only reads are unaffected)",
+    "the forward_default_deny for these cells, for the joint print only"
    ]
   }
  ],
