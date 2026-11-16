@@ -1,0 +1,1 @@
+OPENGAP2 print.txt sha256 403dcef1e0eb0b525ba9781a4ddcd42fb33b7e6358d191985173eba7d326cc64 (opengap2.py 72fce82e, opengap1f.py da2346e5; one run Nov 16, committed before reading; no new Databento cost, est. running total $0.168104)
