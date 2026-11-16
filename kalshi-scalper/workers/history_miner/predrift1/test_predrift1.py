@@ -13,3 +13,6 @@ assert P.entry([(tip - 6 * H - 5 * m, 0.70, 0.72), (tip - H - 2 * m, 0.85, 0.87)
 assert P.entry([(tip - 6 * H - 5 * m, 0.40, 0.42), (tip - H - 2 * m, 0.30, 0.32)], tip)[:2] == ("no", 0.70)
 assert P.pick({"B": 1, "A": 2}, "ml", "NHL") == {"A": 2} and P.pick({"A": 1}, "ml", "NBA") == {} and P.pick({"T": 1}, "total", "NBA") == {"T": 1}
 print("predrift1: ok")
+assert P.schedule_ok({"2026-11-12T06:00:00Z"}) and P.schedule_ok({"2026-11-12T06:05:00Z"}) and P.schedule_ok({"2026-11-12T06:30:00Z"})
+assert not P.schedule_ok({"2026-11-12T04:15:00Z"}) and not P.schedule_ok({"2026-11-12T06:00:00Z", "2026-11-12T06:30:00Z"}) and not P.schedule_ok({None})
+print("schedule test: ok")

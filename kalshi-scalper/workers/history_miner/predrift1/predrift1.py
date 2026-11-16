@@ -39,13 +39,32 @@ def entry(rows, tip):
     return (side, ask, d) if LO - I.EPS <= ask <= HI + I.EPS else None
 
 
-def load_listing(folder):
-    out = {}
+OK_MIN = ("00", "30", "05")
+
+
+def schedule_ok(values):
+    """The Head's look-ahead test (Nov 16 15:22Z): one schedule value per game, on :00, :30 or :05 with 0 seconds."""
+    if len(values) != 1:
+        return False
+    v = next(iter(values))
+    return bool(v) and v[14:16] in OK_MIN and v[17:19] == "00"
+
+
+def load_listing(folder, dropped=None):
+    out, occ, mk = {}, defaultdict(set), []
     for f in sorted(glob.glob(os.path.join(folder, "*.json.gz"))):
         for m in json.load(gzip.open(f)).get("markets", []):
-            cl = ts(m["close_time"])
-            if I.START <= cl < I.CUT and m.get("occurrence_datetime"):
-                out[m["ticker"]] = (cl, m.get("result"), ts(m["occurrence_datetime"]) - 3 * 3600)
+            occ[m["event_ticker"].split("-", 1)[-1] + "|" + m["event_ticker"][:5]].add(m.get("occurrence_datetime"))
+            mk.append(m)
+    bad = {g for g, v in occ.items() if not schedule_ok(v)}
+    if dropped is not None:
+        for g in bad:
+            dropped[g.split("|")[1]] += 1
+    for m in mk:
+        cl = ts(m["close_time"])
+        g = m["event_ticker"].split("-", 1)[-1] + "|" + m["event_ticker"][:5]
+        if I.START <= cl < I.CUT and m.get("occurrence_datetime") and g not in bad:
+            out[m["ticker"]] = (cl, m.get("result"), ts(m["occurrence_datetime"]) - 3 * 3600)
     return out
 
 
@@ -65,7 +84,8 @@ def run(ingame, results):
             lg, g = I.league_of(ev), I.game_of(ev)
             if lg and g and kind in ("ml", "total"):
                 per[(lg, g, kind)][tk].append((t, b, a))
-    L = load_listing(results)
+    sched_dropped = defaultdict(int)
+    L = load_listing(results, sched_dropped)
     trs = []
     for (lg, g, kind) in sorted(per):
         for tk, rows in sorted(pick(per[(lg, g, kind)], kind, lg).items()):
@@ -81,6 +101,7 @@ def run(ingame, results):
     S = I.summarise(trs); S["verdict"] = I.verdict(S)
     S["by_league_kind"] = {"%s_%s" % (lg, k): I.summarise([x for x in trs if x["league"] == lg and x["kind"] == k])
                            for lg in ("NBA", "NFL", "NHL") for k in ("total", "ml")}
+    S["schedule_test_dropped_games"] = dict(sched_dropped)
     S["yes_share"] = sum(1 for x in trs if x["side"] == "yes") / len(trs) if trs else None
     return {"label": "PREDRIFT1 quick read, thirds 1 and 2 only; tip = occurrence_datetime - 3 h; upper bound, not fill-checked",
             "tries": 1, "card": S}

@@ -13,3 +13,6 @@ Rule (built for the recorder's real ~2 minute gaps):
 - Net as ingame1.net; h 0, 1c, 2c; primary 2c; c 1 and 10. Bar: n >= 100 over t1 and t2; PF 2c >= 1.3 pooled and >= 1.0 in t1 and t2. Under 100: "no evidence at n = x". One try.
 
 Hand case (invented): tip 10:00. Rows at 03:55 (0.40, 0.42), 08:58 (0.47, 0.49): d = +0.07, buy YES at 0.49; win h 2c: entry 0.51, fee ceil(1.7493) = 0.02, net +0.47; loss -0.53. A row at 03:45 only for M6 (15 min before): no trade. d = +0.03: no trade. M1 row (0.85, 0.87), d > 0: ask 0.87 out of range, no trade. d < 0 with M1 row (0.30, 0.32): buy NO at 0.70.
+
+## Amendment 1 (2026-11-16 ~15:45Z, the Head's look-ahead test, before any read)
+A game is kept only if its listing markets carry ONE occurrence_datetime, on minute :00, :30 or :05 with 0 seconds; others are dropped and counted per league (schedule_test_dropped_games). Checked on schedule fields only (no result): NBA 38 and NHL 33 games all pass; NFL 6 of 14 fail (kickoffs at :15, :20, :25, which are real NFL kickoff minutes; applied strictly as asked, flagged to the Head).
