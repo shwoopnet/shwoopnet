@@ -1672,3 +1672,7 @@ Page only, nothing to deploy. The whole Bot status card (`data-card="status"`) i
 ## Held-out log: pooled stock perps extracts for ENGPERPS_POOL1 (Nov 16, 2026, Auditor B's allow line)
 
 The two pooled stock perps extracts (94 Equities-class perps, 1 minute candles and funding prints from 2026-11-05T18:39Z to before 2026-11-17T00:00Z) are listed in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`, readable only by Desk A's pooled stock perps loader at sha256 a13fd79b (the corrected line; Auditor B's first sha 8393ab13 was never logged). No held-out window is in the files. Docs only.
+
+## Held-out log: ENGPERPS_POOL1 second build reader (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the Testing Desk's second-build reader of the pooled stock perps extracts (loader `pool1_second_load.py`, sha256 0d2888f8; same two extracts and the same window, 2026-11-05T18:39Z to before 2026-11-17T00:00Z, as Desk A's pooled loader line). Neither build may run until both lines are on main. Docs only.
