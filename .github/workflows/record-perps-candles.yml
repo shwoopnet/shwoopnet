@@ -5,7 +5,16 @@ name: record-perps-candles
 on:
   schedule:
     - cron: "0 2,3,4 * * 1-6"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Back-pull: one finished UTC date (YYYY-MM-DD); leave empty for the normal run"
+        required: false
+        type: string
+      only:
+        description: "Back-pull: comma separated tickers, e.g. KXGOLDPERP,KXUS500PERP,KXUSTECH100PERP (needs a date)"
+        required: false
+        type: string
 permissions:
   contents: write
 concurrency:
@@ -28,9 +37,18 @@ jobs:
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           if git fetch -q --depth 1 origin perp-data; then git checkout -q -b perp-data FETCH_HEAD; else git checkout -q --orphan perp-data; fi
       - name: Record
+        env:
+          BACK_DATE: ${{ inputs.date }}
+          BACK_ONLY: ${{ inputs.only }}
         run: |
           [ "$(date -u +%Y%m%d)" -le 20270226 ] || { echo "past the stop date 2027-02-26; nothing recorded"; exit 0; }
-          python3 code/scripts/record_perps_candles.py data
+          if [ -n "$BACK_DATE" ]; then
+            [[ "$BACK_DATE" =~ ^20[0-9]{2}-[01][0-9]-[0-3][0-9]$ ]] || { echo "bad date"; exit 1; }
+            [[ -z "$BACK_ONLY" || "$BACK_ONLY" =~ ^[A-Z0-9,]{1,200}$ ]] || { echo "bad ticker list"; exit 1; }
+            python3 code/scripts/record_perps_candles.py data "$BACK_DATE" "$BACK_ONLY"
+          else
+            python3 code/scripts/record_perps_candles.py data
+          fi
       - name: Commit and push the data branch
         run: |
           cd data
