@@ -53,3 +53,8 @@
 - **Window constants:** KXNBAPTS 2025-26 markets with close_time from **2026-03-01T00:00:00Z** (1772323200) to before **2026-04-14T00:00:00Z** (1776124800). That is the regular season only; the play-in and playoffs are excluded. The scorer tests close_time first and drops everything else before reading any other field.
 - **Exclusion by ticker (the ruling):** the 1,099 markets PROPS1 read candles for. **Open problem, stated before any pull:** that ticker list is not in any committed file. PROPS1's database is git-ignored and its session is archived. PROPS1's sample cannot be rebuilt without its ESPN model (the sample was the first 40 by sha1 among the markets its model scored). The Head is asked how to handle this before the candle job is built. The list job does not depend on it.
 - **What PROPS1's read covered:** pre-game candles only, from 2 h before tip to tip, of at most 1,099 markets across NBA, WNBA and NFL stats. SIBHIT-R's quote is the late fourth-quarter minute T = O - 60.
+
+## Amendment 2 (Nov 16, 2026, ~15:30Z; the Head of R&D's choice (A) of 15:24Z; written before any pull)
+
+- **No ticker exclusion.** Because the 1,099-ticker list cannot be recovered, SIBHIT-R reads every market in the window. The disclosure: PROPS1 read pre-game candles only (tip - 2 h to tip), for a cheap-side test, on at most about 12% of the window's markets. SIBHIT-R reads the late fourth-quarter minute. It is a different question at a different minute, so the overlap cannot have selected SIBHIT-R's result.
+- **On a pass:** the forward read on the 2026-11-13 to before 2026-12-04 block (after Dec 4) is still required before any shadow, beside the second build (16b) and the Verification Analyst.
