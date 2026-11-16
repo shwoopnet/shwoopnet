@@ -3,8 +3,8 @@
  "status": "active",
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/ENGINE1_HELDOUT_READ_PLAN_NOV16.md",
- "purpose": "Settled markets (tickers, close times; a reader reads results only for kept rows) of the 8 shadow series (BTC, ETH, XRP, GOLD, HYPE, NEAR, SOL, BNB 15 minute), closes 2026-10-03T16:00Z to before 2026-10-28T00:00Z, in 10 day close ranges, as input for the candle jobs of ENGINE1's held-out read.",
- "heldout": "Unread by ENGINE1, seen by earlier development cards. Closes before 2026-10-03T16:00Z (1791043200) and at or after 2026-10-28T00:00Z (1793145600) are NEVER asked (the cut table of Auditor B and the Head, Nov 16). The landed run goes into HELDOUT_PULL_RUNS.md (Main) and is readable only by the ENGINE1 held-out loader.",
+ "purpose": "Settled markets (tickers, close times; a reader reads results only for kept rows) of KXBTC15M, KXETH15M, KXXRP15M, KXGOLD15M, KXDOGE15M, closes 2026-10-03T16:00Z to before 2026-10-28T00:00Z, in 10 day close ranges, as input for the candle jobs of ENGINE1's held-out read.",
+ "heldout": "Unread by ENGINE1, seen by earlier development cards. Closes before 2026-10-03T16:00Z (1791043200) and at or after 1793145600 (2026-10-28T00:00Z) are NEVER asked (Auditor B's windows, Nov 16). The landed run goes into HELDOUT_PULL_RUNS.md (Main) and is readable only by the ENGINE1 held-out loader.",
  "allowed_endpoints": [
   {
    "name": "markets_list",
@@ -25,13 +25,10 @@
   "KXETH15M",
   "KXXRP15M",
   "KXGOLD15M",
-  "KXHYPE15M",
-  "KXNEAR15M",
-  "KXSOL15M",
-  "KXBNB15M"
+  "KXDOGE15M"
  ],
  "ticker_allowlist": [],
- "max_requests": 84,
+ "max_requests": 57,
  "requests": [
   {
    "id": "settled_KXBTC15M_01",
@@ -178,10 +175,10 @@
    "max_pages": 3
   },
   {
-   "id": "settled_KXHYPE15M_01",
+   "id": "settled_KXDOGE15M_01",
    "path": "/markets",
    "params": {
-    "series_ticker": "KXHYPE15M",
+    "series_ticker": "KXDOGE15M",
     "status": "settled",
     "min_close_ts": 1791043200,
     "max_close_ts": 1791907199,
@@ -190,10 +187,10 @@
    "max_pages": 3
   },
   {
-   "id": "settled_KXHYPE15M_02",
+   "id": "settled_KXDOGE15M_02",
    "path": "/markets",
    "params": {
-    "series_ticker": "KXHYPE15M",
+    "series_ticker": "KXDOGE15M",
     "status": "settled",
     "min_close_ts": 1791907200,
     "max_close_ts": 1792771199,
@@ -202,118 +199,10 @@
    "max_pages": 3
   },
   {
-   "id": "settled_KXHYPE15M_03",
+   "id": "settled_KXDOGE15M_03",
    "path": "/markets",
    "params": {
-    "series_ticker": "KXHYPE15M",
-    "status": "settled",
-    "min_close_ts": 1792771200,
-    "max_close_ts": 1793145599,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXNEAR15M_01",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXNEAR15M",
-    "status": "settled",
-    "min_close_ts": 1791043200,
-    "max_close_ts": 1791907199,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXNEAR15M_02",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXNEAR15M",
-    "status": "settled",
-    "min_close_ts": 1791907200,
-    "max_close_ts": 1792771199,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXNEAR15M_03",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXNEAR15M",
-    "status": "settled",
-    "min_close_ts": 1792771200,
-    "max_close_ts": 1793145599,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXSOL15M_01",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXSOL15M",
-    "status": "settled",
-    "min_close_ts": 1791043200,
-    "max_close_ts": 1791907199,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXSOL15M_02",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXSOL15M",
-    "status": "settled",
-    "min_close_ts": 1791907200,
-    "max_close_ts": 1792771199,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXSOL15M_03",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXSOL15M",
-    "status": "settled",
-    "min_close_ts": 1792771200,
-    "max_close_ts": 1793145599,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXBNB15M_01",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXBNB15M",
-    "status": "settled",
-    "min_close_ts": 1791043200,
-    "max_close_ts": 1791907199,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXBNB15M_02",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXBNB15M",
-    "status": "settled",
-    "min_close_ts": 1791907200,
-    "max_close_ts": 1792771199,
-    "limit": 1000
-   },
-   "max_pages": 3
-  },
-  {
-   "id": "settled_KXBNB15M_03",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXBNB15M",
+    "series_ticker": "KXDOGE15M",
     "status": "settled",
     "min_close_ts": 1792771200,
     "max_close_ts": 1793145599,
@@ -322,7 +211,7 @@
    "max_pages": 3
   }
  ],
- "notes": "8 series x 3 ranges (Oct 3 16:00Z to Oct 28 00:00Z), at most 3 pages each (a series has 96 closes a day, 960 in 10 days, so one page of 1000 almost always). max_requests is the page budget plus 12 retries. Candles are NOT requested here. Pacing 5.0 s.",
+ "notes": "5 series x 3 ranges of at most 10 days, at most 3 pages each (a series has 96 closes a day, 960 in 10 days, so one page of 1000 almost always). max_requests is the page budget plus 12 retries. Candles are NOT requested here. Pacing 5.0 s.",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 5.0,
