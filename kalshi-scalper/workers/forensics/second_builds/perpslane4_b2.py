@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PERPSLANE4 INDEPENDENT SECOND BUILD (Forensics desk, Nov 16, 2026). Written from PERPSLANE4_DEFINITIONS.md, specs/PERPSLANE4.spec.json (sha256 02bd15fd...) and LANE4_HAND_CASE.md on claude/testing-desk (a5bc1912b) ONLY. The Testing Desk's plugin, loader and prints were not opened before this file was committed.
-Declared readings (each can move a count): (R1, superseded by the Nov 16 20:56Z definitions) no data-start rule: the boundary is only the cut. (R2) A2 needs the underlyings u[name][ET date] = (official open, previous close); this build takes them as an argument and has none (no Databento read), so A2 prints 'no underlying' skips only. (R3) trade day = the ET date of the entry end; trading days = ET dates before the boundary on which at least one POOL name has a usable candle ending 09:31 ET. (R4) the gate and BH are per fee (0.0012 and 0.0005 a side) and each uses that fee's own nets; the day z uses the h 0.0002 net of that fee. (R5) TAKEN = both candles usable; a trade dropped later for the boundary or for unbooked funding still occupies the position. Rule C: T = P + 86400 per print P. Closures 2026-11-26 and 2026-12-25 are no session day; 2026-11-27 and 2026-12-24 have no B2 or B3. (R6) ET midday offset: EDT (UTC-4) for ET dates up to 2026-10-31, EST (UTC-5) from 2026-11-01 (the change is 2026-11-01T06:00Z).
+Declared readings (each can move a count): (R1, superseded by the Nov 16 20:56Z definitions) no data-start rule: the boundary is only the cut. (R2) A2 needs the underlyings u[name][ET date] = (official open, previous close); this build takes them as an argument and has none (no Databento read), so A2 prints 'no underlying' skips only. (R3) trade day = the ET date of the entry end; trading days = ET dates before the boundary on which at least one POOL name has a usable candle ending 09:31 ET (weekends included, no weekday filter: corrected after the real-data compare). (R4) the gate and BH are per fee (0.0012 and 0.0005 a side) and each uses that fee's own nets; the day z uses the h 0.0002 net of that fee. (R5) TAKEN = both candles usable; a trade dropped later for the boundary or for unbooked funding still occupies the position. Rule C: T = P + 86400 per print P. Closures 2026-11-26 and 2026-12-25 are no session day; 2026-11-27 and 2026-12-24 have no B2 or B3. (R6) ET midday offset: EDT (UTC-4) for ET dates up to 2026-10-31, EST (UTC-5) from 2026-11-01 (the change is 2026-11-01T06:00Z).
 usage: python3 -I perpslane4_b2.py --selftest | python3 -I perpslane4_b2.py <m_carried> <extract.sqlite> [<extract.sqlite> ...]"""
 import sys, os, math, sqlite3, collections, calendar, datetime, itertools
 BOUNDARY = 1794873600; H = (0.0002, 0.0005); FEES = (0.0012, 0.0005)
@@ -190,7 +190,7 @@ def main(a):
         if len(dates) >= 5 and len(fd.get(tk, {})) >= 2: pool.append(Name(tk, cd[tk], fd[tk]))
     alldays = sorted({et_date(e) for nm in pool for e in nm.c if e < BOUNDARY and is_wd(et_date(e))})
     days_by = {nm.tk: [d for d in alldays] for nm in pool}
-    trading_days = len({et_date(e) for nm in pool for e in nm.c if e < BOUNDARY and is_wd(et_date(e)) and e == et_end(et_date(e), 9, 31) and usable(nm.c[e])})
+    trading_days = len({et_date(e) for nm in pool for e in nm.c if e < BOUNDARY and e == et_end(et_date(e), 9, 31) and usable(nm.c[e])})   # the definitions: distinct ET dates with a usable 09:31 candle of at least one pool name, weekends included (perps trade around the clock)
     sched_diff = sum(1 for nm in pool for a_, b_ in zip(nm.ts, nm.ts[1:]) if b_ != a_ + 86400)
     print("days where the next actual print differs from the scheduled T:", sched_diff)
     print("names in the pool", len(pool), "of", len(cd), "with candles; ET weekdays", len(alldays), "trading days", trading_days, "rules", len(build_rules()), "m_total", mcar + 101, flush=True)
@@ -205,5 +205,5 @@ def main(a):
     if out:
         with open(out, "w") as fh:
             for rule, r in res:
-                for fee in FEES: q = r[fee]; fh.write("%s fee %.4f n %d days %d perday %.6f pf2 %.12f pf5 %.12f h1 %.12f h2 %.12f z %s p %s gate %s\n" % ("|".join(str(x) for x in rule), fee, q["n"], q["days"], q["perday"], q["pf2"], q["pf5"], q["h1"], q["h2"], "%.12f" % q["z"] if q["z"] is not None else "-", "%.12e" % q["p"] if q["p"] is not None else "-", q["gate"]))
+                for fee in FEES: q = r[fee]; fh.write("%s fee %.4f n %d days %d perday %.12f pf2 %.12f pf5 %.12f h1 %.12f h2 %.12f z %s p %s gate %s\n" % ("|".join(str(x) for x in rule), fee, q["n"], q["days"], q["perday"], q["pf2"], q["pf5"], q["h1"], q["h2"], "%.12f" % q["z"] if q["z"] is not None else "-", "%.12e" % q["p"] if q["p"] is not None else "-", q["gate"]))
 if __name__ == "__main__": main(sys.argv[1:])

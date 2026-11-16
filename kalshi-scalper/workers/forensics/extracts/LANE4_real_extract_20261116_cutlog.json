@@ -1,0 +1,16 @@
+{
+ "candles": 576411,
+ "counts": {
+  "candle rows of other tickers (dropped)": 27842,
+  "duplicate candle (first kept)": 17145,
+  "duplicate print (first kept)": 18,
+  "funding rows of other tickers (dropped)": 48
+ },
+ "extract": "PERPSLANE4 real data",
+ "extract_sha256": "1aded757127d36c590ec7065bc43309713470755f9cee693b0f08ac62149c538",
+ "extractor_sha256": "a6b9532d7369e06b8f2edd1a1bf1d16e07f30c937c750c2b28e846569c0ca6f9",
+ "files": 160,
+ "manifest_sha256": "1b46f85d4b1b92d20447240c284236107e64d754e1a6f340c072ad7d2846e369",
+ "prints": 662,
+ "tickers_with_candles": 61
+}
