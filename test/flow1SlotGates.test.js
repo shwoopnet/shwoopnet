@@ -43,11 +43,11 @@ gates.FL4 = () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiSlotRunLib.js'), 'utf8');
   assert.ok(/path: "\/markets\/trades"/.test(src) && /min_ts: String\(closeSec - 360\), max_ts: String\(closeSec - 180\)/.test(src), 'the engine reads the public tape for 360 to 180 s before the close, with no key');
   assert.ok(/if \(page === FLOW_PAGES - 1\) ok = false;/.test(src), 'a read that needs more pages than allowed is partial and sends nothing');
-  assert.ok(/oiRise, flow, position/.test(src), 'the flow goes into the gate');
+  assert.ok(/oiRise, (oiRel, )?flow, position/.test(src), 'the flow goes into the gate');
 };
 gates.FL5 = () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  assert.ok(/var KAL_SLOT_REGISTERED = \['OICORE', 'EVENT830', 'CFRTIK'\];/.test(html) && !/kalRulesSlotFlow/.test(html), 'the Bot page no longer lists FLOW1 as running');
+  assert.ok(/var KAL_SLOT_REGISTERED = \['OICORE', 'EVENT830', 'CFRTIK', 'OIREL1', 'XRPFAV10'\];/.test(html) && !/kalRulesSlotFlow/.test(html), 'the Bot page no longer lists FLOW1 as running');
   assert.ok(/FLOW1: \{ name: 'Seller flow \(removed\)'/.test(html), 'its past orders keep a label');
 };
 let failed = 0;

@@ -111,7 +111,7 @@ gates.HS3 = async () => {
     quotes: [{ series: 'KXBTC15M', m: { ticker: 'KXBTC15M-26NOV141415-00', status: 'active', close_time: iso(NOW + 150000), yes_bid_dollars: '0.2000', yes_ask_dollars: '0.2200' } }],
     hardStopBlocked: true, recordSkip: async (d) => { skips.push(d); }, clock: () => NOW });
   assert.deepStrictEqual(out, { skipped: 'hard account stop' });
-  assert.ok(skips.length === 1 && skips[0].reason === 'hard_stop', 'the slot logs why it did not enter');
+  assert.ok(skips.length >= 1 && skips.every((x) => x.reason === 'hard_stop'), 'the slot logs why it did not enter, once per strategy whose span the market is in');
   // exits are never gated: neither exit code names the stop
   const lv = read('functions', 'kalshiLiveLib.js');
   const watch = lv.slice(lv.indexOf('async function runExitWatch'), lv.indexOf('async function flattenAll'));

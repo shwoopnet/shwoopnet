@@ -49,7 +49,8 @@ gates.SR2 = () => {
       assert.ok(c.rules[0].includes('Starts at ' + L.steps[0] + ' contracts') && c.rules[0].includes(L.steps.slice(1, -1).join(', ') + ' and ' + L.steps[L.steps.length - 1]), s.id + ' goes live line follows the ladder');
     } else {
       assert.ok(param(c, 'Contracts').startsWith(String(s.contractsPerOrder)), s.id + ' contracts');
-      assert.ok(param(c, 'Daily loss cap') === 'Its own: ' + (slot.SLOT_CAP_FRACTIONS.daily * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.daily, s.id + ' daily cap ' + param(c, 'Daily loss cap'));
+      const seatCap = slot.SLOT_SEAT_CAPS[s.id];   // a seat with its own caps (Nov 13 and 15, 2026) can only lower them: the page states the seat's own number
+      assert.ok(param(c, 'Daily loss cap') === (seatCap ? 'Its own: at most $' + seatCap.daily : 'Its own: ' + (slot.SLOT_CAP_FRACTIONS.daily * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.daily), s.id + ' daily cap ' + param(c, 'Daily loss cap'));
       assert.ok(param(c, 'Lifetime loss cap') === 'Its own: ' + (slot.SLOT_CAP_FRACTIONS.lifetime * 100) + '% of the account, at most $' + slot.SLOT_CAP_CEILINGS.lifetime, s.id + ' lifetime cap');
     }
     assert.strictEqual(param(c, 'Streak stop'), k.maxConsecutiveLosses + ' losses in a row', s.id + ' streak');
