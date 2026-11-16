@@ -22,10 +22,8 @@ _refuse_all()   # standing rule (h): refuse any HELDOUT_ folder before the first
 
 # ---- pinned constants (the registration carries the same values) ----
 START_UTC = "2026-11-13T00:00:00Z"        # development entries start here
-HELDOUT_START_UTC = "2026-11-26T00:00:00Z"  # entries from here on are held-out
-HELDOUT_END_UTC = "2026-12-10T00:00:00Z"
-READ1_NOT_BEFORE = "2026-11-26T00:00:00Z"   # development read, once
-READ2_NOT_BEFORE = "2026-12-12T00:00:00Z"   # held-out read, once
+DEV_END_UTC = "2026-12-06T00:00:00Z"        # development entries end here (exclusive); amendment of Nov 16, 2026 (was 2026-11-26)
+READ1_NOT_BEFORE = "2026-12-12T00:00:00Z"   # development read, once (amendment of Nov 16, 2026; was 2026-11-26)
 P_MIN, P_MAX = 0.60, 0.90                 # price paid for NO, after the 1c slip
 SLIP = 0.01
 MIN_SIZE = 3.0                            # contracts resting at the NO ask (the YES bid size)
@@ -202,7 +200,10 @@ def main():
     root, read_iso = sys.argv[1], sys.argv[2]
     which = sys.argv[3] if len(sys.argv) > 3 else "dev"
     read_t = ts(read_iso)
-    lo, hi, gate = (ts(START_UTC), ts(HELDOUT_START_UTC), ts(READ1_NOT_BEFORE)) if which in ("dev", "monitor") else (ts(HELDOUT_START_UTC), ts(HELDOUT_END_UTC), ts(READ2_NOT_BEFORE))
+    if which not in ("dev", "monitor"):
+        print("REFUSED: the held-out window is withdrawn (registration amendment of Nov 16, 2026)")
+        return
+    lo, hi, gate = ts(START_UTC), ts(DEV_END_UTC), ts(READ1_NOT_BEFORE)
     if read_t < gate and which != "monitor":
         print("REFUSED: this read is not allowed before its pinned date")
         return

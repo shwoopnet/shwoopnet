@@ -19,13 +19,13 @@ cents = all(q("%.2f" % (c / 100)) == (59 <= c <= 89) for c in range(1, 99))
 ok.append(("1", cents and q("0.8900000001") and not q("0.89000001") and q("0.5899999999") and not q("0.5899")))
 d = {}
 for kind in ("T120", "K", "K0", "B"): d[kind] = tempfile.mkdtemp(); make_tree(d[kind], kind)
-o = run(d["T120"], "2026-11-30T12:00:00Z")
+o = run(d["T120"], "2026-12-20T12:00:00Z")
 ok.append(("2", "paper fills 120 | due 120 | settled 100 | unresolved 20" in o and "wins 90 | cash PF 2.09 | net per dollar +0.109" in o and "LABEL: NOT_ENOUGH_DATA, description only" in o and "paper edge shown" not in o and "bar not met" not in o and "KILLED" not in o.split("== NO WEATHER")[0]))
-o = run(d["K"], "2026-11-30T12:00:00Z").split("== NO WEATHER")[0]
-o0 = run(d["K0"], "2026-11-30T12:00:00Z").split("== NO WEATHER")[0]
+o = run(d["K"], "2026-12-20T12:00:00Z").split("== NO WEATHER")[0]
+o0 = run(d["K0"], "2026-12-20T12:00:00Z").split("== NO WEATHER")[0]
 ok.append(("3", "would read KILLED (description only): running paper net fell under $-40 at settled fill 21" in o and "KILLED: running" not in o.replace("would read KILLED", "") and "LABEL: KILLED" not in o0 and "KILLED: running paper net fell under $-40 at settled fill 21" in o0 and "(description only)" not in o0))
 # 4 bootstrap pin, tree B (all resolved, 12 losses), independent implementation
-ob = run(d["B"], "2026-11-30T12:00:00Z").split("== NO WEATHER")[0]
+ob = run(d["B"], "2026-12-20T12:00:00Z").split("== NO WEATHER")[0]
 cost = 0.80 + 0.07 * 0.80 * 0.20; win, loss = 1 - cost, -cost
 fills = []   # (close date, net) in ticker order, losses at ranks 9, 18 ... 108
 for i in range(1, 121): fills.append(("2026-11-14" if i <= 40 else "2026-11-16", loss if i % 9 == 0 else win))
@@ -41,9 +41,17 @@ ok.append(("5", "MONITOR, not the registered verdict; the Nov 26 read is the ver
 ok.append(("6", "REFUSED" in run(d["T120"], "2026-11-17T00:00:00Z")))
 # 7 cut leg lists (Auditor B, line 9)
 ok.append(("7a", s3.leg_series("KXA-1:yes|KXB-2:no") == (["KXA", "KXB"], "complete") and s3.leg_series("KXA-1:yes|KXB-2:no|...") == (["KXA", "KXB"], "incomplete") and s3.leg_series("") == ([], "unknown")))
-s3.LEGS.clear(); lg = tempfile.mkdtemp(); make_lg_tree(lg); ol = run(lg, "2026-11-30T12:00:00Z")
+s3.LEGS.clear(); lg = tempfile.mkdtemp(); make_lg_tree(lg); ol = run(lg, "2026-12-20T12:00:00Z")
 nw = ol.split("== NO WEATHER")[1]
 ok.append(("7b", "paper fills 4 | due 4 | settled 4" in ol and "paper fills with leg tickers stored 4 | leg unknown 0 | legs incomplete 2 | with a weather leg 1" in ol
            and "..." not in ol.split("== ALL")[0].split("leg series seen")[1] and "settled 2" in nw.splitlines()[0] and "== ALL COMBOS (the registered line): settled 4" in ol))
+# 8 window extended to Dec 5
+def rowat(iso):
+    t = int(datetime.datetime.fromisoformat(iso.replace("Z", "+00:00")).timestamp() * 1000)
+    return {"t_recv_ms": str(t), "ticker": "X", "event_ticker": "E", "yes_bid_size": "5", "volume": "3", "legs": "3", "close_time": "2026-12-10T10:00:00Z", "no_ask": "0.79"}
+def inw(iso):
+    f = s3.qualifies(rowat(iso)); return bool(f) and s3.ts(s3.START_UTC) <= f["t"] < s3.ts(s3.DEV_END_UTC)
+ok.append(("8a", inw("2026-12-05T23:59:59Z") and not inw("2026-12-06T00:00:00Z")))
+ok.append(("8b", "REFUSED" in run(d["T120"], "2026-12-11T23:59:59Z") and "REFUSED" not in run(d["T120"], "2026-12-12T00:00:00Z") and "REFUSED" in run(d["T120"], "2026-12-20T12:00:00Z", "heldout")))
 for k, v in ok: print(k, "PASS" if v else "FAIL")
 sys.exit(0 if all(v for _, v in ok) else 1)
