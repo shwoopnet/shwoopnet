@@ -18,7 +18,7 @@
 
 **Gates (the Head's, Nov 16, with Auditor B's additions).** Each rule must have **3 signals a day or more** (at least 48 trades on the 16 development days, a filter on the printed table: every one of the 624 cells stays in m), then for a pass: n of 100 or more, **at least 40 games and 10 trade days** (about a third of the roughly 120 development games), cash PF 1.3 or more at 1c with both halves 1.0 or more, 2c PF 1.0 or more, and Benjamini-Hochberg alpha 0.05 over every cell ever tried (the TALLY). Ranking: dollars a week at 5 contracts, among rules that clear the gates.
 
-**The unit, so n is honest.** A game has about 49 correlated rungs. The engine's `day` is the UTC date (several games share a date). The print adds: the number of games, the number of player-games, and a **z clustered by game**. A pass needs the game-clustered z, and the card states n in games first, rungs second.
+**The unit, so n is honest.** A game has about 49 correlated rungs. The engine's `day` is the UTC date (several games share a date). The print adds: the number of games, the number of player-games, and a **z clustered by game**; the Benjamini-Hochberg p is one per rule from game-level sums (one-sided, from that z), not from dates. A pass needs the game-clustered z, and the card states n in games first, rungs second.
 
 **Cost model.** 5 contracts for the dollars-a-week rank, 10 contracts for the engine's PF (fee per order, rounded: the standing form). Haircuts 1c (primary) and 2c. "Candle replay, upper bound, not fill-checked."
 
@@ -33,10 +33,9 @@
 
 **Independence.** The development days are the same days SIBHIT and the NBA fade/follow cards read for counts and prices. PROPUNDER (closed unread) is read-exposed. Any pass here still needs the Dec 4 read.
 
-**New code, said plainly (`needs_new_code`).**
-1. A ladder-grid plugin (feature builder, the 624 cells, per-cell cash and the print), with a hand case, audited once.
-2. A loader extension: candle volume (the generic loader returns bid and ask only).
-3. A candle job: live batched candles for the development rungs over [D - 30 min, scheduled end + 30 min], about 210 minutes a rung, 5,851 rungs, about 140 requests at 42 tickers each, **estimated near 185 MB, so two runs** (the 200 MB cap), pacing 5 s.
-Nothing is built or pulled until the Head and Auditor B approve this design.
+**New code (built Nov 16; design APPROVED by Auditor B and the Head).**
+1. `engine/nbaladder.py` (decisions, features, the 624 cells, cash, the print) with `test_nbaladder.py` (5 hand cases).
+2. `engine/deskc_candles_vol.py`: candle volume, in a SEPARATE file so the audited loader (`deskc_kp_load.py`, c76c7f7d) stays byte for byte. **volume_fp is per candle, not cumulative**: on the landed SIBHIT candles, 1,636 of 3,933 candle series with 3 or more candles were non-monotone (counts only), which a running total cannot be. A minute with no candle counts as zero volume.
+3. The candle jobs `NBALADDER_CANDLES_P1` and `_P2`, built from the landed live list KXNBAPTS_LISTS_A (no cursor on its last page, closes 1792540800 to 1793923199 only): 60 and 63 batched requests (one per game, two when a game has more than 60 rungs), 2,826 and 2,987 tickers, windows [scheduled end - 9180 s, scheduled end - 600 s] (143 minutes, at most 60 tickers a request, under 10,000 ticker-minutes), pacing 5 s. **Size estimate from the SIBHIT run (386 bytes a stored candle, about 3 of 4 minutes present): 117 and 124 MB; 165 MB a file if every minute is present.** Each answer is at most about 3.3 MB, under the 5 MB limit.
 
 **Prediction (numeric, before any read).** Under no edge the best of 624 cells reaches PF 1.15 to 1.30 by luck on 16 days, so a development winner proves little; P(a rule clears every gate on development and then holds on the joint Dec 4 read) about 4%. Kill fast: no rule with 48 or more trades and PF 1.3 or more at 1c with both halves 1.0 or more, or BH-adjusted nothing survives.
