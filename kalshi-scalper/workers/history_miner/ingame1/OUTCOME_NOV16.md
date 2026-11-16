@@ -9,3 +9,5 @@ Ran once each (prints committed blind at b1caeaeee, Auditor B CLEAN on code and 
 - Any in-game rule on this recorder needs a trigger that tolerates 2 minute gaps, or the recorder must reach its designed cadence. Not a result about the markets; a result about the data.
 - Ticker coverage: of 136 NHL moneyline tickers in the rows, 42 are in the Nov 8 to Nov 12 listing (the rest close Nov 13 on, held out, or Nov 7).
 - Auditor B (Nov 16 15:23Z): IGFADE1 reads NOT RUNNABLE at the recorder's cadence (a 45 s trigger cannot fire at ~2 minute polls); tried 1, passed 0. Any version with a trigger of 2 minutes or more is a new registration and a new try.
+
+## PREDRIFT1 (Nov 16): ran once at 4784dace7, print committed blind at 3eaca1fe2. No evidence (n far under 100); tip = occurrence - 3 h, a schedule-shaped proxy, truth unproven; NFL schedule test weaker. Mark coverage: most listed totals markets have no recorder quote at tip - 6 h or tip - 1 h (NFL almost none), so the recorder cannot test pre-game drift either. Per the Head (Nov 16 15:21Z): moving off the recorder. Figures by message only.
