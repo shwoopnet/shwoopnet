@@ -2,3 +2,5 @@
 29b64d13c3c8aa6e6cbf5dc0a9f61355bb4f29a78000a62e6d1ab53738595c34  test_fundx2.py
 b9fb706050ed3c890c1d144f496c6fe6c88528495fee18e111ea318bcbdc4e09  FUNDX2_CARD_NOV16.md
 0549b1999c8f6bad63d302f257526c215deff369d3146a35cea7a10c28bda977  FUNDX2.spec.json
+
+# FUNDX2 plugin, test, card and spec at 346279b1b: CLEAN by Auditor B, 2026-11-16 (the spec keeps auditor_clean_date "pending" on purpose: editing it would change its hash). NOT cleared for any read: needs the labelled funding file back to 2026-06-03 with the ticker set named before any cut, its sha256, the loader line, and Main merge of the runner.
