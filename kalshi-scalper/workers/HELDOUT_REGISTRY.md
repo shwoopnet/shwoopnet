@@ -761,3 +761,12 @@ Archive 15 minute series (the 19, closes before 2026-10-03T00:00Z; SOL before 20
 
 ## EVM4 closed unread, perps released (the owner, popup 2026-11-16: "Close EVM4, release")
 The US 500, US Tech 100, gold and WTI perps (KXUS500PERP, KXUSTECH100PERP, KXGOLDPERP, KXWTIFUTURE) are released from 2026-11-06 on; no card holds them. EVM4 was closed with no result read.
+
+## PROPS1 closed, released for SIBHIT-R (entered 2026-11-16 on the Head of R&D's ruling of Nov 16 at 15:23Z, via Desk C)
+PROPS1 (research session V2): "CLOSED Nov 16, 2026 by the Head of R&D. The owner session is archived, nobody is assigned to read it, and its TEST third is already partly read: results for calibration, pre-game candles for 1,099 sampled markets. The same kind of closure as RV and EVM4. Released for SIBHIT-R (Idea Desk C): 2025-26 KXNBAPTS closes 2026-03-01 to before 2026-04-14 (regular season)."
+
+## SIBHIT-R (Idea Desk C), new row (entered 2026-11-16 at Desk C's request on the same ruling)
+- registration: claude/idea-desk-c:kalshi-scalper/workers/idea_desk_c/allkalshi/sibhitr/SIBHITR_CARD.md
+- read window: closes 2026-03-01 to before 2026-04-14, read once
+- fallback: closes 2026-11-13 to before 2026-12-04, after Dec 4
+- status: OPEN, unread.
