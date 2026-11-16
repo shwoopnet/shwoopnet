@@ -1,3 +1,5 @@
+**STATUS Nov 16, 2026 (the Verification Analyst scored uniqueness): PERPWKND1 is a VERSION of V2's SPW1 (STOCKPERP, Sunday reopening gap to Monday 09:25 ET, weekend bar 2027-06-06) and of OVN3 (weekend gap, NOT_ENOUGH_DATA, 0 scorable weekends of 30); the same entry mechanism (a weekend gap, follow or fade) with a different hold. Not a new strategy, no addition to the 20 to 30. It stays a feasibility and development read only, as a version tested beside its parents; the Head decides whether to run the existence count.**
+
 # PERPWKND1: the stock and index perp weekend gap (Desk A, 2026-11-16). CARD ONLY, nothing read, nothing run. Not frozen until Auditor B signs the data, holds and look-ahead rows.
 
 **Label on everything it will ever print: development, first weeks of stock perps (they began trading 2026-11-05 18:39Z), one regime; no evidence at n under 100.** The account size is never written; results are in price terms (basis points) and as percent of margin.

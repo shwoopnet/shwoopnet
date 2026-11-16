@@ -1,6 +1,8 @@
-# PERPBASIS1 forward card (Desk A, Nov 16, 2026). Rule, bar and kill written first. NO development: it reads forward on new data only.
+**RENAMED Nov 16, 2026 (VA flagged a name clash): this card was PERPBASIS1 and is now PERPRVSPY1 (the SPY perp against the US500 perp, a relative-value pair). PERPBASIS1 is the History Miner's perp-spot premium card. The cleared lanes and POOL1 specs still say PERPBASIS1 in one 'closest rows' sentence; they are not edited (their shas are pinned), and that mention means THIS card. VA also reads this card as a version of V2's RV1 to RV3 and the pairs family; that ruling is the Head's.**
 
-**Family card:** PERPBASIS1 | relative value between two perps on the same underlying (a pair, one leg long and one short, equal notional) + convergence or time exit | two legs on Kalshi's perps, both taker; 1 contract-equivalent of each, notional capped by the perps rules; correlation group: none (market neutral) | stage Idea (forward card).
+# PERPRVSPY1 forward card (Desk A, Nov 16, 2026). Rule, bar and kill written first. NO development: it reads forward on new data only.
+
+**Family card:** PERPRVSPY1 | relative value between two perps on the same underlying (a pair, one leg long and one short, equal notional) + convergence or time exit | two legs on Kalshi's perps, both taker; 1 contract-equivalent of each, notional capped by the perps rules; correlation group: none (market neutral) | stage Idea (forward card).
 
 **Why forward only (the Head, Nov 16):** the perps history starts 2026-11-06, so Nov 6 to 16 is too short to develop on; nothing is fitted to it. Every constant below is fixed now from reasoning, not from any data.
 
