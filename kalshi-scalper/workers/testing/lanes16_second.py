@@ -10,13 +10,13 @@ BASKETS = {"semis": ("KXNVDAPERP", "KXMUPERP", "KXAMDPERP", "KXAVGOPERP", "KXAMA
 TAKER, MAKER, HS, EXITS = P.TAKER, P.MAKER, P.HS, P.EXITS
 M_NEW = 144
 SQ = math.sqrt(30)
-EPS = 1e-9          # float tolerance on the through-by-one-tick comparisons (equality counts)
+EPS = 1e-12          # float tolerance on the through-by-one-tick comparisons (equality counts)
 usable = P.usable
 
 
 def tick_of(s):
     v = sorted(set(x for c in s.values() if usable(c) for x in c[:2])); d = [b - a for a, b in zip(v, v[1:]) if b - a > 0]
-    return round(min(d), 9) if d else None
+    return round(min(d), 10) if d else None
 
 
 def kept_baskets(data, funding, baskets=None):
