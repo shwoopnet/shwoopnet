@@ -133,8 +133,7 @@
   "sha256": "1e77d23ed1c003122b21704d660cb0b9eb7263acef4d8bccb4963862059f334e",
   "hand_case_file": "test_engine_c.py",
   "hand_case_sha256": "d7f86d007fefb6e016dee7b9348167c5b26d547edce84c4491af954f356e1be1",
-  "auditor_clean_date": null,
-  "note": "unsigned until Auditor B clears this plugin hash"
+  "auditor_clean_date": "2026-11-16"
  },
  "subset_rationale": "one rule, its thresholds (gap 0.15 or breadth 27, band 0.30 to 0.70) fixed before any price of these markets was read; breadth's 27 is the median of open-time counts",
  "halves": "floor(n/2) in entry order",
