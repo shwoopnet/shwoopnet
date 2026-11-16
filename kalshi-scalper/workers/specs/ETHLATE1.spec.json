@@ -86,7 +86,7 @@
   "bh_alpha": 0.05
  },
  "tries": {
-  "rules_this_spec": 48,
+  "rules_this_spec": 96,
   "prior_m": "from the TALLY"
  },
  "prediction": "no survivor: PF under 1.0 at 1c in most cells; n per cell 60 to 130 over 19 days",
