@@ -1,0 +1,312 @@
+{
+ "fixture": "btcmom3",
+ "rule": "x = (yes_bid+yes_ask)/2 at e minus the same at e-180, Bitcoin KXBTC15M with the same close; up if x > 1e-12, down if x < -1e-12, else flat; missing if either candle absent",
+ "pins": {
+  "engine1_batchb.py": "68a5ab435d8246be30681a703179d88608b0384ce2ca50f4f6bad458cea07f1e",
+  "engine1_core.py": "53317e4b56a8328fb616d460d5cb4597af13a2b9020d73aefaa37717439694bf"
+ },
+ "n": 17,
+ "cases": [
+  {
+   "market": "KXETH15M",
+   "close": 1785974400,
+   "seconds_left": 600,
+   "e": 1785973800,
+   "btc_candle_e_minus_180": {
+    "end": 1785973620,
+    "yes_bid": 0.12,
+    "yes_ask": 0.13
+   },
+   "btc_candle_e": {
+    "end": 1785973800,
+    "yes_bid": 0.35,
+    "yes_ask": 0.36
+   },
+   "expected_x": 0.22999999999999998,
+   "expected_class": "up"
+  },
+  {
+   "market": "KXHYPE15M",
+   "close": 1785978000,
+   "seconds_left": 480,
+   "e": 1785977520,
+   "btc_candle_e_minus_180": {
+    "end": 1785977340,
+    "yes_bid": 0.48,
+    "yes_ask": 0.49
+   },
+   "btc_candle_e": {
+    "end": 1785977520,
+    "yes_bid": 0.54,
+    "yes_ask": 0.55
+   },
+   "expected_x": 0.06000000000000005,
+   "expected_class": "up"
+  },
+  {
+   "market": "KXXRP15M",
+   "close": 1785974400,
+   "seconds_left": 600,
+   "e": 1785973800,
+   "btc_candle_e_minus_180": {
+    "end": 1785973620,
+    "yes_bid": 0.12,
+    "yes_ask": 0.13
+   },
+   "btc_candle_e": {
+    "end": 1785973800,
+    "yes_bid": 0.35,
+    "yes_ask": 0.36
+   },
+   "expected_x": 0.22999999999999998,
+   "expected_class": "up"
+  },
+  {
+   "market": "KXSOL15M",
+   "close": 1786924800,
+   "seconds_left": 600,
+   "e": 1786924200,
+   "btc_candle_e_minus_180": {
+    "end": 1786924020,
+    "yes_bid": 0.45,
+    "yes_ask": 0.46
+   },
+   "btc_candle_e": {
+    "end": 1786924200,
+    "yes_bid": 0.7,
+    "yes_ask": 0.71
+   },
+   "expected_x": 0.24999999999999994,
+   "expected_class": "up"
+  },
+  {
+   "market": "KXBNB15M",
+   "close": 1785978000,
+   "seconds_left": 480,
+   "e": 1785977520,
+   "btc_candle_e_minus_180": {
+    "end": 1785977340,
+    "yes_bid": 0.48,
+    "yes_ask": 0.49
+   },
+   "btc_candle_e": {
+    "end": 1785977520,
+    "yes_bid": 0.54,
+    "yes_ask": 0.55
+   },
+   "expected_x": 0.06000000000000005,
+   "expected_class": "up"
+  },
+  {
+   "market": "KXETH15M",
+   "close": 1785975300,
+   "seconds_left": 600,
+   "e": 1785974700,
+   "btc_candle_e_minus_180": {
+    "end": 1785974520,
+    "yes_bid": 0.27,
+    "yes_ask": 0.28
+   },
+   "btc_candle_e": {
+    "end": 1785974700,
+    "yes_bid": 0.21,
+    "yes_ask": 0.22
+   },
+   "expected_x": -0.060000000000000026,
+   "expected_class": "down"
+  },
+  {
+   "market": "KXHYPE15M",
+   "close": 1785978000,
+   "seconds_left": 600,
+   "e": 1785977400,
+   "btc_candle_e_minus_180": {
+    "end": 1785977220,
+    "yes_bid": 0.37,
+    "yes_ask": 0.38
+   },
+   "btc_candle_e": {
+    "end": 1785977400,
+    "yes_bid": 0.35,
+    "yes_ask": 0.36
+   },
+   "expected_x": -0.020000000000000018,
+   "expected_class": "down"
+  },
+  {
+   "market": "KXXRP15M",
+   "close": 1785975300,
+   "seconds_left": 600,
+   "e": 1785974700,
+   "btc_candle_e_minus_180": {
+    "end": 1785974520,
+    "yes_bid": 0.27,
+    "yes_ask": 0.28
+   },
+   "btc_candle_e": {
+    "end": 1785974700,
+    "yes_bid": 0.21,
+    "yes_ask": 0.22
+   },
+   "expected_x": -0.060000000000000026,
+   "expected_class": "down"
+  },
+  {
+   "market": "KXSOL15M",
+   "close": 1786924800,
+   "seconds_left": 480,
+   "e": 1786924320,
+   "btc_candle_e_minus_180": {
+    "end": 1786924140,
+    "yes_bid": 0.64,
+    "yes_ask": 0.65
+   },
+   "btc_candle_e": {
+    "end": 1786924320,
+    "yes_bid": 0.58,
+    "yes_ask": 0.59
+   },
+   "expected_x": -0.06000000000000005,
+   "expected_class": "down"
+  },
+  {
+   "market": "KXBNB15M",
+   "close": 1785978000,
+   "seconds_left": 600,
+   "e": 1785977400,
+   "btc_candle_e_minus_180": {
+    "end": 1785977220,
+    "yes_bid": 0.37,
+    "yes_ask": 0.38
+   },
+   "btc_candle_e": {
+    "end": 1785977400,
+    "yes_bid": 0.35,
+    "yes_ask": 0.36
+   },
+   "expected_x": -0.020000000000000018,
+   "expected_class": "down"
+  },
+  {
+   "market": "KXETH15M",
+   "close": 1786023000,
+   "seconds_left": 600,
+   "e": 1786022400,
+   "btc_candle_e_minus_180": {
+    "end": 1786022220,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "btc_candle_e": {
+    "end": 1786022400,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "expected_x": 0.0,
+   "expected_class": "flat"
+  },
+  {
+   "market": "KXHYPE15M",
+   "close": 1786023000,
+   "seconds_left": 600,
+   "e": 1786022400,
+   "btc_candle_e_minus_180": {
+    "end": 1786022220,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "btc_candle_e": {
+    "end": 1786022400,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "expected_x": 0.0,
+   "expected_class": "flat"
+  },
+  {
+   "market": "KXXRP15M",
+   "close": 1786023000,
+   "seconds_left": 600,
+   "e": 1786022400,
+   "btc_candle_e_minus_180": {
+    "end": 1786022220,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "btc_candle_e": {
+    "end": 1786022400,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "expected_x": 0.0,
+   "expected_class": "flat"
+  },
+  {
+   "market": "KXSOL15M",
+   "close": 1786945500,
+   "seconds_left": 360,
+   "e": 1786945140,
+   "btc_candle_e_minus_180": {
+    "end": 1786944960,
+    "yes_bid": 0.4,
+    "yes_ask": 0.41
+   },
+   "btc_candle_e": {
+    "end": 1786945140,
+    "yes_bid": 0.4,
+    "yes_ask": 0.41
+   },
+   "expected_x": 0.0,
+   "expected_class": "flat"
+  },
+  {
+   "market": "KXBNB15M",
+   "close": 1786023000,
+   "seconds_left": 600,
+   "e": 1786022400,
+   "btc_candle_e_minus_180": {
+    "end": 1786022220,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "btc_candle_e": {
+    "end": 1786022400,
+    "yes_bid": 0.52,
+    "yes_ask": 0.53
+   },
+   "expected_x": 0.0,
+   "expected_class": "flat"
+  },
+  {
+   "market": "KXETH15M",
+   "close": 1785974400,
+   "seconds_left": 600,
+   "e": 1785973800,
+   "btc_candle_e_minus_180": null,
+   "btc_candle_e": {
+    "end": 1785973800,
+    "yes_bid": 0.35,
+    "yes_ask": 0.36
+   },
+   "expected_x": null,
+   "expected_class": "missing",
+   "constructed": "up case with the e-180 Bitcoin candle removed"
+  },
+  {
+   "market": "KXHYPE15M",
+   "close": 1785978000,
+   "seconds_left": 480,
+   "e": 1785977520,
+   "btc_candle_e_minus_180": {
+    "end": 1785977340,
+    "yes_bid": 0.48,
+    "yes_ask": 0.49
+   },
+   "btc_candle_e": null,
+   "expected_x": null,
+   "expected_class": "missing",
+   "constructed": "up case with the e Bitcoin candle removed"
+  }
+ ],
+ "note": "15 archive cases (5 up, 5 down, 5 flat) plus 2 constructed missing cases; archive had no natural missing pair in the 6 markets sampled"
+}
