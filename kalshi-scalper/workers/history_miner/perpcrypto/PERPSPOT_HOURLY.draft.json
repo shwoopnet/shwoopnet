@@ -10,7 +10,7 @@
   "stop_after_consecutive_429": 3,
   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
  },
- "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list). Revision 2: BTC history extended to 2026-06-03 in hourly steps (14 requests), because the BASIS rule runs on HOURLY spacing only; the 783 request 1 minute BTC job is not needed by the 16 cells.",
+ "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list). Revision 2: BTC history extended to 2026-06-03 in hourly steps (14 requests), because the BASIS rule runs on HOURLY spacing only; the 783 request 1 minute BTC job is not needed by the 16 cells. max_requests = requests + 12 (26 + 12 = 38) so that a 429 re-ask does not stop the run, as in every cleared job (Auditor B 20:52Z).",
  "job_id": "PERPSPOT_HOURLY",
  "purpose": "Coinbase spot HOURLY candles for the PERPCRYPTO1 basis: BTC-USD 2026-06-03 to 2026-11-17 (the PERPBTC1M window plus the snapshots), ETH, SOL, XRP and DOGE 2026-10-21 to 2026-11-17 (the hourly perp snapshot window). 300 candles a request. HYPE-USD is not requested (Coinbase may not list it).",
  "allowed_endpoints": [
@@ -33,7 +33,7 @@
   "XRP-USD",
   "DOGE-USD"
  ],
- "max_requests": 26,
+ "max_requests": 38,
  "requests": [
   {
    "id": "BTC-USD_3600_1780444800",

@@ -150,3 +150,11 @@ def gate(trades_by_cell):
         return None
     first = set(days[:GATE_DAYS])
     return {c: {"rate": sum(1 for t in ts if day(t["signal_ts"]) in first) / GATE_DAYS, "dropped": sum(1 for t in ts if day(t["signal_ts"]) in first) / GATE_DAYS < RATE_GATE} for c, ts in trades_by_cell.items()}
+
+
+PROXY_NOTE = "a basis computed against spot is not the basis against Kalshi's reference_price: the proxy rows are printed apart and a pass on proxy rows alone is not a pass"
+
+
+def report(snapshot_trades, proxy_trades):
+    """Every table prints the SNAPSHOT rows (Kalshi's own reference_price) and the PROXY rows (perp 1 minute candle at the top of the hour against Coinbase hourly spot, BTC before Oct 21) APART; they are never pooled."""
+    return {"snapshot_rows": summarise(snapshot_trades), "proxy_rows": dict(summarise(proxy_trades), note=PROXY_NOTE), "rule": "a pass on proxy rows alone is not a pass"}

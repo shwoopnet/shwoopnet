@@ -92,3 +92,9 @@ assert E.gate({"c": mk(0, 5)}) is None
 g = E.gate({"c": sum((mk(d, 4) for d in range(7)), []) + mk(7, 1), "d": sum((mk(d, 2) for d in range(7)), []) + mk(7, 30)})
 assert A(g["c"]["rate"], 4.0) and not g["c"]["dropped"] and A(g["d"]["rate"], 2.0) and g["d"]["dropped"]
 print("gate: ok")
+
+# proxy rows are printed apart from the snapshot rows and never pooled (Auditor B, 20:52Z)
+a = E.basis_trades({"KXBTCPERP": rows}, (10, "converge", 1)); rp = E.report(a, [])
+assert rp["snapshot_rows"]["n"] == 1 and rp["proxy_rows"]["n"] == 0 and "not the basis against Kalshi's reference_price" in rp["proxy_rows"]["note"] and "not a pass" in rp["rule"]
+rp2 = E.report(a, a + a); assert rp2["snapshot_rows"]["n"] == 1 and rp2["proxy_rows"]["n"] == 2
+print("proxy rows apart: ok")
