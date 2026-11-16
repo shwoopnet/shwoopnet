@@ -1,0 +1,152 @@
+{
+ "cut_rule": "nearest rank on SEARCH prints only: lower = s[ceil(qn)-1], upper = s[n-ceil(qn)]; at least 120 prints",
+ "cuts": {
+  "KXBTCPERP": {
+   "10": {
+    "has_threshold": true,
+    "lower": 0.0,
+    "search_extremes": 33,
+    "search_n": 310,
+    "upper": 0.0002021961502973,
+    "validate_extremes": 39,
+    "validate_prints": 189
+   },
+   "5": {
+    "has_threshold": true,
+    "lower": 0.0,
+    "search_extremes": 18,
+    "search_n": 310,
+    "upper": 0.0002433475339431,
+    "validate_extremes": 25,
+    "validate_prints": 189
+   }
+  },
+  "KXDOGEPERP": {
+   "10": {
+    "has_threshold": true,
+    "lower": 0.0,
+    "search_extremes": 10,
+    "search_n": 292,
+    "upper": 0.0,
+    "validate_extremes": 43,
+    "validate_prints": 189
+   },
+   "5": {
+    "has_threshold": true,
+    "lower": 0.0,
+    "search_extremes": 10,
+    "search_n": 292,
+    "upper": 0.0,
+    "validate_extremes": 43,
+    "validate_prints": 189
+   }
+  },
+  "KXETHPERP": {
+   "10": {
+    "has_threshold": true,
+    "lower": -0.0001053008584658,
+    "search_extremes": 35,
+    "search_n": 310,
+    "upper": 0.0,
+    "validate_extremes": 72,
+    "validate_prints": 189
+   },
+   "5": {
+    "has_threshold": true,
+    "lower": -0.0001322862089178,
+    "search_extremes": 20,
+    "search_n": 310,
+    "upper": 0.0,
+    "validate_extremes": 67,
+    "validate_prints": 189
+   }
+  },
+  "KXHYPEPERP": {
+   "10": {
+    "has_threshold": true,
+    "lower": -0.0001000852239841,
+    "search_extremes": 59,
+    "search_n": 295,
+    "upper": 0.0,
+    "validate_extremes": 57,
+    "validate_prints": 189
+   },
+   "5": {
+    "has_threshold": true,
+    "lower": -0.0001255879280633,
+    "search_extremes": 30,
+    "search_n": 295,
+    "upper": 0.0001620106375591,
+    "validate_extremes": 43,
+    "validate_prints": 189
+   }
+  },
+  "KXSOLPERP": {
+   "10": {
+    "has_threshold": true,
+    "lower": 0.0,
+    "search_extremes": 19,
+    "search_n": 310,
+    "upper": 0.0,
+    "validate_extremes": 94,
+    "validate_prints": 189
+   },
+   "5": {
+    "has_threshold": true,
+    "lower": 0.0,
+    "search_extremes": 19,
+    "search_n": 310,
+    "upper": 0.0,
+    "validate_extremes": 94,
+    "validate_prints": 189
+   }
+  },
+  "KXXRPPERP": {
+   "10": {
+    "has_threshold": true,
+    "lower": 0.0,
+    "search_extremes": 52,
+    "search_n": 310,
+    "upper": 0.0001526554753053,
+    "validate_extremes": 87,
+    "validate_prints": 189
+   },
+   "5": {
+    "has_threshold": true,
+    "lower": -0.0001648252354029,
+    "search_extremes": 32,
+    "search_n": 310,
+    "upper": 0.0001884910835929,
+    "validate_extremes": 67,
+    "validate_prints": 189
+   }
+  }
+ },
+ "hashes": {
+  "funding_file": "fc17090234c0e5bdf02d04813da007492faa254e81a2a83157ae51e150cdc442",
+  "fundx2_events.py": "67d049b5c105efab788cac4e9a4ef9a04473261fe4f58aca6a9d90f9fecef718",
+  "fundx2_thresholds.py": "5948609a7aeb44aebae68b98c39375691efca3a501d15a2071c5946b446f300d",
+  "perps_crypto_load.py": "2dc464836765a96b21c69378c7e5b4264e0a546fd2d9948defcf44215afd6fd7",
+  "perps_crypto_run.py": "b5d3844651700f7d670b72b09ae264e2ab07aa9fefe38714f94df6624e874bfe"
+ },
+ "id": "FUNDX2",
+ "load_counts": {
+  "funding ticker outside the wall (dropped)": 232
+ },
+ "search": [
+  1780444800,
+  1789430400
+ ],
+ "ticker_set": [
+  "KXBTCPERP",
+  "KXETHPERP",
+  "KXSOLPERP",
+  "KXXRPPERP",
+  "KXDOGEPERP",
+  "KXHYPEPERP"
+ ],
+ "validate": [
+  1789430400,
+  1794873600
+ ]
+}
