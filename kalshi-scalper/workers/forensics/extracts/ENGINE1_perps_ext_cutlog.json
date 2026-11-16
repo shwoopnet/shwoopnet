@@ -1,0 +1,40 @@
+{
+ "extract": "ENGINE1 perps extension (index perps)",
+ "files": [
+  "2026-11-06.csv.gz",
+  "2026-11-08.csv.gz",
+  "2026-11-09.csv.gz",
+  "2026-11-10.csv.gz",
+  "2026-11-11.csv.gz",
+  "2026-11-12.csv.gz",
+  "2026-11-13.csv.gz",
+  "2026-11-14.csv.gz"
+ ],
+ "tickers": [
+  "KXUS500PERP",
+  "KXUSTECH100PERP"
+ ],
+ "counts": {
+  "candles": 16676,
+  "duplicate_row": 10
+ },
+ "by_ticker": [
+  [
+   "KXUS500PERP",
+   8332,
+   1793923200,
+   1794607320,
+   0,
+   8332
+  ],
+  [
+   "KXUSTECH100PERP",
+   8344,
+   1793923200,
+   1794607260,
+   0,
+   8344
+  ]
+ ],
+ "extract_sha256": "e106b722c8a966333aa5f60bd9d43bad6f9942a9f4858ba634e58f05c2f0a5ad"
+}
