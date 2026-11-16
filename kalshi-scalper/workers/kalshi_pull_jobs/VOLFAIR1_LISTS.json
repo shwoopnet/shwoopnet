@@ -1,0 +1,183 @@
+{
+ "job_id": "VOLFAIR1_LISTS",
+ "status": "active",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/VOLFAIR1_REGISTRATION_NOV16.md",
+ "purpose": "Settled KXBTCD hourly markets (tickers, strikes, close times; a reader never reads a result before the strike file is built) for VOLFAIR1, closes 2026-06-01T00:00Z to before 2026-09-21T00:00Z only, in 10 day close ranges, as input for the candle jobs.",
+ "heldout": "Closes at or after 2026-09-21T00:00Z (1789948800) are NEVER asked: EVM1's held-out third (HOLDS H18) and HRSEAS1's W3 (H19) stay held. The last range ends at 1789948799. Development (closes before 2026-09-01) is labelled development; validation is 2026-09-01 to before 2026-09-21. The landed run goes into HELDOUT_PULL_RUNS.md (Main) and is readable only by the VOLFAIR1 loader.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXBTCD"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 204,
+ "requests": [
+  {
+   "id": "settled_KXBTCD_01",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1781135999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_02",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1781136000,
+    "max_close_ts": 1781999999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_03",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1782000000,
+    "max_close_ts": 1782863999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_04",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1782864000,
+    "max_close_ts": 1783727999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_05",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1783728000,
+    "max_close_ts": 1784591999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_06",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1784592000,
+    "max_close_ts": 1785455999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_07",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1785456000,
+    "max_close_ts": 1786319999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_08",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1786320000,
+    "max_close_ts": 1787183999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_09",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1787184000,
+    "max_close_ts": 1788047999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1788048000,
+    "max_close_ts": 1788911999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_11",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1788912000,
+    "max_close_ts": 1789775999,
+    "limit": 1000
+   },
+   "max_pages": 16
+  },
+  {
+   "id": "settled_KXBTCD_12",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTCD",
+    "status": "settled",
+    "min_close_ts": 1789776000,
+    "max_close_ts": 1789948799,
+    "limit": 1000
+   },
+   "max_pages": 16
+  }
+ ],
+ "notes": "12 ranges of 10 days (the last one shorter), at most 16 pages each (KXBTCD has about 24 closes a day and about 50 to 60 strikes a close: about 12,000 markets per 10 days, 12 pages of 1000). max_requests is the page budget plus 12 for 429 retries. Candles are NOT requested here; the candle jobs are made from the landed list by volfair1_make_candle_jobs.py. Pacing 5.0 s (the Head's order of Nov 14).",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
