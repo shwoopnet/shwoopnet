@@ -4,3 +4,8 @@ b9fb706050ed3c890c1d144f496c6fe6c88528495fee18e111ea318bcbdc4e09  FUNDX2_CARD_NO
 0549b1999c8f6bad63d302f257526c215deff369d3146a35cea7a10c28bda977  FUNDX2.spec.json
 
 # FUNDX2 plugin, test, card and spec at 346279b1b: CLEAN by Auditor B, 2026-11-16 (the spec keeps auditor_clean_date "pending" on purpose: editing it would change its hash). NOT cleared for any read: needs the labelled funding file back to 2026-06-03 with the ticker set named before any cut, its sha256, the loader line, and Main merge of the runner.
+5948609a7aeb44aebae68b98c39375691efca3a501d15a2071c5946b446f300d  fundx2_thresholds.py
+71d3214c4eadcc2c391f6cbc89ce684f8ba7e9ab5393cafe35660354f24d5bd1  test_fundx2_thresholds.py
+67d049b5c105efab788cac4e9a4ef9a04473261fe4f58aca6a9d90f9fecef718  fundx2_events.py
+b5d3844651700f7d670b72b09ae264e2ab07aa9fefe38714f94df6624e874bfe  perps_crypto_run.py
+2dc464836765a96b21c69378c7e5b4264e0a546fd2d9948defcf44215afd6fd7  perps_crypto_load.py
