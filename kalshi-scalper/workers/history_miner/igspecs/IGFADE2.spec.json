@@ -1,0 +1,89 @@
+{
+ "id": "IGFADE2",
+ "desk": "History Miner",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "split": {
+  "mode": "forward_only",
+  "first_close_of_read": "2026-11-17T00:00:00Z",
+  "release_rule": "first read after 3 days of the PR 960 cadence have landed (about 2026-11-19), then on each auto-run; kill_fast on the first read"
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ],
+  "haircuts_stress": [],
+  "fee_taker": null,
+  "fee_maker": null
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 1,
+  "prior_m": "from the TALLY"
+ },
+ "kill_fast": true,
+ "uniqueness": {
+  "closest_existing": [
+   "IGFADE1 (NOT RUNNABLE at the old cadence; this is its version and replaces it, 7g)",
+   "INGAMELAG1 (V2, NBA, lead-lag; not used)"
+  ],
+  "declined_list_rows_checked": [
+   "lead-lag between related markets (one market only)",
+   "favourite-and-hold (buys the side that fell, 15c to 60c)",
+   "taker order-flow family (no trade tape used)"
+  ],
+  "difference": "fades a single market's own jump on the recorder's 20 s hot cadence; no other market's price",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "ingame_load.py (forward version, needs_new_code: window from 2026-11-17T00:00Z, results from a forward kalshi-pull listing, a new allow line)",
+  "loader_sha256": "pending (the forward version is written, audited and listed before the first auto-run)",
+  "extracts": [
+   "sports-data ingame/<date>/<HHMM>/obs.csv.gz for date directories from 2026-11-17",
+   "a forward settled-markets listing of the ticker wall, closes from 2026-11-17T00:00Z (job to be written)"
+  ],
+  "window": {
+   "first_close": "2026-11-17T00:00:00Z",
+   "last_close_exclusive": "2026-12-15T00:00:00Z"
+  },
+  "held_out_map_checked_by": "pending Auditor B (forward window; SPORTS-PRE holds KXNBAGAME and KXNFLGAME outcomes to 2027-01-01, so those two are outside every wall here)",
+  "independence_note": "the same games feed all History Miner in-game specs; their rows are one sample of games, n not to be added across specs",
+  "ticker_wall": [
+   "KXNHLGAME",
+   "KXNBATOTAL",
+   "KXNFLTOTAL",
+   "KXNHLTOTAL",
+   "KXNBASPREAD",
+   "KXNFLSPREAD",
+   "KXNHLSPREAD"
+  ]
+ },
+ "event": {
+  "scorer_plugin": "ingame_events.py (needs_new_code)",
+  "scorer_plugin_sha256": "pending",
+  "decision_instant": "the second of two consecutive polls of one ticker no more than 60 s apart, both two-sided",
+  "signal_threshold_abs_mid_move": 0.1,
+  "entry_rule": "buy the side that fell at its ask (YES ask, or 1 - yes_bid) if 0.15 to 0.60; the earliest such pair per game and kind",
+  "exit": "H"
+ },
+ "prediction": "n >= 100 by the first full read; 2c PF >= 1.3 with each half >= 1.0",
+ "kill": "2c PF under 1.0 on the first read (kill_fast), or under 100 events by 2026-12-15",
+ "outputs": {
+  "survivor_line": "market, rule, PF 1c and 2c, n, days",
+  "family_flag": "none"
+ },
+ "card": "kalshi-scalper/workers/history_miner/igspecs/IGSPECS_CARDS_NOV16.md",
+ "needs_new_code": [
+  "ingame_load.py forward version",
+  "ingame_events.py scorer plugin (hand case first)",
+  "forward results listing job"
+ ]
+}
