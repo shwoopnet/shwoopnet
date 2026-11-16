@@ -1,127 +1,127 @@
-ticker	class	page_max_leverage	page_max_source	note
-KXAAVEPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXADAPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXBCHPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXBNBPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXBTCPERP	Crypto	15.4	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
-KXDOGEPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXETHPERP	Crypto	10.5	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
-KXHYPEPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXKSHIBPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXLINKPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXLTCPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXNEARPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXSOLPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXSUIPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXUNIPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXVVVPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXWLDPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXXRPPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXZECPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXBRENTFUTURE	Energy	unknown	none: no page value held (not estimated)	
-KXHHGASFUTURE	Energy	unknown	none: no page value held (not estimated)	
-KXTTFFUTURE	Energy	unknown	none: no page value held (not estimated)	
-KXWTIFUTURE	Energy	unknown	none: no page value held (not estimated)	
-KXAAPLPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXABBVPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXABTPERP	Equities	unknown	none: no page value held (not estimated)	
-KXACNPERP	Equities	unknown	none: no page value held (not estimated)	
-KXADBEPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXADIPERP	Equities	unknown	none: no page value held (not estimated)	
-KXAMATPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXAMDPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXAMGNPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXAMZNPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXANETPERP	Equities	unknown	none: no page value held (not estimated)	
-KXAPHPERP	Equities	unknown	none: no page value held (not estimated)	
-KXARMPERP	Equities	unknown	none: no page value held (not estimated)	
-KXASMLPERP	Equities	unknown	none: no page value held (not estimated)	
-KXAVGOPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXAXPPERP	Equities	unknown	none: no page value held (not estimated)	
-KXBABAPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXBACPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXBAPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXBKNGPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXBLKPERP	Equities	unknown	none: no page value held (not estimated)	
-KXBRKBPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXCATPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXCOPPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXCOSTPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXCPERP	Equities	unknown	none: no page value held (not estimated)	
-KXCRMPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXCRWDPERP	Equities	unknown	none: no page value held (not estimated)	
-KXCSCOPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXCVXPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXDELLPERP	Equities	unknown	none: no page value held (not estimated)	
-KXDEPERP	Equities	unknown	none: no page value held (not estimated)	
-KXDHRPERP	Equities	unknown	none: no page value held (not estimated)	
-KXDISPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXGEPERP	Equities	unknown	none: no page value held (not estimated)	
-KXGEVPERP	Equities	unknown	none: no page value held (not estimated)	
-KXGILDPERP	Equities	unknown	none: no page value held (not estimated)	
-KXGOOGLPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXGSPERP	Equities	unknown	none: no page value held (not estimated)	
-KXHDPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXIBMPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXINTCPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXISRGPERP	Equities	unknown	none: no page value held (not estimated)	
-KXJNJPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXJPMPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXKLACPERP	Equities	unknown	none: no page value held (not estimated)	
-KXKOPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXLINPERP	Equities	unknown	none: no page value held (not estimated)	
-KXLLYPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXLMTPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXLRCXPERP	Equities	unknown	none: no page value held (not estimated)	
-KXMAPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXMCDPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXMETAPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXMRKPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXMSFTPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXMSPERP	Equities	unknown	none: no page value held (not estimated)	
-KXMUPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXNEEPERP	Equities	unknown	none: no page value held (not estimated)	
-KXNEMPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXNFLXPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXNVDAPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXORCLPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXPANWPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXPEPPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXPFEPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXPGPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXPLDPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXPLTRPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXPMPERP	Equities	unknown	none: no page value held (not estimated)	
-KXQCOMPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXQQQPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXRTXPERP	Equities	unknown	none: no page value held (not estimated)	
-KXSBUXPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXSCHWPERP	Equities	unknown	none: no page value held (not estimated)	
-KXSHOPPERP	Equities	unknown	none: no page value held (not estimated)	
-KXSKHYPERP	Equities	unknown	none: no page value held (not estimated)	
-KXSNDKPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXSPCXPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXSPYPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXTJXPERP	Equities	unknown	none: no page value held (not estimated)	
-KXTMOPERP	Equities	unknown	none: no page value held (not estimated)	
-KXTMUSPERP	Equities	unknown	none: no page value held (not estimated)	
-KXTSLAPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXTSMPERP	Equities	unknown	none: no page value held (not estimated)	
-KXTXNPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXUNHPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXUNPPERP	Equities	unknown	none: no page value held (not estimated)	
-KXVPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXVZPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXWELLPERP	Equities	unknown	none: no page value held (not estimated)	
-KXWFCPERP	Equities	unknown	none: no page value held (not estimated)	
-KXWMTPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXXOMPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXUS2000PERP	Indices	24.6	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
-KXUS500PERP	Indices	36.1	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
-KXUSTECH100PERP	Indices	28.9	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
-KXALUMINUMPERP	Metals	unknown	none: no page value held (not estimated)	
-KXCOPPERPERP	Metals	17.7	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
-KXGOLDPERP	Metals	40	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
-KXPALLADIUMPERP	Metals	unknown	none: no page value held (not estimated)	
-KXPLATINUMPERP	Metals	unknown	none: no page value held (not estimated)	
-KXSILVERPERP	Metals	17.7	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
+ticker	class	page_max	page_max_source	size_max_known
+KXAAVEPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXADAPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXBCHPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXBNBPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXBTCPERP	Crypto	15.4	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXDOGEPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXETHPERP	Crypto	10.5	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXHYPEPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXKSHIBPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXLINKPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXLTCPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXNEARPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXSOLPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXSUIPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXUNIPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXVVVPERP	Crypto	2.3	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXWLDPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXXRPPERP	Crypto	5.4	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXZECPERP	Crypto	unknown	none: not in the owner's paste (not estimated)	
+KXBRENTFUTURE	Energy	unknown	none: not in the owner's paste (not estimated)	
+KXHHGASFUTURE	Energy	unknown	none: not in the owner's paste (not estimated)	
+KXTTFFUTURE	Energy	unknown	none: not in the owner's paste (not estimated)	
+KXWTIFUTURE	Energy	unknown	none: not in the owner's paste (not estimated)	
+KXAAPLPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXABBVPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXABTPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXACNPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXADBEPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXADIPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXAMATPERP	Equities	4.5	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXAMDPERP	Equities	3.4	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXAMGNPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXAMZNPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXANETPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXAPHPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXARMPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXASMLPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXAVGOPERP	Equities	4.4	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXAXPPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXBABAPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXBACPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXBAPERP	Equities	4.4	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXBKNGPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXBLKPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXBRKBPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXCATPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXCOPPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXCOSTPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXCPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXCRMPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXCRWDPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXCSCOPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXCVXPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXDELLPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXDEPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXDHRPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXDISPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXGEPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXGEVPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXGILDPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXGOOGLPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXGSPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXHDPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXIBMPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXINTCPERP	Equities	2.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXISRGPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXJNJPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXJPMPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXKLACPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXKOPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXLINPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXLLYPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXLMTPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXLRCXPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXMAPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXMCDPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXMETAPERP	Equities	4.5	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXMRKPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXMSFTPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXMSPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXMUPERP	Equities	3.3	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXNEEPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXNEMPERP	Equities	4.7	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXNFLXPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXNVDAPERP	Equities	4.5	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXORCLPERP	Equities	4.5	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPANWPERP	Equities	4.4	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPEPPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPFEPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPGPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPLDPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPLTRPERP	Equities	3.8	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPMPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXQCOMPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXQQQPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXRTXPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXSBUXPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXSCHWPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXSHOPPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXSKHYPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXSNDKPERP	Equities	1.5	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXSPCXPERP	Equities	3.5	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXSPYPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXTJXPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXTMOPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXTMUSPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXTSLAPERP	Equities	4.2	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXTSMPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXTXNPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXUNHPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXUNPPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXVPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXVZPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXWELLPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXWFCPERP	Equities	unknown	none: not in the owner's paste (not estimated)	
+KXWMTPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXXOMPERP	Equities	4.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXUS2000PERP	Indices	24.6	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXUS500PERP	Indices	36.1	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXUSTECH100PERP	Indices	28.9	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXALUMINUMPERP	Metals	13.3	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXCOPPERPERP	Metals	17.7	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXGOLDPERP	Metals	40	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	17.4x at $800 (owner ticket)
+KXPALLADIUMPERP	Metals	5.3	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXPLATINUMPERP	Metals	10	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
+KXSILVERPERP	Metals	17.7	owner paste, relayed by EA 2026-11-16 17:40Z, small-size max	
