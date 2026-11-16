@@ -6,6 +6,7 @@
   "clean",
   "owner_override_shadow"
  ],
+ "income_label": "validate-window income, upward biased (selected on the same window that passed the bar, winner's curse), not a forecast; signals a day counts calendar days, weekends included",
  "spec_sha256_covers": "the spec object only (rule, costs, mode), not rank, admission, flags or paper figures",
  "no_money_no_orders": true,
  "specs": [
@@ -51,7 +52,8 @@
     "dollars_week_5c_1c": 16.33,
     "dollars_week_5c_2c": 13.85,
     "bh_p": 0.00033708677924274586,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -98,7 +100,8 @@
     "dollars_week_5c_1c": 13.45,
     "dollars_week_5c_2c": 11.35,
     "bh_p": 0.006154069870743898,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -143,7 +146,8 @@
     "dollars_week_5c_1c": 13.44,
     "dollars_week_5c_2c": 11.03,
     "bh_p": 0.011276876160873929,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -188,7 +192,8 @@
     "dollars_week_5c_1c": 12.31,
     "dollars_week_5c_2c": 10.48,
     "bh_p": 0.05692634059683664,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -233,7 +238,8 @@
     "dollars_week_5c_1c": 12.29,
     "dollars_week_5c_2c": 10.24,
     "bh_p": 0.0226419099258111,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -280,7 +286,8 @@
     "dollars_week_5c_1c": 11.9,
     "dollars_week_5c_2c": 9.77,
     "bh_p": 0.01772746830063574,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -325,7 +332,8 @@
     "dollars_week_5c_1c": 11.17,
     "dollars_week_5c_2c": 9.0,
     "bh_p": 0.0345499666064413,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -372,7 +380,8 @@
     "dollars_week_5c_1c": 10.33,
     "dollars_week_5c_2c": 6.21,
     "bh_p": 0.018961894305350415,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -419,7 +428,8 @@
     "dollars_week_5c_1c": 9.43,
     "dollars_week_5c_2c": 8.27,
     "bh_p": 0.001048878997283595,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -464,7 +474,8 @@
     "dollars_week_5c_1c": 8.03,
     "dollars_week_5c_2c": 6.12,
     "bh_p": 0.056838853274906204,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -509,7 +520,8 @@
     "dollars_week_5c_1c": 6.32,
     "dollars_week_5c_2c": 4.19,
     "bh_p": 0.1134044867814133,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -557,7 +569,8 @@
     "dollars_week_5c_1c": 6.18,
     "dollars_week_5c_2c": 3.44,
     "bh_p": 0.047420246519632336,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -605,7 +618,8 @@
     "dollars_week_5c_1c": 5.71,
     "dollars_week_5c_2c": 3.99,
     "bh_p": 0.09411198342837111,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -652,7 +666,8 @@
     "dollars_week_5c_1c": 5.64,
     "dollars_week_5c_2c": 3.6,
     "bh_p": 0.10483133211219643,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -699,7 +714,8 @@
     "dollars_week_5c_1c": 5.58,
     "dollars_week_5c_2c": 2.08,
     "bh_p": 0.09588948122969858,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -744,7 +760,8 @@
     "dollars_week_5c_1c": 5.44,
     "dollars_week_5c_2c": 2.9,
     "bh_p": 0.14882932849223196,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   },
   {
@@ -791,7 +808,8 @@
     "dollars_week_5c_1c": 5.0,
     "dollars_week_5c_2c": 2.71,
     "bh_p": 0.052769765364044485,
-    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+    "label": "validate-window income, upward biased, not a forecast",
+    "note": "signals a day counts calendar days (weekends included); archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
    }
   }
  ]

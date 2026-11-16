@@ -1,6 +1,6 @@
 # SHADOW_CLUSTER_MAP_NOV16 (Desk A, 2026-11-16)
 
-Source: the 190 rules that passed VALIDATE in ENGINE1 run 2 (1c PF 1.3+, 2c PF 1.0+, both halves, n 100+), re-scored with the same audited driver code (reproduces the listing to 1e-9; no new rule tried, m 2,347,488 unchanged). **None is a pass:** BH survivors 0 at m 2.35 million; these are candidates for a log-only forward test, upper bound, not fill-checked. Paper research figures only. Dollars a week = signals a day (validate) x cash edge at 1c per contract x 5 contracts x 7, scaled linearly from the 10 contract cash.
+Source: the 190 rules that passed VALIDATE in ENGINE1 run 2 (1c PF 1.3+, 2c PF 1.0+, both halves, n 100+), re-scored with the same audited driver code (reproduces the listing to 1e-9; no new rule tried, m 2,347,488 unchanged). **None is a pass:** BH survivors 0 at m 2.35 million; these are candidates for a log-only forward test, upper bound, not fill-checked. Paper research figures only. **Every income figure is validate-window income, upward biased (it comes from the same window that passed the bar), not a forecast; signals a day counts calendar days, weekends included.** Dollars a week = signals a day (validate) x cash edge at 1c per contract x 5 contracts x 7, scaled linearly from the 10 contract cash.
 
 Excluded before clustering: **35 Dogecoin rules** (7e: Dogecoin removed from the bot, any Dogecoin strategy declined). Admission: validate and search signals a day both at least 3 (all 190 met it).
 
@@ -8,7 +8,7 @@ Clustering: near-duplicates merged when same market, same side rule, same exit, 
 
 Families (cap 5 each): the entry condition kind (plain band, spread filter, momentum or volume filter, open-interest trigger) x the price region bought (cheap tail 5c to 35c, middle 35c to 85c, high 85c+), with the favourite-late shape (price band 17+ and 10 minutes or less left) as its own family, flagged as the closed gold L1 mechanism. Cap 3 per market.
 
-## Picks (ranked by dollars a week at 1c, 5 contracts)
+## Picks (ranked by dollars a week at 1c, 5 contracts; validate-window income, upward biased, not a forecast)
 
 | # | spec | admission | market | side | look (s left) | band | filter | exit | n | signals/day | PF 1c | PF 2c | edge 1c c/ct | edge 2c c/ct | $/wk 1c | $/wk 2c | family | cluster (size) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
