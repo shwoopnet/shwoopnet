@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "status": "active",
  "registration": "kalshi-scalper/workers/econcensus/ECONCENSUS_NOTE.md",
- "purpose": "Series metadata of the Climate and Weather, Companies and Science and Technology categories (ticker, frequency, title), to find event-driven families (earnings, mentions, snow, hurricanes, launches) for engine specs. No market, price or result.",
+ "purpose": "Series metadata of the Companies and Mentions categories (ticker, frequency, title), to find event-driven families (earnings, mentions, snow, hurricanes, launches) for engine specs. No market, price or result.",
  "heldout": "none (series metadata only: ticker, frequency, title; no market list, no price, no result, no date window)",
  "allowed_endpoints": [
   {
@@ -18,8 +18,8 @@
  ],
  "series_allowlist": [],
  "ticker_allowlist": [],
- "max_requests": 6,
- "notes": "Three requests; the earlier all-category list was cut by the runner's 5 MB cap, so one category at a time. Titles and frequencies only are read.",
+ "max_requests": 4,
+ "notes": "Two requests; the earlier all-category list was cut by the runner's 5 MB cap, so one category at a time. Titles and frequencies only are read.",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 5.0,
@@ -30,14 +30,6 @@
  },
  "requests": [
   {
-   "id": "series_Climate_and_Weather",
-   "path": "/series",
-   "params": {
-    "category": "Climate and Weather",
-    "limit": 20000
-   }
-  },
-  {
    "id": "series_Companies",
    "path": "/series",
    "params": {
@@ -46,10 +38,10 @@
    }
   },
   {
-   "id": "series_Science_and_Technology",
+   "id": "series_Mentions",
    "path": "/series",
    "params": {
-    "category": "Science and Technology",
+    "category": "Mentions",
     "limit": 20000
    }
   }
