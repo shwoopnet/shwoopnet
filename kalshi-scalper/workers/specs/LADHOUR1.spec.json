@@ -96,7 +96,9 @@
   "pf_secondary": 1.0,
   "min_trade_days": 10,
   "bh_alpha": 0.05,
-  "signals_per_day_min": 3
+  "signals_per_day_min": 3,
+  "min_events": 40,
+  "events_note": "Nov 16 amendment: as ETHLATE1, events = distinct hourly close times of the cell's SCORED trades in the half being gated (an M60 entry with no mark is in neither n nor events); 3 signals a day counted in SEARCH only; BH runs per series over the one m_total."
  },
  "tries": {
   "rules_this_spec": 384,

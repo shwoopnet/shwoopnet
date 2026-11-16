@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """LADHOUR1 adapter (Desk B, Nov 16 2026; DRAFT, unrun, unsigned). NO new scoring code: it calls Desk A's cleared engine files for the 96 cell keys of each of KXINXU, KXNASDAQ100U, KXWTIH, KXGOLDH (specs/LADHOUR1.spec.json).
 REFUSES unless every engine file's sha256 equals the pin below, and unless engine1_split has a dated constant for each series that has data. C8 gate as in ETHLATE1 (PF 1.3 at 2c primary, both 2c halves 1.0 or more, n >= 100, >= 10 trade days,
->= 3 signals a day in SEARCH, >= 40 events = distinct closes of SCORED trades). BH over ONE m_total (m_carried + 384) with the 2c day-clustered p, pooled over the four series. Expected figures: EXPECTED_ladhour1_nov16.md.
+>= 3 signals a day in SEARCH, >= 40 events = distinct closes of SCORED trades). BH PER SERIES (each series is read once on its own date) over the one m_total (m_carried + 384) with the 2c day-clustered p. Expected figures: EXPECTED_ladhour1_nov16.md.
 Usage: python3 ladhour1_run.py <quote-data checkout> KXINXU=<run folder> KXNASDAQ100U=<run folder> KXWTIH=<run folder> KXGOLDH=<run folder>"""
 import os, sys, hashlib, collections
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -57,7 +57,8 @@ def run(markets_by_series, m_total=None, engine_dir=ENGINE_DIR):
             if len(items) < MIN_N: continue
             agg, _ = D.score_group(items, k[5]); ev = events_of(items, k[5], K, D)
             if c8_pass(agg[0.02], ev): v_res[k] = agg[0.02]; v_p[k] = D.pval(agg[0.02]["day_z"]); v_ev[k] = ev
-    keep = D.bh(v_p, m_total, ALPHA)
+    keep = set()
+    for ser in SERIES: keep |= D.bh({k: p for k, p in v_p.items() if k[0] == ser}, m_total, ALPHA)      # each series is read on its own date (spec release rule), so BH runs per series over the one m_total
     rep["search_cells_scored"] = scored; rep["search_passes"] = len(s_pass); rep["validate_bar_passes"] = len(v_res)
     rep["survivors"] = [{"series": k[0], "cell": k[1:], "pf_2c": v_res[k]["pf"], "n": v_res[k]["n"], "days": v_res[k]["trade_days"], "events": v_ev[k]} for k in sorted(keep, key=str)]
     return rep
