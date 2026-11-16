@@ -84,19 +84,18 @@ def search(rungs, candles, carried=6290660, validate_h_only=False):
     for hours in (9, 5, 4):
         kept, guarded, c2 = decisions(rungs, candles, O_by, hours)
         for k, v in c2.items(): cnt["%s_%dh" % (k, hours)] = v
+        cnt["inplay_guard_%d" % hours] = len(guarded)          # once per skipped rung, per decision time (Desk C)
         for (h, ex) in CELLS:
             if h != hours or (validate_h_only and ex != "H"): continue
             for band in BANDS:
                 for side in SIDES:
                     for f in FILTERS:
-                        tr = []; g_skipped = 0
-                        for d in guarded:
-                            if b.in_band(b.side_ask(d, side), band) and passes(d, f): g_skipped += 1
+                        tr = []
                         for d in kept:
                             if ex == "M35" and d["r"]["event"] in drop: continue
                             if not b.in_band(b.side_ask(d, side), band) or not passes(d, f): continue
                             c1, mk = cash(d, side, ex, candles, "primary"); c2_, _ = cash(d, side, ex, candles, "two"); cw, _ = cash(d, side, ex, candles, "weekly", 5)
                             tr.append({"game": d["r"]["event"], "day": d["D"] // 86400, "close_time": d["r"]["close_time"], "ticker": d["r"]["ticker"], "cash1": c1, "cash2": c2_, "cashw": cw, "marked": mk})
-                        st = b.cell_stats(tr); st["inplay_skipped"] = g_skipped; cells[(hours, ex, band[0], side, f)] = st
+                        st = b.cell_stats(tr); cells[(hours, ex, band[0], side, f)] = st
     elig = b.eligible(cells); surv = {k for k in b.bh(elig, m_total(carried)) if b.gate_ok(cells[k])}
     return cells, cnt, surv

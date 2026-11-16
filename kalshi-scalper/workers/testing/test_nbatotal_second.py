@@ -43,8 +43,8 @@ cells, cnt, surv = m.search([R1], cs); assert len(cells) == 520 and surv == set(
 cs3 = {"T-1": {**cs["T-1"], O - 14000: cd(0.39, 0.41), O - 13900: cd(0.55, 0.57)}}
 cells3, cnt3, _ = m.search([R1], cs3); assert cnt3["m35_dropped_games"] == 1 and cells3[(9, "H", 0.40, "yes", "none")]["n"] == 1 and cells3[(9, "M35", 0.40, "yes", "none")]["n"] == 0
 cellsv, _, _ = m.search([R1], cs, validate_h_only=True); assert (9, "M35", 0.40, "yes", "none") not in cellsv and (9, "H", 0.40, "yes", "none") in cellsv
-# guarded rungs are counted per cell
-cg = m.search([R1], g_fail)[0]; assert cg[(9, "H", 0.40, "yes", "none")]["inplay_skipped"] == 1 and cg[(9, "H", 0.40, "yes", "none")]["n"] == 0 and cg[(9, "H", 0.50, "yes", "none")]["inplay_skipped"] == 0
+# guarded rungs are counted once per decision time (inplay_guard_9, _5, _4), not per cell
+cg, cntg, _ = m.search([R1], g_fail); assert cntg["inplay_guard_9"] == 1 and cntg["inplay_guard_5"] == 0 and cg[(9, "H", 0.40, "yes", "none")]["n"] == 0 and "inplay_skipped" not in cg[(9, "H", 0.40, "yes", "none")]
 assert m.m_total() == 6291180 and m.m_total(0) == 520
 assert mg(cd(0.395, 0.405), cd(0.395 + 0.15 - 5e-10, 0.405 + 0.15 - 5e-10)) == {"G1"} and mg(cd(0.395, 0.405), cd(0.395 + 0.15 - 2e-9, 0.405 + 0.15 - 2e-9)) == set()          # the 1e-9 tolerance
 for close, want in ((O - m.MARK + 120, -0.16), (O - m.MARK + 121, -0.06)):
