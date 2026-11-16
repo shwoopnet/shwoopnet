@@ -117,6 +117,9 @@ assert near(p.funding_for(pr, ts(2026, 10, 13, 13, 50), ts(2026, 10, 14, 13, 31)
 assert p.funding_for(pr, ts(2026, 10, 12, 19, 0), ts(2026, 10, 12, 19, 30), True) is None and p.funding_for(pr, ts(2026, 10, 13, 21, 0), ts(2026, 10, 14, 13, 31), True) == 0.0
 assert p.funding_for(pr, ts(2026, 10, 14, 20, 30), ts(2026, 10, 15, 20, 30), True) is None and p.funding_for(pr, ts(2026, 10, 16, 21, 0), ts(2026, 10, 17, 22, 0), True) == 0.0 and p.funding_for(pr, ts(2026, 10, 16, 21, 0), ts(2026, 10, 17, 22, 0) + 1, True) is None
 assert p.funding_for({P1: 0.0}, P1 - 1, P1 + 100, True) is None and p.funding_for({P1: 0.0}, P1, P1 + 100, True) == 0.0          # an entry one second before the first print is not covered; at the print it is
+# counter order (Auditor B R4): cooldown BEFORE the feature, so a missing feature inside a cooldown is not counted
+t0 = ts(2026, 11, 10, 15, 0); CO = {t0 - 60 + k: (round(100 + (k + 60) / 60 * 0.1 - 0.01, 6), round(100 + (k + 60) / 60 * 0.1 + 0.01, 6)) for k in (0, 60, 120, 180, 240, 360)}          # candles at t0-60, t0, t0+60, t0+120, t0+180, t0+300
+tr, c = p.rule_trades(CO, None, "mom1_up", "long", "T3", 0.0); assert c["missing_feature"] == 1 and len(tr) == 1 and tr[0]["e"] == t0 and c["no_mark"] == 0, (c, tr)
 # statistics, gate, BH
 mk = lambda nets, days: [{"e": i, "day": d, "funding": 0.0, "net_taker": x, "net_maker": x} for i, (x, d) in enumerate(zip(nets, days))]
 t = mk([2.0, -1.0, 2.0, -1.0], [0, 0, 1, 1]); s = p.stats(t); assert s["n"] == 4 and s["pf"] == 2.0 and s["h1"] == 2.0 and s["h2"] == 2.0 and s["trade_days"] == 2 and near(s["net"], 2.0)

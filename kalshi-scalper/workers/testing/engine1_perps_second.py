@@ -123,10 +123,10 @@ def rule_trades(series, cuts, filt, side, ex, h, entry_range=(-math.inf, math.in
     last_e = last_exit = None
     for e in sorted(series):
         if not (entry_range[0] <= e < entry_range[1]) or not two_sided(series[e]): continue
+        if last_e is not None and ((ex in ("TC", "TO") and e < last_exit) or (ex not in ("TC", "TO") and e < last_e + HOLD[ex])): continue
         f = feature(filt, series, e, cuts)
         if f is None: cnt["missing_feature"] += 1; continue
         if not f: continue
-        if last_e is not None and ((ex in ("TC", "TO") and e < last_exit) or (ex not in ("TC", "TO") and e < last_e + HOLD[ex])): continue
         if boundary is not None and e < boundary and horizon(e, ex) >= boundary: cnt["clipped"] += 1; continue          # R1: the clip horizon never depends on the outcome path
         q = series[e]; long_ = side == "long"
         fill = q[1] * (1 + h) if long_ else q[0] * (1 - h)
