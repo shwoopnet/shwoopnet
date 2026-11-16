@@ -1,0 +1,94 @@
+{
+ "extract": "ENGINE1 nc15",
+ "cut": 1791043200,
+ "series": [
+  "KXSILVER15M",
+  "KXCOPPER15M",
+  "KXWTI15M",
+  "KXEURUSD15M",
+  "KXGBPUSD15M",
+  "KXUSDJPY15M",
+  "KXHYPE15M",
+  "KXBNB15M",
+  "KXAUDUSD15M",
+  "KXUSDCAD15M",
+  "KXNATGAS15M"
+ ],
+ "runs": [
+  "NC15_LISTS_A/2026-11-14T0639Z_43567362760",
+  "NC15_LISTS_B/2026-11-14T0710Z_43569819335",
+  "NC15_CANDLES_A1/2026-11-14T0742Z_43572344399",
+  "NC15_CANDLES_A2/2026-11-14T0822Z_43575507647",
+  "NC15_CANDLES_A3/2026-11-14T0902Z_43578620866",
+  "NC15_CANDLES_B1/2026-11-14T0940Z_43581645588",
+  "NC15_CANDLES_B2/2026-11-14T1020Z_43584771195",
+  "NC15_CANDLES_B3/2026-11-14T1101Z_43588018609",
+  "NC15_CANDLES_B4/2026-11-14T1141Z_43591230490"
+ ],
+ "counts": {
+  "dropped by the cut": 32666,
+  "candles kept": 221320,
+  "candle after close (dropped)": 11075,
+  "candle without last (NULL)": 5165,
+  "candle market not kept (not parsed)": 32626
+ },
+ "markets_by_series": [
+  [
+   "KXBNB15M",
+   2528,
+   1788739200,
+   1791042300
+  ],
+  [
+   "KXCOPPER15M",
+   1917,
+   1788739200,
+   1790974800
+  ],
+  [
+   "KXEURUSD15M",
+   650,
+   1790202600,
+   1790974800
+  ],
+  [
+   "KXGBPUSD15M",
+   650,
+   1790202600,
+   1790974800
+  ],
+  [
+   "KXHYPE15M",
+   2528,
+   1788739200,
+   1791042300
+  ],
+  [
+   "KXNATGAS15M",
+   1977,
+   1788739200,
+   1791000000
+  ],
+  [
+   "KXSILVER15M",
+   1917,
+   1788739200,
+   1790974800
+  ],
+  [
+   "KXUSDJPY15M",
+   650,
+   1790202600,
+   1790974800
+  ],
+  [
+   "KXWTI15M",
+   1977,
+   1788739200,
+   1791000000
+  ]
+ ],
+ "markets": 14794,
+ "extract_sha256": "70a6d9033813c59e9458bcf418923cec254bc30befef9453332438e68c9f5d22",
+ "extractor_sha256": "3636f755fe50a76319bd6353bafc04e8fcfac3809014ec8ea0dfd78552ed2b86"
+}
