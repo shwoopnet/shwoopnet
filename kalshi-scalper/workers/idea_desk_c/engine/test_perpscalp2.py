@@ -41,6 +41,33 @@ def fixture(dip=False, fund=None):
     return root
 
 
+class Clock(unittest.TestCase):
+    def test_edt_and_est_days(self):
+        d1 = P.et_min(calendar.timegm((2026, 10, 20, 13, 35, 0)))                  # EDT: 09:35 ET = 13:35Z
+        d2 = P.et_min(calendar.timegm((2026, 11, 10, 14, 35, 0)))                  # EST: 09:35 ET = 14:35Z
+        self.assertEqual((d1[1], d2[1]), (9 * 60 + 35, 9 * 60 + 35))
+        self.assertEqual(P.et_min(calendar.timegm((2026, 10, 20, 19, 45, 0)))[1], 15 * 60 + 45)   # EDT: 15:45 ET = 19:45Z
+
+    def test_holidays_and_early_close(self):
+        import datetime
+        self.assertIsNone(P.sess_end(datetime.date(2026, 11, 26)))
+        self.assertIsNone(P.sess_end(datetime.date(2026, 12, 25)))
+        self.assertEqual(P.sess_end(datetime.date(2026, 11, 27)), 12 * 60 + 45)
+        self.assertEqual(P.sess_end(datetime.date(2026, 12, 24)), 12 * 60 + 45)
+        self.assertEqual(P.sess_end(datetime.date(2026, 11, 10)), 15 * 60 + 45)
+
+    def test_h16_rows_dropped_and_counted(self):
+        root = fixture()
+        with gzip.open(os.path.join(root, "kalshi1m", "2026-12-22.csv.gz"), "wt", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["ticker", "end_period_ts", "bid_close", "ask_close", "volume"])
+            w.writerow(["KXNVDAPERP", P.H16_START, "100.0", "100.1", "1"])
+        dropped = {}
+        c, fu = P.load(root, 1797897700, [], dropped)                              # an end epoch past H16 is cut to H16 - 1
+        self.assertEqual(dropped["h16_rows"], 1)
+        self.assertNotIn(P.H16_START, c["KXNVDAPERP"])
+
+
 class Hand(unittest.TestCase):
     def test_grid(self):
         self.assertEqual(P.N_CELLS, 168)
@@ -109,6 +136,9 @@ class Hand(unittest.TestCase):
         self.assertEqual((out["m_carried"], out["m_new"], out["m_total"]), (6290660, 168, 6290828))
         self.assertEqual(len(out["cells"]), 168)
         self.assertIn("KXNVDAPERP", out["counts"]["dropped_short_history"])       # 76 regular-hours candles: under 600
+        self.assertEqual(out["counts"]["valid_regular_candles"]["KXNVDAPERP"], 76)
+        self.assertEqual(out["counts"]["files_read"], 2)
+        self.assertEqual(len(out["counts"]["manifest_sha256"]), 64)
 
 
 if __name__ == "__main__":

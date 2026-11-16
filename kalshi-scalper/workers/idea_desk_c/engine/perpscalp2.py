@@ -3,7 +3,7 @@
 Perps scalping, the liquid subset: 14 names, 7 follow entry rules (vol expansion r 2 and 3, opening-range breakout N 5, 15, 30, volume spike q 5 and 10) x 4 window filters
 x 6 exits (target and stop in units of U = sigma1 x sqrt(10), time stops 10 and 30 minutes) = 168 cells, each read in three columns (taker/taker, maker entry with taker
 exit, maker entry with maker target). Reads the perp-data layout only: <root>/kalshi1m/<date>[.only].csv.gz and <root>/funding/<date>[.only].csv.gz. No network, no result file."""
-import calendar, csv, glob, gzip, math, os, sys
+import calendar, csv, glob, gzip, hashlib, math, os, sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -23,13 +23,30 @@ SPREAD_MAX, COOLDOWN, END_REG = 0.003, 900, 15 * 60 + 45
 N_CELLS = len(ENTRIES) * len(WINDOWS) * len(EXITS)                                  # 7 x 4 x 6 = 168
 MIN_N, MIN_DAYS, MIN_SIGNALS, ALPHA = 100, 10, 48, 0.05
 END_EPOCH = 1794787199                                                              # development: candles ending through 2026-11-15 23:59:59Z
+H16_START = 1797897600                                                              # H16 (NVDA, AAPL, US 500, US Tech 100, SPY, QQQ) opens 2026-12-22: rows at or after it are dropped and counted
+HOLIDAYS = ("2026-11-26", "2026-12-25")                                             # no session
+EARLY = ("2026-11-27", "2026-12-24")                                                # early close: regular hours end 12:45 ET
 BIG = 1e9
 
 
-def load(root):
+def _sha(path):
+    with open(path, "rb") as fh:
+        return hashlib.sha256(fh.read()).hexdigest()
+
+
+def sess_end(d):
+    """regular hours end (minutes after midnight ET) for the ET date d, or None on a holiday"""
+    s = d.isoformat()
+    return None if s in HOLIDAYS else (12 * 60 + 45 if s in EARLY else END_REG)
+
+
+def load(root, end_epoch=END_EPOCH, manifest=None, dropped=None):
     """-> ({name: {end_ts: (bid, ask, volume)}}, {name: sorted [(time, rate)]}). Unusable candles (a missing bid or ask, crossed) are dropped; a gap is never bridged."""
     c = {n: {} for n in NAMES}
+    end_epoch = min(end_epoch, H16_START - 1)
     for f in sorted(glob.glob(os.path.join(root, "kalshi1m", "*.csv.gz"))):
+        if manifest is not None:
+            manifest.append((os.path.relpath(f, root), _sha(f)))
         for r in csv.DictReader(gzip.open(f, "rt")):
             n = r["ticker"]
             if n not in c:
@@ -38,11 +55,17 @@ def load(root):
                 ts, b, a, v = int(r["end_period_ts"]), float(r["bid_close"]), float(r["ask_close"]), float(r["volume"] or 0)
             except ValueError:
                 continue
-            if ts > END_EPOCH or not (0 < b <= a < BIG):
+            if ts >= H16_START:
+                if dropped is not None:
+                    dropped["h16_rows"] = dropped.get("h16_rows", 0) + 1
+                continue
+            if ts > end_epoch or not (0 < b <= a < BIG):
                 continue
             c[n].setdefault(ts, (b, a, v))
     fu = {n: [] for n in NAMES}
     for f in sorted(glob.glob(os.path.join(root, "funding", "*.csv.gz"))):
+        if manifest is not None:
+            manifest.append((os.path.relpath(f, root), _sha(f)))
         for r in csv.DictReader(gzip.open(f, "rt")):
             n = r["ticker"]
             if n in fu:
@@ -91,7 +114,8 @@ def signal_times(c, ent, day_cache):
         days = {}
         for t in sorted(c):
             wd, m, d = et_min(t)
-            if wd < 5 and 9 * 60 + 31 <= m <= END_REG:
+            end = sess_end(d)
+            if wd < 5 and end is not None and 9 * 60 + 31 <= m <= end:
                 days.setdefault(d, []).append((t, m))
         for d, L in days.items():
             rng = [t for t, m in L if m <= 9 * 60 + 30 + par]
@@ -100,7 +124,7 @@ def signal_times(c, ent, day_cache):
             ms = [mid(c[t]) for t in rng]
             hi, lo = max(ms), min(ms)
             for t, m in L:
-                if m > 9 * 60 + 30 + par and m <= END_REG:
+                if m > 9 * 60 + 30 + par and m <= sess_end(d):
                     x = mid(c[t])
                     if x > hi:
                         out.append((t, 1)); break
@@ -109,7 +133,8 @@ def signal_times(c, ent, day_cache):
         return sorted(out)
     for t in sorted(c):
         wd, m, d = et_min(t)
-        if wd >= 5 or not (9 * 60 + 35 <= m <= END_REG):
+        end = sess_end(d)
+        if wd >= 5 or end is None or not (9 * 60 + 35 <= m <= end):
             continue
         if (c[t][1] - c[t][0]) / mid(c[t]) > SPREAD_MAX:
             continue
@@ -168,7 +193,7 @@ def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
     tgt = ref * (1 + side * k_t * U)
     stp = ref * (1 - side * k_s * U)
     wd, m, d = et_min(e)
-    last = min(e + T, e + (END_REG - m) * 60)
+    last = min(e + T, e + (sess_end(d) - m) * 60)
     ex = None
     fee_out = FEE_T
     for x in sorted(k for k in c if e < k <= last):
@@ -255,11 +280,14 @@ def margin_row(trs_by_name):
 
 
 def run(root, m_carried=6290660, N_fill=(2, 5)):
-    c, fu = load(root)
-    counts = {"names_loaded": sum(1 for n in NAMES if c[n]), "dropped_short_history": [], "signals": {}}
+    manifest, dropped = [], {}
+    c, fu = load(root, END_EPOCH, manifest, dropped)
+    counts = {"names_loaded": sum(1 for n in NAMES if c[n]), "dropped_short_history": [], "valid_regular_candles": {}, "h16_rows_dropped": dropped.get("h16_rows", 0),
+              "files_read": len(manifest), "manifest_sha256": hashlib.sha256(repr(sorted(manifest)).encode()).hexdigest()}
     use = []
     for n in NAMES:
-        reg = sum(1 for t in c[n] if et_min(t)[0] < 5 and 9 * 60 + 35 <= et_min(t)[1] <= END_REG)
+        reg = sum(1 for t in c[n] if et_min(t)[0] < 5 and sess_end(et_min(t)[2]) is not None and 9 * 60 + 35 <= et_min(t)[1] <= sess_end(et_min(t)[2]))
+        counts["valid_regular_candles"][n] = reg
         if reg < 600:
             counts["dropped_short_history"].append(n)
         else:
@@ -278,7 +306,11 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
                     for (t, side) in sig[(n, ent[0])]:
                         e = t + 60
                         wd, m, d = et_min(e)
-                        if not ((lo <= m <= hi) if WIN_OPEN[w] else (lo < m <= hi)):
+                        end_d = sess_end(d)
+                        if end_d is None:
+                            continue
+                        hi_d = min(hi, end_d - 10)                              # no entry in the last 10 minutes of the session
+                        if not ((lo <= m <= hi_d) if WIN_OPEN[w] else (lo < m <= hi_d)):
                             continue
                         if e < busy_until or e - last_entry < COOLDOWN:
                             continue
