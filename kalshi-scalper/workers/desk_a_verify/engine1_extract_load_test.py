@@ -15,7 +15,9 @@ def perps(con):
     con.executemany("INSERT INTO market VALUES (?,?,?,?,?)", [("KXSPYPERP", "SPY", None, None, "p"), ("KXUS500PERP", "US500", None, None, "p")])
     con.executemany("INSERT INTO candle VALUES (?,?,?,?,?,?,?)", [("KXSPYPERP", 1793923199, 600.0, 600.1, 600.0, 1, None), ("KXSPYPERP", 1793923260, 601.0, 601.1, 601.0, None, 5), ("KXUS500PERP", 1793923260, 1, 2, 1, 1, 1)])
 a, b = mk("arch.xz", arch), mk("perps.xz", perps)
-nc = mk("nc.xz", arch)
+def arch_nc(con):
+    arch(con); con.execute("INSERT INTO candle VALUES ('K3', 1, .1, .2, .1, 1, 1)")                    # different bytes, so a different sha256 from the archive extract
+nc = mk("nc.xz", arch_nc); assert nc != a
 L.ARCHIVE = ("arch.xz", a); L.PERPFILE = ("perps.xz", b); L.NC15FILE = ("nc.xz", nc)
 allow = os.path.join(base, "H.md"); L.ALLOW_FILE = allow
 try: L.load(base); assert False                                    # 1: no allow line
@@ -47,6 +49,12 @@ try: L.load(base, with_nc15=True); assert False
 except SystemExit as e: assert "REFUSED" in str(e)
 L.NC15FILE = ("nc.xz", nc); L.PERPFILE = ("perps.xz", b)
 open(allow, "w").write("x %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b, nc))
+# any-line rule: a first-pass line B1 sitting BEFORE the NC15 line must not hide it
+open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\ny %s engine1_extract_load.py %s %s %s %s\n" % (L.ALLOW_MARK, "0" * 64, a, b, L.ALLOW_MARK, L.self_sha(), a, b, nc))
+assert list(L.load(base, with_nc15=True)[4]) == ["WTI"]                                              # the second line grants the NC15 pass although the first line is for another hash
+try: open(allow, "w").write("x %s engine1_extract_load.py %s %s %s\n" % (L.ALLOW_MARK, L.self_sha(), a, b)); L.load(base, with_nc15=True); assert False
+except SystemExit as e: assert "REFUSED" in str(e)                                                    # a line without the NC15 sha does not grant the NC15 pass
+assert L.load(base)[0]                                                                                # but it grants the first pass
 open(os.path.join(base, "arch.xz"), "ab").write(b"x")                                                      # 3: a changed file is refused
 try: L.load(base); assert False
 except SystemExit as e: assert "sha256" in str(e)

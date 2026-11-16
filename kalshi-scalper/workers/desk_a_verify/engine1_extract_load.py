@@ -10,16 +10,18 @@ PERP_FROM = 1793923200                             # 2026-11-06T00:00Z (date -u 
 PERPS = ("KXSPYPERP", "KXQQQPERP", "KXNVDAPERP", "KXAAPLPERP")
 ARCHIVE = ("ENGINE1_archive_extract.sqlite.xz", "9e4bece477ee5c5caec5b024b1cb86c1b6538061a2bb2092faa1e091bef06820")
 PERPFILE = ("ENGINE1_perps_extract.sqlite.xz", "730fa9385bc04e4225cba35c197bff200d49b0ecd6a2830c92978f653c03c398")
-NC15FILE = ("ENGINE1_nc15_extract.sqlite.xz", "")   # sha256 OPEN until Forensics runs the NC15 extract once after Line A; an empty value refuses the loader. Freeze this file only after it is filled.
+NC15FILE = ("ENGINE1_nc15_extract.sqlite.xz", "ada858e596bf8d373fe2ac227cb1450cd6b31ca46a1f5f8804f1d4ba782552f8")   # Forensics' NC15 extract, commit 49bc3031 (Auditor B hashed the committed file); an empty value refuses the NC15 pass
 ALLOW_FILE = os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md")
 ALLOW_MARK = "readable ONLY by Desk A's ENGINE1 extract loader"
 def self_sha(): return hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest()
 def refuse_unless_allowed(with_nc15=False):
+    """ANY line carrying the mark, the file name, this file's own sha256 and the sha256 of every extract that pass opens is enough (Auditor B: the first-pass line B1 and the later NC15 line B2 may both be present)."""
     try: text = open(ALLOW_FILE, encoding="utf-8").read()
     except OSError: raise SystemExit("REFUSED: HELDOUT_PULL_RUNS.md cannot be read")
-    line = [l for l in text.splitlines() if ALLOW_MARK in l]
-    if not line or "engine1_extract_load.py" not in line[0] or self_sha() not in line[0] or ARCHIVE[1] not in line[0] or PERPFILE[1] not in line[0] or (with_nc15 and (not NC15FILE[1] or NC15FILE[1] not in line[0])):
-        raise SystemExit("REFUSED: no allow-list line names engine1_extract_load.py with this file's sha256 %s and the sha256 of every extract it opens (archive and perps; NC15 too in the NC15 pass) (the Head's written acceptance, merged by Main)" % self_sha())
+    need = [ARCHIVE[1], PERPFILE[1]] + ([NC15FILE[1]] if with_nc15 else [])
+    for line in text.splitlines():
+        if ALLOW_MARK in line and "engine1_extract_load.py" in line and self_sha() in line and all(x and x in line for x in need): return
+    raise SystemExit("REFUSED: no allow-list line names engine1_extract_load.py with this file's sha256 %s and the sha256 of every extract this pass opens (the Head's written acceptance, merged by Main)" % self_sha())
 def open_extract(base, spec):
     name, want = spec; path = os.path.join(base, name)
     raw = open(path, "rb").read()
