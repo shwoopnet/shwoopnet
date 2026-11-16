@@ -4,7 +4,21 @@ Gate: SEARCH n >= MIN_N scored entries at 10 contracts, PF at 1c >= 1.3 and PF a
 import math, time, collections
 import engine1_core as K, engine1_enum as N, engine1_split as S
 MIN_N = 100; PF1 = 1.3; PF2 = 1.0; ALPHA = 0.05; CONTRACTS = 10
+MIN_SPD = 3.0; INCOME_CONTRACTS = 5          # (the owner, Nov 16) a SEARCH gate of 3 or more signals a day; the income figure is at 5 contracts a signal, 7 days a week. m (the count tried) is NOT changed by the gate.
 DISCLOSURE = "upper bound, not fill-checked; sales booked at max(bid - h, 0.01), purchases at min(ask + h, 0.99); fee ceil(round(x, 9)) per order per leg; target and stop only on candles ending at or before close - 60; one-sided p from day-clustered z of the 1c cash at 10 contracts; the same ticker appears in several buckets and rules, so the tests are dependent and BH is only approximate"
+def search_days(closes):
+    """SEARCH window days: first to last close, inclusive of both days."""
+    return (max(closes) - min(closes)) / 86400.0 + 1 if closes else 0.0
+def validate_days(closes, last_search_date):
+    """VALIDATE window days: from the start of the day after the last SEARCH date to the last close."""
+    import calendar
+    return (max(closes) - (calendar.timegm(time.strptime(last_search_date, "%Y-%m-%d")) + 86400)) / 86400.0 if closes else 0.0
+def income(agg, days):
+    """-> signals a day, cash edge per contract in cents, dollars a week at INCOME_CONTRACTS (linear from the 10 contract cash)."""
+    n = agg["n"]
+    if n == 0 or not days: return {"signals_per_day": 0.0, "edge_cents_per_contract": 0.0, "dollars_week": 0.0}
+    per = agg["net"] / (n * CONTRACTS)
+    return {"signals_per_day": n / days, "edge_cents_per_contract": per * 100, "dollars_week": (n / days) * per * INCOME_CONTRACTS * 7}
 def short(series):
     """The ONE mapping from an extract's series string to engine1_split's key: KXWTI15M -> WTI, KXBTC15M -> BTC; an already short name passes."""
     x = series[2:] if series.startswith("KX") else series
@@ -51,7 +65,7 @@ def bh(pvals, m, alpha=ALPHA):
 def run(markets_by_source):
     """markets_by_source: {source: {series: [market]}}. Returns a report dict (counts first)."""
     rep = {"no_split_constant": [], "disclosure": DISCLOSURE, "tried_by_series": {}, "search_entries_total": 0, "search_non_whole_cent_entries": 0, "validate_entries_total": 0, "validate_non_whole_cent_entries": 0}
-    search, valid = {}, {}
+    search, valid, sdays, vdays = {}, {}, {}, {}
     st = {"entries": 0, "non_whole": 0}; stv = {"entries": 0, "non_whole": 0}; total = 0; seen = set(); rep["duplicate_tickers_dropped"] = 0
     for src, bys in markets_by_source.items():
         for series, mk in bys.items():
@@ -69,6 +83,7 @@ def run(markets_by_source):
                 cuts[b] = N.spread_cuts(sp) if sp else None
             rep["tried_by_series"][(src, series)] = N.RULES_PER_SERIES; total += N.RULES_PER_SERIES
             search[(src, series)] = (groups(sm, cuts, st), cuts); valid[(src, series)] = groups(vm, cuts, stv)
+            sdays[(src, series)] = search_days([m["close"] for m in sm]); vdays[(src, series)] = validate_days([m["close"] for m in vm], S.LAST_SEARCH[short(series)])
     rep["search_entries_total"] = st["entries"]; rep["search_non_whole_cent_entries"] = st["non_whole"]; rep["validate_entries_total"] = stv["entries"]; rep["validate_non_whole_cent_entries"] = stv["non_whole"]
     rep["combos_tried_m"] = total                                              # printed before any result
     s_pass, s_p = {}, {}
@@ -78,7 +93,7 @@ def run(markets_by_source):
             for x in N.EXITS:
                 agg, p = score_group(items, x)
                 if agg[0.01]["n"] >= MIN_N: s_p[key + rule + (x,)] = p
-                if passes(agg[0.01], agg[0.02]): s_pass[key + rule + (x,)] = (agg[0.01], agg[0.02])
+                if passes(agg[0.01], agg[0.02]) and sdays[key] and agg[0.01]["n"] / sdays[key] >= MIN_SPD: s_pass[key + rule + (x,)] = (agg[0.01], agg[0.02])      # the 3 a day gate: dropped without a write-up, m unchanged
     rep["search_passes"] = len(s_pass)
     v_res, v_p = {}, {}
     for k, _ in s_pass.items():
@@ -91,7 +106,7 @@ def run(markets_by_source):
         if passes(agg[0.01], agg[0.02]): v_res[k] = (agg[0.01], agg[0.02]); v_p[k] = p
     keep = bh(v_p, total)
     rep["validate_bar_passes"] = len(v_res); rep["validate_passes"] = len(keep)
-    rep["validate_bar_list"] = [{"source": k[0], "series": k[1], "bucket": k[2], "band": k[3], "side": k[4], "filter": k[5], "exit": k[6], "pf_1c": v_res[k][0]["pf"], "pf_2c": v_res[k][1]["pf"], "n": v_res[k][0]["n"], "days": v_res[k][0]["trade_days"], "p": v_p[k], "family": family(k)} for k in sorted(v_res, key=str)]   # information only: every rule that met the bar on the VALIDATE dates, before BH (added for run 2, listing only)
+    rep["validate_bar_list"] = [{"source": k[0], "series": k[1], "bucket": k[2], "band": k[3], "side": k[4], "filter": k[5], "exit": k[6], "pf_1c": v_res[k][0]["pf"], "pf_2c": v_res[k][1]["pf"], "n": v_res[k][0]["n"], "days": v_res[k][0]["trade_days"], "p": v_p[k], "family": family(k), "income_1c": income(v_res[k][0], vdays[(k[0], k[1])]), "income_2c": income(v_res[k][1], vdays[(k[0], k[1])])} for k in sorted(v_res, key=lambda k: (-income(v_res[k][0], vdays[(k[0], k[1])])["dollars_week"], str(k)))]    # ranked by dollars a week at 1c   # information only: every rule that met the bar on the VALIDATE dates, before BH (added for run 2, listing only)
     rep["survivors"] = [{"source": k[0], "series": k[1], "bucket": k[2], "band": k[3], "side": k[4], "filter": k[5], "exit": k[6], "pf_1c": v_res[k][0]["pf"], "pf_2c": v_res[k][1]["pf"], "n": v_res[k][0]["n"], "days": v_res[k][0]["trade_days"], "family": family(k)} for k in sorted(keep, key=str)]
     return rep
 def family(k):

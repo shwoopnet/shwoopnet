@@ -2,7 +2,7 @@
 import os, sys, calendar
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import engine1_driver as D, engine1_enum as N, engine1_core as K, engine1_split as S
-D.MIN_N = 3
+D.MIN_N = 3; D.MIN_SPD = 2.0     # the 3 a day gate is tested below at its real value
 def mk(day, i, res="yes"):
     close = calendar.timegm((2026, 9, day, 12, 15 * i, 0))
     return {"series": "BTC", "ticker": "T%d_%d" % (day, i), "close": close, "result": res, "candles": [(close - 300, .89, .90, .9, 1, 10)]}
@@ -41,3 +41,16 @@ assert D.short("KXAUDUSD15M") == "AUDUSD" and "AUDUSD" not in S.LAST_SEARCH and 
 r5 = D.run({"nc": {"KXAUDUSD15M": sd}, "arch": {"KXBTC15M": [dict(m, series="KXBTC15M") for m in sd + vd]}})
 assert r5["no_split_constant"] == [("nc", "KXAUDUSD15M")] and list(r5)[0] == "no_split_constant" and r5["tried_by_series"] == {("arch", "KXBTC15M"): 1} and r5["validate_passes"] >= 1, r5
 print("ALL OK")
+
+# (Nov 16, the owner) the SEARCH gate of 3 signals a day and the income figure; m is NOT changed by the gate
+D.MIN_SPD = 3.0
+rg = D.run({"arch": {"BTC": sd + vd}})
+assert rg["combos_tried_m"] == 1 and rg["search_passes"] == 0 and rg["validate_bar_list"] == [], rg          # 9 SEARCH entries in 3.03 days = 2.97 a day: dropped, nothing written up, m unchanged
+D.MIN_SPD = 2.0
+sdays = D.search_days([m["close"] for m in sd]); assert abs(sdays - (2 + 45 / 1440 + 1)) < 1e-9, sdays
+vdays = D.validate_days([m["close"] for m in vd], "2026-09-03"); assert abs(vdays - (2 + 12.75 / 24)) < 1e-9, vdays      # Sep 4 00:00 to Sep 6 12:45
+inc = D.income(agg, vdays)
+assert abs(inc["signals_per_day"] - 9 / vdays) < 1e-9 and abs(inc["edge_cents_per_contract"] - 8.4) < 1e-9 and abs(inc["dollars_week"] - (9 / vdays) * 0.084 * 5 * 7) < 1e-9, inc      # 7.56 / 90 = 0.084 dollars a contract = 8.4 cents
+top = rep["validate_bar_list"][0]; assert "income_1c" in top and "income_2c" in top and all(rep["validate_bar_list"][i]["income_1c"]["dollars_week"] >= rep["validate_bar_list"][i + 1]["income_1c"]["dollars_week"] for i in range(len(rep["validate_bar_list"]) - 1))
+assert D.income({"n": 0, "net": 0}, 3.0)["dollars_week"] == 0.0
+print("INCOME AND GATE OK")
