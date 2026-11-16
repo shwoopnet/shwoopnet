@@ -1,4 +1,9 @@
 import math, engine1_perps_driver_second as d, engine1_perps_second as p
+# mechanics tests need a funding model that books every position: prints of rate 0 every 12 hours around each series; None means that, {} means no prints at all
+_rs = d.run_spec
+def cover(series): lo, hi = min(series), max(series); return {q: 0.0 for q in range(lo - 86400 - lo % 43200, hi + 86400 + 43200, 43200)}
+def _run(spec, series, splits, funding=None, prior_m=0): return _rs(spec, series, splits, {n: cover(s) for n, s in series.items()} if funding is None else funding, prior_m)
+d.run_spec = _run
 # option counts (hand case): none 1, mom 2 each, spread 3, tod 5, orb 2, sess 2
 sp1 = {"grid": {"filters": ["none", "mom1", "spread", "orb"], "side_rules": ["long", "short"], "exits": ["T3", "TC", "TS15"]}}
 assert len(d.rules(sp1)) == 48 and len(d.rules({"grid": {"filters": ["none", "tod", "sess", "mom15"], "side_rules": ["long"], "exits": ["T30", "T60", "T240", "TO"]}})) == 40
@@ -23,8 +28,8 @@ om = d.run_spec(spec, {"KXM": mixed}, {"KXM": B}); assert ("KXM", "none", "long"
 seen = []; real = d.day_p; d.day_p = lambda tr, key: (seen.append(key), 0.0)[1]
 d.run_spec(spec, {"KXRISE": ser}, {"KXRISE": B}); d.day_p = real; assert seen == ["net_taker"]
 sp4 = dict(spec, grid={"filters": ["none"], "side_rules": ["long"], "exits": ["T240"]}, gates=dict(spec["gates"], min_n=60))
-rates = {dd: 0.0001 for dd in range(0, 14)}
-assert len(d.run_spec(sp4, {"KXRISE": ser}, {"KXRISE": B}, {"KXRISE": rates})["search_passes"]) == 1 and d.run_spec(sp4, {"KXRISE": ser}, {"KXRISE": B}, None)["search_passes"] == []
+rates = {q: 0.0001 for q in range(-86400 + 21 * 3600, 15 * 86400, 86400)}          # daily prints at 21:00Z covering the series
+assert len(d.run_spec(sp4, {"KXRISE": ser}, {"KXRISE": B}, {"KXRISE": rates})["search_passes"]) == 1 and d.run_spec(sp4, {"KXRISE": ser}, {"KXRISE": B}, {"KXRISE": {}})["search_passes"] == []
 # the spread cut points come from the SEARCH half only: the driver asks spread_cuts for the candles before B and nothing later
 calls = []; real_sc = p.spread_cuts; p.spread_cuts = lambda ser, lo, hi: (calls.append((lo, hi)), real_sc(ser, lo, hi))[1]
 try: d.run_spec(dict(spec, grid={"filters": ["spread"], "side_rules": ["long"], "exits": ["T3"]}), {"KXRISE": ser}, {"KXRISE": B})

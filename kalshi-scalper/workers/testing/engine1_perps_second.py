@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ENGINE1 perps scorer, BUILD 2 (Testing Desk, Nov 16, 2026). Independent of Desk A's code: written from ENGINE1_PERPS_AMENDMENT_NOV16.md and the hand case only.
 Research only: pure functions on candles, no I/O. Hand case: ENGINE1_PERPS_SECOND_HAND_CASE.md (committed first). Test: test_engine1_perps_second.py (invented rows only).
-A series is {end_ts: (bid, ask)}; time is UTC epoch seconds (the US cash session is 14:30 to 21:00 UTC under EST).
+A series is {end_ts: (bid, ask)}; time is UTC epoch seconds; every clock rule is in US Eastern time with DST (UTC-4 from 2026-03-08T07:00Z to 2026-11-01T06:00Z, UTC-5 otherwise).
 """
 import math
 
@@ -12,13 +12,19 @@ FILTERS = (["none"] + ["mom%d_%s" % (k, d) for k in MOM_K for d in ("up", "down"
            + ["tod_pre", "tod_open", "tod_mid", "tod_close", "tod_post"] + ["orb_up", "orb_down", "sess_high", "sess_low"])
 EXITS = ["T3", "T10", "T15", "T30", "TS15", "TS30", "T60", "T240", "TC", "TO"]
 HOLD = {"T3": 1800, "T10": 1800, "T15": 1800, "T30": 1800, "TS15": 1800, "TS30": 1800, "T60": 3600, "T240": 14400}          # the cooldown after a taken entry; TC and TO: until the previous exit
-OPEN, CASH_CLOSE = 14 * 3600 + 30 * 60, 21 * 3600
+H = 3600
+DST_START, DST_END = 1772953200, 1793512800          # 2026-03-08T07:00:00Z and 2026-11-01T06:00:00Z
+FUND_HOLE = 26 * H          # two neighbouring prints further apart than this leave a stretch with no print
 
 
 def two_sided(q): return q is not None and q[0] is not None and q[1] is not None and 0 < q[0] < q[1]
 def mid(q): return (q[0] + q[1]) / 2
-def sod(ts): return ts % 86400
 def day(ts): return ts // 86400
+def et_off(ts): return -4 * H if DST_START <= ts < DST_END else -5 * H
+def et_sod(ts): return (ts + et_off(ts)) % 86400
+def et_local_day(ts): return (ts + et_off(ts)) // 86400
+def et_day_start(ts): return day_start_of_local(et_local_day(ts))
+def day_start_of_local(L): return L * 86400 - et_off(L * 86400 + 12 * H)          # the UTC instant of 00:00 ET of local day L, the offset read at that day's midday
 
 
 def spread_cuts(series, lo, hi):
@@ -29,11 +35,11 @@ def spread_cuts(series, lo, hi):
 
 
 def tod_class(ts):
-    s = sod(ts)
-    if 9 * 3600 <= s < OPEN: return "pre"
-    if OPEN <= s < 15 * 3600 + 1800: return "open"
-    if 15 * 3600 + 1800 <= s < 20 * 3600: return "mid"
-    if 20 * 3600 <= s < CASH_CLOSE: return "close"
+    s = et_sod(ts)
+    if 4 * H <= s < 9 * H + 1800: return "pre"
+    if 9 * H + 1800 <= s < 10 * H + 1800: return "open"
+    if 10 * H + 1800 <= s < 15 * H: return "mid"
+    if 15 * H <= s < 16 * H: return "close"
     return "post"
 
 
@@ -49,28 +55,29 @@ def feature(filt, series, e, cuts):
         if cuts is None: return None
         sp = (q[1] - q[0]) / mid(q) * 1e4; cls = "low" if sp <= cuts[0] else ("mid" if sp <= cuts[1] else "high"); return cls == filt[7:]
     if filt.startswith("tod_"): return tod_class(e) == filt[4:]
-    base = day(e) * 86400
+    base = et_day_start(e)
     if filt.startswith("orb_"):
-        if sod(e) < 15 * 3600 + 60: return False
-        w = [mid(c) for t, c in series.items() if base + OPEN + 60 <= t <= base + 15 * 3600 and two_sided(c)]
+        if et_sod(e) < 10 * H + 60: return False
+        w = [mid(c) for t, c in series.items() if base + 9 * H + 1800 + 60 <= t <= base + 10 * H and two_sided(c)]
         if not w: return None
         return mid(q) > max(w) if filt == "orb_up" else mid(q) < min(w)
     if filt.startswith("sess_"):
-        w = [mid(c) for t, c in series.items() if base + OPEN + 60 <= t <= e - 60 and two_sided(c)]
+        w = [mid(c) for t, c in series.items() if base + 9 * H + 1800 + 60 <= t <= e - 60 and two_sided(c)]
         if not w: return None
         return mid(q) > max(w) if filt == "sess_high" else mid(q) < min(w)
     raise ValueError(filt)
 
 
 def next_open_ts(e):
-    d = day(e) + 1
-    while (d + 3) % 7 >= 5: d += 1          # epoch day 0 is a Thursday; Monday = 0: Saturday 5, Sunday 6
-    return d * 86400 + OPEN + 60
+    """09:31 ET on the next ET weekday strictly after e's ET day"""
+    L = et_local_day(e) + 1
+    while (L + 3) % 7 >= 5: L += 1          # epoch day 0 is a Thursday; Monday = 0: Saturday 5, Sunday 6
+    return day_start_of_local(L) + 9 * H + 1800 + 60
 
 
 def horizon(e, ex):
     """the time by which a rule's exit is certain to have happened, whatever the path (Auditor B R1): the rule's own exit time; e + 1800 for TS15 and TS30 (the worst case)"""
-    if ex == "TC": return day(e) * 86400 + CASH_CLOSE
+    if ex == "TC": return et_day_start(e) + 16 * H
     if ex == "TO": return next_open_ts(e)
     if ex in ("TS15", "TS30"): return e + 1800
     return e + 60 * int(ex[1:])
@@ -93,14 +100,24 @@ def find_exit(series, e, side, fill, ex, h):
             if not long_ and (q[1] <= fill * (1 - k) or q[1] >= fill * (1 + k)): return t, px(q)
         return at(e + 1800)
     if ex == "TC":
-        ts = day(e) * 86400 + CASH_CLOSE
+        ts = et_day_start(e) + 16 * H
         return None if e >= ts else at(ts)
     if ex == "TO": return at(next_open_ts(e))
     raise ValueError(ex)
 
 
+def funding_for(funding, e, xt, long_):
+    """funding {print_ts: rate} of one ticker (the extract's own print timestamps): the booked funding of a position, or None when it overlaps a stretch with no print"""
+    if not funding: return None
+    ps = sorted(funding)
+    if e < ps[0] or xt > ps[-1] + FUND_HOLE: return None
+    for a, b in zip(ps, ps[1:]):
+        if b - a > FUND_HOLE and e < b and xt > a: return None
+    return sum((funding[q] if long_ else -funding[q]) for q in ps if e < q < xt)
+
+
 def rule_trades(series, cuts, filt, side, ex, h, entry_range=(-math.inf, math.inf), boundary=None, funding=None):
-    """all trades of one rule at relative haircut h. -> (trades, counts). funding: {utc day: rate of that day's 21:00 print} or None (no extract).
+    """all trades of one rule at relative haircut h. -> (trades, counts). funding: {print_ts: rate} of the ticker's own prints, or None (no extract).
     A trade carries gross, funding (None when not booked) and the nets at both fees; funding-not-booked trades are labelled and kept apart."""
     out, cnt = [], {"missing_feature": 0, "no_mark": 0, "clipped": 0, "funding_not_booked": 0}
     last_e = last_exit = None
@@ -118,14 +135,9 @@ def rule_trades(series, cuts, filt, side, ex, h, entry_range=(-math.inf, math.in
         xt, xp = r
         last_e, last_exit = e, xt
         gross = xp / fill - 1 if long_ else (fill - xp) / fill
-        fund, booked = 0.0, True
-        for d in range(day(e), day(xt) + 1):          # the 21:00 prints strictly between the entry end and the exit end
-            p = d * 86400 + CASH_CLOSE
-            if e < p < xt:
-                rate = None if funding is None else funding.get(d)
-                if rate is None: booked = False
-                else: fund += rate if long_ else -rate          # paid by longs when positive, received by shorts
-        t = {"e": e, "exit_ts": xt, "side": side, "fill": fill, "exit": xp, "gross": gross, "funding": fund if booked else None, "day": day(e)}
+        fund = funding_for(funding, e, xt, long_)
+        booked = fund is not None
+        t = {"e": e, "exit_ts": xt, "side": side, "fill": fill, "exit": xp, "gross": gross, "funding": fund, "day": day(e)}
         if booked: t["net_taker"], t["net_maker"] = gross - TAKER - fund, gross - MAKER - fund
         else: cnt["funding_not_booked"] += 1
         out.append(t)

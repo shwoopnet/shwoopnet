@@ -1,5 +1,10 @@
 import datetime, math, engine1_perps_second as p
 def near(a, b, t=1e-9): return abs(a - b) < t
+# mechanics tests need a funding model that books every position: prints of rate 0 every 12 hours around the series; the funding tests below pass their own prints
+_real = p.rule_trades
+def cover(series): lo, hi = min(series), max(series); return {q: 0.0 for q in range(lo - 86400 - lo % 43200, hi + 86400 + 43200, 43200)}
+def _rt(series, cuts, *a, funding="cover", **kw): return _real(series, cuts, *a, funding=cover(series) if funding == "cover" else funding, **kw)
+p.rule_trades = _rt
 def ts(y, mo, d, h, mi): return int(datetime.datetime(y, mo, d, h, mi, tzinfo=datetime.timezone.utc).timestamp())
 # ---- KXHAND (Desk A's published invented series; candle i ends at T0 + 60 i, T0 = Tuesday 2026-11-10 14:50 UTC so that i10 ends 15:00)
 T0 = ts(2026, 11, 10, 14, 50); E = lambda i: T0 + 60 * i
@@ -55,26 +60,63 @@ for ex, want in (("T60", 0.0043976806), ("T240", -0.0045978205), ("TC", 0.009395
 # an entry at or after 21:00 has no TC mark; TO from Friday and Saturday is Monday 14:31
 tr, c = p.rule_trades(S, None, "none", "long", "TC", 0.0002, entry_range=one(G(380))); assert tr == [] and c["no_mark"] == 1
 mon = ts(2026, 11, 16, 14, 31)
-assert p.next_open_ts(ts(2026, 11, 13, 16, 0)) == mon and p.next_open_ts(ts(2026, 11, 14, 12, 0)) == mon and p.next_open_ts(ts(2026, 11, 15, 12, 0)) == mon and p.next_open_ts(ts(2026, 11, 10, 22, 0)) == wed and p.next_open_ts(ts(2026, 11, 16, 3, 0)) == ts(2026, 11, 17, 14, 31)
+assert p.next_open_ts(ts(2026, 11, 13, 16, 0)) == mon and p.next_open_ts(ts(2026, 11, 14, 12, 0)) == mon and p.next_open_ts(ts(2026, 11, 15, 12, 0)) == mon and p.next_open_ts(ts(2026, 11, 10, 22, 0)) == wed and p.next_open_ts(ts(2026, 11, 16, 3, 0)) == mon and p.next_open_ts(ts(2026, 11, 16, 5, 30)) == ts(2026, 11, 17, 14, 31) and p.next_open_ts(ts(2026, 11, 16, 14, 31)) == ts(2026, 11, 17, 14, 31)          # ET semantics: 03:00Z Monday is Sunday 22:00 ET, so the next weekday is that Monday; 05:30Z is Monday 00:30 ET, so Tuesday
 # cooldown: T60 entries at i0 and i60 and later (every 60 minutes); TC: i0 only (the next entry must end at or after 21:00)
 tr, c = p.rule_trades(S, None, "none", "long", "T60", 0.0002); assert [t["e"] for t in tr] == [G(0), G(60), G(120), G(180), G(240), G(300)] and c["no_mark"] >= 1
 tr, c = p.rule_trades(S, None, "none", "long", "TC", 0.0002); assert [t["e"] for t in tr] == [G(0)]
 tr, c = p.rule_trades(S, None, "none", "long", "T240", 0.0002); assert [t["e"] for t in tr] == [G(0)]          # G(240) has no T240 mark (the series ends at G(380))
-# ---- funding (KXFUND: Tuesday, every candle 99.99 / 100.01, h 0)
+# ---- funding from the extract's own print timestamps (KXFUND: Tuesday, every candle 99.99 / 100.01, h 0)
 F0 = ts(2026, 11, 10, 20, 50); FS = {F0 + 60 * i: (99.99, 100.01) for i in range(31)}; FS[ts(2026, 11, 10, 21, 10)] = (99.99, 100.01)
-fr = {day(F0): 0.0002} if (day := p.day) else None
+P_PREV, P_NOW, P_NEXT = ts(2026, 11, 9, 21, 0), ts(2026, 11, 10, 21, 0), ts(2026, 11, 11, 21, 0)
+fr = {P_PREV: 0.0001, P_NOW: 0.0002, P_NEXT: 0.0003}
 tr, c = p.rule_trades(FS, None, "none", "long", "T30", 0.0, entry_range=one(F0), funding=fr); assert near(tr[0]["net_taker"], -0.00279998, 1e-9) and near(tr[0]["funding"], 0.0002)
 tr, c = p.rule_trades(FS, None, "none", "short", "T30", 0.0, entry_range=one(F0), funding=fr); assert near(tr[0]["net_taker"], -0.00240002, 1e-9) and near(tr[0]["funding"], -0.0002)
 tr, c = p.rule_trades(FS, None, "none", "long", "T10", 0.0, entry_range=one(F0), funding=fr); assert near(tr[0]["net_taker"], -0.00259998, 1e-9) and tr[0]["funding"] == 0.0          # exit exactly at 21:00 pays nothing
 tr, c = p.rule_trades(FS, None, "none", "long", "T10", 0.0, entry_range=one(F0 + 600), funding=fr); assert near(tr[0]["net_taker"], -0.00259998, 1e-9)          # entered at 21:00: the print is not strictly after
-tr, c = p.rule_trades(FS, None, "none", "long", "T30", 0.0, entry_range=one(F0), funding={}); assert len(tr) == 1 and tr[0]["funding"] is None and "net_taker" not in tr[0] and c["funding_not_booked"] == 1 and p.booked(tr) == []
-tr, c = p.rule_trades(FS, None, "none", "long", "T30", 0.0, entry_range=one(F0), funding=None); assert c["funding_not_booked"] == 1
-# three prints over a weekend: a Friday 20:50 long held to Monday 14:31 crosses Fri, Sat, Sun prints
-W0 = ts(2026, 11, 13, 20, 50); mon = ts(2026, 11, 16, 14, 31); WS = {W0: (99.99, 100.01), mon: (99.99, 100.01)}
-fw = {day(W0): 0.0001, day(W0) + 1: 0.0002, day(W0) + 2: 0.0004}
-tr, c = p.rule_trades(WS, None, "none", "long", "TO", 0.0, entry_range=one(W0), funding=fw); assert len(tr) == 1 and near(tr[0]["funding"], 0.0007)
-fw2 = dict(fw); del fw2[day(W0) + 1]
+# no prints at all, or a position before the first print / after the last print + 26 h / across a gap of over 26 h: not booked, kept apart
+for fd in (None, {}, {P_NOW: 0.0002}, {P_PREV: 0.0, P_NOW + 3 * 3600: 0.0}):
+    tr, c = p.rule_trades(FS, None, "none", "long", "T30", 0.0, entry_range=one(F0), funding=fd); assert len(tr) == 1 and tr[0]["funding"] is None, fd          # no prints; e before the first print; a gap of 27 h across the position
+tr, c = p.rule_trades(FS, None, "none", "long", "T30", 0.0, entry_range=one(F0), funding={P_PREV: 0.0, P_NOW: 0.0002}); assert tr[0]["funding"] == 0.0002
+tr, c = p.rule_trades(FS, None, "none", "long", "T30", 0.0, entry_range=one(F0), funding={}); assert tr[0]["funding"] is None and "net_taker" not in tr[0] and c["funding_not_booked"] == 1 and p.booked(tr) == []
+tr, c = p.rule_trades(FS, None, "none", "long", "T30", 0.0, entry_range=one(F0), funding={P_NOW: 0.0002}); assert tr[0]["funding"] is None          # e is before the first print
+last_ok = {P_PREV: 0.0001, P_NOW: 0.0002}          # the last print + 26 h = Wed 23:00: a position ending Tuesday 21:20 is covered; the same prints cannot cover a position ending after Wed 23:00
+assert p.funding_for(last_ok, F0, F0 + 1800, True) is not None and p.funding_for(last_ok, F0, P_NOW + 26 * 3600, True) is not None and p.funding_for(last_ok, F0, P_NOW + 26 * 3600 + 1, True) is None
+assert p.funding_for({P_PREV: 0.0, P_PREV + 26 * 3600: 0.0}, P_PREV + 100, P_PREV + 200, True) == 0.0 and p.funding_for({P_PREV: 0.0, P_PREV + 26 * 3600 + 1: 0.0}, P_PREV + 100, P_PREV + 200, True) is None          # a gap of exactly 26 h is covered, over 26 h is not
+assert p.funding_for({P_PREV: 0.0, P_PREV + 30 * 3600: 0.0}, P_PREV - 100, P_PREV - 50, True) is None and p.funding_for({P_PREV: 0.0, P_PREV + 30 * 3600: 0.0}, P_PREV + 30 * 3600, P_PREV + 31 * 3600, True) == 0.0          # before the first print: not booked; after the gap, starting at the second print: covered
+# the Friday to Monday weekend: prints Fri, Sat, Sun 20:00Z (EDT week) and Mon 21:00Z (EST); a long Fri 20:50Z to Mon 14:31Z crosses Sat and Sun and the print on Mon is after the exit
+W0 = ts(2026, 10, 30, 20, 50); mon = ts(2026, 11, 2, 14, 31); WS = {W0: (99.99, 100.01), mon: (99.99, 100.01)}
+fw = {ts(2026, 10, 30, 20, 0): 0.0001, ts(2026, 10, 31, 20, 0): 0.0002, ts(2026, 11, 1, 20, 0): 0.0004, ts(2026, 11, 2, 21, 0): 0.0008}
+tr, c = p.rule_trades(WS, None, "none", "long", "TO", 0.0, entry_range=one(W0), funding=fw); assert len(tr) == 1 and tr[0]["exit_ts"] == mon and near(tr[0]["funding"], 0.0006)
+tr, c = p.rule_trades(WS, None, "none", "short", "TO", 0.0, entry_range=one(W0), funding=fw); assert near(tr[0]["funding"], -0.0006)
+fw2 = dict(fw); del fw2[ts(2026, 11, 1, 20, 0)]          # Sat 20:00Z to Mon 21:00Z is over 26 h with no print: the position overlaps it
 tr, c = p.rule_trades(WS, None, "none", "long", "TO", 0.0, entry_range=one(W0), funding=fw2); assert tr[0]["funding"] is None
+
+# ---- pass 3: DST-aware ET clocks (addendum 2). EDT Tuesday 2026-10-13: the KXHAND series shifted so that candle i ends at 13:50Z + i min (09:50 ET + i)
+assert p.et_off(p.DST_END - 1) == -4 * 3600 and p.et_off(p.DST_END) == -5 * 3600 and p.et_off(p.DST_START - 1) == -5 * 3600 and p.et_off(p.DST_START) == -4 * 3600 and p.DST_END == ts(2026, 11, 1, 6, 0) and p.DST_START == ts(2026, 3, 8, 7, 0)
+T1 = ts(2026, 10, 13, 13, 50); E1 = lambda i: T1 + 60 * i
+HE = {E1(i): (round(mids[i] - 0.05, 6), round(mids[i] + 0.05, 6)) for i in range(41)}; HE[E1(10)], HE[E1(13)] = (100.00, 100.10), (100.60, 100.70)
+assert [p.feature("orb_up", HE, E1(i), None) for i in (10, 11, 12)] == [False, True, True] and p.feature("orb_down", HE, E1(11), None) is False and p.et_sod(E1(11)) == 10 * 3600 + 60
+assert [p.feature("sess_high", HE, E1(i), None) for i in (10, 11, 12, 13, 14)] == [False, True, True, True, False] and [p.feature("sess_low", HE, E1(i), None) for i in (10, 11, 12, 13)] == [False] * 4
+for hh, mm, ss, want in ((13, 29, 59, "pre"), (13, 30, 0, "open"), (14, 29, 59, "open"), (14, 30, 0, "mid"), (18, 59, 59, "mid"), (19, 0, 0, "close"), (19, 59, 59, "close"), (20, 0, 0, "post"), (7, 59, 59, "post"), (8, 0, 0, "pre")):
+    assert p.tod_class(ts(2026, 10, 13, hh, mm) + ss) == want, (hh, mm, ss)
+long_day = {ts(2026, 10, 13, 13, 50): (99.99, 100.01), ts(2026, 10, 13, 20, 0): (101.99, 102.01), ts(2026, 10, 14, 13, 31): (99.99, 100.01)}
+tr, c = p.rule_trades(long_day, None, "none", "long", "TC", 0.0, entry_range=one(ts(2026, 10, 13, 13, 50))); assert len(tr) == 1 and tr[0]["exit_ts"] == ts(2026, 10, 13, 20, 0)          # 16:00 EDT
+tr, c = p.rule_trades(long_day, None, "none", "long", "TO", 0.0, entry_range=one(ts(2026, 10, 13, 13, 50))); assert len(tr) == 1 and tr[0]["exit_ts"] == ts(2026, 10, 14, 13, 31)          # 09:31 EDT
+# the DST step: Friday 2026-10-30 (EDT) to Monday 2026-11-02 (EST)
+mon_open = ts(2026, 11, 2, 14, 31)
+for e in (ts(2026, 10, 30, 16, 0), ts(2026, 10, 31, 12, 0), ts(2026, 11, 1, 5, 59), ts(2026, 11, 1, 6, 0), ts(2026, 11, 1, 12, 0)): assert p.next_open_ts(e) == mon_open, e
+assert p.next_open_ts(ts(2026, 10, 29, 20, 0)) == ts(2026, 10, 30, 13, 31) and p.next_open_ts(ts(2026, 11, 2, 14, 31)) == ts(2026, 11, 3, 14, 31)
+assert p.et_day_start(ts(2026, 10, 30, 15, 0)) + 16 * 3600 == ts(2026, 10, 30, 20, 0) and p.et_day_start(ts(2026, 11, 2, 15, 0)) + 16 * 3600 == ts(2026, 11, 2, 21, 0)
+tr, c = p.rule_trades({ts(2026, 10, 30, 13, 50): (99.99, 100.01), ts(2026, 10, 30, 20, 0): (99.99, 100.01)}, None, "none", "long", "TC", 0.0); assert len(tr) == 1 and tr[0]["exit_ts"] == ts(2026, 10, 30, 20, 0)
+tr, c = p.rule_trades({ts(2026, 11, 2, 14, 50): (99.99, 100.01), ts(2026, 11, 2, 21, 0): (99.99, 100.01)}, None, "none", "long", "TC", 0.0); assert len(tr) == 1 and tr[0]["exit_ts"] == ts(2026, 11, 2, 21, 0)
+tr, c = p.rule_trades({ts(2026, 10, 30, 20, 0): (99.99, 100.01), ts(2026, 10, 30, 20, 10): (99.99, 100.01)}, None, "none", "long", "TC", 0.0); assert tr == [] and c["no_mark"] == 2          # at or after 16:00 ET: no TC mark
+# funding from the extract's own prints (addendum 2 hand values)
+P1, P2, P3, P4 = ts(2026, 10, 12, 20, 0), ts(2026, 10, 13, 20, 0), ts(2026, 10, 14, 20, 0), ts(2026, 10, 16, 20, 0)
+pr = {P1: 0.0001, P2: -0.0002, P3: 0.0003, P4: 0.0001}
+assert near(p.funding_for(pr, ts(2026, 10, 13, 13, 50), ts(2026, 10, 14, 13, 31), True), -0.0002) and near(p.funding_for(pr, ts(2026, 10, 13, 13, 50), ts(2026, 10, 14, 13, 31), False), 0.0002)
+assert p.funding_for(pr, ts(2026, 10, 12, 19, 0), ts(2026, 10, 12, 19, 30), True) is None and p.funding_for(pr, ts(2026, 10, 13, 21, 0), ts(2026, 10, 14, 13, 31), True) == 0.0
+assert p.funding_for(pr, ts(2026, 10, 14, 20, 30), ts(2026, 10, 15, 20, 30), True) is None and p.funding_for(pr, ts(2026, 10, 16, 21, 0), ts(2026, 10, 17, 22, 0), True) == 0.0 and p.funding_for(pr, ts(2026, 10, 16, 21, 0), ts(2026, 10, 17, 22, 0) + 1, True) is None
+assert p.funding_for({P1: 0.0}, P1 - 1, P1 + 100, True) is None and p.funding_for({P1: 0.0}, P1, P1 + 100, True) == 0.0          # an entry one second before the first print is not covered; at the print it is
 # statistics, gate, BH
 mk = lambda nets, days: [{"e": i, "day": d, "funding": 0.0, "net_taker": x, "net_maker": x} for i, (x, d) in enumerate(zip(nets, days))]
 t = mk([2.0, -1.0, 2.0, -1.0], [0, 0, 1, 1]); s = p.stats(t); assert s["n"] == 4 and s["pf"] == 2.0 and s["h1"] == 2.0 and s["h2"] == 2.0 and s["trade_days"] == 2 and near(s["net"], 2.0)
@@ -87,7 +129,7 @@ assert p.bh({"a": 0.001, "b": 0.04, "c": 0.5}, 3) == {"a"} and p.bh({"a": 0.001,
 # ---- edges found by mutation: cooldown at exactly the previous exit, boundary on a VALIDATE entry, orb and sess edges, zero momentum, distinct cut values, TS no-trigger fallback, missing counts
 Fri = ts(2026, 11, 13, 20, 50); Mon = ts(2026, 11, 16, 14, 31); Tue = ts(2026, 11, 17, 14, 31)
 TO = {Fri: (99.99, 100.01), Mon: (99.99, 100.01), Tue: (99.99, 100.01)}
-tr, c = p.rule_trades(TO, None, "none", "long", "TO", 0.0, funding={d: 0.0 for d in range(day(Fri), day(Tue) + 1)}); assert [t["e"] for t in tr] == [Fri, Mon] and tr[0]["exit_ts"] == Mon and tr[1]["exit_ts"] == Tue          # the entry at exactly the previous exit is allowed
+tr, c = p.rule_trades(TO, None, "none", "long", "TO", 0.0); assert [t["e"] for t in tr] == [Fri, Mon] and tr[0]["exit_ts"] == Mon and tr[1]["exit_ts"] == Tue          # the entry at exactly the previous exit is allowed
 tr, c = p.rule_trades(H, None, "none", "long", "T3", h, entry_range=(E(1), E(2)), boundary=E(0)); assert len(tr) == 1 and c["clipped"] == 0          # a VALIDATE entry is never clipped
 ob = {ts(2026, 11, 10, 14, 30): (104.99, 105.01)}; ob.update({ts(2026, 11, 10, 14, 31) + 60 * i: (99.99, 100.01) for i in range(30)}); ob[ts(2026, 11, 10, 15, 1)] = (100.99, 101.01)
 ob2 = dict(ob); ob2[ts(2026, 11, 10, 15, 0)] = (100.99, 101.01)          # the entry candle ending 15:00 itself (above everything in 14:31 to 14:59): not allowed before 15:01

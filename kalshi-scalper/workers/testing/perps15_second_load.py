@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reader of Forensics' 15-name stock perps extract for the Testing Desk's second engine build (Nov 16, 2026). Offline. REFUSES unless the allow-list file carries a line for this reader naming this
 file's own sha256 AND the two extracts' xz sha256 (no flag, no env var). The wall is exactly the 15 names below: each row's ticker is compared with the wall before any other column is used.
-Reads only candle(ticker, end_ts, yes_bid, yes_ask) and funding(ticker, ts, rate); the other columns (last, volume, oi) are never touched. Nothing before 2026-11-06T00:00Z is read.
+Reads only candle(ticker, end_ts, yes_bid, yes_ask) and funding(ticker, ts, rate): the funding dict of a ticker is {print ts: rate}; the other columns (last, volume, oi) are never touched. Nothing before 2026-11-06T00:00Z is read.
 Splits (the engine's rule, Desk A's engine1_split.py): per ticker the distinct UTC dates of its candle end_ts, D of them; SEARCH = the first floor(D/2) dates; B = the first candle second of the next UTC date.
   python3 -I perps15_second_load.py <dir with the two .xz extracts>     prints counts, D and the last SEARCH date per ticker."""
 import calendar, collections, hashlib, lzma, math, os, shutil, sqlite3, sys, tempfile, time
@@ -53,8 +53,8 @@ def load(directory, allow_file=None, xz_sha=None, wall=WALL):
         for row in fdb.execute("select * from funding"):
             tk = row[0]
             if tk not in funding: c["funding row outside the wall (not parsed)"] += 1; continue
-            if row[1] is None or row[1] < FIRST_TS or row[1] % 86400 != 21 * 3600: c["funding row not a 21:00Z print or before the start (dropped)"] += 1; continue
-            funding[tk][day(row[1])] = float(row[2])
+            if row[1] is None or row[1] < FIRST_TS or row[2] is None: c["funding row before the start or without a rate (dropped)"] += 1; continue
+            funding[tk][int(row[1])] = float(row[2])          # booked from the extract's own print timestamps (Auditor B's ruling), whatever the hour
         fdb.close()
     finally: shutil.rmtree(tmp, ignore_errors=True)
     return series, funding, dict(c)

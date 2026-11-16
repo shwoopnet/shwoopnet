@@ -26,9 +26,9 @@ try: L.load(d, allow, bad, wall=("KXMUPERP",)); raise AssertionError("must refus
 except SystemExit as e: assert "does not match the allowed xz sha256" in str(e)
 open(allow, "w").write(line(L.self_sha(), files) + "\n")
 s, f, c = L.load(d, allow, files, wall=("KXMUPERP", "KXTSLAPERP"))
-assert c["candle row outside the wall (not parsed)"] == 1 and c["candle before 2026-11-06 (dropped)"] == 1 and c["duplicate candle differs (first kept)"] == 1 and c["funding row outside the wall (not parsed)"] == 1 and c["funding row not a 21:00Z print or before the start (dropped)"] == 2, c
+assert c["candle row outside the wall (not parsed)"] == 1 and c["candle before 2026-11-06 (dropped)"] == 1 and c["duplicate candle differs (first kept)"] == 1 and c["funding row outside the wall (not parsed)"] == 1 and c["funding row before the start or without a rate (dropped)"] == 1, c
 assert s["KXMUPERP"][T + 60] == (10.0, 10.1) and len(s["KXMUPERP"]) == 30 and len(s["KXTSLAPERP"]) == 2          # the US Tech row and the pre-start row never enter; the first of a differing duplicate is kept
-assert f["KXMUPERP"] == {L.day(T): 0.0001, L.day(T) + 1: -0.0002} and f["KXTSLAPERP"] == {}
+assert f["KXMUPERP"] == {T + 21 * 3600: 0.0001, T + 86400 + 21 * 3600: -0.0002, T + 22 * 3600: 0.5} and f["KXTSLAPERP"] == {}          # the print timestamps are the extract's own, any hour
 sp = L.splits(s); D, last, B = sp["KXMUPERP"]
 assert D == 10 and last == L.day(T) + 5 and B == (L.day(T) + 6) * 86400          # hand: the dates are offsets 0, 2, 3, 4, 5, 6, 7, 8, 9, 10; floor(10/2) = 5, the fifth is offset 5
 
