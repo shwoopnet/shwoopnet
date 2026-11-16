@@ -139,7 +139,7 @@ class Puller:
         return self.read("/markets/candlesticks", {"market_tickers": ",".join(tickers), "start_ts": start_ts, "end_ts": end_ts, "period_interval": 1})
 
 
-def fetch_markets(puller, series, min_close, max_close):
+def fetch_markets(puller, series, min_close, max_close, keep=None):
     """-> [market] for the settled markets of one series closing in [min_close, max_close]: {series, ticker, close, result, candles}. result not yes or no is kept as 'void'."""
     ms = []
     for m in puller.settled(series, min_close, max_close):
@@ -147,8 +147,15 @@ def fetch_markets(puller, series, min_close, max_close):
         if isinstance(tk, str) and tk.split("-")[0] == series and cl is not None:
             ms.append({"series": series, "ticker": tk, "close": cl, "result": m.get("result") if m.get("result") in ("yes", "no") else "void", "candles": []})
     ms = sorted({m["ticker"]: m for m in ms}.values(), key=lambda m: (m["close"], m["ticker"]))
-    for i in range(0, len(ms), BATCH):
-        grp = ms[i:i + BATCH]
+    if keep is not None:
+        held = [m for m in ms if not keep(m)]   # candles are pulled only for markets the held-out guard clears for at least one spec (Auditor B's note, Nov 16); the held ones stay in the list with no candles so the guard still counts them as refused
+        ms = [m for m in ms if keep(m)] + held
+        ms.sort(key=lambda m: (m["close"], m["ticker"]))
+        pull = [m for m in ms if m not in held]
+    else:
+        pull = ms
+    for i in range(0, len(pull), BATCH):
+        grp = pull[i:i + BATCH]
         rows = candle_rows(puller.candles([m["ticker"] for m in grp], grp[0]["close"] - LEAD_S, grp[-1]["close"]), {m["ticker"]: m["close"] for m in grp})
         for m in grp:
             m["candles"] = sorted(rows.get(m["ticker"], {}).values())
@@ -275,7 +282,10 @@ def run_once(root, now, puller, state, cfg=None):
     for series in series_in_list:
         lo = max(start, st["pulled_until"].get(series, start))
         if max_close >= lo:
-            fetched[series] = fetch_markets(puller, series, lo, max_close)
+            specs_here = [(i["spec"], i["spec_sha256"]) for i in lst["specs"] if i["spec"]["market"] == series]
+            def keep(m, specs_here=specs_here):
+                return any(m["close"] >= start and m["close"] - sp["entry"]["seconds_left"] >= start and guard({"sha256": sh, "series": series_in_list, "start_utc": start}, m["ticker"], m["close"])[0] for sp, sh in specs_here)
+            fetched[series] = fetch_markets(puller, series, lo, max_close, keep)
     results, counts = {}, []
     for item in lst["specs"]:
         spec, sha = item["spec"], item["spec_sha256"]

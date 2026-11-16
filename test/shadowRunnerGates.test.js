@@ -21,6 +21,7 @@ gates.SR1 = () => {
   assert.ok(o.match, JSON.stringify(o.got) + ' vs ' + JSON.stringify(o.want));
   assert.ok(o.all_get && o.min_close_is_start, 'every request goes to the elections host and the first pull starts at the written start constant');
   assert.strictEqual(o.pulled_until, o.max_close + 1, 'the pull cursor moves to just after the last settled close it read');
+  assert.strictEqual(o.held_candle_pulled, false, 'no candle is pulled for a market the held-out guard refuses (it is still counted as refused)');
   assert.ok(o.second_run_same_n && o.second_run_new_requests === 1, 'a second run reads one list page and no candles, and no trade is counted twice');
 };
 gates.SR2 = () => {
