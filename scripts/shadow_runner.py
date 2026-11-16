@@ -295,7 +295,7 @@ def run_once(root, now, puller, state, cfg=None):
     for series in fetched:
         st["pulled_until"][series] = max_close + 1
     results_doc = {"list": lst["list"], "as_of_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now)), "labels": {"forward": LABEL_FWD, "paper": LABEL_PAPER}, "specs": results}
-    return results_doc, {"as_of_utc": results_doc["as_of_utc"], "specs": counts}, st
+    return results_doc, {"as_of_utc": results_doc["as_of_utc"], "rebuilt_from_scratch": not state, "specs": counts}, st
 
 
 def main(argv):

@@ -93,6 +93,11 @@ gates.SR6 = () => {
   assert.deepStrictEqual(o.first_two.map((t) => t[0]), [8.2, 8.2, -1.8], 'the tie at one close is ordered by ticker (TB before TC)');
   assert.ok(/def cache_key/.test(runnerSrc) && /list_sha256/.test(runnerSrc.slice(runnerSrc.indexOf('def cache_key'), runnerSrc.indexOf('def cache_key') + 500)) && /HOLDS\.json/.test(runnerSrc.slice(runnerSrc.indexOf('def cache_key'), runnerSrc.indexOf('def cache_key') + 500)));
 };
+gates.SR8 = () => {
+  // Consequence: a cache miss is visible: the counts file says rebuilt_from_scratch true when the run started with no state, false when it had one.
+  const o = JSON.parse(execFileSync('python3', [path.join(__dirname, 'shadowRunnerStateCase.py')], { encoding: 'utf8' }).trim().split('\n').pop());
+  assert.deepStrictEqual(o.rebuilt, [true, false]);
+};
 gates.SR7 = () => {
   // Consequence (Auditor B S1 state): the daily workflow keeps the private state only in the Actions cache (never uploaded, committed or printed), pushes only the two aggregate files to its own shadow-data branch, never main, and stops by itself.
   const wf = fs.readFileSync(path.join(root, '.github', 'workflows', 'shadow-forward.yml'), 'utf8');
@@ -103,6 +108,8 @@ gates.SR7 = () => {
   assert.ok(/git push -q origin shadow-data/.test(steps) && !/git push[^\n]*\bmain\b/.test(steps));
   assert.ok(/ref: main/.test(steps) && /persist-credentials: false/.test(steps) && /2027-01-31T23:59:00Z/.test(steps));
   assert.ok(!/\bcat\b[^\n]*state|echo[^\n]*state\/|ls[^\n]*state/.test(steps), 'the state is never printed');
+  assert.ok(!/pull_request/.test(steps) && /schedule:/.test(steps) && /workflow_dispatch/.test(steps), 'only the schedule and a hand dispatch run it, never a pull request (nothing can read or poison the cache)');
+  assert.ok(/unexpected path in the commit/.test(steps), 'the commit fails if any other path changed');
   assert.ok(/python3 -I code\/scripts\/shadow_runner\.py/.test(steps) && !/secrets\.(?!GITHUB_TOKEN)/.test(steps), 'no secret but the built-in token');
 };
 let failed = 0;

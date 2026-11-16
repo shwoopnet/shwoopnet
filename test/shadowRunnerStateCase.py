@@ -51,5 +51,5 @@ a, b = inc["trades"]["T_01"], scratch["trades"]["T_01"]
 state_text = json.dumps(inc["trades"])
 out = {"seq_equal": a["seq"] == b["seq"], "n": len(a["seq"]), "days_equal": a["n_days"] == b["n_days"], "n_days": a["n_days"], "agg_equal": res["specs"]["T_01"] == res_s["specs"]["T_01"],
        "no_identifiers": not any(x in state_text for x in ("KXTEST", "TB", "TC", "close", "ticker")), "state_keys": sorted(a.keys()),
-       "key_parts": R.cache_key(cfg, tmp).count("-") , "first_two": a["seq"][:3]}
+       "key_parts": R.cache_key(cfg, tmp).count("-") , "first_two": a["seq"][:3], "rebuilt": [cnt_s["rebuilt_from_scratch"], cnt["rebuilt_from_scratch"]]}
 print(json.dumps(out))
