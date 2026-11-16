@@ -41,7 +41,7 @@
    "last_close_exclusive": "2026-11-06T00:00:00Z"
   },
   "held_out_map_checked_by": "Auditor B (pending: F7 and FAMSPORTS data windows against the development days)",
-  "independence_note": "the same development days as NBALADDER and SIBHIT; F7 and FAMSPORTS may have read KXNBATOTAL prices on some of them (windows to be mapped)"
+  "independence_note": "development days labelled: read for F7 and FAMSPORTS (KXNBATOTAL prices may have been read by both; not independent); Oct 30 to Nov 5 overlaps the W-CAT-SPORTS1 third, released"
  },
  "split": {
   "mode": "fixed_dates",
@@ -71,10 +71,24 @@
    "end_epoch": 1796342400,
    "card": "NBATOTAL, NBAREB, NBALADDER, SIBHIT, SIBHIT-R",
    "status": "OPEN"
+  },
+  {
+   "label": "W-CAT-SPORTS1 held-out third (closes from 2026-10-30T02:53:19Z), RELEASED by the Head 2026-11-13 06:51Z (rnd-queue b9e8e490); overlaps development Oct 30 to Nov 5",
+   "start_epoch": 1793328799,
+   "end_epoch": null,
+   "card": "W-CAT-SPORTS1",
+   "status": "released"
+  },
+  {
+   "label": "H04 ingame rows lists KXNBATOTAL* from 1794528000 open ended, no scope field: refuses this validate window until the Head narrows it or releases pre-game closes",
+   "start_epoch": 1794528000,
+   "end_epoch": null,
+   "card": "History Miner's forward IG specs",
+   "status": "BLOCKS the validate read until the Head rules"
   }
  ],
  "look_ahead": {
-  "decision_instant": "D = scheduled end minus 9 h, 5 h or 3.5 h; clock check as NBALADDER",
+  "decision_instant": "D = scheduled end minus 9 h, 5 h or 4 h; clock check as NBALADDER; in-play guard: skip a rung (counted per rule) if its last two two-sided candles before D differ in mid by 0.15 or more",
   "features": "each feature uses candles ending at or before D",
   "entry_quote": "latest two-sided candle ending in [D - 180 s, D]",
   "exit": "H settles on the result, read last for traded rungs; M35 sells at the mark ending 3.5 h before the scheduled end"
@@ -96,7 +110,7 @@
  "event": {
   "scorer_plugin": "nbatotal.py",
   "scorer_plugin_sha256": null,
-  "decision_instant": "9 h, 5 h or 3.5 h before the scheduled end",
+  "decision_instant": "9 h, 5 h or 4 h before the scheduled end",
   "signal_threshold": "the grid's 520 cells",
   "entry_rule": "every rung open at D whose side ask is in the cell's band and passes the cell's filter",
   "exit": "H or M35 (the candle ending exactly 3.5 h before the scheduled end; no mark = held, printed both ways)"
