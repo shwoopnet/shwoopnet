@@ -5,7 +5,8 @@
  "kind": "grid15m",
  "card": "kalshi-scalper/workers/specs/ETHLATE1_CARD.md",
  "needs_new_code": [
-  "loader wall: hourbridge_load.py walls KXBTCD and KXBTC15M; KXETHD must be added by an audited edit (and its results rows from the recorder's results.csv checked to carry the hourly Ethereum markets)"
+  "ethlate1_load.py (Desk B's own loader, ticker wall first; replaces extending hourbridge_load.py), audited by Auditor B and allow-listed by Main",
+  "ETHD_RESULTS pull (about 15 to 35 requests, closes 2026-10-28 to 2026-11-15)"
  ],
  "uniqueness": {
   "closest_existing": [
@@ -23,10 +24,11 @@
   "family_flag": "none"
  },
  "data": {
-  "loader": "hourbridge_load.py (wall to be extended to KXETHD)",
-  "loader_sha256": "7cb4249d0db6c475a2c48f9c6c01ab9c5edd4bdc5355e88641cbbf8ffaad2270",
+  "loader": "ethlate1_load.py (kalshi-scalper/workers/ethlate1/)",
+  "loader_sha256": "d0cc2188e149d1ce8ce30262d00b97e60c007bd69881c1ddd025e012baf58acf",
   "extracts": [
-   "quote-data checkout: quotes/<date>/<HHMM>/ladder.csv.gz and results.csv.gz for date directories 2026-10-28 to 2026-11-15"
+   "quote-data checkout: quotes/<date>/<HHMM>/ladder.csv.gz for date directories 2026-10-27 to 2026-11-15 (19 days, 4 hour recorder blocks, some blocks missing: 2 to 6 ladder files a day, 103 files in all)",
+   "ETHD_RESULTS landed run (KXETHD settled markets with results, closes 2026-10-28 to 2026-11-15)"
   ],
   "ticker_wall": [
    "KXETHD"
@@ -36,10 +38,20 @@
    "last_close_exclusive": "2026-11-16T00:00:00Z"
   },
   "held_out_map_checked_by": "PENDING (Auditor B: table has no KXETHD row; card-level freezes to confirm)",
-  "independence_note": "Ethereum co-moves with Bitcoin: the same days as the held Bitcoin ladder cards, but no Bitcoin outcome is touched"
+  "independence_note": "DEVELOPMENT: KXETHD closes may have been read by LADLONG1 (spent), XETH1, XLADDER1, HRSEAS1, NEWH12, NEWS FADE, OIHR1, PERPOI1, SKEW1 and VOLGAP1 on archive data; this file is recorder quotes, new data. KXBTCD rows in ladder.csv and the results run are held and the loader drops them on ticker before any other column. G3H1, CORR1, LADL1, HOURBRIDGE1: Auditor B cannot map them; the Head is asked to confirm they are Bitcoin only",
+  "loader_note": "the sha of the draft loader at e.g. this commit; any later edit changes it and the spec is re-hashed for Auditor B's sign-off"
  },
  "split": {
-  "mode": "fixed_dates"
+  "mode": "fixed_dates",
+  "development": "closes 2026-10-28T00:00:00Z to before 2026-11-16T00:00:00Z (the quote recorder, 19 days, blocks missing; development only)",
+  "validate_forward": {
+   "series": [
+    "KXETHD"
+   ],
+   "first_close": "2026-11-16T00:00:00Z",
+   "last_close_exclusive": "2026-12-16T00:00:00Z",
+   "rule": "read ONCE, by the one surviving development rule only; the series is named here so default deny does not refuse it"
+  }
  },
  "grid": {
   "buckets": [
@@ -74,9 +86,11 @@
  "costs": {
   "contracts": 10,
   "haircuts_primary": [
-   0.01,
+   0.02,
    0.02
-  ]
+  ],
+  "haircut_note": "C8: entry at 120 s and exit at 60 s before the close are inside the last 2 minutes, so 2c is PRIMARY (PF 1.3 at 2c, halves 1.0 or more); 1c is secondary only; every figure is 'upper bound, not fill-checked'",
+  "fee": "ceil(round(100*0.07*c*p*(1-p),9))/100 per order on the order's own price; void refunds the price and keeps the fee"
  },
  "gates": {
   "min_n": 100,
@@ -87,13 +101,21 @@
  },
  "tries": {
   "rules_this_spec": 96,
-  "prior_m": "from the TALLY"
+  "prior_m": "96 new tries (12 bands x 2 sides yes and no x 2 filters x 2 exits x 1 bucket) plus the carried tally the Head names (Auditor B sent the Head options A and B; the number is inserted when named); BH over the total; bars on unrounded figures"
  },
- "prediction": "no survivor: PF under 1.0 at 1c in most cells; n per cell 60 to 130 over 19 days",
- "kill": "no cell with PF 1.3 at 1c and 1.0 at 2c, both halves, n 100, 10 days; kill_fast drops the family at PF under 1.0 on the first read",
+ "prediction": "no survivor: PF under 1.0 at 2c in most cells; most cells will print 'no evidence at n = x' (about 308 events with a quote in the window across 12 bands, so n under 100 in nearly every cell)",
+ "kill": "no cell with PF 1.3 at 2c and halves 1.0 or more, n 100, 10 days; kill_fast drops the family at PF under 1.0 at 2c on the first read",
  "kill_fast": true,
  "outputs": {
   "survivor_line": "market, rule, PF 1c and 2c, n, days",
   "family_flag": "none"
+ },
+ "rules": {
+  "two_sided": "0 < bid < ask < 1 for the side taken (rule 18)",
+  "cheap_side": "the lower ask of the two sides at the look (the YES ask against 1 minus the YES bid); a tie goes to YES",
+  "look": "the last recorder row at or before the close minus 120 s, and no more than 60 s old (else no entry for that event)",
+  "exit_M60": "the bid of the last row at or before the close minus 60 s; none: held to settlement (both printed)",
+  "spread_filter": "round trip spread (ask minus bid) of the side taken at most 0.03 (a number, fixed now)",
+  "z": "day-clustered"
  }
 }

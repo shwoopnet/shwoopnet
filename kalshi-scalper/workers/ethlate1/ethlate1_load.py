@@ -1,6 +1,6 @@
 """ETHLATE1 loader (Desk B, Nov 16 2026). Offline. Reads a checkout of quote-data (quotes/<date>/<HHMM>/ladder.csv.gz) and ONE landed ETHD_RESULTS run folder.
 REFUSES unless HELDOUT_PULL_RUNS.md carries a line with the mark, "ethlate1_load.py" and this file's own sha256 (no flag, no env var).
-Wall: only date directories 2026-10-27 to 2026-11-15 are listed; each ladder row's close_time is read FIRST (outside [2026-10-28T00:00Z, 2026-11-16T00:00Z) dropped and counted), then the ticker (KXETHD- only), then status; results from the run only for kept rows, yes or no only.
+Wall: only date directories 2026-10-27 to 2026-11-15 are listed; each row's ticker is read FIRST (KXETHD- only; any other series dropped and counted, nothing else of the row parsed), then close_time (outside [2026-10-28T00:00Z, 2026-11-16T00:00Z) dropped and counted), then status; results from the run only for kept rows, yes or no only.
 Output: {"KXETHD": [{series, ticker, close, result, candles: [(end_ts, yes_bid, yes_ask, last, volume, oi)]}]} (the last ladder row of each clock minute; last None, volume 0, oi 0).
 Expected figures: EXPECTED_ethlate1_load_nov16.md."""
 import os, sys, csv, gzip, io, json, hashlib, calendar, time, collections
@@ -27,9 +27,9 @@ def ladder_rows(rows, cnt):
     """close_time FIRST -> {ticker: (close, [(t_recv_s, bid, ask)])} for KXETHD rows inside the window."""
     out = {}
     for r in rows:
+        if not r["ticker"].startswith("KXETHD-"): cnt["ticker outside the wall (dropped)"] += 1; continue      # ticker FIRST: no other column of a wrong-series row is parsed
         c = in_window(r["close_time"])
         if c is None: cnt["ladder row dropped by the cut or no close"] += 1; continue
-        if not r["ticker"].startswith("KXETHD-"): cnt["ticker outside the wall (dropped)"] += 1; continue
         if r["status"] != "active": cnt["ladder row not active (dropped)"] += 1; continue
         try: t = int(r["t_recv_ms"]) / 1000.0; b = float(r["yes_bid"]); a = float(r["yes_ask"])
         except (ValueError, KeyError): cnt["ladder row unreadable (dropped)"] += 1; continue
@@ -50,9 +50,9 @@ def result_rows(rows, cnt):
     """results from the ETHD_RESULTS answers: close_time first, ticker wall, then result (yes or no only)."""
     out = {}
     for r in rows:
+        if not r["ticker"].startswith("KXETHD-"): cnt["result ticker outside the wall (dropped)"] += 1; continue   # ticker FIRST: a KXBTCD outcome is never read
         c = in_window(r["close_time"])
         if c is None: cnt["result row outside the window (dropped)"] += 1; continue
-        if not r["ticker"].startswith("KXETHD-"): cnt["result ticker outside the wall (dropped)"] += 1; continue
         if r["result"] not in ("yes", "no"): cnt["result not yes or no (dropped)"] += 1; continue
         out[r["ticker"]] = r["result"]
     return out
