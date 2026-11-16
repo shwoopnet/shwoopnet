@@ -88,7 +88,7 @@ def stats(es, ex, candles, span):
         if c2 is None: continue
         ts.append((e["day"], c2, c1))
     k = len(ts); h = k // 2; v2 = [t[1] for t in ts]
-    ev = len(set(e["close_ts"] for e in es if cash(e, ex, H2, candles) is not None))
+    ev = len(set(e["close_ts"] for e in es))          # every entry of the cell in the half (Desk B: M60 too, marked or not)
     return {"n": k, "events": ev, "days": len(set(t[0] for t in ts)), "per_day": (k / span) if span else 0.0, "pf2": pf(v2), "h1": pf(v2[:h]), "h2": pf(v2[h:]), "pf1": pf([t[2] for t in ts]), "z": z_day([(t[0], t[1]) for t in ts]), "marked": k}
 
 
