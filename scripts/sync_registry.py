@@ -105,6 +105,8 @@ def build(spec, text, batch, start=None):
     row.update(stage='Shadow', label='UNPROVEN', goesLive=SHADOW_LIVE, kill=SHADOW_KILL, nBasis=spec['basis'], **{'return': SHADOW_RETURN})
     row['notes'] = [spec['extra']] if spec.get('extra') else []
     c = spec['counting']
+    if c == 'batch2':   # Nov 16, 2026: the NC15 places show their fill-checked signal count toward 60 (the count file on the nc15-counts branch; it reads no result)
+        row['roomTarget'], row['roomWhat'] = 60, 'signals toward 60'
     if c in ('batch2', 'cfrti') and batch:
         # The NC15 places count from the START TIME line of the admit list when there is one (it was moved twice after the batch 2 admission, Nov 13, 2026), else from the admission.
         stamp = (start or batch) if c == 'batch2' else batch

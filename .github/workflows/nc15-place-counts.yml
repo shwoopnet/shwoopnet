@@ -1,0 +1,59 @@
+# Nov 16, 2026 (the Head of R&D's go, Auditor B's workflow conditions): the NC15 place counts file. Every 6 hours, a counts-only JSON for the seven NC15 depth-cell places is written to its OWN orphan branch
+# `nc15-counts` (never main, never nc-data). The page reads that one file (the owner allowed the host raw.githubusercontent.com for it, Nov 16, 2026). Research only: no secret, no Kalshi request, no order, no Firestore.
+# The counting is Desk A's frozen core (nc15_wheel_counts.py, sha256 pinned in the wrapper) called by the Testing Desk's wrapper (nc15_place_counts.py), which REFUSES to run unless HELDOUT_PULL_RUNS.md carries the allow line naming both
+# files by sha256. It reads book columns only (26 columns, no result, outcome, trade or settled column) and counts windows whose signal poll is at or after 2026-11-13T02:40:00Z and whose next poll still holds the order size.
+# Auditor B's conditions (Nov 16): the nc-data branch is checked out READ-ONLY (no credentials kept) and only the one wrapper command runs on it; the push touches only nc15_place_counts.json on nc15-counts; nothing else may be added to this file without a new check.
+# It stops by itself: from 2027-01-31 23:59 UTC every run exits at once (checked in the first step). Runner cost: a few minutes a run on a public repo.
+name: nc15-place-counts
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: nc15-place-counts
+  cancel-in-progress: false
+jobs:
+  counts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Stop for good after the end date (2027-01-31 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to do"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the code from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+          persist-credentials: false
+      - name: Get the NC15 book files from nc-data (read only, only the nc15 folder)
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: nc-data
+          path: nc
+          sparse-checkout: nc15
+          persist-credentials: false
+      - name: Count (the wrapper refuses unless the allow line names it and the core by sha256)
+        id: count
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          python3 -I code/kalshi-scalper/workers/testing/nc15_place_counts.py nc nc15_place_counts.json "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+      - name: Open the counts branch (created empty the first time) and push only the counts file
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir counts && cd counts
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin nc15-counts; then git checkout -q -b nc15-counts FETCH_HEAD; else git checkout -q --orphan nc15-counts; fi
+          cp ../nc15_place_counts.json nc15_place_counts.json
+          git config user.name "nc15-counts"
+          git config user.email "nc15-counts@users.noreply.github.com"
+          git add nc15_place_counts.json
+          git commit -q -m "nc15 place counts $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin nc15-counts && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin nc15-counts || true; done
+          exit 1
