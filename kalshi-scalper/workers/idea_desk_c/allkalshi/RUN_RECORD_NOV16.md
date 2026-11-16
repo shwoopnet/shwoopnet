@@ -8,3 +8,8 @@ Hashes were committed BEFORE the prints were read. Figures go by message only; n
 | LATEWORD | lateword_score.py c0c5b8a8 (ad905abd) | MENTDRIFT_LISTS_A 2026-11-15T1458Z_43727241819; LATEWORD_CANDLES 2026-11-16T1316Z_43873657497 (complete, 272) | 3933100808fdc5d90d8522e665a0ef34cce1a7773eaa0d5316ab335aeb017c2d |
 
 Both commands: `python3 -I <scorer> <root>`, exit 0, empty stderr.
+
+**Notes after reading (Auditor B, Nov 16, 15:21Z).**
+- **SIBHIT:** fails on both arms. Its 120 development games are spent, including for any reversed rule. SIBHIT-R (`sibhitr/`) is a new registration, to be scored only on a window no one has read.
+- **LATEWORD:** "no evidence at n = 0" is a design outcome. Of the 272 late words, 197 were priced outside 0.30 to 0.70 at open + 30 min, so late listings open cheap or lopsided. Any band change would be a new registration.
+- **Tally:** Auditor B counts SIBHIT as 1 try, where the card registered its two arms as 2. The Head decides which count the ledger keeps.
