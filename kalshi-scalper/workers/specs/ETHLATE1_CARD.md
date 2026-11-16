@@ -20,3 +20,6 @@ G3H1 and CORR1: Bitcoin hourly only (CORR1 falsified the Bitcoin version). HOURB
 
 ## Amendment 2 (Nov 16, 2026, 18:45Z, Auditor B's fixes of 18:35Z; before any outcome read)
 Loader bound to the one run (refuses unless the run folder is under ETHD_RESULTS and the allow line names its stamp); a truncated or non-200 page voids the run (counted and raised); a void result is passed through and scored (price refunded, fee kept); the look is the candle ending exactly at close minus 120 s, none = no entry, and M60 the candle ending exactly at close minus 60 s, a missing minute is not replaced by the previous one (a candle quote can be up to 59 s older than its end); m = m_carried + 96, the carried number written in only when Auditor B sends it; the forward validate window needs a second loader version with its own wall, sha and allow line.
+
+## Dated line (Nov 16, 2026, 18:40Z): m written in
+m_carried = 6,290,660 (the Head's ruling of 18:35Z, one value for every print today) + 96 = **6,290,756** total; BH over that; bars on unrounded figures.

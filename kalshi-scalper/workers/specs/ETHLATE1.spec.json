@@ -102,7 +102,9 @@
  },
  "tries": {
   "rules_this_spec": 96,
-  "prior_m": "m_carried + 96, where m_carried is the one number the Head rules for all of today's prints (the whole shared strict count from DEFLATION_LEDGER, 2,113,449 as of Nov 13, plus every row added since; Auditor B proposed 6,290,605 and the Head's word is awaited); the number is written in only when Auditor B sends it. BH over the total; bars on unrounded figures"
+  "prior_m": "6,290,660 carried (the Head's ruling of Nov 16, 18:35Z: the whole shared strict count including all rows after Nov 13, one value for every print today) + 96 this spec = 6,290,756 total; BH over that total; bars on unrounded figures",
+  "m_carried": 6290660,
+  "m_total": 6290756
  },
  "prediction": "no survivor: PF under 1.0 at 2c in most cells; most cells will print 'no evidence at n = x' (about 308 events with a quote in the window across 12 bands, so n under 100 in nearly every cell)",
  "kill": "no cell with PF 1.3 at 2c and halves 1.0 or more, n 100, 10 days; kill_fast drops the family at PF under 1.0 at 2c on the first read",
