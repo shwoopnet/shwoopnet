@@ -844,6 +844,22 @@ gates.KP35 = () => {
   for (const n of ['LIVEDATA_PROBE_A', 'LIVEDATA_PROBE_A2', 'LIVEDATA_PROBE_A3']) assert.ok(!fs.existsSync(path.join(jobDir, n + '.json')), n + ' is not a job here');
 };
 
+// KP39 (Nov 16, 2026, the Head of R&D): the category param may hold single spaces between words ("Climate and Weather"); every other param still refuses a space, and so does a category with anything but letters and single spaces.
+gates.KP39 = () => {
+  const out = py(`
+base = json.load(open(os.path.join(m.JOB_DIR, "CENSUS_LISTING.json")))
+def t(params):
+    j = json.loads(json.dumps(base)); j["requests"] = [{"id": "s", "path": "/series", "params": params}]
+    try: m.check_job(j); return "ok"
+    except m.Refused: return "refused"
+print(json.dumps({"plain": t({"category": "Economics"}), "two": t({"category": "Climate and Weather"}), "three": t({"category": "Science and Technology"}),
+ "double": t({"category": "Climate  and Weather"}), "lead": t({"category": " Economics"}), "trail": t({"category": "Economics "}), "amp": t({"category": "A&B"}), "pct": t({"category": "Climate%20and Weather"}),
+ "slash": t({"category": "Climate/Weather"}), "digit": t({"category": "Politics2"}), "long": t({"category": " ".join(["Word"] * 12)}), "empty": t({"category": ""}),
+ "otherspace": t({"limit": 5, "status": "set tled"})}))`);
+  assert.deepStrictEqual([out.plain, out.two, out.three], ['ok', 'ok', 'ok']);
+  for (const k of ['double', 'lead', 'trail', 'amp', 'pct', 'slash', 'digit', 'long', 'empty', 'otherspace']) assert.strictEqual(out[k], 'refused', k);
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
