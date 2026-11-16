@@ -29,11 +29,20 @@ BASE_PATH = "/trade-api/v2"
 PERPS_HOST = "external-api.kalshi.com"            # the same pair scripts/record_perps_candles.py has used since Nov 6, 2026
 PERPS_BASE_PATH = "/trade-api/v2/margin"
 # The ONLY two places a request can go. A job names one by KEY ("route"); it can never supply a host or a base path of its own (a job that carries a "route" key may not carry "host" or "base_path" at all).
-ROUTES = {"elections": (HOST, BASE_PATH), "perps": (PERPS_HOST, PERPS_BASE_PATH)}
+# Nov 16, 2026 (the Head of R&D's 20:47Z ruling, owner-accepted terms risk for RESEARCH reads, see CLAUDE.md): Coinbase's public spot candles for five fixed products. No key, no account path, GET only.
+COINBASE_HOST = "api.exchange.coinbase.com"
+COINBASE_BASE_PATH = ""
+ROUTES = {"elections": (HOST, BASE_PATH), "perps": (PERPS_HOST, PERPS_BASE_PATH), "coinbase": (COINBASE_HOST, COINBASE_BASE_PATH)}
 DEFAULT_ROUTE = "elections"                       # the five older jobs have no "route" key and still pin host and base_path by value
 PERPS_TICKERS = frozenset({"KXBTCPERP", "KXETHPERP"})
 PERPS_PATH = re.compile(r"/markets/(?P<ticker>[A-Z0-9]{2,32})/candlesticks")
 PERPS_PARAMS = frozenset({"period_interval", "start_ts", "end_ts"})
+COINBASE_PRODUCTS = frozenset({"BTC-USD", "ETH-USD", "SOL-USD", "XRP-USD", "DOGE-USD"})
+COINBASE_PATH = re.compile(r"/products/(?P<product>[A-Z]{2,5}-USD)/candles")
+COINBASE_PARAMS = frozenset({"granularity", "start", "end"})
+COINBASE_GRANULARITY = frozenset({60, 300, 900, 3600, 21600, 86400})     # the only candle sizes the endpoint takes
+COINBASE_MAX_CANDLES = 300                                              # one answer holds at most 300 candles
+COINBASE_TIME = re.compile(r"20[0-9]{2}-[01][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]Z")
 PERPS_MAX_WINDOW_S = 86400                        # one UTC day of 1 minute candles (1,440), the size the existing recorder asks for
 HERE = os.path.dirname(os.path.abspath(__file__))
 JOB_DIR = os.path.join(HERE, "..", "kalshi-scalper", "workers", "kalshi_pull_jobs")
@@ -151,11 +160,16 @@ def check_job(job):
         if not isinstance(r.get("id"), str) or not REQ_ID_RE.fullmatch(r["id"]) or r["id"] in seen:
             raise Refused("bad or repeated request id")
         seen.add(r["id"])
-        check_request(r, eps, tk, sr_)
+        if route == "coinbase":
+            check_coinbase_request(r, tk)
+        else:
+            check_request(r, eps, tk, sr_)
         if route == "perps":
             check_perps_request(r, tk)
     if route == "perps":
         check_perps_job(job, tk, sr_)
+    if route == "coinbase":
+        check_coinbase_job(job, tk, sr_)
     return eps
 
 
@@ -193,6 +207,37 @@ def check_perps_request(r, tk):
         raise Refused("a perps request is one page of 1 minute candles with period_interval, start_ts and end_ts")
     if not 0 < p["end_ts"] - p["start_ts"] <= PERPS_MAX_WINDOW_S:
         raise Refused("a perps request covers at most %d seconds" % PERPS_MAX_WINDOW_S)
+
+
+def check_coinbase_job(job, tk, sr):
+    """The coinbase route reads ONE kind of thing: the candles of five named spot products. No other path, no series, no cursor."""
+    if not tk or not tk <= COINBASE_PRODUCTS or sr:
+        raise Refused("a coinbase job may name only %s, and no series" % sorted(COINBASE_PRODUCTS))
+    for e in job["allowed_endpoints"]:
+        m = re.fullmatch(r"/products/\(\?P<product>([A-Z0-9|-]+)\)/candles", e["path_pattern"])
+        if not m or not set(m.group(1).split("|")) <= COINBASE_PRODUCTS or not set(e.get("params_allowed", [])) <= COINBASE_PARAMS:
+            raise Refused("a coinbase job may allow only the candles endpoint of its named products")
+
+
+def check_coinbase_request(r, tk):
+    """Its own parameter check: the generic one forbids ':' and so would refuse an ISO time. Every value is checked by its own pattern here."""
+    m = COINBASE_PATH.fullmatch(r["path"])
+    if not m or m.group("product") not in COINBASE_PRODUCTS or m.group("product") not in tk:
+        raise Refused("a coinbase request may only read /products/<product>/candles of a named product")
+    p = r.get("params", {})
+    if not isinstance(p, dict) or set(p) != COINBASE_PARAMS or r.get("max_pages", 1) != 1:
+        raise Refused("a coinbase request is one page with granularity, start and end")
+    g = p["granularity"]
+    if isinstance(g, bool) or g not in COINBASE_GRANULARITY:
+        raise Refused("granularity must be one of %s" % sorted(COINBASE_GRANULARITY))
+    for k in ("start", "end"):
+        if not isinstance(p[k], str) or not COINBASE_TIME.fullmatch(p[k]):
+            raise Refused("%s must be an ISO UTC time like 2026-06-03T00:00:00Z" % k)
+    span = epoch_of(p["end"]) - epoch_of(p["start"])
+    if not 0 < span <= g * COINBASE_MAX_CANDLES:
+        raise Refused("a coinbase request covers at most %d candles" % COINBASE_MAX_CANDLES)
+    if epoch_of(p["start"]) < epoch_of("2026-01-01T00:00:00Z") or epoch_of(p["end"]) > epoch_of("2026-12-31T00:00:00Z"):
+        raise Refused("a coinbase request must lie inside 2026")
 
 
 def check_request(r, eps, tk, sr):
