@@ -16,7 +16,8 @@ def ladder(p, side):
         if px is not None and sz is not None: out.append((1 - px, sz))
     return sorted(out)
 def depth_at(lad, limit): return sum(sz for a, sz in lad if a <= limit + 1e-9)
-def main(root):
+def count_places(root, start_ts=None):
+    """-> (st, closes): st {series: Counter} with the counters main() prints (windows, signal poll, cell, entering, fill-checked, next poll later than 6 s); closes {series: [close epoch]}. start_ts (epoch seconds, None = no filter): a window counts only if its signal poll's exchange time t is at or after start_ts; with None nothing changes. Book columns only, no result, trade or outcome column."""
     st = {s: collections.Counter() for s in SC}; closes = {s: [] for s in SC}
     for fn in sorted(glob.glob(root + "/nc15/*/*/book.csv.gz")):
         rows = list(csv.DictReader(gzip.open(fn, "rt"))); rows.sort(key=lambda r: int(r["t_recv_ms"]))
@@ -30,7 +31,6 @@ def main(root):
         for tk, idx in by.items():
             ser = rows[idx[0]]["series"]; cl = parsedate_to_datetime  # placeholder to keep names local
             ct = datetime.datetime.strptime(rows[idx[0]]["close_time"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc).timestamp()
-            st[ser]["windows"] += 1; closes[ser].append(ct)
             L = ct - LOOK; sig = None
             for k, i in enumerate(idx):
                 o = [x for x in offs[max(0, i - 119): i + 1] if x is not None]
@@ -38,6 +38,8 @@ def main(root):
                 t = int(rows[i]["t_recv_ms"]) / 1000 + statistics.median(o)
                 if t <= L and t >= L - WINDOW: sig = (k, i, t)
                 if t > L: break
+            if start_ts is not None and (not sig or sig[2] < start_ts): continue       # only signals logged at or after the start count
+            st[ser]["windows"] += 1; closes[ser].append(ct)
             if not sig: continue
             k, i, t = sig; p = rows[i]; st[ser]["signal poll"] += 1
             ys = sum(f(p[f"yes_bid_sz_{j}"]) or 0 for j in range(1, 6)); ns = sum(f(p[f"no_bid_sz_{j}"]) or 0 for j in range(1, 6))
@@ -56,6 +58,9 @@ def main(root):
             t2 = int(q["t_recv_ms"]) / 1000 + statistics.median(o2)
             if t2 - t > NEXTMAX + 1e-9: st[ser]["next poll later than 6 s"] += 1; continue
             if depth_at(ladder(q, side), limit) >= SIZE: st[ser]["fill-checked"] += 1
+    return st, closes
+def main(root):
+    st, closes = count_places(root)
     span = {s: ((max(c) - min(c)) / 86400.0 if len(c) > 1 else 0.0) for s, c in closes.items()}
     print("series          days   windows signal  cell entering fill-chk | fill-checked per day | per 21 days unscaled | per 21 days SCALED (x 15/21 except HYPE and BNB; the scaled figure decides the 60 line)")
     for s in SC:
