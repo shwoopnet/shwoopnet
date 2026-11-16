@@ -55,6 +55,12 @@ class Hand(unittest.TestCase):
         # .50 fee .02 -> +.48 ; .40 fee .02 lost -> -.42 ; PF raw 48/42
         self.assertEqual(o["raw"]["pf"], round(.48 / .42, 4))
         self.assertAlmostEqual(o["raw"]["mean_c"], 3.0)
+        self.assertEqual(o["bar"], "no evidence at n = 2")
+        self.assertIn("no held-out read", o["result_note"])
+
+    def test_fee_form(self):
+        self.assertEqual(L.fee(0.5), 0.02)
+        self.assertEqual(L.fee(0.40), 0.02)
 
     def test_truncated(self):
         root = tempfile.mkdtemp()

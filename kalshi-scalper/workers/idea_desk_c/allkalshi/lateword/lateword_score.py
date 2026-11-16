@@ -109,7 +109,10 @@ def main(root):
                   "z_event": sh(cz(xs, [r["e"] for r in rows]))}
     p = [r["primary"] for r in rows]
     z = lambda v: 0.0 if v is None else v
-    out["bar"] = "PASS (paper bar)" if (z(pf(p)) >= 1.3 and z(pf(p[:n // 2])) >= 1.0 and z(pf(p[n // 2:])) >= 1.0 and z(pf([r["2c"] for r in rows])) >= 1.0) else "fail"
+    ok = z(pf(p)) >= 1.3 and z(pf(p[:n // 2])) >= 1.0 and z(pf(p[n // 2:])) >= 1.0 and z(pf([r["2c"] for r in rows])) >= 1.0
+    out["bar"] = ("no evidence at n = %d" % n) if n < 100 else ("PASS (paper bar)" if ok else "fail")
+    out["result_note"] = ("development data only (event occurrence 2026-04-17 to before 2026-08-06), no held-out read; a pass is a lead for the Head of R&D's go "
+                          "on the 2026-10-03 to before 2026-11-05 block; the unit is the event (%d events traded, z clustered by event)" % out["events_traded"])
     print(json.dumps(out, indent=1, sort_keys=True))
     return out
 

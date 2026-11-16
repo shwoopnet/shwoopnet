@@ -29,6 +29,7 @@
 - **Void:** a void refunds the price and keeps the fee.
 - **Label:** "upper bound, not fill-checked".
 - **Printed:** halves at floor(n/2) in entry order; z clustered by event.
+- **Floor:** under 100 trades the bar line reads "no evidence at n = x" and never PASS (Auditor B, Nov 16). The result line says development only, no held-out read, and that the event is the unit.
 - **Bar (paper):** PF 1.3+ at the primary line with both halves 1.0+, and PF 1.0+ at 2c, unrounded with no tolerance.
 - **On a fail:** dropped with no write-up.
 - **On a pass:** it goes to the full checks, then the held-out.

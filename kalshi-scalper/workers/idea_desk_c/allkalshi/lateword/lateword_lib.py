@@ -85,4 +85,4 @@ def late_words(rows):
 
 
 def fee(p):
-    return math.ceil(0.07 * p * (1 - p) * 100 - EPS) / 100
+    return math.ceil(round(0.07 * p * (1 - p) * 100, 9)) / 100      # the standing form (Auditor B, Nov 16)
