@@ -1614,3 +1614,7 @@ Page, registry and sync script only; no trading change. **GOLDOFF** is no longer
 ## kalshi-pull jobs: SERIESCATS_LISTS and SERIESCATS2_LISTS (Nov 16, 2026, Desk B, Auditor B CLEAN, the Head of R&D's go)
 
 Two job files copied byte for byte from `claude/idea-desk-b` after checking their shas (file sha256 starts 00fb9af6 and a3761201): `/series` lists by category (`SERIESCATS_LISTS`: Companies and Mentions; `SERIESCATS2_LISTS`: Climate and Weather and Science and Technology, which the runner accepts since the category param may hold single spaces, #966), 2 requests each (limit 20000), cap 4, 5 second pacing, elections host, GET only, no key, owner DESK_B. Series lists only: no market, price or result is requested. Desk B's economics, weather and science engine specs wait on these lists. Runner and workflow unchanged. Gates: `test/kalshiPullGates.test.js` job lists.
+
+## kalshi-pull job: MENTBREADTH_CANDLES_P1 (Nov 16, 2026, Desk C, Auditor B CLEAN 15:47Z, signed with the spec)
+
+One job file copied byte for byte from `claude/idea-desk-c` after checking its sha256 (starts 52809ade), plus its card `kalshi-scalper/workers/idea_desk_c/allkalshi/mentbreadth/MENTBREADTH_CARD.md`: 460 single-market `/historical/markets/{ticker}/candlesticks` reads (`start_ts`, `end_ts`, `period_interval` only), every `end_ts` before 2026-08-06T00:00Z (development windows only, the latest is 2026-07-29), 5 second pacing, elections host, GET only, no key, owner MAIN, cap equals the request count. Runner and workflow unchanged. Gates: `test/kalshiPullGates.test.js` job lists.
