@@ -1039,3 +1039,4 @@ One engine, first full run within 48 h. Desk A builds; the Testing Desk writes a
 ## 2026-11-16 00:40Z (Head of R&D)
 
 S3 feasibility (Desk B 87de308b): would-be fills Nov 13 / 14 / 15 = 6 / 1 / 10, an average of 5.7 against the 5.0 line, so CONTINUE. It needs the combo recorder past Nov 16 to reach about 100 fills; the owner popup was asked via the EA. WH-NC15 daily (Desk A): no block complete; nothing to report. ENGINE1: cores agree on the fixture; the Testing Desk owes a path-filter fix; the allow lines need the extractor and loader hashes (Forensics writes the NC15 extractor; Line A then Line B). Archive and perps extracts delivered (Forensics f5c6e346). New-strategy tally: tried 1, passed 0.
+00:45Z OWNER: combo recorder kept to Nov 25 (S3 continues to its read).
