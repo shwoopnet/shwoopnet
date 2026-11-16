@@ -1,18 +1,24 @@
 """ENGINE1 perps block (Desk A, Nov 16 2026), built to ENGINE1_PERPS_HAND_CASE_NOV16.md. Pure functions on one ticker's candles [(end, bid, ask, last, vol, oi)]. Fee 12 bps a leg ASSUMED. Upper bound, not fill-checked, funding not booked."""
-import math, time, collections
+import math, time, collections, calendar
 FEE = 0.0012; FEE_MAKER = 0.0005; HAIRCUTS = (0.0002, 0.0005); STRESS = (0.001, 0.002); COOLDOWN = 1800      # fees per side, ASSUMED; haircuts relative to price (0.1% and 0.2%)
 MOMS = (1, 3, 5, 15); TODS = ("pre", "open", "mid", "close", "post")
 FILTERS = (None,) + tuple(("mom%d" % k, c) for k in MOMS for c in ("up", "down")) + tuple(("spread", c) for c in ("low", "mid", "high")) + tuple(("tod", c) for c in TODS) + (("orb", "up"), ("orb", "down"), ("sess", "high"), ("sess", "low"))
 EXITS = ("T3", "T10", "T15", "T30", "TS15", "TS30", "T60", "T240", "TC", "TO"); SIDES = ("long", "short")
 RULES_PER_TICKER = len(FILTERS) * len(SIDES) * len(EXITS)
+DST_START = calendar.timegm((2026, 3, 8, 7, 0, 0)); DST_END = calendar.timegm((2026, 11, 1, 6, 0, 0))     # US Eastern DAYLIGHT time (UTC-4) from DST_START to DST_END, else standard (UTC-5); 2026 only
+def et_off(ts): return -4 * 3600 if DST_START <= ts < DST_END else -5 * 3600
+def et_secs(ts): return (ts + et_off(ts)) % 86400
+def et_day0(ts): return ts - et_secs(ts)                         # the UTC epoch of the ET midnight that starts ts's ET day
+def next_et_day0(ts):
+    d = et_day0(ts); return et_day0(d + 36 * 3600)           # noon of the next ET day lies safely inside it, whatever the DST step
 def ok(c): return c is not None and c[1] is not None and c[2] is not None and 0 < c[1] < c[2]
 def mid(c): return (c[1] + c[2]) / 2
 def tod(end):
-    s = end % 86400
-    if 9 * 3600 <= s < 14 * 3600 + 1800: return "pre"
-    if 14 * 3600 + 1800 <= s < 15 * 3600 + 1800: return "open"
-    if 15 * 3600 + 1800 <= s < 20 * 3600: return "mid"
-    if 20 * 3600 <= s < 21 * 3600: return "close"
+    s = et_secs(end)
+    if 4 * 3600 <= s < 9 * 3600 + 1800: return "pre"
+    if 9 * 3600 + 1800 <= s < 10 * 3600 + 1800: return "open"
+    if 10 * 3600 + 1800 <= s < 15 * 3600: return "mid"
+    if 15 * 3600 <= s < 16 * 3600: return "close"
     return "post"
 def spread_cuts(vals):
     v = sorted(vals); n = len(v); return v[math.ceil(n / 3) - 1], v[math.ceil(2 * n / 3) - 1]
@@ -22,14 +28,14 @@ def feature_ok(by, e, filt, cuts):
     name, klass = filt; c = by[e]
     if name == "tod": return tod(e) == klass
     if name in ("orb", "sess"):
-        day0 = e - e % 86400; lo_t = day0 + 14 * 3600 + 1800 + 60                  # candles ending 14:31 UTC ...
+        day0 = et_day0(e); lo_t = day0 + 9 * 3600 + 31 * 60                          # candles ending 09:31 ET ...
         if name == "orb":
-            if e % 86400 < 15 * 3600 + 60: return None                             # the entry must end at 15:01 UTC or later
-            win = [by[t] for t in range(lo_t, day0 + 15 * 3600 + 1, 60) if t in by]  # ... to 15:00 UTC
+            if et_secs(e) < 10 * 3600 + 60: return None                             # the entry must end at 10:01 ET or later
+            win = [by[t] for t in range(lo_t, day0 + 10 * 3600 + 1, 60) if t in by]  # ... to 10:00 ET
             if not win: return None
             hi, lo = max(mid(w) for w in win), min(mid(w) for w in win)
             return mid(c) > hi if klass == "up" else mid(c) < lo
-        win = [by[t] for t in range(lo_t, e, 60) if t in by]                        # candles ending 14:31 UTC up to e - 60
+        win = [by[t] for t in range(lo_t, e, 60) if t in by]                        # candles ending 09:31 ET up to e - 60
         if not win: return None
         return mid(c) > max(mid(w) for w in win) if klass == "high" else mid(c) < min(mid(w) for w in win)
     if name == "spread":
@@ -42,20 +48,20 @@ def exit_time(e, exit_):
     """The candle end at which a time exit sells (TS exits: 1800 s horizon), or None when there is none."""
     if exit_ in ("TS15", "TS30"): return e + COOLDOWN
     if exit_ == "TC":
-        t = e - e % 86400 + 21 * 3600
+        t = et_day0(e) + 16 * 3600                                    # the candle ending 16:00 ET the same ET day
         return t if t > e else None
     if exit_ == "TO":
-        d = e - e % 86400 + 86400
-        while time.gmtime(d).tm_wday >= 5: d += 86400
-        return d + 14 * 3600 + 31 * 60
+        d = next_et_day0(e)
+        while time.gmtime(d + et_off(d) + 12 * 3600).tm_wday >= 5: d = next_et_day0(d)       # the next ET weekday
+        return d + 9 * 3600 + 31 * 60                                  # its 09:31 ET candle
     return e + 60 * int(exit_[1:])
 def funding_times(e, tx):
-    """Daily funding prints at 21:00 UTC (4:00 PM ET under EST) strictly between the entry candle end and the exit candle end (an exit AT the print pays nothing)."""
-    out, d = [], e - e % 86400
-    while d + 21 * 3600 < tx:
-        t = d + 21 * 3600
+    """Daily funding prints at 16:00 ET (21:00 UTC under EST, 20:00 UTC under EDT) strictly between the entry candle end and the exit candle end (an exit AT the print pays nothing)."""
+    out, d = [], et_day0(e)
+    while d + 16 * 3600 < tx:
+        t = d + 16 * 3600
         if t > e: out.append(t)
-        d += 86400
+        d = next_et_day0(d)
     return out
 def hold_of(e, exit_):
     t = exit_time(e, exit_); return COOLDOWN if t is None else max(COOLDOWN, t - e)
@@ -125,17 +131,19 @@ ALPHA = 0.05; MIN_N = 100; PF1 = 1.3; PF2 = 1.0; MIN_DAYS = 10     # trade days 
 def pval(z): return 0.5 * math.erfc(z / math.sqrt(2)) if z is not None else 1.0
 def short(t): return t[2:] if t.startswith("KX") else t
 def passes(a, b): return a["n"] >= MIN_N and a["pf"] >= PF1 and b["pf"] >= PF2
-def run_all(perps, funding=None, m_prior=0):
+def run_all(perps, funding=None, m_prior=0, last_search=None):
     """perps: {ticker: candles}. SEARCH then VALIDATE by engine1_split dates of the entry candle, spread cuts from SEARCH entries only, every rule scored under the TAKER fee (the gate) and the MAKER fee (flagged, resting fills assumed), BH over m = every rule tried. Perps block only. funding: {ticker: {print ts: rate}} or None (then every trade crossing a 4 pm ET print is labelled "funding not booked" and left out of the gate); m_prior: tries already spent (read 1's 504) that stay in the BH denominator."""
+    ls = last_search or S.LAST_SEARCH                       # {short ticker: last SEARCH date}; pass 3 supplies its own (2026-09-30)
+    phase = lambda key, ts: "search" if time.strftime("%Y-%m-%d", time.gmtime(ts)) <= ls[key] else "validate"
     rep = {"m_prior": m_prior, "funding_unbooked_trades": 0, "label": "perps block: upper bound, not fill-checked; taker fee 12 bps a side and maker fee 5 bps a side, both ASSUMED (not confirmed); relative haircuts 0.02% and 0.05% a side (stress line 0.1% and 0.2%); funding not booked; a maker-only pass assumes resting fills, fill rate unknown; information for the forward shadow only", "tried": 0, "cells_n100_search": 0, "search_bar_stress_taker": 0, "search_bar_taker": 0, "search_bar_maker": 0, "maker_only": 0, "insufficient_days": 0, "validate_bar_passes": 0, "validate_passes": 0, "survivors": [], "maker_only_list": [], "no_split_constant": [], "by_ticker": {}}
     m = 0; cand = []; mk_only = []
     for tk, cs in perps.items():
         key = short(tk)
-        if key not in S.LAST_SEARCH: rep["no_split_constant"].append(tk); continue
+        if key not in ls: rep["no_split_constant"].append(tk); continue
         good = [c for c in cs if ok(c)]
-        sp = [(c[2] - c[1]) / mid(c) * 1e4 for c in good if S.phase(key, c[0]) == "search"]
+        sp = [(c[2] - c[1]) / mid(c) * 1e4 for c in good if phase(key, c[0]) == "search"]
         cuts = spread_cuts(sp) if sp else None
-        first_val = min([c[0] for c in good if S.phase(key, c[0]) == "validate"] or [10 ** 12])
+        first_val = min([c[0] for c in good if phase(key, c[0]) == "validate"] or [10 ** 12])
         fund = (funding or {}).get(tk)
         bt = {"cells_n100": 0, "bar_taker": 0, "bar_maker": 0, "bar_stress_taker": 0, "search_days_max": 0}
         for f in FILTERS:

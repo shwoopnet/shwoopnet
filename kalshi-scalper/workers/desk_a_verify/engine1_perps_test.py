@@ -103,4 +103,33 @@ g4, w4, hd, fl4 = P.trade_full(c2, e0, "long", "T60", h2); assert fl4 is None   
 rows = [(D2, .01, 60, None), (D2 + 86400, .02, 60, "funding not booked")]; st = P.stats(rows); assert st["n"] == 1 and st["funding_unbooked"] == 1
 # BH keeps the prior tries in the denominator
 rep = P.run_all({"KXSPYPERP": C}, m_prior=504); assert rep["m_total"] == rep["tried"] + 504 and rep["m_prior"] == 504
+# amendment 3: ET clocks under EDT (Sep 4 to Oct 31) and the DST end (2026-11-01 06:00 UTC)
+U = lambda *a: calendar.timegm(a)
+for (hh, mm, ss), want in (((13, 30, 0), "open"), ((13, 29, 59), "pre"), ((8, 0, 0), "pre"), ((7, 59, 59), "post"), ((14, 30, 0), "mid"), ((19, 0, 0), "close"), ((19, 59, 59), "close"), ((20, 0, 0), "post")):
+    assert P.tod(U(2026, 9, 10, hh, mm, ss)) == want, (hh, mm, ss)                                                     # EDT: ET = UTC - 4
+assert P.tod(U(2026, 11, 9, 14, 30, 0)) == "open" and P.tod(U(2026, 11, 9, 21, 0, 0)) == "post"                           # EST (Nov 9): unchanged from the earlier UTC definitions
+assert P.et_off(U(2026, 11, 1, 5, 59, 59)) == -4 * 3600 and P.et_off(U(2026, 11, 1, 6, 0, 0)) == -5 * 3600 and P.et_off(U(2026, 3, 8, 6, 59, 59)) == -5 * 3600 and P.et_off(U(2026, 3, 8, 7, 0, 0)) == -4 * 3600
+e1 = U(2026, 9, 10, 14, 0, 0)
+assert P.exit_time(e1, "TC") == U(2026, 9, 10, 20, 0, 0) and P.exit_time(U(2026, 9, 10, 20, 0, 0), "TC") is None and P.exit_time(U(2026, 9, 10, 20, 1, 0), "TC") is None
+assert P.exit_time(U(2026, 9, 11, 15, 0, 0), "TO") == U(2026, 9, 14, 13, 31, 0) and P.exit_time(e1, "TO") == U(2026, 9, 11, 13, 31, 0)     # Friday to Monday 09:31 ET; Thursday to Friday
+assert P.exit_time(U(2026, 10, 30, 15, 0, 0), "TO") == U(2026, 11, 2, 14, 31, 0)                                          # across the DST end: Monday 09:31 EST = 14:31 UTC
+assert P.funding_times(U(2026, 10, 30, 15, 0, 0), U(2026, 11, 2, 14, 31, 0)) == [U(2026, 10, 30, 20, 0, 0), U(2026, 10, 31, 20, 0, 0), U(2026, 11, 1, 21, 0, 0)]
+assert P.funding_times(U(2026, 9, 10, 14, 0, 0), U(2026, 9, 10, 20, 0, 0)) == []                                          # an exit at the print pays nothing
+# opening range break in EDT: the window is the candles ending 13:31 to 14:00 UTC, the entry 14:01 UTC or later
+dd = U(2026, 9, 10, 0, 0, 0); byE = {}
+for i in range(0, 120):
+    ts = U(2026, 9, 10, 13, 31, 0) + 60 * i
+    m = 100 + 0.01 * i if i < 30 else 100.5 + 0.01 * (i - 30)
+    byE[ts] = (ts, m - .005, m + .005, 0, 0, 0)
+assert P.feature_ok(byE, U(2026, 9, 10, 14, 0, 0), ("orb", "up"), None) is None                                         # 14:00 UTC = 10:00 ET: too early
+assert P.feature_ok(byE, U(2026, 9, 10, 14, 1, 0), ("orb", "up"), None) is True and P.feature_ok(byE, U(2026, 9, 10, 14, 1, 0), ("orb", "down"), None) is False
+assert P.feature_ok(byE, U(2026, 9, 10, 14, 1, 0), ("sess", "high"), None) is True
+# run_all with its own split (pass 3): SEARCH to 2026-09-30, VALIDATE from 2026-10-01 for a name the default table lacks
+cs3 = []
+for d in range(1, 36):
+    base = calendar.timegm((2026, 9, 1, 0, 0, 0)) + 86400 * (d - 1) + 14 * 3600
+    for i in range(60): m = 100 + 0.001 * i; cs3.append((base + 60 * i, m - .005, m + .005, 0, 0, 0))
+rep3 = P.run_all({"KXGOLDPERP": cs3}, last_search={"GOLDPERP": "2026-09-30"})
+assert rep3["tried"] == 420 and rep3["no_split_constant"] == [] and rep3["by_ticker"]["KXGOLDPERP"]["search_days_max"] >= 10, rep3
+assert P.run_all({"KXGOLDPERP": cs3})["no_split_constant"] == ["KXGOLDPERP"]
 print("ALL OK")
