@@ -47,6 +47,12 @@ assert close(mv["50%"]["mean_pct_of_margin_per_trade"], 2.0) and close(mv["50%"]
 # gold at 17.4x: the Head's example, about 1.28 % of buffer (1/17.4 = 5.747 % minus 4.47 %)
 mg = L.margin_view([(0.01, ("KXGOLDPERP",))], lambda n: 34.8, None); assert close(mg["50%"]["mean_liq_distance_pct"], (1 / 17.4 - 0.0447) * 100, 1e-9) and 1.2 < mg["50%"]["mean_liq_distance_pct"] < 1.35
 mn = L.margin_view([(0.01, ("KXNVDAPERP",))], lambda n: 50.0, None); assert mn["50%"]["mean_liq_distance_pct"] < 0 and mn["50%"]["no_buffer_names"] == ["KXNVDAPERP"]                                               # 1/25 = 4 % < 4.5 %: no buffer
+# a trade that touches a name with no page max is not shown (no default), and its names are listed
+mz = L.margin_view([(0.01, ("KXNVDAPERP",)), (0.01, ("KXXOMPERP",))], lambda n: 4.0 if n == "KXNVDAPERP" else None, None)
+assert mz["50%"]["trades_shown"] == 1 and mz["50%"]["trades_without_page_max_not_shown"] == 1 and mz["50%"]["names_without_page_max"] == ["KXXOMPERP"] and close(mz["50%"]["mean_pct_of_margin_per_trade"], 2.0)
+mz = L.margin_view([(0.01, ("KXXOMPERP",))], lambda n: None, None); assert mz["10%"]["label"] == "no page max, not shown" and mz["10%"]["mean_pct_of_margin_per_trade"] is None
+mz = L.margin_view([(0.02, ("A", "B"))], lambda n: 4.0, None)                                                   # a pair: net 0.02 / (1/2 + 1/2 margins at 50% of 4x = 2x) = 2 % of margin
+assert close(mz["50%"]["mean_pct_of_margin_per_trade"], 2.0)
 # interest credit: a 30 minute hold at 3.5 % APY
 ic = L.interest_credit([1800]); assert close(ic["credit_pct_of_margin_per_trade_at_3.5pct_apy"], 3.5 * 1800 / (365 * 86400), 1e-15)
 # relative strength: 3 names, A up 1 % over 30 minutes to 10:31 ET, B and C flat
@@ -74,7 +80,9 @@ for nm in ("KXAAA", "KXBBB", "KXCCC"):
         for k in range(9 * 60 + 31, 16 * 60 + 1):
             px *= math.exp(random.gauss(0, 0.0004)); t = dd + k * 60; by[t] = (px * 0.9999, px * 1.0001)
     cand[nm] = by; fund[nm] = {days[0] + 16 * 3600: 0.0001, days[1] + 16 * 3600: 0.0001}
-rep = L.evaluate_lanes(cand, fund, lambda n: 4.0, 6290660, baskets={"b": ("KXAAA", "KXBBB", "KXCCC")}, min_days=1)
+rep = L.evaluate_lanes(cand, fund, lambda n: (None if n == "KXCCC" else 4.0), 6290660, baskets={"b": ("KXAAA", "KXBBB", "KXCCC")}, min_days=1)
 assert len(rep["rules"]) == 144 and rep["m_new"] == 144 and "6290804" in rep["header"].replace(",", "").replace(" ", "") or "6290804" in rep["header"].replace(",", ""), rep["header"]
 assert all(set(o["columns"]) == ({"TT", "ME2", "ME5"} if o["signal"].startswith("pair") else {"TT", "ME2", "ME5", "MM2", "MM5"}) for o in rep["rules"])
+assert all("candidate_blocked_no_page_max" in c and "names_traded_without_page_max" in c for o in rep["rules"] for c in o["columns"].values())
+assert any(c["names_traded_without_page_max"] == ["KXCCC"] for o in rep["rules"] for c in o["columns"].values())
 print("ENGPERPS LANES OK; header:", rep["header"][:80])

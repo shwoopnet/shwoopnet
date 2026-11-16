@@ -151,14 +151,17 @@ def pair_trade(cand, fund, e, lg, sh, kt, ks, T, h, us, last_end, mode, n_candle
     return {"e": e, "t0": t0, "tx": tx, "gross": R, "adj": al + as_, "flag": f1 or f2, "fee": fee, "net": (R + al + as_ - fee) / 2.0, "net_units": R + al + as_ - fee, "why": why, "legs": (lg, sh)}
 def maint_of(name): return MAINT_GOLD if name.startswith("KXGOLD") else MAINT_DEFAULT
 def margin_view(rows, levmax, names_of):
-    """price terms and % of margin at 10%, 25%, 50% of each name's page max leverage; liquidation distance = 1 / leverage minus maintenance (assumed), 'no buffer' when it is not positive. rows: [(net in units of ONE leg's notional, [legs])] (a single name is one leg); % of margin = net / sum of the legs' margins (1 / (f L) each)."""
+    """price terms and % of margin at 10%, 25%, 50% of each name's page max leverage; liquidation distance = 1 / leverage minus maintenance (assumed), 'no buffer' when it is not positive. rows: [(net in units of ONE leg's notional, [legs])] (a single name is one leg); % of margin = net / sum of the legs' margins (1 / (f L) each). A trade that touches a name whose page max is None is NOT shown here (no default is ever used): it is counted in trades_without_page_max_not_shown and its names listed."""
     out = {}
     for f in FRACS:
-        tot, n = 0.0, 0; dist = []
+        tot, n = 0.0, 0; dist = []; skipped = 0; nolev = set()
         for net, legs in rows:
+            missing = [l for l in legs if levmax(l) is None]
+            if missing: skipped += 1; nolev.update(missing); continue
             margin = sum(1.0 / (f * levmax(l)) for l in legs); tot += net / margin; n += 1
             dist.append(min(1.0 / (f * levmax(l)) - maint_of(l) for l in legs))
-        out["%d%%" % round(f * 100)] = {"mean_pct_of_margin_per_trade": (tot / n * 100 if n else None), "mean_liq_distance_pct": (sum(dist) / n * 100 if n else None), "worst_liq_distance_pct": (min(dist) * 100 if n else None), "no_buffer_names": sorted({l for _, legs in rows for l in legs if 1.0 / (f * levmax(l)) - maint_of(l) <= 0}), "label": "maintenance assumed (gold 4.47% measured, 4.5% elsewhere); page maxima from the census"}
+        out["%d%%" % round(f * 100)] = {"mean_pct_of_margin_per_trade": (tot / n * 100 if n else None), "mean_liq_distance_pct": (sum(dist) / n * 100 if n else None), "worst_liq_distance_pct": (min(dist) * 100 if n else None), "no_buffer_names": sorted({l for _, legs in rows for l in legs if levmax(l) is not None and 1.0 / (f * levmax(l)) - maint_of(l) <= 0}),
+                                        "trades_shown": n, "trades_without_page_max_not_shown": skipped, "names_without_page_max": sorted(nolev), "label": ("no page max, not shown" if not n and skipped else "maintenance assumed (gold 4.47% measured, 4.5% elsewhere); page maxima pinned in the spec")}
     return out
 def interest_credit(rows):
     """labelled CREDIT, never in the gate: % of margin per trade = APY x hold / 365 days, at 3.5% and 7%. rows: hold seconds."""
@@ -221,9 +224,9 @@ def evaluate_lanes(cand, fund, levmax, m_carried, min_per_day=3.0, baskets=BASKE
                 _, cnt, sg, fl, missed = res[Q.H_PRIMARY]
                 cols[col_name(mode, nn)] = {"n": s1["n"], "trades_per_day": s1["per_day"], "pf_primary": s1["pf"], "pf_second": s2["pf"], "halves_primary": [s1["half1"], s1["half2"]], "halves_second": [s2["half1"], s2["half2"]], "top_day_share": s1["top_day_share"], "gate": g, "p": D.pval(s1["day_z"]),
                     "price_terms": {"net_bp_per_trade": s1["net_mean"] * 1e4, "mean_gross_bp": s1["mean_gross_bp"]}, "signals": sg, "filled": fl, "fill_rate": (fl / sg if sg else None), "unfilled_taker_mean_net_bp": (sum(missed) / len(missed) * 1e4 if missed else None), "skips": dict(cnt),
-                    "margin_view": margin_view([(r[7], r[8]) for r in r1], levmax, None), "interest_credit": interest_credit([r[4] for r in r1]), "funding_unbooked": sum(1 for r in res[Q.H_PRIMARY][0] if r[6])}
+                    "margin_view": margin_view([(r[7], r[8]) for r in r1], levmax, None), "names_traded_without_page_max": sorted({l for r in r1 for l in r[8] if levmax(l) is None}), "interest_credit": interest_credit([r[4] for r in r1]), "funding_unbooked": sum(1 for r in res[Q.H_PRIMARY][0] if r[6])}
             tt = cols["TT"]["gate"]
-            for k, c in cols.items(): c["maker_only_flag"] = bool(k != "TT" and c["gate"] and not tt)
+            for k, c in cols.items(): c["maker_only_flag"] = bool(k != "TT" and c["gate"] and not tt); c["candidate_blocked_no_page_max"] = bool(c["gate"] and c["names_traded_without_page_max"])      # a pass that trades a name with no pinned page max is printed as a pass but cannot be named for shadow or as a CANDIDATE
             out.append({"signal": sid, "exit": {"kt": ex[0], "ks": ex[1], "T": ex[2]}, "columns": cols})
     m_new = len(ALL_IDS) * len(EXITS)
     keep = D.bh({i: o["columns"]["TT"]["p"] for i, o in enumerate(out) if o["columns"]["TT"]["gate"]}, m_carried + m_new)
