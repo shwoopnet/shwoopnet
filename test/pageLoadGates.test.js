@@ -4,7 +4,7 @@ const html = fs.readFileSync(__dirname + '/../index.html', 'utf8');
 // PL-L1: the loss stop meter waits for the bot's settings. Before them it fell back to a $10 line and could read "100% used" in red for a moment.
 assert(html.includes('var kalshiLiveCtl = { arm: null, last: null, session: null, loaded: false };'), 'the control state starts as not loaded');
 assert(html.includes('kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session, loaded: true };'), 'the listener marks it loaded');
-assert(/rEl\.innerHTML = !kalshiOrdersLoaded \? [^\n]*kalshiLiveCtl\.loaded === false \? '<div class="kal-empty">Reading the bot\\'s settings\.\.\.<\/div>'/.test(html), 'the meter says it is reading until then');
+assert(!/\brEl\.innerHTML|id="kalRiskBody"/.test(html), 'the Loss stop tile is gone (Nov 16, 2026), so there is no meter to show 100% in red before the settings answer');
 // PL-L2: "Reading the account..." is said once on the Bot page, not twice; the Today row holds its place.
 assert(!/id="kalBotTotals"><div class="kal-empty">Reading the account/.test(html), 'the totals block does not repeat the line in the markup');
 assert(!/totEl\.innerHTML = '<div class="kal-empty">Reading the account\.\.\.<\/div>'/.test(html), 'nor when it is drawn');

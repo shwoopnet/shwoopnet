@@ -147,7 +147,7 @@ gates.SB9 = () => {
 gates.SB10 = () => {
   // Nov 10, 2026: the card became a page. It is NOT on the Bot page any more (no card, no layout entry, no render call), and a saved layout that still lists it is cleaned by complete().
   assert.ok(!/data-card="board"/.test(html) && !/id="kalBoard"/.test(html) && !/renderKalshiBoard/.test(html), 'the Bot page has no Strategy pipeline card any more');
-  assert.ok(!/\['board', 'Strategy pipeline'\]/.test(html) && /var CARDS = \['account', 'status', 'pnl', 'positions', 'trades'\];/.test(html), 'and the Bot layout lists five cards');
+  assert.ok(!/\['board', 'Strategy pipeline'\]/.test(html) && /var CARDS = \['account', 'status', 'positions', 'trades'\];/.test(html), 'and the Bot layout lists four cards (the result line moved into the Account card on Nov 16, 2026)');
   assert.ok(/id="page-strategies"/.test(html) && /id="stratBody"/.test(html), 'the page and its container exist');
   const comp = new Function(fn('complete').replace('function complete', 'return function complete'))();
   assert.deepStrictEqual(comp(['account', 'board', 'status', 'pnl', 'positions', 'trades'], ['account', 'status', 'pnl', 'positions', 'trades']), ['account', 'status', 'pnl', 'positions', 'trades'], 'a layout saved while the card existed drops it');

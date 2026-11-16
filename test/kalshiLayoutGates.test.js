@@ -22,7 +22,7 @@ gates.Y2 = () => {
   assert.ok(/def\.indexOf\(k\) > -1/.test(iife), 'an unknown card name in a saved order is ignored');
   assert.ok(/def\.forEach\(function\(k, i\)\{ if\(want\.indexOf\(k\) < 0\)\{ var prev = i > 0 \? want\.indexOf\(def\[i - 1\]\) : -1; want\.splice\(prev \+ 1, 0, k\); \}/.test(iife), 'a card the saved order does not mention keeps its place: right after the card before it by default, not at the end');
   assert.ok(!/OPTIONAL = \[\['strategies'/.test(html), 'Strategies is part of the Account card now, so it is not a hideable card of its own');
-  assert.ok(/var CARDS = \['account', 'status', 'pnl', 'positions', 'trades'\];/.test(html), 'account, status, result line, positions, trades is the default order');
+  assert.ok(/var CARDS = \['account', 'status', 'positions', 'trades'\];/.test(html), 'account (with the result line inside it), status, positions, trades is the default order');
   assert.ok(!/OPTIONAL = \[[^\]]*'account'/.test(html), 'the account card still cannot be hidden, only moved');
 };
 
@@ -59,9 +59,9 @@ gates.Y5 = () => {
   // Nov 5, 2026: the rail and main wrappers are gone; the cards are one list on one grid, in the default order (the owner: "i don't have much say in where each card goes").
   assert.ok(!/class="kal-rail"|class="kal-main"/.test(seg), 'no rail or main wrapper');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(seg), ['account', 'status', 'pnl', 'positions', 'trades'], 'one list: the account strip (with the Strategies table), the bot status (with the loss stop), the result line, the positions and the trades (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
-  const rail = [null, seg]; const main = seg.slice(seg.indexOf('data-card="pnl"'));
-  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="6" data-card="status">/.exec(seg)[1];   // data-w is a span of 12 columns since Nov 5, 2026 (6 is the old Half)
+  assert.deepStrictEqual(names(seg), ['account', 'status', 'positions', 'trades'], 'one list: the account card (with the Strategies table and the result line), the bot status, the positions and the trades (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
+  const rail = [null, seg]; const main = seg.slice(seg.indexOf('data-card="positions"'));
+  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="12" data-card="status">/.exec(seg)[1];   // data-w is a span of 12 columns since Nov 5, 2026 (6 is the old Half)
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
@@ -687,7 +687,7 @@ gates.BS2 = () => {
   assert.strictEqual(f.kalshiRiskMeter([], { sizing: false, startCash: 100 }, NOW).limit, 10, 'without sizing the stop is $10');
 };
 gates.BS3 = () => {
-  assert.ok(/id="kalStatusBody"/.test(html) && /id="kalRiskBody"/.test(html) && /data-card="status"/.test(html) && !/data-card="risk"/.test(html), 'the loss stop meter lives inside the status card (Oct 24, 2026: the separate card was mostly empty space), on the page');
+  assert.ok(/id="kalStatusBody"/.test(html) && !/id="kalRiskBody"/.test(html) && /data-card="status"/.test(html) && !/data-card="risk"/.test(html), 'the loss stop tile is gone from the page (Nov 16, 2026, the owner: remove list); the meter logic stays for the Strategies page summary');
   assert.ok(/kalshiStatusTimer = setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiStatusTick\(\); \} \}, 1000\)/.test(html) && /clearInterval\(kalshiStatusTimer\)/.test(html), 'a one second tick moves the two live lines, only while the page is visible, and stops when it is left');
   const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.ok(/const L1_SIZED_STOP_FRACTION = 0\.12;/.test(src) && /const L1_WINDOW_CAP_FRACTION = 0\.055;/.test(src) && /const L1_LOSS_STOP = 10\.0;/.test(src), 'the meter quotes the same 12%, 5.5% and $10 the bot uses; change one and this gate names the other');
