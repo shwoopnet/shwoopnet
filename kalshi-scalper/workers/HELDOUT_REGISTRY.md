@@ -757,3 +757,5 @@ Where the exclusion bites (Auditor B, registry rows only): PUB20's later try (it
 
 ## Archive 15 minute series, third 3 spent (the Head's order, entered 2026-11-15)
 Archive 15 minute series (the 19, closes before 2026-10-03T00:00Z; SOL before 2026-09-30T09:30Z): third 3 SPENT on 2026-11-15 by FAV10-X (History Miner 5f9470d43) and OIREL-X; no later card may use it as a held-out. (Entered by Desk A at the Head's word. Note: at the time of this entry the OIREL-X read has not yet run; the line is the Head's registration that it will spend the third, and FAV10-X's read has run.)
+
+| EVM4 (US 500, US Tech 100, gold, WTI perps from 2026-11-06) | Head of R&D, owner popup Nov 16, 2026 | main EVM4 registration | KXUS500PERP, KXUSTECH100PERP, KXGOLDPERP, KXWTIFUTURE perps | CLOSED UNREAD (owner: "Close EVM4, release"); the four are released from 2026-11-06, no card holds them | none | CLOSED | no result read | released 2026-11-16 | none recorded |
