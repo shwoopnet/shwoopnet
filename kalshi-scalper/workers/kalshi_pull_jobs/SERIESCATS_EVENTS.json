@@ -1,0 +1,10526 @@
+{
+ "job_id": "SERIESCATS_EVENTS",
+ "registration": "kalshi-scalper/workers/testing/SERIESCATS_EVENTS_REGISTRATION.md",
+ "purpose": "Events list (series, category, strike or close date) of every Mentions, Companies and Science and Technology series, for events per day. No market, price or result.",
+ "heldout": "none (event metadata only: event ticker, series, category, strike or close date; no market, no price, no result)",
+ "allowed_endpoints": [
+  {
+   "name": "events_list",
+   "method": "GET",
+   "path_pattern": "/events",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "AAPLCEOCHANGE",
+  "AAPLWATCH",
+  "AIDEBATES",
+  "AITURING",
+  "ALTMAN",
+  "AMCCEOCHANGE",
+  "AOH1996",
+  "APPLEAI",
+  "APPLECAR",
+  "APPLEFOLD",
+  "APPLEPORT",
+  "APPLEUS",
+  "APPLEWATCH",
+  "BIGTECHLAYOFF",
+  "BRAZILX",
+  "BRAZILXBAN",
+  "CBVOLUME",
+  "CHINALLM",
+  "CHINATOPLLM",
+  "DISBOARD",
+  "DISCEOCHANGE",
+  "DISNEYBOARD",
+  "EVMKT",
+  "EXOPLAN",
+  "FBDAU",
+  "FEMALECEO",
+  "GMECEOCHANGE",
+  "GOOGLECEOCHANGE",
+  "GOOGLESHARE",
+  "GPT45",
+  "GPT4P5",
+  "GPT5",
+  "GPTPARAM",
+  "GSTORM",
+  "IMOAI",
+  "JPMCEOCHANGE",
+  "KX60MINMENTION",
+  "KXA100MAX",
+  "KXA100MON",
+  "KXA100Q",
+  "KXA100W",
+  "KXAAPLPRICE17OVER16",
+  "KXAAPLPRICEFOLD",
+  "KXAASCORE",
+  "KXABNBMENTION",
+  "KXACKMANMENTION",
+  "KXACOOPERMENTION",
+  "KXACQUIREDFIRST",
+  "KXADBEMENTION",
+  "KXAGICO",
+  "KXAIADOPTION",
+  "KXAIAUTHOR",
+  "KXAIFINANCE",
+  "KXAIFOOD",
+  "KXAIHEALTH",
+  "KXAILIMITSUSCHINA",
+  "KXAIMANU",
+  "KXAIMILLENNIUM",
+  "KXAINEURALESE",
+  "KXAIOPEN",
+  "KXAIPARETO",
+  "KXAIPAUSE",
+  "KXAIRELEASE",
+  "KXAISCORE",
+  "KXAISI",
+  "KXAISPEND1",
+  "KXAISPEND10",
+  "KXAISPIKE",
+  "KXAITECH",
+  "KXAITURING",
+  "KXALIENS",
+  "KXALLINMENTION",
+  "KXALTHOFFMENTION",
+  "KXALTMAN",
+  "KXALTMANMENTION",
+  "KXALUNMENTION",
+  "KXAMODEIMENTION",
+  "KXANTHADOPT",
+  "KXANTHPERSONALAGENT",
+  "KXANTHROPICMILLENNIUM",
+  "KXANTHSHARE",
+  "KXANTHVREQ",
+  "KXANTHVSPEND",
+  "KXANTITRUSTOAIMSFT",
+  "KXANVCD",
+  "KXAOCMENTION",
+  "KXAOH1996",
+  "KXAPPLEAI",
+  "KXAPPLEMENTION",
+  "KXAPPLEOPENAICASE",
+  "KXAPPLEUS",
+  "KXARCAGI2",
+  "KXARENASCORE",
+  "KXARMSTRONGMENTION",
+  "KXARTEMISII",
+  "KXASL3",
+  "KXASTEROID",
+  "KXASTRONAUTS",
+  "KXATHLETEMENTION",
+  "KXATPMENTION",
+  "KXAVGMEASLESDJT",
+  "KXAWARDMENTION",
+  "KXAZDATACENTERS",
+  "KXB200MAX",
+  "KXB200MON",
+  "KXB200Q",
+  "KXB200TEST",
+  "KXB200W",
+  "KXBAA",
+  "KXBABASHARE",
+  "KXBACHELORETTEMENTION",
+  "KXBAMENTION",
+  "KXBANNONMENTION",
+  "KXBARIWEISSOUT",
+  "KXBARKLEYMENTION",
+  "KXBARRMENTION",
+  "KXBASEDAPPREV",
+  "KXBBMENTION",
+  "KXBDONMENTION",
+  "KXBENIOFFMENTION",
+  "KXBERNIEMENTION",
+  "KXBESSENTMTPMENTION",
+  "KXBESTLLM",
+  "KXBESTLLMCHINA",
+  "KXBESTLLMCOUNTRY",
+  "KXBESTLLMOS",
+  "KXBIANCOMENTION",
+  "KXBIDENMENTION",
+  "KXBIEBERMENTION",
+  "KXBILATERALMENTION",
+  "KXBIRCHSWINN",
+  "KXBLUESPACEX",
+  "KXBOLAUNCH",
+  "KXBONDIMENTION",
+  "KXBONGINOMENTION",
+  "KXBOWMANMENTION",
+  "KXBRAINLIVE",
+  "KXBRKEM",
+  "KXBRKMENTION",
+  "KXBTCMENTIONULBRICHT",
+  "KXBTCMENTIONVANCE",
+  "KXBUBECKLEAVE",
+  "KXBUBECKOUT",
+  "KXBUCKMASTERSUE",
+  "KXBURNHAMMENTION",
+  "KXBUSHMENTION",
+  "KXBUSINESSROUNDTABLE",
+  "KXCADATACENTERS",
+  "KXCANCELTHELINE",
+  "KXCANDACEMENTION",
+  "KXCANDEBMENTION",
+  "KXCARDFEECHASESAPH",
+  "KXCARLSONMENTION",
+  "KXCARNEYMENTION",
+  "KXCATMENTION",
+  "KXCAVAA",
+  "KXCCLA",
+  "KXCENAMENTION",
+  "KXCFBMENTION",
+  "KXCHIKCOUNT",
+  "KXCHINA1",
+  "KXCHINAAI",
+  "KXCHINALLM",
+  "KXCHINATOPLLM",
+  "KXCHOPSTICKS",
+  "KXCLAUDE",
+  "KXCLAUDE4",
+  "KXCLAUDE5",
+  "KXCMAMENTION",
+  "KXCMECOMPUTE",
+  "KXCMGA",
+  "KXCODEAI",
+  "KXCODINGMODEL",
+  "KXCOLBERTMENTION",
+  "KXCOLLEGEDROP",
+  "KXCOLLEGERANK",
+  "KXCOLONIZEMARS",
+  "KXCOMPANYACTIONANTH",
+  "KXCOMPANYBOARDOPENDOOR",
+  "KXCOMPANYLAYOFF",
+  "KXCOMPBANCHINESEAI",
+  "KXCONGRESSMENTION",
+  "KXCOOPERMENTION",
+  "KXCOSTAMENTION",
+  "KXCOSTCOA",
+  "KXCRACKERBARRELREBRANDREVERSE",
+  "KXCRITICALITY",
+  "KXCRMMENTION",
+  "KXCROCKETTMENTION",
+  "KXCRYPTOSUMMIT",
+  "KXCULTUREMENTION",
+  "KXCUOMOMENTION",
+  "KXCVNAA",
+  "KXCYCLOCOUNT",
+  "KXDANAWHITEFB",
+  "KXDANGROSSMETA",
+  "KXDATACENTER",
+  "KXDEBATEMENTION",
+  "KXDEEPADOPT",
+  "KXDEEPSEEKR2RELEASE",
+  "KXDEEPSEEKV4RELEASE",
+  "KXDEEPSHARE",
+  "KXDEEPTOKEND",
+  "KXDEEPTOKENM",
+  "KXDEEPVREQ",
+  "KXDESANTISMENTION",
+  "KXDILLONMENTION",
+  "KXDIMONMENTION",
+  "KXDISTANCE3IATLAS",
+  "KXDJTCANG7",
+  "KXDJTCONF",
+  "KXDJTCPAC",
+  "KXDJTDAS",
+  "KXDJTFRENCHREP",
+  "KXDJTHANNITY",
+  "KXDJTINVESTMENT",
+  "KXDJTJOINTSESSION",
+  "KXDJTJUSTICEMENTION",
+  "KXDJTLANDRY",
+  "KXDJTMETA",
+  "KXDJTMEXG7",
+  "KXDJTNATOMENTION",
+  "KXDJTRALLY",
+  "KXDJTRGA",
+  "KXDJTUKRG7",
+  "KXDJTWOMENS",
+  "KXDOGSHOWMENTION",
+  "KXDRAKEMENTION",
+  "KXDROZMENTION",
+  "KXDWTSMENTION",
+  "KXEARNIGNSMENTIONJPM",
+  "KXEARNINGSMENTIONAAL",
+  "KXEARNINGSMENTIONAAOI",
+  "KXEARNINGSMENTIONAAP",
+  "KXEARNINGSMENTIONAAPL",
+  "KXEARNINGSMENTIONABNB",
+  "KXEARNINGSMENTIONAC",
+  "KXEARNINGSMENTIONACA",
+  "KXEARNINGSMENTIONACI",
+  "KXEARNINGSMENTIONACN",
+  "KXEARNINGSMENTIONADBE",
+  "KXEARNINGSMENTIONADOBE",
+  "KXEARNINGSMENTIONALIBABA",
+  "KXEARNINGSMENTIONALK",
+  "KXEARNINGSMENTIONALLY",
+  "KXEARNINGSMENTIONAMAT",
+  "KXEARNINGSMENTIONAMC",
+  "KXEARNINGSMENTIONAMD",
+  "KXEARNINGSMENTIONAMGN",
+  "KXEARNINGSMENTIONAMZN",
+  "KXEARNINGSMENTIONANF",
+  "KXEARNINGSMENTIONARITZIA",
+  "KXEARNINGSMENTIONAS",
+  "KXEARNINGSMENTIONASTS",
+  "KXEARNINGSMENTIONATZ",
+  "KXEARNINGSMENTIONAVAV",
+  "KXEARNINGSMENTIONAVGO",
+  "KXEARNINGSMENTIONAXP",
+  "KXEARNINGSMENTIONAZO",
+  "KXEARNINGSMENTIONBA",
+  "KXEARNINGSMENTIONBAC",
+  "KXEARNINGSMENTIONBB",
+  "KXEARNINGSMENTIONBJ",
+  "KXEARNINGSMENTIONBLK",
+  "KXEARNINGSMENTIONBULL",
+  "KXEARNINGSMENTIONC",
+  "KXEARNINGSMENTIONCALM",
+  "KXEARNINGSMENTIONCAR",
+  "KXEARNINGSMENTIONCAVA",
+  "KXEARNINGSMENTIONCBRL",
+  "KXEARNINGSMENTIONCBRS",
+  "KXEARNINGSMENTIONCCL",
+  "KXEARNINGSMENTIONCELH",
+  "KXEARNINGSMENTIONCHWY",
+  "KXEARNINGSMENTIONCIEN",
+  "KXEARNINGSMENTIONCMG",
+  "KXEARNINGSMENTIONCOHR",
+  "KXEARNINGSMENTIONCOINBASE",
+  "KXEARNINGSMENTIONCOST",
+  "KXEARNINGSMENTIONCRCL",
+  "KXEARNINGSMENTIONCRM",
+  "KXEARNINGSMENTIONCRWD",
+  "KXEARNINGSMENTIONCRWV",
+  "KXEARNINGSMENTIONCVNA",
+  "KXEARNINGSMENTIONDAL",
+  "KXEARNINGSMENTIONDASH",
+  "KXEARNINGSMENTIONDE",
+  "KXEARNINGSMENTIONDEER",
+  "KXEARNINGSMENTIONDELL",
+  "KXEARNINGSMENTIONDIS",
+  "KXEARNINGSMENTIONDKNG",
+  "KXEARNINGSMENTIONDKS",
+  "KXEARNINGSMENTIONDOCUSIGN",
+  "KXEARNINGSMENTIONDOLLARGENERAL",
+  "KXEARNINGSMENTIONDPZ",
+  "KXEARNINGSMENTIONDUOL",
+  "KXEARNINGSMENTIONEA",
+  "KXEARNINGSMENTIONEBAY",
+  "KXEARNINGSMENTIONETOR",
+  "KXEARNINGSMENTIONF",
+  "KXEARNINGSMENTIONFDX",
+  "KXEARNINGSMENTIONFIG",
+  "KXEARNINGSMENTIONFUTU",
+  "KXEARNINGSMENTIONGEV",
+  "KXEARNINGSMENTIONGIS",
+  "KXEARNINGSMENTIONGM",
+  "KXEARNINGSMENTIONGME",
+  "KXEARNINGSMENTIONGOOGL",
+  "KXEARNINGSMENTIONGRAB",
+  "KXEARNINGSMENTIONGS",
+  "KXEARNINGSMENTIONHD",
+  "KXEARNINGSMENTIONHIMS",
+  "KXEARNINGSMENTIONHLT",
+  "KXEARNINGSMENTIONHOOD",
+  "KXEARNINGSMENTIONHPE",
+  "KXEARNINGSMENTIONINTC",
+  "KXEARNINGSMENTIONINTU",
+  "KXEARNINGSMENTIONISRG",
+  "KXEARNINGSMENTIONJNJ",
+  "KXEARNINGSMENTIONJPM",
+  "KXEARNINGSMENTIONKKR",
+  "KXEARNINGSMENTIONKLAR",
+  "KXEARNINGSMENTIONKMX",
+  "KXEARNINGSMENTIONKO",
+  "KXEARNINGSMENTIONKR",
+  "KXEARNINGSMENTIONKTOS",
+  "KXEARNINGSMENTIONLEVI",
+  "KXEARNINGSMENTIONLLY",
+  "KXEARNINGSMENTIONLMT",
+  "KXEARNINGSMENTIONLOW",
+  "KXEARNINGSMENTIONLUCID",
+  "KXEARNINGSMENTIONLULU",
+  "KXEARNINGSMENTIONLUNR",
+  "KXEARNINGSMENTIONLYFT",
+  "KXEARNINGSMENTIONM",
+  "KXEARNINGSMENTIONMA",
+  "KXEARNINGSMENTIONMCD",
+  "KXEARNINGSMENTIONMCO",
+  "KXEARNINGSMENTIONMDT",
+  "KXEARNINGSMENTIONMELI",
+  "KXEARNINGSMENTIONMETA",
+  "KXEARNINGSMENTIONMKC",
+  "KXEARNINGSMENTIONMRVL",
+  "KXEARNINGSMENTIONMS",
+  "KXEARNINGSMENTIONMSFT",
+  "KXEARNINGSMENTIONMSTR",
+  "KXEARNINGSMENTIONMTN",
+  "KXEARNINGSMENTIONMU",
+  "KXEARNINGSMENTIONNBIS",
+  "KXEARNINGSMENTIONNFLX",
+  "KXEARNINGSMENTIONNIO",
+  "KXEARNINGSMENTIONNKE",
+  "KXEARNINGSMENTIONNVDA",
+  "KXEARNINGSMENTIONNYT",
+  "KXEARNINGSMENTIONOKLO",
+  "KXEARNINGSMENTIONON",
+  "KXEARNINGSMENTIONORCL",
+  "KXEARNINGSMENTIONPANW",
+  "KXEARNINGSMENTIONPATH",
+  "KXEARNINGSMENTIONPEP",
+  "KXEARNINGSMENTIONPG",
+  "KXEARNINGSMENTIONPGR",
+  "KXEARNINGSMENTIONPLTR",
+  "KXEARNINGSMENTIONPSKY",
+  "KXEARNINGSMENTIONPYPL",
+  "KXEARNINGSMENTIONQCOM",
+  "KXEARNINGSMENTIONRACE",
+  "KXEARNINGSMENTIONRDDT",
+  "KXEARNINGSMENTIONRIVN",
+  "KXEARNINGSMENTIONRKLB",
+  "KXEARNINGSMENTIONROKU",
+  "KXEARNINGSMENTIONROST",
+  "KXEARNINGSMENTIONRY",
+  "KXEARNINGSMENTIONSBUX",
+  "KXEARNINGSMENTIONSFM",
+  "KXEARNINGSMENTIONSHOP",
+  "KXEARNINGSMENTIONSJM",
+  "KXEARNINGSMENTIONSNAP",
+  "KXEARNINGSMENTIONSNOW",
+  "KXEARNINGSMENTIONSPCX",
+  "KXEARNINGSMENTIONSPOT",
+  "KXEARNINGSMENTIONSTZ",
+  "KXEARNINGSMENTIONSYUM",
+  "KXEARNINGSMENTIONTFC",
+  "KXEARNINGSMENTIONTGT",
+  "KXEARNINGSMENTIONTLN",
+  "KXEARNINGSMENTIONTOL",
+  "KXEARNINGSMENTIONTOST",
+  "KXEARNINGSMENTIONTSLA",
+  "KXEARNINGSMENTIONTSMC",
+  "KXEARNINGSMENTIONTTWO",
+  "KXEARNINGSMENTIONUAL",
+  "KXEARNINGSMENTIONUBER",
+  "KXEARNINGSMENTIONULTA",
+  "KXEARNINGSMENTIONURBN",
+  "KXEARNINGSMENTIONV",
+  "KXEARNINGSMENTIONVSCO",
+  "KXEARNINGSMENTIONVST",
+  "KXEARNINGSMENTIONVZ",
+  "KXEARNINGSMENTIONWEN",
+  "KXEARNINGSMENTIONWFC",
+  "KXEARNINGSMENTIONWGO",
+  "KXEARNINGSMENTIONWING",
+  "KXEARNINGSMENTIONWMT",
+  "KXEARNINGSMENTIONYETI",
+  "KXEARNINGSMENTIONYOU",
+  "KXEARNINGSMENTIONYUM",
+  "KXEARNINGSMENTIONZETA",
+  "KXEARNINGSMENTIONZM",
+  "KXEARNINGSMENTIONZS",
+  "KXEBAYA",
+  "KXEBOLACOUNTRY",
+  "KXECBMENTION",
+  "KXELLISONMENTION",
+  "KXELONMARS",
+  "KXELONMENTION",
+  "KXELONSUEAPPLE",
+  "KXELSAYEDMENTION",
+  "KXENTMENTION",
+  "KXEPLMENTION",
+  "KXEPOCHSCORE",
+  "KXEVMKT",
+  "KXEVSHARE",
+  "KXEXOPLAN",
+  "KXFA",
+  "KXFABLEDISABLED",
+  "KXFABLERESTORE",
+  "KXFDAANNOUNCE",
+  "KXFDAAPPROVAL",
+  "KXFDAAPPROVALDATECMPS",
+  "KXFDAAPPROVALDATELLY",
+  "KXFDAAPPROVALDATENTLA",
+  "KXFDAAPPROVALMK1654",
+  "KXFDAAPPROVALPSYCHEDELIC",
+  "KXFDAAPPROVE",
+  "KXFDARETATRUTDE",
+  "KXFDARETATRUTIDE",
+  "KXFDATYPE1DIABETES",
+  "KXFDAVERVE102",
+  "KXFEDGOVMENTION",
+  "KXFEDMENTION",
+  "KXFEDMENTIONDURATION",
+  "KXFIELDS",
+  "KXFIGHTMENTION",
+  "KXFIGMAA",
+  "KXFIGMENTION",
+  "KXFINKMENTION",
+  "KXFLDATACENTERS",
+  "KXFLDENGUE",
+  "KXFLOP",
+  "KXFNSMENTION",
+  "KXFOMCTONE",
+  "KXFOXNEWSMENTION",
+  "KXFOXONE",
+  "KXFOXSATMENTION",
+  "KXFRANKLINMENTION",
+  "KXFREYMENTION",
+  "KXFRONTIER",
+  "KXFSDMARKET",
+  "KXFTNMENTION",
+  "KXFURYMENTION",
+  "KXFUSION",
+  "KXGABBMENTION",
+  "KXGADATACENTERS",
+  "KXGAMEDAYMENTION",
+  "KXGEMINI",
+  "KXGEMINI3",
+  "KXGILLISESPYS",
+  "KXGLASERMENTION",
+  "KXGOLDENMENTION",
+  "KXGONORRHEACOUNT",
+  "KXGOOGLADOPT",
+  "KXGOOGLMENTION",
+  "KXGOOGSHARE",
+  "KXGOOGTOKEND",
+  "KXGOOGTOKENM",
+  "KXGOOGVREQ",
+  "KXGOOGVSPEND",
+  "KXGOVERNORMENTION",
+  "KXGPT",
+  "KXGPT45",
+  "KXGPT4P5",
+  "KXGPT5",
+  "KXGPT5RELEASE",
+  "KXGPT6",
+  "KXGPTCOST",
+  "KXGPTFEES",
+  "KXGPTPARAM",
+  "KXGPTS",
+  "KXGRABA",
+  "KXGREENDAYMENTION",
+  "KXGRIFFINMENTION",
+  "KXGROK",
+  "KXGROK2OS",
+  "KXGROK3",
+  "KXGROK3TOPLLMCHANGE",
+  "KXGROK4",
+  "KXGSTORM",
+  "KXGUINEAWORM",
+  "KXGUTFELDMENTION",
+  "KXH100MAX",
+  "KXH100MON",
+  "KXH100Q",
+  "KXH100W",
+  "KXH200MAX",
+  "KXH200MON",
+  "KXH200Q",
+  "KXH200W",
+  "KXH5N1COUNT",
+  "KXHANNITYMENTION",
+  "KXHANTACOUNT",
+  "KXHANTACOUNTRY",
+  "KXHARTMENTION",
+  "KXHARVARDACCEPT",
+  "KXHARVARDAPPS",
+  "KXHBIDENMENTION",
+  "KXHDA",
+  "KXHEARINGMENTION",
+  "KXHEGSETHMENTION",
+  "KXHILLARYMENTION",
+  "KXHILTONMENTION",
+  "KXHLS",
+  "KXHOCHULMENTION",
+  "KXHODGE",
+  "KXHOMANMENTION",
+  "KXHOODA",
+  "KXIMAGEAI",
+  "KXIMOAI",
+  "KXINDIAX",
+  "KXINFANTINOMENTION",
+  "KXINGRAHAMMENTION",
+  "KXINTERSTELLAR",
+  "KXIPHONEASSEMBLE",
+  "KXIPHONEPRICE",
+  "KXIPOSUPERVOTE",
+  "KXIRANMOU",
+  "KXIRKUTSKPATHOGEN",
+  "KXIVYACCEPT",
+  "KXJEFFRIESMENTION",
+  "KXJENNINGSLEAVE",
+  "KXJENSENMENTION",
+  "KXJOHNSONMENTION",
+  "KXJOINANTHROPIC",
+  "KXJOINAPPLEJB",
+  "KXJOINBARSTOOL",
+  "KXJOINCBS",
+  "KXJOINJENSENHUANG",
+  "KXJOINKARPATHY",
+  "KXJOINMETA",
+  "KXJOINOPENAI",
+  "KXJOINOPENDOOR",
+  "KXJOINSTEPHENCOLBERT",
+  "KXJOINUBER",
+  "KXJOINXAI",
+  "KXJONYIVEMETA",
+  "KXJPOWMENTION",
+  "KXKAMALAMENTION",
+  "KXKARDASHIANMENTION",
+  "KXKARPMENTION",
+  "KXKHANNAMENTION",
+  "KXKILLSWITCH",
+  "KXKIMMELMENTION",
+  "KXKINGMENTION",
+  "KXKIRKMENTION",
+  "KXKLARNAA",
+  "KXKPAXMENTION",
+  "KXKXDJTHANNITY",
+  "KXLABSPEND",
+  "KXLAMMYMENTION",
+  "KXLANDSPACELAUNCH",
+  "KXLASTEXAM",
+  "KXLASTWORDCOUNT",
+  "KXLASTWORDMENTION",
+  "KXLATENIGHTMENTION",
+  "KXLAUNCHCOUNTM",
+  "KXLAUNCHES",
+  "KXLEAVEANTHROPIC",
+  "KXLEAVEBIER",
+  "KXLEAVECRACKERBARREL",
+  "KXLEAVEJANGS",
+  "KXLEAVEJONYIVEOAI",
+  "KXLEAVEKRISTINCABOT",
+  "KXLEAVEMAGUIRESEQUOIA",
+  "KXLEAVEMETA",
+  "KXLEAVEOPENAI",
+  "KXLEAVESEANCOOK",
+  "KXLEAVEWANGMETA",
+  "KXLEAVEXAI",
+  "KXLEAVITTLATE",
+  "KXLEAVITTMENTION",
+  "KXLEAVITTMENTIONDURATION",
+  "KXLEAVITTSMFMENTION",
+  "KXLEAVITTVIEW",
+  "KXLEBRONMENTION",
+  "KXLIVENATIONUS",
+  "KXLLAMA5",
+  "KXLLM1",
+  "KXLLMCHESS",
+  "KXLLMH2H",
+  "KXLOVEISLMENTION",
+  "KXLUCKEYMENTION",
+  "KXLUMIERE",
+  "KXLUTNICKFTNMENTION",
+  "KXLUVA",
+  "KXLYFTA",
+  "KXMACCELL",
+  "KXMACOS16",
+  "KXMADDOWMENTION",
+  "KXMAHERMENTION",
+  "KXMAMDANIMENTION",
+  "KXMARMADUNCSDS",
+  "KXMARSFLAG",
+  "KXMARSVRAIL",
+  "KXMATHAI",
+  "KXMCDMENTION",
+  "KXMEASLES",
+  "KXMEISSNER",
+  "KXMELANIAMENTION",
+  "KXMENTION",
+  "KXMENTIONEARNAIR",
+  "KXMENTIONEARNCCL",
+  "KXMENTIONEARNCHWY",
+  "KXMENTIONEARNDAL",
+  "KXMENTIONEARNFDX",
+  "KXMENTIONEARNGIS",
+  "KXMENTIONEARNLULU",
+  "KXMENTIONEARNM",
+  "KXMENTIONEARNMU",
+  "KXMENTIONEARNNKE",
+  "KXMENTIONEARNOKLO",
+  "KXMENTIONEARNSFD",
+  "KXMENTIONEARNWGO",
+  "KXMERCHLISTPALANTIR",
+  "KXMETAA",
+  "KXMETACLOSE",
+  "KXMETASHARE",
+  "KXMETEOR",
+  "KXMETREVALCLAUDE4OPUS",
+  "KXMILLENNIUM",
+  "KXMILLENNIUMALL",
+  "KXMILLENNIUMNEXT",
+  "KXMINAJMENTION",
+  "KXMIRANMENTION",
+  "KXMISTRALSHARE",
+  "KXMITACCEPT",
+  "KXMKTSHAREAI",
+  "KXMLBMENTION",
+  "KXMOA",
+  "KXMODELHIGH",
+  "KXMODELSPEND",
+  "KXMOON",
+  "KXMOONMAN",
+  "KXMOONVSPEND",
+  "KXMPOXCOUNT",
+  "KXMRBEASTMENTION",
+  "KXMRVLMENTION",
+  "KXMSFTMENTION",
+  "KXMSTRBTCCOUNT",
+  "KXMSTRMARGIN",
+  "KXMTGMENTION",
+  "KXMTPMENTION",
+  "KXMUSKINJ",
+  "KXMUSKOAI",
+  "KXMUSKPACKAGEVOTE",
+  "KXMVEMENTIONSINGLE",
+  "KXMVEMENTIONSSINGLE",
+  "KXMYSTERYSTOCKBUFFET",
+  "KXNADALMENTION",
+  "KXNADELLAMENTION",
+  "KXNASCARMENTION",
+  "KXNATFRIEDMANMETA",
+  "KXNBAFINALSMENTION",
+  "KXNBAMENTION",
+  "KXNBISMENTION",
+  "KXNCAABMENTION",
+  "KXNCAAMENTION",
+  "KXNEOUTBREAKHANTA",
+  "KXNETANYAHUMENTION",
+  "KXNETFLIXSTUDIO",
+  "KXNEURALINKCOUNT",
+  "KXNEUTRONORBIT",
+  "KXNEWDRUGAPPBEAM",
+  "KXNEWDRUGAPPLICATIONCMPS",
+  "KXNEWDRUGAPPNTLA",
+  "KXNEWGLENN",
+  "KXNEWOUTBREAKEBOLA",
+  "KXNEWOUTBREAKHANTA",
+  "KXNEWOUTBREAKPCHIK",
+  "KXNEWOUTBREAKPCOVID",
+  "KXNEWOUTBREAKPH5N1",
+  "KXNEWOUTBREAKPHEICCHIK",
+  "KXNEWOUTBREAKPHEICCOVID",
+  "KXNEWOUTBREAKPHEICMEASLES",
+  "KXNEWOUTBREAKPHEICZOMBIE",
+  "KXNEWOUTBREAKPMEASLES",
+  "KXNEWOUTBREAKPMPOX",
+  "KXNEWPRODUCTAPPLE",
+  "KXNEWPRODUCTFALLOUT3REM",
+  "KXNEWPRODUCTMICROSOFT",
+  "KXNEWPRODUCTXBOX",
+  "KXNEWSNATIONMENTION",
+  "KXNEWSOMMENTION",
+  "KXNEXTCOMPANYSP500",
+  "KXNEXTLAUNCHSMALL",
+  "KXNEXTVULCAN",
+  "KXNEXTYACCARINO",
+  "KXNFLMENTION",
+  "KXNHLMENTION",
+  "KXNOBELCHEM",
+  "KXNOBELLIT",
+  "KXNOBELMED",
+  "KXNOBELPHYSICS",
+  "KXNOVOHIMS",
+  "KXNPRCEOCHANGE",
+  "KXNVDAMENTION",
+  "KXNYCMAYORDEBATEMENTION",
+  "KXNYCMDEBMENTION",
+  "KXNYDATACENTERS",
+  "KXNYTOAI",
+  "KXNYTOAISETTLE",
+  "KXNYTVISITPALANTIR",
+  "KXO3RELEASE",
+  "KXOAIAGI",
+  "KXOAIDAMAGE",
+  "KXOAIGOOGLE",
+  "KXOAIHARDWARE",
+  "KXOAIMSFT",
+  "KXOAIMUSKSETTLE",
+  "KXOAIMUSKSUIT",
+  "KXOAIPERSONALAGENT",
+  "KXOAIPLATEAU",
+  "KXOAIPROFIT",
+  "KXOAISCREEN",
+  "KXOAISOCIAL",
+  "KXOBAMAMENTION",
+  "KXOHDATACENTERS",
+  "KXOPENADOPT",
+  "KXOPENAIANOTHERMILLENNIUM",
+  "KXOPENAIBOARD",
+  "KXOPENAIBOARDJ",
+  "KXOPENAICEO",
+  "KXOPENAIDAYS",
+  "KXOPENAIMILLENNIUM",
+  "KXOPENAIPROFIT",
+  "KXOPENDEEP",
+  "KXOPENINTAI",
+  "KXOPENSHARE",
+  "KXOPENSOURCEOAI",
+  "KXOPENSOURCESHARE",
+  "KXOPENSOURCESHAREOR",
+  "KXOPENSOURCESHAREORM",
+  "KXOPENTOKEND",
+  "KXOPENTOKENM",
+  "KXOPENVREQ",
+  "KXOPENVSPEND",
+  "KXOPTIMUSDATE",
+  "KXORCLMENTION",
+  "KXOSSPEND",
+  "KXOSWORLD",
+  "KXOTHERLAUNCH",
+  "KXOXALPHA",
+  "KXOXALPHADEV",
+  "KXPADATACENTERS",
+  "KXPAIDSUBAPPLEINTEL",
+  "KXPAULMENTION",
+  "KXPEARLMANMENTION",
+  "KXPELOSIMENTION",
+  "KXPERSONMENTION",
+  "KXPHANTOMREV",
+  "KXPLAGUECOUNT",
+  "KXPMA",
+  "KXPNEUMONICPLAGUE",
+  "KXPNP",
+  "KXPOLIO",
+  "KXPOLIOELIM",
+  "KXPOLITICSMENTION",
+  "KXPORTERMENTION",
+  "KXPORTNOYMENTION",
+  "KXPOWELLMENTION",
+  "KXPRESMENTION",
+  "KXPRIMEENGCONSUMPTION",
+  "KXPRIVACYUPDATENYT",
+  "KXPROJECTHELIX",
+  "KXPSAKIMENTION",
+  "KXQUANTUM",
+  "KXRDDTMENTION",
+  "KXREACTOR",
+  "KXREEVESMENTION",
+  "KXREMOVEDAPPSTORETIKTOK",
+  "KXRENAMECOMMANDERS",
+  "KXRENAMEGUARDIANS",
+  "KXREPORTTOPICEARHART",
+  "KXREVIEWRELEASEMKBHDFRIEND",
+  "KXRFKMENTION",
+  "KXRIEMANN",
+  "KXRIEMANNRES",
+  "KXRIPPLINGDEEL",
+  "KXRKLBCOUNT",
+  "KXRKLBLAUNCH",
+  "KXRKLBORBIT",
+  "KXROBOTAXI",
+  "KXROBOTAXIAREA",
+  "KXROBOTAXICA",
+  "KXROBOTMARS",
+  "KXROCKET",
+  "KXROCKHOF",
+  "KXROGANBOARD",
+  "KXROGANMENTION",
+  "KXRSIANNOUNCE",
+  "KXRTX5090MAX",
+  "KXRTX5090MON",
+  "KXRTX5090Q",
+  "KXRTX5090W",
+  "KXRTXPRO6000MON",
+  "KXRTXPRO6000W",
+  "KXRUBIOMENTION",
+  "KXSASMITH",
+  "KXSBUXA",
+  "KXSCHUMERMENTION",
+  "KXSCOTUSMENTION",
+  "KXSCREWWORMCOUNT",
+  "KXSEA",
+  "KXSECPRESSMENTION",
+  "KXSEWERHEALTH",
+  "KXSGA",
+  "KXSHAQMENTION",
+  "KXSHIRLEYMENTION",
+  "KXSIZE3IATLAS",
+  "KXSNFMENTION",
+  "KXSNLMENTION",
+  "KXSNOOPMENTION",
+  "KXSNOWMENTION",
+  "KXSORA",
+  "KXSOUTHPARKMENTION",
+  "KXSP500BTCPURCHASE",
+  "KXSP500INDEXREMOVE",
+  "KXSPACEDATACENTER",
+  "KXSPACEX",
+  "KXSPACEXCOUNT",
+  "KXSPACEXLAND",
+  "KXSPACEXMARS",
+  "KXSPACEXORBIT",
+  "KXSPACEXREUSE",
+  "KXSPACEXSTARSHIP",
+  "KXSPANBERGERMENTION",
+  "KXSPCELAUNCH",
+  "KXSPCXLAUNCH",
+  "KXSPCXMENTION",
+  "KXSPECIALREPORTMENTION",
+  "KXSPEECHAI",
+  "KXSPIRITCEASEOPERATION",
+  "KXSPOTA",
+  "KXSPOTMENTION",
+  "KXSTANFORDACCEPT",
+  "KXSTARMERMENTION",
+  "KXSTARMERMENTIONB",
+  "KXSTARSHIP",
+  "KXSTARSHIP25",
+  "KXSTARSHIPCATCH",
+  "KXSTARSHIPCREW",
+  "KXSTARSHIPDOCK",
+  "KXSTARSHIPFL",
+  "KXSTARSHIPLAUNCH",
+  "KXSTARSHIPMARS",
+  "KXSTARSHIPSPACE",
+  "KXSTEALTHSHARE",
+  "KXSTEYERMENTION",
+  "KXSTUBBMENTION",
+  "KXSTUDIOGHIBLI",
+  "KXSUETEADATE",
+  "KXSUIMETA",
+  "KXSUPERBOWLAD",
+  "KXSUPERCON",
+  "KXSUPERVOTEALTMAN",
+  "KXSUPERVOTEDARIO",
+  "KXSURVIVORMENTION",
+  "KXSWBAGS",
+  "KXSWEBENCH",
+  "KXSWHIRES",
+  "KXSWIFTMENTION",
+  "KXSWITCH2RELEASE",
+  "KXTALARICOMENTION",
+  "KXTARGETA",
+  "KXTAXAI",
+  "KXTBCOUNT",
+  "KXTBLAMENTION",
+  "KXTBPNMENTION",
+  "KXTCRUMENTION",
+  "KXTECHRANKLISTAI2",
+  "KXTECHRANKLISTAICODE",
+  "KXTENCENTSHARE",
+  "KXTESLAFACTORY",
+  "KXTESLAGAS",
+  "KXTESLAOPTIMUS",
+  "KXTESTINGGG",
+  "KXTHEBEAT",
+  "KXTHEWEEKNIGHTMENTION",
+  "KXTHREADGUYMENTION",
+  "KXTIKTOKBAN",
+  "KXTIKTOKUMG",
+  "KXTNFMENTION",
+  "KXTOKENUSE",
+  "KXTOKENUSED",
+  "KXTOKENUSEM",
+  "KXTOLLA",
+  "KXTOP3AI",
+  "KXTOP3AID",
+  "KXTOPAGENT",
+  "KXTOPAI",
+  "KXTOPLLMCHANGE",
+  "KXTOPLLMGENERAL",
+  "KXTOPMODEL",
+  "KXTOPUSAGEAI",
+  "KXTOPUSAGEAI2",
+  "KXTRIFOLD",
+  "KXTRUMPLATE",
+  "KXTRUMPMENTION",
+  "KXTRUMPMENTIONB",
+  "KXTRUMPMENTIONDURATION",
+  "KXTRUMPMENTIONS",
+  "KXTRUMPSAY",
+  "KXTRUMPSAYCOMPANY",
+  "KXTRUMPSAYCOUNTRY",
+  "KXTRUMPSAYEP",
+  "KXTRUMPSAYMAM",
+  "KXTRUMPSAYMONTH",
+  "KXTRUMPSAYNICKNAME",
+  "KXTRUMPSAYSCAM",
+  "KXTRUMPSAYTRUMP",
+  "KXTRUMPTOPIC",
+  "KXTRUMPZELENSKYY",
+  "KXTSLAA",
+  "KXTSLAMENTION",
+  "KXTXDATACENTERS",
+  "KXUALA",
+  "KXUBERA",
+  "KXUBERKPI",
+  "KXUBERMENTION",
+  "KXUEFAMENTION",
+  "KXUFSD",
+  "KXUNMENTION",
+  "KXURBNA",
+  "KXUSADATACENTERS",
+  "KXUSAMEASLESELIMINATE",
+  "KXUSTESTSMATH",
+  "KXUSTESTSREADING",
+  "KXVADATACENTERS",
+  "KXVANCEMENTION",
+  "KXVAXXOMNI",
+  "KXVERIZONRESTORE",
+  "KXVIDEOAI",
+  "KXVIEWMENTION",
+  "KXVISIONPRO",
+  "KXVISIONPROLAUNCH",
+  "KXVLADTENEVMENTION",
+  "KXVZMENTION",
+  "KXWALESMENTION",
+  "KXWALLERMENTION",
+  "KXWALMARTA",
+  "KXWALZMENTION",
+  "KXWARSHMENTION",
+  "KXWATTERSMENTION",
+  "KXWAYMOCITIES",
+  "KXWAYMOCITY",
+  "KXWAYMOCITYLV",
+  "KXWBCMENTION",
+  "KXWCMENTION",
+  "KXWDAYMENTION",
+  "KXWEBB",
+  "KXWEBULLA",
+  "KXWEFMENTION",
+  "KXWEIGHTDRUGSQ",
+  "KXWENA",
+  "KXWMTMENTION",
+  "KXWNBAMENTION",
+  "KXWOMENTION",
+  "KXWORLDNEWSMENTION",
+  "KXWWDC25LAUNCH",
+  "KXWWDCMENTION",
+  "KXXAIADOPT",
+  "KXXAIREASON",
+  "KXXAISUEAPPLE",
+  "KXXIAOMISHARE",
+  "KXXPAYMENT",
+  "KXYANGMILLS",
+  "KXYCAITOGETHER",
+  "KXZACHARIAMENTION",
+  "KXZAISHARE",
+  "KXZAIVREQ",
+  "KXZAIVSPEND",
+  "KXZAKARIAMENTION",
+  "KXZELENSKYYMENTION",
+  "KXZIWEMENTION",
+  "KXZMMENTION",
+  "KXZUCKMENTION",
+  "LLM1",
+  "MEISSNER",
+  "METADAP",
+  "MOON",
+  "MORAESLEAVE",
+  "MSFTCEO",
+  "NETFLIXSUBS",
+  "NEURALINK",
+  "NPRCEOCHANGE",
+  "NYTOAI",
+  "NYTOAISETTLE",
+  "NYTSUBS",
+  "OAIAGI",
+  "OPENAIBOARD",
+  "OPENAIBOARDJ",
+  "OPENAICEO",
+  "OPENAICEOCHANGE",
+  "OPENAIPROFIT",
+  "OPENAISUIT",
+  "REACTOR",
+  "RHGOLD",
+  "ROBOTAXI",
+  "ROBOTAXIOUT",
+  "ROCKET",
+  "SOFIMEMBERS",
+  "SORA",
+  "SPACEX",
+  "SPACEXCOUNT",
+  "SPACEXLAND",
+  "SPACEXORBIT",
+  "SPACEXSTARSHIP",
+  "SPIRITCEOCHANGE",
+  "SPOTIFYSUBS",
+  "STARSHIPMARS",
+  "SUPERCON",
+  "SWITCH2",
+  "TECHLAYOFF",
+  "TESLA",
+  "TESLACEOCHANGE",
+  "TESLAM2",
+  "TESLAOPTIMUS",
+  "TESLAPROD",
+  "TESLAROADSTER",
+  "TIKTOKBAN",
+  "TIKTOKSELL",
+  "TIKTOKUMG",
+  "TOPLLM",
+  "VAXXOMNI",
+  "VINE",
+  "VISIONPRO",
+  "WEBB",
+  "WEIGHTDRUGSQ",
+  "WEWORKCEO",
+  "XCEOCHANGE"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 1049,
+ "requests": [
+  {
+   "id": "ev_AAPLCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AAPLCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_AAPLWATCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AAPLWATCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_AIDEBATES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AIDEBATES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_AITURING",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AITURING",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_ALTMAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "ALTMAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_AMCCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AMCCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_AOH1996",
+   "path": "/events",
+   "params": {
+    "series_ticker": "AOH1996",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_APPLEAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "APPLEAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_APPLECAR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "APPLECAR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_APPLEFOLD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "APPLEFOLD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_APPLEPORT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "APPLEPORT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_APPLEUS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "APPLEUS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_APPLEWATCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "APPLEWATCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_BIGTECHLAYOFF",
+   "path": "/events",
+   "params": {
+    "series_ticker": "BIGTECHLAYOFF",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_BRAZILX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "BRAZILX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_BRAZILXBAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "BRAZILXBAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_CBVOLUME",
+   "path": "/events",
+   "params": {
+    "series_ticker": "CBVOLUME",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_CHINALLM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "CHINALLM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_CHINATOPLLM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "CHINATOPLLM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_DISBOARD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "DISBOARD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_DISCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "DISCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_DISNEYBOARD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "DISNEYBOARD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_EVMKT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "EVMKT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_EXOPLAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "EXOPLAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_FBDAU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "FBDAU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_FEMALECEO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "FEMALECEO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GMECEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GMECEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GOOGLECEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GOOGLECEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GOOGLESHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GOOGLESHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GPT45",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GPT45",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GPT4P5",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GPT4P5",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GPT5",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GPT5",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GPTPARAM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GPTPARAM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_GSTORM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "GSTORM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_IMOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "IMOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_JPMCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "JPMCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KX60MINMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KX60MINMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXA100MAX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXA100MAX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXA100MON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXA100MON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXA100Q",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXA100Q",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXA100W",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXA100W",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAAPLPRICE17OVER16",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAAPLPRICE17OVER16",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAAPLPRICEFOLD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAAPLPRICEFOLD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAASCORE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAASCORE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXABNBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXABNBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXACKMANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXACKMANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXACOOPERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXACOOPERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXACQUIREDFIRST",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXACQUIREDFIRST",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXADBEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXADBEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAGICO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAGICO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIADOPTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIADOPTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIAUTHOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIAUTHOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIFINANCE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIFINANCE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIFOOD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIFOOD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIHEALTH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIHEALTH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAILIMITSUSCHINA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAILIMITSUSCHINA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIMANU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIMANU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIMILLENNIUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIMILLENNIUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAINEURALESE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAINEURALESE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIOPEN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIOPEN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIPARETO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIPARETO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIPAUSE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIPAUSE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAIRELEASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAIRELEASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAISCORE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAISCORE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAISI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAISI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAISPEND1",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAISPEND1",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAISPEND10",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAISPEND10",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAISPIKE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAISPIKE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAITECH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAITECH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAITURING",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAITURING",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXALIENS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXALIENS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXALLINMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXALLINMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXALTHOFFMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXALTHOFFMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXALTMAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXALTMAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXALTMANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXALTMANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXALUNMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXALUNMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAMODEIMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAMODEIMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANTHADOPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANTHADOPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANTHPERSONALAGENT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANTHPERSONALAGENT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANTHROPICMILLENNIUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANTHROPICMILLENNIUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANTHSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANTHSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANTHVREQ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANTHVREQ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANTHVSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANTHVSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANTITRUSTOAIMSFT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANTITRUSTOAIMSFT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXANVCD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXANVCD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAOCMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAOCMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAOH1996",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAOH1996",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAPPLEAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAPPLEAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAPPLEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAPPLEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAPPLEOPENAICASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAPPLEOPENAICASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAPPLEUS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAPPLEUS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXARCAGI2",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXARCAGI2",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXARENASCORE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXARENASCORE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXARMSTRONGMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXARMSTRONGMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXARTEMISII",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXARTEMISII",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXASL3",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXASL3",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXASTEROID",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXASTEROID",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXASTRONAUTS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXASTRONAUTS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXATHLETEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXATHLETEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXATPMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXATPMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAVGMEASLESDJT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAVGMEASLESDJT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAWARDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAWARDMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXAZDATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXAZDATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXB200MAX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXB200MAX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXB200MON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXB200MON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXB200Q",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXB200Q",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXB200TEST",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXB200TEST",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXB200W",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXB200W",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBAA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBAA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBABASHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBABASHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBACHELORETTEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBACHELORETTEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBANNONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBANNONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBARIWEISSOUT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBARIWEISSOUT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBARKLEYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBARKLEYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBARRMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBARRMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBASEDAPPREV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBASEDAPPREV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBDONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBDONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBENIOFFMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBENIOFFMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBERNIEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBERNIEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBESSENTMTPMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBESSENTMTPMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBESTLLM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBESTLLM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBESTLLMCHINA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBESTLLMCHINA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBESTLLMCOUNTRY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBESTLLMCOUNTRY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBESTLLMOS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBESTLLMOS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBIANCOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBIANCOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBIDENMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBIDENMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBIEBERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBIEBERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBILATERALMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBILATERALMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBIRCHSWINN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBIRCHSWINN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBLUESPACEX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBLUESPACEX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBOLAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBOLAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBONDIMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBONDIMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBONGINOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBONGINOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBOWMANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBOWMANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBRAINLIVE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBRAINLIVE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBRKEM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBRKEM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBRKMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBRKMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBTCMENTIONULBRICHT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBTCMENTIONULBRICHT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBTCMENTIONVANCE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBTCMENTIONVANCE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBUBECKLEAVE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBUBECKLEAVE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBUBECKOUT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBUBECKOUT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBUCKMASTERSUE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBUCKMASTERSUE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBURNHAMMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBURNHAMMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBUSHMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBUSHMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXBUSINESSROUNDTABLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXBUSINESSROUNDTABLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCADATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCADATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCANCELTHELINE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCANCELTHELINE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCANDACEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCANDACEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCANDEBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCANDEBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCARDFEECHASESAPH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCARDFEECHASESAPH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCARLSONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCARLSONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCARNEYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCARNEYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCATMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCATMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCAVAA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCAVAA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCCLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCCLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCENAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCENAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCFBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCFBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCHIKCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCHIKCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCHINA1",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCHINA1",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCHINAAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCHINAAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCHINALLM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCHINALLM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCHINATOPLLM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCHINATOPLLM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCHOPSTICKS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCHOPSTICKS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCLAUDE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCLAUDE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCLAUDE4",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCLAUDE4",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCLAUDE5",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCLAUDE5",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCMAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCMAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCMECOMPUTE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCMECOMPUTE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCMGA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCMGA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCODEAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCODEAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCODINGMODEL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCODINGMODEL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOLBERTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOLBERTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOLLEGEDROP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOLLEGEDROP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOLLEGERANK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOLLEGERANK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOLONIZEMARS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOLONIZEMARS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOMPANYACTIONANTH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOMPANYACTIONANTH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOMPANYBOARDOPENDOOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOMPANYBOARDOPENDOOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOMPANYLAYOFF",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOMPANYLAYOFF",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOMPBANCHINESEAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOMPBANCHINESEAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCONGRESSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCONGRESSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOOPERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOOPERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOSTAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOSTAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCOSTCOA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCOSTCOA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCRACKERBARRELREBRANDREVERSE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCRACKERBARRELREBRANDREVERSE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCRITICALITY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCRITICALITY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCRMMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCRMMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCROCKETTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCROCKETTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCRYPTOSUMMIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCRYPTOSUMMIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCULTUREMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCULTUREMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCUOMOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCUOMOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCVNAA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCVNAA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXCYCLOCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXCYCLOCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDANAWHITEFB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDANAWHITEFB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDANGROSSMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDANGROSSMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDATACENTER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDATACENTER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEBATEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEBATEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEEPADOPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEEPADOPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEEPSEEKR2RELEASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEEPSEEKR2RELEASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEEPSEEKV4RELEASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEEPSEEKV4RELEASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEEPSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEEPSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEEPTOKEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEEPTOKEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEEPTOKENM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEEPTOKENM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDEEPVREQ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDEEPVREQ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDESANTISMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDESANTISMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDILLONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDILLONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDIMONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDIMONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDISTANCE3IATLAS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDISTANCE3IATLAS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTCANG7",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTCANG7",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTCONF",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTCONF",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTCPAC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTCPAC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTDAS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTDAS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTFRENCHREP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTFRENCHREP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTHANNITY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTHANNITY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTINVESTMENT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTINVESTMENT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTJOINTSESSION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTJOINTSESSION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTJUSTICEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTJUSTICEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTLANDRY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTLANDRY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTMEXG7",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTMEXG7",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTNATOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTNATOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTRALLY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTRALLY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTRGA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTRGA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTUKRG7",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTUKRG7",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDJTWOMENS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDJTWOMENS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDOGSHOWMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDOGSHOWMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDRAKEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDRAKEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDROZMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDROZMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXDWTSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXDWTSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNIGNSMENTIONJPM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNIGNSMENTIONJPM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAAOI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAAOI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAAP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAAP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAAPL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAAPL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONABNB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONABNB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONACA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONACA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONACI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONACI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONACN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONACN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONADBE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONADBE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONADOBE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONADOBE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONALIBABA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONALIBABA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONALK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONALK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONALLY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONALLY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAMAT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAMAT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAMC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAMC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAMD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAMD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAMGN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAMGN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAMZN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAMZN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONANF",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONANF",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONARITZIA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONARITZIA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONASTS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONASTS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONATZ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONATZ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAVAV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAVAV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAVGO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAVGO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAXP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAXP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONAZO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONAZO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONBA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONBA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONBAC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONBAC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONBB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONBB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONBJ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONBJ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONBLK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONBLK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONBULL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONBULL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCALM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCALM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCAR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCAR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCAVA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCAVA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCBRL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCBRL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCBRS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCBRS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCCL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCCL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCELH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCELH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCHWY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCHWY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCIEN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCIEN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCMG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCMG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCOHR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCOHR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCOINBASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCOINBASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCOST",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCOST",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCRCL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCRCL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCRM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCRM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCRWD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCRWD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCRWV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCRWV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONCVNA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONCVNA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDASH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDASH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDEER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDEER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDELL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDELL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDIS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDIS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDKNG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDKNG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDKS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDKS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDOCUSIGN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDOCUSIGN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDOLLARGENERAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDOLLARGENERAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDPZ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDPZ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONDUOL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONDUOL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONEA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONEA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONEBAY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONEBAY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONETOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONETOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONF",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONF",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONFDX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONFDX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONFIG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONFIG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONFUTU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONFUTU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONGEV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONGEV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONGIS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONGIS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONGM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONGM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONGME",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONGME",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONGOOGL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONGOOGL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONGRAB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONGRAB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONGS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONGS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONHD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONHD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONHIMS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONHIMS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONHLT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONHLT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONHOOD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONHOOD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONHPE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONHPE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONINTC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONINTC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONINTU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONINTU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONISRG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONISRG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONJNJ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONJNJ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONJPM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONJPM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONKKR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONKKR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONKLAR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONKLAR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONKMX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONKMX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONKO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONKO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONKR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONKR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONKTOS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONKTOS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLEVI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLEVI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLLY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLLY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLMT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLMT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLOW",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLOW",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLUCID",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLUCID",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLULU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLULU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLUNR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLUNR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONLYFT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONLYFT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMCD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMCD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMCO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMCO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMDT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMDT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMELI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMELI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMKC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMKC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMRVL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMRVL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMSFT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMSFT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMSTR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMSTR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMTN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMTN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONMU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONMU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONNBIS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONNBIS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONNFLX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONNFLX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONNIO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONNIO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONNKE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONNKE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONNVDA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONNVDA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONNYT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONNYT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONOKLO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONOKLO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONORCL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONORCL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPANW",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPANW",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPATH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPATH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPEP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPEP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPGR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPGR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPLTR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPLTR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPSKY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPSKY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONPYPL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONPYPL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONQCOM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONQCOM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONRACE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONRACE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONRDDT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONRDDT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONRIVN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONRIVN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONRKLB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONRKLB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONROKU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONROKU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONROST",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONROST",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONRY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONRY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSBUX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSBUX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSFM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSFM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSHOP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSHOP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSJM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSJM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSNAP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSNAP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSNOW",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSNOW",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSPCX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSPCX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSPOT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSPOT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSTZ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSTZ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONSYUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONSYUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTFC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTFC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTGT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTGT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTLN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTLN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTOL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTOL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTOST",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTOST",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTSLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTSLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTSMC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTSMC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONTTWO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONTTWO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONUAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONUAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONUBER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONUBER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONULTA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONULTA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONURBN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONURBN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONVSCO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONVSCO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONVST",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONVST",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONVZ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONVZ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONWEN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONWEN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONWFC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONWFC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONWGO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONWGO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONWING",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONWING",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONWMT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONWMT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONYETI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONYETI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONYOU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONYOU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONYUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONYUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONZETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONZETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONZM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONZM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEARNINGSMENTIONZS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEARNINGSMENTIONZS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEBAYA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEBAYA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEBOLACOUNTRY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEBOLACOUNTRY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXECBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXECBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXELLISONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXELLISONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXELONMARS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXELONMARS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXELONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXELONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXELONSUEAPPLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXELONSUEAPPLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXELSAYEDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXELSAYEDMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXENTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXENTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEPLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEPLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEPOCHSCORE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEPOCHSCORE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEVMKT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEVMKT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEVSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEVSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXEXOPLAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXEXOPLAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFABLEDISABLED",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFABLEDISABLED",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFABLERESTORE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFABLERESTORE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAANNOUNCE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAANNOUNCE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAAPPROVAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAAPPROVAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAAPPROVALDATECMPS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAAPPROVALDATECMPS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAAPPROVALDATELLY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAAPPROVALDATELLY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAAPPROVALDATENTLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAAPPROVALDATENTLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAAPPROVALMK1654",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAAPPROVALMK1654",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAAPPROVALPSYCHEDELIC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAAPPROVALPSYCHEDELIC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAAPPROVE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAAPPROVE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDARETATRUTDE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDARETATRUTDE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDARETATRUTIDE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDARETATRUTIDE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDATYPE1DIABETES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDATYPE1DIABETES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFDAVERVE102",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFDAVERVE102",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFEDGOVMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFEDGOVMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFEDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFEDMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFEDMENTIONDURATION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFEDMENTIONDURATION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFIELDS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFIELDS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFIGHTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFIGHTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFIGMAA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFIGMAA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFIGMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFIGMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFINKMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFINKMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFLDATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFLDATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFLDENGUE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFLDENGUE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFLOP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFLOP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFNSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFNSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFOMCTONE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFOMCTONE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFOXNEWSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFOXNEWSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFOXONE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFOXONE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFOXSATMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFOXSATMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFRANKLINMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFRANKLINMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFREYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFREYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFRONTIER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFRONTIER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFSDMARKET",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFSDMARKET",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFTNMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFTNMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFURYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFURYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXFUSION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFUSION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGABBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGABBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGADATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGADATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGAMEDAYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGAMEDAYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGEMINI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGEMINI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGEMINI3",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGEMINI3",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGILLISESPYS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGILLISESPYS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGLASERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGLASERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOLDENMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOLDENMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGONORRHEACOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGONORRHEACOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOOGLADOPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOOGLADOPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOOGLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOOGLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOOGSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOOGSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOOGTOKEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOOGTOKEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOOGTOKENM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOOGTOKENM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOOGVREQ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOOGVREQ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOOGVSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOOGVSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGOVERNORMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGOVERNORMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPT45",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPT45",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPT4P5",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPT4P5",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPT5",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPT5",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPT5RELEASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPT5RELEASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPT6",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPT6",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPTCOST",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPTCOST",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPTFEES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPTFEES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPTPARAM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPTPARAM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGPTS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGPTS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGRABA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGRABA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGREENDAYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGREENDAYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGRIFFINMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGRIFFINMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGROK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGROK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGROK2OS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGROK2OS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGROK3",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGROK3",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGROK3TOPLLMCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGROK3TOPLLMCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGROK4",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGROK4",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGSTORM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGSTORM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGUINEAWORM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGUINEAWORM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXGUTFELDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXGUTFELDMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH100MAX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH100MAX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH100MON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH100MON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH100Q",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH100Q",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH100W",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH100W",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH200MAX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH200MAX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH200MON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH200MON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH200Q",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH200Q",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH200W",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH200W",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXH5N1COUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXH5N1COUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHANNITYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHANNITYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHANTACOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHANTACOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHANTACOUNTRY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHANTACOUNTRY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHARTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHARTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHARVARDACCEPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHARVARDACCEPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHARVARDAPPS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHARVARDAPPS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHBIDENMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHBIDENMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHDA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHDA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHEARINGMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHEARINGMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHEGSETHMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHEGSETHMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHILLARYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHILLARYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHILTONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHILTONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHLS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHLS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHOCHULMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHOCHULMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHODGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHODGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHOMANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHOMANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXHOODA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXHOODA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIMAGEAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIMAGEAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIMOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIMOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXINDIAX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXINDIAX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXINFANTINOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXINFANTINOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXINGRAHAMMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXINGRAHAMMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXINTERSTELLAR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXINTERSTELLAR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIPHONEASSEMBLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIPHONEASSEMBLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIPHONEPRICE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIPHONEPRICE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIPOSUPERVOTE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIPOSUPERVOTE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIRANMOU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIRANMOU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIRKUTSKPATHOGEN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIRKUTSKPATHOGEN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXIVYACCEPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXIVYACCEPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJEFFRIESMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJEFFRIESMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJENNINGSLEAVE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJENNINGSLEAVE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJENSENMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJENSENMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOHNSONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOHNSONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINANTHROPIC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINANTHROPIC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINAPPLEJB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINAPPLEJB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINBARSTOOL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINBARSTOOL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINCBS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINCBS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINJENSENHUANG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINJENSENHUANG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINKARPATHY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINKARPATHY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINOPENAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINOPENAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINOPENDOOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINOPENDOOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINSTEPHENCOLBERT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINSTEPHENCOLBERT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINUBER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINUBER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJOINXAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJOINXAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJONYIVEMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJONYIVEMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXJPOWMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJPOWMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKAMALAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKAMALAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKARDASHIANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKARDASHIANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKARPMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKARPMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKHANNAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKHANNAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKILLSWITCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKILLSWITCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKIMMELMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKIMMELMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKINGMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKINGMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKIRKMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKIRKMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKLARNAA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKLARNAA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKPAXMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKPAXMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXKXDJTHANNITY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXKXDJTHANNITY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLABSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLABSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLAMMYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLAMMYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLANDSPACELAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLANDSPACELAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLASTEXAM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLASTEXAM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLASTWORDCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLASTWORDCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLASTWORDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLASTWORDMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLATENIGHTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLATENIGHTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLAUNCHCOUNTM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLAUNCHCOUNTM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLAUNCHES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLAUNCHES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEANTHROPIC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEANTHROPIC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEBIER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEBIER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVECRACKERBARREL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVECRACKERBARREL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEJANGS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEJANGS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEJONYIVEOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEJONYIVEOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEKRISTINCABOT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEKRISTINCABOT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEMAGUIRESEQUOIA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEMAGUIRESEQUOIA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEOPENAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEOPENAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVESEANCOOK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVESEANCOOK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEWANGMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEWANGMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVEXAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVEXAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVITTLATE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVITTLATE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVITTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVITTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVITTMENTIONDURATION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVITTMENTIONDURATION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVITTSMFMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVITTSMFMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEAVITTVIEW",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEAVITTVIEW",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLEBRONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLEBRONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLIVENATIONUS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLIVENATIONUS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLLAMA5",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLLAMA5",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLLM1",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLLM1",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLLMCHESS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLLMCHESS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLLMH2H",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLLMH2H",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLOVEISLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLOVEISLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLUCKEYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLUCKEYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLUMIERE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLUMIERE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLUTNICKFTNMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLUTNICKFTNMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLUVA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLUVA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXLYFTA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXLYFTA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMACCELL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMACCELL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMACOS16",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMACOS16",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMADDOWMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMADDOWMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMAHERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMAHERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMAMDANIMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMAMDANIMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMARMADUNCSDS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMARMADUNCSDS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMARSFLAG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMARSFLAG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMARSVRAIL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMARSVRAIL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMATHAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMATHAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMCDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMCDMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMEASLES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMEASLES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMEISSNER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMEISSNER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMELANIAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMELANIAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNAIR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNAIR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNCCL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNCCL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNCHWY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNCHWY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNDAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNDAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNFDX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNFDX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNGIS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNGIS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNLULU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNLULU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNMU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNMU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNNKE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNNKE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNOKLO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNOKLO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNSFD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNSFD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMENTIONEARNWGO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMENTIONEARNWGO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMERCHLISTPALANTIR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMERCHLISTPALANTIR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMETAA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMETAA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMETACLOSE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMETACLOSE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMETASHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMETASHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMETEOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMETEOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMETREVALCLAUDE4OPUS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMETREVALCLAUDE4OPUS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMILLENNIUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMILLENNIUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMILLENNIUMALL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMILLENNIUMALL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMILLENNIUMNEXT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMILLENNIUMNEXT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMINAJMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMINAJMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMIRANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMIRANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMISTRALSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMISTRALSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMITACCEPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMITACCEPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMKTSHAREAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMKTSHAREAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMLBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMLBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMOA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMOA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMODELHIGH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMODELHIGH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMODELSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMODELSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMOON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMOON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMOONMAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMOONMAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMOONVSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMOONVSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMPOXCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMPOXCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMRBEASTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMRBEASTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMRVLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMRVLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMSFTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMSFTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMSTRBTCCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMSTRBTCCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMSTRMARGIN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMSTRMARGIN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMTGMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMTGMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMTPMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMTPMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMUSKINJ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMUSKINJ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMUSKOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMUSKOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMUSKPACKAGEVOTE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMUSKPACKAGEVOTE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMVEMENTIONSINGLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMVEMENTIONSINGLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMVEMENTIONSSINGLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMVEMENTIONSSINGLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXMYSTERYSTOCKBUFFET",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXMYSTERYSTOCKBUFFET",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNADALMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNADALMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNADELLAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNADELLAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNASCARMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNASCARMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNATFRIEDMANMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNATFRIEDMANMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNBAFINALSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNBAFINALSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNBAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNBAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNBISMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNBISMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNCAABMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNCAABMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNCAAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNCAAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEOUTBREAKHANTA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEOUTBREAKHANTA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNETANYAHUMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNETANYAHUMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNETFLIXSTUDIO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNETFLIXSTUDIO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEURALINKCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEURALINKCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEUTRONORBIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEUTRONORBIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWDRUGAPPBEAM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWDRUGAPPBEAM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWDRUGAPPLICATIONCMPS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWDRUGAPPLICATIONCMPS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWDRUGAPPNTLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWDRUGAPPNTLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWGLENN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWGLENN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKEBOLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKEBOLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKHANTA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKHANTA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPCHIK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPCHIK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPCOVID",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPCOVID",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPH5N1",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPH5N1",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPHEICCHIK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPHEICCHIK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPHEICCOVID",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPHEICCOVID",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPHEICMEASLES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPHEICMEASLES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPHEICZOMBIE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPHEICZOMBIE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPMEASLES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPMEASLES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWOUTBREAKPMPOX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWOUTBREAKPMPOX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWPRODUCTAPPLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWPRODUCTAPPLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWPRODUCTFALLOUT3REM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWPRODUCTFALLOUT3REM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWPRODUCTMICROSOFT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWPRODUCTMICROSOFT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWPRODUCTXBOX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWPRODUCTXBOX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWSNATIONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWSNATIONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEWSOMMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEWSOMMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEXTCOMPANYSP500",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEXTCOMPANYSP500",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEXTLAUNCHSMALL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEXTLAUNCHSMALL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEXTVULCAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEXTVULCAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNEXTYACCARINO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNEXTYACCARINO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNFLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNFLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNHLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNHLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNOBELCHEM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNOBELCHEM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNOBELLIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNOBELLIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNOBELMED",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNOBELMED",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNOBELPHYSICS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNOBELPHYSICS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNOVOHIMS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNOVOHIMS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNPRCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNPRCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNVDAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNVDAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNYCMAYORDEBATEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNYCMAYORDEBATEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNYCMDEBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNYCMDEBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNYDATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNYDATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNYTOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNYTOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNYTOAISETTLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNYTOAISETTLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXNYTVISITPALANTIR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXNYTVISITPALANTIR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXO3RELEASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXO3RELEASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIAGI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIAGI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIDAMAGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIDAMAGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIGOOGLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIGOOGLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIHARDWARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIHARDWARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIMSFT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIMSFT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIMUSKSETTLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIMUSKSETTLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIMUSKSUIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIMUSKSUIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIPERSONALAGENT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIPERSONALAGENT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIPLATEAU",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIPLATEAU",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAIPROFIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAIPROFIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAISCREEN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAISCREEN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOAISOCIAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOAISOCIAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOBAMAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOBAMAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOHDATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOHDATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENADOPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENADOPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENAIANOTHERMILLENNIUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENAIANOTHERMILLENNIUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENAIBOARD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENAIBOARD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENAIBOARDJ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENAIBOARDJ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENAICEO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENAICEO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENAIDAYS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENAIDAYS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENAIMILLENNIUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENAIMILLENNIUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENAIPROFIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENAIPROFIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENDEEP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENDEEP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENINTAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENINTAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENSOURCEOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENSOURCEOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENSOURCESHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENSOURCESHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENSOURCESHAREOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENSOURCESHAREOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENSOURCESHAREORM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENSOURCESHAREORM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENTOKEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENTOKEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENTOKENM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENTOKENM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENVREQ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENVREQ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPENVSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPENVSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOPTIMUSDATE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOPTIMUSDATE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXORCLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXORCLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOSSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOSSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOSWORLD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOSWORLD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOTHERLAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOTHERLAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOXALPHA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOXALPHA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXOXALPHADEV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXOXALPHADEV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPADATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPADATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPAIDSUBAPPLEINTEL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPAIDSUBAPPLEINTEL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPAULMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPAULMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPEARLMANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPEARLMANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPELOSIMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPELOSIMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPERSONMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPERSONMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPHANTOMREV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPHANTOMREV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPLAGUECOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPLAGUECOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPMA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPMA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPNEUMONICPLAGUE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPNEUMONICPLAGUE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPNP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPNP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPOLIO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPOLIO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPOLIOELIM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPOLIOELIM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPOLITICSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPOLITICSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPORTERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPORTERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPORTNOYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPORTNOYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPOWELLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPOWELLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPRESMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPRESMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPRIMEENGCONSUMPTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPRIMEENGCONSUMPTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPRIVACYUPDATENYT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPRIVACYUPDATENYT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPROJECTHELIX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPROJECTHELIX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXPSAKIMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPSAKIMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXQUANTUM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXQUANTUM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRDDTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRDDTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXREACTOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXREACTOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXREEVESMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXREEVESMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXREMOVEDAPPSTORETIKTOK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXREMOVEDAPPSTORETIKTOK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRENAMECOMMANDERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRENAMECOMMANDERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRENAMEGUARDIANS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRENAMEGUARDIANS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXREPORTTOPICEARHART",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXREPORTTOPICEARHART",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXREVIEWRELEASEMKBHDFRIEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXREVIEWRELEASEMKBHDFRIEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRFKMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRFKMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRIEMANN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRIEMANN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRIEMANNRES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRIEMANNRES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRIPPLINGDEEL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRIPPLINGDEEL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRKLBCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRKLBCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRKLBLAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRKLBLAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRKLBORBIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRKLBORBIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROBOTAXI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROBOTAXI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROBOTAXIAREA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROBOTAXIAREA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROBOTAXICA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROBOTAXICA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROBOTMARS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROBOTMARS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROCKET",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROCKET",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROCKHOF",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROCKHOF",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROGANBOARD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROGANBOARD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXROGANMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXROGANMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRSIANNOUNCE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRSIANNOUNCE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRTX5090MAX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRTX5090MAX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRTX5090MON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRTX5090MON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRTX5090Q",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRTX5090Q",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRTX5090W",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRTX5090W",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRTXPRO6000MON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRTXPRO6000MON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRTXPRO6000W",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRTXPRO6000W",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXRUBIOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXRUBIOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSASMITH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSASMITH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSBUXA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSBUXA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSCHUMERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSCHUMERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSCOTUSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSCOTUSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSCREWWORMCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSCREWWORMCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSEA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSEA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSECPRESSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSECPRESSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSEWERHEALTH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSEWERHEALTH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSGA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSGA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSHAQMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSHAQMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSHIRLEYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSHIRLEYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSIZE3IATLAS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSIZE3IATLAS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSNFMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSNFMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSNLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSNLMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSNOOPMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSNOOPMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSNOWMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSNOWMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSORA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSORA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSOUTHPARKMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSOUTHPARKMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSP500BTCPURCHASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSP500BTCPURCHASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSP500INDEXREMOVE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSP500INDEXREMOVE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEDATACENTER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEDATACENTER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEXCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEXCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEXLAND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEXLAND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEXMARS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEXMARS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEXORBIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEXORBIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEXREUSE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEXREUSE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPACEXSTARSHIP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPACEXSTARSHIP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPANBERGERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPANBERGERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPCELAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPCELAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPCXLAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPCXLAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPCXMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPCXMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPECIALREPORTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPECIALREPORTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPEECHAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPEECHAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPIRITCEASEOPERATION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPIRITCEASEOPERATION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPOTA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPOTA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSPOTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSPOTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTANFORDACCEPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTANFORDACCEPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARMERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARMERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARMERMENTIONB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARMERMENTIONB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIP25",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIP25",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIPCATCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIPCATCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIPCREW",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIPCREW",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIPDOCK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIPDOCK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIPFL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIPFL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIPLAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIPLAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIPMARS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIPMARS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTARSHIPSPACE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTARSHIPSPACE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTEALTHSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTEALTHSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTEYERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTEYERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTUBBMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTUBBMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSTUDIOGHIBLI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSTUDIOGHIBLI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSUETEADATE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSUETEADATE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSUIMETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSUIMETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSUPERBOWLAD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSUPERBOWLAD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSUPERCON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSUPERCON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSUPERVOTEALTMAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSUPERVOTEALTMAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSUPERVOTEDARIO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSUPERVOTEDARIO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSURVIVORMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSURVIVORMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSWBAGS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSWBAGS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSWEBENCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSWEBENCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSWHIRES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSWHIRES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSWIFTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSWIFTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXSWITCH2RELEASE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXSWITCH2RELEASE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTALARICOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTALARICOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTARGETA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTARGETA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTAXAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTAXAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTBCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTBCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTBLAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTBLAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTBPNMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTBPNMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTCRUMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTCRUMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTECHRANKLISTAI2",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTECHRANKLISTAI2",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTECHRANKLISTAICODE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTECHRANKLISTAICODE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTENCENTSHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTENCENTSHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTESLAFACTORY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTESLAFACTORY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTESLAGAS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTESLAGAS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTESLAOPTIMUS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTESLAOPTIMUS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTESTINGGG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTESTINGGG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTHEBEAT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTHEBEAT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTHEWEEKNIGHTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTHEWEEKNIGHTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTHREADGUYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTHREADGUYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTIKTOKBAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTIKTOKBAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTIKTOKUMG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTIKTOKUMG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTNFMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTNFMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOKENUSE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOKENUSE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOKENUSED",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOKENUSED",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOKENUSEM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOKENUSEM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOLLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOLLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOP3AI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOP3AI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOP3AID",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOP3AID",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOPAGENT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOPAGENT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOPAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOPAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOPLLMCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOPLLMCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOPLLMGENERAL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOPLLMGENERAL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOPMODEL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOPMODEL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOPUSAGEAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOPUSAGEAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTOPUSAGEAI2",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTOPUSAGEAI2",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRIFOLD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRIFOLD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPLATE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPLATE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPMENTIONB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPMENTIONB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPMENTIONDURATION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPMENTIONDURATION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPMENTIONS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPMENTIONS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYCOMPANY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYCOMPANY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYCOUNTRY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYCOUNTRY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYEP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYEP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYMAM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYMAM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYMONTH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYMONTH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYNICKNAME",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYNICKNAME",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYSCAM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYSCAM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPSAYTRUMP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPSAYTRUMP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPTOPIC",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPTOPIC",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTRUMPZELENSKYY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTRUMPZELENSKYY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTSLAA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTSLAA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTSLAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTSLAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXTXDATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTXDATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUALA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUALA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUBERA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUBERA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUBERKPI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUBERKPI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUBERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUBERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUEFAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUEFAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUFSD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUFSD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUNMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUNMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXURBNA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXURBNA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUSADATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUSADATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUSAMEASLESELIMINATE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUSAMEASLESELIMINATE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUSTESTSMATH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUSTESTSMATH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXUSTESTSREADING",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXUSTESTSREADING",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVADATACENTERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVADATACENTERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVANCEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVANCEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVAXXOMNI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVAXXOMNI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVERIZONRESTORE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVERIZONRESTORE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVIDEOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVIDEOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVIEWMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVIEWMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVISIONPRO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVISIONPRO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVISIONPROLAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVISIONPROLAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVLADTENEVMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVLADTENEVMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXVZMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXVZMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWALESMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWALESMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWALLERMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWALLERMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWALMARTA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWALMARTA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWALZMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWALZMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWARSHMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWARSHMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWATTERSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWATTERSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWAYMOCITIES",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWAYMOCITIES",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWAYMOCITY",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWAYMOCITY",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWAYMOCITYLV",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWAYMOCITYLV",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWBCMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWBCMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWCMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWCMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWDAYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWDAYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWEBB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWEBB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWEBULLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWEBULLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWEFMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWEFMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWEIGHTDRUGSQ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWEIGHTDRUGSQ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWENA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWENA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWMTMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWMTMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWNBAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWNBAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWOMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWOMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWORLDNEWSMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWORLDNEWSMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWWDC25LAUNCH",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWWDC25LAUNCH",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXWWDCMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWWDCMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXXAIADOPT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXXAIADOPT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXXAIREASON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXXAIREASON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXXAISUEAPPLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXXAISUEAPPLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXXIAOMISHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXXIAOMISHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXXPAYMENT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXXPAYMENT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXYANGMILLS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXYANGMILLS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXYCAITOGETHER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXYCAITOGETHER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZACHARIAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZACHARIAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZAISHARE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZAISHARE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZAIVREQ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZAIVREQ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZAIVSPEND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZAIVSPEND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZAKARIAMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZAKARIAMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZELENSKYYMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZELENSKYYMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZIWEMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZIWEMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZMMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZMMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_KXZUCKMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXZUCKMENTION",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_LLM1",
+   "path": "/events",
+   "params": {
+    "series_ticker": "LLM1",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_MEISSNER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "MEISSNER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_METADAP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "METADAP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_MOON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "MOON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_MORAESLEAVE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "MORAESLEAVE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_MSFTCEO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "MSFTCEO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_NETFLIXSUBS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "NETFLIXSUBS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_NEURALINK",
+   "path": "/events",
+   "params": {
+    "series_ticker": "NEURALINK",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_NPRCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "NPRCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_NYTOAI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "NYTOAI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_NYTOAISETTLE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "NYTOAISETTLE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_NYTSUBS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "NYTSUBS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_OAIAGI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "OAIAGI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_OPENAIBOARD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "OPENAIBOARD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_OPENAIBOARDJ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "OPENAIBOARDJ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_OPENAICEO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "OPENAICEO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_OPENAICEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "OPENAICEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_OPENAIPROFIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "OPENAIPROFIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_OPENAISUIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "OPENAISUIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_REACTOR",
+   "path": "/events",
+   "params": {
+    "series_ticker": "REACTOR",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_RHGOLD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "RHGOLD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_ROBOTAXI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "ROBOTAXI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_ROBOTAXIOUT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "ROBOTAXIOUT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_ROCKET",
+   "path": "/events",
+   "params": {
+    "series_ticker": "ROCKET",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SOFIMEMBERS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SOFIMEMBERS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SORA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SORA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SPACEX",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SPACEX",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SPACEXCOUNT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SPACEXCOUNT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SPACEXLAND",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SPACEXLAND",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SPACEXORBIT",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SPACEXORBIT",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SPACEXSTARSHIP",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SPACEXSTARSHIP",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SPIRITCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SPIRITCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SPOTIFYSUBS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SPOTIFYSUBS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_STARSHIPMARS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "STARSHIPMARS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SUPERCON",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SUPERCON",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_SWITCH2",
+   "path": "/events",
+   "params": {
+    "series_ticker": "SWITCH2",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TECHLAYOFF",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TECHLAYOFF",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TESLA",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TESLA",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TESLACEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TESLACEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TESLAM2",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TESLAM2",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TESLAOPTIMUS",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TESLAOPTIMUS",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TESLAPROD",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TESLAPROD",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TESLAROADSTER",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TESLAROADSTER",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TIKTOKBAN",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TIKTOKBAN",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TIKTOKSELL",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TIKTOKSELL",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TIKTOKUMG",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TIKTOKUMG",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_TOPLLM",
+   "path": "/events",
+   "params": {
+    "series_ticker": "TOPLLM",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_VAXXOMNI",
+   "path": "/events",
+   "params": {
+    "series_ticker": "VAXXOMNI",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_VINE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "VINE",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_VISIONPRO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "VISIONPRO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_WEBB",
+   "path": "/events",
+   "params": {
+    "series_ticker": "WEBB",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_WEIGHTDRUGSQ",
+   "path": "/events",
+   "params": {
+    "series_ticker": "WEIGHTDRUGSQ",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_WEWORKCEO",
+   "path": "/events",
+   "params": {
+    "series_ticker": "WEWORKCEO",
+    "limit": 200
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "ev_XCEOCHANGE",
+   "path": "/events",
+   "params": {
+    "series_ticker": "XCEOCHANGE",
+    "limit": 200
+   },
+   "max_pages": 1
+  }
+ ],
+ "notes": "One request per series, 200 events a page, status as the probe showed; a series whose answer carries a cursor is listed apart and asked in a follow-up job.",
+ "owner": "MAIN",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "status": "active",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
