@@ -1,0 +1,1 @@
+OPENGAP1 print.txt sha256 771f4c4ca86560be550ea3abc5a3575c1d1576cda0c7ebaad4f264558b7c15b8 (opengap1_second.py 242f477f, convert 5412367f, fetch d3f8cd43; one run Nov 16, committed before reading; Databento est. running total $0.168104)
