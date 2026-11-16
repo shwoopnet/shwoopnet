@@ -1,0 +1,128 @@
+{
+ "job_id": "IG_FWD_RESULTS",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/igspecs/IGSPECS_CARDS_NOV16.md",
+ "purpose": "Settled results and schedule fields of the in-game forward specs' ticker wall (IGFADE2, IGLATEDRIFT1, IGDOG1), closes from 2026-11-17; read only by ingame_fwd_load.py under its allow line.",
+ "heldout": "forward only: closes 1794873600 (2026-11-17T00:00Z) to 1797292799; KXNBAGAME and KXNFLGAME are not requested (SPORTS-PRE to 2027-01-01); spreads pending Auditor B's hold line.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNHLGAME",
+  "KXNBATOTAL",
+  "KXNFLTOTAL",
+  "KXNHLTOTAL",
+  "KXNBASPREAD",
+  "KXNFLSPREAD",
+  "KXNHLSPREAD"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 80,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "settled_KXNHLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLGAME",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "settled_KXNBATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBATOTAL",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "settled_KXNFLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNFLTOTAL",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "settled_KXNHLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLTOTAL",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "settled_KXNBASPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBASPREAD",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "settled_KXNFLSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNFLSPREAD",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "settled_KXNHLSPREAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLSPREAD",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 10
+  }
+ ]
+}
