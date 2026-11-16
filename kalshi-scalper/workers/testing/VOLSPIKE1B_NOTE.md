@@ -1,0 +1,2 @@
+# VOLSPIKE1b status (Testing Desk, Nov 16, 2026)
+VOLSPIKE1 (MIN_PRIOR 5) ran once and produced n 0 (design error: at most 4 candles end by close - 660). The Head approved VOLSPIKE1b (MIN_PRIOR 3, counted as try 2) conditional on Auditor B's OK; Auditor B recommended dropping it (baseline 2c PF 0.84, noisy median on 3 values, owner's Nov 15 order against versions). NOT registered, NOT built, no spike subset read, until the Head rules after Auditor B's view. Disclosure for any 1b: the no-spike baseline (n 15,799, 2c PF 0.838) was seen before it would be frozen.
