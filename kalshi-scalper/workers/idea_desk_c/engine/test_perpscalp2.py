@@ -68,6 +68,127 @@ class Clock(unittest.TestCase):
         self.assertNotIn(P.H16_START, c["KXNVDAPERP"])
 
 
+def write(root, sub, name, header, rows):
+    os.makedirs(os.path.join(root, sub), exist_ok=True)
+    with gzip.open(os.path.join(root, sub, name), "wt", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(header)
+        for r in rows:
+            w.writerow(r)
+
+
+class Loader(unittest.TestCase):
+    def test_iso_formats(self):
+        self.assertEqual(P.iso("2026-11-13T21:00:00Z"), calendar.timegm((2026, 11, 13, 21, 0, 0)))
+        self.assertEqual(P.iso("2026-11-13T21:00:00.000Z"), calendar.timegm((2026, 11, 13, 21, 0, 0)))
+        self.assertEqual(P.iso("2026-11-13T21:00:00.512345Z"), calendar.timegm((2026, 11, 13, 21, 0, 0)))
+        with self.assertRaises(ValueError):
+            P.iso("2026-11-13 21:00:00")
+
+    def test_funding_rows_with_fraction_are_read_not_dropped(self):
+        root = fixture()
+        write(root, "funding", "2026-11-11.csv.gz", ["ticker", "funding_time", "funding_rate", "mark_price"],
+              [["KXNVDAPERP", "2026-11-10T16:10:00Z", "0.001", "1"], ["KXNVDAPERP", "2026-11-10T16:11:00.000Z", "0.002", "1"]])
+        st = {}
+        c, fu = P.load(root, P.END_EPOCH, [], st)
+        self.assertEqual(len(fu["KXNVDAPERP"]), 2)
+        self.assertEqual(st["funding_rows"]["KXNVDAPERP"], 2)
+        write(root, "funding", "2026-11-12.csv.gz", ["ticker", "funding_time", "funding_rate"], [["KXNVDAPERP", "bad", "0"]])
+        with self.assertRaises(ValueError):
+            P.load(root, P.END_EPOCH, [], {})
+
+    def test_all_history_skipped_and_counted(self):
+        root = fixture()
+        write(root, "funding", "all-history.csv.gz", ["ticker", "funding_time", "funding_rate", "mark_price"], [["KXNVDAPERP", "2026-11-10T16:10:00Z", "0.5", "1"]])
+        st = {}
+        c, fu = P.load(root, P.END_EPOCH, [], st)
+        self.assertEqual(st["files_skipped"], 1)
+        self.assertEqual(fu["KXNVDAPERP"], [])
+
+    def test_duplicates_first_file_wins_and_counted(self):
+        root = fixture()
+        write(root, "kalshi1m", "2026-11-10.only.csv.gz", ["ticker", "end_period_ts", "bid_close", "ask_close", "volume"],
+              [["KXNVDAPERP", T0, "100.0", "100.5", "9"], ["KXNVDAPERP", T0 + 60, "100.095000", "100.105000", "1"]])
+        write(root, "funding", "2026-11-10.csv.gz", ["ticker", "funding_time", "funding_rate", "mark_price"], [["KXNVDAPERP", "2026-11-10T16:10:00Z", "0.001", "1"]])
+        write(root, "funding", "2026-11-10.only.csv.gz", ["ticker", "funding_time", "funding_rate", "mark_price"],
+              [["KXNVDAPERP", "2026-11-10T16:10:00Z", "0.009", "1"], ["KXNVDAPERP", "2026-11-10T16:10:00Z", "0.001", "1"]])
+        st = {}
+        c, fu = P.load(root, P.END_EPOCH, [], st)
+        self.assertEqual(c["KXNVDAPERP"][T0], (99.995, 100.005, 1.0))                  # the .csv.gz file sorts before .only.csv.gz: first kept
+        self.assertEqual(st["candle_duplicate_differs"], 1)
+        self.assertEqual(st["candle_duplicate_first_kept"], 1)
+        self.assertEqual(fu["KXNVDAPERP"], [(calendar.timegm((2026, 11, 10, 16, 10, 0)), 0.001)])
+        self.assertEqual(st["print_duplicate_differs"], 1)
+        self.assertEqual(st["print_duplicate_first_kept"], 1)
+
+    def test_columns_and_grid_refused(self):
+        root = fixture()
+        write(root, "kalshi1m", "2026-11-12.csv.gz", ["ticker", "end_period_ts", "bid_close"], [])
+        with self.assertRaises(ValueError):
+            P.load(root, P.END_EPOCH, [], {})
+        root = fixture()
+        write(root, "kalshi1m", "2026-11-12.csv.gz", ["ticker", "end_period_ts", "bid_close", "ask_close", "volume"], [["KXNVDAPERP", T0 + 61, "1", "2", "1"]])
+        with self.assertRaises(ValueError):
+            P.load(root, P.END_EPOCH, [], {})
+
+
+class Rules(unittest.TestCase):
+    def test_orb_spread_filter_and_no_replacement(self):
+        # a 5 minute range 09:31 to 09:35 ET (14:31Z to 14:35Z); the first breakout candle has a wide spread: skipped and NOT replaced by the next breakout
+        base = calendar.timegm((2026, 11, 10, 14, 30, 0))
+        c = {}
+        for k in range(1, 6):
+            c[base + 60 * k] = (99.995, 100.005, 1.0)                            # range high/low mid 100.0
+        c[base + 60 * 6] = (101.0, 101.5, 1.0)                                    # breakout, spread 0.5 / 101.25 = 0.49% > 0.3%
+        c[base + 60 * 7] = (101.995, 102.005, 1.0)                                # a later breakout: not used
+        self.assertEqual(P.signal_times(c, ("E3", "orb", 5), None), [])
+        c[base + 60 * 6] = (101.995, 102.005, 1.0)                                # a tight first breakout
+        self.assertEqual(P.signal_times(c, ("E3", "orb", 5), None), [(base + 60 * 6, 1)])
+
+    def test_time_exit_gap_drops_trade(self):
+        root = fixture()
+        c, fu = P.load(root)
+        n = dict(c["KXNVDAPERP"])
+        t = T0 + 60 * 64
+        for k in range(66, 76):                                                   # the candles 66..75 are gone: a gap through the planned exit at candle 75
+            n.pop(T0 + 60 * k, None)
+        P.STATS.clear()
+        self.assertIsNone(P.build_trade(n, [], 0.01, t, 1, 0.0031873, 100.2, 1.0, 1.0, 600, "TT", 0, 0.0))
+        self.assertEqual(P.STATS["no_exit_candle"], 1)
+        n[T0 + 60 * 74] = (100.195, 100.205, 1.0)                                 # a candle within 2 minutes before the planned exit: used
+        self.assertEqual(P.build_trade(n, [], 0.01, t, 1, 0.0031873, 100.2, 1.0, 1.0, 600, "TT", 0, 0.0)["x"], T0 + 60 * 74)
+
+
+class Positions(unittest.TestCase):
+    def test_one_position_per_name_in_every_column(self):
+        # two weekdays of regular-hours minutes (2026-11-10 and 11, 14:30Z to 20:50Z) with a volume spike every 7 minutes and a wobbling mid: many signals, overlapping holds
+        root = tempfile.mkdtemp()
+        rows = []
+        for day in (10, 11):
+            t0 = calendar.timegm((2026, 11, day, 14, 30, 0))
+            for k in range(0, 380):
+                mm = 100.0 + 0.05 * ((k * 7) % 11) + (0.5 if (k // 40) % 2 else 0.0) + 0.01 * k / 380
+                rows.append(["KXNVDAPERP", t0 + 60 * k, "%.4f" % (mm - 0.005), "%.4f" % (mm + 0.005), 30 if k % 7 == 0 else 1])
+        write(root, "kalshi1m", "2026-11-10.csv.gz", ["ticker", "end_period_ts", "bid_close", "ask_close", "volume"], rows)
+        os.makedirs(os.path.join(root, "funding"), exist_ok=True)
+        seen = []
+        orig = P.metrics
+        P.metrics = lambda trs: (seen.append(list(trs)) or orig(trs))
+        try:
+            out = P.run(root, 6290660)
+        finally:
+            P.metrics = orig
+        self.assertEqual(out["counts"]["valid_regular_candles"]["KXNVDAPERP"], 2 * 371)
+        total = 0
+        for trs in seen:
+            trs = sorted(trs, key=lambda x: x["e"])
+            total += len(trs)
+            for a, b in zip(trs, trs[1:]):
+                self.assertGreaterEqual(b["e"], a["x"])                        # one position per name
+                self.assertGreaterEqual(b["e"] - a["e"], P.COOLDOWN)           # and a 15 minute cooldown between entries
+        self.assertGreater(total, 50)                                          # the fixture does trade in every column family
+
+
 class Hand(unittest.TestCase):
     def test_grid(self):
         self.assertEqual(P.N_CELLS, 168)

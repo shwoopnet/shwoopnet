@@ -3,7 +3,7 @@
 Perps scalping, the liquid subset: 14 names, 7 follow entry rules (vol expansion r 2 and 3, opening-range breakout N 5, 15, 30, volume spike q 5 and 10) x 4 window filters
 x 6 exits (target and stop in units of U = sigma1 x sqrt(10), time stops 10 and 30 minutes) = 168 cells, each read in three columns (taker/taker, maker entry with taker
 exit, maker entry with maker target). Reads the perp-data layout only: <root>/kalshi1m/<date>[.only].csv.gz and <root>/funding/<date>[.only].csv.gz. No network, no result file."""
-import calendar, csv, glob, gzip, hashlib, math, os, sys
+import calendar, csv, glob, gzip, hashlib, math, os, re, sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -40,40 +40,91 @@ def sess_end(d):
     return None if s in HOLIDAYS else (12 * 60 + 45 if s in EARLY else END_REG)
 
 
-def load(root, end_epoch=END_EPOCH, manifest=None, dropped=None):
-    """-> ({name: {end_ts: (bid, ask, volume)}}, {name: sorted [(time, rate)]}). Unusable candles (a missing bid or ask, crossed) are dropped; a gap is never bridged."""
+ISO_RE = re.compile(r"^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(\.\d+)?Z$")
+FILE_RE = re.compile(r"^\d{4}-\d\d-\d\d(\.only)?\.csv\.gz$")
+CANDLE_COLS = ("ticker", "end_period_ts", "bid_close", "ask_close", "volume")
+FUND_COLS = ("ticker", "funding_time", "funding_rate")
+
+
+def iso(s):
+    """'2026-11-13T21:00:00Z' or with fractional seconds ('...:00.000Z') -> integer epoch (the fraction is floored); anything else raises"""
+    m = ISO_RE.match(s)
+    if not m:
+        raise ValueError("unparsable funding_time %r" % s)
+    return calendar.timegm(tuple(int(x) for x in m.groups()[:6]))
+
+
+def _files(root, sub, stats):
+    out = []
+    for f in sorted(glob.glob(os.path.join(root, sub, "*.csv.gz"))):
+        if FILE_RE.match(os.path.basename(f)):
+            out.append(f)
+        else:
+            stats["files_skipped"] = stats.get("files_skipped", 0) + 1            # for example funding/all-history.csv.gz
+    return out
+
+
+def _reader(f, cols, stats, key):
+    fh = gzip.open(f, "rt", newline="")
+    rd = csv.DictReader(fh)
+    hdr = tuple(rd.fieldnames or ())
+    stats.setdefault("headers_seen", set()).add((key, hdr))
+    missing = [c for c in cols if c not in hdr]
+    if missing:
+        raise ValueError("%s lacks columns %s" % (f, missing))
+    return fh, rd
+
+
+def load(root, end_epoch=END_EPOCH, manifest=None, stats=None):
+    """-> ({name: {end_ts: (bid, ask, volume)}}, {name: sorted [(time, rate)]}). Unusable candles (a missing bid or ask, crossed) are dropped; a gap is never bridged.
+    Files: only <date>[.only].csv.gz under kalshi1m and funding, in sorted path order; a key (name, time) seen twice keeps the FIRST file's row; duplicates are counted."""
+    st = stats if stats is not None else {}
     c = {n: {} for n in NAMES}
+    fu = {n: {} for n in NAMES}
     end_epoch = min(end_epoch, H16_START - 1)
-    for f in sorted(glob.glob(os.path.join(root, "kalshi1m", "*.csv.gz"))):
+    for f in _files(root, "kalshi1m", st):
         if manifest is not None:
             manifest.append((os.path.relpath(f, root), _sha(f)))
-        for r in csv.DictReader(gzip.open(f, "rt")):
-            n = r["ticker"]
-            if n not in c:
-                continue
-            try:
-                ts, b, a, v = int(r["end_period_ts"]), float(r["bid_close"]), float(r["ask_close"]), float(r["volume"] or 0)
-            except ValueError:
-                continue
-            if ts >= H16_START:
-                if dropped is not None:
-                    dropped["h16_rows"] = dropped.get("h16_rows", 0) + 1
-                continue
-            if ts > end_epoch or not (0 < b <= a < BIG):
-                continue
-            c[n].setdefault(ts, (b, a, v))
-    fu = {n: [] for n in NAMES}
-    for f in sorted(glob.glob(os.path.join(root, "funding", "*.csv.gz"))):
-        if manifest is not None:
-            manifest.append((os.path.relpath(f, root), _sha(f)))
-        for r in csv.DictReader(gzip.open(f, "rt")):
-            n = r["ticker"]
-            if n in fu:
+        fh, rd = _reader(f, CANDLE_COLS, st, "kalshi1m")
+        with fh:
+            for r in rd:
+                n = r["ticker"]
+                if n not in c:
+                    continue
                 try:
-                    fu[n].append((calendar.timegm(datetime.strptime(r["funding_time"], "%Y-%m-%dT%H:%M:%SZ").timetuple()), float(r["funding_rate"])))
+                    ts, b, a, v = int(r["end_period_ts"]), float(r["bid_close"]), float(r["ask_close"]), float(r["volume"] or 0)
                 except ValueError:
-                    pass
-    return c, {n: sorted(set(v)) for n, v in fu.items()}
+                    st["candle_rows_unparsable"] = st.get("candle_rows_unparsable", 0) + 1
+                    continue
+                if ts % 60 != 0:
+                    raise ValueError("candle end %d is off the 60 s grid" % ts)
+                if ts >= H16_START:
+                    st["h16_rows"] = st.get("h16_rows", 0) + 1
+                    continue
+                if ts > end_epoch or not (0 < b <= a < BIG):
+                    continue
+                if ts in c[n]:
+                    k = "candle_duplicate_differs" if c[n][ts] != (b, a, v) else "candle_duplicate_first_kept"
+                    st[k] = st.get(k, 0) + 1
+                    continue
+                c[n][ts] = (b, a, v)
+    for f in _files(root, "funding", st):
+        if manifest is not None:
+            manifest.append((os.path.relpath(f, root), _sha(f)))
+        fh, rd = _reader(f, FUND_COLS, st, "funding")
+        with fh:
+            for r in rd:
+                n = r["ticker"]
+                if n not in fu:
+                    continue
+                t, rate = iso(r["funding_time"]), float(r["funding_rate"])
+                st.setdefault("funding_rows", {})[n] = st.get("funding_rows", {}).get(n, 0) + 1
+                if t in fu[n]:
+                    k = "print_duplicate_differs" if fu[n][t] != rate else "print_duplicate_first_kept"
+                    st[k] = st.get(k, 0) + 1
+                    continue
+                fu[n][t] = rate
+    return c, {n: sorted(v.items()) for n, v in fu.items()}
 
 
 def mid(q):
@@ -126,10 +177,10 @@ def signal_times(c, ent, day_cache):
             for t, m in L:
                 if m > 9 * 60 + 30 + par and m <= sess_end(d):
                     x = mid(c[t])
-                    if x > hi:
-                        out.append((t, 1)); break
-                    if x < lo:
-                        out.append((t, -1)); break
+                    if x > hi or x < lo:
+                        if (c[t][1] - c[t][0]) / x <= SPREAD_MAX:                   # the common spread filter; a skipped first breakout is not replaced
+                            out.append((t, 1 if x > hi else -1))
+                        break
         return sorted(out)
     for t in sorted(c):
         wd, m, d = et_min(t)
@@ -169,6 +220,9 @@ def funding_of(fu, side, e, x):
     return -side * f, any(e < t < x for t, r in fu)
 
 
+STATS = {}
+
+
 def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
     """One trade for a signal at candle t. col 'TT' taker/taker, 'MT' maker entry taker exit, 'MM' maker entry and maker target. -> dict or None (not filled / no exit)."""
     q = c[t]
@@ -194,34 +248,34 @@ def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
     stp = ref * (1 - side * k_s * U)
     wd, m, d = et_min(e)
     last = min(e + T, e + (sess_end(d) - m) * 60)
-    ex = None
+    ex, tx = None, None
     fee_out = FEE_T
-    for x in sorted(k for k in c if e < k <= last):
+    for x in range(e + 60, last + 1, 60):
+        if x not in c:
+            continue
         b, a = c[x][0], c[x][1]
         if side > 0:
             if col == "MM" and b >= tgt + tick + 1e-12:
-                ex, fee_out = tgt, FEE_M; break
+                ex, fee_out, tx = tgt, FEE_M, x; break
             if b <= stp:
-                ex = b * (1 - h); break
+                ex, tx = b * (1 - h), x; break
             if col != "MM" and b >= tgt:
-                ex = b * (1 - h); break
+                ex, tx = b * (1 - h), x; break
         else:
             if col == "MM" and a <= tgt - tick - 1e-12:
-                ex, fee_out = tgt, FEE_M; break
+                ex, fee_out, tx = tgt, FEE_M, x; break
             if a >= stp:
-                ex = a * (1 + h); break
+                ex, tx = a * (1 + h), x; break
             if col != "MM" and a <= tgt:
-                ex = a * (1 + h); break
-        tx = x
+                ex, tx = a * (1 + h), x; break
     if ex is None:
-        xs = [k for k in c if e < k <= last]
-        if not xs:
+        # time exit: only on a candle ending within 2 minutes of the planned exit; otherwise the trade is dropped (a gap is never bridged)
+        tx = next((x for x in (last, last - 60, last - 120) if x > e and x in c), None)
+        if tx is None:
+            STATS["no_exit_candle"] = STATS.get("no_exit_candle", 0) + 1
             return None
-        tx = max(xs)
         ex = c[tx][0] * (1 - h) if side > 0 else c[tx][1] * (1 + h)
         fee_out = FEE_T
-    else:
-        tx = x
     gross = (ex / en - 1) if side > 0 else (en / ex - 1)
     fund, crossed = funding_of(fu, side, e, tx)
     return {"e": e, "x": tx, "side": side, "net": gross - fee_in - fee_out + fund, "gross": gross, "crossed": crossed,
@@ -280,10 +334,11 @@ def margin_row(trs_by_name):
 
 
 def run(root, m_carried=6290660, N_fill=(2, 5)):
-    manifest, dropped = [], {}
-    c, fu = load(root, END_EPOCH, manifest, dropped)
-    counts = {"names_loaded": sum(1 for n in NAMES if c[n]), "dropped_short_history": [], "valid_regular_candles": {}, "h16_rows_dropped": dropped.get("h16_rows", 0),
-              "files_read": len(manifest), "manifest_sha256": hashlib.sha256(repr(sorted(manifest)).encode()).hexdigest()}
+    STATS.clear()
+    manifest, st = [], {}
+    c, fu = load(root, END_EPOCH, manifest, st)
+    counts = {"names_loaded": sum(1 for n in NAMES if c[n]), "dropped_short_history": [], "valid_regular_candles": {}, "files_read": len(manifest),
+              "manifest_sha256": hashlib.sha256(repr(sorted(manifest)).encode()).hexdigest()}
     use = []
     for n in NAMES:
         reg = sum(1 for t in c[n] if et_min(t)[0] < 5 and sess_end(et_min(t)[2]) is not None and 9 * 60 + 35 <= et_min(t)[1] <= sess_end(et_min(t)[2]))
@@ -294,7 +349,10 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
             use.append(n)
     ticks = {n: tick_of(c[n]) for n in use}
     sig = {(n, e[0]): signal_times(c[n], e, None) for n in use for e in ENTRIES}
-    cells, adverse = [], {}
+    s1c = {}
+    sigma = lambda n, t: s1c.setdefault((n, t), sigma1(c[n], t))
+    COLS = ("TT", "MT2", "MT5", "MM2", "MM5")
+    cells = []
     for ent in ENTRIES:
         for w, (lo, hi) in WINDOWS.items():
             for (k_t, k_s, T) in EXITS:
@@ -302,7 +360,8 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
                 filled_taker, unfilled_taker = {2: [], 5: []}, {2: [], 5: []}
                 for n in use:
                     cc = c[n]
-                    busy_until, last_entry = 0, -10 ** 12
+                    busy = {k: 0 for k in COLS}
+                    last_e = {k: -10 ** 12 for k in COLS}
                     for (t, side) in sig[(n, ent[0])]:
                         e = t + 60
                         wd, m, d = et_min(e)
@@ -312,32 +371,36 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
                         hi_d = min(hi, end_d - 10)                              # no entry in the last 10 minutes of the session
                         if not ((lo <= m <= hi_d) if WIN_OPEN[w] else (lo < m <= hi_d)):
                             continue
-                        if e < busy_until or e - last_entry < COOLDOWN:
-                            continue
-                        s1 = sigma1(cc, t)
+                        s1 = sigma(n, t)
                         if s1 is None or s1 == 0:
                             continue
                         U = s1 * math.sqrt(10)
                         ref = mid(cc[t])
-                        tr = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[0])
-                        if tr is None:
+                        # the hypothetical taker trade of this signal (adverse-selection comparison; ignores the position rule)
+                        hyp = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[0])
+                        if hyp is None:
                             continue
-                        tr["name"] = n
-                        trs = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[1])
-                        if trs is None:
-                            continue
-                        trs["name"] = n
-                        res["TT"].append(tr); res["TS"].append(trs)
-                        busy_until, last_entry = tr["x"], e
+                        if e >= busy["TT"] and e - last_e["TT"] >= COOLDOWN:
+                            hyp["name"] = n
+                            trs = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[1])
+                            if trs is not None:
+                                trs["name"] = n
+                                res["TT"].append(hyp); res["TS"].append(trs)
+                                busy["TT"], last_e["TT"] = hyp["x"], e
                         for N in N_fill:
-                            mt = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "MT", N, HAIRCUTS[0])
-                            mm = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "MM", N, HAIRCUTS[0])
-                            if mt is not None:
-                                mt["name"] = n; res["MT%d" % N].append(mt); filled_taker[N].append(tr["net"])
-                            else:
-                                unfilled_taker[N].append(tr["net"])
-                            if mm is not None:
-                                mm["name"] = n; res["MM%d" % N].append(mm)
+                            filled = False
+                            for col in ("MT", "MM"):
+                                key = "%s%d" % (col, N)
+                                tr = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, col, N, HAIRCUTS[0])
+                                if tr is None:
+                                    continue
+                                if col == "MT":
+                                    filled = True                                               # the limit filled (adverse selection compares filled with unfilled signals)
+                                if tr["e"] >= busy[key] and tr["e"] - last_e[key] >= COOLDOWN:       # one position per name in each column
+                                    tr["name"] = n
+                                    res[key].append(tr)
+                                    busy[key], last_e[key] = tr["x"], tr["e"]
+                            (filled_taker if filled else unfilled_taker)[N].append(hyp["net"])
                 g, s = metrics(res["TT"]), metrics(res["TS"])
                 by = {}
                 for t in res["TT"]:
@@ -359,6 +422,10 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
     for i, r in enumerate(cells):
         r["bh_survivor"] = i in surv
     counts["ticks"] = ticks
-    return {"label": "candle replay, upper bound, not fill-checked; DEVELOPMENT through 2026-11-15; first week, one regime",
+    counts["load"] = {k: (sorted(v) if isinstance(v, set) else v) for k, v in st.items()}
+    counts["no_exit_candle"] = STATS.get("no_exit_candle", 0)
+    counts["h16_rows_dropped"] = st.get("h16_rows", 0)
+    return {"label": "candle replay, upper bound, not fill-checked; exit checks on bid and ask closes miss intra-minute touches (a lower bound on target and stop hits); "
+                     "DEVELOPMENT through 2026-11-15, the same days as PERPSCALP1, PERPSLANE4 and POOL1; day z is a normal approximation on a few days; first week, one regime",
             "m_carried": m_carried, "m_new": N_CELLS, "m_total": mt, "counts": counts, "cells": cells, "bh_survivors": len(surv),
             "passes": [r["cell"] for r in cells if r["pass"] and r["bh_survivor"]], "maker_only_flags": [r["cell"] for r in cells if r["maker_only"]]}
