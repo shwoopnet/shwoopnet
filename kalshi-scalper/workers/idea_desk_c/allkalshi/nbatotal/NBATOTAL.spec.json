@@ -87,13 +87,6 @@
    "status": "BLOCKS the validate read until the Head rules"
   },
   {
-   "label": "FAMSPORTS read at most 8 KXNBATOTAL games (W1 and W2 pooled with NFL and NHL), W3 unread (Auditor B, 2026-11-16)",
-   "start_epoch": null,
-   "end_epoch": null,
-   "card": "FAMSPORTS",
-   "status": "label on development"
-  },
-  {
    "label": "H04 narrowed to in-play by the Head 2026-11-16; clause S2 for the joint print (pre-game candles ending at or before each decision plus the result; aggregates only; disclosed on IGDRIFTGRID1, IGDRIFTSPREAD1, IGPERIOD1)",
    "start_epoch": 1794528000,
    "end_epoch": null,
@@ -169,5 +162,9 @@
   "m_carried_source": "the Head's ruling A, 2026-11-16: the whole shared strict count in DEFLATION_LEDGER (rnd-queue 25471e1f6, last additions Nov 13)",
   "header": "m_carried = 2,113,449 (Head's ruling, 2026-11-16), m_new = 1,768 + SIBHIT-R's arms; fixed once printed"
  },
- "exits_rule": "M35: no mark = counted and held to settlement (H); printed both ways"
+ "exits_rule": "M35: no mark = counted and held to settlement (H); printed both ways",
+ "labels": [
+  "FAMSPORTS read at most 8 KXNBATOTAL games (W1 and W2 pooled with NFL and NHL), W3 unread (Auditor B, 2026-11-16)",
+  "development: read for F7 and FAMSPORTS, not independent (F7's window is not mappable from files)"
+ ]
 }
