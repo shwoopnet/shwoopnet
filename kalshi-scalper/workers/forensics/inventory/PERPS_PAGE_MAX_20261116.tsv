@@ -3,9 +3,9 @@ KXAAVEPERP	Crypto	unknown	none: no page value held (not estimated)
 KXADAPERP	Crypto	unknown	none: no page value held (not estimated)	
 KXBCHPERP	Crypto	unknown	none: no page value held (not estimated)	
 KXBNBPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXBTCPERP	Crypto	15.4	owner_pasted (page value pasted by the owner)	
+KXBTCPERP	Crypto	15.4	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
 KXDOGEPERP	Crypto	unknown	none: no page value held (not estimated)	
-KXETHPERP	Crypto	10.5	owner_pasted (page value pasted by the owner)	
+KXETHPERP	Crypto	10.5	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
 KXHYPEPERP	Crypto	unknown	none: no page value held (not estimated)	
 KXKSHIBPERP	Crypto	unknown	none: no page value held (not estimated)	
 KXLINKPERP	Crypto	unknown	none: no page value held (not estimated)	
@@ -116,12 +116,12 @@ KXWELLPERP	Equities	unknown	none: no page value held (not estimated)
 KXWFCPERP	Equities	unknown	none: no page value held (not estimated)	
 KXWMTPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
 KXXOMPERP	Equities	unknown	none confirmed per name	a class value 4.9 is held for ALL 58 equities with a value (identical), cannot be shown to be that name's own page row; the Head's per-name list (NVDA 4.5, MU 3.3, AMD 3.4) conflicts with it
-KXUS2000PERP	Indices	24.6	owner_pasted (page value pasted by the owner)	
-KXUS500PERP	Indices	36.1	owner_pasted (page value pasted by the owner)	
-KXUSTECH100PERP	Indices	28.9	owner_pasted (page value pasted by the owner)	
+KXUS2000PERP	Indices	24.6	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
+KXUS500PERP	Indices	36.1	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
+KXUSTECH100PERP	Indices	28.9	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
 KXALUMINUMPERP	Metals	unknown	none: no page value held (not estimated)	
-KXCOPPERPERP	Metals	17.7	owner_pasted (page value pasted by the owner)	
-KXGOLDPERP	Metals	40	owner_pasted (page value pasted by the owner)	
+KXCOPPERPERP	Metals	17.7	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
+KXGOLDPERP	Metals	40	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
 KXPALLADIUMPERP	Metals	unknown	none: no page value held (not estimated)	
 KXPLATINUMPERP	Metals	unknown	none: no page value held (not estimated)	
-KXSILVERPERP	Metals	17.7	owner_pasted (page value pasted by the owner)	
+KXSILVERPERP	Metals	17.7	relayed by the Head as owner-pasted page values; entered in census commit 4a071c29 (2026-11-16 17:50Z); per-name text not kept	
