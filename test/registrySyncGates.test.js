@@ -30,8 +30,8 @@ gates.RS1 = () => {
   const out = execFileSync('node', [path.join(__dirname, 'strategyRegistryGates.test.js')], { encoding: 'utf8' });
   assert.ok(!/FAIL/.test(out));
   const wh = reg.strategies.filter((x) => x.id.startsWith('WH-'));
-  assert.strictEqual(wh.filter((x) => x.stage === 'Shadow').length, 13, 'the 13 standing wheel places are Shadow rows (7 NC15, CFRTI-K on Bitcoin, 5 more CFRTI-K; every sports and esports place was withdrawn Nov 13)');
-  assert.ok(wh.filter((x) => x.stage === 'Retired').length === 10, 'the four withdrawn forex places and the six withdrawn sports and esports places are Retired');
+  assert.strictEqual(wh.filter((x) => x.stage === 'Shadow').length, 7, 'the 7 standing wheel places are the NC15 depth cells (the six CFRTI-K places were retired Nov 16 with CFRTIK paused; every sports and esports place was withdrawn Nov 13)');
+  assert.ok(wh.filter((x) => x.stage === 'Retired').length === 16, 'the four withdrawn forex places, the six withdrawn sports and esports places and the six retired CFRTIK places are Retired');
   for (const id of ['CL-MAPBREAK', 'CL-REMATCH', 'CL-TIE3', 'CL-WXDAYEND']) { const x = reg.strategies.find((y) => y.id === id); assert.ok(x && x.stage === 'Retired' && x.cause === 'failed the bar', id + ' is Retired (failed the bar)'); }
   assert.ok(!/PENDING RECOUNT/i.test(JSON.stringify(reg)), 'MAPBREAK is closed, never pending');
 };
@@ -57,7 +57,7 @@ gates.RS2 = () => {
   s2.run();
   const o2 = JSON.parse(fs.readFileSync(s2.regPath, 'utf8'));
   assert.ok(/8:40 PM CT/.test(o2.strategies.find((x) => x.id === 'WH-NC15-WTI').nextReadText), 'the NC15 start comes from the START TIME line');
-  assert.ok(/6:23 PM CT/.test(o2.strategies.find((x) => x.id === 'WH-CFRTIK-BTC').nextReadText), 'CFRTI-K on Bitcoin keeps its admission time');
+  assert.ok(['WH-CFRTIK-BTC', 'WH-CFRTIK-SILVER', 'WH-CFRTIK-COPPER', 'WH-CFRTIK-WTI', 'WH-CFRTIK-HYPE', 'WH-CFRTIK-BNB'].every((id) => { const r = o2.strategies.find((x) => x.id === id); return r && r.stage === 'Retired' && r.retiredOn === '2026-11-16'; }), 'the six CFRTIK wheel places are retired (CFRTIK is paused for new orders, Nov 16, 2026)');
 };
 
 gates.RS3 = () => {
