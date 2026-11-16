@@ -1,0 +1,335 @@
+{
+ "job": {
+  "job_id": "ECONHIST_LISTS",
+  "owner": "DESK_B",
+  "status": "active",
+  "registration": "kalshi-scalper/workers/econcensus/ECONHIST_NOTE.md",
+  "purpose": "Stage 2 of the economics census: the historical markets of 10 US release series (CPI, payrolls, core PCE, two claims series, unemployment, two ISM, PPI, CPI index) to count releases and markets. Lists only, no candle, no Fed series.",
+  "heldout": "The historical endpoint takes no date bound: the raw pages carry every close before 2026-09-10 and the results of any held part. The READER cuts by close_time FIRST at fixed dates (Auditor B hold map, Nov 15): KXCPI and KXPCECORE from 2025-09-26T00:00:00Z (NOWCAST1 frozen holdout, forward read 2027-03-01); the other eight series have no hold before the endpoint end. Raw pages stay in the run scratch; the run goes on HELDOUT_PULL_RUNS.md as LOADED and is read only for tickers, close times and counts. No Fed series.",
+  "allowed_endpoints": [
+   {
+    "name": "hist_markets_list",
+    "method": "GET",
+    "path_pattern": "/historical/markets",
+    "params_allowed": [
+     "series_ticker",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXCPI",
+   "KXPAYROLLS",
+   "KXPCECORE",
+   "KXJOBLESSCLAIMS",
+   "KXCONTCLAIMS",
+   "KXUE",
+   "KXISMPMI",
+   "KXUSISMSERV",
+   "KXUSPPIYOY",
+   "KXCPINDEX"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 44,
+  "notes": "At most 32 pages plus 12 for repeats after a 429; at 5 s about 4 minutes. A series with fewer pages stops at its cursor's end.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 5.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "hist_KXCPI",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXCPI",
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "hist_KXPAYROLLS",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXPAYROLLS",
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "hist_KXPCECORE",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXPCECORE",
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "hist_KXJOBLESSCLAIMS",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXJOBLESSCLAIMS",
+     "limit": 1000
+    },
+    "max_pages": 4
+   },
+   {
+    "id": "hist_KXCONTCLAIMS",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXCONTCLAIMS",
+     "limit": 1000
+    },
+    "max_pages": 4
+   },
+   {
+    "id": "hist_KXUE",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXUE",
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "hist_KXISMPMI",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXISMPMI",
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "hist_KXUSISMSERV",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXUSISMSERV",
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "hist_KXUSPPIYOY",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXUSPPIYOY",
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "hist_KXCPINDEX",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXCPINDEX",
+     "limit": 1000
+    },
+    "max_pages": 3
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-16T1522Z",
+ "finished": "2026-11-16T1522Z",
+ "status": "complete",
+ "requests_sent": 10,
+ "bytes_stored": 4089815,
+ "rows": [
+  {
+   "index": 1,
+   "id": "hist_KXCPI",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCPI",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 962590,
+   "t_send_ms": 1794842521005,
+   "t_recv_ms": 1794842521163,
+   "server_date": "Mon, 16 Nov 2026 15:22:01 GMT",
+   "file": "0001.json.gz",
+   "sha256": "6dc9d0ae4a7cebfbfc517f7083946490835570775c4da650e7824c45574c2d46",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "hist_KXPAYROLLS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXPAYROLLS",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 670546,
+   "t_send_ms": 1794842526005,
+   "t_recv_ms": 1794842526136,
+   "server_date": "Mon, 16 Nov 2026 15:22:06 GMT",
+   "file": "0002.json.gz",
+   "sha256": "74c0bfc768c60f2459778aef8280fb4252c1f7b4eebbb1bb0d7bdf661edcea58",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "hist_KXPCECORE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXPCECORE",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 231957,
+   "t_send_ms": 1794842531005,
+   "t_recv_ms": 1794842531118,
+   "server_date": "Mon, 16 Nov 2026 15:22:11 GMT",
+   "file": "0003.json.gz",
+   "sha256": "15e010b6c43511ec11562136ddf0549cbdf143d14a80f6c571aa18257e981fb5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "hist_KXJOBLESSCLAIMS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXJOBLESSCLAIMS",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 857442,
+   "t_send_ms": 1794842536005,
+   "t_recv_ms": 1794842536179,
+   "server_date": "Mon, 16 Nov 2026 15:22:16 GMT",
+   "file": "0004.json.gz",
+   "sha256": "d242d5539e7f85426c176e94e415fa86428102fa61c7f8874b9147f45e4be371",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "hist_KXCONTCLAIMS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCONTCLAIMS",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 70842,
+   "t_send_ms": 1794842541006,
+   "t_recv_ms": 1794842541103,
+   "server_date": "Mon, 16 Nov 2026 15:22:21 GMT",
+   "file": "0005.json.gz",
+   "sha256": "e1440f651f9c83f95fb50472c256a6d0032f9cd94987b22c7a762df7e3e87bf0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "hist_KXUE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXUE",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 793071,
+   "t_send_ms": 1794842546006,
+   "t_recv_ms": 1794842546130,
+   "server_date": "Mon, 16 Nov 2026 15:22:26 GMT",
+   "file": "0006.json.gz",
+   "sha256": "9a9a1206bf8bde3d199e7c6b54696b8e4ac068811e3c37b83e75509dd7e21044",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "hist_KXISMPMI",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXISMPMI",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 153386,
+   "t_send_ms": 1794842551006,
+   "t_recv_ms": 1794842551095,
+   "server_date": "Mon, 16 Nov 2026 15:22:31 GMT",
+   "file": "0007.json.gz",
+   "sha256": "803a45cd605406ff2f7b39a68e7278a701882e30f9c1e2e6fe99f1f12718ab96",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "hist_KXUSISMSERV",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXUSISMSERV",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 71795,
+   "t_send_ms": 1794842556006,
+   "t_recv_ms": 1794842556126,
+   "server_date": "Mon, 16 Nov 2026 15:22:36 GMT",
+   "file": "0008.json.gz",
+   "sha256": "e1f2e2a2162dd385c0a65d8bd56afdbfae4d437e62a3d3e43083406e5ea9b7c4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "hist_KXUSPPIYOY",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXUSPPIYOY",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 137416,
+   "t_send_ms": 1794842561006,
+   "t_recv_ms": 1794842561090,
+   "server_date": "Mon, 16 Nov 2026 15:22:41 GMT",
+   "file": "0009.json.gz",
+   "sha256": "843f0bddbf50fb618da06a116cac8556693e7a62b23543726007d1733ff43447",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "hist_KXCPINDEX",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCPINDEX",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 140770,
+   "t_send_ms": 1794842566006,
+   "t_recv_ms": 1794842566168,
+   "server_date": "Mon, 16 Nov 2026 15:22:46 GMT",
+   "file": "0010.json.gz",
+   "sha256": "a8fc95831cc49ef4c680176e4082225f543ddb3d5e7a255224d499e6bfb5619a",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
