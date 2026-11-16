@@ -9,11 +9,14 @@
 - **Universe:** KXTRUMPMENTION and KXTRUMPMENTIONB, from the landed MENTDRIFT_LISTS_A run (2026-11-15T1458Z_43727241819, complete, not truncated).
   - Development: each market's OWN occurrence_datetime is 2026-04-17 to before 2026-08-06. A missing occurrence is dropped.
   - "Event does not qualify" is dropped.
-- **Event times:**
-  - First listing F: the earliest open_time of the event's words.
-  - O: the earliest occurrence.
-  - D = O - 60 min.
-- **Late word:** opened at least 6 h after F, opened before D, and still open at D.
+- **First listing F:** the earliest open_time of the event's words.
+- **Late word:** opened at least 6 h after F.
+- **Decision D:** the word's own open_time + 30 min. The word must not have closed by D, which is a fact known at D.
+- **Why not the speech time (the Head's caution, Nov 16).** occurrence_datetime is NOT a schedule known before the event.
+  - In the development list it differs between the markets of one event in 61 of 96 events.
+  - The last close is within about 15 minutes of the first occurrence in most events.
+  - So it is set or revised near the end. It is used only to choose the development sample, never for timing.
+  - (Measured from time fields only.)
 - **Trade:** buy YES at D when the YES ask is 0.30 to 0.70.
   - Quote: the candle ending at D, else the latest ending in [D - 180 s, D].
   - It must be two-sided under rule 18.
@@ -29,7 +32,7 @@
 - **Bar (paper):** PF 1.3+ at the primary line with both halves 1.0+, and PF 1.0+ at 2c, unrounded with no tolerance.
 - **On a fail:** dropped with no write-up.
 - **On a pass:** it goes to the full checks, then the held-out.
-- **Sample size:** about 266 late words in 32 events, before the band and the quote check. The read is thin, and the z by event says so.
+- **Sample size:** 272 late words in 33 events, before the band and the quote check. The read is thin, and the z by event says so.
 
 **Reading order.**
 1. The market's own occurrence, then open and close times, then the word title.
@@ -44,10 +47,10 @@
 - **Never pulled:** from 2026-11-05 on, TRUMPTOPIC1's forward window.
 
 **Stage B:** `LATEWORD_CANDLES.json`, built by `build_lateword_candles.py` from the list's time fields and word titles.
-- 266 requests, one historical single-market read per late word.
+- One historical single-market read per late word (count in the job's notes).
 - Window [D - 180 s, D], so no candle after the decision is fetched.
-- Pacing 5 s, about 22 minutes.
+- Pacing 5 s, under 470 requests, one file.
 
-**Disclosure:** to size this, I read the landed list's time fields (ticker, event_ticker, open_time, occurrence_datetime, close_time) and the word title, for development events only. No price, volume or result was read.
+**Disclosure:** to size this and to check the clock, I read the landed list's time fields (ticker, event_ticker, open_time, occurrence_datetime, close_time) and the word title, for development events only. No price, volume or result was read.
 
 **Files:** `lateword_lib.py`, `build_lateword_candles.py`, `lateword_score.py`, `test_lateword.py` (2 tests: the hand case and the truncation stop).

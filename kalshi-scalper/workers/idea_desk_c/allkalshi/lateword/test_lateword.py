@@ -26,7 +26,6 @@ class Hand(unittest.TestCase):
     def test_case(self):
         root = tempfile.mkdtemp()
         O = L.iso("2026-06-10T18:00:00")
-        D = O - 3600
         first = O - 20 * 3600
         def m(word, op, res, occ=O, close=O + 3600, sub=None):
             return {"ticker": "KXTRUMPMENTION-26JUN10-" + word, "event_ticker": "KXTRUMPMENTION-26JUN10", "open_time": iso(op), "occurrence_datetime": iso(occ),
@@ -35,7 +34,7 @@ class Hand(unittest.TestCase):
               m("LATEA", first + 7 * 3600, "yes"),            # late, YES .50 -> won
               m("LATEB", first + 8 * 3600, "no"),             # late, YES .40 -> lost
               m("LATEC", first + 9 * 3600, "yes"),            # late, YES .85 -> out of band
-              m("LATED", D + 60, "yes"),                      # opened after D: not late
+              m("LATED", O + 3000, "yes"),                    # late, but closes before open + 30 min: not traded
               m("LATEE", first + 6 * 3600, "yes", occ=None),  # no own occurrence: dropped
               m("NQ", first + 7 * 3600, "no", sub="Event does not qualify"),
               {"ticker": "KXTRUMPMENTION-26AUG10-X", "event_ticker": "KXTRUMPMENTION-26AUG10", "open_time": "2026-08-10T00:00:00Z",
@@ -44,9 +43,11 @@ class Hand(unittest.TestCase):
         put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": ms, "cursor": ""})])
         w = L.late_words(L.list_rows(root))
         self.assertEqual(sorted(w), ["KXTRUMPMENTION-26JUN10-LATEA", "KXTRUMPMENTION-26JUN10-LATEB", "KXTRUMPMENTION-26JUN10-LATEC"])
-        put(root, "LATEWORD_CANDLES", [({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-LATEA/candlesticks"}, {"candlesticks": [c(D, .48, .50)]}),
-                                       ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-LATEB/candlesticks"}, {"candlesticks": [c(D - 60, .38, .40)]}),
-                                       ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-LATEC/candlesticks"}, {"candlesticks": [c(D, .83, .85)]})])
+        DA, DB, DC = (w["KXTRUMPMENTION-26JUN10-LATE" + k]["D"] for k in "ABC")
+        self.assertEqual(DA, first + 7 * 3600 + 1800)
+        put(root, "LATEWORD_CANDLES", [({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-LATEA/candlesticks"}, {"candlesticks": [c(DA, .48, .50)]}),
+                                       ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-LATEB/candlesticks"}, {"candlesticks": [c(DB - 60, .38, .40)]}),
+                                       ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-LATEC/candlesticks"}, {"candlesticks": [c(DC, .83, .85)]})])
         with contextlib.redirect_stdout(io.StringIO()):
             o = SC.main(root)
         self.assertEqual(o["n"], 2)

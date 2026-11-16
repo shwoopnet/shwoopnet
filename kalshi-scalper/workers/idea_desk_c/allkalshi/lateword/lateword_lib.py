@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """LATEWORD shared code (Idea Desk C, Nov 16, 2026). Standard library only, no network. Card: LATEWORD_CARD.md.
 A Trump mention word that Kalshi lists hours after the rest of the event's words was added for a reason (a topic in the news).
-At D = O - 60 min, buy YES on each such word whose YES ask is 0.30 to 0.70; hold to settlement."""
+Decision D = the word's own open_time + 30 min (the Head's caution, Nov 16: occurrence_datetime is not a schedule known before the event, so it is
+never used for timing). Buy YES when the YES ask is 0.30 to 0.70; hold to settlement."""
 import calendar, gzip, json, math, os, time
 
 SERIES = ("KXTRUMPMENTION", "KXTRUMPMENTIONB")
 DEV = ("2026-04-17T00:00:00", "2026-08-06T00:00:00")     # event occurrence window (own occurrence of each market)
 LATE_H = 6                                               # opened at least 6 h after the event's first market
-D_MIN = 60
+ENTRY_AFTER_OPEN_S = 30 * 60
 BAND = (0.30, 0.70)
 LOOKBACK_S = 180
 EPS = 1e-9
@@ -68,17 +69,17 @@ def list_rows(root):
 
 
 def late_words(rows):
-    """ticker -> dict(D, event, close). A word is late if opened >= LATE_H after the event's first market and before D."""
+    """ticker -> dict(D, event, close). Late: opened >= LATE_H after the event's first listed word. D = open + 30 min; the word must not have
+    closed by D (a fact known at D). Uses open_time and close_time only; occurrence only chose the development sample."""
     ev = {}
     for x in rows:
         ev.setdefault(x[1], []).append(x)
     out = {}
     for e, L in sorted(ev.items()):
         first = min(x[2] for x in L)
-        O = min(x[3] for x in L)
-        D = O - D_MIN * 60
         for t, _e, op, _o, c in L:
-            if op - first >= LATE_H * 3600 and op < D and c > D:
+            D = op + ENTRY_AFTER_OPEN_S
+            if op - first >= LATE_H * 3600 and c > D:
                 out[t] = {"D": D, "event": e, "close": c}
     return out
 

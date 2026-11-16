@@ -12,7 +12,7 @@ w = L.late_words(L.list_rows(root))
 reqs = [{"id": "h_" + t, "path": "/historical/markets/%s/candlesticks" % t,
          "params": {"start_ts": w[t]["D"] - L.LOOKBACK_S, "end_ts": w[t]["D"], "period_interval": 1}} for t in sorted(w)]
 job = {"job_id": "LATEWORD_CANDLES", "owner": "MAIN", "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/lateword/LATEWORD_CARD.md",
-       "purpose": "LATEWORD quick first read (Idea Desk C): 1 minute candles of late-listed Trump mention words at D = occurrence - 60 min, development events only, a 3 minute window each.",
+       "purpose": "LATEWORD quick first read (Idea Desk C): 1 minute candles of late-listed Trump mention words at D = the word's open time + 30 min, development events only, a 3 minute window each.",
        "heldout": "none read: development events only (own occurrence 2026-04-17 to before 2026-08-06). Never requested: TRUMPTOPIC1's spent held-out (occurrence 2026-08-06 to before 2026-10-03), LATEWORD's held-out (occurrence 2026-10-03 to before 2026-11-05, read once on the Head of R&D's go) and TRUMPTOPIC1's forward window (from 2026-11-05).",
        "allowed_endpoints": [{"name": "hist_market_candlesticks", "method": "GET", "path_pattern": "/historical/markets/(?P<ticker>[A-Z0-9][A-Z0-9._-]{0,63})/candlesticks",
                               "params_allowed": ["start_ts", "end_ts", "period_interval"]}],
