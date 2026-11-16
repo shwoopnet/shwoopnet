@@ -43,12 +43,12 @@ gates.RB2 = () => {
 
 // RB3: the 30 second recorder (and so the 10 second Sunday one) carry halt_sources and is_open, from the same market object with no extra read; absent fields are empty.
 gates.RB3 = () => {
-  assert.ok(/EXTRA_COLUMNS = \["halt_sources", "is_open"\]/.test(scripts.fast), 'columns declared');
+  assert.ok(/EXTRA_COLUMNS = \["halt_sources", "is_open", "leverage_estimate"\]/.test(scripts.fast), 'columns declared');
   assert.ok(/base\.COLUMNS \+ EXTRA_COLUMNS/.test(scripts.fast) && /base\.COLUMNS \+ fast\.EXTRA_COLUMNS/.test(scripts.sunday), 'both recorders write the new header');
   const r = py('record_perps_fast.py', `
-a = m.rows_with_flags([{"ticker": "KXAAPLPERP", "halt_sources": [], "schedule": {"is_open": False}}, {"ticker": "KXBTCPERP", "halt_sources": ["a", "b"], "schedule": {"is_open": True}}, {"ticker": "X"}], "t")
-print(json.dumps([m.base.COLUMNS + m.EXTRA_COLUMNS == m.base.COLUMNS + ["halt_sources", "is_open"], [x[-2:] for x in a], len(a[0]) == len(m.base.COLUMNS) + 2]))`);
-  assert.deepStrictEqual(r, [true, [['', 'false'], ['a|b', 'true'], ['', '']], true]);
+a = m.rows_with_flags([{"ticker": "KXAAPLPERP", "halt_sources": [], "schedule": {"is_open": False}, "leverage_estimate": "5"}, {"ticker": "KXBTCPERP", "halt_sources": ["a", "b"], "schedule": {"is_open": True}}, {"ticker": "X"}], "t")
+print(json.dumps([m.base.COLUMNS + m.EXTRA_COLUMNS == m.base.COLUMNS + ["halt_sources", "is_open", "leverage_estimate"], [x[-3:] for x in a], len(a[0]) == len(m.base.COLUMNS) + 3]))`);
+  assert.deepStrictEqual(r, [true, [['', 'false', '5'], ['a|b', 'true', ''], ['', '', '']], true]);
 };
 
 // RB4: the Sunday window is 17:55 to 18:35 New York on Sundays only (so daylight saving moves it), writes one file, a second start does nothing, a failed read costs one sample, past the stop date nothing.
@@ -72,7 +72,7 @@ clock[0] = dt.datetime(2026, 11, 8, 23, 33, 30, tzinfo=u)
 b = m.main(d, now, fetch, sleep)
 clock[0] = dt.datetime(2027, 2, 28, 22, 58, 0, tzinfo=u)
 c = m.main(d, now, fetch, sleep)
-print(json.dumps([w, a, len(rows) - 1, calls[0], b, c, rows[0].endswith('halt_sources,is_open'), os.listdir(d)]))`);
+print(json.dumps([w, a, len(rows) - 1, calls[0], b, c, rows[0].endswith('halt_sources,is_open,leverage_estimate'), os.listdir(d)]))`);
   assert.deepStrictEqual(r[0], ['sunday', null, null, null, 'sunday', null], 'Nov 22:58Z in, 22:50Z before, 23:36Z after, Monday no; July (EDT) 21:58Z in, 22:58Z after');
   assert.strictEqual(r[1], 0);
   assert.strictEqual(r[3], 12, 'a window of 12 reads in the last 2 minutes');
@@ -200,6 +200,29 @@ print(json.dumps([mk(None), mk((m.ONLY_NEW,), dt.date(2026, 11, 5)), mk(('KXETHP
   assert.ok(r[0][2] && r[1][2] && r[2][2], 'at least 1.2 s between calls');
   const c = scripts.candles;
   assert.ok(/ONLY_NEW = "NEW"/.test(c) && /LIST_PAGES = 3/.test(c) && /asset classes on the list/.test(c) && /^GAP_S = 1\.2/m.test(c));
+};
+
+// RB10 (Nov 16, 2026, the Head of R&D, Forensics' map): leverage_estimate is kept (hourly: its own day file so the main header never changes; fast and Sunday: a third extra column), and the candle archive can write every market's funding prints for one day, or the whole history, in ONE request with no ticker.
+gates.RB10 = () => {
+  const r = py('record_perps_candles.py', `
+u = dt.timezone.utc
+urls = []
+def get(url):
+    urls.append(url); return 200, {"funding_rates": [{"ticker": "KXSPYPERP", "funding_time": "2026-11-07T21:00:00Z", "funding_rate": 0.001, "mark_price": "7"}, {"ticker": "KXAAPLPERP", "funding_time": "2026-11-07T21:00:00Z", "funding_rate": 0.002, "mark_price": "8"}]}
+d = tempfile.mkdtemp(); sl = []
+now = dt.datetime(2026, 11, 16, 2, tzinfo=u)
+a = m.run(d, now, get, sl.append, day=dt.date(2026, 11, 7), only=("FUNDING_DAY",))
+day_rows = gzip.open(os.path.join(d, 'funding', '2026-11-07.all.csv.gz'), 'rt').read().strip().split('\\n')
+b = m.run(d, now, get, sl.append, day=dt.date(2026, 11, 7), only=("FUNDING_ALL",))
+again = m.run(d, now, get, sl.append, day=dt.date(2026, 11, 7), only=("FUNDING_DAY",))
+def refuse(url): return 429, None
+c = m.run(tempfile.mkdtemp(), now, refuse, lambda s: None, day=dt.date(2026, 11, 7), only=("FUNDING_DAY",))
+print(json.dumps([a, len(day_rows) - 1, b, os.path.exists(os.path.join(d, 'kalshi1m')), again, len(urls), 'ticker=' in urls[0], 'start_ts=' in urls[0], 'start_ts' in urls[1], c, min(x for x in sl if x >= 1.0) >= 1.2]))`);
+  assert.deepStrictEqual(r, [0, 2, 0, false, 0, 2, false, true, false, 1, true], 'one ticker-less request a file, no candle file, an existing file is not read again, three 429s write nothing');
+  const h = py('record_perps.py', `
+a = m.lev_rows([{"ticker": "KXAAPLPERP", "leverage_estimate": "5"}, {"ticker": "X"}], "t")
+print(json.dumps([m.LEV_COLUMNS, a, m.COLUMNS == ["ts_utc", "ticker", "asset_class", "status", "bid", "ask", "bid_size", "ask_size", "price", "reference_price", "settlement_mark", "liquidation_mark", "open_interest", "volume_24h", "notional_oi_usd", "funding_cap", "funding_deadband"]]))`);
+  assert.deepStrictEqual(h, [['ts_utc', 'ticker', 'leverage_estimate'], [['t', 'KXAAPLPERP', '5'], ['t', 'X', '']], true], 'the hourly main file header is unchanged');
 };
 
 for (const [name, fn] of Object.entries(gates)) {
