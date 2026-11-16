@@ -144,7 +144,8 @@ def evaluate(tr, trading_days):
         days = len({t[2] for t in a}); z, p = zp(a)
         p1 = pf([t[3] for t in a]); p2 = pf([t[3] for t in b]); perday = n / trading_days if trading_days else 0.0
         gate = n >= 100 and days >= 10 and perday >= 3 and p1 >= 1.3 and halves_ok(a, 1.3) and p2 >= 1.0 and halves_ok(b, 1.0) if n else False
-        r[fee] = {"n": n, "days": days, "perday": perday, "pf2": p1, "pf5": p2, "z": z, "p": p, "gate": gate}
+        hh = len(a) // 2; va = [t[3] for t in a]
+        r[fee] = {"h1": pf(va[:hh]) if a else 0.0, "h2": pf(va[hh:]) if a else 0.0, "n": n, "days": days, "perday": perday, "pf2": p1, "pf5": p2, "z": z, "p": p, "gate": gate}
     return r
 def bh(ps, m):
     o = sorted(range(len(ps)), key=lambda i: (ps[i], i)); k = 0
@@ -204,5 +205,5 @@ def main(a):
     if out:
         with open(out, "w") as fh:
             for rule, r in res:
-                for fee in FEES: q = r[fee]; fh.write("%s fee %.4f n %d days %d perday %.6f pf2 %.12f pf5 %.12f z %s p %s gate %s\n" % ("|".join(str(x) for x in rule), fee, q["n"], q["days"], q["perday"], q["pf2"], q["pf5"], "%.12f" % q["z"] if q["z"] is not None else "-", "%.12e" % q["p"] if q["p"] is not None else "-", q["gate"]))
+                for fee in FEES: q = r[fee]; fh.write("%s fee %.4f n %d days %d perday %.6f pf2 %.12f pf5 %.12f h1 %.12f h2 %.12f z %s p %s gate %s\n" % ("|".join(str(x) for x in rule), fee, q["n"], q["days"], q["perday"], q["pf2"], q["pf5"], q["h1"], q["h2"], "%.12f" % q["z"] if q["z"] is not None else "-", "%.12e" % q["p"] if q["p"] is not None else "-", q["gate"]))
 if __name__ == "__main__": main(sys.argv[1:])
