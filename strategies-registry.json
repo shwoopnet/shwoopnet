@@ -759,8 +759,8 @@
     "Marginal: re-counted once on 2026-11-19, withdrawn if under 60 fill-checked signals per 21 days"
    ],
    "code": {},
-   "roomTarget": null,
-   "roomWhat": null,
+   "roomTarget": 60,
+   "roomWhat": "signals toward 60",
    "cause": null,
    "figures": null
   },
@@ -782,8 +782,8 @@
    "reason": null,
    "notes": [],
    "code": {},
-   "roomTarget": null,
-   "roomWhat": null,
+   "roomTarget": 60,
+   "roomWhat": "signals toward 60",
    "cause": null,
    "figures": null
   },
@@ -805,8 +805,8 @@
    "reason": null,
    "notes": [],
    "code": {},
-   "roomTarget": null,
-   "roomWhat": null,
+   "roomTarget": 60,
+   "roomWhat": "signals toward 60",
    "cause": null,
    "figures": null
   },
@@ -828,8 +828,8 @@
    "reason": null,
    "notes": [],
    "code": {},
-   "roomTarget": null,
-   "roomWhat": null,
+   "roomTarget": 60,
+   "roomWhat": "signals toward 60",
    "cause": null,
    "figures": null
   },
@@ -851,8 +851,8 @@
    "reason": null,
    "notes": [],
    "code": {},
-   "roomTarget": null,
-   "roomWhat": null,
+   "roomTarget": 60,
+   "roomWhat": "signals toward 60",
    "cause": null,
    "figures": null
   },
@@ -876,8 +876,8 @@
     "Marginal: re-counted once on 2026-11-19, withdrawn if under 60 fill-checked signals per 21 days"
    ],
    "code": {},
-   "roomTarget": null,
-   "roomWhat": null,
+   "roomTarget": 60,
+   "roomWhat": "signals toward 60",
    "cause": null,
    "figures": null
   },
@@ -899,8 +899,8 @@
    "reason": null,
    "notes": [],
    "code": {},
-   "roomTarget": null,
-   "roomWhat": null,
+   "roomTarget": 60,
+   "roomWhat": "signals toward 60",
    "cause": null,
    "figures": null
   },

@@ -31,6 +31,7 @@ gates.B1 = () => {
     'api.gold-api.com',           // gold spot for the Kalshi charts
     'www.w3.org',                 // the SVG namespace, not a request
     'shwoopnet.github.io',        // this site's own address in the og:image tag (link previews); the page never fetches it
+    'raw.githubusercontent.com',  // the ONE counts-only file of the NC15 place counts on the nc15-counts branch (the owner allowed it, Nov 16, 2026); read only, no other path (gate NC1)
   ]);
   const extra = [...hosts].filter((h) => !allowed.has(h));
   assert.deepStrictEqual(extra, [], 'the page may only reference the hosts listed here; found ' + extra.join(', '));

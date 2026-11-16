@@ -33,7 +33,7 @@ gates.FB1 = () => {
   const fnDir = path.join(root, 'functions');
   const mentions = fs.readdirSync(fnDir).filter((f) => f.endsWith('.js')).filter((f) => /record_nc_book|record-nc-book/.test(fs.readFileSync(path.join(fnDir, f), 'utf8')));
   assert.deepStrictEqual(mentions, [], 'nothing in functions/ mentions it');
-  assert.ok(!/record_nc_book|record-nc-book|nc15/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), 'the page does not mention it');
+  assert.ok(!/record_nc_book|record-nc-book|nc15/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8').replace(/nc15-counts|nc15_place_counts/g, '')), 'the page does not mention the recorder (since Nov 16, 2026 it names only the counts-only file nc15-counts/nc15_place_counts.json, test/nc15CountsFeedGates.test.js)');
 };
 
 // FB2: the workflow pushes only the data branch, uses only the built-in token, and each job fits inside the 6 hour limit.
