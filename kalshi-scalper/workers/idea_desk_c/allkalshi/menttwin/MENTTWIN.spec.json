@@ -1,0 +1,86 @@
+{
+ "id": "MENTTWIN",
+ "desk": "Idea Desk C",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/idea_desk_c/allkalshi/menttwin/MENTTWIN_CARD.md",
+ "needs_new_code": [
+  "engine/deskc_kp_load.py (generic kalshi-pull loader, first audit)",
+  "engine/menttwin.py (plugin, first audit)"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "MENT1",
+   "MENTPERSIST1",
+   "TRUMPTOPIC1",
+   "LATEWORD"
+  ],
+  "declined_list_rows_checked": [
+   "lock and parity scans (not a lock: different events)",
+   "favourite-and-hold",
+   "cheap-side-late (band 0.30 to 0.70, YES only)"
+  ],
+  "difference": "the price gap between twins of the same word in two events of the same day; no card has read it",
+  "family_flag": "parity"
+ },
+ "data": {
+  "loader": "deskc_kp_load.py",
+  "loader_sha256": "c76c7f7d03aaec243f0f92fe465382a4a4d292f315c5f27e78e139d22e716fea",
+  "extracts": [
+   "kalshi-pull-data: MENTDRIFT_LISTS_A/2026-11-15T1458Z_43727241819",
+   "MENTTWIN_CANDLES_P1, MENTTWIN_CANDLES_P2 (to be pulled)"
+  ],
+  "ticker_wall": [
+   "KXTRUMPMENTION",
+   "KXTRUMPMENTIONB"
+  ],
+  "window": {
+   "first_occurrence": "2026-04-17T00:00:00Z",
+   "last_occurrence_exclusive": "2026-08-06T00:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B (pending)",
+  "independence_note": "the same development events as TRUMPTOPIC1's fit third, LATEWORD and the dropped MENTDRIFT"
+ },
+ "split": {
+  "mode": "fixed_dates",
+  "search_last_occurrence_exclusive": "2026-08-06T00:00:00Z",
+  "validate_first_occurrence": "2026-10-03T00:00:00Z",
+  "validate_last_occurrence_exclusive": "2026-11-05T00:00:00Z"
+ },
+ "event": {
+  "scorer_plugin": "menttwin.py",
+  "scorer_plugin_sha256": "341bb01c25a287bd05c45ed57c12470b3e68f6cdceec13fcbf7499eaea71f0a7",
+  "decision_instant": "the later twin's open_time + 30 min",
+  "signal_threshold_abs_mid_gap": 0.15,
+  "entry_rule": "buy YES on the cheaper twin at its ask, ask 0.30 to 0.70, one per pair",
+  "exit": "H"
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ],
+  "haircuts_stress": [],
+  "fee_taker": null,
+  "fee_maker": null
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 1,
+  "prior_m": "from the TALLY"
+ },
+ "prediction": "20 to 60 trades: no evidence likely; if n >= 100, PF at 1c 0.8 to 1.2",
+ "kill": "PF at 1c under 1.0 on the first read, or under 100 trades",
+ "kill_fast": true,
+ "outputs": {
+  "survivor_line": "market, rule, PF 1c and 2c, n, days",
+  "family_flag": "parity"
+ }
+}
