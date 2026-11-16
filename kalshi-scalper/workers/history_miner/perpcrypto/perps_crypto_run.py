@@ -46,7 +46,9 @@ def check_run(run):
 
 
 def csv_rows(path):
-    return csv.DictReader(io.StringIO(gzip.decompress(open(path, "rb").read()).decode("utf-8")))
+    """A .csv.gz (gzip magic) or a plain .csv (the perp-data perps/ day files are plain)."""
+    raw = open(path, "rb").read()
+    return csv.DictReader(io.StringIO((gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw).decode("utf-8")))
 
 
 def load_all(snap=(), btc=None, spot=(), funding=None, cnt=None):

@@ -36,4 +36,7 @@ except Exception as e: assert "REFUSED" in str(e) or isinstance(e, (OSError, EOF
 open(os.path.join(btc, "STATUS"), "w").write("running")
 try: R.check_run(btc); raise AssertionError("status")
 except SystemExit as e: assert "STATUS" in str(e)
+# a plain .csv day file reads the same as a gz
+plain = os.path.join(d, "p.csv"); open(plain, "w").write("ts_utc,ticker,bid,ask,price,reference_price,funding_cap,extra\n2026-10-22T01:00:00Z,KXBTCPERP,1,2,1.5,1.4,0.01,x\n")
+assert [r["ticker"] for r in R.csv_rows(plain)] == ["KXBTCPERP"] and [r["ticker"] for r in R.csv_rows(snap)][0] == "KXBTCPERP"
 print("perps runner: ok")
