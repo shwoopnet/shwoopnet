@@ -38,4 +38,13 @@ import tempfile as tf
 d3 = tf.mkdtemp(); w3 = os.path.join(d3, "x.csv")
 with open(w3, "w", newline="") as f: f.write(",".join(SH) + "\n"); f.write(",".join(map(str, srow("2026-11-10T04:30:00.000000000Z", 7.0, 11, "QQQ"))) + "\n"); f.write(",".join(map(str, srow("2026-11-10T05:30:00.000000000Z", 8.0, 11, "QQQ"))) + "\n")
 o3, c3 = c.read_stats(w3); assert c3 == {("QQQ", "2026-11-09"): 7.0, ("QQQ", "2026-11-10"): 8.0}, c3
+# the opening print must be known at the 09:31:00 ET entry candle: 14:30:59Z kept, 14:31:00Z kept (inclusive), 14:31:01Z missing (counted)
+for ts, keep in (("2026-11-09T14:31:00.000000000Z", True), ("2026-11-09T14:31:01.000000000Z", False), ("2026-11-09T14:30:59.000000000Z", True)):
+    d6 = tempfile.mkdtemp()
+    with open(os.path.join(d6, "xnas_stat.csv"), "w", newline="") as f: f.write(",".join(SH) + "\n"); f.write(",".join(map(str, srow(ts, 101.0, 1, "QQQ"))) + "\n"); f.write(",".join(map(str, srow("2026-11-06T21:00:00.000000000Z", 100.0, 11, "QQQ"))) + "\n")
+    open(os.path.join(d6, "arcx_stat.csv"), "w").write(",".join(SH) + "\n")
+    with open(os.path.join(d6, "equs_1d.csv"), "w") as f:
+        f.write("ts_event,rtype,publisher_id,instrument_id,open,high,low,close,volume,symbol\n"); [f.write(day + "T00:00:00.000000000Z,35,1,1,101,101,101,100,1,QQQ\n") for day in ("2026-11-06", "2026-11-09")]
+    rr = [x for x in c.convert(d6, os.path.join(d6, "u.csv")) if x["date"] == "2026-11-09"][0]
+    assert (rr["u_open"] == "101.0") == keep, (ts, rr)
 print("opengap1 convert tests passed")
