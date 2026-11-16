@@ -1,9 +1,9 @@
 """ENGINE1 perps block (Desk A, Nov 16 2026), built to ENGINE1_PERPS_HAND_CASE_NOV16.md. Pure functions on one ticker's candles [(end, bid, ask, last, vol, oi)]. Fee 12 bps a leg ASSUMED. Upper bound, not fill-checked, funding not booked."""
 import math, time, collections
-FEE = 0.0012; FEE_MAKER = 0.0005; HAIRCUTS = (0.001, 0.002); COOLDOWN = 1800      # fees per side, ASSUMED; haircuts relative to price (0.1% and 0.2%)
+FEE = 0.0012; FEE_MAKER = 0.0005; HAIRCUTS = (0.0002, 0.0005); STRESS = (0.001, 0.002); COOLDOWN = 1800      # fees per side, ASSUMED; haircuts relative to price (0.1% and 0.2%)
 MOMS = (1, 3, 5, 15); TODS = ("pre", "open", "mid", "close", "post")
 FILTERS = (None,) + tuple(("mom%d" % k, c) for k in MOMS for c in ("up", "down")) + tuple(("spread", c) for c in ("low", "mid", "high")) + tuple(("tod", c) for c in TODS) + (("orb", "up"), ("orb", "down"), ("sess", "high"), ("sess", "low"))
-EXITS = ("T3", "T10", "T15", "T30", "TS15", "TS30"); SIDES = ("long", "short")
+EXITS = ("T3", "T10", "T15", "T30", "TS15", "TS30", "T60", "T240", "TC", "TO"); SIDES = ("long", "short")
 RULES_PER_TICKER = len(FILTERS) * len(SIDES) * len(EXITS)
 def ok(c): return c is not None and c[1] is not None and c[2] is not None and 0 < c[1] < c[2]
 def mid(c): return (c[1] + c[2]) / 2
@@ -38,6 +38,19 @@ def feature_ok(by, e, filt, cuts):
     k = int(name[3:]); p = by.get(e - 60 * k)
     if not ok(p): return None
     r = math.log(mid(c) / mid(p)); return (r > 0 and klass == "up") or (r < 0 and klass == "down")
+def exit_time(e, exit_):
+    """The candle end at which a time exit sells (TS exits: 1800 s horizon), or None when there is none."""
+    if exit_ in ("TS15", "TS30"): return e + COOLDOWN
+    if exit_ == "TC":
+        t = e - e % 86400 + 21 * 3600
+        return t if t > e else None
+    if exit_ == "TO":
+        d = e - e % 86400 + 86400
+        while time.gmtime(d).tm_wday >= 5: d += 86400
+        return d + 14 * 3600 + 31 * 60
+    return e + 60 * int(exit_[1:])
+def hold_of(e, exit_):
+    t = exit_time(e, exit_); return COOLDOWN if t is None else max(COOLDOWN, t - e)
 def trade_full(by, e, side, exit_, h):
     """-> (gross return, reason, hold seconds) or (None, 'no mark', 0). Candles in `by` are keyed by end_ts. The fee is applied by the caller."""
     c = by[e]; long_ = side == "long"
@@ -52,12 +65,12 @@ def trade_full(by, e, side, exit_, h):
             if long_: hit_t, hit_s = x[1] >= fill * (1 + k), x[1] <= fill * (1 - k)
             else: hit_t, hit_s = x[2] <= fill * (1 - k), x[2] >= fill * (1 + k)
             if hit_t or hit_s: ex, why, hold = leave(x), "target" if hit_t else "stop", t - e; break
-        mins = 30
-    else: mins = int(exit_[1:])
+        tx = e + COOLDOWN
+    else: tx = exit_time(e, exit_)
     if ex is None:
-        x = by.get(e + 60 * mins)
+        x = by.get(tx) if tx is not None else None
         if not ok(x): return None, "no mark", 0
-        ex, why, hold = leave(x), "time", 60 * mins
+        ex, why, hold = leave(x), "time", tx - e
     gross = (ex / fill - 1) if long_ else (fill - ex) / fill
     return gross, why, hold
 def trade(by, e, side, exit_, h):
@@ -79,14 +92,14 @@ def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None, boundary=Non
     by = {c[0]: c for c in candles if ok(c)}; rows, cnt, last = [], collections.Counter(), None
     for e in sorted(by):
         if (lo is not None and e < lo) or (hi is not None and e >= hi): continue
-        if last is not None and e < last + COOLDOWN: continue
-        if boundary is not None and e + COOLDOWN >= boundary: cnt["exit crosses the boundary"] += 1; continue          # (Auditor B) SEARCH never touches VALIDATE prices
+        if last is not None and e < last: continue                                  # last = the previous entry's exit time (hold)
+        if boundary is not None and e + hold_of(e, exit_) >= boundary: cnt["exit crosses the boundary"] += 1; continue          # (Auditor B) SEARCH never touches VALIDATE prices
         f = feature_ok(by, e, filt, cuts)
         if f is None: cnt["missing feature candle"] += 1; continue
         if not f: continue
         g, why, hold = trade_full(by, e, side, exit_, h)
         if g is None: cnt[why] += 1; continue
-        rows.append((e, g, hold)); cnt[why] += 1; last = e
+        rows.append((e, g, hold)); cnt[why] += 1; last = e + hold_of(e, exit_)
     return rows, cnt
 def days(rows): return len({time.strftime('%Y-%m-%d', time.gmtime(r[0])) for r in rows})
 def stats(rows, fee=FEE):
@@ -100,7 +113,7 @@ def short(t): return t[2:] if t.startswith("KX") else t
 def passes(a, b): return a["n"] >= MIN_N and a["pf"] >= PF1 and b["pf"] >= PF2
 def run_all(perps):
     """perps: {ticker: candles}. SEARCH then VALIDATE by engine1_split dates of the entry candle, spread cuts from SEARCH entries only, every rule scored under the TAKER fee (the gate) and the MAKER fee (flagged, resting fills assumed), BH over m = every rule tried. Perps block only."""
-    rep = {"label": "perps block: upper bound, not fill-checked; taker fee 12 bps a side and maker fee 5 bps a side, both ASSUMED (not confirmed); relative haircuts 0.1% and 0.2%; funding not booked; a maker-only pass assumes resting fills, fill rate unknown; information for the forward shadow only", "tried": 0, "cells_n100_search": 0, "search_bar_taker": 0, "search_bar_maker": 0, "maker_only": 0, "insufficient_days": 0, "validate_bar_passes": 0, "validate_passes": 0, "survivors": [], "maker_only_list": [], "no_split_constant": [], "by_ticker": {}}
+    rep = {"label": "perps block: upper bound, not fill-checked; taker fee 12 bps a side and maker fee 5 bps a side, both ASSUMED (not confirmed); relative haircuts 0.02% and 0.05% a side (stress line 0.1% and 0.2%); funding not booked; a maker-only pass assumes resting fills, fill rate unknown; information for the forward shadow only", "tried": 0, "cells_n100_search": 0, "search_bar_stress_taker": 0, "search_bar_taker": 0, "search_bar_maker": 0, "maker_only": 0, "insufficient_days": 0, "validate_bar_passes": 0, "validate_passes": 0, "survivors": [], "maker_only_list": [], "no_split_constant": [], "by_ticker": {}}
     m = 0; cand = []; mk_only = []
     for tk, cs in perps.items():
         key = short(tk)
@@ -109,7 +122,7 @@ def run_all(perps):
         sp = [(c[2] - c[1]) / mid(c) * 1e4 for c in good if S.phase(key, c[0]) == "search"]
         cuts = spread_cuts(sp) if sp else None
         first_val = min([c[0] for c in good if S.phase(key, c[0]) == "validate"] or [10 ** 12])
-        bt = {"cells_n100": 0, "bar_taker": 0, "bar_maker": 0, "search_days_max": 0}
+        bt = {"cells_n100": 0, "bar_taker": 0, "bar_maker": 0, "bar_stress_taker": 0, "search_days_max": 0}
         for f in FILTERS:
             for side in SIDES:
                 for x in EXITS:
@@ -120,11 +133,13 @@ def run_all(perps):
                     if a_t["n"] >= MIN_N: bt["cells_n100"] += 1
                     pt, pm = passes(a_t, b_t), passes(a_m, b_m)
                     bt["bar_taker"] += pt; bt["bar_maker"] += pm
+                    s1, _ = run_rule(good, f, side, x, STRESS[0], cuts, hi=first_val, boundary=first_val); s2, _ = run_rule(good, f, side, x, STRESS[1], cuts, hi=first_val, boundary=first_val)
+                    bt["bar_stress_taker"] += passes(stats(s1, FEE), stats(s2, FEE))                # the old 0.1% and 0.2% lines, a stress line only
                     if (pt or pm) and days(r1) < MIN_DAYS: rep["insufficient_days"] += 1; continue
                     if pt: cand.append((tk, f, side, x, cuts, first_val, a_t, b_t))
                     elif pm: mk_only.append((tk, f, side, x))
         rep["by_ticker"][tk] = bt
-        rep["cells_n100_search"] += bt["cells_n100"]; rep["search_bar_taker"] += bt["bar_taker"]; rep["search_bar_maker"] += bt["bar_maker"]
+        rep["cells_n100_search"] += bt["cells_n100"]; rep["search_bar_taker"] += bt["bar_taker"]; rep["search_bar_stress_taker"] += bt["bar_stress_taker"]; rep["search_bar_maker"] += bt["bar_maker"]
     rep["tried"] = m; rep["maker_only"] = len(mk_only); rep["maker_only_list"] = [{"ticker": t, "filter": f, "side": sd, "exit": x, "flag": "assumes resting fills; fill rate unknown"} for t, f, sd, x in mk_only]
     vp = {}
     for tk, f, side, x, cuts, fv, a_t, b_t in cand:

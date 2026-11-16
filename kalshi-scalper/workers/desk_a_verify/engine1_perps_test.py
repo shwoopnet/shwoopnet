@@ -12,7 +12,7 @@ for i in range(0, 41):
     elif i == 13: C.append((e, 100.60, 100.70, 0, 0, 0))
     else: m = mids.get(i, 100.0); C.append((e, round(m - .05, 6), round(m + .05, 6), 0, 0, 0))
 by = {c[0]: c for c in C}; e = T0 + 600; h = 1e-4
-assert P.RULES_PER_TICKER == 252 and len(P.FILTERS) == 21 and P.HAIRCUTS == (0.001, 0.002) and P.FEE == 0.0012 and P.FEE_MAKER == 0.0005
+assert P.RULES_PER_TICKER == 420 and len(P.FILTERS) == 21 and len(P.EXITS) == 10 and P.HAIRCUTS == (0.0002, 0.0005) and P.STRESS == (0.001, 0.002) and P.FEE == 0.0012 and P.FEE_MAKER == 0.0005
 # features
 assert P.feature_ok(by, e, ("mom1", "down"), None) is True and P.feature_ok(by, e, ("mom1", "up"), None) is False
 assert P.feature_ok(by, e, ("mom3", "up"), None) is True and P.feature_ok(by, e, ("mom5", "up"), None) is True
@@ -59,7 +59,7 @@ assert [r[0] for r in rows2] == [e]
 assert P.days([(T0, .01, 0), (T0 + 60, .01, 0)]) == 1 and P.MIN_DAYS == 10
 # run_all: tried = 204 per ticker with a constant; a ticker without one is counted apart; thin data passes nothing
 rep = P.run_all({"KXHAND": C, "KXSPYPERP": C})
-assert rep["tried"] == 252 and rep["no_split_constant"] == ["KXHAND"] and rep["search_passes"] == 0 and rep["validate_passes"] == 0 and rep["survivors"] == [] and "insufficient_days" in rep, rep
+assert rep["tried"] == 420 and rep["no_split_constant"] == ["KXHAND"] and rep["search_passes"] == 0 and rep["validate_passes"] == 0 and rep["survivors"] == [] and "insufficient_days" in rep, rep
 # the days floor in run_all on an invented rising series (every long T3 entry is profitable): under MIN_DAYS it is counted and cannot pass
 cs = []
 for d in (9, 10, 11, 12):
@@ -70,4 +70,24 @@ P.MIN_N = 3; P.MIN_DAYS = 10
 r1 = P.run_all({"KXSPYPERP": cs}); assert r1["search_passes"] == 0 and r1["insufficient_days"] > 0 and r1["survivors"] == [], r1
 P.MIN_DAYS = 2
 r2 = P.run_all({"KXSPYPERP": cs}); assert r2["search_passes"] > 0 and r2["insufficient_days"] >= 0, r2
+# amendment 2: the long exits on KXHAND2 (Tuesday 2026-11-10, candle i ends 14:40 UTC + i minutes, bid = mid - 0.01, ask = mid + 0.01)
+D2 = calendar.timegm((2026, 11, 10, 14, 40, 0)); mid2 = {60: 100.50, 240: 99.60, 380: 101.00, 1431: 102.00}
+c2 = {}
+for i in range(0, 1500):
+    m = mid2.get(i, 100.00); c2[D2 + 60 * i] = (D2 + 60 * i, round(m - .01, 6), round(m + .01, 6), 0, 0, 0)
+e0 = D2; h2 = 2e-4
+for ex, want in (("T60", 0.0043976806), ("T240", -0.0045978205), ("TC", 0.0093951812), ("TO", 0.0193901825)):
+    g, why, hold = P.trade_full(c2, e0, "long", ex, h2); assert why == "time" and near(g, want, 2e-9), (ex, g, want)
+assert P.trade_full(c2, e0, "long", "T60", h2)[2] == 3600 and P.trade_full(c2, e0, "long", "TC", h2)[2] == 380 * 60 and P.trade_full(c2, e0, "long", "TO", h2)[2] == 1431 * 60
+assert P.exit_time(D2 + 380 * 60, "TC") is None and P.trade_full(c2, D2 + 380 * 60, "long", "TC", h2)[1] == "no mark"                    # entry at 21:00: no mark for TC
+fri = calendar.timegm((2026, 11, 13, 15, 0, 0)); sat = calendar.timegm((2026, 11, 14, 15, 0, 0)); sun = calendar.timegm((2026, 11, 15, 15, 0, 0)); mon = calendar.timegm((2026, 11, 16, 14, 31, 0))
+assert P.exit_time(fri, "TO") == mon and P.exit_time(sat, "TO") == mon and P.exit_time(sun, "TO") == mon and P.exit_time(D2, "TO") == D2 + 1431 * 60
+# cooldown = hold: a T60 rule enters at i0 and not again before i60; a TC rule once a day
+rows, cnt = P.run_rule(list(c2.values()), None, "long", "T60", h2, None, lo=D2, hi=D2 + 61 * 60)
+assert [r[0] for r in rows] == [D2, D2 + 3600], [(r[0] - D2) // 60 for r in rows]
+rows, cnt = P.run_rule(list(c2.values()), None, "long", "TC", h2, None, lo=D2, hi=D2 + 380 * 60)
+assert len(rows) == 1 and rows[0][0] == D2, [(r[0] - D2) // 60 for r in rows]
+# the boundary clip uses the rule's own hold: an entry whose T240 exit reaches the boundary is dropped
+rows, cnt = P.run_rule(list(c2.values()), None, "long", "T240", h2, None, lo=D2, hi=D2 + 61 * 60, boundary=D2 + 240 * 60)
+assert rows == [] and cnt["exit crosses the boundary"] >= 1
 print("ALL OK")
