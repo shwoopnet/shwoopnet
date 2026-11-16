@@ -1,0 +1,4 @@
+ENGINE1 batch B2 prints (Desk A, Nov 16 2026). sha256 of each output file, committed BEFORE any is read.
+cdcc8ed5d5b04624e74aa84598dbb07db183cead09b2d9a09f2c008d5f526af3  out_ENGB1TIMESTOP.json
+7bd3041bfb62d29e4f237d4c78ef9eeff149175d74a2fb35878638a93a534d12  out_ENGB2VSPIKE.json
+fb4d19e474853836dc07c7a214f06cc018a108c541861eeb738a2797f8dae95b  out_ENGB3SPRW.json
