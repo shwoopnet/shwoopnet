@@ -1724,3 +1724,7 @@ The ENGINE1 held-out read is complete and listed in `kalshi-scalper/workers/HELD
 ## Held-out log: ENGINE1 Forensics extractor line (Nov 16, 2026, Auditor B CLEAN)
 
 A second ENGINE1 line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`, separate from Desk A's loader line: readable ONLY by Forensics' extractor `engine1_heldout.py` (sha256 34badbec..., commit 670ddc9b on `claude/forensics-desk`, read in full by Auditor B), naming the same five runs (lists A and B, candles A1, A1C and B1). The extractor refuses unless the log carries a line with its file name, its own sha256 and every run name. I checked the file's sha256 and the five names before merging. Docs only.
+
+## Held-out log: ENGINE1 second-build reader (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Forensics' independent second-build reader `heldout_read_b2.py` (sha256 1b1228ec..., commit 369ca17f on `claude/forensics-desk`; I checked the file's sha256 before merging) and the ENGINE1 extract it reads. The reader needs the line to carry its file name, its own sha256 and both extract hashes, and reads the extract only after Desk A's print file is passed. Docs only.
