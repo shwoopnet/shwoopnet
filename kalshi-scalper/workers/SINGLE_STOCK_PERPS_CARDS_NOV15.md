@@ -31,3 +31,6 @@
 
 ## Card (a) funding carry: closed on the census alone (Nov 15, 2026, the Head)
 Funding rates are almost always 0 on the census, so there is nothing to earn. No read was made.
+
+## Dated note, 2026-11-16 (card (b), the opening gap; approved by the Head as option 1; appended, frozen text above unchanged)
+Stock perps are priced in their own units (about 1/25 to 1/60 of a share), so reference_price cannot be swapped for the underlying's dollar open. The test is unit-free: (the underlying's official open over its previous close) minus (the perp's 09:25 mid over its previous 16:00 mid), in log or percent terms; trade the perp toward the underlying past the card's threshold; the card's exit. The Testing Desk holds the Databento access and runs it.
