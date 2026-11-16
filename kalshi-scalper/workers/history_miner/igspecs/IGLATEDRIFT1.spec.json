@@ -78,7 +78,7 @@
  },
  "card": "kalshi-scalper/workers/history_miner/igspecs/IGSPECS_CARDS_NOV16.md",
  "needs_new_code": [
-  "ingame_fwd_load.py, ingame_events.py and IG_FWD_RESULTS are written (f4438cb15 and later); pending Auditor B's CLEAN and the allow line"
+  "none pending: ingame_fwd_load.py e639ad63, ingame_events.py 4698bae0 and IG_FWD_RESULTS d535923d are CLEAN (Auditor B 2026-11-16); the allow line is Main's"
  ],
  "holds": [
   {
@@ -129,7 +129,7 @@
   "sha256": "4698bae08dca65bebcaac7bad551bad6611099ba71a082b58b0976835f817e0b",
   "hand_case_file": "IGFWD_HAND_CASE_NOV16.md",
   "hand_case_sha256": "7a032a364505bb53b20a792006a7f163271d2acd05b1909a70722bf431ee0eaa",
-  "auditor_clean_date": "pending"
+  "auditor_clean_date": "2026-11-16"
  },
  "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
  "halves": "by entry time: the first floor(n/2) trades and the rest",
