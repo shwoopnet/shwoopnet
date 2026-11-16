@@ -1752,3 +1752,7 @@ The corrected `lane4_extract_b2.py` (sha256 a6b9532d..., commit 9f849955 on `cla
 ## Held-out log: PERPSCALP2 (Nov 16, 2026, Auditor B's allow line)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's `perpscalp2.py` (sha256 bc77a611..., commit f3ab35f8 on `claude/idea-desk-c`; I hashed it, and its runner `perpscalp2_run.py` is ed3d9d8b...). It reads the perps archive's `kalshi1m` and `funding` files only, candles ending through 1794787199, and drops rows at or after 1797897600 (H16); the `cash1m` and `perps30` folders (H17) are not read. No new source or host. Docs only.
+
+## Held-out log: Desk A's ENGINE1 loader replaced by the amended one (Nov 16, 2026, Auditor B's allow line)
+
+The ENGINE1 loader line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` now names the amended `engine1_heldout_load.py` (sha256 94e25241..., commit ebd2d1c2c on `claude/idea-desk-a`; I hashed the file before merging) in place of the earlier one (c42b5426...), over the same five runs; the amendment covers the registered partial A1 run (request h00048, the unanswered 400, only). The old sha no longer reads these runs, because the loader line is the one place that decides. Forensics' extractor and second-build reader lines are unchanged. Docs only.
