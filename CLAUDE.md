@@ -1634,3 +1634,7 @@ Two job files copied byte for byte from `claude/testing-desk` after checking eac
 ## Held-out log: ENGINE1 held-out lists run A (Nov 16, 2026, Auditor B's allow line)
 
 `ENGINE1_HELD_LISTS_A/2026-11-16T1724Z_43917966818` (the settled lists of KXBTC15M, KXETH15M, KXXRP15M, KXGOLD15M and KXDOGE15M, closes 2026-10-03T16:00Z to before 2026-10-28T00:00Z) is listed in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` as LOADED, readable only by Desk A's ENGINE1 held-out job generator at its pinned sha256 (ticker and close time first, no result field). Auditor B read the folder's structure CLEAN. The loader line comes when the candle runs land; list B follows when it lands. Docs only.
+
+## kalshi-pull job QUAKEH_LISTS, and the ENGINE1 batch B2 allow line (Nov 16, 2026, Desk B, Auditor B CLEAN)
+
+`QUAKEH_LISTS` (Desk B, file sha256 starts 8c03acda, 1 settled `/markets` list request for KXBIGGESTQUAKEH, cap 12, closes 2026-09-17T00:00Z to 2026-10-16T23:59:59Z only, nothing at or after Oct 17, 5 second pacing, elections host, GET only, no key) is copied byte for byte from `claude/idea-desk-b` commit 2a0fab499. Its reader line comes when the reader exists. The same change appends Auditor B's allow line for the ENGINE1 batch B2 runner (ENGB1TIMESTOP, ENGB2VSPIKE, ENGB3SPRW) to `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` verbatim. Runner and workflow unchanged. Gate: `test/kalshiPullGates.test.js` job lists. Nothing trades.

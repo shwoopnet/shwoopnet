@@ -1,0 +1,51 @@
+{
+ "job_id": "QUAKEH_LISTS",
+ "owner": "DESK_B",
+ "status": "active",
+ "registration": "kalshi-scalper/workers/econcensus/ECONCENSUS_NOTE.md",
+ "purpose": "Counts of the settled markets of KXBIGGESTQUAKEH (earthquake hourly) for 30 days: markets and events a day. Tickers and close times only; no price or result is read.",
+ "heldout": "FIXED date window: closes from 2026-09-17T00:00:00Z to 2026-10-16T23:59:59Z only (min_close_ts 1789603200, max_close_ts 1792195199); nothing at or after 2026-10-17T00:00:00Z is requested. The list carries results; the reader reads ticker, event ticker and close_time only; the run is listed on HELDOUT_PULL_RUNS.md.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXBIGGESTQUAKEH"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 12,
+ "notes": "One series, at most 8 pages of 1,000, plus repeats after a 429; at 5 s about a minute.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "settled_KXBIGGESTQUAKEH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBIGGESTQUAKEH",
+    "status": "settled",
+    "min_close_ts": 1789603200,
+    "max_close_ts": 1792195199,
+    "limit": 1000
+   },
+   "max_pages": 8
+  }
+ ]
+}
