@@ -1,0 +1,4 @@
+their header: cells 624 m_total 624 games_dropped_clock 1 survivors 0
+first build: m_total 624 games 23 clock-dropped 1 bh_survivors 0
+cells compared (their n > 0): 596 their empty cells: 28 cells only in mine: 0
+differences: 0

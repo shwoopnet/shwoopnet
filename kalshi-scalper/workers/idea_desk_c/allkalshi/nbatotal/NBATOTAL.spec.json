@@ -158,9 +158,9 @@
   "family_flag": "none"
  },
  "tally": {
-  "m_carried": 2113449,
-  "m_carried_source": "the Head's ruling A, 2026-11-16: the whole shared strict count in DEFLATION_LEDGER (rnd-queue 25471e1f6, last additions Nov 13)",
-  "header": "m_carried = 2,113,449 (Head's ruling, 2026-11-16), m_new = 1,768 + SIBHIT-R's arms; fixed once printed"
+  "m_carried": "NOT FIXED: the ledger's whole count INCLUDING every row added after Nov 13 (ENGINE1 run 2, the perps passes and others); Auditor B adds those rows and writes the single current total into the joint print's header before it prints (the Head, 2026-11-16 18:33Z)",
+  "m_carried_floor": 2113449,
+  "header": "m_carried = <Auditor B's single current ledger total, at least 2,113,449> (Head's ruling A), m_new = 1,768 + SIBHIT-R's arms; fixed once printed"
  },
  "exits_rule": "M35: no mark = counted and held to settlement (H); printed both ways",
  "labels": [
