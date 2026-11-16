@@ -1,0 +1,2 @@
+ENGINE1 perps pass 2 print sha256 (committed before reading): fd276e19016579bcf596723732d4f3ee257852fc92049556bb3fb923606dc0a9
+B3 line in the run checkout = the accepted text byte for byte, line sha256 3a92519d275f119e4edd5cfba447edb2a06a1e7a5d8920a08d0d0fb838145108 (committed c29d8b285). files: loader eded8ea1e721d9de, split f170d7183d0d0b5a, perps driver 175a7ccd8eb26c6b, runner ba3cbcfd5821fb8b; extracts perps 730fa938, ext 97d72ea6, funding bb07226f; archive not opened. m_prior 504.
