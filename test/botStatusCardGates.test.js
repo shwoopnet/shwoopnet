@@ -58,7 +58,7 @@ gates.SC10 = () => {
   for (const name of ['kalPrices', 'kalDepth', 'kalshiPriceWatch', 'KAL_PRICE_WATCH', 'kalshiRenderPrices', 'kalshiEventNext', 'kalshiEscapedEventCell', 'kalshiEscapedPriceCell', 'kalshiLastOrderSizes', 'kalshiEscapedDepthRow', 'kalshiEscapedDepthRows', 'kal-st-bottom', 'kal-st-prices', 'kal-st-depth', 'kal-st-pgrid', 'kal-st-pcell', 'kal-st-drow'])
     assert.ok(!html.includes(name), name + ' is gone from the page');
   assert.ok(!/Prices right now, against what each strategy buys|Depth at the touch, against our order size/.test(html), 'neither tile title is on the page');
-  assert.deepStrictEqual(html.match(/fetch\([^,)]*/g), ["fetch('strategies-registry.json'", 'fetch(location.pathname'], 'the only fetches are the page freshness HEAD check and the committed strategy list (same origin, no figures): removing tiles added no request');
+  assert.deepStrictEqual(html.match(/fetch\([^,)]*/g), ["fetch('strategies-registry.json'", 'fetch(KAL_COUNTS_URL', 'fetch(KAL_SHADOW_URL', 'fetch(location.pathname'], 'the only fetches are the page freshness HEAD check and the committed strategy list (same origin, no figures) and the counts-only file the owner allowed on Nov 16, 2026: removing tiles added no request');
 };
 // What stays: the countdown helpers (pure, tested above) and the relay read that Open positions still needs.
 gates.SC11 = () => {

@@ -218,7 +218,7 @@ gates['SX9 the wiring: quotes reach the slot tick only around the weekday entry 
   } else {
     const reg = JSON.parse(fs.readFileSync(path.join(root, 'strategies-registry.json'), 'utf8'));
     const row = reg.strategies.find((x) => x.id === 'SPXOI1');
-    assert.ok(row && row.stage === 'Probe' && row.label === 'UNPROVEN' && /Trial: below the research bar, no evidence/.test(JSON.stringify(row)) && /waiting for its threshold/i.test(JSON.stringify(row)), 'the registry says: trial, waiting for its threshold');
+    assert.ok(row && row.stage === 'Retired' && row.retiredOn === '2026-11-16' && /never traded/.test(row.reason), 'the registry says: retired Nov 16 (the owner dropped the activity seats; T was never set, so it never traded)');
     assert.ok(!(row.code && (row.code.slot || row.code.live)), 'and does not claim a coded seat while T is null');
   }
   const readme = fs.readFileSync(path.join(root, 'kalshi-scalper', 'README.md'), 'utf8');

@@ -1,0 +1,395 @@
+{
+ "version": "2026-11-16T16Z+4",
+ "author": "Auditor B",
+ "rule": "A cell (ticker pattern, time) is REFUSED if its time is in [from, to) of any row with status OPEN or FROZEN. Time = market close_ts (binary), event occurrence where the row says so, candle end_ts or file date (perps, recorders). 'to' null = open ended. A cell in NO row is NOT cleared: the driver also refuses any time at or after forward_default_deny_from unless the signed spec names that window in its holds table. A row with a 'scope' applies only to that kind of data (archive_binary = ENGINE1 binary-market archive and NC15 extracts); a row without 'scope' applies to every kind.",
+ "forward_default_deny_from": 1794787200,
+ "coverage": "PARTIAL: built from the Nov 15 registry copy and my hold maps of Nov 16; cards not listed are not cleared. Updated on every Head ruling.",
+ "rows": [
+  {
+   "id": "H01",
+   "name": "archive and NC15 binary extracts",
+   "tickers": [
+    "*"
+   ],
+   "from": 1791043200,
+   "to": null,
+   "card": "ENGINE1 global freeze",
+   "status": "FROZEN",
+   "note": "engine1_extract_load.py CUT; all Kalshi binary closes from this instant are outside ENGINE1's archive passes",
+   "scope": "archive_binary"
+  },
+  {
+   "id": "H02",
+   "name": "forward cards on bitcoin hourly and 15 minute",
+   "tickers": [
+    "KXBTCD*",
+    "KXBTC15M*"
+   ],
+   "from": 1793721600,
+   "to": null,
+   "card": "BOOKIMB1, FLOWHR1, MAKERMID1, MAKERTAIL1 forward windows",
+   "status": "OPEN",
+   "note": "outcome reads held until each card's own read; count-only logging allowed"
+  },
+  {
+   "id": "H03",
+   "name": "MMSIM1 held-out",
+   "tickers": [
+    "KXBTCD*"
+   ],
+   "from": 1794063600,
+   "to": null,
+   "card": "MMSIM1",
+   "status": "OPEN",
+   "note": "hourly closes from this instant; read on or after 2026-11-24 by MMSIM1 only"
+  },
+  {
+   "id": "H04",
+   "name": "ingame rows",
+   "tickers": [
+    "KXNBATOTAL*",
+    "KXNFLTOTAL*",
+    "KXNHLGAME*",
+    "KXNHLTOTAL*",
+    "KXNBASPREAD*",
+    "KXNFLSPREAD*",
+    "KXNHLSPREAD*"
+   ],
+   "from": 1794528000,
+   "to": null,
+   "card": "sports-data ingame forward window",
+   "status": "OPEN",
+   "note": "History Miner's forward IG specs own it from 2026-11-17T00:00Z; any other reader refused"
+  },
+  {
+   "id": "H05",
+   "name": "SPORTS-PRE ruling",
+   "tickers": [
+    "KXNBAGAME*",
+    "KXNFLGAME*",
+    "KXNCAAFGAME*"
+   ],
+   "from": 1793491200,
+   "to": 1798761600,
+   "card": "Head's SPORTS-PRE ruling",
+   "status": "OPEN",
+   "note": "moneyline and spread outcomes held"
+  },
+  {
+   "id": "H06",
+   "name": "KXNBAPTS reserve",
+   "tickers": [
+    "KXNBAPTS*"
+   ],
+   "from": 1793923200,
+   "to": 1794528000,
+   "card": "SIBHIT-R reserve",
+   "status": "OPEN",
+   "note": "reserve block"
+  },
+  {
+   "id": "H07",
+   "name": "KXNBAPTS held-out",
+   "tickers": [
+    "KXNBAPTS*"
+   ],
+   "from": 1794528000,
+   "to": 1796342400,
+   "card": "SIBHIT-R held-out",
+   "status": "OPEN",
+   "note": "read once, jointly by SIBHIT-R and NBALADDER (one print, one m), pulled once after Dec 4"
+  },
+  {
+   "id": "H08",
+   "name": "combo recorder",
+   "tickers": [
+    "combo*",
+    "KXMVE*"
+   ],
+   "from": 1794528000,
+   "to": 1796515199,
+   "card": "S3 combo house side: forward frozen rule, entries 2026-11-13T00:00Z to before 2026-12-06T00:00Z, ONE read on or after 2026-12-12T00:00Z",
+   "status": "OPEN",
+   "note": "combo recorder from Nov 13 held for S3's one read; Nov 12 is development; held-out split withdrawn"
+  },
+  {
+   "id": "H09",
+   "name": "bitcoin 15 minute vs OKX join",
+   "tickers": [
+    "KXBTC15M*"
+   ],
+   "from": 1794182400,
+   "to": 1795219199,
+   "card": "CFRTI cards",
+   "status": "OPEN",
+   "note": "held until the Nov 20 sitting; the OKX feed alone is free"
+  },
+  {
+   "id": "H10",
+   "name": "politics closes",
+   "tickers": [
+    "KXTRUMPAPPROVE*",
+    "KXAPRPOTUS*",
+    "KXTRUTHSOCIALD*",
+    "KXTRUMPVH*",
+    "KXNYTTRUMPAPPROVAL*",
+    "KXGCB*",
+    "KXRCP*"
+   ],
+   "from": 1793836800,
+   "to": null,
+   "card": "POLGAPH held-out (strictest date) and W-CAT-POLENT1",
+   "status": "OPEN",
+   "note": "W-CAT-POLENT1 cut2: Entertainment 1794150000, Mentions 1794062768, Politics 1794338069"
+  },
+  {
+   "id": "H11",
+   "name": "W-POL-APPR1 cut2 per family",
+   "tickers": [
+    "KXTRUMPAPPROVE*",
+    "KXAPRPOTUS*",
+    "KXNYTTRUMPAPPROVAL*",
+    "KXGCB*"
+   ],
+   "from": 1792159140,
+   "to": null,
+   "card": "W-POL-APPR1",
+   "status": "OPEN",
+   "note": "cut2: ALL_APPR 1792515540, APPR_DAILY 1792515540, APPR_OTHER 1792159140, APPR_RCP 1792767600, GCB 1792703040; earliest used here"
+  },
+  {
+   "id": "H12",
+   "name": "NOWCAST1 frozen holdout",
+   "tickers": [
+    "KXCPI*",
+    "KXPCECORE*"
+   ],
+   "from": 1758844800,
+   "to": null,
+   "card": "NOWCAST1",
+   "status": "OPEN",
+   "note": "forward read 2027-03-01"
+  },
+  {
+   "id": "H13",
+   "name": "TRUMPTOPIC1 forward window",
+   "tickers": [
+    "KXTRUMPMENTION*",
+    "KXTRUMPMENTIONB*",
+    "KXTRUMPSAY*"
+   ],
+   "from": 1793836800,
+   "to": null,
+   "card": "TRUMPTOPIC1",
+   "status": "OPEN",
+   "note": "by event occurrence"
+  },
+  {
+   "id": "H14",
+   "name": "Trump-word shared held-out",
+   "tickers": [
+    "KXTRUMPMENTION*",
+    "KXTRUMPMENTIONB*"
+   ],
+   "from": 1790985600,
+   "to": 1793836800,
+   "card": "MENTDRIFT held-out (one shared read, Head's go)",
+   "status": "OPEN",
+   "note": "by event occurrence; one read for all Trump-word families"
+  },
+  {
+   "id": "H15",
+   "name": "KXINX15M held-out",
+   "tickers": [
+    "KXINX15M*"
+   ],
+   "from": 1796083200,
+   "to": null,
+   "card": "SPXOI1 / Testing Desk reader",
+   "status": "OPEN",
+   "note": "closes from this instant"
+  },
+  {
+   "id": "H16",
+   "name": "stock perps and index perps forward",
+   "tickers": [
+    "KXSPYPERP*",
+    "KXQQQPERP*",
+    "KXNVDAPERP*",
+    "KXAAPLPERP*",
+    "KXUS500PERP*",
+    "KXUSTECH100PERP*"
+   ],
+   "from": 1797897600,
+   "to": 1801440000,
+   "card": "STOCKPERP and PERPEQ1 held-out",
+   "status": "OPEN",
+   "note": "development ends 2026-12-21"
+  },
+  {
+   "id": "H17",
+   "name": "cash open and close files",
+   "tickers": [
+    "perps30*",
+    "cash1m*"
+   ],
+   "from": 1796083200,
+   "to": null,
+   "card": "CASHCLOSE1, CASHOPEN1 and successors",
+   "status": "OPEN",
+   "note": "files dated from this instant"
+  },
+  {
+   "id": "H18",
+   "name": "EVM1 held-out third",
+   "tickers": [
+    "KXBTCD*"
+   ],
+   "from": 1789948800,
+   "to": 1793750400,
+   "card": "EVM1",
+   "status": "OPEN",
+   "note": "closes from 2026-09-21 to 2026-11-04, never read"
+  },
+  {
+   "id": "H19",
+   "name": "HRSEAS1 W3",
+   "tickers": [
+    "KXBTCD*"
+   ],
+   "from": 1791590400,
+   "to": 1793750400,
+   "card": "HRSEAS1",
+   "status": "OPEN",
+   "note": "last third of its 956 closes, from about 2026-10-10 (conservative), never computed"
+  },
+  {
+   "id": "H20",
+   "name": "R6 five 15 minute series from Oct 28",
+   "tickers": [
+    "KXBTC15M*",
+    "KXETH15M*",
+    "KXXRP15M*",
+    "KXDOGE15M*",
+    "KXGOLD15M*"
+   ],
+   "from": 1793145600,
+   "to": null,
+   "card": "SLOTEX (untouched from Oct 28), BOOKIMB1 holdout Nov 2 to Nov 3T16:00Z and forward, GOLDHAIRCUT1 (Oct 29 to Nov 11), DEPTH1 (Oct 30 to Nov 13), CFRTI cards (from Nov 5/9), MKTTIME1-F, FAM cards forward",
+   "status": "OPEN",
+   "note": "ENGINE1 held-out read for these series ends before 2026-10-28T00:00Z"
+  },
+  {
+   "id": "H21",
+   "name": "EVENT830 release windows",
+   "tickers": [
+    "KXSILVER15M*",
+    "KXCOPPER15M*",
+    "KXWTI15M*",
+    "KXEURUSD15M*",
+    "KXGBPUSD15M*",
+    "KXUSDJPY15M*",
+    "KXAUDUSD15M*",
+    "KXUSDCAD15M*"
+   ],
+   "from": 1793836800,
+   "to": 1798070400,
+   "card": "EVENT830 forward (windows 2026-11-05 to 2026-12-23)",
+   "status": "OPEN",
+   "note": "also: 13:30Z-release closes (within 5 minutes of 13:30Z) from 2026-10-03 are never read by ENGINE1 readers"
+  },
+  {
+   "id": "H22",
+   "name": "NC15DEPTH1 pooled scoring",
+   "tickers": [
+    "KXSILVER15M*",
+    "KXCOPPER15M*",
+    "KXWTI15M*",
+    "KXEURUSD15M*",
+    "KXGBPUSD15M*",
+    "KXUSDJPY15M*",
+    "KXHYPE15M*",
+    "KXBNB15M*",
+    "KXUSDCAD15M*",
+    "KXNATGAS15M*"
+   ],
+   "from": 1795046400,
+   "to": 1798761600,
+   "card": "NC15DEPTH1",
+   "status": "OPEN",
+   "note": "scoring window from 2026-11-19; count-only logging allowed"
+  },
+  {
+   "id": "S1",
+   "name": "Shadow runner clause",
+   "kind": "clearance",
+   "tickers": [
+    "the series listed in SHADOW_LIST_Vn (list version n)"
+   ],
+   "from": "that version's own start_utc (SHADOW_LIST_V1: 1794873600 = 2026-11-17T00:00Z); a later version gets its own fixed start_utc at or after its freeze",
+   "to": null,
+   "card": "owner's forward shadow list; Head of R&D 2026-11-16",
+   "status": "APPROVED",
+   "terms": [
+    "read ONLY to score the specs of that list version, identified by their sha256 in the list",
+    "per-spec aggregates only (n, PF at 1c and 2c, net, days, income) to the Head and the page; no per-market outcome, no per-day or per-hour tables, no result by any feature another held-out card uses",
+    "no spec of a list version may be changed after its first result; new specs come only as a NEW list version (SHADOW_LIST_V2 and later), each with its own start_utc at or after its freeze, counted in m, and under this clause",
+    "exposure disclosed on BOOKIMB1, FLOWHR1, MAKERMID1, MAKERTAIL1, DEPTH1, CFRTI, NC15DEPTH1 and S3",
+    "the result is a forward development figure for the shadow decision and never a held-out verdict for any of those cards",
+    "count-only logging stays allowed on H02, H03, H22"
+   ],
+   "overrides": [
+    "H02",
+    "H20",
+    "H22 and the forward_default_deny for these cells, for the shadow runner only"
+   ]
+  }
+ ],
+ "released": [
+  {
+   "card": "STRESSDAY1",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "closed unread"
+  },
+  {
+   "card": "RACELOCK",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "closed unread"
+  },
+  {
+   "card": "FXREF1",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "NOT_RUNNABLE, nothing read"
+  },
+  {
+   "card": "SETTLE1",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "no date constants"
+  },
+  {
+   "card": "FLOW1 D3",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "closed unread by the Head's ruling (removed from live Nov 4)"
+  },
+  {
+   "card": "PUB20 W3",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "never armed"
+  },
+  {
+   "card": "SPIKE1 W3",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "never armed"
+  },
+  {
+   "card": "FAM2 W3",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "never armed"
+  },
+  {
+   "card": "REV1 split",
+   "released_by": "Head of R&D 2026-11-16",
+   "reason": "owner retired V2 forward reads unread Nov 12"
+  }
+ ]
+}
