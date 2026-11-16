@@ -248,12 +248,16 @@ function makeReportHandler(deps) {
       // The hourly balance history over the asked window. Optional, read only; a failure leaves the field out, an empty history is an empty list.
       let balanceHistory;
       if (typeof deps.readBalances === "function") { try { balanceHistory = balanceSection(await deps.readBalances(now - hours * 3600000)); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      // The one-shot perps account probe (Nov 16, 2026): HTTP statuses and field NAMES only, never a value. Optional; a failure leaves it out.
+      let perpsProbe;
+      if (typeof deps.readPerpsProbe === "function") { try { const pp = await deps.readPerpsProbe(); if (pp && typeof pp === "object") perpsProbe = { at: Number(pp.at) || null, results: pp.results && typeof pp.results === "object" ? pp.results : {} }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       const report = buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders);
       if (deploys !== undefined) report.deploys = deploys;
       if (skips !== undefined) report.skips = skips;
       if (shadow !== undefined) report.shadow = shadow;
       if (longhold !== undefined) report.longhold = longhold;
       if (balanceHistory !== undefined) report.balanceHistory = balanceHistory;
+      if (perpsProbe !== undefined) report.perpsProbe = perpsProbe;
       res.status(200).json(report);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.

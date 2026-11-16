@@ -1034,6 +1034,21 @@ exports.kalshiBalanceSnapshot = onSchedule(
   }
 );
 
+// One-shot read only probe of the perpetuals account (Nov 16, 2026, the owner: "Yes, run the probe"): three GETs, keeps HTTP status and field NAMES only, no value, no order
+// (functions/kalshiPerpsProbeLib.js, test/perpsProbeGates.test.js). The answer shows in the nightly report as perpsProbe. Delete this function once the answer is known.
+const perpsProbe = require("./kalshiPerpsProbeLib");
+exports.kalshiPerpsProbe = onSchedule(
+  { schedule: "every 60 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30, retryCount: 0, memory: "256MiB" },
+  async () => {
+    try {
+      ensureDefaultAdminApp();
+      const out = await perpsProbe.runPerpsProbe({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now() });
+      await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).set(out);
+      console.log("kalshiPerpsProbe: " + Object.keys(out.results).map((p) => p + "=" + out.results[p].status).join(" "));
+    } catch (e) { console.error("kalshiPerpsProbe: " + String((e && e.message) || e).slice(0, 160)); }
+  }
+);
+
 // Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
 // (see kalshiBookLib.js). READ ONLY and keyless. It is the LAST export on purpose: the tests slice the file from
 // here to prove nothing after this point can see the live key or place an order.
@@ -1091,6 +1106,8 @@ exports.kalshiNightlyReport = onRequest(
     readLongholdRows: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(longholdLib.COLLECTION).orderBy("atMs", "desc").limit(2000).get()).docs.map((d) => d.data()); },
     // The hourly balance snapshots (Nov 12, 2026): documents of balance data only, read only.
     readBalances: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(balanceSnap.COLLECTION).where("ts", ">=", sinceMs).orderBy("ts").limit(kalshiReport.MAX_BALANCE_ROWS).get()).docs.map((d) => d.data()); },
+    // The perps probe answer (Nov 16, 2026): statuses and field names only.
+    readPerpsProbe: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).get(); return d.exists ? d.data() : null; },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.
     readSkips: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SKIPS).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
