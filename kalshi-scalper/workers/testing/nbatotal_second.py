@@ -75,10 +75,13 @@ def cash(d, side, ex, candles, mode="primary", n=10):
     return settle(), False
 
 
-def m_total(carried=6290660): return N_CELLS + carried
+JOINT_M_NEW = 624 + 624 + 520 + 2          # the joint print with NBALADDER, NBAREB, NBATOTAL and SIBHIT-R's two arms (the Head, Nov 16)
 
 
-def search(rungs, candles, carried=6290660, validate_h_only=False):
+def m_total(carried=6290660, m_new=N_CELLS): return carried + m_new
+
+
+def search(rungs, candles, carried=6290660, validate_h_only=False, m_new=N_CELLS):
     """-> (cells {(hours, exit, band_lo, side, filter): stats}, counts, survivors)"""
     O_by, cnt = b.games(rungs); drop = m35_dropped(rungs, candles, O_by); cnt["m35_dropped_games"] = len(drop); cells = {}
     for hours in (9, 5, 4):
@@ -97,5 +100,5 @@ def search(rungs, candles, carried=6290660, validate_h_only=False):
                             c1, mk = cash(d, side, ex, candles, "primary"); c2_, _ = cash(d, side, ex, candles, "two"); cw, _ = cash(d, side, ex, candles, "weekly", 5)
                             tr.append({"game": d["r"]["event"], "day": d["D"] // 86400, "close_time": d["r"]["close_time"], "ticker": d["r"]["ticker"], "cash1": c1, "cash2": c2_, "cashw": cw, "marked": mk})
                         st = b.cell_stats(tr); cells[(hours, ex, band[0], side, f)] = st
-    elig = b.eligible(cells); surv = {k for k in b.bh(elig, m_total(carried)) if b.gate_ok(cells[k])}
+    elig = b.eligible(cells); surv = {k for k in b.bh(elig, m_total(carried, m_new)) if b.gate_ok(cells[k])}
     return cells, cnt, surv

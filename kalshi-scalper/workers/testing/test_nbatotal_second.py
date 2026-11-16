@@ -53,4 +53,7 @@ assert m.cash(dict(d, r=dict(R1, close_time=O - m.MARK)), "yes", "M35", cs)[1] i
 seen = []; orig_bh = b.bh
 b.bh = lambda cells, mt, q=0.05: (seen.append(mt), orig_bh(cells, mt, q))[1]
 m.search([R1], cs); m.search([R1], cs, carried=0); b.bh = orig_bh; assert seen == [6291180, 520], seen
+assert m.JOINT_M_NEW == 1770 and m.m_total(6290660, m.JOINT_M_NEW) == 6292430 and m.m_total() == 6291180
+seen.clear(); b.bh = lambda cells, mt, q=0.05: (seen.append(mt), orig_bh(cells, mt, q))[1]
+m.search([R1], cs, m_new=m.JOINT_M_NEW); b.bh = orig_bh; assert seen == [6292430], seen
 print("nbatotal second tests passed")

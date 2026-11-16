@@ -4,9 +4,9 @@ import math
 import nbatotal_second as m
 from nbaladder_driver_second import fmt
 
-def run(rungs, candles, carried=6290660):
-    cells, cnt, surv = m.search(rungs, candles, carried)
-    lines = ["header m_carried %d m_new %d m_total %d" % (carried, m.N_CELLS, m.m_total(carried)), "counts " + repr(sorted(cnt.items())), "cells %d survivors %d" % (len(cells), len(surv))]
+def run(rungs, candles, carried=6290660, m_new=m.N_CELLS):
+    cells, cnt, surv = m.search(rungs, candles, carried, m_new=m_new)
+    lines = ["header m_carried %d m_new %d m_total %d" % (carried, m_new, m.m_total(carried, m_new)), "counts " + repr(sorted(cnt.items())), "cells %d survivors %d" % (len(cells), len(surv))]
     for k in sorted(cells, key=lambda c: (c[0], c[1], c[2], c[3], c[4])):
         s = cells[k]
         lines.append("D%dh|%s|band%.2f|%s|%s | n %d games %d days %d | pf1 %s h1 %s h2 %s pf2 %s | net1 %s weekly5 %s | z %s p %s | marked_n %d marked_pf %s | pass %s" % (
