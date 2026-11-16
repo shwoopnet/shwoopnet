@@ -1772,3 +1772,7 @@ One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk A's lane
 ## Held-out log: ENGPERPS lanes 1 and 6 runner updated (Nov 16, 2026, Auditor B's update of PR 1025)
 
 The runner sha in the ENGPERPS lanes 1 and 6 line of `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` is now `engine1_perps_lanes_run.py` ea1f51f4... (commit 6c9338c61 on `claude/idea-desk-a`, with the Head's page max ruling; the engine `engine1_perps_lanes.py` d7c7a1ec... is unchanged; I hashed both before merging). The old runner sha 2b18e74e... no longer reads. The line also names the pinned page max file (`PERPS_PAGE_MAX_PINNED_5be707ec.tsv`, sha256 5be707ec...). Still not a go to run: the blind second build's fixture compares are pending. Docs only.
+
+## Held-out log: ENGPERPS lanes 1 and 6 engine updated (Nov 16, 2026, Auditor B's update of PR 1026)
+
+The engine sha in the ENGPERPS lanes 1 and 6 line of `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` is now `engine1_perps_lanes.py` ff1a1270... (commit b384dc11e on `claude/idea-desk-a`; two printed labels changed only; I hashed it and the unchanged runner ea1f51f4... before merging). The old engine sha d7c7a1ec... no longer reads. Still not a go to run. Docs only.
