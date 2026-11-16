@@ -1,0 +1,84 @@
+{
+ "id": "EXAMPLEGRID",
+ "desk": "example",
+ "date_registered": "2026-11-16",
+ "kind": "grid15m",
+ "card": "example",
+ "needs_new_code": [],
+ "uniqueness": {
+  "closest_existing": [
+   "L1"
+  ],
+  "declined_list_rows_checked": [
+   "example"
+  ],
+  "difference": "example",
+  "family_flag": "favourite-late"
+ },
+ "data": {
+  "loader": "hourbridge_load.py",
+  "loader_sha256": "7cb4249d0db6c475a2c48f9c6c01ab9c5edd4bdc5355e88641cbbf8ffaad2270",
+  "extracts": [
+   "quote-data checkout: quotes/<date>/<HHMM>/ladder.csv.gz, quotes.csv.gz, results.csv.gz for date directories 2026-10-27 to 2026-11-01"
+  ],
+  "ticker_wall": [
+   "KXBTCD",
+   "KXBTC15M"
+  ],
+  "window": {
+   "first_close": "2026-10-28T00:00:00Z",
+   "last_close_exclusive": "2026-11-02T00:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B, 2026-11-16 (hold map: cut accepted)",
+  "independence_note": "Oct 29 to Nov 1 are the development days of BOOKIMB1, FLOWHR1, MAKERMID1, MAKERTAIL1, ENTRYREPLAY1 block D and CFRTI-B: not independent of theirs"
+ },
+ "split": {
+  "mode": "fixed_dates"
+ },
+ "grid": {
+  "buckets": [
+   300,
+   360
+  ],
+  "bands": [
+   17,
+   18
+  ],
+  "side_rules": [
+   "favourite"
+  ],
+  "filters": [
+   "none",
+   "oi3"
+  ],
+  "exits": [
+   "H",
+   "M60"
+  ]
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ]
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 32,
+  "prior_m": "from the TALLY"
+ },
+ "prediction": "example",
+ "kill": "example",
+ "kill_fast": true,
+ "outputs": {
+  "survivor_line": "x",
+  "family_flag": "x"
+ }
+}
