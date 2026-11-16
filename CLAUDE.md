@@ -1756,3 +1756,27 @@ One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's `per
 ## Perps archive: funding by named ticker (Nov 16, 2026, the History Miner's PERPCRYPTO1 and the Head's FUNDX2)
 
 The ticker-less funding route (`FUNDING_ALL`, `funding/all-history.csv.gz`) returns every market's prints with a BLANK ticker, which the History Miner's loader refuses. `scripts/record_perps_candles.py` gets a third back-pull word, `FUNDING_BY_TICKER`: dispatch `record-perps-candles` with `date` (any finished date, unused), `days` 1 and `only` = `FUNDING_BY_TICKER,KXBTCPERP,KXETHPERP,...` (perp tickers only, nothing else is accepted, no workflow change: the input pattern already allows letters, digits, underscore and comma). It asks the funding history route ONCE PER NAMED TICKER (`?ticker=T`, following the cursor, at most 20 pages a ticker), labels every row with the ticker the request named, and writes `funding/by-ticker.csv.gz` on `perp-data`; an existing file is never read again, spacing is the same 1.2 seconds, three 429s in a row write nothing, and no candle file is touched. Not verified live: whether a ticker's full history pages through a cursor (the ticker-less route does), and how many prints each crypto perp holds; the first run answers both. Script and test only (gate RB11). Needs the owner's typed merge (a recorder script change); then a dispatch by Main.
+
+## Held-out log: Desk A's ENGINE1 loader replaced by the amended one (Nov 16, 2026, Auditor B's allow line)
+
+The ENGINE1 loader line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` now names the amended `engine1_heldout_load.py` (sha256 94e25241..., commit ebd2d1c2c on `claude/idea-desk-a`; I hashed the file before merging) in place of the earlier one (c42b5426...), over the same five runs; the amendment covers the registered partial A1 run (request h00048, the unanswered 400, only). The old sha no longer reads these runs, because the loader line is the one place that decides. Forensics' extractor and second-build reader lines are unchanged. Docs only.
+
+## Held-out log: PERPSCALP2 replacement line (Nov 16, 2026, Auditor B's allow line)
+
+The PERPSCALP2 line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` now names the corrected `perpscalp2.py` (sha256 b2c98390..., commit 60c1f8bc on `claude/idea-desk-c`; I hashed it and its runner `perpscalp2_run.py` ed3d9d8b... before merging) in place of bc77a611..., which no longer reads. Scope unchanged: perp-data `kalshi1m` and `funding` per-day files, candles through 1794787199, H16 rows dropped, H17 folders not read, no new source or host. Desk C ran PERPSCALP2_PRINT2 before this line existed (a procedural deviation on development files, not a hold breach). Docs only.
+
+## Held-out log: PERPSCALP2 second reader (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the Testing Desk's `perpscalp2_second_load.py` (sha256 6235e740..., commit 8eeaa5351 on `claude/testing-desk`; I hashed it, its run script a18addde... and `perpscalp2_second.py` 86a91086... before merging). Same sources and cutoff as Desk C's PERPSCALP2 line; no new source or host. Docs only.
+
+## Held-out log: ENGPERPS lanes 1 and 6 (Nov 16, 2026, Auditor B's corrected allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk A's lanes 1 and 6 runner `engine1_perps_lanes_run.py` (sha256 2b18e74e..., with `engine1_perps_lanes.py` d7c7a1ec..., commit 34d107160 on `claude/idea-desk-a`; I hashed both before merging). It replaces Auditor B's earlier text (older shas never logged) and reads only through the already listed POOL1 loader; no new source. The line is not a go: Desk A still needs the blind second build and Auditor B's fixture compare. Docs only.
+
+## Held-out log: ENGPERPS lanes 1 and 6 runner updated (Nov 16, 2026, Auditor B's update of PR 1025)
+
+The runner sha in the ENGPERPS lanes 1 and 6 line of `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` is now `engine1_perps_lanes_run.py` ea1f51f4... (commit 6c9338c61 on `claude/idea-desk-a`, with the Head's page max ruling; the engine `engine1_perps_lanes.py` d7c7a1ec... is unchanged; I hashed both before merging). The old runner sha 2b18e74e... no longer reads. The line also names the pinned page max file (`PERPS_PAGE_MAX_PINNED_5be707ec.tsv`, sha256 5be707ec...). Still not a go to run: the blind second build's fixture compares are pending. Docs only.
+
+## Held-out log: ENGPERPS lanes 1 and 6 engine updated (Nov 16, 2026, Auditor B's update of PR 1026)
+
+The engine sha in the ENGPERPS lanes 1 and 6 line of `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` is now `engine1_perps_lanes.py` ff1a1270... (commit b384dc11e on `claude/idea-desk-a`; two printed labels changed only; I hashed it and the unchanged runner ea1f51f4... before merging). The old engine sha d7c7a1ec... no longer reads. Still not a go to run. Docs only.
