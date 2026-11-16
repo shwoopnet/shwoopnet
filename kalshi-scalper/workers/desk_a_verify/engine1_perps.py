@@ -49,9 +49,17 @@ def exit_time(e, exit_):
         while time.gmtime(d).tm_wday >= 5: d += 86400
         return d + 14 * 3600 + 31 * 60
     return e + 60 * int(exit_[1:])
+def funding_times(e, tx):
+    """Daily funding prints at 21:00 UTC (4:00 PM ET under EST) strictly between the entry candle end and the exit candle end (an exit AT the print pays nothing)."""
+    out, d = [], e - e % 86400
+    while d + 21 * 3600 < tx:
+        t = d + 21 * 3600
+        if t > e: out.append(t)
+        d += 86400
+    return out
 def hold_of(e, exit_):
     t = exit_time(e, exit_); return COOLDOWN if t is None else max(COOLDOWN, t - e)
-def trade_full(by, e, side, exit_, h):
+def trade_full(by, e, side, exit_, h, funding=None):
     """-> (gross return, reason, hold seconds) or (None, 'no mark', 0). Candles in `by` are keyed by end_ts. The fee is applied by the caller."""
     c = by[e]; long_ = side == "long"
     fill = c[2] * (1 + h) if long_ else c[1] * (1 - h)
@@ -69,13 +77,17 @@ def trade_full(by, e, side, exit_, h):
     else: tx = exit_time(e, exit_)
     if ex is None:
         x = by.get(tx) if tx is not None else None
-        if not ok(x): return None, "no mark", 0
+        if not ok(x): return None, "no mark", 0, None
         ex, why, hold = leave(x), "time", tx - e
     gross = (ex / fill - 1) if long_ else (fill - ex) / fill
-    return gross, why, hold
+    flag = None
+    for t in funding_times(e, e + hold):                 # a positive rate: longs pay shorts; the rate is a fraction of notional
+        if funding is not None and t in funding: gross -= funding[t] if long_ else -funding[t]
+        else: flag = "funding not booked"
+    return gross, why, hold, flag
 def trade(by, e, side, exit_, h):
     """-> (net return at the taker fee, reason) or (None, reason); kept for the hand case."""
-    g, why, hold = trade_full(by, e, side, exit_, h)
+    g, why, hold, flag = trade_full(by, e, side, exit_, h)
     return (None, why) if g is None else (g - 2 * FEE, why)
 def pf(xs):
     w = sum(x for x in xs if x > 0); l = -sum(x for x in xs if x < 0)
@@ -87,7 +99,7 @@ def day_z(rows):
     if n < 2: return None
     m = sum(v) / n; sd = math.sqrt(sum((x - m) ** 2 for x in v) / (n - 1))
     return None if sd == 0 else m / (sd / math.sqrt(n))
-def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None, boundary=None):
+def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None, boundary=None, funding=None):
     """All entries of one rule with the 1800 s cooldown; lo and hi bound the entry end (inclusive lo, exclusive hi). -> rows [(e, net)], counters."""
     by = {c[0]: c for c in candles if ok(c)}; rows, cnt, last = [], collections.Counter(), None
     for e in sorted(by):
@@ -97,23 +109,25 @@ def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None, boundary=Non
         f = feature_ok(by, e, filt, cuts)
         if f is None: cnt["missing feature candle"] += 1; continue
         if not f: continue
-        g, why, hold = trade_full(by, e, side, exit_, h)
+        g, why, hold, flag = trade_full(by, e, side, exit_, h, funding)
         if g is None: cnt[why] += 1; continue
-        rows.append((e, g, hold)); cnt[why] += 1; last = e + hold_of(e, exit_)
+        rows.append((e, g, hold, flag)); cnt[why] += 1; last = e + hold_of(e, exit_)
+        if flag: cnt[flag] += 1
     return rows, cnt
 def days(rows): return len({time.strftime('%Y-%m-%d', time.gmtime(r[0])) for r in rows})
 def stats(rows, fee=FEE):
     """rows [(e, gross, hold)] -> stats at a per side fee; also the average hold (minutes) and the average gross move."""
+    unbooked = sum(1 for r in rows if len(r) > 3 and r[3]); rows = [r for r in rows if not (len(r) > 3 and r[3])]
     nets = [(r[0], r[1] - 2 * fee) for r in rows]; xs = [x for _, x in nets]; half = len(xs) // 2
-    return {"n": len(xs), "pf": pf(xs), "half1": pf(xs[:half]), "half2": pf(xs[half:]), "net": sum(xs), "day_z": day_z(nets), "avg_hold_min": (sum(r[2] for r in rows) / len(rows) / 60) if rows else None, "avg_gross_bp": (sum(r[1] for r in rows) / len(rows) * 1e4) if rows else None, "evidence": "ok" if len(xs) >= 100 else "no evidence at n = %d" % len(xs)}
+    return {"n": len(xs), "pf": pf(xs), "half1": pf(xs[:half]), "half2": pf(xs[half:]), "net": sum(xs), "day_z": day_z(nets), "avg_hold_min": (sum(r[2] for r in rows) / len(rows) / 60) if rows else None, "avg_gross_bp": (sum(r[1] for r in rows) / len(rows) * 1e4) if rows else None, "funding_unbooked": unbooked, "evidence": "ok" if len(xs) >= 100 else "no evidence at n = %d" % len(xs)}
 import engine1_split as S
 ALPHA = 0.05; MIN_N = 100; PF1 = 1.3; PF2 = 1.0; MIN_DAYS = 10     # trade days needed in SEARCH and in VALIDATE (Auditor B): fewer prints 'insufficient days' and the rule cannot pass
 def pval(z): return 0.5 * math.erfc(z / math.sqrt(2)) if z is not None else 1.0
 def short(t): return t[2:] if t.startswith("KX") else t
 def passes(a, b): return a["n"] >= MIN_N and a["pf"] >= PF1 and b["pf"] >= PF2
-def run_all(perps):
-    """perps: {ticker: candles}. SEARCH then VALIDATE by engine1_split dates of the entry candle, spread cuts from SEARCH entries only, every rule scored under the TAKER fee (the gate) and the MAKER fee (flagged, resting fills assumed), BH over m = every rule tried. Perps block only."""
-    rep = {"label": "perps block: upper bound, not fill-checked; taker fee 12 bps a side and maker fee 5 bps a side, both ASSUMED (not confirmed); relative haircuts 0.02% and 0.05% a side (stress line 0.1% and 0.2%); funding not booked; a maker-only pass assumes resting fills, fill rate unknown; information for the forward shadow only", "tried": 0, "cells_n100_search": 0, "search_bar_stress_taker": 0, "search_bar_taker": 0, "search_bar_maker": 0, "maker_only": 0, "insufficient_days": 0, "validate_bar_passes": 0, "validate_passes": 0, "survivors": [], "maker_only_list": [], "no_split_constant": [], "by_ticker": {}}
+def run_all(perps, funding=None, m_prior=0):
+    """perps: {ticker: candles}. SEARCH then VALIDATE by engine1_split dates of the entry candle, spread cuts from SEARCH entries only, every rule scored under the TAKER fee (the gate) and the MAKER fee (flagged, resting fills assumed), BH over m = every rule tried. Perps block only. funding: {ticker: {print ts: rate}} or None (then every trade crossing a 4 pm ET print is labelled "funding not booked" and left out of the gate); m_prior: tries already spent (read 1's 504) that stay in the BH denominator."""
+    rep = {"m_prior": m_prior, "funding_unbooked_trades": 0, "label": "perps block: upper bound, not fill-checked; taker fee 12 bps a side and maker fee 5 bps a side, both ASSUMED (not confirmed); relative haircuts 0.02% and 0.05% a side (stress line 0.1% and 0.2%); funding not booked; a maker-only pass assumes resting fills, fill rate unknown; information for the forward shadow only", "tried": 0, "cells_n100_search": 0, "search_bar_stress_taker": 0, "search_bar_taker": 0, "search_bar_maker": 0, "maker_only": 0, "insufficient_days": 0, "validate_bar_passes": 0, "validate_passes": 0, "survivors": [], "maker_only_list": [], "no_split_constant": [], "by_ticker": {}}
     m = 0; cand = []; mk_only = []
     for tk, cs in perps.items():
         key = short(tk)
@@ -122,29 +136,31 @@ def run_all(perps):
         sp = [(c[2] - c[1]) / mid(c) * 1e4 for c in good if S.phase(key, c[0]) == "search"]
         cuts = spread_cuts(sp) if sp else None
         first_val = min([c[0] for c in good if S.phase(key, c[0]) == "validate"] or [10 ** 12])
+        fund = (funding or {}).get(tk)
         bt = {"cells_n100": 0, "bar_taker": 0, "bar_maker": 0, "bar_stress_taker": 0, "search_days_max": 0}
         for f in FILTERS:
             for side in SIDES:
                 for x in EXITS:
                     m += 1
-                    r1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, hi=first_val, boundary=first_val); r2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, hi=first_val, boundary=first_val)
+                    r1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, hi=first_val, boundary=first_val, funding=fund); r2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, hi=first_val, boundary=first_val, funding=fund)
+                    rep["funding_unbooked_trades"] += stats(r1, FEE)["funding_unbooked"]
                     a_t, b_t = stats(r1, FEE), stats(r2, FEE); a_m, b_m = stats(r1, FEE_MAKER), stats(r2, FEE_MAKER)
                     bt["search_days_max"] = max(bt["search_days_max"], days(r1))
                     if a_t["n"] >= MIN_N: bt["cells_n100"] += 1
                     pt, pm = passes(a_t, b_t), passes(a_m, b_m)
                     bt["bar_taker"] += pt; bt["bar_maker"] += pm
-                    s1, _ = run_rule(good, f, side, x, STRESS[0], cuts, hi=first_val, boundary=first_val); s2, _ = run_rule(good, f, side, x, STRESS[1], cuts, hi=first_val, boundary=first_val)
+                    s1, _ = run_rule(good, f, side, x, STRESS[0], cuts, hi=first_val, boundary=first_val, funding=fund); s2, _ = run_rule(good, f, side, x, STRESS[1], cuts, hi=first_val, boundary=first_val, funding=fund)
                     bt["bar_stress_taker"] += passes(stats(s1, FEE), stats(s2, FEE))                # the old 0.1% and 0.2% lines, a stress line only
                     if (pt or pm) and days(r1) < MIN_DAYS: rep["insufficient_days"] += 1; continue
                     if pt: cand.append((tk, f, side, x, cuts, first_val, a_t, b_t))
                     elif pm: mk_only.append((tk, f, side, x))
         rep["by_ticker"][tk] = bt
         rep["cells_n100_search"] += bt["cells_n100"]; rep["search_bar_taker"] += bt["bar_taker"]; rep["search_bar_stress_taker"] += bt["bar_stress_taker"]; rep["search_bar_maker"] += bt["bar_maker"]
-    rep["tried"] = m; rep["maker_only"] = len(mk_only); rep["maker_only_list"] = [{"ticker": t, "filter": f, "side": sd, "exit": x, "flag": "assumes resting fills; fill rate unknown"} for t, f, sd, x in mk_only]
+    rep["tried"] = m; rep["m_total"] = m + m_prior; rep["maker_only"] = len(mk_only); rep["maker_only_list"] = [{"ticker": t, "filter": f, "side": sd, "exit": x, "flag": "assumes resting fills; fill rate unknown"} for t, f, sd, x in mk_only]
     vp = {}
     for tk, f, side, x, cuts, fv, a_t, b_t in cand:
         good = [c for c in perps[tk] if ok(c)]
-        v1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, lo=fv); v2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, lo=fv)
+        v1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, lo=fv, funding=(funding or {}).get(tk)); v2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, lo=fv, funding=(funding or {}).get(tk))
         sa, sb = stats(v1, FEE), stats(v2, FEE)
         if passes(sa, sb):
             if days(v1) < MIN_DAYS: rep["insufficient_days"] += 1; continue
@@ -152,7 +168,7 @@ def run_all(perps):
     rep["search_passes"] = len(cand); rep["validate_bar_passes"] = len(vp)
     items = sorted(vp.items(), key=lambda kv: kv[1][0]); k = 0
     for i, (_, v) in enumerate(items, 1):
-        if v[0] <= ALPHA * i / m: k = i
+        if v[0] <= ALPHA * i / (m + m_prior): k = i
     rep["validate_passes"] = k
     rep["survivors"] = [{"ticker": key[0], "filter": key[1], "side": key[2], "exit": key[3], "pf_taker_h1": v[1]["pf"], "pf_taker_h2": v[2]["pf"], "pf_maker_h1": v[3]["pf"], "n": v[1]["n"], "avg_hold_min": v[1]["avg_hold_min"], "avg_gross_bp": v[1]["avg_gross_bp"], "p": v[0], "leverage_table": "to be built for a survivor (needs Kalshi's margin rules)"} for key, v in items[:k]]
     return rep

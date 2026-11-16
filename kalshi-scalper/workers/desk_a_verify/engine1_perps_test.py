@@ -77,7 +77,7 @@ for i in range(0, 1500):
     m = mid2.get(i, 100.00); c2[D2 + 60 * i] = (D2 + 60 * i, round(m - .01, 6), round(m + .01, 6), 0, 0, 0)
 e0 = D2; h2 = 2e-4
 for ex, want in (("T60", 0.0043976806), ("T240", -0.0045978205), ("TC", 0.0093951812), ("TO", 0.0193901825)):
-    g, why, hold = P.trade_full(c2, e0, "long", ex, h2); assert why == "time" and near(g, want, 2e-9), (ex, g, want)
+    g, why, hold, fl = P.trade_full(c2, e0, "long", ex, h2); assert why == "time" and near(g, want, 2e-9), (ex, g, want)
 assert P.trade_full(c2, e0, "long", "T60", h2)[2] == 3600 and P.trade_full(c2, e0, "long", "TC", h2)[2] == 380 * 60 and P.trade_full(c2, e0, "long", "TO", h2)[2] == 1431 * 60
 assert P.exit_time(D2 + 380 * 60, "TC") is None and P.trade_full(c2, D2 + 380 * 60, "long", "TC", h2)[1] == "no mark"                    # entry at 21:00: no mark for TC
 fri = calendar.timegm((2026, 11, 13, 15, 0, 0)); sat = calendar.timegm((2026, 11, 14, 15, 0, 0)); sun = calendar.timegm((2026, 11, 15, 15, 0, 0)); mon = calendar.timegm((2026, 11, 16, 14, 31, 0))
@@ -90,4 +90,17 @@ assert len(rows) == 1 and rows[0][0] == D2, [(r[0] - D2) // 60 for r in rows]
 # the boundary clip uses the rule's own hold: an entry whose T240 exit reaches the boundary is dropped
 rows, cnt = P.run_rule(list(c2.values()), None, "long", "T240", h2, None, lo=D2, hi=D2 + 61 * 60, boundary=D2 + 240 * 60)
 assert rows == [] and cnt["exit crosses the boundary"] >= 1
+# (2) funding: prints at 21:00 UTC strictly between the entry candle end and the exit candle end
+ft = P.funding_times(D2, D2 + 1431 * 60); assert ft == [D2 + 380 * 60], ft                       # TO from Tuesday 14:40: one print (Tuesday 21:00)
+assert P.funding_times(D2, D2 + 380 * 60) == [] and P.funding_times(D2, D2 + 3600) == []          # TC exits AT the print: nothing paid; T60 crosses none
+fri21 = calendar.timegm((2026, 11, 13, 21, 0, 0)); assert P.funding_times(fri, calendar.timegm((2026, 11, 16, 14, 31, 0))) == [fri21, fri21 + 86400, fri21 + 2 * 86400]
+g0, w0, hd, fl0 = P.trade_full(c2, e0, "long", "TO", h2); assert fl0 == "funding not booked" and near(g0, 0.0193901825, 2e-9)          # no funding map: labelled
+g1, w1, hd, fl1 = P.trade_full(c2, e0, "long", "TO", h2, {D2 + 380 * 60: 0.0001}); assert fl1 is None and near(g1, 0.0193901825 - 0.0001, 2e-9)       # long pays a positive rate
+g2, w2, hd, fl2 = P.trade_full(c2, e0, "short", "TO", h2, {D2 + 380 * 60: 0.0001}); g3, w3, hd, fl3 = P.trade_full(c2, e0, "short", "TO", h2, {D2 + 380 * 60: -0.0001})
+assert fl2 is None and near(g2 - g3, 0.0002, 1e-12)                                              # a short receives a positive rate and pays a negative one
+g4, w4, hd, fl4 = P.trade_full(c2, e0, "long", "T60", h2); assert fl4 is None                    # no print crossed: no label
+# a flagged trade is left out of the gate figures and counted
+rows = [(D2, .01, 60, None), (D2 + 86400, .02, 60, "funding not booked")]; st = P.stats(rows); assert st["n"] == 1 and st["funding_unbooked"] == 1
+# BH keeps the prior tries in the denominator
+rep = P.run_all({"KXSPYPERP": C}, m_prior=504); assert rep["m_total"] == rep["tried"] + 504 and rep["m_prior"] == 504
 print("ALL OK")
