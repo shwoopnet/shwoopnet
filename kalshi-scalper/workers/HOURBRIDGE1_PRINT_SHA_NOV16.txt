@@ -1,0 +1,2 @@
+HOURBRIDGE1 development read print sha256 (committed before reading): 48166090f5546592a9130ce20595e481dfabb662707fb2542fcb682aa0d5ed76
+files: core 2c29841271d7960e, loader 7cb4249d0db6c475 (allow line merged, #965), runner ea7122da75b19fc3, engine1_core 53317e4b56a8328f; quote-data dirs 2026-10-27 to 2026-11-01 only (git archive); same days as BOOKIMB1, FLOWHR1, MAKERMID1 and MAKERTAIL1 development.
