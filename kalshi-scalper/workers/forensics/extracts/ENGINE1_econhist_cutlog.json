@@ -1,0 +1,96 @@
+{
+ "extract": "ENGINE1 econhist",
+ "run": "ECONHIST_LISTS/2026-11-16T1522Z_43895509363",
+ "cuts": {
+  "KXCPI": 1758844800,
+  "KXPCECORE": 1758844800,
+  "KXPAYROLLS": null,
+  "KXJOBLESSCLAIMS": null,
+  "KXCONTCLAIMS": null,
+  "KXUE": null,
+  "KXISMPMI": null,
+  "KXUSISMSERV": null,
+  "KXUSPPIYOY": null,
+  "KXCPINDEX": null
+ },
+ "counts": {
+  "dropped by the cut KXCPI": 110,
+  "unknown series or no close": 497,
+  "dropped by the cut KXPCECORE": 61
+ },
+ "markets_by_series": [
+  [
+   "KXCONTCLAIMS",
+   33,
+   1787833740,
+   1789043340,
+   3
+  ],
+  [
+   "KXCPI",
+   68,
+   1733923500,
+   1757593500,
+   10
+  ],
+  [
+   "KXCPINDEX",
+   63,
+   1784032140,
+   1789129740,
+   3
+  ],
+  [
+   "KXISMPMI",
+   97,
+   1743515940,
+   1788273213,
+   13
+  ],
+  [
+   "KXJOBLESSCLAIMS",
+   524,
+   1749731400,
+   1789043100,
+   55
+  ],
+  [
+   "KXPAYROLLS",
+   240,
+   1733491500,
+   1788524940,
+   22
+  ],
+  [
+   "KXPCECORE",
+   41,
+   1734701100,
+   1756470300,
+   9
+  ],
+  [
+   "KXUE",
+   516,
+   1772494158,
+   1789438012,
+   54
+  ],
+  [
+   "KXUSISMSERV",
+   45,
+   1777989540,
+   1788443940,
+   3
+  ],
+  [
+   "KXUSPPIYOY",
+   82,
+   1778675340,
+   1789043340,
+   5
+  ]
+ ],
+ "markets": 1709,
+ "extract_sha256": "3d7801a69297e3cb3071ac8e992f6925fdc7e7c762b92f554560279fa01a3f62",
+ "extractor_sha256": "edfdcf5bf3d47d292d487aafa55736a0709a4d7fc85db726204ffe8273e81243"
+}
