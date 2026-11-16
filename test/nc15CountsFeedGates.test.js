@@ -14,7 +14,7 @@ const good = { places: [{ id: 'WH-NC15-WTI', fill_checked_signals: 12, status: '
 // NC1: the page makes exactly one request to that host: a read-only GET of the one counts file, with no credentials, and nothing else on the host is named anywhere.
 gates.NC1 = () => {
   const urls = [...html.matchAll(/https?:\/\/raw\.githubusercontent\.com[^'"\s)]*/g)].map((m) => m[0]);
-  assert.deepStrictEqual(urls, ['https://raw.githubusercontent.com/shwoopnet/shwoopnet/nc15-counts/nc15_place_counts.json'], 'one path on the host, and only the counts file');
+  assert.deepStrictEqual(urls, ['https://raw.githubusercontent.com/shwoopnet/shwoopnet/nc15-counts/nc15_place_counts.json', 'https://raw.githubusercontent.com/shwoopnet/shwoopnet/shadow-data/shadow_counts.json'], 'two paths on the host: the NC15 counts file and the shadow runner aggregate file (Nov 16, 2026), nothing else');
   const ens = html.slice(html.indexOf('  function kalshiCountsEnsure('), html.indexOf("  // Gold's kill state: read once"));
   assert.ok(/fetch\(KAL_COUNTS_URL, \{ cache: 'no-cache', credentials: 'omit' \}\)/.test(ens) && !/method|POST|body|headers/.test(ens), 'a plain GET with no credentials, headers or body');
   assert.ok(!/setInterval|setTimeout/.test(ens), 'no timer: it is read when the page is drawn and again only after ten minutes');
@@ -48,11 +48,29 @@ gates.NC4 = () => {
 };
 // NC5: the page shows the depth cells as signals toward 60, and a parked place as parked (rate), not as a progress bar.
 gates.NC5 = () => {
-  assert.ok(/word: building \? 'BUILDING' : bkey === 'live' \? 'ON TRIAL' : parked \? 'PARKED \(RATE\)' : 'COLLECTING'/.test(html), 'a parked place says parked (rate)');
+  assert.ok(/word: building \? 'BUILDING' : bkey === 'live' \? 'ON TRIAL' : parked \? 'PARKED \(RATE\)' : cn && cn\.status === 'CANDIDATE'/.test(html), 'a parked place says parked (rate)');
   assert.ok(/frac: !parked && tgt && have !== null/.test(html), 'a parked place draws no progress');
   const reg = JSON.parse(fs.readFileSync(path.join(root, 'strategies-registry.json'), 'utf8')).strategies.filter((r) => r.id.indexOf('WH-NC15-') === 0 && r.stage === 'Shadow');
   assert.strictEqual(reg.length, 7);
   for (const r of reg) assert.deepStrictEqual([r.roomTarget, r.roomWhat], [60, 'signals toward 60'], r.id);
+};
+// SC1 (Nov 16, 2026): the shadow runner file reaches the page as counts only: an id of the shadow list, whole numbers, a status word and a days figure; anything else is refused or dropped, and the read is a plain GET like the NC15 one.
+const snorm = new Function(html.slice(html.indexOf('  function kalshiShadowCountsNorm('), html.indexOf('  function kalshiShadowCountsEnsure(')) + '; return kalshiShadowCountsNorm;')();
+gates.SC1 = () => {
+  const j = { specs: [{ id: 'SH1_04_BTC', signals: 12, wins: 5, voids: 1, target: 100, status: 'collecting', expected_days_to_100: 40, as_of_utc: '2026-11-18T04:00:00Z', ticker: 'KXBTC15M-X', pnl: 99 }] };
+  const by = snorm(j);
+  assert.deepStrictEqual(by['SH1_04_BTC'], { signals: 12, wins: 5, voids: 1, status: 'collecting', target: 100, days: 40, asOf: '2026-11-18T04:00:00Z' }, 'no ticker or money field is kept');
+  assert.strictEqual(snorm({ specs: [{ id: 'WH-NC15-WTI', signals: 1, wins: 0, voids: 0 }] }), null, 'only shadow list ids');
+  assert.strictEqual(snorm({ specs: [{ id: 'SH1_04_BTC', signals: -1, wins: 0, voids: 0 }] }), null);
+  assert.strictEqual(snorm({ specs: [{ id: 'SH1_04_BTC', signals: 3, wins: 1.5, voids: 0 }] }), null);
+  assert.strictEqual(snorm({ nope: 1 }), null);
+  assert.strictEqual(snorm({ specs: [{ id: 'SH1_04_BTC', signals: 3, wins: 1, voids: 0, status: 'WINNER', expected_days_to_100: null }] })['SH1_04_BTC'].status, 'collecting', 'an unknown status is never shown as a pass');
+  const ens = html.slice(html.indexOf('  function kalshiShadowCountsEnsure('), html.indexOf("  // Gold's kill state: read once"));
+  assert.ok(/fetch\(KAL_SHADOW_URL, \{ cache: 'no-cache', credentials: 'omit' \}\)/.test(ens) && !/method|POST|body|headers|setInterval|setTimeout/.test(ens));
+  const reg = JSON.parse(fs.readFileSync(path.join(root, 'strategies-registry.json'), 'utf8')).strategies;
+  const list = JSON.parse(fs.readFileSync(path.join(root, 'kalshi-scalper', 'workers', 'SHADOW_LIST_V1.json'), 'utf8')).specs.map((x) => x.spec.id);
+  assert.strictEqual(list.length, 17);
+  for (const id of list) assert.ok(reg.some((r) => r.id === id && r.stage === 'Shadow' && r.roomTarget === 100), id + ' is a Shadow row with a target of 100');
 };
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
