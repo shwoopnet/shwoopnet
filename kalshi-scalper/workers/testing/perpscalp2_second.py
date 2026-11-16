@@ -20,7 +20,7 @@ LMAX = {"KXNVDAPERP": 4.5, "KXMUPERP": 3.3, "KXSPCXPERP": 3.5, "KXCOSTPERP": 4.9
 COLUMNS = ("TT", "TS", "MT2", "MT5", "MM2", "MM5")
 
 
-def usable(c): return c is not None and c[0] is not None and c[1] is not None and 0 < c[0] < c[1]
+def usable(c): return c is not None and c[0] is not None and c[1] is not None and 0 < c[0] <= c[1]
 def mid(c): return (c[0] + c[1]) / 2
 def day_of(t): return p.et_local_day(t)
 def session_end(L): return L4.et_end(L, 12, 45) if L in L4.EARLY else L4.et_end(L, 15, 45)

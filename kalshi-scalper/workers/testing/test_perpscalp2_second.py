@@ -92,3 +92,7 @@ class T3(unittest.TestCase):
         s[t + 120] = (tgt + 0.005, tgt + 0.025, 10)          # bid above the target, below target + tick
         self.assertEqual(m.exit_of(s, t, 1, t + 60, 0, 1, 600, .0002, "TT", .02, U)[3], "target")
         self.assertEqual(m.exit_of(s, t, 1, t + 60, 0, 1, 600, .0002, "MM2", .02, U)[3], "time")
+
+class T4(unittest.TestCase):
+    def test_equal_bid_ask_usable(self):
+        self.assertTrue(m.usable((100.0, 100.0, 1))); self.assertFalse(m.usable((100.01, 100.0, 1))); self.assertFalse(m.usable((0, 1, 1)))
