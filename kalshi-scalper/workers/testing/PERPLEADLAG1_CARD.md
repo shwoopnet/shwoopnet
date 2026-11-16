@@ -1,3 +1,5 @@
+# WITHDRAWN (Nov 16, 2026, the Head's ruling): declined row. Lead-lag between related markets is on the declined list (docs/STRATEGY_LIFECYCLE.md 7e); the Head assigned it in error. NEVER RUN, no data read, no loader built, no Tier B registered. The 12 rules stay counted as tried (m_new 12 kept by the Head's ruling). The data note on perps30 (held from 2026-12-01, one file, fast recorder deleted, 60 s recorder cannot resolve seconds) stays valid.
+
 # PERPLEADLAG1 card (Testing Desk, Nov 16, 2026): does the US Tech 100 perp lead single-stock perps around the cash open and close? A new scalping lane, not a version.
 **Label on every figure: first week, one regime, development, no evidence at n < 100.** Stock perps began Nov 5, 2026, so about 7 trading days exist before Nov 17. Nothing in this card has been read: counts first, outcomes only after Auditor B signs the spec and the loader. No account figure anywhere (price terms and percent of margin).
 
