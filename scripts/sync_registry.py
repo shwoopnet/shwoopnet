@@ -35,9 +35,9 @@ def closure(i, name, marker, src, date, cause, reason, ret, rule='', notes=None)
 
 NEVER = "Never as written (a new, differently registered rule would start from zero)"
 CATALOG = [
-    # Nov 16, 2026 (the owner: "clean up our shadow list"): CFRTIK is paused for new orders (Nov 15), so its six wheel places are retired. Its Nov 20 held-out research read can still run on paper without them.
-    *[wheel(i, 'Perp-model longshot, wheel place (%s)' % n, "%s 15 minute: the CFRTI-K model edge from the %s perpetual" % (n, n), m, retire=True, date='2026-11-16', cause='failed the bar',
-            reason="Retired Nov 16: CFRTIK is paused for new orders (Nov 15) after live fills far under 1.3, so its wheel places no longer count; its Nov 20 held-out read can still run on paper",
+    # Nov 16, 2026 (the owner: "clean up our shadow list"): CFRTIK was paused for new orders by the owner (Nov 15), so its six wheel places are retired (cause: superseded, not a failed read). Its Nov 20 held-out research read can still run on paper without them.
+    *[wheel(i, 'Perp-model longshot, wheel place (%s)' % n, "%s 15 minute: the CFRTI-K model edge from the %s perpetual" % (n, n), m, retire=True, date='2026-11-16', cause='superseded',
+            reason="Retired Nov 16: paused by the owner. CFRTIK was paused for new orders on Nov 15, so its wheel places no longer count; its Nov 20 held-out read can still run on paper",
             ret="Not as listed; a new place would start again from a fresh paper record once CFRTIK trades again")
       for i, n, m in (('WH-CFRTIK-BTC', 'Bitcoin', r'CFRTI-K on Bitcoin'), ('WH-CFRTIK-SILVER', 'Silver', r'five further CFRTI-K places'), ('WH-CFRTIK-COPPER', 'Copper', r'five further CFRTI-K places'),
                       ('WH-CFRTIK-WTI', 'WTI oil', r'five further CFRTI-K places'), ('WH-CFRTIK-HYPE', 'HYPE', r'five further CFRTI-K places'), ('WH-CFRTIK-BNB', 'BNB', r'five further CFRTI-K places'))],
