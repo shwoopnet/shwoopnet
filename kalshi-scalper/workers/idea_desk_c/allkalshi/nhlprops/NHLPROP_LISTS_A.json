@@ -2,8 +2,8 @@
  "job_id": "NHLPROP_LISTS_A",
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/nhlprops/NHLPROP_CENSUS.md",
- "purpose": "NHL player-prop census (Idea Desk C, Head's idle-check order): settled market lists of the NHL goals, assists and points ladders with close times in the development block only. Counts and time fields: games a day, rungs per game. No candle, no result used for a rule.",
- "heldout": "none read: close_time from 2026-09-18T00:00Z to before 2026-10-30T02:53:19Z only (min_close_ts 1789689600, max_close_ts 1793328798). Not requested: closes from 2026-10-30T02:53:19Z (the frozen third) and anything later.",
+ "purpose": "NHL player-prop census (Idea Desk C, Head's idle-check order, lowest priority): settled market lists of the NHL goals, assists and points ladders for four whole UTC days (Oct 6, 13, 20, 27), one request window per day and series, at most 3 pages of 1,000 each. Counts and time fields: games a day, rungs a game, markets a day, per series. No candle, no result used for a rule. A cursor left after 3 pages makes that day and series void.",
+ "heldout": "none read: four whole UTC days in the development block (closes 2026-10-06, 10-13, 10-20 and 10-27, all before the 2026-10-30T02:53:19Z cut). Overlaps NHLAST1's window (research V2, spent; read closes after 2026-10-03 to 2026-11-03 for KXNHLAST and sister series) and the registry's NHLALL1, NHLFG1, NHLG1 and NHLROUND1 reads of KXNHLGOAL: labelled. Not requested: closes from 2026-10-30T02:53:19Z.",
  "allowed_endpoints": [
   {
    "name": "markets_list",
@@ -30,7 +30,7 @@
   "KXNHLPTS"
  ],
  "max_requests": 48,
- "notes": "Estimate from the Nov 10 settled listing: about 3 games that day with goals 188, assists 119 and points 149 rungs (about 40 to 63 rungs a game); over 6 weeks that is up to a few thousand markets a series, so up to 12 pages of 1,000 a series = 36 pages, cap 48. Pacing 5 s. The reader keeps ticker, event_ticker, open_time, close_time and occurrence_datetime only for the counts.",
+ "notes": "Rebuilt after Auditor B's sizing review: the NHL plays about 7 to 8 games a day and about 150 rungs a game across the three ladders, so a day of one series can reach 1,000+ markets; 4 days x 3 series = 12 requests, up to 3 pages each = 36 pages, cap 48. A cursor left at the page cap means that day and series is void, not partial. Pacing 5 s. The reader keeps ticker, event_ticker, open_time, close_time and occurrence_datetime only.",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
@@ -42,40 +42,148 @@
  },
  "requests": [
   {
-   "id": "dev_KXNHLGOAL",
+   "id": "day20261006_KXNHLGOAL",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNHLGOAL",
     "status": "settled",
     "limit": 1000,
-    "min_close_ts": 1789689600,
-    "max_close_ts": 1793328798
+    "min_close_ts": 1791244800,
+    "max_close_ts": 1791331199
    },
-   "max_pages": 12
+   "max_pages": 3
   },
   {
-   "id": "dev_KXNHLAST",
+   "id": "day20261006_KXNHLAST",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNHLAST",
     "status": "settled",
     "limit": 1000,
-    "min_close_ts": 1789689600,
-    "max_close_ts": 1793328798
+    "min_close_ts": 1791244800,
+    "max_close_ts": 1791331199
    },
-   "max_pages": 12
+   "max_pages": 3
   },
   {
-   "id": "dev_KXNHLPTS",
+   "id": "day20261006_KXNHLPTS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNHLPTS",
     "status": "settled",
     "limit": 1000,
-    "min_close_ts": 1789689600,
-    "max_close_ts": 1793328798
+    "min_close_ts": 1791244800,
+    "max_close_ts": 1791331199
    },
-   "max_pages": 12
+   "max_pages": 3
+  },
+  {
+   "id": "day20261013_KXNHLGOAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLGOAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791849600,
+    "max_close_ts": 1791935999
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261013_KXNHLAST",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLAST",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791849600,
+    "max_close_ts": 1791935999
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261013_KXNHLPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791849600,
+    "max_close_ts": 1791935999
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261020_KXNHLGOAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLGOAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792454400,
+    "max_close_ts": 1792540799
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261020_KXNHLAST",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLAST",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792454400,
+    "max_close_ts": 1792540799
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261020_KXNHLPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792454400,
+    "max_close_ts": 1792540799
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261027_KXNHLGOAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLGOAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1793059200,
+    "max_close_ts": 1793145599
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261027_KXNHLAST",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLAST",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1793059200,
+    "max_close_ts": 1793145599
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "day20261027_KXNHLPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1793059200,
+    "max_close_ts": 1793145599
+   },
+   "max_pages": 3
   }
  ]
 }
