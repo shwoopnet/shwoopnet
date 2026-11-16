@@ -17,10 +17,12 @@ gates.AM2 = () => {
   for (const t of ['kalRiskBody', 'kalRiskText', 'kal-acct-risk', 'kal-risk-own', 'kalshiOwnStops', 'class="kal-meter']) assert.ok(!html.includes(t), t + ' is gone');
   assert.ok(!/>Loss stop</.test(acct) && !/Own stops/.test(html), 'no Loss stop or Own stops text');
 };
-// AM3: no figure twice. At rest the chart's head shows only the percentage (the dollar result is the All strategies row's Result in the table above); the dollar figure shows while the line is being read.
+// AM3 (changed Nov 16, 2026, the owner: "make it so the red number changes with the chart selection, this is what any other platform does"): the one headline figure under the balance is the chart's range result, dollars and percentage, and the separate Today row is hidden, so no figure shows twice and the number follows the range buttons.
 gates.AM3 = () => {
-  assert.ok(/\.kal-acct-pnl \.kal-pnl-head:not\(\.scrub\) b\{ display:none; \}/.test(html), 'dollar figure hidden at rest');
-  assert.ok(/'kal-pnl-head ' \+ \(cum >= 0 \? 'kal-pos' : 'kal-neg'\) \+ \(when \? ' scrub' : ''\)/.test(html), 'and shown while the pointer is on the line');
+  assert.ok(/\.kal-console \[data-card="account"\] \.kal-today\{ display:none; \}/.test(html), 'the separate Today row is hidden in the Account card');
+  assert.ok(!/kal-pnl-head:not\(\.scrub\) b\{ display:none; \}/.test(html), 'the dollar figure shows at rest');
+  assert.ok(/<em class="kal-pnl-rng">' \+ esc\(key === '1D' \? 'Today' : key\) \+ '<\/em><b>'/.test(html), 'the head leads with the range name, then the dollars and the percentage');
+  assert.ok(/'kal-pnl-head ' \+ \(cum >= 0 \? 'kal-pos' : 'kal-neg'\) \+ \(when \? ' scrub' : ''\)/.test(html), 'and still follows the pointer while the line is read');
 };
 // AM4: a saved layout that still names the old card loads cleanly, and a half width saved for Bot status (beside the old card) goes back to full.
 gates.AM4 = () => {
