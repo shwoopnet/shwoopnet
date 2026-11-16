@@ -18,3 +18,5 @@ Hand case (invented, tip T): follow, D 75, 0.05: polls (T + 2700: 0.40/0.42) and
 - The plugin refuses to import unless ingame_events.py has the signed sha256 4698bae0 (the test proves a changed file is refused).
 - 7g: the fade cells count as versions of IGLATEDRIFT1 (same signal, opposite side) and neighbouring cells overlap; m is printed first as 11 for this spec and 12 with IGLATEDRIFT1's cell, and BH counts every cell of all three in-game specs.
 - Same games as IGFADE2 and IGLATEDRIFT1: n is not added across specs.
+
+## Amendment 2 (2026-11-16 ~16:55Z, Auditor B 16:26Z): plugin 6a4e63c8 CLEAN, auditor_clean_date set to 2026-11-16. Engine rule added by Auditor B: the stored gate file is committed before the first outcome print is read, and its sha256 is quoted in that print.

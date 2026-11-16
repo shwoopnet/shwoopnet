@@ -82,7 +82,7 @@
  },
  "card": "kalshi-scalper/workers/history_miner/igdriftgrid/IGDRIFTGRID1_CARD_NOV16.md",
  "needs_new_code": [
-  "ingame_drift_grid.py is written (imports the signed ingame_events.py 4698bae0 unchanged); pending Auditor B's CLEAN and signature"
+  "none pending: ingame_drift_grid.py 6a4e63c8 is CLEAN (Auditor B 2026-11-16); it imports the signed ingame_events.py 4698bae0 unchanged; the loader and job are the signed ones"
  ],
  "holds": [
   {
@@ -132,8 +132,8 @@
   "file": "ingame_drift_grid.py",
   "sha256": "6a4e63c897a1ff93bd36777330398fbd5f7392274230c938d586b1b005914b4d",
   "hand_case_file": "IGDRIFTGRID1_CARD_NOV16.md",
-  "hand_case_sha256": "740596963118e44ae76eeeb1c5f4f252a6a9faa5e6cb535bf6242eddc72af963",
-  "auditor_clean_date": "pending"
+  "hand_case_sha256": "be691bf5c9ca737091f698fbe39efbbb8465d0d647e23a3995e82866c67cbb64",
+  "auditor_clean_date": "2026-11-16"
  },
  "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
  "halves": "by entry time: the first floor(n/2) trades and the rest",
