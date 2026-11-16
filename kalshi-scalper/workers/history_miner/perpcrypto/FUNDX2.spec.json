@@ -72,8 +72,8 @@
   "independence_note": "no other card reads the crypto perps; the BTC perp 1 minute pull is read only by registered readers (the held-out log)"
  },
  "event": {
-  "scorer_plugin": "perps_crypto_events.py (a fixed-cut-point function still to be written and audited)",
-  "scorer_plugin_sha256": "pending",
+  "scorer_plugin": "fundx2_events.py",
+  "scorer_plugin_sha256": "fab8774ecca2489067d95ec0fd58be1e153aaeff1cccd971872307f4a508b733",
   "decision_instant": "the first price row strictly after a funding print at or beyond the SEARCH cut point",
   "signal_threshold_abs_mid_move": null,
   "entry_rule": "q {5,10} percent x side {fade,follow} x hold {8,24} h = 8 cells; cut points per ticker from SEARCH prints only; far touch; one position per ticker",
@@ -110,8 +110,12 @@
   "new_host": false
  },
  "plugin": {
-  "sha256": "pending",
-  "hand_case_sha256": "pending"
+  "file": "fundx2_events.py",
+  "sha256": "fab8774ecca2489067d95ec0fd58be1e153aaeff1cccd971872307f4a508b733",
+  "hand_case": "test_fundx2.py",
+  "hand_case_sha256": "2bbc03598815472cda477e5c2239b8acc0a1b6b5e1ea8c85bd6123ca214bd7c3",
+  "auditor_clean_date": "pending",
+  "imports": "perps_crypto_events.py 8427becd (CLEAN)"
  },
  "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
  "halves": "by entry time: the first floor(n/2) trades and the rest",
