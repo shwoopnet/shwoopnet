@@ -103,3 +103,6 @@ Totals: 17 picks; per market {'KXHYPE15M': 3, 'KXETH15M': 3, 'KXBTC15M': 3, 'KXN
 | 53 | KXGOLD15M | F1 favourite-late shape | 2.8 | 1 | family cap 5 |
 | 54 | KXBTC15M | F1 favourite-late shape | 2.7 | 4 | market cap 3 |
 | 55 | KXGOLD15M | F1 favourite-late shape | 2.4 | 1 | family cap 5 |
+
+## Spread classes used (Auditor B's request, Nov 16)
+All four spread-filter picks use class **low**: SH1_01_HYPE (bucket 600, cuts c1 1, c2 2), SH1_03_ETH (660, c1 1, c2 1), SH1_04_BTC (180, c1 1, c2 1), SH1_16_BNB (420, c1 1, c2 2). No pick uses mid or high. For ETH 660 and BTC 180 the cuts (1, 1) make "mid" empty, so low there means a spread of exactly 1c against wider; no pick is dead. Cuts file: SHADOW_SPREAD_CUTS_V1.json sha256 1e9478cc8dcd7347cdc4ae8d68941e52bdc461d2e046821e7238c363e5d91577.
