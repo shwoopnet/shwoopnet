@@ -48,7 +48,7 @@ sp = {"sha256": "b" * 64, "series": ["KXBTC15M", "KXHYPE15M"], "start_utc": 1794
 print(json.dumps({"deny": t["forward_default_deny_from"], "ids": [x["id"] for x in t["rows"]], "version": t["version"],
  "btc_in_sitting": h.decide(t, sp, "KXBTC15M-26NOV180100-00", 1794880000), "btc_after": h.decide(t, sp, "KXBTC15M-26NOV211200-00", 1795219200 + 3600), "hype": h.decide(t, sp, "KXHYPE15M-26NOV180100-00", 1794880000), "other_reader": h.decide(t, None, "KXHYPE15M-26NOV180100-00", 1794880000)}))`);
   assert.strictEqual(r.deny, 1794787200);
-  assert.ok(['H02', 'H09', 'H20', 'H22', 'S1'].every((i) => r.ids.includes(i)) && /\+4$/.test(r.version));
+  assert.ok(['H02', 'H09', 'H20', 'H22', 'S1', 'S2'].every((i) => r.ids.includes(i)) && /\+7$/.test(r.version));
   assert.strictEqual(r.btc_in_sitting[0], false, 'H09 is not overridden by S1: ' + r.btc_in_sitting[1]);
   assert.strictEqual(r.btc_after[0], true, r.btc_after[1]);
   assert.strictEqual(r.hype[0], true, 'a listed spec reads its own series after its start (H22 and the default deny are overridden): ' + r.hype[1]);
