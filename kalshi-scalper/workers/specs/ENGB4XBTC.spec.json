@@ -162,5 +162,11 @@
  "halves": "by order of the hourly close: the first floor(n/2) trades and the rest",
  "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order; a void refunds the price and keeps the fee",
  "n_floor": "no evidence at n = x",
- "spec_note": "written for the Head's batch order of 2026-11-16 (toward 30 families a day); not run; the code change needs Auditor B's CLEAN and a second build (rule 16b) first"
+ "spec_note": "written for the Head's batch order of 2026-11-16 (toward 30 families a day); not run; the code change needs Auditor B's CLEAN and a second build (rule 16b) first",
+ "heldout_read_registered": {
+  "date": "2026-11-16",
+  "window": "closes 2026-10-03T16:00:00Z (1791043200) to before 2026-10-28T00:00:00Z (1793145600), the same window as the 190's held-out read (the Head's order, Nov 16); the pull of that window (BTC, ETH, XRP, DOGE, GOLD, then the series of the survivors that are not in it) already serves it; ENGB4XBTC also reads the KXBTC15M candles of the same window (in lists job A)",
+  "rule": "each batch B survivor (VALIDATE bar passed) is read ONCE on that window with the same bar as the held-out plan v3 (n at or above 3 a day x window days, PF 1.3 at 1c, 1.0 at 2c, BH over the survivors plus the batch's m), and goes to SHADOW_LIST_V2 only if it holds; registered before the batch is run",
+  "unread_label": "unread by ENGINE1, seen by earlier development cards"
+ }
 }
