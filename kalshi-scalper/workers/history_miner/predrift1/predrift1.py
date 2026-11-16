@@ -40,14 +40,15 @@ def entry(rows, tip):
 
 
 OK_MIN = ("00", "30", "05")
+OK_MIN_NFL = OK_MIN + ("15", "20", "25")                  # the Head, Nov 16 15:24Z: real NFL kickoff minutes
 
 
-def schedule_ok(values):
+def schedule_ok(values, league=None):
     """The Head's look-ahead test (Nov 16 15:22Z): one schedule value per game, on :00, :30 or :05 with 0 seconds."""
     if len(values) != 1:
         return False
     v = next(iter(values))
-    return bool(v) and v[14:16] in OK_MIN and v[17:19] == "00"
+    return bool(v) and v[14:16] in (OK_MIN_NFL if league == "KXNFL" else OK_MIN) and v[17:19] == "00"
 
 
 def load_listing(folder, dropped=None):
@@ -56,7 +57,7 @@ def load_listing(folder, dropped=None):
         for m in json.load(gzip.open(f)).get("markets", []):
             occ[m["event_ticker"].split("-", 1)[-1] + "|" + m["event_ticker"][:5]].add(m.get("occurrence_datetime"))
             mk.append(m)
-    bad = {g for g, v in occ.items() if not schedule_ok(v)}
+    bad = {g for g, v in occ.items() if not schedule_ok(v, g.split("|")[1])}
     if dropped is not None:
         for g in bad:
             dropped[g.split("|")[1]] += 1

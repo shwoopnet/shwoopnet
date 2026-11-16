@@ -16,3 +16,6 @@ Hand case (invented): tip 10:00. Rows at 03:55 (0.40, 0.42), 08:58 (0.47, 0.49):
 
 ## Amendment 1 (2026-11-16 ~15:45Z, the Head's look-ahead test, before any read)
 A game is kept only if its listing markets carry ONE occurrence_datetime, on minute :00, :30 or :05 with 0 seconds; others are dropped and counted per league (schedule_test_dropped_games). Checked on schedule fields only (no result): NBA 38 and NHL 33 games all pass; NFL 6 of 14 fail (kickoffs at :15, :20, :25, which are real NFL kickoff minutes; applied strictly as asked, flagged to the Head).
+
+## Amendment 2 (2026-11-16 ~15:55Z, the Head 15:24Z, before any read)
+NFL only: minutes :15, :20 and :25 are also allowed (real NFL kickoff minutes); one value per game is still required. NBA and NHL unchanged (:00, :30, :05).
