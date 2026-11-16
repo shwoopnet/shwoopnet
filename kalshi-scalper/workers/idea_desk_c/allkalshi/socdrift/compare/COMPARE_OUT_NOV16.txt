@@ -1,0 +1,6 @@
+their header: header m_carried 6290660 m_new 600 m_total 6291260 days_window 42.1203587963
+their counts: counts [('clock_dropped_games', 2), ('closed_by_D_12h', 10), ('closed_by_D_24h', 0), ('closed_by_D_6h', 10), ('live_guard_dropped_m2', 2), ('m2_dropped_games', 2), ('no_quote_12h', 15), ('no_quote_24h', 9), ('no_quote_6h', 26), ('not_open_12h', 69), ('not_open_24h', 142), ('not_open_6h', 69)]
+my counts: [('clock_dropped_games', 2), ('closed_before_K_info', 10), ('closed_by_D', 20), ('decisions', 442), ('games', 88), ('listed', 270), ('live_guard_dropped_m2', 2), ('m2_dropped_games', 2), ('no_quote', 50), ('not_open', 280), ('series_lists_absent', 14)]
+first build: m_total 6291260 bh_survivors 0
+cells compared (their n > 0): 454 their empty cells: 146 cells only in mine: 0
+differences: 0
