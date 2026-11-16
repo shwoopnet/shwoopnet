@@ -45,7 +45,7 @@ def wrapped(rows):
 
 
 N.metrics = wrapped
-out = N.run(root, 6290660, DAYS)
+out = N.run(root, 6290660) if DAYS == 0 else N.run(root, 6290660, DAYS)
 mine = {}
 for m in cap:
     if "cell" not in m:

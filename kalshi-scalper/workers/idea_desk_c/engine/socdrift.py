@@ -211,7 +211,7 @@ def net(e, side, ask, n, h_entry, exit_, mark, result):
     return round(s * n - (paid * n + K.fee_up_order(paid, n)) - K.fee_up_order(s, n), 9), "time"
 
 
-def run(root, m_carried=0, days_window=42.12):
+def run(root, m_carried=0, days_window=(WIN[1] - WIN[0]) / 86400.0):          # the exact span, 42.1203588 days
     """Enumerates all 600 cells. Reads the result LAST, for every rung that is a candidate in any cell. Returns the printable dict."""
     have = [i for i in LIST_IDS if any(True for _ in KL.bodies(root, LIST_JOB, i))]
     bad = [i for i in have if KL.truncated(root, LIST_JOB, i, WIN[0])]

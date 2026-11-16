@@ -101,7 +101,7 @@
  },
  "plugin": {
   "file": "socdrift.py",
-  "sha256": "ef0cb748370a12852302b58ee4467a545b710d15000aca63820281723e024190",
+  "sha256": "a6c484826c7ded93daca1cf2ea13b2a583a552cb34c5f68ea68517d8aca64455",
   "hand_case_file": "test_socdrift.py",
   "hand_case_sha256": "c02518fdd3cdf97a09e95fdfe3073b2b07c35fbbfe1fa87ffc1c9a76a41ba9eb",
   "auditor_clean_date": null,
@@ -112,7 +112,7 @@
  },
  "event": {
   "scorer_plugin": "socdrift.py",
-  "scorer_plugin_sha256": "ef0cb748370a12852302b58ee4467a545b710d15000aca63820281723e024190",
+  "scorer_plugin_sha256": "a6c484826c7ded93daca1cf2ea13b2a583a552cb34c5f68ea68517d8aca64455",
   "decision_instant": "24 h, 12 h or 6 h before the estimated kickoff, on the hour",
   "signal_threshold": "the grid's 600 cells",
   "entry_rule": "every winner market open at D whose side ask is in the cell's band (0.10 to 0.85) and passes the cell's filter",
