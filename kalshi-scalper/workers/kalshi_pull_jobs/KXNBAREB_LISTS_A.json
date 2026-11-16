@@ -1,0 +1,51 @@
+{
+ "job_id": "KXNBAREB_LISTS_A",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/nbareb/NBAREB_CARD.md",
+ "purpose": "NBAREB search (Idea Desk C, engine spec) stage A: the live settled KXNBAREB market list for the development block only (closes 2026-10-21 to 2026-11-05). No candle.",
+ "heldout": "none read: development block only, min_close_ts 1792540800 (2026-10-21T00:00Z), max_close_ts 1793923199 (2026-11-05T23:59:59Z). Not requested: closes 2026-11-06 to before 2026-11-13 and the validate window (closes 2026-11-13 to before 2026-12-04, one joint read after Dec 4). PROPS1 (closed Nov 16) held KXNBAREB 2025-26 and a frozen part from 2026-10-03T16:00Z; its closure and any release of the frozen part for this window is Auditor B's hold map to confirm before the scorer reads this list.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNBAREB"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 8,
+ "notes": "Estimate: about 16 game days x 7.5 games x 48.6 rungs = 5,800 markets, 6 pages of 1,000; up to 8 pages, cap 8 (pages count against the cap). A last page with a cursor means truncated: the scorer stops. Pacing 5 s.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "dev_KXNBAREB",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBAREB",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792540800,
+    "max_close_ts": 1793923199
+   },
+   "max_pages": 8
+  }
+ ]
+}
