@@ -4,7 +4,7 @@ shows only LIVE and cannot back-serve: every 60 seconds (1) the perps list, one 
 open interest, 24 hour volume, leverage estimate and the long and short leverage estimates at each notional size; the static fields (contract size, tick, funding cap, schedule and so on) once per job in static.csv), and (2) the order books of the active markets, depth 5, one request of at most 100 tickers. Candles, funding and the trade tape DO back-serve
 (candles by ticker, funding in one request, trades with time filters) and are NOT recorded here.
 
-Public GET only: no key, no signing, no auth header, no account path, no order, no Firestore. Host kalshi external-api only, redirects refused, a generic User-Agent. At most 2 requests a minute, at least
+Public GET only: no key, no signing, no auth header, no account path, no order, no Firestore. Host kalshi external-api only, redirects refused, a generic User-Agent. At most 2 requests a minute, plus the fast lane's one batched request every 5 seconds inside 14:30 to 21:00 UTC on weekdays (about 14 a minute in the window), at least
 5 seconds between any two requests; a 429 waits 5 seconds doubling up to 60; three 429s in a row end the run. A hard budget of requests per run (REQUEST_BUDGET).
 Rows are written as returned (best first, prices and sizes as numbers); a missing level is empty, never zero. It stops by itself: no poll at or after END_UTC (2027-02-26 23:59 UTC), and a run started after it exits at once.
 usage: python3 record_perps_live.py <out dir> [--cycle-hours 4]"""
@@ -34,6 +34,14 @@ STATIC_COLS = ["t_recv_ms", "ticker", "asset_class", "market_version", "contract
                "funding_limit_unit", "funding_invalid_premium_handling", "halt_sources", "schedule", "leverage_estimates_json"]
 BOOK_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker"] + ["bid_px_%d" % i for i in range(1, DEPTH + 1)] + ["bid_sz_%d" % i for i in range(1, DEPTH + 1)] \
     + ["ask_px_%d" % i for i in range(1, DEPTH + 1)] + ["ask_sz_%d" % i for i in range(1, DEPTH + 1)]
+# FAST LANE (Nov 16, 2026, the owner's order): inside the cash session window the book top and depth 5 of a few liquid perps every 5 seconds, ONE batched orderbooks request, a step of THIS job (no new workflow, no second run).
+FAST_TICKERS = ("KXNVDAPERP", "KXMUPERP", "KXTSLAPERP", "KXSPCXPERP", "KXUSTECH100PERP", "KXUS500PERP", "KXGOLDPERP", "KXBTCPERP", "KXETHPERP", "KXSPYPERP")
+FAST_EVERY_S = 5.0
+FAST_MIN_GAP_S = 1.0                      # our own pacing between any two requests while the fast lane is on (the list and the full book keep MIN_GAP_S)
+FAST_BUDGET = 4 * 720 + 240               # 5 second polls for at most 4 hours (720 an hour) plus a margin, on top of REQUEST_BUDGET
+CT_OPEN_UTC_S, CT_CLOSE_UTC_S = 14 * 3600 + 1800, 21 * 3600     # 8:30 to 15:00 US Central while Central is on standard time (UTC-6), which holds for the whole run (the stop date is before the March 2027 change)
+FAST_COLS = BOOK_COLS
+FAST_COVER_COLS = ["t_local_ms", "ok", "rows", "n429", "note"]
 COVER_COLS = ["t_local_ms", "list_ok", "list_rows", "book_ok", "book_rows", "n429", "note"]
 
 
@@ -75,11 +83,14 @@ def num(x):
         return ""
 
 
-def levels(lv):
+def levels(lv, best_is_high):
+    # The API lists the whole book with the BEST level LAST (bids ascending, asks descending), so the first five entries are the far levels.
+    # Sort by price and keep the five nearest the touch: highest bids first, lowest asks first.
     out = []
-    for p in (lv if isinstance(lv, list) else [])[:DEPTH]:
-        if isinstance(p, (list, tuple)) and len(p) >= 2:
+    for p in (lv if isinstance(lv, list) else []):
+        if isinstance(p, (list, tuple)) and len(p) >= 2 and num(p[0]) != "":
             out.append((num(p[0]), num(p[1])))
+    out.sort(key=lambda x: x[0], reverse=best_is_high); out = out[:DEPTH]
     return out + [("", "")] * (DEPTH - len(out))
 
 
@@ -107,8 +118,27 @@ def static_row(m, t1):
 
 def book_row(e, t0, t1, date):
     ob = e.get("orderbook") if isinstance(e.get("orderbook"), dict) else {}
-    b, a = levels(ob.get("bids")), levels(ob.get("asks"))
+    b, a = levels(ob.get("bids"), True), levels(ob.get("asks"), False)
     return [t0, t1, date, e.get("ticker", "")] + [x[0] for x in b] + [x[1] for x in b] + [x[0] for x in a] + [x[1] for x in a]
+
+
+def fast_window(t):
+    """True on a Monday to Friday UTC date between 8:30 and 15:00 US Central (14:30 to 21:00 UTC). Holidays are not excluded: the perps list keeps trading."""
+    tm = time.gmtime(t)
+    return tm.tm_wday < 5 and CT_OPEN_UTC_S <= tm.tm_hour * 3600 + tm.tm_min * 60 + tm.tm_sec < CT_CLOSE_UTC_S
+
+
+def fast_poll(tickers, wf, wcf, getter):
+    """One batched orderbooks request for the fast tickers; returns (status, rows written). Never raises."""
+    st, obj, date, t0, t1 = getter("/markets/orderbooks?tickers=" + ",".join(tickers)); rows = 0; note = ""
+    if st == 200 and obj and isinstance(obj.get("orderbooks"), list):
+        for e in obj["orderbooks"]:
+            if isinstance(e, dict) and e.get("ticker") in tickers:
+                wf.writerow(book_row(e, t0, t1, date)); rows += 1
+    elif st != 429:
+        note = "fast book status %s" % st
+    wcf.writerow([now_ms(), 1 if rows else 0, rows, 1 if st == 429 else 0, note])
+    return st, rows
 
 
 def end_epoch():
@@ -124,6 +154,7 @@ def main(argv):
     fm, fb, fc, fs = (open(os.path.join(a.out, n), "w", newline="") for n in ("markets.csv", "book.csv", "coverage.csv", "static.csv"))
     wm, wb, wc, ws = csv.writer(fm), csv.writer(fb), csv.writer(fc), csv.writer(fs)
     wm.writerow(MARKET_COLS); wb.writerow(BOOK_COLS); wc.writerow(COVER_COLS); ws.writerow(STATIC_COLS); static_done = False
+    ff = fcf = None; wf = wcf = None; fast_budget = FAST_BUDGET; fast_429 = 0; fast_dead = False; next_fast = 0.0
     budget = REQUEST_BUDGET; last_req = 0.0; in_row = 0; wait = BACKOFF_S
 
     def paced():
@@ -176,9 +207,28 @@ def main(argv):
             time.sleep(wait); wait = min(wait * 2, BACKOFF_MAX_S)
         else:
             wait = BACKOFF_S
-        time.sleep(max(0.0, POLL_EVERY_S - (time.time() - t_poll)))
-    for f in (fm, fb, fc, fs):
-        f.close()
+        deadline = t_poll + POLL_EVERY_S
+        while time.time() < deadline - 0.05:        # the rest of the minute: fast lane polls inside the window, otherwise just wait
+            now = time.time()
+            if not fast_dead and fast_budget > 0 and fast_window(now) and now >= next_fast and now + FAST_MIN_GAP_S <= deadline:
+                if ff is None:
+                    ff = open(os.path.join(a.out, "book_fast.csv"), "w", newline=""); fcf = open(os.path.join(a.out, "coverage_fast.csv"), "w", newline="")
+                    wf, wcf = csv.writer(ff), csv.writer(fcf); wf.writerow(FAST_COLS); wcf.writerow(FAST_COVER_COLS)
+                d = FAST_MIN_GAP_S - (time.time() - last_req)
+                if d > 0:
+                    time.sleep(d)
+                last_req = time.time(); fast_budget -= 1
+                st, _rows = fast_poll(FAST_TICKERS, wf, wcf, get)
+                fast_429 = fast_429 + 1 if st == 429 else 0
+                next_fast = last_req + FAST_EVERY_S * (2 ** fast_429)         # 5 s, then 10 s and 20 s after a 429 in a row
+                if fast_429 >= MAX_429_IN_ROW:        # the fast lane ends for this job; the normal minute poll carries on
+                    fast_dead = True; wcf.writerow([now_ms(), 0, 0, 0, "three 429s in a row: fast lane ended for this job"])
+                ff.flush(); fcf.flush()
+            else:
+                time.sleep(min(0.2, max(0.0, deadline - time.time())))
+    for f in (fm, fb, fc, fs, ff, fcf):
+        if f is not None:
+            f.close()
     return 0
 
 

@@ -258,7 +258,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['CALIB2_LISTS', 'CANDLEGAP2_TTEBB', 'CANDLEGAP_CS2', 'CENSUS_LISTING', 'CFRTI_K_CANDLES', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'CROWDLEG_TAPE_TRIAL', 'ECONCENSUS_LISTS', 'ECONHIST_LISTS', 'ECONLAG_CALENDAR', 'ENGINE1_HELD_CANDLES_A1', 'ENGINE1_HELD_CANDLES_A1C', 'ENGINE1_HELD_CANDLES_B1', 'ENGINE1_HELD_LISTS_A', 'ENGINE1_HELD_LISTS_B', 'ESOCTIE_CANDLES_P1', 'ESOCTIE_CANDLES_P2', 'ESOCTIE_CANDLES_P3', 'ESOCTIE_CANDLES_P4', 'ESOCTIE_LISTS', 'ETHD_RESULTS', 'ETHD_RESULTS2', 'FOMCTEXT_CANDLES', 'FOMCTEXT_EVENTS', 'FOMCTEXT_HIST_A', 'HISTCUTOFF1', 'HOURLYTEMP_CANDLES', 'HOURLYTEMP_LISTS', 'IG_RESULTS', 'IG_RESULTS_NHL', 'INGAMELAG_M1', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'INPLAYJUMP_C_ESOCCER', 'INPLAYJUMP_C_TTEBB', 'INPLAYJUMP_LISTS', 'INPLAYJUMP_PILOTVAL', 'INPLAYJUMP_T_CH1', 'INPLAYJUMP_T_CH2', 'INPLAYJUMP_T_CH3', 'INPLAYJUMP_T_CH4', 'INPLAYJUMP_T_CH5', 'INPLAYJUMP_T_ITF1', 'INPLAYJUMP_T_ITF2', 'INPLAYJUMP_T_ITF3', 'INPLAYJUMP_T_ITF4', 'INPLAYJUMP_T_ITF5', 'KXNBAPTS_LISTS_A', 'KXNBAREB_LISTS_A', 'KXNBATOTAL_LISTS_A', 'LADDER_CENSUS_LISTS', 'LATEWORD_CANDLES', 'LIVEDATA_PROBE_A4', 'LIVEDATA_PROBE_B', 'MAPBREAK_CANDLES', 'MAPBREAK_CANDLES_M2', 'MAPBREAK_CANDLES_REST', 'MAPBREAK_LISTS', 'MENTBREADTH_CANDLES_P1', 'MENTDRIFT_LISTS_A', 'MENTTWIN_CANDLES_P1', 'MENTTWIN_CANDLES_P2', 'NBALADDER_CANDLES_P1', 'NBALADDER_CANDLES_P2', 'NC15_CANDLES_A1', 'NC15_CANDLES_A2', 'NC15_CANDLES_A3', 'NC15_CANDLES_B1', 'NC15_CANDLES_B2', 'NC15_CANDLES_B3', 'NC15_CANDLES_B4', 'NC15_LISTS_A', 'NC15_LISTS_B', 'NC15_PROBE', 'NDQ15M_LISTS', 'NHLOT_CANDLES', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'OICAND_CANDLES_1', 'OICAND_CANDLES_1_REST', 'OICAND_CANDLES_2', 'OICAND_CANDLES_2_REST', 'OICAND_LISTS', 'OIFIELD_CHECK', 'PERPBTC1M', 'PERPETH1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'POLGAPH_LISTS', 'POLGAPH_LISTS_NOV4', 'QUAKEH_LISTS', 'REMATCH_STAGE1_CANDLES', 'ROLLOFF_PROXY', 'RULESREAD_LISTS', 'SERIESCATS2_LISTS', 'SERIESCATS_EVENTS', 'SERIESCATS_EVENTS_PROBE', 'SERIESCATS_LISTS', 'SIBHITR_LISTS_A', 'SIBHIT_CANDLES', 'SOCDERIV_CANDLES_A', 'SOCDERIV_CANDLES_B', 'SOCDERIV_LISTS', 'SOCDRIFT_CANDLES_P1', 'SOCDRIFT_CANDLES_P2', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'SPXOI1_CANDLES', 'SPXOI1_CANDLES_PATCH', 'SPXOI1_LISTS', 'TESTING_LISTS_BUNDLE', 'TIE3_CANDLES', 'VOIDSNAP_CANDLES', 'WHEEL0_CANDLES_DOGE', 'WHEEL0_CANDLES_ETH', 'WHEEL0_CANDLES_GOLD', 'WHEEL0_CANDLES_XRP', 'WHEEL0_LISTS']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['CALIB2_LISTS', 'CANDLEGAP2_TTEBB', 'CANDLEGAP_CS2', 'CENSUS_LISTING', 'CFRTI_K_CANDLES', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'CROWDLEG_TAPE_TRIAL', 'ECONCENSUS_LISTS', 'ECONHIST_LISTS', 'ECONLAG_CALENDAR', 'ENGINE1_HELD_CANDLES_A1', 'ENGINE1_HELD_CANDLES_A1C', 'ENGINE1_HELD_CANDLES_B1', 'ENGINE1_HELD_LISTS_A', 'ENGINE1_HELD_LISTS_B', 'ESOCTIE_CANDLES_P1', 'ESOCTIE_CANDLES_P2', 'ESOCTIE_CANDLES_P3', 'ESOCTIE_CANDLES_P4', 'ESOCTIE_LISTS', 'ETHD_RESULTS', 'ETHD_RESULTS2', 'FOMCTEXT_CANDLES', 'FOMCTEXT_EVENTS', 'FOMCTEXT_HIST_A', 'HISTCUTOFF1', 'HOURLYTEMP_CANDLES', 'HOURLYTEMP_LISTS', 'IG_RESULTS', 'IG_RESULTS_NHL', 'INGAMELAG_M1', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'INPLAYJUMP_C_ESOCCER', 'INPLAYJUMP_C_TTEBB', 'INPLAYJUMP_LISTS', 'INPLAYJUMP_PILOTVAL', 'INPLAYJUMP_T_CH1', 'INPLAYJUMP_T_CH2', 'INPLAYJUMP_T_CH3', 'INPLAYJUMP_T_CH4', 'INPLAYJUMP_T_CH5', 'INPLAYJUMP_T_ITF1', 'INPLAYJUMP_T_ITF2', 'INPLAYJUMP_T_ITF3', 'INPLAYJUMP_T_ITF4', 'INPLAYJUMP_T_ITF5', 'KXNBAPTS_LISTS_A', 'KXNBAREB_LISTS_A', 'KXNBATOTAL_LISTS_A', 'LADDER_CENSUS_LISTS', 'LATEWORD_CANDLES', 'LIVEDATA_PROBE_A4', 'LIVEDATA_PROBE_B', 'MAPBREAK_CANDLES', 'MAPBREAK_CANDLES_M2', 'MAPBREAK_CANDLES_REST', 'MAPBREAK_LISTS', 'MENTBREADTH_CANDLES_P1', 'MENTDRIFT_LISTS_A', 'MENTTWIN_CANDLES_P1', 'MENTTWIN_CANDLES_P2', 'NBALADDER_CANDLES_P1', 'NBALADDER_CANDLES_P2', 'NC15_CANDLES_A1', 'NC15_CANDLES_A2', 'NC15_CANDLES_A3', 'NC15_CANDLES_B1', 'NC15_CANDLES_B2', 'NC15_CANDLES_B3', 'NC15_CANDLES_B4', 'NC15_LISTS_A', 'NC15_LISTS_B', 'NC15_PROBE', 'NDQ15M_LISTS', 'NHLOT_CANDLES', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'OICAND_CANDLES_1', 'OICAND_CANDLES_1_REST', 'OICAND_CANDLES_2', 'OICAND_CANDLES_2_REST', 'OICAND_LISTS', 'OIFIELD_CHECK', 'PERPBTC1M', 'PERPETH1M', 'PERPSPOT_HOURLY', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'POLGAPH_LISTS', 'POLGAPH_LISTS_NOV4', 'QUAKEH_LISTS', 'REMATCH_STAGE1_CANDLES', 'ROLLOFF_PROXY', 'RULESREAD_LISTS', 'SERIESCATS2_LISTS', 'SERIESCATS_EVENTS', 'SERIESCATS_EVENTS_PROBE', 'SERIESCATS_LISTS', 'SIBHITR_LISTS_A', 'SIBHIT_CANDLES', 'SOCDERIV_CANDLES_A', 'SOCDERIV_CANDLES_B', 'SOCDERIV_LISTS', 'SOCDRIFT_CANDLES_P1', 'SOCDRIFT_CANDLES_P2', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'SPXOI1_CANDLES', 'SPXOI1_CANDLES_PATCH', 'SPXOI1_LISTS', 'TESTING_LISTS_BUNDLE', 'TIE3_CANDLES', 'VOIDSNAP_CANDLES', 'WHEEL0_CANDLES_DOGE', 'WHEEL0_CANDLES_ETH', 'WHEEL0_CANDLES_GOLD', 'WHEEL0_CANDLES_XRP', 'WHEEL0_LISTS']);
   assert.ok(!jobs.some((f) => /BALLOTNO|ECONLAG_CANDLES/i.test(f)), 'BALLOTNO and the not-yet-built candle stages are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
@@ -524,7 +524,7 @@ gates.KP14b = () => {
     const budget = job.requests.reduce((n, r) => n + (r.max_pages || 1), 0);
     assert.ok(job.max_requests <= 1200 && budget <= job.max_requests, job.job_id + ': page budget within the cap, cap within 1,200');
     // NHLOT_CANDLES (86 requests, cap 150) and REMATCH_STAGE1_CANDLES (120, cap 150) carry the cap their desk registered. INGAMELAG_M1 is registered with 20 requests of headroom for 429 retries (retries count against the cap): 215 requests, cap 235. HOURLYTEMP_CANDLES is 129 requests, cap 140 (11 of headroom, Desk B's registration). The seven NC15_CANDLES_A1 to B4 files carry 12 of headroom each for 429 retries (Desk A and Auditor B, Nov 14). OICAND_CANDLES_2_REST is 420 requests, cap 432 (12 of headroom for 429 retries, Desk B and Auditor B, Nov 14). OICAND_CANDLES_1_REST is 421 requests, cap 433 (12 of headroom for 429 retries, Desk B and Auditor B, Nov 14). Any other headroom is a failure.
-    const headroom = { ENGINE1_HELD_CANDLES_A1: 12, ENGINE1_HELD_CANDLES_A1C: 12, ENGINE1_HELD_CANDLES_B1: 12, ETHD_RESULTS: 0, SOCDRIFT_CANDLES_P1: 12, SOCDRIFT_CANDLES_P2: 12, ETHD_RESULTS2: 12, SERIESCATS_LISTS: 2, SERIESCATS2_LISTS: 2, INGAMELAG_M1A: 15, INGAMELAG_M1B: 15, SOCDERIV_CANDLES_A: 20, SOCDERIV_CANDLES_B: 20, LIVEDATA_PROBE_A4: 2, LIVEDATA_PROBE_B: 5, HOURLYTEMP_CANDLES: 11, OICAND_CANDLES_1_REST: 12, OICAND_CANDLES_2_REST: 12, NC15_CANDLES_A1: 12, NC15_CANDLES_A2: 12, NC15_CANDLES_A3: 12, NC15_CANDLES_B1: 12, NC15_CANDLES_B2: 12, NC15_CANDLES_B3: 12, NC15_CANDLES_B4: 12, NHLOT_CANDLES: 64, REMATCH_STAGE1_CANDLES: 30, VOIDSNAP_CANDLES: 221 }[job.job_id] || 0;
+    const headroom = { PERPSPOT_HOURLY: 12, ENGINE1_HELD_CANDLES_A1: 12, ENGINE1_HELD_CANDLES_A1C: 12, ENGINE1_HELD_CANDLES_B1: 12, ETHD_RESULTS: 0, SOCDRIFT_CANDLES_P1: 12, SOCDRIFT_CANDLES_P2: 12, ETHD_RESULTS2: 12, SERIESCATS_LISTS: 2, SERIESCATS2_LISTS: 2, INGAMELAG_M1A: 15, INGAMELAG_M1B: 15, SOCDERIV_CANDLES_A: 20, SOCDERIV_CANDLES_B: 20, LIVEDATA_PROBE_A4: 2, LIVEDATA_PROBE_B: 5, HOURLYTEMP_CANDLES: 11, OICAND_CANDLES_1_REST: 12, OICAND_CANDLES_2_REST: 12, NC15_CANDLES_A1: 12, NC15_CANDLES_A2: 12, NC15_CANDLES_A3: 12, NC15_CANDLES_B1: 12, NC15_CANDLES_B2: 12, NC15_CANDLES_B3: 12, NC15_CANDLES_B4: 12, NHLOT_CANDLES: 64, REMATCH_STAGE1_CANDLES: 30, VOIDSNAP_CANDLES: 221 }[job.job_id] || 0;
     if (job.requests.every((r) => !r.max_pages || r.max_pages === 1)) assert.strictEqual(job.requests.length + headroom, job.max_requests, job.job_id + ': count equals the cap' + (headroom ? ' less its registered headroom' : ''));
     const eps = job.allowed_endpoints.map((e) => ({ rx: new RegExp('^(?:' + e.path_pattern.replace(/\(\?P</g, '(?<') + ')$'), params: new Set(e.params_allowed) }));
     const tk = new Set(job.ticker_allowlist);
@@ -672,7 +672,7 @@ print(json.dumps([m.runs_today(d, "JOB_A", now), m.MAX_RUNS_PER_DAY]))`);
 // KP18b: raising the day cap from 6 to 12 changed ONLY that number. Every per-run limit is still what it was.
 gates.KP18b = () => {
   const out = py('print(json.dumps([m.GAP_S, m.BACKOFF_S, m.BACKOFF_MAX_S, m.MAX_429_IN_ROW, m.MAX_FAILS_IN_ROW, m.HARD_MAX_REQUESTS, m.MAX_BODY_BYTES, m.MAX_RUN_BYTES, m.MAX_RUN_SECONDS, m.MAX_JOB_BYTES, m.MAX_PAGES, m.END_UTC, sorted(m.ROUTES.keys()), [m.ROUTES[k][0] for k in sorted(m.ROUTES)]]))');
-  assert.deepStrictEqual(out, [1.0, 5.0, 60.0, 3, 3, 1200, 5000000, 200000000, 2400, 2000000, 50, '2027-02-28T23:59:00Z', ['elections', 'perps'], ['api.elections.kalshi.com', 'external-api.kalshi.com']]);
+  assert.deepStrictEqual(out, [1.0, 5.0, 60.0, 3, 3, 1200, 5000000, 200000000, 2400, 2000000, 50, '2027-02-28T23:59:00Z', ['coinbase', 'elections', 'perps'], ['api.exchange.coinbase.com', 'api.elections.kalshi.com', 'external-api.kalshi.com']]);
   const src = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'kalshi_pull.py'), 'utf8');
   assert.ok(/^MAX_RUNS_PER_DAY = 40 /m.test(src), 'the day cap is 40');
   assert.ok(/5 MB an answer, 200 MB a run, 40 real runs a UTC day/.test(wf), 'the workflow header says 40');
@@ -725,7 +725,7 @@ gates.KP22 = () => {
   const r = py(`
 print(json.dumps({"routes": m.ROUTES, "perps_url": m.build_url(json.load(open(os.path.join(m.JOB_DIR, "PERPBTC1M.json"))), "/markets/KXBTCPERP/candlesticks", {"period_interval": 1, "start_ts": 1780444800, "end_ts": 1780531200}),
  "old_url": m.build_url(json.load(open(os.path.join(m.JOB_DIR, "COMBO1_OPENBOOK.json"))), "/markets", {})}))`);
-  assert.deepStrictEqual(r.routes, { elections: ['api.elections.kalshi.com', '/trade-api/v2'], perps: ['external-api.kalshi.com', '/trade-api/v2/margin'] });
+  assert.deepStrictEqual(r.routes, { elections: ['api.elections.kalshi.com', '/trade-api/v2'], perps: ['external-api.kalshi.com', '/trade-api/v2/margin'], coinbase: ['api.exchange.coinbase.com', ''] });
   assert.strictEqual(r.perps_url, 'https://external-api.kalshi.com/trade-api/v2/margin/markets/KXBTCPERP/candlesticks?period_interval=1&start_ts=1780444800&end_ts=1780531200');
   assert.strictEqual(r.old_url, 'https://api.elections.kalshi.com/trade-api/v2/markets');
   const bad = py(`
@@ -861,6 +861,37 @@ print(json.dumps({"plain": t({"category": "Economics"}), "two": t({"category": "
 };
 
 let failed = 0;
+// KP40 (Nov 16, 2026, the Head of R&D's ruling for RESEARCH reads, owner-accepted terms risk): the coinbase route reads ONLY the candles of five named spot products. Consequence: it can never reach another
+// Coinbase path (accounts, orders, products list), another host, a cursor, a product not named, an unnamed query value, or a window over 300 candles; and no other route can carry a Coinbase path.
+gates.KP40 = () => {
+  const out = py(`
+base = json.load(open(os.path.join(m.JOB_DIR, "PERPSPOT_HOURLY.json")))
+def t(mut):
+    j = json.loads(json.dumps(base)); mut(j)
+    try: m.check_job(j); return "ok"
+    except m.Refused: return "refused"
+def req(j, **kw):
+    r = j["requests"][0]; r["params"].update(kw.get("params", {}))
+    if "path" in kw: r["path"] = kw["path"]
+    if "pages" in kw: r["max_pages"] = kw["pages"]
+def host(j): j["host"] = "api.coinbase.com"
+def sneak(j): j["allowed_endpoints"].append({"name": "x", "method": "GET", "path_pattern": "/accounts", "params_allowed": []})
+def prod(j): j["ticker_allowlist"].append("PEPE-USD")
+def ser(j): j["series_allowlist"] = ["KXBTC15M"]
+print(json.dumps({"base": t(lambda j: None), "host": t(host), "sneak": t(sneak), "prod": t(prod), "ser": t(ser),
+ "path": t(lambda j: req(j, path="/accounts")), "other": t(lambda j: req(j, path="/products/BTC-EUR/candles")), "gran": t(lambda j: req(j, params={"granularity": 7})),
+ "bool": t(lambda j: req(j, params={"granularity": True})), "iso": t(lambda j: req(j, params={"start": "2026-06-03"})), "inj": t(lambda j: req(j, params={"end": "2026-06-04T00:00:00Z&x=1"})),
+ "wide": t(lambda j: req(j, params={"start": "2026-06-03T00:00:00Z", "end": "2026-07-03T00:00:00Z"})), "back": t(lambda j: req(j, params={"end": "2026-06-02T00:00:00Z"})),
+ "old": t(lambda j: req(j, params={"start": "2025-06-03T00:00:00Z", "end": "2025-06-04T00:00:00Z"})), "pages": t(lambda j: req(j, pages=2)),
+ "extra": t(lambda j: req(j, params={"limit": 5})), "fakedate": t(lambda j: req(j, params={"start": "2026-02-31T00:00:00Z", "end": "2026-03-01T00:00:00Z"})), "elect": t(lambda j: j.update({"route": "elections"})),
+ "url": m.build_url(base, "/products/BTC-USD/candles", {"granularity": 3600, "start": "2026-06-03T00:00:00Z", "end": "2026-06-03T12:00:00Z"})}))`);
+  assert.strictEqual(out.base, 'ok');
+  for (const k of ['host', 'sneak', 'prod', 'ser', 'path', 'other', 'gran', 'bool', 'iso', 'inj', 'wide', 'back', 'old', 'pages', 'extra', 'fakedate', 'elect']) assert.strictEqual(out[k], 'refused', k);
+  assert.ok(/^https:\/\/api\.exchange\.coinbase\.com\/products\/BTC-USD\/candles\?granularity=3600&start=2026-06-03T00%3A00%3A00Z&end=2026-06-03T12%3A00%3A00Z$/.test(out.url), 'the url');
+  const job = JSON.parse(fs.readFileSync(path.join(root, 'kalshi-scalper', 'workers', 'kalshi_pull_jobs', 'PERPSPOT_HOURLY.json'), 'utf8'));
+  assert.deepStrictEqual(Object.keys(job.requests).length, 26); assert.strictEqual(job.max_requests, 38); assert.strictEqual(job.route, 'coinbase'); assert.ok(!('host' in job));
+};
+
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
 }
