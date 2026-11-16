@@ -13,8 +13,11 @@ OCT28, NOV3 = calendar.timegm((2026, 10, 28, 0, 0, 0)), calendar.timegm((2026, 1
 TO = {"KXBTC15M": OCT28, "KXETH15M": OCT28, "KXXRP15M": OCT28, "KXDOGE15M": OCT28, "KXGOLD15M": OCT28,
       "KXHYPE15M": NOV3, "KXSOL15M": NOV3, "KXNEAR15M": NOV3, "KXBNB15M": NOV3, "KXZEC15M": NOV3, "KXWTI15M": NOV3, "KXSILVER15M": NOV3}
 EVENT830_SERIES = ("KXWTI15M", "KXSILVER15M"); E830_TOD, E830_TOL = 48600, 300     # 13:30Z, seconds
-LISTS = ()      # filled after the pull lands: "<job>/<stamp>_<runid>" folder names of the lists runs
-CANDLES = ()    # filled after the pull lands: the candle runs
+A = "ENGINE1_HELD_LISTS_A/2026-11-16T1724Z_43917966818"; B = "ENGINE1_HELD_LISTS_B/2026-11-16T1725Z_43918002964"
+C_A1 = "ENGINE1_HELD_CANDLES_A1/2026-11-16T1839Z_43931013583"; C_A1C = "ENGINE1_HELD_CANDLES_A1C/2026-11-16T1931Z_43939580521"; C_B1 = "ENGINE1_HELD_CANDLES_B1/2026-11-16T1950Z_43943450855"
+LISTS = (A, B)                 # the two landed lists runs (complete)
+CANDLES = (C_A1, C_A1C, C_B1)  # the three landed candle runs
+COVERS = {C_A1: C_A1C}         # A1 stopped on request h00048 (3 answers of 400); A1 is read ONLY for its 200 answers, and ONLY if A1C is listed, complete and answered every failed id with 200
 ALLOW_FILE = os.path.join(HERE, "..", "..", "HELDOUT_PULL_RUNS.md")
 def self_sha(): return hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest()
 def refuse_unless_allowed(allow_file=ALLOW_FILE, lists=None, candles=None):
@@ -30,11 +33,19 @@ def run_bodies(base, run):
     folder = os.path.join(base, *run.split("/"))
     try: man = json.load(open(os.path.join(folder, "manifest.json")))
     except Exception as e: raise SystemExit("REFUSED: %s has no readable manifest.json (%s)" % (run, e))
-    if man.get("status") != "complete" or not isinstance(man.get("rows"), list) or not man["rows"]: raise SystemExit("REFUSED: %s is not a complete run" % run)
+    cov = COVERS.get(run); okstat = ("complete",) if cov is None else ("complete", "stopped_failures")
+    if man.get("status") not in okstat or not isinstance(man.get("rows"), list) or not man["rows"]: raise SystemExit("REFUSED: %s is not a complete run" % run)
     ids = collections.defaultdict(list)
     for r in man["rows"]: ids[r.get("id")].append(r)
+    covered = set()
+    if cov is not None:                       # ids the covering run answered 200, from ITS manifest (and it must itself be complete)
+        try: cm = json.load(open(os.path.join(base, *cov.split("/"), "manifest.json")))
+        except Exception as e: raise SystemExit("REFUSED: covering run %s has no readable manifest.json (%s)" % (cov, e))
+        if cm.get("status") != "complete" or cov not in CANDLES: raise SystemExit("REFUSED: covering run %s is not complete or not listed" % cov)
+        covered = {r.get("id") for r in cm.get("rows", []) if r.get("status") == 200}
     for rid, rs in ids.items():
-        if not any(r.get("status") == 200 for r in rs) or any(r.get("status") not in (200, 429) for r in rs): raise SystemExit("REFUSED: request %r of %s was not answered 200" % (rid, run))
+        bad = not any(r.get("status") == 200 for r in rs) or any(r.get("status") not in (200, 429) for r in rs)
+        if bad and not (cov is not None and rid in covered and not any(r.get("status") == 200 for r in rs)): raise SystemExit("REFUSED: request %r of %s was not answered 200" % (rid, run))
     for r in man["rows"]:
         if r.get("status") == 200 and "file" in r: yield json.load(gzip.open(os.path.join(folder, r["file"])))
 def iso(s):

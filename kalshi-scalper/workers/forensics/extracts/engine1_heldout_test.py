@@ -17,6 +17,33 @@ def cand(e, bid, ask, full=True):
     k = {"end_period_ts": e, "yes_bid": {"close_dollars": bid}, "yes_ask": {"close_dollars": ask}}
     if full: k.update({"price": {"close_dollars": 0.5}, "volume_fp": "3", "open_interest_fp": "10"})
     return k
+def cover_test():
+    b = tempfile.mkdtemp(); P, Q = "C/p_1", "C/q_2"
+    def mk(run, status, rows):
+        d = os.path.join(b, *run.split("/")); os.makedirs(d, exist_ok=True)
+        for i, r in enumerate(rows):
+            if r["status"] == 200: json.dump({"markets": []}, gzip.open(os.path.join(d, "f%d.json.gz" % i), "wt")); r["file"] = "f%d.json.gz" % i
+        json.dump({"status": status, "rows": rows}, open(os.path.join(d, "manifest.json"), "w"))
+    mk(P, "stopped_failures", [{"id": "h1", "status": 200}, {"id": "h2", "status": 400}, {"id": "h2", "status": 400}])
+    mk(Q, "complete", [{"id": "h2", "status": 200}, {"id": "h2b", "status": 200}])
+    o = (X.COVERS, X.CANDLES)
+    try:
+        X.COVERS = {P: Q}; X.CANDLES = (P, Q); assert len(list(X.run_bodies(b, P))) == 1 and len(list(X.run_bodies(b, Q))) == 2      # failed id h2 covered: only the 200 answer of h1 is read
+        X.COVERS = {}                                                                                            # no cover: refused
+        try: list(X.run_bodies(b, P)); raise AssertionError("stopped run without a cover must refuse")
+        except SystemExit: pass
+        X.COVERS = {P: Q}; X.CANDLES = (P,)                                                                      # cover not listed: refused
+        try: list(X.run_bodies(b, P)); raise AssertionError("unlisted cover must refuse")
+        except SystemExit: pass
+        X.CANDLES = (P, Q); mk(Q, "complete", [{"id": "h9", "status": 200}])                                     # cover lacks the failed id: refused
+        try: list(X.run_bodies(b, P)); raise AssertionError("cover without the failed id must refuse")
+        except SystemExit: pass
+        mk(Q, "stopped_failures", [{"id": "h2", "status": 200}])                                                 # cover not complete: refused
+        try: list(X.run_bodies(b, P)); raise AssertionError("incomplete cover must refuse")
+        except SystemExit: pass
+    finally: X.COVERS, X.CANDLES = o
+    assert X.COVERS == {X.C_A1: X.C_A1C} and X.LISTS == (X.A, X.B) and X.CANDLES == (X.C_A1, X.C_A1C, X.C_B1)
+    print("cover test ok")
 def main():
     assert X.FROM == 1791043200 and X.TO["KXBTC15M"] == 1793145600 and X.TO["KXSILVER15M"] == 1793721600 and X.TO["KXZEC15M"] == 1793721600 and len(X.TO) == 12 and "KXNATGAS15M" not in X.TO and "KXCOPPER15M" not in X.TO
     b = tempfile.mkdtemp(); out = os.path.join(b, "out"); allow = os.path.join(b, "H.md"); LS, CS = ("L/x_1",), ("C/x_2",)
@@ -38,3 +65,4 @@ def main():
     db = sqlite3.connect(os.path.join(out, "ENGINE1_heldout_extract.sqlite")); assert db.execute("select count(*) from market").fetchone()[0] == 3 and db.execute("select count(*) from market where result='void'").fetchone()[0] == 1
     print("engine1_heldout test ok", c)
 main()
+cover_test()
