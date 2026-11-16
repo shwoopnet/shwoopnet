@@ -57,3 +57,6 @@
 **Files:** `lateword_lib.py`, `build_lateword_candles.py`, `lateword_score.py`, `test_lateword.py` (2 tests: the hand case and the truncation stop).
 
 **Joint held-out (the Head of R&D, Nov 16, 15:46Z).** The window of own occurrence 2026-10-03 to before 2026-11-05 is read ONCE for every Trump-word family that passes development (LATEWORD, MENTTWIN, MENTBREADTH and any later one), in one print, with m counting every family. No family reads it alone.
+
+## Closed Nov 16, 2026 (the Head of R&D's rate rule)
+Closed by the rate rule: no measured signals (n = 0 in the one read, Nov 16, development only).
