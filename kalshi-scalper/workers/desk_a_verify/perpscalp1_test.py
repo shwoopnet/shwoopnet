@@ -23,8 +23,12 @@ assert len(sg) == 1
 t4 = calendar.timegm(time.strptime("2026-11-14T15:00:00Z", "%Y-%m-%dT%H:%M:%SZ")); cs4 = [(t4 + 60 * m, x - 0.005, x + 0.005) for m, x in enumerate(mids)]
 assert list(P.signals(cs4)) == []
 assert P.day_z([(t0, 0.001), (t0 + 86400, -0.001), (t0 + 2 * 86400, 0.001)]) is not None and P.day_z([(t0, 0.001)]) is None
-r = P.run({"KXSPYPERP": cs}); a = r["names"]["KXSPYPERP"]["arms"]
-assert a["T"]["h0bp"]["n"] == 1 and ok(a["T"]["h0bp"]["net_sum"], 0.0004711, 1e-6) and ok(a["R"]["h2bp"]["net_sum"], -0.0058708, 1e-6) and a["T"]["h0bp"]["evidence"] == "no evidence at n = 1" and r["tries"] == 2 and r["names"]["KXNVDAPERP"] == {"no_data": True}
-import subprocess; rr = subprocess.run([sys.executable, "-I", os.path.join(os.path.dirname(os.path.abspath(__file__)), "perpscalp1.py"), "/tmp/x.json", "/tmp/none.gz"], capture_output=True, text=True, env={"PATH": os.environ["PATH"]})
+# loader-shaped input: 6-tuples, an US500 row must never reach the reader, None and zero quotes are skipped
+lo = {"KXSPYPERP": [(t, b, a, 0, 1, None) for t, b, a in cs] + [(cs[-1][0] + 60, None, 101, 0, 0, 0), (cs[-1][0] + 120, 0, 101, 0, 0, 0)], "KXUS500PERP": [(t, b, a, 0, 1, 1) for t, b, a in cs]}
+fl = P.from_loader(lo); assert list(fl) == ["KXSPYPERP"] and fl["KXSPYPERP"] == cs, list(fl)
+r = P.run(fl); assert "KXUS500PERP" not in r["names"] and len(P.NAMES) == 4 and r["tries"] == 2, r
+a = r["names"]["KXSPYPERP"]["arms"]
+assert a["T"]["h0bp"]["n"] == 1 and ok(a["T"]["h0bp"]["net_sum"], 0.0004711, 1e-6) and ok(a["R"]["h2bp"]["net_sum"], -0.0058708, 1e-6) and a["T"]["h0bp"]["evidence"] == "no evidence at n = 1" and r["tries"] == 2 and r["names"]["KXNVDAPERP"] == {"no_data": True} and "assumed" in r["label"].lower()
+import subprocess; rr = subprocess.run([sys.executable, "-I", os.path.join(os.path.dirname(os.path.abspath(__file__)), "perpscalp1.py"), "/tmp/x.json", "/tmp"], capture_output=True, text=True, env={"PATH": os.environ["PATH"]})
 assert rr.returncode != 0 and "PERPSCALP_READ" in rr.stdout + rr.stderr
 print("ALL OK")

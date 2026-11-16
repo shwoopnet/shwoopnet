@@ -1,7 +1,8 @@
-"""PERPSCALP1 reader (Desk A, Nov 15 2026), built to PERPSCALP1_HAND_CASE_NOV15.md (committed first at a620e1726). Offline; reads 1 minute perp candle files and sends nothing.
-  PERPSCALP_READ=1 python3 -I perpscalp1.py <out.json> <file.csv.gz> [<file.csv.gz> ...]      DEFAULT-CLOSED. Files: perp-data kalshi1m/<date>.csv.gz (columns ticker, end_period_ts, bid_close, ask_close, ...). Names: the tight six. Label: "upper bound, not fill-checked"; fee 12 bps a leg is an ASSUMPTION (docs/PERPS_THEORY.md, not confirmed against Kalshi's fee page)."""
-import sys, os, csv, gzip, io, json, math, time, collections
-NAMES = ("KXSPYPERP", "KXQQQPERP", "KXUS500PERP", "KXUSTECH100PERP", "KXNVDAPERP", "KXAAPLPERP")
+"""PERPSCALP1 reader (Desk A, Nov 15 2026), built to PERPSCALP1_HAND_CASE_NOV15.md (committed first at a620e1726). Offline; sends nothing.
+  PERPSCALP_READ=1 python3 -I perpscalp1.py <out.json> <dir holding the two .sqlite.xz extracts>      DEFAULT-CLOSED. Candles come ONLY from engine1_extract_load.load (allow line, sha check). Names: the four stock perps. Label: "upper bound, not fill-checked"; fee 12 bps a leg is an ASSUMPTION (docs/PERPS_THEORY.md, not confirmed against Kalshi's fee page)."""
+import sys, os, json, math, time, collections
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+NAMES = ("KXSPYPERP", "KXQQQPERP", "KXNVDAPERP", "KXAAPLPERP")                  # the four stock names; US500, Tech 100, gold and WTI are cut for everyone (EVM4)
 FEE = 0.0012; HAIRCUTS = (0.0, 0.0001, 0.0002); WIN = 60; MIN_RET = 40; LAG = 300; HOLD = 600; PAUSE = 900; MAXSPREAD = 0.003
 H0, H1 = 14 * 3600 + 35 * 60, 20 * 3600 + 45 * 60
 def pf(xs):
@@ -45,16 +46,17 @@ def trade(cs, i, side, s5, mid, h):
     tk, bk, ak = cs[last]
     return entry, (bk * (1 - h) if side > 0 else ak * (1 + h)), "time"
 def net(entry, ex, side): return ((ex - entry) / entry if side > 0 else (entry - ex) / entry) - 2 * FEE
-def load(paths):
-    q = collections.defaultdict(dict)
-    for p in paths:
-        with gzip.open(p, "rt", newline="") as f:
-            for r in csv.DictReader(f):
-                if r.get("ticker") in NAMES:
-                    try: b, a = float(r["bid_close"]), float(r["ask_close"])
-                    except (ValueError, KeyError, TypeError): continue
-                    if b > 0 and a > 0 and a >= b: q[r["ticker"]][int(float(r["end_period_ts"]))] = (b, a)
-    return {k: sorted((t, b, a) for t, (b, a) in v.items()) for k, v in q.items()}
+def from_loader(perps):
+    """perps: the audited loader's perps output {ticker: [(end_ts, bid, ask, last, volume, oi), ...]}. A ticker outside NAMES is ignored (the loader never hands one over; this is a second wall). No other open of any extract."""
+    out = {}
+    for k, v in perps.items():
+        if k not in NAMES: continue
+        q = {}
+        for c in v:
+            b, a = c[1], c[2]
+            if b is not None and a is not None and b > 0 and a > 0 and a >= b: q[int(c[0])] = (b, a)
+        out[k] = sorted((t, b, a) for t, (b, a) in q.items())
+    return out
 def day_z(rows):                                                           # rows: [(entry_ts, net)] -> day-clustered z of the mean net, None under 2 days or sd 0
     by = collections.defaultdict(float)
     for t, x in rows: by[time.strftime("%Y-%m-%d", time.gmtime(t))] += x
@@ -82,6 +84,9 @@ def run(series):
     return out
 if __name__ == "__main__":
     a = [x for x in sys.argv[1:] if not x.startswith("--")]
-    if len(a) < 2: sys.exit(__doc__)
+    if len(a) != 2: sys.exit(__doc__)
     if os.environ.get("PERPSCALP_READ") != "1": sys.exit("REFUSED: PERPSCALP_READ=1 is not set (reading starts only after Auditor B's quick check)")
-    json.dump(run(load(a[1:])), open(a[0], "w"), indent=1, default=str); print("wrote", a[0])
+    import engine1_extract_load as L
+    wa, ca, wp, cp, wn, cn = L.load(a[1])                                   # the audited loader only: allow line, sha check, ticker filter and the Nov 6 start all happen there
+    r = run(from_loader(wp)); r["loader_drops"] = cp
+    json.dump(r, open(a[0], "w"), indent=1, default=str); print("wrote", a[0])
