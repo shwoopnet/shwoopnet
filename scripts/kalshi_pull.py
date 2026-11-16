@@ -233,10 +233,13 @@ def check_coinbase_request(r, tk):
     for k in ("start", "end"):
         if not isinstance(p[k], str) or not COINBASE_TIME.fullmatch(p[k]):
             raise Refused("%s must be an ISO UTC time like 2026-06-03T00:00:00Z" % k)
-    span = epoch_of(p["end"]) - epoch_of(p["start"])
-    if not 0 < span <= g * COINBASE_MAX_CANDLES:
+    try:
+        t0, t1 = epoch_of(p["start"]), epoch_of(p["end"])      # an impossible date such as 2026-02-31 is a refusal, not a crash
+    except ValueError:
+        raise Refused("start and end must be real dates")
+    if not 0 < t1 - t0 <= g * COINBASE_MAX_CANDLES:
         raise Refused("a coinbase request covers at most %d candles" % COINBASE_MAX_CANDLES)
-    if epoch_of(p["start"]) < epoch_of("2026-01-01T00:00:00Z") or epoch_of(p["end"]) > epoch_of("2026-12-31T00:00:00Z"):
+    if t0 < epoch_of("2026-01-01T00:00:00Z") or t1 > epoch_of("2026-12-31T00:00:00Z"):
         raise Refused("a coinbase request must lie inside 2026")
 
 

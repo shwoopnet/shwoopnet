@@ -883,13 +883,11 @@ print(json.dumps({"base": t(lambda j: None), "host": t(host), "sneak": t(sneak),
  "bool": t(lambda j: req(j, params={"granularity": True})), "iso": t(lambda j: req(j, params={"start": "2026-06-03"})), "inj": t(lambda j: req(j, params={"end": "2026-06-04T00:00:00Z&x=1"})),
  "wide": t(lambda j: req(j, params={"start": "2026-06-03T00:00:00Z", "end": "2026-07-03T00:00:00Z"})), "back": t(lambda j: req(j, params={"end": "2026-06-02T00:00:00Z"})),
  "old": t(lambda j: req(j, params={"start": "2025-06-03T00:00:00Z", "end": "2025-06-04T00:00:00Z"})), "pages": t(lambda j: req(j, pages=2)),
- "extra": t(lambda j: req(j, params={"limit": 5})), "elect": t(lambda j: j.update({"route": "elections"})),
+ "extra": t(lambda j: req(j, params={"limit": 5})), "fakedate": t(lambda j: req(j, params={"start": "2026-02-31T00:00:00Z", "end": "2026-03-01T00:00:00Z"})), "elect": t(lambda j: j.update({"route": "elections"})),
  "url": m.build_url(base, "/products/BTC-USD/candles", {"granularity": 3600, "start": "2026-06-03T00:00:00Z", "end": "2026-06-03T12:00:00Z"})}))`);
   assert.strictEqual(out.base, 'ok');
-  for (const k of ['host', 'sneak', 'prod', 'ser', 'path', 'other', 'gran', 'bool', 'iso', 'inj', 'wide', 'back', 'old', 'pages', 'extra', 'elect']) assert.strictEqual(out[k], 'refused', k);
+  for (const k of ['host', 'sneak', 'prod', 'ser', 'path', 'other', 'gran', 'bool', 'iso', 'inj', 'wide', 'back', 'old', 'pages', 'extra', 'fakedate', 'elect']) assert.strictEqual(out[k], 'refused', k);
   assert.ok(/^https:\/\/api\.exchange\.coinbase\.com\/products\/BTC-USD\/candles\?granularity=3600&start=2026-06-03T00%3A00%3A00Z&end=2026-06-03T12%3A00%3A00Z$/.test(out.url), 'the url');
-  const src = fs.readFileSync(scriptPath, 'utf8');
-  assert.ok(!/\bPOST\b|method=|HTTPPasswordMgr|Authorization|api[-_]?key/i.test(src.replace(/the owner/gi, '')) || true);
   const job = JSON.parse(fs.readFileSync(path.join(root, 'kalshi-scalper', 'workers', 'kalshi_pull_jobs', 'PERPSPOT_HOURLY.json'), 'utf8'));
   assert.deepStrictEqual(Object.keys(job.requests).length, 26); assert.strictEqual(job.max_requests, 38); assert.strictEqual(job.route, 'coinbase'); assert.ok(!('host' in job));
 };
