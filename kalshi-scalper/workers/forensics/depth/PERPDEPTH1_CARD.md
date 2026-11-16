@@ -1,19 +1,17 @@
-# PERPDEPTH1 card (draft, Forensics desk, Nov 16, 2026; research only, nothing run)
+# PERPDEPTH1 card v3 (Forensics, Nov 16, 2026; lane 3 of the perps lane; research only, nothing run)
 
-**Question.** On the liquid perps, does the resting book at the top 5 levels predict the next 3 to 60 minutes of price better than the last price already does?
+**Question.** In the liquid perps, do the resting book, the quote against the liquidation mark and the book before the daily funding print say anything about the next 5 to 60 minutes that the touch does not?
 
-**Mechanism.** Resting size on one side is a short lived claim on the next trade. If it is real, price moves toward the thin side (follow). If it is stale, spoofed or an inventory artefact, the quote reverts (fade). Both directions are in the grid, so the family does not choose.
+**Features (4, constants fixed now).** F1 top-5 depth imbalance (follow or fade at 0.3, 0.5, 0.7). F2 spread widening against the name's own 24 h median (1.5x, 2x, 3x; direction from the last 5 minute mid move). F3 distance of the mid from `liquidation_mark_price` (1, 2, 3 bps; fade or follow). F4 book thinning in the hour before the 4 PM ET print (depth at or under 0.5, 0.35, 0.2 of the 24 h median, direction from the imbalance; the five equity and index perps only).
 
-**Data.** Only the live perps recorder (book.csv, markets.csv, static.csv, funding), forward from `start_utc` 1794873600 (2026-11-17T00:00Z). No earlier book exists, so the family cannot be back-tested and cannot be peeked at: first read not before 1796688000 (2026-12-08T00:00Z), one read, 10 trade days, 100 decisions a cell.
+**Markets.** Gold, US Tech 100, US Large Cap, Bitcoin, Ethereum, NVDA, MU, TSLA. 666 rules (192 + 192 + 192 + 90), m_total 6,291,326 on the carried 6,290,660.
 
-**Markets.** Gold, US Tech 100, US Large Cap, Bitcoin, Ethereum, NVDA, MU, tickers copied from static.csv. NVDA decisions stop before the H16 hold (1797897600). Auditor B to confirm MU.
+**Forward only.** Provisional start_utc 1794960000 (2026-11-18T00:00Z), the first full day after the corrected recorder starts; no entry before it. First read not before 2026-12-08 and only at n >= 100 and 10 trade days; short rules get one more read on 2026-12-21 (the last decision, before H16 from 2026-12-22 for NVDA and the two index names).
 
-**Features and cells.** Two features (book imbalance; depth weighted mid against last price in spreads), three constant thresholds each, follow or fade, five holds: 7 x 2 x 3 x 2 x 5 = 420 rules. Thresholds are written before data exists.
+**Prerequisite found today.** The recorder's first file kept the far book levels (the API lists the best level last). The fix is on `claude/forensics-perps-live-fix`; F1 and F4 have no usable data until it is merged and a new job runs.
 
-**Look-ahead.** Decision uses rows received by the decision minute; entry is the next quote after it; exit is the first quote at or after the hold; gaps over 2 minutes void and are counted.
+**Costs.** Price terms in bps after crossing the touch both ways and a 5 or 12 bps round-trip fee (the Head's scenarios; Kalshi's real fee to be written in first). Margin terms at 10, 25 and 50 percent of the recorder's size specific maximum leverage (sizes 1,000 and 10,000), with a path-based liquidation test (conservative maintenance assumption, to be checked).
 
-**Costs.** Price terms first (basis points after the spread paid both ways, two haircuts, fee ASSUMED). Margin terms (times the recorder's leverage estimate) shown beside, never instead. Income = decisions a day x edge x contract value x leverage.
+**Gates.** n 100, 10 trade days, 3 entries a day, PF 1.3 at 5 bps and 1.0 at 12 bps, BH 5%, kill fast.
 
-**Gates.** n 100, PF 1.3 primary and 1.0 secondary, 10 trade days, 3 decisions a day, BH 5% over every cell ever tried. Kill fast as in the spec.
-
-**Honest prior.** Low. Single minute snapshots of a top-5 book are coarse and the recorder cannot see the order flow between them. This is a cheap, bounded test of a field no earlier test had.
+**Honest prior.** Low. A tight, liquid perp pays a few bps of spread each way and 5 to 12 bps of fee; a book snapshot a minute apart is coarse. It is a bounded test of fields no candle carries.

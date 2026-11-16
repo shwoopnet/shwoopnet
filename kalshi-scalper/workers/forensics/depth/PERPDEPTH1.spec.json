@@ -1,54 +1,56 @@
 {
  "id": "PERPDEPTH1",
- "desk": "FORENSICS",
+ "version": "v3",
+ "desk": "FORENSICS (lane 3: order book and liquidation features)",
  "date_registered": "2026-11-16",
- "status": "DRAFT v2 (Auditor B fixes of Nov 16), unsigned, nothing run; the recorder must be merged first",
+ "status": "DRAFT v3, unsigned, nothing run (replaces v2 sha dc21c4e1; the Head's lane order of 2026-11-16 20:44Z changed the features, markets, costs and read date, so v2's sign-off does not carry over)",
  "kind": "event_rule",
  "card": "kalshi-scalper/workers/forensics/depth/PERPDEPTH1_CARD.md",
  "needs_new_code": [
-  "loader for the perp-live-data book.csv and markets.csv (columns in scripts/record_perps_live.py: BOOK_COLS, MARKET_COLS), audited once with its wall",
-  "event scorer plugin: one decision per ticker per minute grid point, entry at the next recorded quote, exit by hold; hand case first"
+  "loader for the perp-live-data files (markets.csv, book.csv, static.csv, coverage.csv), audited once with its wall",
+  "event scorer plugin: episode detection, next-quote entry, hold exit, path based liquidation test, fee scenarios; hand case first",
+  "the recorder book-level fix (branch claude/forensics-perps-live-fix ef8ad514) must be merged and running: book.csv of the first file holds far levels and is NOT used"
  ],
  "uniqueness": {
   "closest_existing": [
-   "perps grid mom1/mom3 (price momentum, candles)",
-   "CANDLEVSBOOK1 (binary candle vs book)"
+   "perps grid mom1/mom3 (price momentum on candles)",
+   "CANDLEVSBOOK1 (binary candle against book)"
   ],
   "declined_list_rows_checked": [
    "lock and parity scans",
    "second-of-minute taker clustering",
    "fractional-size flow",
-   "favourite-and-hold ban (not applicable: perps, no settlement price band)"
+   "favourite-and-hold ban (not applicable: perps, no settlement band)"
   ],
-  "difference": "uses the resting book of a perpetual (top 5 levels each side), a field no candle carries; the signal is order-book pressure, not price history or trade flow",
-  "family_flag": "none (book imbalance); a survivor is checked for correlation with perps momentum before it is called unique"
+  "difference": "signals come from the resting book, the quote against the liquidation mark and the book before the daily funding print: fields no candle carries",
+  "family_flag": "none (book and liquidation structure); a survivor is checked for correlation with perps momentum before it is called unique"
  },
  "data": {
-  "source": "perp-live-data branch, perps/live recorder (record-perps-live.yml): book.csv top 5 levels with sizes every minute, markets.csv quote, last price, marks, open interest, leverage estimates",
+  "source": "perp-live-data branch (record-perps-live.yml): markets.csv (bid, ask, sizes, last, marks, open interest, leverage estimates by size), book.csv (five levels nearest the touch, ONLY from the first file written after the book-level fix), static.csv, coverage.csv",
   "tickers": [
-   "gold perp",
-   "US Tech 100 perp",
-   "US Large Cap perp",
-   "BTC perp",
-   "ETH perp",
-   "NVDA perp",
-   "MU perp"
+   "KXGOLDPERP",
+   "KXUSTECH100PERP",
+   "KXUS500PERP",
+   "KXBTCPERP",
+   "KXETHPERP",
+   "KXNVDAPERP",
+   "KXMUPERP",
+   "KXTSLAPERP"
   ],
-  "ticker_names_note": "exact tickers to be copied from static.csv of the first recorder file, not typed from memory",
-  "window": {
-   "first_decision_utc": "2026-11-17T00:00:00Z",
-   "last_decision_utc": "2026-12-21T00:00:00Z"
-  },
-  "independence_note": "forward recorder data only; no historical book exists, so nothing earlier can be scored"
+  "ticker_names_note": "names as seen in static.csv of the first file; the wall and its sha256 go into the spec before any outcome-bearing column is joined",
+  "independence_note": "forward recorder data only; no earlier book exists"
  },
  "split": {
   "mode": "forward_only",
-  "start_utc": 1794873600,
-  "start_utc_check": "2026-11-17T00:00:00Z",
+  "start_utc": 1794960000,
+  "start_utc_check": "2026-11-18T00:00:00Z",
+  "start_rule": "provisional: 00:00 UTC of the first full UTC day after the first recorder file that carries the fixed book levels. If that file is not written before 2026-11-17T20:00Z the constant moves to the next midnight by a dated amendment BEFORE any outcome column is joined; no amendment after.",
+  "warmup": "rows of a ticker before start_utc feed only the trailing medians; no trade is entered before start_utc",
   "first_read_not_before_epoch": 1796688000,
   "first_read_check": "2026-12-08T00:00:00Z",
-  "release_rule": "first read on or after 1796688000 only if 10 trade days and 100 decisions a cell exist, else it waits and says so; one read",
-  "start_rule": "decisions from max(1794873600, the first recorded row of each ticker); the recorder exists only once Main merges it"
+  "last_decision_epoch": 1797811200,
+  "last_decision_check": "2026-12-21T00:00:00Z",
+  "release_rule": "one read per rule: at the first read date if the rule has 100 entries, else it is 'no evidence at n = x' there and is read once more on 2026-12-21 on the same constants; a rule that reached n >= 100 at the first read is never re-read"
  },
  "holds": [
   {
@@ -57,7 +59,7 @@
    "end_epoch": 1801440000,
    "card": "H16",
    "status": "OPEN",
-   "handling": "last decision 1797811200 (2026-12-21T00:00Z); the longest hold (60 min) from it ends 2026-12-21T01:00Z, before 1797897600. Applies to NVDA, US Tech 100 and US Large Cap. MU is not in H16 (Auditor B)."
+   "handling": "last decision 1797811200 (2026-12-21T00:00Z); the longest hold (60 min) ends 01:00Z Dec 21 before 1797897600; applies to NVDA, US Tech 100 and US Large Cap. MU and TSLA are not in H16 (Auditor B confirmed MU; TSLA absent from his list)"
   },
   {
    "label": "H17 perps30 and cash1m files",
@@ -65,80 +67,134 @@
    "end_epoch": null,
    "card": "H17",
    "status": "OPEN",
-   "handling": "not used; this spec reads only the live recorder"
+   "handling": "not used"
   }
  ],
  "features": {
-  "imbalance": "(sum bid_sz_1..5 minus sum ask_sz_1..5) / (sum bid_sz_1..5 plus sum ask_sz_1..5), from the book row at the decision minute",
-  "dwmid_gap": "(dwmid minus last price) / (ask_px_1 minus bid_px_1); dwmid = (sum_i bid_px_i*bid_sz_i + sum_i ask_px_i*ask_sz_i) / (sum_i bid_sz_i + sum_i ask_sz_i), i = 1..5; last price from the markets row of the same minute; a row with a missing level or a crossed top is skipped and counted",
-  "thresholds": {
-   "imbalance": [
-    0.2,
-    0.4,
-    0.6
-   ],
-   "dwmid_gap": [
+  "F1_imbalance": {
+   "def": "I = (sum bid_sz_1..5 minus sum ask_sz_1..5) / (sum bid_sz_1..5 plus sum ask_sz_1..5) from book.csv at the decision minute",
+   "thresholds": [
+    0.3,
     0.5,
-    1.0,
-    2.0
+    0.7
+   ],
+   "direction": "follow: long when I >= T, short when I <= -T; fade: the reverse",
+   "markets": 8,
+   "holds_min": [
+    5,
+    15,
+    30,
+    60
    ]
   },
-  "thresholds_note": "constants written now, not fitted to any recorded data"
+  "F2_spread_widening": {
+   "def": "R = quoted spread in bps / the median of the same name's quoted spread over its previous 24 h of rows (at least 720 rows, else skipped and counted)",
+   "thresholds": [
+    1.5,
+    2.0,
+    3.0
+   ],
+   "direction": "widening has no sign: direction is the sign of the mid change over the previous 5 minutes (follow = same way, fade = against); a flat 5 minute mid skips the decision",
+   "markets": 8,
+   "holds_min": [
+    5,
+    15,
+    30,
+    60
+   ]
+  },
+  "F3_liq_distance": {
+   "def": "D = (mid minus liquidation_mark_price) / mid in bps, mid = (bid + ask)/2 of the same minute's markets row",
+   "thresholds_bps": [
+    1.0,
+    2.0,
+    3.0
+   ],
+   "direction": "mid above the mark: fade = short, follow = long; mid below the mark: the reverse; |D| >= T",
+   "markets": 8,
+   "holds_min": [
+    5,
+    15,
+    30,
+    60
+   ]
+  },
+  "F4_pre_print_thinning": {
+   "def": "K = sum of the five levels' sizes on both sides / the median of the same name's total depth over the previous 24 h; decision minutes from 90 to 30 minutes before the daily 4 PM ET funding print only (21:00 UTC while New York is on standard time, which holds for the whole window); signal when K <= T",
+   "thresholds": [
+    0.5,
+    0.35,
+    0.2
+   ],
+   "direction": "sign of the book imbalance I at the decision minute (follow / fade); I = 0 skips",
+   "markets": [
+    "KXNVDAPERP",
+    "KXMUPERP",
+    "KXTSLAPERP",
+    "KXUSTECH100PERP",
+    "KXUS500PERP"
+   ],
+   "holds_min": [
+    5,
+    15,
+    30
+   ],
+   "note": "hold ends before the print (decision at most 30 minutes before the print and hold at most 30, so the exit is at or before the print minute); gold (14:00Z print) and crypto (print times unverified) are left out of F4"
+  },
+  "thresholds_note": "all constants written now. F3 and F2 thresholds were chosen from signal COUNTS in the first 101 minute file (no outcome, no return was computed); F1 and F4 thresholds are round values with no data behind them (book unusable in that file)."
  },
+ "episodes": "a signal is the first minute a condition holds after it was false for at least 15 minutes; one position per name and rule at a time (no new entry until the hold ends); entry at the first recorded quote AFTER the decision minute (buy at the ask, sell at the bid), exit at the first quote at or after entry + hold (opposite touch); a missing quote within 2 minutes of the exit time voids the trade and counts it; an event whose hold spans a funding print is dropped and counted",
  "grid": {
-  "markets": 7,
-  "features": 2,
-  "thresholds_per_feature": 3,
-  "directions": [
-   "follow",
-   "fade"
-  ],
-  "holds_minutes": [
-   3,
-   10,
-   15,
-   30,
-   60
-  ],
-  "rules_this_spec": 420,
-  "rules_formula": "7 x 2 x 3 x 2 x 5",
-  "subset_rationale": "all cells fixed before any data exists"
+  "rules_this_spec": 666,
+  "rules_formula": "F1 8x3x2x4 = 192; F2 8x3x2x4 = 192; F3 8x3x2x4 = 192; F4 5x3x2x3 = 90",
+  "subset_rationale": "the whole stated grid, fixed before any outcome exists"
  },
  "look_ahead": {
-  "decision": "book row and markets row with t_recv_ms at or before the decision minute end",
-  "entry": "the first quote recorded after the decision minute (ask for a buy, bid for a sell), never the decision row",
-  "exit": "the first quote at or after entry plus the hold; a missing quote within 2 minutes voids the event and counts it",
-  "funding": "events whose hold spans a funding print are dropped and counted; the recorder holds no funding file (a funding pull is a separate audited item)"
+  "decision": "markets and book rows with t_recv_ms at or before the end of the decision minute; trailing medians use only rows before it",
+  "entry": "the first quote after the decision minute, never the decision row",
+  "exit": "first quote at or after the hold; path test uses every recorded mid from entry to exit",
+  "funding": "events whose hold spans a funding print are dropped and counted; funding is not in the recorder"
  },
  "costs": {
-  "price_terms": "return in basis points of entry price after the spread paid at entry and exit, a fee assumption of taker fee ASSUMED until Kalshi's schedule is read, haircuts two numbers 0.0002 and 0.0004 of price",
-  "margin_terms": "return on margin = bps x leverage_estimate for the notional at the size used (from the recorder's long_lev or short_lev at 10000), shown beside price terms, never in place of them",
-  "income": "decisions a day x cash edge in bps x contract value x leverage, ranked; figures by message only",
-  "fee": "perps taker fee NOT YET FIXED: before the one read a number from Kalshi's published schedule is written here, and the pass is shown also at 2x that fee; until then every figure is labelled 'fee assumed, not a result'"
+  "price_terms": "net per trade in bps of entry notional: (exit touch minus entry touch)/entry touch x 1e4 for a long (negated for a short), the spread is paid by crossing the touch both ways, minus the fee",
+  "fee_scenarios_bps_round_trip": [
+   5,
+   12
+  ],
+  "fee_note": "12 and 5 bps are the Head's scenarios of 2026-11-16; Kalshi's published perps fee is still to be written in before the read and the two scenarios stay beside it. Every figure is labelled 'fee assumed, not a result' until then",
+  "margin_terms": "for each size key 1000 and 10000 (notional in dollars), L_max = the recorder's long_lev or short_lev estimate of that key at entry; leverage used = f x L_max with f = 10%, 25%, 50%; return on margin = net bps x leverage used; reported beside, never instead of, price terms",
+  "liquidation_test": "path based: with d_liq = (1/f - 1) / L_max (assumes maintenance margin equals the margin at maximum leverage, conservative, to be checked against Kalshi's margin rules), a trade whose worst recorded mid moves against it by d_liq or more before exit counts as liquidated and loses the whole margin (-1/(f L_max) x 1e4 bps of notional); the count of such trades is printed per f",
+  "income": "entries a day x mean net bps (price terms) x leverage used, ranked; figures by message only"
  },
  "gates": {
   "min_n": 100,
   "pf_primary": 1.3,
   "pf_secondary": 1.0,
+  "pf_note": "PF 1.3 at fee 5 bps and PF 1.0 at fee 12 bps (the harsher cost), as the binary families use a lenient line and a harsh line",
   "min_trade_days": 10,
+  "min_signals_per_day": 3.0,
+  "signals_per_day_note": "entries per active day of the name (weekdays; equities only inside their open session), over the days from start_utc to the read",
   "bh_alpha": 0.05,
-  "min_signals_per_day": 3.0
+  "p": "one sided, day clustered (UTC date of entry) on the 5 bps net"
  },
  "tries": {
-  "rules_this_spec": 420,
-  "prior_m": "6,290,660 (Head ruling 2026-11-16 18:35Z); m_total 6,291,080 = carried + 420"
+  "rules_this_spec": 666,
+  "prior_m": "6,290,660 (Head ruling 2026-11-16 18:35Z); m_total 6,291,326 = carried + 666"
  },
- "prediction": "none positive is expected: a top-5 book on a thin perp is mostly stale or spoofed; if any cell passes, expected PF under 1.15 at the primary haircut",
- "kill": "drop the family if the first read has PF under 1.0 at the primary haircut in 5 of 7 markets",
+ "read_date": {
+  "first": "2026-12-08",
+  "second_for_short_rules": "2026-12-21",
+  "basis": "only 101 minutes of data exist, so signal rates are a thin guide. Episodes seen in that file (15 minute lockout, before the position lockout): liquidation distance >= 1.0 to 3.0 bps about 0 to 4 per name per 101 minutes; spread >= 2x of the in-file median 0 to 3 per name per 101 minutes; zero at 5x and at 6 bps, which is why those thresholds are not used. At about 1 to 3 episodes per name per open hour a rule reaches 100 entries in roughly 5 to 20 open days (hold lockout lowers it); the 10 trade day floor then binds first for the faster rules, so 2026-12-08 is the first read, and slower rules (F4 has at most 20 decision minutes a day, F1 at 0.7) are expected to read 'no evidence at n = x' there and get the single read on 2026-12-21. The rate is re-measured from the first 3 full days and written as a dated note BEFORE any outcome column is joined; the dates do not move after that."
+ },
+ "prediction": "low prior: most rules fail the PF 1.3 / 1.0 pair at the 12 bps scenario because a 5 to 60 minute hold in a liquid perp earns well under 12 bps; expect at most a handful at 5 bps and none after BH",
+ "kill": "drop the family if the first read has PF under 1.0 at fee 5 bps in at least 6 of the 8 markets for each feature",
  "kill_fast": true,
  "n_floor": "no evidence at n = x",
- "fee_form": "per-order ceil(round(...)) form for binaries is not used; perps fee ASSUMED, flagged in the print",
  "sources": {
   "names": [
    "perp-live-data recorder files"
   ],
   "new_host": false
  },
- "name_note": "renamed from DEPTH1: that id is the R6 depth card (S1, H20) and NC15DEPTH1",
- "wall": "loader walls the 7 tickers copied from static.csv of the first file; the tickers and their sha256 go in this spec before any outcome-bearing column is joined; rows with a missing level or a crossed top are skipped and counted; two-sided top means 0 < bid < ask"
+ "fee_form": "perps: bps of notional, assumed; binary per-order rounding is not used"
 }
