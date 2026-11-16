@@ -108,16 +108,16 @@ c = m.run(d2, now, refuse, lambda s: None)
 e = m.run(tempfile.mkdtemp(), dt.datetime(2027, 3, 1, 2, 0, 0, tzinfo=u), get, lambda s: None)
 print(json.dumps([a, len(cr) - 1, len(fr) - 1, n, len(urls) == n, b, c, os.path.exists(os.path.join(d2, 'kalshi1m')), e, min(x for x in sleeps if x >= 1.0) >= 1.2, [x for x in urls if 'KXBTC' in x or 'KXGOLD' in x]]))`);
   assert.strictEqual(r[0], 0);
-  assert.strictEqual(r[1], 3, 'one candle for each of the two stock and index markets and the fixed extra Bitcoin perpetual');
-  assert.strictEqual(r[2], 3, 'only the target date funding row, for each of the three');
-  assert.strictEqual(r[3], 7, 'one list read, then a candle and a funding read per market');
+  assert.strictEqual(r[1], 4, 'one candle for each of the two stock and index markets and the fixed extra Bitcoin and gold perpetuals');
+  assert.strictEqual(r[2], 4, 'only the target date funding row, for each of the four');
+  assert.strictEqual(r[3], 9, 'one list read, then a candle and a funding read per market');
   assert.strictEqual(r[4], true, 'a second run reads nothing');
   assert.strictEqual(r[5], 0);
   assert.strictEqual(r[6], 1, 'three refusals in a row end the run');
   assert.strictEqual(r[7], false, 'and write nothing');
   assert.strictEqual(r[8], 0, 'past the stop date');
   assert.strictEqual(r[9], true, 'at least 1.2 seconds between calls');
-  assert.ok(r[10].every((x) => /KXBTCPERP/.test(x)) && r[10].length === 2, 'no crypto or metals read except the fixed extra Bitcoin perpetual (candles and funding)');
+  assert.ok(r[10].every((x) => /KXBTCPERP|KXGOLDPERP/.test(x)) && r[10].length === 4, 'no crypto or metals read except the fixed extra Bitcoin and gold perpetuals (candles and funding)');
   const wf = wfs.candles;
   assert.ok(/cron: "0 2,3,4 \* \* \*"/.test(wf), 'every night UTC, so Saturday UTC is archived too (Nov 15, 2026)');
 };
@@ -169,8 +169,9 @@ let failed = 0;
 // RB8: the nightly perps candle archive also takes six fixed extra tickers (the owner's merge, Nov 13, 2026); nothing else about it changed: same host, same candle route, same spacing and stop date.
 gates.RB8 = () => {
   const c = scripts.candles;
-  assert.ok(/EXTRA_TICKERS = \("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KXHYPEPERP", "KXBNBPERP"\)/.test(c), 'six fixed extra tickers');
+  assert.ok(/EXTRA_TICKERS = \("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KXHYPEPERP", "KXBNBPERP", "KXGOLDPERP"\)/.test(c), 'seven fixed extra tickers');
   assert.ok(/m\.get\("ticker"\) in EXTRA_TICKERS/.test(c), 'selected from the public list, never constructed');
+  assert.ok(/day >= now\.date\(\)/.test(c) && /\.only/.test(c) && /sys\.argv\[3\]/.test(c), 'back-pull: a finished date only, a separate .only file, a ticker list');
   assert.ok(/^CLASSES = \("Equities", "Indices"\)/m.test(c) && /^GAP_S = 1\.2/m.test(c) && /STOP_DATE = dt\.date\(2027, 2, 26\)/.test(c), 'classes, spacing and stop date unchanged');
 };
 

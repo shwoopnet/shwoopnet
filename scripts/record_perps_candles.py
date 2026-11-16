@@ -23,7 +23,7 @@ import urllib.request
 BASE = "https://external-api.kalshi.com/trade-api/v2/margin"
 CLASSES = ("Equities", "Indices")
 # Nov 13, 2026 (the Head of R&D, the owner's merge): six more fixed tickers, the Kalshi perpetuals on the underlyings of five NC15 series plus Bitcoin, so the frozen CFRTI-K formula can be replayed forward. A ticker not on the public list is simply absent.
-EXTRA_TICKERS = ("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KXHYPEPERP", "KXBNBPERP")
+EXTRA_TICKERS = ("KXBTCPERP", "KXSILVERPERP", "KXCOPPERPERP", "KXWTIFUTURE", "KXHYPEPERP", "KXBNBPERP", "KXGOLDPERP")
 STOP_DATE = dt.date(2027, 2, 26)
 GAP_S = 1.2
 MAX_429_IN_A_ROW = 3
@@ -65,14 +65,20 @@ def funding_row(ticker, f):
     return [ticker, f.get("funding_time", ""), num(f.get("funding_rate")), num(f.get("mark_price"))]
 
 
-def run(out_dir, now=None, get=None, sleep=time.sleep):
+def run(out_dir, now=None, get=None, sleep=time.sleep, day=None, only=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     get = get or http_get
     if now.date() > STOP_DATE:
         print("past the stop date; nothing recorded")
         return 0
-    day = now.date() - dt.timedelta(days=1)
-    name = day.isoformat() + ".csv.gz"
+    # Back-pull (Nov 16, 2026, the owner: gold, S&P 500 and Nasdaq-100 perps): `day` names ONE finished UTC date, `only` limits the tickers; the files then carry the suffix
+    # .only so a date already archived is never overwritten or mixed with a partial list. Without them it archives the previous UTC date, as before.
+    if day is None:
+        day = now.date() - dt.timedelta(days=1)
+    elif day >= now.date():
+        print("that date is not finished; nothing recorded")
+        return 1
+    name = day.isoformat() + (".only" if only else "") + ".csv.gz"
     cpath, fpath = os.path.join(out_dir, "kalshi1m", name), os.path.join(out_dir, "funding", name)
     if os.path.exists(cpath) and os.path.exists(fpath):
         print("this date is already archived; nothing to do")
@@ -95,7 +101,7 @@ def run(out_dir, now=None, get=None, sleep=time.sleep):
     try:
         listing = call(BASE + "/markets?limit=200")
         markets = (listing or {}).get("markets") or []
-        tickers = sorted(m["ticker"] for m in markets if (m.get("asset_class") in CLASSES or m.get("ticker") in EXTRA_TICKERS) and m.get("ticker"))
+        tickers = sorted(m["ticker"] for m in markets if (m.get("asset_class") in CLASSES or m.get("ticker") in EXTRA_TICKERS) and m.get("ticker") and (not only or m.get("ticker") in only))
         if not tickers:
             print("no stock or index perps listed; nothing written")
             return 1
@@ -126,4 +132,7 @@ def run(out_dir, now=None, get=None, sleep=time.sleep):
 
 
 if __name__ == "__main__":
-    sys.exit(run(sys.argv[1] if len(sys.argv) > 1 else "perp-data"))
+    # Usage: record_perps_candles.py OUT_DIR [YYYY-MM-DD [TICKER,TICKER,...]]  (the optional date and ticker list are the back-pull)
+    _day = dt.date.fromisoformat(sys.argv[2]) if len(sys.argv) > 2 else None
+    _only = tuple(t for t in sys.argv[3].split(",") if t.replace("_", "").isalnum()) if len(sys.argv) > 3 else None
+    sys.exit(run(sys.argv[1] if len(sys.argv) > 1 else "perp-data", day=_day, only=_only))
