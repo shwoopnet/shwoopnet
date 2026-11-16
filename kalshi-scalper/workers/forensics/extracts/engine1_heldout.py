@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """ENGINE1 HELD-OUT read extractor (Forensics desk, Nov 16, 2026; the Head's order of 17:20Z). WRITTEN WITHOUT OPENING ANY PULL RUN. The run names below are filled in AFTER the pull lands (which changes this file's sha256: one allow line after landing).
 REFUSES unless HELDOUT_PULL_RUNS.md carries a line containing this file's name, its own sha256 and EVERY run name of LISTS and CANDLES (an empty list refuses). Opens no other run.
-Windows (market close_time, epoch, from inclusive to exclusive; each epoch checked with calendar.timegm): FROM = 1791043200 (2026-10-03T16:00Z, HOLDS H01 ENGINE1 global freeze: this card's own read). TO per series: the 8 clean series (BTC, ETH, XRP, GOLD, HYPE, NEAR, SOL, BNB; the SHADOW_LIST_V1 markets) and DOGE: 1793145600 (2026-10-28T00:00Z, HOLDS H20 for BTC, ETH, XRP, DOGE, GOLD, and the card's own end for the others);
-SILVER, COPPER, WTI, EURUSD, GBPUSD, USDJPY: 1793836800 (2026-11-05T00:00Z, H21); NATGAS: 1795046400 (2026-11-19T00:00Z, H22); ZEC, PALLADIUM, PLATINUM: no HOLDS row beyond H01, so no end other than the pull's own.
-Order as the NC15 and ECONHIST extractors: (1) lists: ticker and close_time ONLY; a series not among the 19, an unreadable close, a close before FROM or at or after the series' TO is dropped and counted (separately for before and after) before any other key of the market is touched; (2) result for kept rows only (not yes or no: dropped and counted);
+Windows (market close_time, epoch, from inclusive to exclusive; each epoch checked with calendar.timegm; Auditor B's rulings of 17:22Z): EXACTLY the 12 series of the 190 rules: BTC, ETH, XRP, DOGE, GOLD, HYPE, SOL, NEAR, BNB, ZEC, WTI, SILVER (no other series is read). FROM = 1791043200 (2026-10-03T16:00Z, HOLDS H01, this card's own read).
+TO: BTC, ETH, XRP, DOGE, GOLD: 1793145600 (2026-10-28T00:00Z); HYPE, SOL, NEAR, BNB, ZEC, WTI, SILVER: 1793721600 (2026-11-03T16:00Z). EVENT830 cut as Desk A's loader: for WTI and SILVER a market whose close time of day is within 300 s of 13:30Z (close % 86400 within 300 of 48600, any date) is dropped and counted right after the close is read.
+Order as the NC15 and ECONHIST extractors: (1) lists: ticker and close_time ONLY; a series not among the 19, an unreadable close, a close before FROM or at or after the series' TO is dropped and counted (separately for before and after) before any other key of the market is touched; (2) result for kept rows only (a result that is not yes or no is KEPT as 'void' and counted);
 (3) candle runs: market_ticker first, non-kept markets counted and not parsed; per candle: end_period_ts, yes_bid.close_dollars, yes_ask.close_dollars (else unreadable, skipped), plus last = price.close_dollars, volume = volume_fp, oi = open_interest_fp (NULL and counted when missing); a candle ending after the market's close is dropped and counted; duplicates keep the first and are counted.
 Schema as the other ENGINE1 extracts: market(ticker, series, close_ts, result, src) and candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi). usage: python3 -I engine1_heldout.py <dir holding the pull run folders> <out dir>"""
 import os, sys, json, gzip, hashlib, collections, calendar, time, sqlite3
 HERE = os.path.dirname(os.path.abspath(__file__))
 FROM = calendar.timegm((2026, 10, 3, 16, 0, 0))
-OCT28, NOV5, NOV19 = calendar.timegm((2026, 10, 28, 0, 0, 0)), calendar.timegm((2026, 11, 5, 0, 0, 0)), calendar.timegm((2026, 11, 19, 0, 0, 0))
-TO = {"KXBTC15M": OCT28, "KXETH15M": OCT28, "KXXRP15M": OCT28, "KXGOLD15M": OCT28, "KXHYPE15M": OCT28, "KXNEAR15M": OCT28, "KXSOL15M": OCT28, "KXBNB15M": OCT28, "KXDOGE15M": OCT28,
-      "KXSILVER15M": NOV5, "KXCOPPER15M": NOV5, "KXWTI15M": NOV5, "KXEURUSD15M": NOV5, "KXGBPUSD15M": NOV5, "KXUSDJPY15M": NOV5, "KXNATGAS15M": NOV19, "KXZEC15M": None, "KXPALLADIUM15M": None, "KXPLATINUM15M": None}
+OCT28, NOV3 = calendar.timegm((2026, 10, 28, 0, 0, 0)), calendar.timegm((2026, 11, 3, 16, 0, 0))
+TO = {"KXBTC15M": OCT28, "KXETH15M": OCT28, "KXXRP15M": OCT28, "KXDOGE15M": OCT28, "KXGOLD15M": OCT28,
+      "KXHYPE15M": NOV3, "KXSOL15M": NOV3, "KXNEAR15M": NOV3, "KXBNB15M": NOV3, "KXZEC15M": NOV3, "KXWTI15M": NOV3, "KXSILVER15M": NOV3}
+EVENT830_SERIES = ("KXWTI15M", "KXSILVER15M"); E830_TOD, E830_TOL = 48600, 300     # 13:30Z, seconds
 LISTS = ()      # filled after the pull lands: "<job>/<stamp>_<runid>" folder names of the lists runs
 CANDLES = ()    # filled after the pull lands: the candle runs
 ALLOW_FILE = os.path.join(HERE, "..", "..", "HELDOUT_PULL_RUNS.md")
@@ -51,6 +52,7 @@ def build(base, out, allow_file=ALLOW_FILE, lists=None, candles=None):
                 tk, ct = m["ticker"], m["close_time"]
                 s = tk.split("-")[0] if isinstance(tk, str) else None; cl = iso(ct) if isinstance(ct, str) else None
                 if s not in TO or cl is None: c["unknown series or no close"] += 1; continue
+                if s in EVENT830_SERIES and abs(cl % 86400 - E830_TOD) <= E830_TOL: c["dropped: EVENT830 13:30Z close (" + s + ")"] += 1; continue
                 if cl < FROM: c["dropped before 2026-10-03T16:00Z"] += 1; continue
                 if TO[s] is not None and cl >= TO[s]: c["dropped at or after the series' end"] += 1; continue
                 if tk in kept: c["duplicate market in the lists (first kept)"] += 1; continue
@@ -59,7 +61,7 @@ def build(base, out, allow_file=ALLOW_FILE, lists=None, candles=None):
     for tk, v in kept.items():                                              # (2) result for kept rows only
         r = v[2].get("result")
         if r in ("yes", "no"): res[tk] = r
-        else: c["no result (dropped)"] += 1
+        else: res[tk] = "void"; c["result not yes or no (kept as void)"] += 1
     dst = os.path.join(out, "ENGINE1_heldout_extract.sqlite")
     if os.path.exists(dst): os.remove(dst)
     o = sqlite3.connect(dst); o.execute("create table market(ticker, series, close_ts, result, src)"); o.execute("create table candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi)"); seen = {}
