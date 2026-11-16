@@ -1,4 +1,4 @@
-# FUNDX2_THRESHOLDS: note (History Miner, 2026-11-16 ~00:10Z, written before any price file is opened)
+# FUNDX2_THRESHOLDS: note (History Miner, 2026-11-16 ~23:55Z (the header first said 00:10Z by mistake), written before any price file is opened)
 
 - Output: FUNDX2_THRESHOLDS.json, sha256 384aeec937440e88fcba7f79170923249dcedd1383bfacd817cd91d6a4239fd6, written by fundx2_thresholds.py 5948609a... (CODE CLEAN, Auditor B) under the allow line merged by Main (PR 1029, 7b8f245), on funding/by-ticker.csv.gz sha256 fc17090234c0e5bdf02d04813da007492faa254e81a2a83157ae51e150cdc442. One run, nothing re-run, nothing edited by hand.
 - Label (Auditor B): the cut points are order statistics of the SEARCH rates (2026-06-03 to before 2026-09-15) only. The VALIDATE extreme counts and print counts in the file are COUNTS ONLY of VALIDATE prints beyond the SEARCH cuts; no VALIDATE rate or price enters any cut point. The file holds cut points and counts and no per-print rate, time or mark price. No price file (snapshot, BTC candle run or spot) was opened by this step.
