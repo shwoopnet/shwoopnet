@@ -7,6 +7,7 @@ BATCH_C_TRIES = 1201824
 FROZEN_TRIES = {"ENGC1ETHMOM": 303264, "ENGC2OIACC": 320112, "ENGC3TOD": 426816, "ENGC4GOLDX": 151632}      # the frozen specs' counts; m is never taken from the series that happened to have a split constant
 def main(spec, base, m_carried, out):
     if spec not in C.SPECS: sys.exit(__doc__)
+    if int(m_carried) != 6290660: raise SystemExit("REFUSED: the carried m for batch C is 6,290,660 on any date (7,492,484 already contains batch C)")
     wa, ca, wp, cp, wn, cn = L.load(base)
     rep = C.run_c(wa, spec, prior_m=int(m_carried), m_full=int(m_carried) + BATCH_C_TRIES)
     if rep["tries_this_spec"] != FROZEN_TRIES[spec]: raise SystemExit("REFUSED: %s tried %d rules, the frozen spec says %d (a series is missing a split constant)" % (spec, rep["tries_this_spec"], FROZEN_TRIES[spec]))
