@@ -1708,3 +1708,7 @@ Run 118 of `ENGINE1_HELD_CANDLES_A1` stopped after 50 requests (3 x HTTP 400): t
 ## kalshi-pull job: ETHD_RESULTS2 (Nov 16, 2026, Desk B, Auditor B CLEAN)
 
 The first `ETHD_RESULTS` run hit its 40 page cap (newest first, so it covered only Nov 10 to Nov 15) and failed Auditor B's structure check; its folder stays unlisted. `ETHD_RESULTS2` (sha256 starts 4a280adc, 33 requests, cap 45, owner DESK_B) asks for the 3,231 hourly Ethereum ladder tickers by name in batches, closes 2026-10-28T00:00Z to before 2026-11-16T00:00Z, elections host, GET only, no key, 5 second pacing. Auditor B recomputed the ticker set and the runner dry run passes. Runner and workflow unchanged. Do not run `ETHD_RESULTS` again. Gates: `test/kalshiPullGates.test.js` job lists. Nothing trades.
+
+## kalshi-pull jobs: SOCDRIFT_CANDLES_P1 and _P2 (Nov 16, 2026, Idea Desk C, Auditor B CLEAN by hash)
+
+Two job files copied byte for byte from `claude/idea-desk-c` commit ca2a65e5 after checking each sha256 (P1 starts 4fe89a58, P2 starts 56d21334), with the card and spec in `kalshi-scalper/workers/idea_desk_c/allkalshi/socdrift/`: 388 requests each, cap 400, 776 games and 1,164 tickers each, 5 second pacing, elections host, GET only, no key, owner MAIN. Run P1 then P2, after `HISTCUTOFF1`: if the historical cutoff is later than 2026-09-18, Desk C rebuilds with a later start. Runner and workflow unchanged. Gates: `test/kalshiPullGates.test.js` job lists. Nothing trades.
