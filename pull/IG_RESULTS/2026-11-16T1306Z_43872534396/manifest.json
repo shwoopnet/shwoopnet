@@ -1,0 +1,139 @@
+{
+ "job": {
+  "job_id": "IG_RESULTS",
+  "status": "active",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/history_miner/ingame1/INGAME_CARDS_NOV15.md",
+  "purpose": "Settled results of NBA and NFL totals markets closing 2026-11-08 to 2026-11-12, for the in-game quick read IGUNDER1. Moneylines (SPORTS-PRE reserve) and NHL (NHLOT pending) are left out per Auditor B's hold map of 2026-11-15 21:26Z.",
+  "heldout": "none read: capped at max_close_ts 1794527999 (2026-11-12T23:59:59Z); KXNBATOTAL and KXNFLTOTAL carry no hold from Nov 8 (Auditor B, 21:26Z); NBA rows also limited to before Nov 13 by INGAMELAG1.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 5.0,
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "min_close_ts",
+     "max_close_ts",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXNBATOTAL",
+   "KXNFLTOTAL"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 6,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "settled_KXNBATOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNBATOTAL",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794527999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_KXNFLTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNFLTOTAL",
+     "status": "settled",
+     "min_close_ts": 1794096000,
+     "max_close_ts": 1794527999,
+     "limit": 1000
+    },
+    "max_pages": 3
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-16T1306Z",
+ "finished": "2026-11-16T1306Z",
+ "status": "complete",
+ "requests_sent": 3,
+ "bytes_stored": 3023317,
+ "rows": [
+  {
+   "index": 1,
+   "id": "settled_KXNBATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBATOTAL",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2172957,
+   "t_send_ms": 1794834370833,
+   "t_recv_ms": 1794834371150,
+   "server_date": "Mon, 16 Nov 2026 13:06:10 GMT",
+   "file": "0001.json.gz",
+   "sha256": "6071c3f3bb41f860c705f917a26df4a1f85ac66a1e3cfc0d06a54387a52eae5d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "settled_KXNBATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNBATOTAL",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 299714,
+   "t_send_ms": 1794834375833,
+   "t_recv_ms": 1794834376107,
+   "server_date": "Mon, 16 Nov 2026 13:06:15 GMT",
+   "file": "0002.json.gz",
+   "sha256": "f13ee26f20a69b8466030267dde7a49609195ba96e52e565848786192d97a0ef",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "settled_KXNFLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNFLTOTAL",
+    "status": "settled",
+    "min_close_ts": 1794096000,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 550646,
+   "t_send_ms": 1794834380834,
+   "t_recv_ms": 1794834381104,
+   "server_date": "Mon, 16 Nov 2026 13:06:20 GMT",
+   "file": "0003.json.gz",
+   "sha256": "0fc77ab02f0ae2011feedf7ca3335269b35d01127f7fe7eb7f762582cf152b87",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
