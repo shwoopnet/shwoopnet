@@ -1724,3 +1724,31 @@ The ENGINE1 held-out read is complete and listed in `kalshi-scalper/workers/HELD
 ## Held-out log: ENGINE1 Forensics extractor line (Nov 16, 2026, Auditor B CLEAN)
 
 A second ENGINE1 line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`, separate from Desk A's loader line: readable ONLY by Forensics' extractor `engine1_heldout.py` (sha256 34badbec..., commit 670ddc9b on `claude/forensics-desk`, read in full by Auditor B), naming the same five runs (lists A and B, candles A1, A1C and B1). The extractor refuses unless the log carries a line with its file name, its own sha256 and every run name. I checked the file's sha256 and the five names before merging. Docs only.
+
+## Held-out log: ENGINE1 second-build reader (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Forensics' independent second-build reader `heldout_read_b2.py` (sha256 1b1228ec..., commit 369ca17f on `claude/forensics-desk`; I checked the file's sha256 before merging) and the ENGINE1 extract it reads. The reader needs the line to carry its file name, its own sha256 and both extract hashes, and reads the extract only after Desk A's print file is passed. Docs only.
+
+## Held-out log: PERPSLANE4 reader (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the Testing Desk's PERPSLANE4 reader `lane4_load.py` (sha256 a4790480...) and its file manifest `LANE4_FILES_MANIFEST.txt` (sha256 1b46f85d...; 160 perp-data files, 2026-09-10 to 2026-11-15). I checked the loader, manifest and spec sha256 against commit b02d24ecc on `claude/testing-desk` before merging. Docs only.
+
+## The 30 second perps recorder and the wheel book recorder are stopped (Nov 16, 2026, the owner's popup: "Stop both")
+
+`.github/workflows/record-perps-fast.yml` (redundant with the 60 second live perps recorder) and `.github/workflows/record-wheelbook.yml` with `scripts/record_wheelbook.py` (no open card needs it) are DELETED, as are their gate files `test/perpFastRecorderGates.test.js` and `test/wheelBookRecorderGates.test.js`; `test/stopFastWheelbookGates.test.js` (STOP1) pins that neither workflow comes back and that nothing under `functions/` names them. Why deleted and not just switched off: a GitHub workflow cannot be disabled from code, and each one chained itself around the clock, so they held runner slots (they and about two dozen other recorders were running at once while the kalshi-pull queue sat unstarted). **Checked before stopping:** no strategy, page or function reads either one; the INPLAYJUMP wheel places were withdrawn Nov 13 (the registry sync retires all five sports and esports places) and were never admitted; the wheel book was only a research source (`docs/WHEEL_ADMIT_LIST.md` row 4, MAPBREAK, which is closed). **Kept:** `scripts/record_perps_fast.py` (the Sunday recorder imports it), every file already recorded on `perp-data` (`perps30/`) and the weekly `wheelbook-*` branches, and the guard rows in `HOLDS.json`. Putting either back is `git checkout` of the deleted files from history plus the owner's say. **Until this merges, the owner can free the slots at once:** on GitHub, Actions tab, `record-perps-fast` and `record-wheelbook`, the `...` menu, Disable workflow. Needs the owner's typed merge (workflow change). Nothing to deploy.
+
+## Held-out log: ETHD_RESULTS2 for Desk B's ETHLATE1 loader (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`: the run `ETHD_RESULTS2/2026-11-16T2059Z_43950254867` (structure CLEAN, 14 of 14, 3,231 hourly Ethereum ladder markets, closes 2026-10-28 to before 2026-11-16) is readable ONLY by Desk B's ETHLATE1 loader `ethlate1_load.py` (sha256 0c4d4f05...; I checked the file on `claude/idea-desk-b` before merging). The first `ETHD_RESULTS` folder stays unlisted. Docs only.
+
+## Held-out log: PERPSLANE4 second-build line withdrawn (Nov 16, 2026, Auditor B)
+
+Auditor B withdrew the allow line for Forensics' `lane4_extract_b2.py` (sha256 53490d8a...) minutes after it was merged in #1015: the extractor parses `funding_time` as a number but the real funding files hold ISO strings, so it would crash on the real layout (its selftest used numeric epochs). The line and its section were removed in the same change; a corrected extractor needs a new commit, a new sha and a new CLEAN before any line returns. The Testing Desk's `lane4_load.py` line (#1010) is unaffected. Docs only.
+
+## Held-out log: PERPSLANE4 second-build extractor, corrected (Nov 16, 2026, Auditor B's allow line)
+
+The corrected `lane4_extract_b2.py` (sha256 a6b9532d..., commit 9f849955 on `claude/forensics-desk`; I hashed the file before merging) is named in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` with the shared manifest (sha256 1b46f85d...). The fix over the withdrawn version is ISO funding times and digit-only end timestamps, applied after the ticker wall check. The earlier version (53490d8a...) stays unlisted. Docs only.
+
+## Held-out log: PERPSCALP2 (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's `perpscalp2.py` (sha256 bc77a611..., commit f3ab35f8 on `claude/idea-desk-c`; I hashed it, and its runner `perpscalp2_run.py` is ed3d9d8b...). It reads the perps archive's `kalshi1m` and `funding` files only, candles ending through 1794787199, and drops rows at or after 1797897600 (H16); the `cash1m` and `perps30` folders (H17) are not read. No new source or host. Docs only.
