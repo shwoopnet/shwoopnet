@@ -1,0 +1,122 @@
+{
+ "id": "PERPIMB1",
+ "version": "v1",
+ "desk": "FORENSICS (lane 3, scalping)",
+ "date_registered": "2026-11-16",
+ "status": "DRAFT, unsigned, nothing run, no data after the cut exists yet",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/forensics/depth/PERPIMB1_CARD.md",
+ "needs_new_code": [
+  "loader for the perp-live-data files book.csv, book_fast.csv, markets.csv, coverage files (audited once, wall first)",
+  "event scorer plugin: episode detection, next-quote entry, hold exit, taker and maker columns, margin view, hand case first"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "PERPDEPTH1 F1 (top-5 book imbalance, holds 5 to 60 minutes)",
+   "ENGINE1 perps mom1/mom3 (price momentum)"
+  ],
+  "declined_list_rows_checked": [
+   "second-of-minute taker clustering (closed by evidence)",
+   "fractional-size flow (closed)",
+   "lock and parity scans (closed)",
+   "favourite-and-hold ban (not applicable)"
+  ],
+  "difference": "touch only (level 1 sizes, not the 5 level sum), a scalping horizon of 1 to 5 minutes, and a 5 second sampling arm that PERPDEPTH1 does not have; the signal is a resting-size imbalance, not price history",
+  "overlap_disclosed": "the feature is the level-1 slice of PERPDEPTH1 F1; the two are different holds and sampling, but the same hypothesis family: a survivor of either is checked for correlation with the other (0.3 or more = duplicate, 7d) before it is called unique; the Head ruled it a separate lane, not a version",
+  "family_flag": "book imbalance"
+ },
+ "counterparty": "the liquidity providers on the THIN side of the touch: a resting quote that is the only size left is picked off or repriced after the next taker order; a taker that follows the imbalance trades against makers who do not reprice fast enough (adverse selection, their loss). If instead the thick side is stale or spoofed, the fade is the other side of that.",
+ "data": {
+  "source": "perp-live-data branch: ARM F = book_fast.csv (5 second batched book, 14:30 to 21:00 UTC Monday to Friday, ten tickers of which the five below); ARM S = book.csv (60 second book, all hours) with markets.csv for the quote and marks",
+  "tickers": [
+   "KXBTCPERP",
+   "KXETHPERP",
+   "KXGOLDPERP",
+   "KXUSTECH100PERP",
+   "KXUS500PERP"
+  ],
+  "files_before_the_book_fix_excluded": "PR 1013 merged 2026-11-16T15:16:29-06:00 = 21:16:29Z (epoch 1794863789). Every perplive/<date>/<HHMM> folder whose job STARTED before that instant, i.e. all files of the 2026-11-16 18:18 UTC job (it ran the old code to its 22:00Z boundary and its book.csv holds the five FAR levels), is dropped by the loader and counted; the first usable job is the first one started after 21:16:29Z. Main records the first usable directory stamp here on the first fixed file; the first FULL UTC day after it is the start day.",
+  "book_fast_exists_only_after": "PR 1014 (fast lane) merged 2026-11-16T15:18:51-06:00; its first window is Tuesday 2026-11-17 14:30Z",
+  "independence_note": "forward recorder data only"
+ },
+ "split": {
+  "mode": "forward_only",
+  "start_utc": 1794873600,
+  "start_utc_check": "2026-11-17T00:00:00Z (provisional: the first full UTC day after the first fixed file; moves only by a dated amendment before any outcome is joined)",
+  "first_read_not_before_epoch": 1796083200,
+  "first_read_check": "2026-12-01T00:00:00Z (10 trade days after the start day: 2026-11-17 to 2026-11-30 weekdays)",
+  "last_decision_epoch": 1797811200,
+  "last_decision_check": "2026-12-21T00:00:00Z",
+  "release_rule": "one read per rule; a rule under 100 entries at the first read prints 'no evidence at n = x' and is read once more on 2026-12-21; a rule with n >= 100 is never re-read"
+ },
+ "holds": [
+  {
+   "label": "H16 perps (KXUS500PERP, KXUSTECH100PERP among them)",
+   "start_epoch": 1797897600,
+   "end_epoch": 1801440000,
+   "card": "H16",
+   "status": "OPEN",
+   "handling": "last decision 1797811200 = 2026-12-21T00:00Z, the longest hold is 5 minutes"
+  }
+ ],
+ "feature": {
+  "I1": "(bid_sz_1 - ask_sz_1) / (bid_sz_1 + ask_sz_1) from the book row at the decision poll; two sided top required (0 < bid_px_1 < ask_px_1, both sizes > 0), else skipped and counted",
+  "thresholds": [
+   0.5,
+   0.7,
+   0.9
+  ],
+  "direction": [
+   "follow: long when I1 >= T, short when I1 <= -T",
+   "fade: the reverse"
+  ],
+  "markets": 5,
+  "holds_minutes": [
+   1,
+   2,
+   3,
+   5
+  ],
+  "arms": [
+   "F (5 s book)",
+   "S (60 s book)"
+  ]
+ },
+ "episodes": "a signal is the first poll at which the condition holds after being false for at least 3 polls; one position per name and rule at a time; ENTRY at the first recorded quote after the decision poll (buy at the ask, sell at the bid) from the same arm's own data, EXIT at the first quote at or after entry + hold; a gap of more than 2 polls at the exit voids the trade and counts; an event whose hold spans a funding print is dropped and counted",
+ "grid": {
+  "rules_this_spec": 240,
+  "rules_formula": "5 markets x 3 thresholds x 2 directions x 4 holds x 2 arms",
+  "subset_rationale": "the whole stated grid, thresholds chosen from the scale of the feature, no outcome used"
+ },
+ "costs": {
+  "taker": "net per trade in bps of entry notional after crossing the touch both ways, minus a round trip fee of 5 bps and, as the harsh line, 12 bps (the Head's scenarios; Kalshi's published perps fee is still to be written in; every figure 'fee assumed, not a result')",
+  "maker_column": "the same trades with the ENTRY at the own side of the touch (no spread crossed on entry) and a taker exit; fee 5 and 12 bps round trip as above; maker fills are NOT modelled, so the column is an upper bound: a rule that passes ONLY here is FLAGGED 'maker-only' and is NOT counted as a pass",
+  "margin_view": "for f = 10, 25 and 50 percent of the page max leverage of the name (PERPS_PAGE_MAX_20261116.tsv sha 5be707ec: BTC 15.4, ETH 10.5, gold 40, US Tech 100 28.9, US 500 36.1), return on margin = net bps x f x page max, and the path based liquidation test with d_liq = (1/f - 1)/L_max (a conservative maintenance assumption to be checked), the worst recorded mid against the position decides; reported beside price terms, never instead"
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "pf_note": "PF 1.3 at the 5 bps taker line and 1.0 at 12 bps",
+  "min_trade_days": 10,
+  "min_signals_per_day": 3.0,
+  "signals_per_day_note": "entries per active day of the name, for ARM F only the days with a fast window (weekdays), for ARM S every UTC day with data; both gates are on the rule, so a 60 s rule needs 3 a day from 60 s polls",
+  "bh_alpha": 0.05,
+  "p": "one sided, day clustered (UTC date of entry), taker 5 bps net"
+ },
+ "tries": {
+  "rules_this_spec": 240,
+  "prior_m": "for a print today 6,290,660 + 240 = 6,290,900; from 2026-11-17 on 7,492,484 + 240 = 7,492,724 (carried numbers by the Head and Auditor B; Auditor B confirms on Nov 17)"
+ },
+ "prediction": "numeric: the mean mid move over the next 1 to 5 minutes after |I1| >= 0.9 is under 0.5 bps in every market (spread 0.5 bps, fee 5 bps); expected PF at the 5 bps taker line below 1.0 in at least 4 of 5 markets; probability that any rule passes PF 1.3 at 5 bps with 3 a day and 100 entries about 3 percent; a maker-only pass is likely and is not counted",
+ "kill": "drop the family if at the first read the PF at the 5 bps taker line is under 1.0 in at least 4 of 5 markets in BOTH arms, or if fewer than 3 entries a day are reached by any rule in both arms",
+ "kill_fast": true,
+ "n_floor": "no evidence at n = x",
+ "sources": {
+  "names": [
+   "perp-live-data recorder files"
+  ],
+  "new_host": false
+ },
+ "fee_form": "perps: bps of notional, assumed"
+}
