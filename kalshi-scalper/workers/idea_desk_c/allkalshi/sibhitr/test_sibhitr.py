@@ -56,6 +56,15 @@ class Hand(unittest.TestCase):
         self.assertAlmostEqual(o["R_SLOW_YES"]["raw"]["mean_c"], -42.0)
         self.assertEqual(o["R_FAST_NO"]["bar"], "no evidence at n = 2")
 
+    def test_cursor_but_window_covered(self):
+        root = self.build(cursor="abc")      # the last page holds Mar 10 closes, not before Mar 1: still truncated
+        with contextlib.redirect_stdout(io.StringIO()):
+            o = SC.main(root)
+        self.assertIn("stopped", o)
+        root2 = tempfile.mkdtemp()
+        put(root2, "SIBHITR_LISTS_A", [({"id": "hist_KXNBAPTS", "page": 1}, {"markets": [{"ticker": "KXNBAPTS-X-P0-10", "close_time": "2026-02-20T03:00:00Z"}], "cursor": "abc"})])
+        self.assertFalse(L.truncated(root2))   # a last page reaching before the window start covers the window
+
     def test_truncated(self):
         root = self.build(cursor="abc")
         with contextlib.redirect_stdout(io.StringIO()):

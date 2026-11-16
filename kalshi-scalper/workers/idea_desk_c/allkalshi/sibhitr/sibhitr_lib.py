@@ -44,11 +44,21 @@ def bodies(root, job, rid=None):
 
 
 def truncated(root):
+    """True when the window may be incomplete: the last stored page still has a cursor AND its earliest close_time is not before the
+    window start. The historical list comes newest first by close time, so a last page reaching before WIN[0] covers the whole window
+    (Amendment 5, Nov 16, time fields only)."""
     last = {}
     for r, b in bodies(root, LIST_JOB, LIST_ID):
         if "markets" in b:
-            last[(r.get("page") or 0)] = b.get("cursor") or ""
-    return bool(last) and bool(last[max(last)])
+            closes = [B.iso(m.get("close_time")) for m in b.get("markets") or []]
+            closes = [c for c in closes if c is not None]
+            last[(r.get("page") or 0)] = (b.get("cursor") or "", min(closes) if closes else None)
+    if not last:
+        return True
+    cur, earliest = last[max(last)]
+    if not cur:
+        return False
+    return earliest is None or earliest >= WIN[0]
 
 
 def list_rows(root):

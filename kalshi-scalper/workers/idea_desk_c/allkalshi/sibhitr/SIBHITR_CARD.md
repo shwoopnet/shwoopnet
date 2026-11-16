@@ -81,3 +81,17 @@
   - Games are sorted by the lowercase hex digest of its md5 (string order, which is byte order for hex), ascending, with the event_ticker string as the tie break.
   - The read sample is the first 40.
 - **How the held-out stays out:** `games(rows, "read")` returns only the 40. The candle builder and the scorer call it that way, so no held-out game reaches a candle request, a quote, a side or a result. The scorer calls `games(rows, "heldout")` once, only to print `heldout_games_unread`, a count built from time fields. The held-out is read only after a pass, by a later reviewed change.
+
+## Amendment 5 (Nov 16, 2026, ~15:40Z; after the list landed, before any candle; time fields only)
+
+- **What happened:** SIBHITR_LISTS_A came back with all 18 pages full and a cursor on the last one. The scorer's truncation rule stopped the build, as written.
+- **What the pages show:** the historical list is ordered newest first by close time. From close times only, the pages run from June 14, 2026 down to January 15, 2026; the window (Mar 1 to Apr 14) sits on pages 4 to 13. The list goes on past January, so KXNBAPTS existed before March. PROPS1's census said March to June, as a lower bound.
+- **The change:** a list counts as truncated only when its last stored page has a cursor AND that page's earliest close is not before the window start. A last page reaching before Mar 1 covers the whole window, because later pages are older.
+- **Disclosure:** this rule changed after the list landed. It depends only on close times, never on a price, volume or result, and it widens nothing: the window, sample, sides and bar are unchanged. It is sent to Auditor B before any candle job.
+
+## Amendment 6 (Nov 16, 2026, ~15:45Z; after the list landed, before any candle; time fields only): the registered clock does not exist in 2025-26
+
+- **The finding:** every 2025-26 KXNBAPTS market in the historical list has `occurrence_datetime` empty (1,000 of 1,000 on a window page). SIBHIT's clock (T = occurrence - 60 min) and its clock check therefore cannot be applied, and the builder finds 0 games. Nothing was built and no candle was requested.
+- **The obvious substitute does not work.** `expected_expiration_time` is present in 2025-26, one value per game, on :00 or :30. But in the 2026-27 development list it sits either 0 h or 3 h after occurrence, and the two offsets are mixed inside every one of the 120 games. It is not a stable stand-in for SIBHIT's clock. Using it would be a new rule chosen after seeing the list.
+- **Effect:** SIBHIT-R as registered cannot be read on 2025-26. Amendment 5 (the truncation rule) is moot for now.
+- **Next:** the Head chooses between (1) the registered fallback, closes 2026-11-13 to before 2026-12-04, pulled after Dec 4, where occurrence exists, and (2) a new registration with a different clock. No candle is pulled meanwhile.
