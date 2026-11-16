@@ -1,0 +1,2 @@
+ENGB4XBTC run once Nov 16 2026 from a scratch checkout: engine1_batchb.py 68a5ab43, runner 2bf456b5, driver 1281ce0a, extract loader 5c5b0eaa (line on main), archive extract (Line B1), batch m 2,650,752 and 4,073,472.
+sha256 of out_engb4.json, committed BEFORE it was read: 0e4da9d49945ba027ebd092832726fdbe0673b854aec6c49e35124ad2348c2fd
