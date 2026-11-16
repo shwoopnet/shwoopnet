@@ -1,0 +1,133 @@
+{
+ "id": "PERPBASIS1",
+ "desk": "History Miner",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "split": {
+  "mode": "fixed_dates",
+  "search": "BTC 2026-06-03T00:00Z to before 2026-09-15T00:00Z (cut points only, trades never opened); ETH and XRP forward-search 2026-11-17T00:00Z to before 2026-11-24T00:00Z",
+  "validate": "BTC 2026-09-15T00:00Z to before 2026-11-12T00:00Z; ETH and XRP from 2026-11-24T00:00Z; BTC forward from 2026-11-17T00:00Z",
+  "release_rule": "cut points computed once and committed (PERPBASIS1_THRESHOLDS.json) with counts and the loader hash before any outcome print; gate fixed on the first 7 distinct trade days, committed before the first outcome print"
+ },
+ "costs": {
+  "fee_taker_per_side": 0.0012,
+  "fee_stress_per_side": 0.0005,
+  "haircuts_primary": [
+   0.0002,
+   0.0005
+  ],
+  "haircuts_stress": [],
+  "fee_taker": 0.0012,
+  "fee_maker": 0.0005,
+  "note": "perps: 12 bps of notional a side (24 round trip), 5 bps a side as the stress, plus a relative haircut per fill 0.02 and 0.05 percent; fees ASSUMED until Kalshi's fee page is read; funding booked from the data"
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 8,
+  "prior_m": "6,290,660 + 16 (8 PERPBASIS1 + 8 withdrawn BASIS) = 6,290,676 for a print on 2026-11-16; 7,492,484 + 16 = 7,492,500 from 2026-11-17",
+  "note": "PERPBASIS1 8 cells; replaces PERPCRYPTO1 BASIS 8"
+ },
+ "kill_fast": true,
+ "uniqueness": {
+  "closest_existing": [
+   "PERPCRYPTO1 BASIS (withdrawn unrun, replaced)",
+   "FUNDX2 (funding print)",
+   "PERP1 to PERP3 (daily trend, FALSIFIED)"
+  ],
+  "declined_list_rows_checked": [
+   "lead-lag between related markets (see card amendment 1: level of the gap against a fixed threshold, mean reversion, no leader)",
+   "favourite-and-hold",
+   "taker order-flow family (no tape)"
+  ],
+  "difference": "the perp's premium over Coinbase spot at 1 minute, tail crossings, 15 or 60 minute time exit; replaces BASIS under 7g",
+  "family_flag": "none; the Verification Analyst scores the four checks before any read"
+ },
+ "data": {
+  "loader": "perpbasis1_load.py (to be written and audited)",
+  "loader_sha256": "pending",
+  "extracts": [
+   "PERPBTC1M 1 minute candles (bid.close, ask.close), BTC, 2026-06-03 to about 2026-11-12 (kalshi-pull-data run 43252136600; its own allow line)",
+   "Coinbase 1 minute candles, BTC (PERPSPOT_BTC1M via PR 1020), ETH and XRP forward windows",
+   "the 60 second perp recorder (PR 998) for ETH, XRP and forward BTC, columns and spacing to be confirmed by counts",
+   "labelled funding (PR 1021)"
+  ],
+  "ticker_wall": [
+   "KXBTCPERP",
+   "KXETHPERP",
+   "KXXRPPERP"
+  ],
+  "window": {
+   "first_close": "BTC VALIDATE 2026-09-15T00:00Z; ETH and XRP 2026-11-24T00:00Z",
+   "last_close_exclusive": "BTC history 2026-11-12T00:00Z; forward windows per the rolling read"
+  },
+  "held_out_map_checked_by": "pending Auditor B",
+  "independence_note": "no other card reads the crypto perps; the BTC perp 1 minute pull is read only by registered readers (the held-out log)"
+ },
+ "event": {
+  "scorer_plugin": "perpbasis1_events.py (to be written and audited)",
+  "scorer_plugin_sha256": "pending",
+  "decision_instant": "the first minute whose premium is outside the SEARCH cut after a minute inside",
+  "signal_threshold_abs_mid_move": null,
+  "entry_rule": "q {1, 2.5} percent x side {converge, follow} x hold {15, 60} min = 8 cells; far touch next minute; one position per ticker",
+  "exit": "H"
+ },
+ "prediction": "at least one cell has PF >= 1.3 at taker with the 0.02 percent haircut and PF >= 1.0 at 0.05 percent, n >= 100, 10 or more trade days, a pooled rate >= 3 a day and a BH pass; dead on arithmetic if every VALIDATE cut point is under the 24 bps round trip; prior very low",
+ "kill": "a cell is dropped when its pooled rate over the first 7 trade days is under 3.0 a day or its first read has PF under 1.0 at the primary haircut (kill_fast); every cell is reported dead if all VALIDATE cut points are under the 24 bps round trip",
+ "outputs": {
+  "survivor_line": "market, rule, PF at taker 0.02 and 0.05 percent, n, days, rate a day, margin return and liquidation share at 10, 25 and 50 percent of the maximum leverage",
+  "header": "BTC prints apart (history Jun 3 to Nov 12 plus forward); ETH and XRP are forward only",
+  "family_flag": "none"
+ },
+ "card": "kalshi-scalper/workers/history_miner/perpbasis1/PERPBASIS1_CARD_NOV16.md",
+ "needs_new_code": [
+  "labelled funding pull for the six tickers, or crypto in the daily funding recorder (Main)",
+  "a Coinbase route row in scripts/kalshi_pull.py (Main; needs the owner's typed merge and Auditor B's runner read)",
+  "the loader's file-level readers (they open files only after the allow line; walls and refusals are tested in perps_crypto_load.py)",
+  "Auditor B's CLEAN of perps_crypto_load.py, perps_crypto_events.py and test_perps_crypto.py",
+  "the owner's list of page maximum leverage for SOL, DOGE and HYPE (API estimate used meanwhile)"
+ ],
+ "holds": [
+  {
+   "label": "crypto perp tickers KXBTCPERP, KXETHPERP, KXSOLPERP, KXXRPPERP, KXDOGEPERP, KXHYPEPERP: no hold names them",
+   "start_epoch": 0,
+   "end_epoch": null,
+   "card": "none (Auditor B 2026-11-16 20:48Z); read by CFRTI-K, EVM1, PBOOK1 to 3, PERPBIN1, PERPOI1, SNAPBACK1 on KXBTCPERP and PBOOK1 to 3, SNAPBACK1 on KXETHPERP; H09 forbids joining BTC perp prices to KXBTC15M inside Nov 9 to Nov 20 (this spec does not)",
+   "status": "no hold; PERPBTC1M is a registered-readers-only run (own allow line first)"
+  }
+ ],
+ "sources": {
+  "names": [
+   "Kalshi public perps list, funding history and candles (recorders and pulls)",
+   "Coinbase public spot candles (research only, public, generic user agent, no key; the standing list, the Head 2026-11-16 20:47Z)"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "file": "perpbasis1_events.py",
+  "sha256": "pending",
+  "hand_case": "test_perpbasis1.py",
+  "hand_case_sha256": "pending",
+  "auditor_clean_date": "pending"
+ },
+ "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
+ "halves": "by entry time: the first floor(n/2) trades and the rest",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order at c = 10; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x",
+ "look_ahead": {
+  "decision_instant": "the perp minute ending at t, with the last COMPLETED Coinbase minute candle (start t - 60 s)",
+  "inputs": "the premium at t and FIXED per-ticker cut points from SEARCH premiums only (nearest rank, at least 5,000 SEARCH minutes); the signal is the first minute outside after a minute inside (re-arm)",
+  "entry_quote": "the NEXT minute's far touch",
+  "exit_price": "the near touch of the first minute at least H later (tolerance 2 minutes, else skipped); funding on prints strictly between entry and exit from the labelled file (positive = longs pay); a trade crossing a print the file lacks is excluded and counted"
+ },
+ "notes_v2": "approved by the Head 2026-11-16 20:47Z; margin table v2 on page-max leverage and 4.5 percent maintenance; spot accepted for research",
+ "card_sha256": "553e8ec62320486f67bed969f1c900b304e71d92e8b7c1e3ea1dc08f1e917331",
+ "rule_count": 8,
+ "status": "DRAFT spec: not signed; loader, plugin, allow line and the Verification Analyst's four checks pending",
+ "fee_form_perps_note": "NOT the binary-contract fee: perps pay 12 bps of notional a side (stress 5 bps) plus a 0.02 or 0.05 percent haircut per fill, and funding; the standing form above is kept only because spec_check requires the field"
+}
