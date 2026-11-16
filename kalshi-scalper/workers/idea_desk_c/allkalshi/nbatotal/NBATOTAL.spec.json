@@ -95,7 +95,7 @@
   }
  ],
  "look_ahead": {
-  "decision_instant": "D = scheduled end minus 9 h, 5 h or 4 h; clock check as NBALADDER; in-play guard: skip a rung (counted per rule) if its last two two-sided candles before D differ in mid by 0.15 or more",
+  "decision_instant": "D = scheduled end minus 9 h, 5 h or 4 h; clock check as NBALADDER; in-play guard: skip a rung (counted per rule) if its last two two-sided candles before D differ in mid by 0.15 or more; M35 guard (Head and Auditor B, Nov 16): a game is dropped from M35 only (counted, m35_dropped_games, stays in H) if on any rung any two consecutive two-sided candles ending in (O - 4 h, O - 3.5 h] differ in mid by 0.15 or more (a real tip more than 3.5 h before the scheduled end)",
   "features": "each feature uses candles ending at or before D",
   "entry_quote": "latest two-sided candle ending in [D - 180 s, D]",
   "exit": "H settles on the result, read last for traded rungs; M35 sells at the mark ending 3.5 h before the scheduled end"
@@ -108,17 +108,17 @@
  },
  "plugin": {
   "file": "nbatotal.py",
-  "sha256": "2c18c4b340773a78ed657f618029ad3993fa39390fb35e543937a87f1de0abfc",
+  "sha256": "44214a1255b0d7ece5197f80a5b2738faa08cfcd564308cccacf3d9af3825ee7",
   "hand_case_file": "test_nbatotal.py",
-  "hand_case_sha256": "4bafa943c9dfaa1deef63ca6010259022e8d1729429bfb50438e07b30b97133c",
+  "hand_case_sha256": "dfa843c254923beefb3658911431f7f12f4b8c8e65f809d7f639b7c937ae7a61",
   "auditor_clean_date": null,
   "note": "BUILT, awaiting audit; base nbaladder.py 965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063; volume extension 98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a",
   "run_script_sha256": "9b9c2866e42376cae3c812457d0e486279ea62d29c34735c58dd1e5d95e9d770",
-  "builder_sha256": "609a0ac321cef4ba9d8b3ae719130efbb85e90c9309a92f3e1f2660c4920d4e2"
+  "builder_sha256": "75350efb9ba14cc2426a377efa533188e07e0340d139e22be8a7b7c7d422e6b6"
  },
  "event": {
   "scorer_plugin": "nbatotal.py",
-  "scorer_plugin_sha256": "2c18c4b340773a78ed657f618029ad3993fa39390fb35e543937a87f1de0abfc",
+  "scorer_plugin_sha256": "44214a1255b0d7ece5197f80a5b2738faa08cfcd564308cccacf3d9af3825ee7",
   "decision_instant": "9 h, 5 h or 4 h before the scheduled end",
   "signal_threshold": "the grid's 520 cells",
   "entry_rule": "every rung open at D whose side ask is in the cell's band and passes the cell's filter",
