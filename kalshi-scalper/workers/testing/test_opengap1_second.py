@@ -40,18 +40,19 @@ c1 = dict(E1["c"]); c1[100000 - 300] = (0.0, 10.06); assert g.score_event(dict(E
 # timestamps: 09:30 ET on 2026-11-09 is 14:30Z
 import datetime
 assert g._ts("2026-11-09", 9, 30) == int(datetime.datetime(2026, 11, 9, 14, 30, tzinfo=datetime.timezone.utc).timestamp()) and g._ts("2026-11-06", 16, 0) == int(datetime.datetime(2026, 11, 6, 21, 0, tzinfo=datetime.timezone.utc).timestamp())
-assert (g.FEE, g.HAIRCUTS, g.DEV_FROM, g.DEV_TO) == (0.0012, (0.0, 0.01, 0.02), "2026-11-06", "2026-11-30")
+assert (g.FEE, g.HAIRCUTS, g.DEV_FROM, g.DEV_TO, g.FIRST_TS) == (0.0012, (0.0, 0.01, 0.02), "2026-11-06", "2026-11-30", 1793923200)
 print("opengap1 tests passed")
 # loader on invented files: kalshi1m gz per UTC day, underlying csv; days outside the development range are dropped; non-listed perps ignored
 import csv, gzip, os, tempfile
 d = tempfile.mkdtemp(); hdr = "ticker,end_period_ts,bid_open,bid_high,bid_low,bid_close,ask_open,ask_high,ask_low,ask_close,price_open,price_high,price_low,price_close,price_mean,price_previous,open_interest,volume"
 def row(t, ts, b, a): return f"{t},{ts},0,0,0,{b},0,0,0,{a},0,0,0,0,0,0,0,0"
 t16, t25, t31, t32 = g._ts("2026-11-06", 16, 0), g._ts("2026-11-09", 9, 25), g._ts("2026-11-09", 9, 31), g._ts("2026-11-09", 9, 32)
-with gzip.open(os.path.join(d, "2026-11-06.csv.gz"), "wt") as f: f.write(hdr + "\n" + row("KXSPYPERP", t16, 9.99, 10.01) + "\n" + row("KXOTHERPERP", t16, 1, 2) + "\n")
+bad = "KXUS500PERP,NOT_A_TS,x,x,x,BAD,x,x,x,BAD,x,x,x,x,x,x,x,x"          # a US500 row that raises on any column but ticker
+with gzip.open(os.path.join(d, "2026-11-06.csv.gz"), "wt") as f: f.write(hdr + "\n" + row("KXSPYPERP", t16, 9.99, 10.01) + "\n" + row("KXOTHERPERP", t16, 1, 2) + "\n" + bad + "\n" + row("KXSPYPERP", g.FIRST_TS - 60, 1.0, 2.0) + "\n")
 with gzip.open(os.path.join(d, "2026-11-09.csv.gz"), "wt") as f: f.write(hdr + "\n" + row("KXSPYPERP", t25, 10.04, 10.06) + "\n" + row("KXSPYPERP", t31, 10.06, 10.08) + "\n" + row("KXSPYPERP", t32, 10.07, 10.09) + "\n")
 uf = os.path.join(d, "u.csv")
 with open(uf, "w") as f: f.write("perp,date,prev_date,u_open,u_prev_close,x_open,x_prev_close\nKXSPYPERP,2026-11-09,2026-11-06,101,100,101.01,100\nKXSPYPERP,2026-12-02,2026-11-30,101,100,101,100\n")
-evs = g.load(d, uf); assert len(evs) == 1 and evs[0]["open_ts"] == g._ts("2026-11-09", 9, 30) and evs[0]["u_open"] == 101.0 and "KXOTHERPERP" not in str(evs[0]["c"]) and len(evs[0]["c"]) == 4
+evs = g.load(d, uf); assert len(evs) == 1 and evs[0]["open_ts"] == g._ts("2026-11-09", 9, 30) and evs[0]["u_open"] == 101.0 and "KXOTHERPERP" not in str(evs[0]["c"]) and len(evs[0]["c"]) == 4 and (g.FIRST_TS - 60) not in evs[0]["c"]
 o, sk = g.run(evs); assert len(o[0.0]) == 1 and near(o[0.0][0]["ret"], -0.00099206, 1e-7)
 g.main(d, uf)
 # the closure edge: a gap closed to exactly half counts (mid 20.10: gap_t = 0.005 = half of 0.01), so the exit is that candle's bid, not the later one

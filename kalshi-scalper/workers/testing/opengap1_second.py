@@ -7,6 +7,7 @@ import csv, datetime, gzip, math, sys
 
 PERPS = {"KXSPYPERP": "SPY", "KXQQQPERP": "QQQ", "KXNVDAPERP": "NVDA", "KXAAPLPERP": "AAPL"}
 FEE, HAIRCUTS = 0.0012, (0.0, 0.01, 0.02)
+FIRST_TS = 1793923200          # 2026-11-06T00:00Z
 DEV_FROM, DEV_TO = "2026-11-06", "2026-11-30"          # development dates only (UTC days); nothing from December
 
 
@@ -79,7 +80,11 @@ def load(perp_dir, ucsv):
         except OSError: continue
         with fh:
             for r in csv.DictReader(fh):
-                if r["ticker"] in PERPS and r["bid_close"] != "" and r["ask_close"] != "": cand.setdefault(r["ticker"], {})[int(r["end_period_ts"])] = (float(r["bid_close"]), float(r["ask_close"]))
+                if r["ticker"] not in PERPS: continue          # the ticker wall: every other row (US500, US tech 100, ...) is dropped before any other column is parsed
+                if r["bid_close"] == "" or r["ask_close"] == "": continue
+                ts = int(r["end_period_ts"])
+                if ts < FIRST_TS: continue          # no candle before 2026-11-06T00:00Z is read
+                cand.setdefault(r["ticker"], {})[ts] = (float(r["bid_close"]), float(r["ask_close"]))
     evs = []
     for r in ur:
         if not (DEV_FROM <= r["date"] <= DEV_TO): continue
@@ -96,9 +101,10 @@ def main(perp_dir, ucsv):
     for label, sel in [("pooled (information only)", evs)] + [(PERPS[n], [e for e in evs if e["name"] == n]) for n in PERPS]:
         for fee in (FEE, 0.0):
             out, sk = run(sel, fee)
-            print(f"{label} fee/side {fee}: skips {sk}")
+            print(f"{label} fee/side {fee}: skips {sk}; triggers before the exit test {len(out[0.0]) + sk['no_exit']}; events {len(sel)}")
             for h in HAIRCUTS:
                 b = block(out[h]); print(f"  h {h:.2f}: n {b['n']} wins {b['wins']} sum {b['sum']:.6f} PF {b['pf']:.4f} half1 {b['h1']:.4f} half2 {b['h2']:.4f} dayz {b['z'] if b['z'] is None else round(b['z'], 4)} break-even fee/side {b['breakeven_fee'] if b['breakeven_fee'] is None else round(b['breakeven_fee'], 6)}" + ("  no evidence at n = %d (under 100)" % b["n"] if b["n"] < 100 else ""))
+    print("plumbing and first look only: n is at most 20 (Nov 9 to 13, four names), so nothing here can pass; PERPSCALP1 (Desk A) reads the same candles and days with a different rule (its own tries)")
     print("tries: one rule x four names; every name under 100 trades = no evidence; upper bound, not fill-checked")
 
 
