@@ -130,9 +130,8 @@
   "file": "menttwin.py",
   "sha256": "0eab9d021fab387817709421693cfcb8c7d0d06ff7d7bb92629ed14d8bd1bb04",
   "hand_case_file": "test_engine_c.py",
-  "hand_case_sha256": "aae91beeacda6b7354859e619ca1c41aea884cab37e4323d26e9999f75ffb8bc",
-  "auditor_clean_date": null,
-  "note": "unsigned until Auditor B clears this plugin hash; MENTTWIN's earlier build (341bb01c) was CLEAN on 2026-11-16, this revision adds only the cut-list refusal"
+  "hand_case_sha256": "d7f86d007fefb6e016dee7b9348167c5b26d547edce84c4491af954f356e1be1",
+  "auditor_clean_date": "2026-11-16"
  },
  "subset_rationale": "one rule, its thresholds (gap 0.15 or breadth 27, band 0.30 to 0.70) fixed before any price of these markets was read; breadth's 27 is the median of open-time counts",
  "halves": "floor(n/2) in entry order",

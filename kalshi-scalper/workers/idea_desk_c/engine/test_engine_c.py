@@ -110,13 +110,32 @@ class Breadth(unittest.TestCase):
                                              ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-W01/candlesticks"}, {"candlesticks": [c(D, .45, .47)]}),
                                              ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-W02/candlesticks"}, {"candlesticks": [c(D, .10, .12)]})])
         es, why, _ = MB.entries(root)
-        self.assertEqual(why, {"ok": 2, "out_of_band": 1, "no_two_sided_quote": 24})
+        self.assertEqual({k: v for k, v in why.items() if k != "control_non_wide"}, {"ok": 2, "out_of_band": 1, "no_two_sided_quote": 24})
         self.assertEqual(sorted((e["id"][-3:], e["ask"], e["result"]) for e in es), [("W00", 0.55, "no"), ("W01", 0.55, "yes")])
         with contextlib.redirect_stdout(io.StringIO()):
             o = FR.main(root, "mentbreadth")
         # 1c: paid .56 x10 = 5.60, fee ceil(0.07*10*.56*.44*100)/100 = ceil(17.248)/100 = .18 -> 5.78; won +4.22, lost -5.78; net -1.56
         self.assertAlmostEqual(o["1c"]["net"], -1.56)
         self.assertTrue(o["kill_fast"])
+
+
+class BreadthDays(unittest.TestCase):
+    def test_two_events_one_date(self):
+        root = tempfile.mkdtemp()
+        O = KL.iso("2026-06-10T18:00:00")
+        op = O - 20 * 3600
+        D = op + 1800
+        ms = []
+        for ev in ("A", "B"):
+            ms += [{"ticker": "KXTRUMPMENTION-26JUN10%s-W%02d" % (ev, i), "event_ticker": "EV" + ev, "occurrence_datetime": iso(O), "close_time": iso(O + 3600),
+                    "open_time": iso(op), "yes_sub_title": "w%d" % i, "title": "", "result": "no"} for i in range(27)]
+        put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": ms, "cursor": ""}),
+                                        ({"id": "hist_KXTRUMPMENTIONB", "page": 1}, {"markets": [], "cursor": ""})])
+        put(root, "MENTBREADTH_CANDLES_P1", [({"path": "/historical/markets/KXTRUMPMENTION-26JUN10%s-W00/candlesticks" % ev}, {"candlesticks": [c(D, .45, .47)]}) for ev in ("A", "B")])
+        with contextlib.redirect_stdout(io.StringIO()):
+            o = FR.main(root, "mentbreadth")
+        self.assertEqual(o["n"], 2)
+        self.assertEqual(o["1c"]["trade_days"], 1)                 # two events on one UTC date are one trade day
 
 
 class Cut(unittest.TestCase):

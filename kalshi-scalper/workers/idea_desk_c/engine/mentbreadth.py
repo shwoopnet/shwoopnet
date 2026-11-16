@@ -59,9 +59,10 @@ def entries(root):
             why["out_of_band"] = why.get("out_of_band", 0) + 1
             continue
         why["ok"] = why.get("ok", 0) + 1
-        out.append({"id": r["ticker"], "close_ts": r["close_time"], "day": r["event"], "series": r["series"], "side": "no", "ask": ask,
+        out.append({"id": r["ticker"], "close_ts": r["close_time"], "day": time.strftime("%Y-%m-%d", time.gmtime(D)), "series": r["series"], "side": "no", "ask": ask,
                     "n": N, "entry_end": D, "path": [], "event": r["event"]})
     res = KL.results(root, LIST_JOBS, {e["id"] for e in out})      # LAST
     for e in out:
         e["result"] = res.get(e["id"], "")
+    why["control_non_wide"] = "control not run (no candles were pulled for non-wide words)"
     return [e for e in out if e["result"] in ("yes", "no", "void")], why, nwide

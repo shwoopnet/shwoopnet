@@ -25,7 +25,8 @@
 - **Haircuts:** 1c (primary) and 2c.
 - **Bar:** n 100+, PF 1.3+ at 1c with both halves 1.0+, PF 1.0+ at 2c.
 - **Kill fast:** PF under 1.0 at 1c.
-- **z:** clustered by event.
+- **z and trade days:** by the UTC date of D (Auditor B, Nov 16: several events share a date and their words are correlated).
+- **Control:** the same NO rule on the sample's NON-wide words would need its own candles, which are not pulled. The print says "control not run".
 
 **Prediction.** Of 460 sampled words, perhaps 120 to 200 fall in the band. PF at 1c 0.9 to 1.25. A pass needs breadth to add a lot on top of the general NO tilt (MENT1); P(pass) about 10%.
 

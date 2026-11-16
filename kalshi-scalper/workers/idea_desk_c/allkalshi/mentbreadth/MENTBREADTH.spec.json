@@ -51,7 +51,7 @@
  },
  "event": {
   "scorer_plugin": "mentbreadth.py",
-  "scorer_plugin_sha256": "188946f410108f517f6b797467b373f094acadb1a37fe0107313c2ca23578f43",
+  "scorer_plugin_sha256": "1e77d23ed1c003122b21704d660cb0b9eb7263acef4d8bccb4963862059f334e",
   "decision_instant": "the word's open_time + 30 min",
   "signal_threshold_breadth": 27,
   "entry_rule": "buy NO at 1 - YES bid, NO ask 0.30 to 0.70, md5 sample of 460 wide words",
@@ -130,11 +130,11 @@
  },
  "plugin": {
   "file": "mentbreadth.py",
-  "sha256": "188946f410108f517f6b797467b373f094acadb1a37fe0107313c2ca23578f43",
+  "sha256": "1e77d23ed1c003122b21704d660cb0b9eb7263acef4d8bccb4963862059f334e",
   "hand_case_file": "test_engine_c.py",
-  "hand_case_sha256": "aae91beeacda6b7354859e619ca1c41aea884cab37e4323d26e9999f75ffb8bc",
+  "hand_case_sha256": "d7f86d007fefb6e016dee7b9348167c5b26d547edce84c4491af954f356e1be1",
   "auditor_clean_date": null,
-  "note": "unsigned until Auditor B clears this plugin hash; MENTTWIN's earlier build (341bb01c) was CLEAN on 2026-11-16, this revision adds only the cut-list refusal"
+  "note": "unsigned until Auditor B clears this plugin hash"
  },
  "subset_rationale": "one rule, its thresholds (gap 0.15 or breadth 27, band 0.30 to 0.70) fixed before any price of these markets was read; breadth's 27 is the median of open-time counts",
  "halves": "floor(n/2) in entry order",
