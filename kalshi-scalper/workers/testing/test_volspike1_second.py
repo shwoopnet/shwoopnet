@@ -37,6 +37,8 @@ assert v.verdict(ok, ok, {"pf": 1.49}, {"pf": 1.49}) is True and v.verdict(ok, o
 for pri, want_n in (([10, 10, 20, 10, 30], 1), ([10, 20, 10, 30], 0)):
     cs = {10000 - 660 - 60 * j: (.60, .62, vol) for j, vol in enumerate(reversed(pri))}; cs[10000 - 600] = (.60, .62, 60)
     t2, _, _ = v.trades([("X", "S", 10000, "yes")], {"X": cs}); assert len(t2) == want_n, (pri, t2)
+# volume diagnostic: cumulative (never decreasing) gives 0, per-candle gives a share
+assert v.decrease_share({"a": {1: (0, 0, 1), 2: (0, 0, 2), 3: (0, 0, 2)}}) == (0.0, 0, 2) and v.decrease_share({"a": {1: (0, 0, 5), 2: (0, 0, 2), 3: (0, 0, 9), 4: (0, 0, None)}}) == (0.5, 1, 2) and v.decrease_share({}) == (0.0, 0, 0)
 # reader: refuses at the cut, loads below, drops after-close candles, reads volume
 f = os.path.join(tempfile.mkdtemp(), "t.sqlite"); db = sqlite3.connect(f)
 db.execute("create table market(ticker,series,open_ts,close_ts,result,strike,src)"); db.execute("create table candle(ticker,end_ts,bid_c,ask_c,volume,oi)")
@@ -47,3 +49,12 @@ except SystemExit as e: assert "REFUSED" in str(e) and "max 1791043200" in str(e
 db = sqlite3.connect(f); db.execute("delete from market where ticker='KXGOLD15M-B'"); db.commit(); db.close()
 sha, ms, cd, dr = v.load(f); assert dr == 1 and cd["KXGOLD15M-A"] == {1791043000: (.4, .5, 7)}
 print("volspike1 tests passed")
+
+# main aborts on a cumulative volume column
+f2 = os.path.join(tempfile.mkdtemp(), "c.sqlite"); db = sqlite3.connect(f2)
+db.execute("create table market(ticker,series,open_ts,close_ts,result,strike,src)"); db.execute("create table candle(ticker,end_ts,bid_c,ask_c,volume,oi)")
+db.execute("insert into market values('KXGOLD15M-A','KXGOLD15M',0,5000,'yes',1.0,'x')")
+for i, vol in enumerate((1, 2, 3, 4)): db.execute("insert into candle values('KXGOLD15M-A',?,.4,.5,?,1)", (1000 + 60 * i, vol))
+db.commit(); db.close()
+try: v.main(f2); raise AssertionError("must abort")
+except SystemExit as e: assert "ABORTED" in str(e)

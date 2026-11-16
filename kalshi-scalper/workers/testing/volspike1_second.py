@@ -95,6 +95,15 @@ def load(path):
     return sha, ms, cands, dropped
 
 
+def decrease_share(cands):
+    """share of consecutive candle pairs within a market (ordered by end_ts) where volume DECREASES; 0 would mean a cumulative column"""
+    pairs = dec = 0
+    for cs in cands.values():
+        v = [cs[k][2] for k in sorted(cs) if cs[k][2] is not None]
+        for a, b in zip(v, v[1:]): pairs += 1; dec += b < a
+    return (dec / pairs if pairs else 0.0), dec, pairs
+
+
 def show(label, tr):
     bs = {h: block(tr, h) for h in HAIRCUTS}
     print(f"{label}: n {len(tr)}")
@@ -106,12 +115,16 @@ def show(label, tr):
 def main(path):
     sha, ms, cands, dropped = load(path)
     print("VOLSPIKE1 extract sha256", sha, "markets", len(ms), "series", len(set(m[1] for m in ms)), "candles after close dropped", dropped, "close_ts min", min(m[2] for m in ms), "max", max(m[2] for m in ms), "(refused if any >= %d)" % CUT_TS)
+    share, dec, pairs = decrease_share(cands)
+    print(f"volume diagnostic: {dec} of {pairs} consecutive candle pairs decrease ({share:.1%}); 0% would mean cumulative")
+    if share == 0.0: raise SystemExit("ABORTED: volume never decreases, the column looks cumulative, so the spike test would be meaningless")
     tr, base, sk = trades(ms, cands)
     print("skips", sk)
     bs = show("VOLSPIKE1", tr)
     bb = {h: block(base, h) for h in HAIRCUTS}
     print(f"  baseline (same E candle and band, no spike or still-price condition) n {len(base)}: 1c PF {bb[0.01]['pf']:.4f} 2c PF {bb[0.02]['pf']:.4f}; spike minus baseline PF: 1c {bs[0.01]['pf'] - bb[0.01]['pf']:.4f} 2c {bs[0.02]['pf'] - bb[0.02]['pf']:.4f}")
     print(f"  pass (1c and 2c bars, and the baseline must not itself clear 1.5): {verdict(bs[0.01], bs[0.02], bb[0.01], bb[0.02])}   (development data already read for OIREL-X, no held-out inside: a pass is a lead for the forward shadow, not a pass; favourite-late family, a closed family, only the spike is new)")
+    print("  same family as favourite-late (closed): the spike is the only new input; read the spike against the baseline, not against 1.5 alone")
     std = [t for t in tr if t[1].split("-")[0] in STANDARD]
     if std:
         sb = {h: block(std, h) for h in HAIRCUTS}
