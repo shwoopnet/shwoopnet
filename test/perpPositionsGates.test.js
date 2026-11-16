@@ -1,0 +1,14 @@
+const fs=require('fs'),assert=require('assert');
+const h=fs.readFileSync('index.html','utf8');
+const m=h.match(/function kalshiPerpRisk[\s\S]*?function kalshiPerpRows\(a\)\{[^\n]*\n/);
+assert(m,'PP1 functions present');
+const f=new Function(m[0]+';return {kalshiPerpsHtml,kalshiPerpRisk,kalshiPerpRows};')();
+const esc=s=>String(s).replace(/</g,'&lt;'), money=v=>'$'+v.toFixed(2);
+const row={market:'Bitcoin <x>',up:true,multiplier:27.4,cost:10,size:274,entry:90000,index:91000,value:12.5,pnl:2.5,pnlPct:25,takeProfit:95000,stopLoss:88000,closeAt:87000,bufferPct:27};
+const out=f.kalshiPerpsHtml([row],esc,money);
+for(const t of ['Perp','27.4x','UP','Current value','Leveraged size','Entered at','Low risk, 27% buffer','Closes at 87,000','Take profit 95,000','+$2.50 (+25.0%)','Bitcoin &lt;x>'])assert(out.includes(t),'PP2 '+t);
+assert(f.kalshiPerpsHtml([],esc,money)==='','PP3 empty');
+assert(f.kalshiPerpsHtml([{market:'X',up:false}],esc,money).includes('No auto close set'),'PP3 sparse');
+assert(f.kalshiPerpRisk(5).label.startsWith('High')&&f.kalshiPerpRisk(15).label.startsWith('Medium'),'PP4');
+assert.deepStrictEqual(f.kalshiPerpRows({}),[]);
+console.log('perpPositionsGates ok');

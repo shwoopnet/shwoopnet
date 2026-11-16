@@ -443,6 +443,11 @@
   .kal-hold-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .kal-hold-head .kal-name{ font-weight:700; font-size:14px; }
   .kal-side{ font-size:12px; font-weight:700; padding:2px 9px; border-radius:999px; border:1px solid var(--border); white-space:nowrap; }
+  .kal-perp .kal-chip{ margin-right:6px; } .kal-mult{ font-size:12px; font-weight:700; padding:1px 7px; border-radius:999px; border:1px solid var(--border); color:var(--muted); margin-left:4px; }
+  .kal-perp-stats{ grid-template-columns:repeat(3,minmax(0,1fr)); } .kal-perp-stats > div:nth-child(n+4){ margin-top:2px; }
+  .kal-perp-riskhead{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .kal-perp-bar{ height:6px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; } .kal-perp-bar i{ display:block; height:100%; background:var(--paper); border-radius:999px; }
+  @media screen and (max-width:700px){ .kal-perp-stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
   .kal-hold-stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
   /* With a price path the row is two columns (the owner, Oct 23, 2026: "a lot of dead space", "fit a chart in here"): the three figures stack on the left and the chart fills the rest. */
   .kal-hold-body{ display:grid; grid-template-columns:minmax(120px,170px) minmax(0,1fr); gap:10px 28px; align-items:stretch; }
@@ -1819,6 +1824,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 16</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the Open positions card has a layout for perpetual (perp) positions, copied from the Kalshi app: market and Up or Down, the multiplier, current value, return in dollars and percent, cost, leveraged size, entry and index price, a risk label with a buffer bar, the forced-close price and any auto close levels. They are marked Perp and are not the bot's trades. No perp data is connected yet, so nothing shows until it is.</li>
                   <li>Research: a new recorder saves Kalshi's whole perpetual markets list and the order books of the active ones every minute, to its own data branch (public data, nothing trades; the owner approved the extra Actions minutes).</li>
                   <li>Research: the perps recorders now also keep each perp's leverage estimate, and the nightly archive can pull every market's funding payments in one request, including the whole history. Public data only, nothing trades.</li>
                   <li>Bot page: the per strategy table is gone from the Account card (the owner: "i still see the strategies"). The card is now the balance, Today, the Running badge and the Account result chart with its range buttons. Every strategy's results are on the Strategies page. The separate "Order switch OFF" row is gone too; the Running badge already says it. Account and Account result are now one box: one header, the balance and Today on the left with the period return beside Today, the range buttons on the right, and the chart under them with no second title or divider. The whole Bot status card is gone too (the owner: "bot status needs to be pulled too"): the next look ring, the heartbeat line and the "Needs a look" note. The Running badge on the Account card is what shows a stopped bot. The red or green headline under the balance now follows the chart buttons (Today, 1W, 1M and so on) with the range name, dollars and percentage; the separate Today row is gone.</li>
@@ -3175,6 +3181,32 @@
     }).join('');
   }
 
+  // Perp positions (Nov 16, 2026, the owner, from the Kalshi app's perp screen). A perp row is marked Perp and is not one of the bot's trades. The field names below are PLACEHOLDERS until the real data shape is named:
+  // market, up (true for Up, false for Down), multiplier, cost, size (cost times multiplier), entry, index (current index price), value (current value), pnl, pnlPct, takeProfit and stopLoss (price levels, optional),
+  // closeAt (the forced-close price) and bufferPct (distance to it as a percent). Nothing in the page produces such rows yet (kalshiPerpRows returns none), so the card shows no perp until real data is wired.
+  function kalshiPerpRisk(buf){
+    if(!Number.isFinite(buf)){ return { label: 'Risk n/a', w: 0 }; }
+    return { label: (buf >= 20 ? 'Low' : (buf >= 10 ? 'Medium' : 'High')) + ' risk, ' + Math.round(buf) + '% buffer', w: Math.max(0, Math.min(100, buf)) };
+  }
+  function kalshiPerpsHtml(rows, esc, money){
+    if(!rows || !rows.length){ return ''; }
+    var num = function(v){ return Number.isFinite(Number(v)) && v !== null && v !== ''; };
+    var px = function(v){ return num(v) ? Number(v).toLocaleString('en-US', { maximumFractionDigits: 4 }) : 'n/a'; };
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    return rows.map(function(r){
+      var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
+      var pnlTxt = num(r.pnl) ? sg(Number(r.pnl)) + (num(r.pnlPct) ? ' (' + (r.pnlPct >= 0 ? '+' : '-') + Math.abs(Number(r.pnlPct)).toFixed(1) + '%)' : '') : 'n/a';
+      var risk = kalshiPerpRisk(Number(r.bufferPct));
+      var auto = (num(r.takeProfit) || num(r.stopLoss)) ? 'Take profit ' + px(r.takeProfit) + ' · Stop loss ' + px(r.stopLoss) : 'No auto close set';
+      return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + (num(r.multiplier) ? ' <span class="kal-mult">' + esc(Number(r.multiplier).toFixed(1)) + 'x</span>' : '') +
+        '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
+        '<div class="kal-hold-stats kal-perp-stats">' + stat('Current value', num(r.value) ? money(Number(r.value)) : 'n/a') + stat('Return', pnlTxt, num(r.pnl) ? (r.pnl >= 0 ? 'kal-pos' : 'kal-neg') : '') +
+        stat('Cost', num(r.cost) ? money(Number(r.cost)) : 'n/a') + stat('Leveraged size', num(r.size) ? money(Number(r.size)) : 'n/a') + stat('Entered at', px(r.entry)) + stat('Index now', px(r.index)) + '</div>' +
+        '<div class="kal-perp-risk"><div class="kal-perp-riskhead"><span>' + esc(risk.label) + '</span><span>Closes at ' + esc(px(r.closeAt)) + '</span></div><div class="kal-perp-bar" aria-hidden="true"><i style="width:' + risk.w.toFixed(0) + '%"></i></div></div>' +
+        '<div class="kal-hold-sub">' + esc(auto) + ' · Perp, not one of the bot\'s trades.</div></div>';
+    }).join('');
+  }
+  function kalshiPerpRows(a){ return a && Array.isArray(a.perps) ? a.perps : []; }   // no source yet: the account read carries no perp positions, so this is empty until the data is named
   // Today's result as a share of the account (Oct 22, 2026, the owner's request). The base is the account total at the START of today, taken as the total now minus today's bot result, so a good day is not
   // measured against a balance it already grew. The total includes anything done outside the bot (your own trades, deposits), which is why this is "of the account" and not a return on the bot alone.
   // '' when the total is unknown or not above zero. It is a percentage, not a dollar figure, so the Privacy toggle leaves it showing.
@@ -3200,7 +3232,8 @@
     });
     Object.keys(kalshiPosPaths).forEach(function(k){ if(!openNow[k]){ delete kalshiPosPaths[k]; } });
     rows.forEach(function(r){ var L = kalshiPosPaths[r.ticker] || []; r.path = L.map(function(x){ return x.v; }); r.pathT = L.map(function(x){ return x.t; }); });
-    posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoney);
+    var perpHtml = kalshiPerpsHtml(kalshiPerpRows(a), escapeHtml, kalshiMoney);
+    posEl.innerHTML = (rows.length || !perpHtml ? kalshiPositionsHtml(rows, escapeHtml, kalshiMoney) : '') + perpHtml;
   }
   var kalshiBooksLast = null;
   var kalshiPosPaths = {};   // ticker -> [{ t, v }]: the chance of each open position's side, one point per read since this page opened
