@@ -11,3 +11,12 @@ Net at the fee 0.0012 a side (return - 0.0024): r 0.001: -0.0053881, -0.0044020,
 **Interim kill:** after at least 50 triggered events, the pooled net PF at r 0.001 and the chosen fee (12 bps) under 1.0 prints KILL; at 49 events it refuses to print a PF; at 50 with PF exactly 1.0 or above it prints CONTINUE.
 **Date window:** event dates from 2026-11-17 to 2027-01-31 inclusive; 2026-11-16 and earlier and 2027-02-01 and later are dropped; the build refuses any event date on or after 2027-03-14 (DST).
 **Final read:** refused unless the pooled triggered count is at least 100, or the last event date is on or after 2027-01-31 (the stop date).
+
+## Addendum 2 (Nov 16, 2026, the Head's relative sizes 0.02% and 0.05% as primary; 0.1% and 0.2% as stress lines): hand figures for the new lines, before the code change
+Same E1, E2, E3 and fills as above, relative haircut r:
+| | r 0.0002 | r 0.0005 |
+|---|---|---|
+| E1 long 10.08 to 10.07 | entry 10.082016, exit 10.067986: -0.01403 / 10.082016 = -0.0013916 | entry 10.08504, exit 10.064965: -0.020075 / 10.08504 = -0.0019906 |
+| E2 short 4.99 to 4.99 | entry 4.989002, exit 4.990998: -0.001996 / 4.989002 = -0.0004001 | entry 4.987505, exit 4.992495: -0.00499 / 4.987505 = -0.0010005 |
+| E3 long 20.03 to 20.14 | entry 20.034006, exit 20.135972: 0.101966 / 20.034006 = 0.0050897 | entry 20.040015, exit 20.12993: 0.089915 / 20.040015 = 0.0044868 |
+Net at the fee 0.0012 a side (return - 0.0024): r 0.0002: -0.0037916, -0.0028001, +0.0026897, PF 0.0026897 / 0.0065917 = 0.4080; r 0.0005: -0.0043906, -0.0034005, +0.0020868, PF 0.0020868 / 0.0077911 = 0.2678. At the placeholder fee 0.0005 (return - 0.0010): r 0.0002: -0.0023916, -0.0014001, +0.0040897, PF 0.0040897 / 0.0037917 = 1.0786; r 0.0005: -0.0029906, -0.0020005, +0.0034868, PF 0.0034868 / 0.0049911 = 0.6986. The 0.1% and 0.2% figures above are the stress lines. The interim kill reads the 0.02% line (r 0.0002).

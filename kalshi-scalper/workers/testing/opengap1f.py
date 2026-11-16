@@ -10,7 +10,8 @@ PERPS = {"KXSPYPERP": "SPY", "KXQQQPERP": "QQQ", "KXNVDAPERP": "NVDA", "KXAAPLPE
 FIRST_TS = 1793923200          # 2026-11-06T00:00Z: no perp candle before it is read
 FWD_FROM, FWD_TO, DST_CHANGE = "2026-11-17", "2027-01-31", "2027-03-14"
 FEES = (0.0012, 0.0005)          # 12 bps (the PERP1 assumption) and the 5 bps placeholder; Kalshi's verified fee is added with --fee
-REL = (0.001, 0.002)          # the primary 1c-equivalent and 2c-equivalent lines (addendum 1): relative to the fill price
+REL = (0.0002, 0.0005)          # the primary 1c-equivalent and 2c-equivalent lines (addendum 2): relative to the fill price
+STRESS = (0.001, 0.002)          # printed as stress lines (addendum 2); addendum 1 had these as the primary lines
 ABS = (0.01, 0.02)          # the literal price-unit lines, information only
 TRIGGERS_FINAL, TRIGGERS_INTERIM = 100, 50
 
@@ -76,7 +77,7 @@ def run(evs, mode, x, fee):
 
 
 def interim(evs, fees=FEES, verified=None):
-    """PF at the 0.1% line for every fee; the KILL decision only on the verified fee (Kalshi's own page); with none, 'no kill: fee unverified'"""
+    """PF at the 0.02% line for every fee; the KILL decision only on the verified fee (Kalshi's own page); with none, 'no kill: fee unverified'"""
     n, _ = triggered(evs)
     if n < TRIGGERS_INTERIM: raise SystemExit("REFUSED: %d triggered events, the interim look needs %d" % (n, TRIGGERS_INTERIM))
     pfs = {fee: block(run(evs, "rel", REL[0], fee))["pf"] for fee in fees}
@@ -129,10 +130,10 @@ def main(mode, perp_dir, ucsv, fees, stop, verified=None):
     print("OPENGAP1-F final read: triggered events pooled", n, "per name", {PERPS[k]: v for k, v in sorted(per.items())}, "events", len(evs), "(upper bound, not fill-checked; paper only; one try)")
     for fee in fees:
         for label, sel in [("pooled", evs)] + [(PERPS[k], [e for e in evs if e["name"] == k]) for k in PERPS]:
-            bl = {("rel", r): block(run(sel, "rel", r, fee)) for r in REL}; bi = {("abs", h): block(run(sel, "abs", h, fee)) for h in ABS}
-            for key, b in list(bl.items()) + list(bi.items()):
-                print(f"{label} fee/side {fee} haircut {key[0]} {key[1]}{' (primary)' if key[0] == 'rel' else ' (information only)'}: n {b['n']} wins {b['wins']} PF {b['pf']:.4f} half1 {b['h1']:.4f} half2 {b['h2']:.4f} dayz {b['z'] if b['z'] is None else round(b['z'], 4)}" + ("  no evidence at n = %d (under 100)" % b["n"] if b["n"] < 100 else ""))
-            if label == "pooled": print(f"pooled fee/side {fee} ({'VERIFIED' if fee == verified else 'assumed, not verified'}) bar (rel 0.1% PF >= 1.3, both halves >= 1.0, rel 0.2% PF >= 1.0, n >= 100): {verdict(bl[('rel', REL[0])], bl[('rel', REL[1])])}")
+            bl = {("rel", r): block(run(sel, "rel", r, fee)) for r in REL}; bs = {("rel", r): block(run(sel, "rel", r, fee)) for r in STRESS}; bi = {("abs", h): block(run(sel, "abs", h, fee)) for h in ABS}
+            for key, b, tag in [(k, v, "(primary)") for k, v in bl.items()] + [(k, v, "(stress, information only)") for k, v in bs.items()] + [(k, v, "(information only)") for k, v in bi.items()]:
+                print(f"{label} fee/side {fee} haircut {key[0]} {key[1]} {tag}: n {b['n']} wins {b['wins']} PF {b['pf']:.4f} half1 {b['h1']:.4f} half2 {b['h2']:.4f} dayz {b['z'] if b['z'] is None else round(b['z'], 4)}" + ("  no evidence at n = %d (under 100)" % b["n"] if b["n"] < 100 else ""))
+            if label == "pooled": print(f"pooled fee/side {fee} ({'VERIFIED' if fee == verified else 'assumed, not verified'}) bar (rel 0.02% PF >= 1.3, both halves >= 1.0, rel 0.05% PF >= 1.0, n >= 100): {verdict(bl[('rel', REL[0])], bl[('rel', REL[1])])}")
 
 
 if __name__ == "__main__":

@@ -19,12 +19,14 @@ E8 = ev("d9", 900000, 200, 202, mk(900000, (19.99, 20.01), (19.99, 20.01), {60: 
 evs = [E1, E2, E3, E4, E9, E5, E6, E7, E8]
 # relative haircut figures (hand case)
 rel = {0.001: (-0.0029881, -0.0020020, 0.0034828), 0.002: (-0.0049802, -0.0040080, 0.0014778)}
+rel.update({0.0002: (-0.0013916, -0.0004001, 0.0050897), 0.0005: (-0.0019906, -0.0010005, 0.0044868)})
 for r, rr in rel.items():
     out = sorted(f.run(evs, "rel", r, 0.0), key=lambda x: x["open_ts"]); assert [o["day"] for o in out] == ["d1", "d2", "d3"]
     for o, x in zip(out, rr): assert near(o["ret"], x), (r, o, x)
     for fee in (0.0012, 0.0005):
         b = f.block(f.run(evs, "rel", r, fee)); v = [x - 2 * fee for x in rr]
         assert near(b["pf"], sum(x for x in v if x > 0) / max(1e-18, -sum(x for x in v if x < 0)), 1e-5) or (b["pf"] == 0.0 and sum(1 for x in v if x > 0) == 0), (r, fee, b)
+for r, fee, want in ((0.0002, 0.0012, 0.4080), (0.0005, 0.0012, 0.2678), (0.0002, 0.0005, 1.0786), (0.0005, 0.0005, 0.6986)): assert abs(f.block(f.run(evs, "rel", r, fee))["pf"] - want) < 5e-5, (r, fee)
 assert abs(f.block(f.run(evs, "rel", 0.001, 0.0012))["pf"] - 0.1106) < 5e-5 and f.block(f.run(evs, "rel", 0.002, 0.0012))["pf"] == 0.0 and abs(f.block(f.run(evs, "rel", 0.001, 0.0005))["pf"] - 0.3552) < 5e-5
 # the literal price-unit lines equal the frozen OPENGAP1 figures (hand case: E1 -0.00297324 at 1c)
 ab = sorted(f.run(evs, "abs", 0.01, 0.0), key=lambda x: x["open_ts"]); assert near(ab[0]["ret"], -0.00297324) and near(ab[1]["ret"], -0.00401606) and near(ab[2]["ret"], 0.00449102)
@@ -74,13 +76,30 @@ import io, contextlib
 real_load = f.load; f.load = lambda d, u: many(100, True)
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf): f.main("read", "d", "u", [0.0012, 0.0005, 0.0003], False, 0.0003)
-out = buf.getvalue(); assert "fee/side 0.0003 (VERIFIED) bar" in out and "fee/side 0.0012 (assumed, not verified) bar" in out and "(primary)" in out and "(information only)" in out and "triggered events pooled 100" in out
+out = buf.getvalue(); assert "fee/side 0.0003 (VERIFIED) bar" in out and "fee/side 0.0012 (assumed, not verified) bar" in out and "(primary)" in out and "(stress, information only)" in out and "haircut rel 0.001 (stress" in out and "haircut rel 0.0002 (primary)" in out and "(information only)" in out and "triggered events pooled 100" in out
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf): f.main("interim", "d", "u", [0.0012, 0.0005], False, None)
 assert "no kill: fee unverified" in buf.getvalue()
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf): f.main("count", "d", "u", [0.0012], False, None)
 assert buf.getvalue().strip().startswith("OPENGAP1-F triggered events pooled 100") and "PF" not in buf.getvalue()
+f.load = real_load
+# which haircut line feeds the kill and the bar: stubbed PFs by haircut (0.0002 primary, 0.0005 second primary, 0.001 and 0.002 stress)
+real_run, real_block = f.run, f.block
+def with_pfs(pfmap, fn):
+    f.run = lambda sel, mode, x, fee: [{"x": x, "mode": mode}]
+    f.block = lambda rows: {"n": 100, "wins": 1, "pf": pfmap.get(rows[0]["x"], 9.9), "h1": 1.5, "h2": 1.5, "z": None}
+    try: return fn()
+    finally: f.run, f.block = real_run, real_block
+assert with_pfs({0.0002: 0.9, 0.0005: 1.5, 0.001: 1.5, 0.002: 1.5}, lambda: f.interim(many(50, True), (0.0012,), 0.0012)["verdict"]) == "KILL"
+assert with_pfs({0.0002: 1.5, 0.0005: 0.9, 0.001: 0.5, 0.002: 0.4}, lambda: f.interim(many(50, True), (0.0012,), 0.0012)["verdict"]) == "CONTINUE"
+assert with_pfs({0.0002: 0.9, 0.0005: 1.5}, lambda: f.interim(many(50, True), (0.0012,), None))["pf_by_fee"] == {0.0012: 0.9}          # the printed PF is the 0.02% line
+buf = io.StringIO()
+def rd():
+    f.load = lambda d, u: many(100, True)
+    with contextlib.redirect_stdout(buf): f.main("read", "d", "u", [0.0012], False, 0.0012)
+with_pfs({0.0002: 1.4, 0.0005: 1.1, 0.001: 0.5, 0.002: 0.4}, rd); assert "bar (rel 0.02% PF >= 1.3, both halves >= 1.0, rel 0.05% PF >= 1.0, n >= 100): True" in buf.getvalue(), buf.getvalue()[-400:]
+buf = io.StringIO(); with_pfs({0.0002: 1.4, 0.0005: 0.9, 0.001: 2.0, 0.002: 2.0}, rd); assert "n >= 100): False" in buf.getvalue()
 f.load = real_load
 # verdict
 ok = {"n": 100, "pf": 1.3, "h1": 1.0, "h2": 1.0}; assert f.verdict(ok, {"pf": 1.0}) is True and f.verdict(dict(ok, n=99), {"pf": 1.0}) is False and f.verdict(dict(ok, pf=1.29), {"pf": 1.0}) is False and f.verdict(dict(ok, h1=.99), {"pf": 1.0}) is False and f.verdict(dict(ok, h2=.99), {"pf": 1.0}) is False and f.verdict(ok, {"pf": .99}) is False
@@ -99,5 +118,5 @@ w(["KXSPYPERP,2027-03-14,2027-03-12,101,100,101,100\n"])
 try: f.load(d, uf); raise AssertionError("must refuse")
 except SystemExit as e: assert "DST" in str(e)
 w(["KXSPYPERP,2027-01-31,2027-01-29,101,100,101,100\n"]); assert len(f.load(d, uf)) == 1
-assert (f.FEES, f.REL, f.ABS, f.FWD_FROM, f.FWD_TO, f.DST_CHANGE, f.FIRST_TS, f.TRIGGERS_FINAL, f.TRIGGERS_INTERIM) == ((0.0012, 0.0005), (0.001, 0.002), (0.01, 0.02), "2026-11-17", "2027-01-31", "2027-03-14", 1793923200, 100, 50)
+assert (f.FEES, f.REL, f.STRESS, f.ABS, f.FWD_FROM, f.FWD_TO, f.DST_CHANGE, f.FIRST_TS, f.TRIGGERS_FINAL, f.TRIGGERS_INTERIM) == ((0.0012, 0.0005), (0.0002, 0.0005), (0.001, 0.002), (0.01, 0.02), "2026-11-17", "2027-01-31", "2027-03-14", 1793923200, 100, 50)
 print("opengap1f tests passed")
