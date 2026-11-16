@@ -1,0 +1,139 @@
+{
+ "id": "NBALADDER",
+ "desk": "Idea Desk C",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/idea_desk_c/allkalshi/nbaladder/NBALADDER_CARD.md",
+ "needs_new_code": [
+  "engine/nbaladder.py (ladder-grid plugin, first audit, hand case)",
+  "engine/deskc_kp_load.py: add candle volume (first audit of the extension)",
+  "NBALADDER_CANDLES_P1, P2 (candle jobs, built from the landed list)"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "SIBHIT",
+   "SIBHIT-R",
+   "PROPS1",
+   "PROPUNDER"
+  ],
+  "declined_list_rows_checked": [
+   "cheap-side (bands 30c to 70c)",
+   "favourite-and-hold (side is a search dimension)",
+   "lead-lag (no cross-market price)",
+   "parity (rungs never compared with a total)",
+   "calibration sweeps (a counted many-rule search, every cell in the tally)"
+  ],
+  "difference": "a counted many-rule search over timing, rung position, price, move, spread, volume and rung age on one ladder family",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "deskc_kp_load.py",
+  "loader_sha256": "c76c7f7d03aaec243f0f92fe465382a4a4d292f315c5f27e78e139d22e716fea",
+  "extracts": [
+   "kalshi-pull-data: KXNBAPTS_LISTS_A/2026-11-15T1457Z_43727127463",
+   "NBALADDER_CANDLES_P1, P2 (not yet built)"
+  ],
+  "ticker_wall": [
+   "KXNBAPTS"
+  ],
+  "window": {
+   "first_close": "2026-10-21T00:00:00Z",
+   "last_close_exclusive": "2026-11-06T00:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B (pending)",
+  "independence_note": "the same development days as SIBHIT and the dropped NBA fade and follow cards; PROPUNDER (closed unread) is read-exposed",
+  "loader_note": "hash of the loader as audited (c76c7f7d); the volume extension will change it and needs its own audit"
+ },
+ "split": {
+  "mode": "fixed_dates",
+  "search_last_close_exclusive": "2026-11-06T00:00:00Z",
+  "validate_first_close": "2026-11-13T00:00:00Z",
+  "validate_last_close_exclusive": "2026-12-04T00:00:00Z",
+  "validate_note": "pulled after Dec 4; one joint read with SIBHIT-R, one print, one m; on the Head's go"
+ },
+ "holds": [
+  {
+   "label": "development closes",
+   "start_epoch": 1792540800,
+   "end_epoch": 1793923200,
+   "card": "this spec (spent for SIBHIT)",
+   "status": "OPEN (development)"
+  },
+  {
+   "label": "PROPUNDER reserve; never pulled",
+   "start_epoch": 1793923200,
+   "end_epoch": 1794528000,
+   "card": "PROPUNDER (closed unread)",
+   "status": "OPEN"
+  },
+  {
+   "label": "joint validate window with SIBHIT-R",
+   "start_epoch": 1794528000,
+   "end_epoch": 1796342400,
+   "card": "NBALADDER, SIBHIT, SIBHIT-R",
+   "status": "OPEN"
+  }
+ ],
+ "look_ahead": {
+  "decision_instant": "D = scheduled end (occurrence) minus 120, 60 or 30 minutes; the clock check drops any game whose occurrence is not one value on :00 or :30",
+  "features": "each feature uses candles ending at or before D only; the candle job windows start at D - 30 min",
+  "entry_quote": "the latest two-sided candle ending in [D - 180 s, D]",
+  "exit": "H settles on the list's result, read last for traded rungs; M10 sells at the mark ending 10 minutes before the scheduled end"
+ },
+ "sources": {
+  "names": [
+   "Kalshi public API through kalshi-pull (api.elections.kalshi.com), landed runs only"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "file": "nbaladder.py",
+  "sha256": null,
+  "hand_case_file": null,
+  "hand_case_sha256": null,
+  "auditor_clean_date": null,
+  "note": "not built: waiting on design approval"
+ },
+ "event": {
+  "scorer_plugin": "nbaladder.py",
+  "scorer_plugin_sha256": null,
+  "decision_instant": "scheduled end minus 120, 60 or 30 minutes",
+  "signal_threshold": "the grid's 624 cells",
+  "entry_rule": "every rung open at D whose side ask is in the cell's band and passes the cell's filter, one contract set per rung",
+  "exit": "H or M10"
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ],
+  "haircuts_stress": [],
+  "fee_taker": null,
+  "fee_maker": null
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "min_signals_per_day": 3,
+  "bh_alpha": 0.05,
+  "unit": "game (z clustered by game; n stated in games first)"
+ },
+ "tries": {
+  "rules_this_spec": 624,
+  "prior_m": "from the TALLY"
+ },
+ "prediction": "best of 624 cells reaches PF 1.15 to 1.30 by luck on 16 days; P(a rule clears every gate on development and holds on the joint read) about 4%",
+ "kill": "no rule with 48 or more trades and PF 1.3 or more at 1c with both halves 1.0 or more; or nothing survives BH",
+ "kill_fast": true,
+ "subset_rationale": "the grid values were fixed from round numbers and the feature definitions before any price of these markets was read; 3 x 4 x 2 x 2 x 13 = 624",
+ "halves": "floor(n/2) in entry order",
+ "fee_form": "ceil(round(0.07 x n x p x (1 - p) x 100, 9)) / 100 per order; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x below 100",
+ "outputs": {
+  "survivor_line": "rule, PF 1c and 2c, n in games and rungs, dollars a week at 5 contracts",
+  "family_flag": "none"
+ }
+}
