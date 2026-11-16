@@ -1,5 +1,11 @@
 # ENGINE1 held-out read: one-page plan, version 2 (Desk A, 2026-11-16, after the Head's cut table). Proposal only; nothing pulled, nothing read.
 
+**Batch B freeze (2026-11-16, recorded BEFORE the 190's held-out read prints; the Head's order).** The four batch B spec files are committed and hashed here, and are not edited after the read, so batch B was frozen by someone who had not seen the Oct 3 to Oct 28 outcomes (nobody has: the read has not run). sha256 of each file, final content (commit 85879d7b0 and later; the held-out registration key was added in it):
+- specs/ENGB1TIMESTOP.spec.json: d0fa190efe43d5535743e68a0bc6eef221816b63b5abd9c00aee21c78ff7c93e
+- specs/ENGB2VSPIKE.spec.json: bcd53e01db6b7c7c1ab68e54f48d316eebdf039abaa377961c83856c9ab02cac
+- specs/ENGB3SPRW.spec.json: 653c4710e797e480649561a3bbed4be83c98068ca310ac8bc6c9254a46d73b08
+- specs/ENGB4XBTC.spec.json: fd5b5b2bd3ae3a37af2d6731842a9ece270bc67427de4511f532252d7e1d7e49
+
 **Label on every figure of this read: "unread by ENGINE1, seen by earlier development cards".** It is not a clean held-out for the market as a whole (other cards read parts of these dates), only for ENGINE1's rules.
 
 **What it is.** One read of exactly the 190 rules that passed VALIDATE in run 2 (ENGINE1_RUN2_BARLIST_NOV16.json, sha256 16049fec...), on closes the archive extract never held (HOLDS H01, shared: other cards hold parts of Oct 3 onward).
