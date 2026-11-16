@@ -10,25 +10,25 @@ Families (cap 5 each): the entry condition kind (plain band, spread filter, mome
 
 ## Picks (ranked by dollars a week at 1c, 5 contracts)
 
-| # | spec | market | side | look (s left) | band | filter | exit | n | signals/day | PF 1c | PF 2c | edge 1c c/ct | edge 2c c/ct | $/wk 1c | $/wk 2c | family | cluster (size) |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | SH1_01_HYPE | KXHYPE15M | cheap | 600 | 3 | spread:low | M60 | 139 | 4.79 | 1.84 | 1.67 | 9.73 | 8.25 | 16.3 | 13.8 | spread filter, cheap tail (5c to 35c) | 1 (4) |
-| 2 | SH1_02_ETH | KXETH15M | yes | 600 | 16 | none | H | 183 | 6.31 | 1.74 | 1.62 | 6.09 | 5.13 | 13.4 | 11.3 | plain band, middle (35c to 85c) | 2 (4) |
-| 3 | SH1_03_ETH | KXETH15M | yes | 660 | 6 | spread:low | M60 | 121 | 4.17 | 1.54 | 1.43 | 9.20 | 7.55 | 13.4 | 11.0 | spread filter, cheap tail (5c to 35c) | 3 (1) |
-| 4 | SH1_04_BTC | KXBTC15M | cheap | 180 | 5 | spread:low | H | 149 | 5.14 | 1.37 | 1.30 | 6.84 | 5.82 | 12.3 | 10.5 | spread filter, cheap tail (5c to 35c) | 4 (2) |
-| 5 | SH1_05_BTC | KXBTC15M | cheap | 120 | 2 | mom5:down | H | 160 | 5.52 | 1.58 | 1.45 | 6.36 | 5.30 | 12.3 | 10.2 | momentum or volume filter, cheap tail (5c to 35c) | 5 (6) |
-| 6 | SH1_06_HYPE | KXHYPE15M | yes | 600 | 3 | oi3:up | M60 | 121 | 4.17 | 1.69 | 1.53 | 8.15 | 6.69 | 11.9 | 9.8 | open-interest trigger, cheap tail (5c to 35c) | 6 (1) |
-| 7 | SH1_07_BTC | KXBTC15M | cheap | 120 | 2 | mom5:down | S | 160 | 5.52 | 1.56 | 1.41 | 5.78 | 4.66 | 11.2 | 9.0 | momentum or volume filter, cheap tail (5c to 35c) | 7 (7) |
-| 8 | SH1_08_HYPE | KXHYPE15M | cheap | 420 | 1 | oi6:up | M60 | 268 | 9.24 | 1.53 | 1.27 | 3.19 | 1.92 | 10.3 | 6.2 | open-interest trigger, cheap tail (5c to 35c) | 9 (5) |
-| 9 | SH1_09_ETH | KXETH15M | yes | 420 | 15 | none | H | 100 | 3.45 | 1.76 | 1.66 | 7.81 | 6.85 | 9.4 | 8.3 | plain band, middle (35c to 85c) | 12 (2) |
-| 10 | SH1_10_NEAR | KXNEAR15M | cheap | 420 | 4 | vol3:up | M60 | 107 | 3.69 | 1.44 | 1.32 | 6.22 | 4.74 | 8.0 | 6.1 | momentum or volume filter, cheap tail (5c to 35c) | 13 (1) |
-| 11 | SH1_11_SOL | KXSOL15M | favourite | 540 | 16 | vol3:up | S | 122 | 5.45 | 1.33 | 1.21 | 3.31 | 2.20 | 6.3 | 4.2 | momentum or volume filter, middle (35c to 85c) | 20 (1) |
-| 12 | SH1_12_GOLD | KXGOLD15M | favourite | 420 | 18 | oi3:up | H | 237 | 8.21 | 1.50 | 1.27 | 2.15 | 1.20 | 6.2 | 3.4 | F1 favourite-late shape | 22 (8) |
-| 13 | SH1_13_XRP | KXXRP15M | yes | 540 | 17 | mom3:up | H | 152 | 5.24 | 1.45 | 1.31 | 3.11 | 2.17 | 5.7 | 4.0 | F1 favourite-late shape | 24 (26) |
-| 14 | SH1_14_SOL | KXSOL15M | favourite | 480 | 18 | vol3:up | H | 137 | 6.12 | 1.65 | 1.41 | 2.63 | 1.68 | 5.6 | 3.6 | F1 favourite-late shape | 26 (2) |
-| 15 | SH1_15_XRP | KXXRP15M | favourite | 360 | 18 | mom1:up | H | 307 | 10.59 | 1.31 | 1.11 | 1.51 | 0.56 | 5.6 | 2.1 | F1 favourite-late shape | 27 (2) |
-| 16 | SH1_16_BNB | KXBNB15M | cheap | 420 | 1 | spread:low | M60 | 166 | 5.73 | 1.47 | 1.21 | 2.71 | 1.45 | 5.4 | 2.9 | spread filter, cheap tail (5c to 35c) | 28 (2) |
-| 17 | SH1_17_NEAR | KXNEAR15M | yes | 420 | 18 | mom3:up | H | 201 | 6.93 | 1.50 | 1.27 | 2.06 | 1.12 | 5.0 | 2.7 | F1 favourite-late shape | 31 (2) |
+| # | spec | admission | market | side | look (s left) | band | filter | exit | n | signals/day | PF 1c | PF 2c | edge 1c c/ct | edge 2c c/ct | $/wk 1c | $/wk 2c | family | cluster (size) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | SH1_01_HYPE | clean | KXHYPE15M | cheap | 600 | 3 | spread:low | M60 | 139 | 4.79 | 1.84 | 1.67 | 9.73 | 8.25 | 16.3 | 13.8 | spread filter, cheap tail (5c to 35c) | 1 (4) |
+| 2 | SH1_02_ETH | owner_override_shadow | KXETH15M | yes | 600 | 16 | none | H | 183 | 6.31 | 1.74 | 1.62 | 6.09 | 5.13 | 13.4 | 11.3 | plain band, middle (35c to 85c) | 2 (4) |
+| 3 | SH1_03_ETH | clean | KXETH15M | yes | 660 | 6 | spread:low | M60 | 121 | 4.17 | 1.54 | 1.43 | 9.20 | 7.55 | 13.4 | 11.0 | spread filter, cheap tail (5c to 35c) | 3 (1) |
+| 4 | SH1_04_BTC | clean | KXBTC15M | cheap | 180 | 5 | spread:low | H | 149 | 5.14 | 1.37 | 1.30 | 6.84 | 5.82 | 12.3 | 10.5 | spread filter, cheap tail (5c to 35c) | 4 (2) |
+| 5 | SH1_05_BTC | clean | KXBTC15M | cheap | 120 | 2 | mom5:down | H | 160 | 5.52 | 1.58 | 1.45 | 6.36 | 5.30 | 12.3 | 10.2 | momentum or volume filter, cheap tail (5c to 35c) | 5 (6) |
+| 6 | SH1_06_HYPE | clean | KXHYPE15M | yes | 600 | 3 | oi3:up | M60 | 121 | 4.17 | 1.69 | 1.53 | 8.15 | 6.69 | 11.9 | 9.8 | open-interest trigger, cheap tail (5c to 35c) | 6 (1) |
+| 7 | SH1_07_BTC | clean | KXBTC15M | cheap | 120 | 2 | mom5:down | S | 160 | 5.52 | 1.56 | 1.41 | 5.78 | 4.66 | 11.2 | 9.0 | momentum or volume filter, cheap tail (5c to 35c) | 7 (7) |
+| 8 | SH1_08_HYPE | clean | KXHYPE15M | cheap | 420 | 1 | oi6:up | M60 | 268 | 9.24 | 1.53 | 1.27 | 3.19 | 1.92 | 10.3 | 6.2 | open-interest trigger, cheap tail (5c to 35c) | 9 (5) |
+| 9 | SH1_09_ETH | owner_override_shadow | KXETH15M | yes | 420 | 15 | none | H | 100 | 3.45 | 1.76 | 1.66 | 7.81 | 6.85 | 9.4 | 8.3 | plain band, middle (35c to 85c) | 12 (2) |
+| 10 | SH1_10_NEAR | clean | KXNEAR15M | cheap | 420 | 4 | vol3:up | M60 | 107 | 3.69 | 1.44 | 1.32 | 6.22 | 4.74 | 8.0 | 6.1 | momentum or volume filter, cheap tail (5c to 35c) | 13 (1) |
+| 11 | SH1_11_SOL | clean | KXSOL15M | favourite | 540 | 16 | vol3:up | S | 122 | 5.45 | 1.33 | 1.21 | 3.31 | 2.20 | 6.3 | 4.2 | momentum or volume filter, middle (35c to 85c) | 20 (1) |
+| 12 | SH1_12_GOLD | owner_override_shadow | KXGOLD15M | favourite | 420 | 18 | oi3:up | H | 237 | 8.21 | 1.50 | 1.27 | 2.15 | 1.20 | 6.2 | 3.4 | F1 favourite-late shape | 22 (8) |
+| 13 | SH1_13_XRP | owner_override_shadow | KXXRP15M | yes | 540 | 17 | mom3:up | H | 152 | 5.24 | 1.45 | 1.31 | 3.11 | 2.17 | 5.7 | 4.0 | F1 favourite-late shape | 24 (26) |
+| 14 | SH1_14_SOL | owner_override_shadow | KXSOL15M | favourite | 480 | 18 | vol3:up | H | 137 | 6.12 | 1.65 | 1.41 | 2.63 | 1.68 | 5.6 | 3.6 | F1 favourite-late shape | 26 (2) |
+| 15 | SH1_15_XRP | owner_override_shadow | KXXRP15M | favourite | 360 | 18 | mom1:up | H | 307 | 10.59 | 1.31 | 1.11 | 1.51 | 0.56 | 5.6 | 2.1 | F1 favourite-late shape | 27 (2) |
+| 16 | SH1_16_BNB | clean | KXBNB15M | cheap | 420 | 1 | spread:low | M60 | 166 | 5.73 | 1.47 | 1.21 | 2.71 | 1.45 | 5.4 | 2.9 | spread filter, cheap tail (5c to 35c) | 28 (2) |
+| 17 | SH1_17_NEAR | owner_override_shadow | KXNEAR15M | yes | 420 | 18 | mom3:up | H | 201 | 6.93 | 1.50 | 1.27 | 2.06 | 1.12 | 5.0 | 2.7 | F1 favourite-late shape | 31 (2) |
 
 Totals: 17 picks; per market {'KXHYPE15M': 3, 'KXETH15M': 3, 'KXBTC15M': 3, 'KXNEAR15M': 2, 'KXSOL15M': 2, 'KXGOLD15M': 1, 'KXXRP15M': 2, 'KXBNB15M': 1}; per family {'spread filter, cheap tail (5c to 35c)': 4, 'plain band, middle (35c to 85c)': 2, 'momentum or volume filter, cheap tail (5c to 35c)': 3, 'open-interest trigger, cheap tail (5c to 35c)': 2, 'momentum or volume filter, middle (35c to 85c)': 1, 'F1 favourite-late shape': 5}.
 

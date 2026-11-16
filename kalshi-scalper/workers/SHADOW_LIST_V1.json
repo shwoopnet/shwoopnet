@@ -2,6 +2,11 @@
  "list": "SHADOW_LIST_V1",
  "date": "2026-11-16",
  "n": 17,
+ "admission_values": [
+  "clean",
+  "owner_override_shadow"
+ ],
+ "spec_sha256_covers": "the spec object only (rule, costs, mode), not rank, admission, flags or paper figures",
  "no_money_no_orders": true,
  "specs": [
   {
@@ -30,6 +35,8 @@
    },
    "spec_sha256": "2142dd78c680bc20a29c777d43176aae046f77d5dce755c5b3ef7252440bba94",
    "rank": 1,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "spread filter, cheap tail (5c to 35c)",
    "flags": [],
    "cluster": 1,
@@ -73,6 +80,8 @@
    },
    "spec_sha256": "ac26cae23e3356d3b3f5c13a327b2df5a79b764223017e1c2cabaf6a2d7c89bd",
    "rank": 2,
+   "admission": "owner_override_shadow",
+   "admission_note": "Nov 16 2026 owner popup: 'Yes, shadow all 17'; label only, logs from day one",
    "family": "plain band, middle (35c to 85c)",
    "flags": [
     "Ethereum high-price side: Ethereum as L1 is declined (7e); shadow only"
@@ -118,6 +127,8 @@
    },
    "spec_sha256": "35e15453fe70229a66f107a9b516e6507336dc6957ee55020b16139a6ca6b30b",
    "rank": 3,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "spread filter, cheap tail (5c to 35c)",
    "flags": [],
    "cluster": 3,
@@ -161,6 +172,8 @@
    },
    "spec_sha256": "44ee712a587e3b631fe2bb7bd1a42bc6ac746b433b0e6baaa88a8e176de08557",
    "rank": 4,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "spread filter, cheap tail (5c to 35c)",
    "flags": [],
    "cluster": 4,
@@ -204,6 +217,8 @@
    },
    "spec_sha256": "319f8bcbe377bb666b8a300e619048b9717ec8931ad463d846162b0662583ebc",
    "rank": 5,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "momentum or volume filter, cheap tail (5c to 35c)",
    "flags": [],
    "cluster": 5,
@@ -247,6 +262,8 @@
    },
    "spec_sha256": "0bf6a6ef88f61c8f6e6e2d678b841346848b84e56e5044ae9d6f94d1f6a5d539",
    "rank": 6,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "open-interest trigger, cheap tail (5c to 35c)",
    "flags": [
     "open-interest trigger: check against OICORE (cheap side, open interest rise); different market"
@@ -292,6 +309,8 @@
    },
    "spec_sha256": "1d09e7791868a242d86405dfb8ba88a08ec1c55ddacf6094e8272b1699fc0c00",
    "rank": 7,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "momentum or volume filter, cheap tail (5c to 35c)",
    "flags": [],
    "cluster": 7,
@@ -335,6 +354,8 @@
    },
    "spec_sha256": "8b73b86a204c1eee2ef897e28dab7c5d270383b8c85da36cdbdf3195f903843c",
    "rank": 8,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "open-interest trigger, cheap tail (5c to 35c)",
    "flags": [
     "open-interest trigger: check against OICORE (cheap side, open interest rise); different market"
@@ -380,6 +401,8 @@
    },
    "spec_sha256": "3d0371e389348a5672ab21636a2f302d7a990c974405d122986112fb4a905d16",
    "rank": 9,
+   "admission": "owner_override_shadow",
+   "admission_note": "Nov 16 2026 owner popup: 'Yes, shadow all 17'; label only, logs from day one",
    "family": "plain band, middle (35c to 85c)",
    "flags": [
     "Ethereum high-price side: Ethereum as L1 is declined (7e); shadow only"
@@ -425,6 +448,8 @@
    },
    "spec_sha256": "62051a9cb594e5685ad16b0013f4af1de12236a5a025a37f9800f3034ae705ea",
    "rank": 10,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "momentum or volume filter, cheap tail (5c to 35c)",
    "flags": [],
    "cluster": 13,
@@ -468,6 +493,8 @@
    },
    "spec_sha256": "db80b17d94a8ff2be97a3b69e0e4860bdf3501df750a82c830036bc1f14e5bd4",
    "rank": 11,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "momentum or volume filter, middle (35c to 85c)",
    "flags": [],
    "cluster": 20,
@@ -511,6 +538,8 @@
    },
    "spec_sha256": "62ca90ce9cea97d00d243f9eb2c48581755d4973d28f83b89414f04d5204c3a6",
    "rank": 12,
+   "admission": "owner_override_shadow",
+   "admission_note": "Nov 16 2026 owner popup: 'Yes, shadow all 17'; label only, logs from day one",
    "family": "F1 favourite-late shape",
    "flags": [
     "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique",
@@ -557,6 +586,8 @@
    },
    "spec_sha256": "d79dac2fba8280b3d6ef75fab3705429f00755c3a50252641d46df2015012044",
    "rank": 13,
+   "admission": "owner_override_shadow",
+   "admission_note": "Nov 16 2026 owner popup: 'Yes, shadow all 17'; label only, logs from day one",
    "family": "F1 favourite-late shape",
    "flags": [
     "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique",
@@ -603,6 +634,8 @@
    },
    "spec_sha256": "c767674e3b007fa1211a392fb91ee5e4cbbf847add25d9260ee1a7157c730808",
    "rank": 14,
+   "admission": "owner_override_shadow",
+   "admission_note": "Nov 16 2026 owner popup: 'Yes, shadow all 17'; label only, logs from day one",
    "family": "F1 favourite-late shape",
    "flags": [
     "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique"
@@ -648,6 +681,8 @@
    },
    "spec_sha256": "6fc64db4599e63dc7084352ae0f18ac52f584229794df5ac48ae3c7437eab8d6",
    "rank": 15,
+   "admission": "owner_override_shadow",
+   "admission_note": "Nov 16 2026 owner popup: 'Yes, shadow all 17'; label only, logs from day one",
    "family": "F1 favourite-late shape",
    "flags": [
     "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique"
@@ -693,6 +728,8 @@
    },
    "spec_sha256": "ae917f99875af50c90a72214f1d46fdc807b96ca4a3dec3cf49b971106b8875d",
    "rank": 16,
+   "admission": "clean",
+   "admission_note": "no 7e row touched and not a favourite-late shape",
    "family": "spread filter, cheap tail (5c to 35c)",
    "flags": [],
    "cluster": 28,
@@ -736,6 +773,8 @@
    },
    "spec_sha256": "97f9133af28cd8618e0f5f2319665f4ecc400f8d3a75f818f14c2253c9a33359",
    "rank": 17,
+   "admission": "owner_override_shadow",
+   "admission_note": "Nov 16 2026 owner popup: 'Yes, shadow all 17'; label only, logs from day one",
    "family": "F1 favourite-late shape",
    "flags": [
     "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique"

@@ -1,0 +1,3345 @@
+{
+ "note": "ENGINE1 run 2 (Nov 16 2026) validate_bar_list: the 190 rules that met the VALIDATE bar (1c PF 1.3+, 2c PF 1.0+, both halves, n 100+), BH survivors 0 at m 2,347,488. Paper research, upper bound, not fill-checked.",
+ "m": 2347488,
+ "validate_bar_list": [
+  {
+   "source": "archive",
+   "series": "KXBNB15M",
+   "bucket": 420,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.4658597144630665,
+   "pf_2c": 1.212854609929078,
+   "n": 166,
+   "days": 29,
+   "p": 0.14882932849223196,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBNB15M",
+   "bucket": 420,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.369876944981186,
+   "pf_2c": 1.2403623553095118,
+   "n": 133,
+   "days": 28,
+   "p": 0.09412930106346284,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBNB15M",
+   "bucket": 480,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "mom1",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3318530032197178,
+   "pf_2c": 1.1120359739762726,
+   "n": 147,
+   "days": 28,
+   "p": 0.1297170952820947,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "mom1",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.335851565333011,
+   "pf_2c": 1.1361060566675332,
+   "n": 270,
+   "days": 29,
+   "p": 0.10401586755118025,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "mom1",
+    "down"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3514304723885562,
+   "pf_2c": 1.1672672323608044,
+   "n": 113,
+   "days": 28,
+   "p": 0.1892821038300838,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "mom1",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.503478904515174,
+   "pf_2c": 1.2849648112603966,
+   "n": 113,
+   "days": 28,
+   "p": 0.12653042835194217,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "mom5",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3145974149175856,
+   "pf_2c": 1.1261557427573454,
+   "n": 137,
+   "days": 28,
+   "p": 0.18711928714780057,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.331041968162084,
+   "pf_2c": 1.1402005850396992,
+   "n": 135,
+   "days": 28,
+   "p": 0.17768866856317322,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "S",
+   "pf_1c": 1.4083695779945928,
+   "pf_2c": 1.2070300560366785,
+   "n": 139,
+   "days": 28,
+   "p": 0.12060588588334534,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3622511673629885,
+   "pf_2c": 1.1782029234737748,
+   "n": 121,
+   "days": 28,
+   "p": 0.15501186584501025,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.5111777535441657,
+   "pf_2c": 1.2908619877531795,
+   "n": 121,
+   "days": 28,
+   "p": 0.09680413175578238,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": null,
+   "exit": "S",
+   "pf_1c": 1.3958988698590238,
+   "pf_2c": 1.1960625946491672,
+   "n": 140,
+   "days": 28,
+   "p": 0.12517336950939317,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "mom3",
+    "down"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4335841144548593,
+   "pf_2c": 1.3126572147267324,
+   "n": 147,
+   "days": 29,
+   "p": 0.06858075868393541,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "mom3",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3929078930370755,
+   "pf_2c": 1.262505926979611,
+   "n": 147,
+   "days": 29,
+   "p": 0.09860532838721434,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "mom5",
+    "down"
+   ],
+   "exit": "H",
+   "pf_1c": 1.5846259910375733,
+   "pf_2c": 1.4518759326369646,
+   "n": 160,
+   "days": 29,
+   "p": 0.0226419099258111,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "mom5",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3642691415313226,
+   "pf_2c": 1.1489627776960423,
+   "n": 152,
+   "days": 29,
+   "p": 0.10179199604199451,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "mom5",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.5557424315233062,
+   "pf_2c": 1.4113979918349333,
+   "n": 160,
+   "days": 29,
+   "p": 0.0345499666064413,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4987429665988268,
+   "pf_2c": 1.3735421526157947,
+   "n": 152,
+   "days": 29,
+   "p": 0.03352888169130671,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.4714294714294716,
+   "pf_2c": 1.33271719038817,
+   "n": 152,
+   "days": 29,
+   "p": 0.04825561896809932,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.43339421107975,
+   "pf_2c": 1.3135654138426782,
+   "n": 163,
+   "days": 29,
+   "p": 0.05061650637047535,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3083750201710505,
+   "pf_2c": 1.0991197309096115,
+   "n": 156,
+   "days": 29,
+   "p": 0.12541776557704376,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.408760397882613,
+   "pf_2c": 1.2767785664727545,
+   "n": 163,
+   "days": 29,
+   "p": 0.06980021122990653,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.419411280362289,
+   "pf_2c": 1.3005060148940233,
+   "n": 175,
+   "days": 29,
+   "p": 0.05199825627419233,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "S",
+   "pf_1c": 1.402805611222445,
+   "pf_2c": 1.2710786505688874,
+   "n": 175,
+   "days": 29,
+   "p": 0.06902817959072471,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.419411280362289,
+   "pf_2c": 1.3005060148940233,
+   "n": 175,
+   "days": 29,
+   "p": 0.05199825627419233,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 120,
+   "band": 2,
+   "side": "cheap",
+   "filter": null,
+   "exit": "S",
+   "pf_1c": 1.402805611222445,
+   "pf_2c": 1.2710786505688874,
+   "n": 175,
+   "days": 29,
+   "p": 0.06902817959072471,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 180,
+   "band": 5,
+   "side": "cheap",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3658352772294995,
+   "pf_2c": 1.3009398952589049,
+   "n": 149,
+   "days": 29,
+   "p": 0.05692634059683664,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 180,
+   "band": 5,
+   "side": "cheap",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.3525356267102597,
+   "pf_2c": 1.2882508500188894,
+   "n": 150,
+   "days": 29,
+   "p": 0.06446174658001043,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 180,
+   "band": 7,
+   "side": "cheap",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3840408805031446,
+   "pf_2c": 1.327270403816664,
+   "n": 111,
+   "days": 28,
+   "p": 0.07106608419495236,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 180,
+   "band": 7,
+   "side": "cheap",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.3877936692007042,
+   "pf_2c": 1.330875884890881,
+   "n": 113,
+   "days": 28,
+   "p": 0.06919978584682693,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 240,
+   "band": 4,
+   "side": "cheap",
+   "filter": [
+    "mom1",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.339630955659598,
+   "pf_2c": 1.204986578567004,
+   "n": 135,
+   "days": 29,
+   "p": 0.04202374845946046,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 360,
+   "band": 3,
+   "side": "cheap",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3361069625204467,
+   "pf_2c": 1.2015019605236923,
+   "n": 116,
+   "days": 29,
+   "p": 0.11732871503927936,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.4075588066551923,
+   "pf_2c": 1.2587691661415668,
+   "n": 195,
+   "days": 29,
+   "p": 0.05591302811762156,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.4628608498216025,
+   "pf_2c": 1.3032980905791385,
+   "n": 180,
+   "days": 29,
+   "p": 0.012125073390453383,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6912450663796195,
+   "pf_2c": 1.4312855113636362,
+   "n": 151,
+   "days": 29,
+   "p": 0.03450369106404066,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6817366343738787,
+   "pf_2c": 1.4236505681818181,
+   "n": 150,
+   "days": 29,
+   "p": 0.035920993908942746,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6912450663796195,
+   "pf_2c": 1.4312855113636362,
+   "n": 151,
+   "days": 29,
+   "p": 0.03450369106404066,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6761750986724078,
+   "pf_2c": 1.4181463068181819,
+   "n": 150,
+   "days": 29,
+   "p": 0.03703859348222745,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.6912450663796195,
+   "pf_2c": 1.4312855113636362,
+   "n": 151,
+   "days": 29,
+   "p": 0.03450369106404066,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.5665571719067732,
+   "pf_2c": 1.3045330088226348,
+   "n": 161,
+   "days": 27,
+   "p": 0.05644838872545264,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3278537409740359,
+   "pf_2c": 1.1356447688564477,
+   "n": 130,
+   "days": 27,
+   "p": 0.1908056117671092,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.347057919803349,
+   "pf_2c": 1.1517639902676398,
+   "n": 132,
+   "days": 27,
+   "p": 0.1765220056020548,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.347057919803349,
+   "pf_2c": 1.1517639902676398,
+   "n": 132,
+   "days": 27,
+   "p": 0.1765220056020548,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "favourite",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.347057919803349,
+   "pf_2c": 1.1517639902676398,
+   "n": 132,
+   "days": 27,
+   "p": 0.1765220056020548,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 600,
+   "band": 3,
+   "side": "cheap",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3874762992853322,
+   "pf_2c": 1.2502840521747036,
+   "n": 171,
+   "days": 29,
+   "p": 0.05126563421542299,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 600,
+   "band": 3,
+   "side": "cheap",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3874762992853322,
+   "pf_2c": 1.2502840521747036,
+   "n": 171,
+   "days": 29,
+   "p": 0.05126563421542299,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXBTC15M",
+   "bucket": 600,
+   "band": 3,
+   "side": "cheap",
+   "filter": null,
+   "exit": "M60",
+   "pf_1c": 1.3874762992853322,
+   "pf_2c": 1.2502840521747036,
+   "n": 171,
+   "days": 29,
+   "p": 0.05126563421542299,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4776059850374064,
+   "pf_2c": 1.37156099004043,
+   "n": 106,
+   "days": 29,
+   "p": 0.07057963113579352,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.5254513813356538,
+   "pf_2c": 1.3425438124932803,
+   "n": 106,
+   "days": 29,
+   "p": 0.060176270225022185,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.636209476309227,
+   "pf_2c": 1.5198698353219604,
+   "n": 115,
+   "days": 29,
+   "p": 0.025411219882734076,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.6822927996519468,
+   "pf_2c": 1.4802709386087518,
+   "n": 115,
+   "days": 29,
+   "p": 0.023280773818413786,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6643391521197006,
+   "pf_2c": 1.5457055517207376,
+   "n": 117,
+   "days": 29,
+   "p": 0.02162838624641077,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.7092669132042637,
+   "pf_2c": 1.502526610041931,
+   "n": 117,
+   "days": 29,
+   "p": 0.020027155705177116,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.7093266832917706,
+   "pf_2c": 1.5873188048515925,
+   "n": 120,
+   "days": 29,
+   "p": 0.0162616798652115,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 16,
+   "side": "no",
+   "filter": null,
+   "exit": "T",
+   "pf_1c": 1.7548401131172504,
+   "pf_2c": 1.5421997634662938,
+   "n": 120,
+   "days": 29,
+   "p": 0.01511583580744886,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3653498871331826,
+   "pf_2c": 1.2353663985701517,
+   "n": 120,
+   "days": 27,
+   "p": 0.17551772358558795,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.3850581904642725,
+   "pf_2c": 1.1529601189001732,
+   "n": 120,
+   "days": 27,
+   "p": 0.18509455263847902,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3753221917352623,
+   "pf_2c": 1.1669684002633312,
+   "n": 262,
+   "days": 29,
+   "p": 0.07320238154185509,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.407060596275966,
+   "pf_2c": 1.1941395844432605,
+   "n": 207,
+   "days": 29,
+   "p": 0.10791420275758784,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "B",
+   "pf_1c": 1.5817010309278352,
+   "pf_2c": 1.0055193176116408,
+   "n": 123,
+   "days": 29,
+   "p": 0.09513994296611022,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 2.1623235613463625,
+   "pf_2c": 1.8393336915636753,
+   "n": 123,
+   "days": 29,
+   "p": 0.016726660517982925,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "S",
+   "pf_1c": 2.0208762886597937,
+   "pf_2c": 1.6909182137481187,
+   "n": 123,
+   "days": 29,
+   "p": 0.014873103193083643,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "T",
+   "pf_1c": 1.6997828447339847,
+   "pf_2c": 1.1053197205803331,
+   "n": 123,
+   "days": 29,
+   "p": 0.09199393416869756,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.828695652173913,
+   "pf_2c": 1.5531411359724614,
+   "n": 131,
+   "days": 29,
+   "p": 0.06994311751269759,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.326239973809134,
+   "pf_2c": 1.1055140632448752,
+   "n": 131,
+   "days": 29,
+   "p": 0.19331673698693402,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 2.1054779806659507,
+   "pf_2c": 1.784301212507977,
+   "n": 154,
+   "days": 28,
+   "p": 0.002410723996939012,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 2.475402792696026,
+   "pf_2c": 2.0987024037438844,
+   "n": 180,
+   "days": 28,
+   "p": 0.0001748561015885377,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 2.6049409237379164,
+   "pf_2c": 2.210806211444374,
+   "n": 188,
+   "days": 28,
+   "p": 6.597465633625354e-05,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 2.6178302900107413,
+   "pf_2c": 2.2216549670282917,
+   "n": 189,
+   "days": 28,
+   "p": 5.889900545413782e-05,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 2.6178302900107413,
+   "pf_2c": 2.2216549670282917,
+   "n": 189,
+   "days": 28,
+   "p": 5.889900545413782e-05,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.8549208903191206,
+   "pf_2c": 1.5706319702602232,
+   "n": 109,
+   "days": 27,
+   "p": 0.06202654377024356,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 2.635875402792696,
+   "pf_2c": 2.23739629865986,
+   "n": 190,
+   "days": 28,
+   "p": 5.33334938677166e-05,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.690387016229713,
+   "pf_2c": 1.5304584208575311,
+   "n": 131,
+   "days": 29,
+   "p": 0.021309893531384374,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.5064918851435707,
+   "pf_2c": 1.239466205362659,
+   "n": 131,
+   "days": 29,
+   "p": 0.06245035454846985,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.631396588486141,
+   "pf_2c": 1.3886543535620055,
+   "n": 190,
+   "days": 29,
+   "p": 0.027841553259006065,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3057823879938202,
+   "pf_2c": 1.0915236051502146,
+   "n": 190,
+   "days": 29,
+   "p": 0.08269039992264274,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 2.2791681353542472,
+   "pf_2c": 1.9382198952879583,
+   "n": 100,
+   "days": 28,
+   "p": 0.015872897386672618,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3077085088458296,
+   "pf_2c": 1.0946029140160065,
+   "n": 100,
+   "days": 28,
+   "p": 0.2068721746401909,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.8089531194924215,
+   "pf_2c": 1.192670157068063,
+   "n": 100,
+   "days": 28,
+   "p": 0.08107604883214252,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3553295079116676,
+   "pf_2c": 1.2306699922593962,
+   "n": 151,
+   "days": 29,
+   "p": 0.06996298070420044,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3553295079116676,
+   "pf_2c": 1.2306699922593962,
+   "n": 151,
+   "days": 29,
+   "p": 0.06996298070420044,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 17,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.3553295079116676,
+   "pf_2c": 1.2306699922593962,
+   "n": 151,
+   "days": 29,
+   "p": 0.06996298070420044,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 120,
+   "band": 1,
+   "side": "no",
+   "filter": [
+    "mom1",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3014243551905555,
+   "pf_2c": 1.1135909393737509,
+   "n": 125,
+   "days": 28,
+   "p": 0.17580918630774378,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 240,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4770043073502848,
+   "pf_2c": 1.3371373573490994,
+   "n": 104,
+   "days": 28,
+   "p": 0.13434415686435297,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3690136500347037,
+   "pf_2c": 1.1646564885496182,
+   "n": 277,
+   "days": 29,
+   "p": 0.14586609048570942,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.4201159278308433,
+   "pf_2c": 1.1867111216956419,
+   "n": 277,
+   "days": 29,
+   "p": 0.056647491026528746,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.5549239514518358,
+   "pf_2c": 1.319647201946472,
+   "n": 159,
+   "days": 29,
+   "p": 0.12987177059966684,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.309271523178808,
+   "pf_2c": 1.0950413223140496,
+   "n": 159,
+   "days": 29,
+   "p": 0.21040787570692654,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3970342023439368,
+   "pf_2c": 1.1851325757575757,
+   "n": 185,
+   "days": 29,
+   "p": 0.22390725291191524,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6175084175084173,
+   "pf_2c": 1.3720341242335379,
+   "n": 189,
+   "days": 29,
+   "p": 0.1146798615493132,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3353895362120176,
+   "pf_2c": 1.1149310191366266,
+   "n": 189,
+   "days": 29,
+   "p": 0.17786741261732558,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4192776847644104,
+   "pf_2c": 1.203716856060606,
+   "n": 188,
+   "days": 29,
+   "p": 0.21157917192486186,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4712987323606794,
+   "pf_2c": 1.2485795454545454,
+   "n": 194,
+   "days": 29,
+   "p": 0.18342743558134644,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.411624013393925,
+   "pf_2c": 1.1976799242424243,
+   "n": 187,
+   "days": 29,
+   "p": 0.2175917931659957,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "B",
+   "pf_1c": 1.9098974216800666,
+   "pf_2c": 1.218791946308725,
+   "n": 134,
+   "days": 28,
+   "p": 0.008658785962429843,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 3.205755395683454,
+   "pf_2c": 2.72872908508366,
+   "n": 134,
+   "days": 28,
+   "p": 0.002606387435233522,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 2.0525065336184367,
+   "pf_2c": 1.7094547964113183,
+   "n": 134,
+   "days": 28,
+   "p": 0.004618311023668195,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 3.833154506437768,
+   "pf_2c": 2.5209771640998406,
+   "n": 134,
+   "days": 28,
+   "p": 0.00011946018239030677,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.4712987323606794,
+   "pf_2c": 1.2485795454545454,
+   "n": 194,
+   "days": 29,
+   "p": 0.18342743558134644,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 420,
+   "band": 15,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.7641934220830071,
+   "pf_2c": 1.662057629085283,
+   "n": 100,
+   "days": 28,
+   "p": 0.001048878997283595,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 420,
+   "band": 15,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.7641934220830071,
+   "pf_2c": 1.662057629085283,
+   "n": 100,
+   "days": 28,
+   "p": 0.001048878997283595,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 600,
+   "band": 16,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.7594164270183068,
+   "pf_2c": 1.6351970033296337,
+   "n": 175,
+   "days": 29,
+   "p": 0.00651877944725117,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 600,
+   "band": 16,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.738533934252386,
+   "pf_2c": 1.615954378605139,
+   "n": 183,
+   "days": 29,
+   "p": 0.006154069870743898,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 600,
+   "band": 16,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.5900259521638493,
+   "pf_2c": 1.4784267480577136,
+   "n": 159,
+   "days": 29,
+   "p": 0.021383052688767806,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 600,
+   "band": 16,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "T",
+   "pf_1c": 1.4558462509644385,
+   "pf_2c": 1.266856270810211,
+   "n": 159,
+   "days": 29,
+   "p": 0.054988526974683954,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 600,
+   "band": 16,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.738533934252386,
+   "pf_2c": 1.615954378605139,
+   "n": 183,
+   "days": 29,
+   "p": 0.006154069870743898,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXETH15M",
+   "bucket": 660,
+   "band": 6,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.5392850222825034,
+   "pf_2c": 1.4251744997673335,
+   "n": 121,
+   "days": 27,
+   "p": 0.011276876160873929,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 300,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.437351222679074,
+   "pf_2c": 1.2195801199657241,
+   "n": 105,
+   "days": 25,
+   "p": 0.1541805327834625,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.5832973672852826,
+   "pf_2c": 1.3432357341312247,
+   "n": 117,
+   "days": 24,
+   "p": 0.0870064925861088,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3157894736842104,
+   "pf_2c": 1.1170401992173604,
+   "n": 117,
+   "days": 23,
+   "p": 0.20780946382371826,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6566483295317322,
+   "pf_2c": 1.407038512616202,
+   "n": 192,
+   "days": 26,
+   "p": 0.031159007727534875,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3913822449162412,
+   "pf_2c": 1.1833333333333333,
+   "n": 241,
+   "days": 27,
+   "p": 0.10635647187705155,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.498631476050831,
+   "pf_2c": 1.2747412208571152,
+   "n": 237,
+   "days": 27,
+   "p": 0.047420246519632336,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3913822449162412,
+   "pf_2c": 1.1833333333333333,
+   "n": 241,
+   "days": 27,
+   "p": 0.10635647187705155,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4609181808407696,
+   "pf_2c": 1.2434560544796764,
+   "n": 209,
+   "days": 25,
+   "p": 0.07161022519178528,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "down"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4483500717360116,
+   "pf_2c": 1.2263045793397231,
+   "n": 129,
+   "days": 26,
+   "p": 0.12807170105477306,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3345265795596923,
+   "pf_2c": 1.140453418349274,
+   "n": 112,
+   "days": 23,
+   "p": 0.21734841985088355,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.3913822449162412,
+   "pf_2c": 1.1833333333333333,
+   "n": 241,
+   "days": 27,
+   "p": 0.10635647187705155,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3751881315846055,
+   "pf_2c": 1.1659574468085105,
+   "n": 102,
+   "days": 23,
+   "p": 0.21442485238566705,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.5495592345732103,
+   "pf_2c": 1.3161702127659574,
+   "n": 113,
+   "days": 23,
+   "p": 0.12409906201660947,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.938407746100054,
+   "pf_2c": 1.6465264838967262,
+   "n": 112,
+   "days": 23,
+   "p": 0.054038300375720716,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.6116191500806887,
+   "pf_2c": 1.1354804365184987,
+   "n": 112,
+   "days": 23,
+   "p": 0.14450120500017985,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.5495592345732103,
+   "pf_2c": 1.3161702127659574,
+   "n": 113,
+   "days": 23,
+   "p": 0.12409906201660947,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.5495592345732103,
+   "pf_2c": 1.3161702127659574,
+   "n": 113,
+   "days": 23,
+   "p": 0.12409906201660947,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 360,
+   "band": 1,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3477915294651983,
+   "pf_2c": 1.1147844743514725,
+   "n": 146,
+   "days": 29,
+   "p": 0.1488917671414418,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 420,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "mom3",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.4529474543285832,
+   "pf_2c": 1.208855291576674,
+   "n": 264,
+   "days": 29,
+   "p": 0.039802027808013125,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 420,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "mom5",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.519381278116719,
+   "pf_2c": 1.2643489321108696,
+   "n": 270,
+   "days": 29,
+   "p": 0.021941956386477834,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 420,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.531842187014601,
+   "pf_2c": 1.2746847617012182,
+   "n": 268,
+   "days": 29,
+   "p": 0.018961894305350415,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 420,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "vol3",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.3478463329452852,
+   "pf_2c": 1.1149825783972125,
+   "n": 143,
+   "days": 29,
+   "p": 0.10521759311202288,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 420,
+   "band": 1,
+   "side": "cheap",
+   "filter": null,
+   "exit": "M60",
+   "pf_1c": 1.511093405246384,
+   "pf_2c": 1.2576835890136537,
+   "n": 271,
+   "days": 29,
+   "p": 0.022539526112145925,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 600,
+   "band": 3,
+   "side": "cheap",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.8419774609302035,
+   "pf_2c": 1.6696246132290269,
+   "n": 139,
+   "days": 28,
+   "p": 0.00033708677924274586,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 600,
+   "band": 3,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.6890550740844283,
+   "pf_2c": 1.530298067474615,
+   "n": 121,
+   "days": 29,
+   "p": 0.01772746830063574,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 660,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "mom3",
+    "down"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.5944079846869017,
+   "pf_2c": 1.406300585232225,
+   "n": 155,
+   "days": 29,
+   "p": 0.024855915915526994,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 660,
+   "band": 2,
+   "side": "cheap",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.6479354662291497,
+   "pf_2c": 1.4536794919686216,
+   "n": 156,
+   "days": 29,
+   "p": 0.020675006199734256,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 660,
+   "band": 2,
+   "side": "cheap",
+   "filter": null,
+   "exit": "M60",
+   "pf_1c": 1.6479354662291497,
+   "pf_2c": 1.4536794919686216,
+   "n": 156,
+   "days": 29,
+   "p": 0.020675006199734256,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXHYPE15M",
+   "bucket": 840,
+   "band": 5,
+   "side": "cheap",
+   "filter": null,
+   "exit": "M60",
+   "pf_1c": 1.3397648862765141,
+   "pf_2c": 1.2354809806956097,
+   "n": 142,
+   "days": 28,
+   "p": 0.05540539188005575,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXNEAR15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4967641418983701,
+   "pf_2c": 1.266041987901791,
+   "n": 201,
+   "days": 29,
+   "p": 0.052769765364044485,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXNEAR15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3573735199138857,
+   "pf_2c": 1.1480771279428996,
+   "n": 204,
+   "days": 29,
+   "p": 0.1099527625068357,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXNEAR15M",
+   "bucket": 420,
+   "band": 4,
+   "side": "cheap",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "M60",
+   "pf_1c": 1.4412681567951184,
+   "pf_2c": 1.3193351381980734,
+   "n": 107,
+   "days": 28,
+   "p": 0.056838853274906204,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXSILVER15M",
+   "bucket": 300,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "down"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3822483377145507,
+   "pf_2c": 1.1744452945677124,
+   "n": 141,
+   "days": 23,
+   "p": 0.10096660710983649,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXSOL15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6495495495495496,
+   "pf_2c": 1.4110199714693294,
+   "n": 137,
+   "days": 23,
+   "p": 0.10483133211219643,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXSOL15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3031554113830726,
+   "pf_2c": 1.0971543546996263,
+   "n": 137,
+   "days": 23,
+   "p": 0.1863931630960189,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXSOL15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "T",
+   "pf_1c": 1.5629453681710213,
+   "pf_2c": 1.0324786324786326,
+   "n": 137,
+   "days": 23,
+   "p": 0.16896691435284023,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXSOL15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.325267304445695,
+   "pf_2c": 1.1052344601962922,
+   "n": 150,
+   "days": 23,
+   "p": 0.17570532566159017,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXSOL15M",
+   "bucket": 540,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3256019972618185,
+   "pf_2c": 1.2093295827473043,
+   "n": 122,
+   "days": 23,
+   "p": 0.1134044867814133,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXSOL15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4109263657957243,
+   "pf_2c": 1.2765615337043907,
+   "n": 111,
+   "days": 23,
+   "p": 0.10297059891677449,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXWTI15M",
+   "bucket": 240,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3884670634106298,
+   "pf_2c": 1.2575373058572734,
+   "n": 132,
+   "days": 22,
+   "p": 0.07616273009128631,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXWTI15M",
+   "bucket": 480,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3489186148268535,
+   "pf_2c": 1.2230055658627088,
+   "n": 105,
+   "days": 25,
+   "p": 0.1808060217084622,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXWTI15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4159070598748882,
+   "pf_2c": 1.2031139419674453,
+   "n": 125,
+   "days": 25,
+   "p": 0.12078638354456037,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXWTI15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4396782841823055,
+   "pf_2c": 1.2231068648266101,
+   "n": 127,
+   "days": 24,
+   "p": 0.10586012872739226,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXWTI15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "favourite",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.4537980339588918,
+   "pf_2c": 1.2354918612880397,
+   "n": 128,
+   "days": 25,
+   "p": 0.09852830748258608,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 300,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "B",
+   "pf_1c": 1.6542972168737966,
+   "pf_2c": 1.344108089618608,
+   "n": 102,
+   "days": 29,
+   "p": 0.0334912566011114,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 300,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.5854984894259818,
+   "pf_2c": 1.421410616590271,
+   "n": 102,
+   "days": 29,
+   "p": 0.044478141990344625,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3090544604076177,
+   "pf_2c": 1.1140002646552867,
+   "n": 307,
+   "days": 29,
+   "p": 0.09588948122969858,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3165066951060551,
+   "pf_2c": 1.1196761703625486,
+   "n": 175,
+   "days": 29,
+   "p": 0.20557132268369424,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3312673648215432,
+   "pf_2c": 1.1333192254787854,
+   "n": 195,
+   "days": 29,
+   "p": 0.19188877078966002,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3562727078435564,
+   "pf_2c": 1.1552216696645858,
+   "n": 198,
+   "days": 29,
+   "p": 0.17528852679559193,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3213680643795003,
+   "pf_2c": 1.1109501138480646,
+   "n": 198,
+   "days": 29,
+   "p": 0.16481901034006768,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3562727078435564,
+   "pf_2c": 1.1552216696645858,
+   "n": 198,
+   "days": 29,
+   "p": 0.17528852679559193,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.3213680643795003,
+   "pf_2c": 1.1109501138480646,
+   "n": 198,
+   "days": 29,
+   "p": 0.16481901034006768,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "S",
+   "pf_1c": 1.4349469576880867,
+   "pf_2c": 1.2063492063492065,
+   "n": 187,
+   "days": 29,
+   "p": 0.1271688143054229,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.361829450737337,
+   "pf_2c": 1.159665643847212,
+   "n": 199,
+   "days": 29,
+   "p": 0.17179746133252577,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "S",
+   "pf_1c": 1.326874205844981,
+   "pf_2c": 1.115297039950321,
+   "n": 199,
+   "days": 29,
+   "p": 0.16104046897470792,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3381750828621566,
+   "pf_2c": 1.1376315027506998,
+   "n": 216,
+   "days": 29,
+   "p": 0.17433644069512788,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4099663711403239,
+   "pf_2c": 1.1959745762711864,
+   "n": 147,
+   "days": 29,
+   "p": 0.15147040072588314,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.715071843472944,
+   "pf_2c": 1.456265133171913,
+   "n": 176,
+   "days": 29,
+   "p": 0.042288276533220356,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.484774333877107,
+   "pf_2c": 1.238952103731146,
+   "n": 176,
+   "days": 29,
+   "p": 0.07068926831309474,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3873080128586737,
+   "pf_2c": 1.1785924790757987,
+   "n": 184,
+   "days": 29,
+   "p": 0.1267498621652476,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3954042147874748,
+   "pf_2c": 1.1854296828952022,
+   "n": 185,
+   "days": 29,
+   "p": 0.12583289244944618,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4054054054054055,
+   "pf_2c": 1.1941530119061652,
+   "n": 186,
+   "days": 29,
+   "p": 0.11788756516117313,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6276189019727785,
+   "pf_2c": 1.381226343679031,
+   "n": 168,
+   "days": 29,
+   "p": 0.06331934232440664,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "S",
+   "pf_1c": 1.359574188461033,
+   "pf_2c": 1.1361189438605486,
+   "n": 168,
+   "days": 29,
+   "p": 0.13276898392702066,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "vol3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 2.414746543778802,
+   "pf_2c": 2.048087048087048,
+   "n": 106,
+   "days": 29,
+   "p": 0.006997940373972264,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.4054054054054055,
+   "pf_2c": 1.1941530119061652,
+   "n": 186,
+   "days": 29,
+   "p": 0.11788756516117313,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "vol3",
+    "down"
+   ],
+   "exit": "S",
+   "pf_1c": 1.4016162605607934,
+   "pf_2c": 1.1814805941542883,
+   "n": 180,
+   "days": 28,
+   "p": 0.08342623263404962,
+   "family": "favourite-late (closed family)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom1",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4017484868863483,
+   "pf_2c": 1.189214380825566,
+   "n": 166,
+   "days": 29,
+   "p": 0.15485539475550347,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3468220567605482,
+   "pf_2c": 1.1443067720572526,
+   "n": 197,
+   "days": 29,
+   "p": 0.16932446709684779,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3468220567605482,
+   "pf_2c": 1.1443067720572526,
+   "n": 197,
+   "days": 29,
+   "p": 0.16932446709684779,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "S",
+   "pf_1c": 1.330209241499564,
+   "pf_2c": 1.1138755980861246,
+   "n": 197,
+   "days": 29,
+   "p": 0.14166745826515476,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3468220567605482,
+   "pf_2c": 1.1443067720572526,
+   "n": 197,
+   "days": 29,
+   "p": 0.16932446709684779,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4386826347305388,
+   "pf_2c": 1.2212211025489035,
+   "n": 190,
+   "days": 29,
+   "p": 0.11012723166372843,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.3468220567605482,
+   "pf_2c": 1.1443067720572526,
+   "n": 197,
+   "days": 29,
+   "p": 0.16932446709684779,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4463527413418893,
+   "pf_2c": 1.3085255392660378,
+   "n": 152,
+   "days": 29,
+   "p": 0.09411198342837111,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "mom5",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3979591836734697,
+   "pf_2c": 1.265038405109174,
+   "n": 159,
+   "days": 29,
+   "p": 0.1010256689219033,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "spread",
+    "low"
+   ],
+   "exit": "H",
+   "pf_1c": 1.4435219352193522,
+   "pf_2c": 1.305578093306288,
+   "n": 140,
+   "days": 29,
+   "p": 0.0930683693266099,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.3040524144625092,
+   "pf_2c": 1.1799263646550346,
+   "n": 161,
+   "days": 29,
+   "p": 0.15494626384507154,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "mom3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6365191361984177,
+   "pf_2c": 1.3956392887383575,
+   "n": 118,
+   "days": 28,
+   "p": 0.12589797554771381,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oi3",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.6399401325636092,
+   "pf_2c": 1.3988145639288738,
+   "n": 118,
+   "days": 28,
+   "p": 0.125547312660988,
+   "family": "OI (check against OICORE)"
+  },
+  {
+   "source": "archive",
+   "series": "KXXRP15M",
+   "bucket": 600,
+   "band": 18,
+   "side": "yes",
+   "filter": null,
+   "exit": "H",
+   "pf_1c": 1.6685909771220868,
+   "pf_2c": 1.4231583403895005,
+   "n": 120,
+   "days": 28,
+   "p": 0.11271878992213774,
+   "family": "none identified (lead-lag cannot be seen from this data; check by hand)"
+  },
+  {
+   "source": "archive",
+   "series": "KXZEC15M",
+   "bucket": 240,
+   "band": 17,
+   "side": "no",
+   "filter": [
+    "oi6",
+    "up"
+   ],
+   "exit": "H",
+   "pf_1c": 1.3169050313818296,
+   "pf_2c": 1.1943793911007023,
+   "n": 125,
+   "days": 29,
+   "p": 0.14360287789065415,
+   "family": "OI (check against OICORE)"
+  }
+ ]
+}
