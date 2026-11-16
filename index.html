@@ -924,7 +924,7 @@
 
   .kal-console [data-card="status"]{ align-self:stretch; }
   /* The Account result line lives inside the Account card (Nov 16, 2026, the owner: one module for Account and Account result), full width under the balance and the strategies table. The chart box has a fixed height instead of the chart's own shape (at full width that shape would be very tall); the drawing stretches to it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
-  .kal-console [data-card="account"] .kal-acct-pnl{ grid-column:1 / -1; grid-row:8; min-width:0; margin-top:6px; padding-top:16px; border-top:1px solid var(--border); }
+  .kal-console [data-card="account"] .kal-acct-pnl{ grid-column:1 / -1; grid-row:4; min-width:0; margin-top:6px; padding-top:16px; border-top:1px solid var(--border); }
   .kal-acct-pnl-h{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; } .kal-acct-pnl-h .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; margin:0; }
   .kal-acct-pnl .kal-plot{ aspect-ratio:auto !important; height:240px; } .kal-acct-pnl .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
   /* Each figure once: at rest the dollar result is the All strategies row's Result in the table above, so the chart's head shows only the percentage; the dollar figure appears while a finger or the pointer is on the line, with its date. */
@@ -1114,7 +1114,7 @@
   .kal-console [data-card="account"] .kal-tile b{ font:800 20px/1.15 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
   .kal-console [data-card="account"] .kal-tile .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:none; margin:0; }
   .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1; grid-row:auto; }   /* auto, not a fixed row 5 (Nov 2, 2026, the owner's screenshot): the Order switch row and the loading note both sat in row 5 and printed on top of each other; auto rows stack them under the Loss stop tile */
-  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:7; }
+  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
