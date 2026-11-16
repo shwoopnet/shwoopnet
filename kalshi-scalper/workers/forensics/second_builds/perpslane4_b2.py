@@ -170,11 +170,13 @@ def selftest():
     print("selftest ok")
 def main(a):
     if a[0] == "--selftest": return selftest()
-    mcar = int(a[0]); cd = collections.defaultdict(dict); fd = collections.defaultdict(dict)
+    mcar = int(a[0]); cd = collections.defaultdict(dict); fd = collections.defaultdict(dict); uu = collections.defaultdict(dict)
     for path in a[1:]:
         db = sqlite3.connect("file:%s?mode=ro" % path, uri=True); tabs = {r[0] for r in db.execute("select name from sqlite_master where type='table'")}
         if "candle" in tabs:
             for tk, e, b, k in db.execute("select ticker, end_ts, yes_bid, yes_ask from candle"): cd[tk].setdefault(e, (b, k))
+        if "underlying" in tabs:     # underlying(ticker, et_date 'YYYY-MM-DD', u_open, u_prev): the official open of the ET date and the previous trading day's official close, for A2 only
+            for tk, ds, uo, up in db.execute("select ticker, et_date, u_open, u_prev from underlying"): uu[tk].setdefault(datetime.date.fromisoformat(ds), (float(uo), float(up)))
         if "funding" in tabs:
             for tk, ts, r in db.execute("select ticker, ts, rate from funding"): fd[tk].setdefault(ts, float(r))
     pool = []
@@ -187,7 +189,7 @@ def main(a):
     print("names in the pool", len(pool), "of", len(cd), "with candles; ET weekdays", len(alldays), "trading days", trading_days, "rules", len(build_rules()), "m_total", mcar + 101, flush=True)
     res = []; skips = collections.Counter(); unb = collections.Counter()
     for rule in build_rules():
-        tr, cnt, ub = run_rule(rule, pool, days_by); skips.update(cnt); unb.update(ub); res.append((rule, evaluate(tr, trading_days)))
+        tr, cnt, ub = run_rule(rule, pool, days_by, uu); skips.update(cnt); unb.update(ub); res.append((rule, evaluate(tr, trading_days)))
     print("skips", dict(skips), "funding-unbooked names", len(unb))
     for fee in FEES:
         ps = [r[fee]["p"] for _, r in res if r[fee]["p"] is not None]; k = bh(ps, mcar + 101)
