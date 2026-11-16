@@ -12,6 +12,7 @@ KS = (1, 2); TS = (15, 30, 60)
 EXITS = [(kt, ks, t) for kt in KS for ks in KS for t in TS]
 FUND_HOLE = 26 * H
 r9 = lambda x: round(x, 9)
+CUTOFF = 1794873600          # 2026-11-17T00:00:00Z: forward days stay unread (R10)
 
 
 def et_end(L, hh, mm): return p.day_start_of_local(L) + hh * H + mm * 60          # the UTC instant of hh:mm ET on local ET date L
@@ -33,7 +34,7 @@ def trading_dates(data):
     for n in data:
         for t in data[n]:
             L = p.et_local_day(t)
-            if t == et_end(L, 9, 31): ds.add(L)
+            if t == et_end(L, 9, 31) and t < CUTOFF: ds.add(L)
     return sorted(ds)
 
 
@@ -85,7 +86,7 @@ def gap_entries(data, cls_bp, mode, names):
             a, b = s[e], s[et_end(Lp, 16, 0)]
             if not (usable(a) and usable(b)): sk["gap_missing"] += 1; continue
             g = p.mid(a) / p.mid(b) - 1
-            if not r9(abs(g)) >= r9(cls_bp / 10000): continue
+            if not r9(abs(g) * 1e4) >= cls_bp: continue
             up = g > 0
             long_ = up if mode == "follow" else not up
             out.append((n, e, "long" if long_ else "short"))
@@ -134,11 +135,12 @@ def carry_trades(data, funding, names, share, h):
         if len(set(x[0] for x in c)) < 3: continue
         M = len(c); k = math.ceil(M / 3) if share == "A" else math.ceil(M / 2)
         chosen += c[:k]
-    out, cnt = [], {"no_mark": 0, "blocked": 0, "funding_not_booked": 0}; last = {}
+    out, cnt = [], {"no_mark": 0, "blocked": 0, "funding_not_booked": 0, "window_dropped": 0}; last = {}
     for (n, T, e, rate) in sorted(chosen, key=lambda x: (x[2], x[0])):
         if n in last and e < last[n]: cnt["blocked"] += 1; continue
         s = data[n]; xt = T + 1800; a, b = s.get(e), s.get(xt)
         if not (usable(a) and usable(b)): cnt["no_mark"] += 1; continue
+        if e >= CUTOFF or xt >= CUTOFF: cnt["window_dropped"] += 1; continue
         long_ = rate < 0
         fill = a[1] * (1 + h) if long_ else a[0] * (1 - h); xp = b[0] * (1 - h) if long_ else b[1] * (1 + h)
         gross = xp / fill - 1 if long_ else (fill - xp) / fill
@@ -153,7 +155,7 @@ def carry_trades(data, funding, names, share, h):
 def rule_trades(data, funding, entries, ex, h):
     """entries: [(name, e, side)]; ex = (kt, ks, T). -> (trades, counts)"""
     kt, ks, T = ex
-    out, cnt = [], {"no_entry": 0, "blocked": 0, "no_vol": 0, "no_mark": 0, "funding_not_booked": 0}; last = {}; lastts = {n: max(data[n]) for n in data}
+    out, cnt = [], {"no_entry": 0, "blocked": 0, "no_vol": 0, "no_mark": 0, "funding_not_booked": 0, "window_dropped": 0}; last = {}; lastts = {n: max(data[n]) for n in data}
     for (n, e, side) in sorted(entries, key=lambda x: (x[1], x[0])):
         s = data[n]
         if not usable(s.get(e)): cnt["no_entry"] += 1; continue
@@ -162,7 +164,9 @@ def rule_trades(data, funding, entries, ex, h):
         if sg is None: cnt["no_vol"] += 1; continue
         r = run_exit(s, e, side, kt, ks, T, h, lastts[n], sg * math.sqrt(30))
         if r is None: cnt["no_mark"] += 1; continue
-        xt, fill, xp = r; long_ = side == "long"; last[n] = xt
+        xt, fill, xp = r; long_ = side == "long"
+        if e >= CUTOFF or xt >= CUTOFF: cnt["window_dropped"] += 1; continue
+        last[n] = xt
         gross = xp / fill - 1 if long_ else (fill - xp) / fill
         fd = fund_book(funding.get(n), e, xt, long_)
         t = {"name": n, "e": e, "exit_ts": xt, "side": side, "gross": gross, "funding": fd, "day": p.et_local_day(e)}
@@ -193,3 +197,46 @@ def gate(tr_lo, tr_hi, ndays):
     info = {"n": len(a), "per_day": len(a) / ndays, "pf_lo": pf([t["net"] for t in a]), "pf_hi": pf([t["net"] for t in b]), "net_hi": sum(t["net"] for t in b), "share": share}
     ok = (len(a) / ndays >= 3 and okpf(a, 1.3) and okpf(b, 1.0) and okpf(a1, 1.3) and okpf(a2, 1.3) and okpf(b1, 1.0) and okpf(b2, 1.0) and share <= 0.3 and info["net_hi"] > 0)
     return ok, info
+
+
+def trend_candidates(data, names, lookback, c, mode, sig=None):
+    """{name: [(e, side, u)]} candles in order that qualify (independent of any position); lookback L minutes, threshold c in u"""
+    days = set(trading_dates(data)); out = {}
+    for n in names:
+        s = data[n]; lst = []
+        for e in sorted(s):
+            L = p.et_local_day(e)
+            if L not in days or not (et_end(L, 10, 31) <= e <= et_end(L, 15, 30)) or not usable(s[e]): continue
+            lb = e - 60 * lookback
+            if not (usable(s.get(lb)) and p.et_local_day(lb) == L and lb >= et_end(L, 9, 31)): continue
+            if sig is not None and (n, e) in sig: sg = sig[(n, e)]
+            else:
+                sg = sigma(s, e)
+                if sig is not None: sig[(n, e)] = sg
+            if sg is None: continue
+            u = sg * math.sqrt(30); R = math.log(p.mid(s[e]) / p.mid(s[lb]))
+            if not abs(R) > c * u: continue
+            up = R > 0
+            lst.append((e, "long" if (up if mode == "trend" else not up) else "short", u))
+        out[n] = lst
+    return out
+
+
+def trend_trades(data, funding, cands, ex, h):
+    """cands from trend_candidates; ex = (kt, ks, T). The first qualifying candle at or after the name's previous exit end; a no-mark candle opens nothing."""
+    kt, ks, T = ex; out, cnt = [], {"no_mark": 0, "funding_not_booked": 0, "window_dropped": 0}
+    for n in sorted(cands):
+        s = data[n]; last_ts = max(s); free = -math.inf
+        for (e, side, u) in cands[n]:
+            if e < free: continue
+            r = run_exit(s, e, side, kt, ks, T, h, last_ts, u)
+            if r is None: cnt["no_mark"] += 1; continue
+            xt, fill, xp = r; long_ = side == "long"
+            if e >= CUTOFF or xt >= CUTOFF: cnt["window_dropped"] += 1; continue
+            free = xt; gross = xp / fill - 1 if long_ else (fill - xp) / fill
+            fd = fund_book(funding.get(n), e, xt, long_)
+            t = {"name": n, "e": e, "exit_ts": xt, "side": side, "gross": gross, "funding": fd, "day": p.et_local_day(e)}
+            if fd is None: cnt["funding_not_booked"] += 1
+            else: t["net"] = gross - 2 * TAKER - fd; t["net_maker"] = gross - 2 * MAKER - fd
+            out.append(t)
+    return out, cnt

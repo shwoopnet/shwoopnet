@@ -21,11 +21,19 @@ def signals(data, funding, names):
 
 
 def run(data, funding):
-    names = m.pool_names(data, funding); data = {n: data[n] for n in names}; nd = len(m.trading_dates(data)); lines = ["pool %s trading_days %d" % (",".join(names), nd), "m 122 + carried 102184 = 102306"]
+    names = m.pool_names(data, funding); data = {n: data[n] for n in names}; nd = len(m.trading_dates(data)); lines = ["pool %s trading_days %d" % (",".join(names), nd), "m 218 + carried 103444 = 103662"]
     for sname, entries in signals(data, funding, names):
         for ex in m.EXITS:
             lo = m.rule_trades(data, funding, entries, ex, m.HS[0]); hi = m.rule_trades(data, funding, entries, ex, m.HS[1]); ok, info = m.gate(lo[0], hi[0], nd)
             lines.append(fmt_rule("%s_k%d_%d_T%d" % (sname, *ex), lo, hi, ok, info))
+    sig = {}
+    for L in (30, 60):
+        for c in (1, 2):
+            for mode in ("trend", "rev"):
+                cands = m.trend_candidates(data, names, L, c, "trend" if mode == "trend" else "rev", sig)
+                for ex in m.EXITS:
+                    lo = m.trend_trades(data, funding, cands, ex, m.HS[0]); hi = m.trend_trades(data, funding, cands, ex, m.HS[1]); ok, info = m.gate(lo[0], hi[0], nd)
+                    lines.append(fmt_rule("tr%d_c%d_%s_k%d_%d_T%d" % (L, c, mode, *ex), lo, hi, ok, info))
     for share in ("A", "B"):
         lo = m.carry_trades(data, funding, names, share, m.HS[0]); hi = m.carry_trades(data, funding, names, share, m.HS[1]); ok, info = m.gate(lo[0], hi[0], nd)
         lines.append(fmt_rule("carry%s" % share, lo, hi, ok, info))
