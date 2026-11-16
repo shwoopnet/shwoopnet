@@ -1,0 +1,87 @@
+{
+ "id": "MENTBREADTH",
+ "desk": "Idea Desk C",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/idea_desk_c/allkalshi/mentbreadth/MENTBREADTH_CARD.md",
+ "needs_new_code": [
+  "engine/mentbreadth.py (plugin, first audit)",
+  "engine/family_run.py (generic runner, first audit)"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "MENT1",
+   "CAL1",
+   "FLB1",
+   "LATEWORD",
+   "MENTTWIN"
+  ],
+  "declined_list_rows_checked": [
+   "favourite-and-hold",
+   "cheap-side-late",
+   "calibration sweeps (one conditioned rule, not a sweep)"
+  ],
+  "difference": "conditions on event breadth (words listed by the decision time), a field no card has read",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "deskc_kp_load.py",
+  "loader_sha256": "c76c7f7d03aaec243f0f92fe465382a4a4d292f315c5f27e78e139d22e716fea",
+  "extracts": [
+   "kalshi-pull-data: MENTDRIFT_LISTS_A/2026-11-15T1458Z_43727241819",
+   "MENTBREADTH_CANDLES_P1 (to be pulled)"
+  ],
+  "ticker_wall": [
+   "KXTRUMPMENTION",
+   "KXTRUMPMENTIONB"
+  ],
+  "window": {
+   "first_occurrence": "2026-04-17T00:00:00Z",
+   "last_occurrence_exclusive": "2026-08-06T00:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B, 2026-11-16 (no calibration hold on this block; shown by TRUMPTOPIC1, development only)",
+  "independence_note": "the same development events as TRUMPTOPIC1's fit thirds, LATEWORD and MENTTWIN"
+ },
+ "split": {
+  "mode": "fixed_dates",
+  "search_last_occurrence_exclusive": "2026-08-06T00:00:00Z",
+  "validate_first_occurrence": "2026-10-03T00:00:00Z",
+  "validate_last_occurrence_exclusive": "2026-11-05T00:00:00Z"
+ },
+ "event": {
+  "scorer_plugin": "mentbreadth.py",
+  "scorer_plugin_sha256": "5e4d0b5a72544d3dd32cb03601dc7d2200beab5cd6ee8184d94e1004efadd361",
+  "decision_instant": "the word's open_time + 30 min",
+  "signal_threshold_breadth": 27,
+  "entry_rule": "buy NO at 1 - YES bid, NO ask 0.30 to 0.70, md5 sample of 460 wide words",
+  "exit": "H"
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ],
+  "haircuts_stress": [],
+  "fee_taker": null,
+  "fee_maker": null
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05
+ },
+ "tries": {
+  "rules_this_spec": 1,
+  "prior_m": "from the TALLY"
+ },
+ "prediction": "120 to 200 trades in band; PF at 1c 0.9 to 1.25; P(pass) about 10%",
+ "kill": "PF at 1c under 1.0 on the first read, or under 100 trades",
+ "kill_fast": true,
+ "outputs": {
+  "survivor_line": "market, rule, PF 1c and 2c, n, days",
+  "family_flag": "none"
+ }
+}

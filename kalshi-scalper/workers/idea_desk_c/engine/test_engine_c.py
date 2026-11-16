@@ -5,6 +5,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import deskc_kp_load as KL
 import menttwin as P
 import menttwin_run as R
+import mentbreadth as MB
+import family_run as FR
 
 iso = lambda ts: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts))
 c = lambda ts, yb, ya: {"end_period_ts": ts, "yes_bid": {"close_dollars": str(yb)}, "yes_ask": {"close_dollars": str(ya)}}
@@ -78,6 +80,32 @@ class Twin(unittest.TestCase):
         # 10 contracts at .42 (1c): cost 4.20 + fee ceil(0.07*10*.42*.58*100)/100 = ceil(17.052)/100 = .18 -> 4.38; won 10 -> +5.62
         self.assertAlmostEqual(o["1c"]["net"], 5.62)
         self.assertEqual(o["bar"], "no evidence at n = 1")
+
+
+class Breadth(unittest.TestCase):
+    def test_hand(self):
+        root = tempfile.mkdtemp()
+        O = KL.iso("2026-06-10T18:00:00")
+        op = O - 20 * 3600
+        D = op + 1800
+        ms = [{"ticker": "KXTRUMPMENTION-26JUN10-W%02d" % i, "event_ticker": "WIDE", "occurrence_datetime": iso(O), "close_time": iso(O + 3600),
+               "open_time": iso(op), "yes_sub_title": "w%d" % i, "title": "", "result": "no" if i % 2 == 0 else "yes"} for i in range(27)]
+        ms += [{"ticker": "KXTRUMPMENTION-26JUN11-N%02d" % i, "event_ticker": "NARROW", "occurrence_datetime": iso(O + 86400), "close_time": iso(O + 90000),
+                "open_time": iso(op), "yes_sub_title": "n%d" % i, "title": "", "result": "no"} for i in range(5)]
+        put(root, "MENTDRIFT_LISTS_A", [({"id": "hist_KXTRUMPMENTION", "page": 1}, {"markets": ms, "cursor": ""})])
+        ws, nwide = MB.build(root)
+        self.assertEqual(nwide, 27)                                   # the narrow event (5 words) is never wide
+        put(root, "MENTBREADTH_CANDLES_P1", [({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-W00/candlesticks"}, {"candlesticks": [c(D, .45, .47)]}),
+                                             ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-W01/candlesticks"}, {"candlesticks": [c(D, .45, .47)]}),
+                                             ({"path": "/historical/markets/KXTRUMPMENTION-26JUN10-W02/candlesticks"}, {"candlesticks": [c(D, .10, .12)]})])
+        es, why, _ = MB.entries(root)
+        self.assertEqual(why, {"ok": 2, "out_of_band": 1, "no_two_sided_quote": 24})
+        self.assertEqual(sorted((e["id"][-3:], e["ask"], e["result"]) for e in es), [("W00", 0.55, "no"), ("W01", 0.55, "yes")])
+        with contextlib.redirect_stdout(io.StringIO()):
+            o = FR.main(root, "mentbreadth")
+        # 1c: paid .56 x10 = 5.60, fee ceil(0.07*10*.56*.44*100)/100 = ceil(17.248)/100 = .18 -> 5.78; won +4.22, lost -5.78; net -1.56
+        self.assertAlmostEqual(o["1c"]["net"], -1.56)
+        self.assertTrue(o["kill_fast"])
 
 
 if __name__ == "__main__":
