@@ -1728,3 +1728,7 @@ A second ENGINE1 line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`, separate
 ## Held-out log: ENGINE1 second-build reader (Nov 16, 2026, Auditor B's allow line)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Forensics' independent second-build reader `heldout_read_b2.py` (sha256 1b1228ec..., commit 369ca17f on `claude/forensics-desk`; I checked the file's sha256 before merging) and the ENGINE1 extract it reads. The reader needs the line to carry its file name, its own sha256 and both extract hashes, and reads the extract only after Desk A's print file is passed. Docs only.
+
+## Held-out log: PERPSLANE4 reader (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the Testing Desk's PERPSLANE4 reader `lane4_load.py` (sha256 a4790480...) and its file manifest `LANE4_FILES_MANIFEST.txt` (sha256 1b46f85d...; 160 perp-data files, 2026-09-10 to 2026-11-15). I checked the loader, manifest and spec sha256 against commit b02d24ecc on `claude/testing-desk` before merging. Docs only.
