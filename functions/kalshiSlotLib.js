@@ -341,12 +341,13 @@ const OIREL1_ENTRY = Object.freeze({
   killRules: Object.freeze({ maxConsecutiveLosses: 30, minNet: Object.freeze({ afterFills: 5, net: -18 }) }),
   forwardReadDate: "2026-12-01", reviewedAt: "2026-11-15",
 });
+// Streak kill 3 (Nov 16, 2026, the Risk Analyst under the owner's risk grant): a favourite's loss costs about 30 wins, so 30 in a row was far too loose; 3 is the old XRPYES10 line.
 const XRPFAV10_ENTRY = Object.freeze({
   id: "XRPFAV10", readme: "kalshi-scalper/workers/XRPFAV10_SHADOW_SPEC_NOV15.md", series: Object.freeze(["KXXRP15M"]),
   entry: Object.freeze({ sideRule: "favourite", priceMin: 0.88, priceMax: 0.92, leftMaxSec: 640, leftMinSec: 570 }),
   exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 3,
   scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
-  killRules: Object.freeze({ maxConsecutiveLosses: 30, minNet: Object.freeze({ afterFills: 5, net: -18 }) }),
+  killRules: Object.freeze({ maxConsecutiveLosses: 3, minNet: Object.freeze({ afterFills: 5, net: -18 }) }),
   forwardReadDate: "2026-12-13", reviewedAt: "2026-11-15",
 });
 const SLOT_STRATEGIES = Object.freeze(SLOT_STRATEGIES_BASE.concat([OIREL1_ENTRY, XRPFAV10_ENTRY], SPXOI1_ENTRY && validateSlotStrategy(SPXOI1_ENTRY).ok ? [SPXOI1_ENTRY] : []));

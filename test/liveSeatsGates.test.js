@@ -20,11 +20,11 @@ const tick = () => new Promise((r) => setImmediate(r));
 const gates = {};
 const OIREL = slot.SLOT_STRATEGIES.find((s) => s.id === 'OIREL1'), XRPF = slot.SLOT_STRATEGIES.find((s) => s.id === 'XRPFAV10');
 
-gates['LS1 both seats are registered exactly as the owner ordered: frozen, valid, 3 contracts, held to settlement, net kill -$18 after 5 fills, 30 losses in a row, $3 an order and $9 a day'] = () => {
+gates['LS1 both seats are registered exactly as the owner ordered: frozen, valid, 3 contracts, held to settlement, net kill -$18 after 5 fills, 30 losses in a row (3 for XRPFAV10, a favourite), $3 an order and $9 a day'] = () => {
   for (const s of [OIREL, XRPF]) {
     assert.ok(s && Object.isFrozen(s) && Object.isFrozen(s.entry) && Object.isFrozen(s.killRules), s && s.id);
     assert.deepStrictEqual(slot.validateSlotStrategy(s).errors, []);
-    assert.deepStrictEqual([s.contractsPerOrder, s.exit, s.killRules.maxConsecutiveLosses, s.killRules.minNet, s.reviewedAt], [3, { holdToSettle: true }, 30, { afterFills: 5, net: -18 }, '2026-11-15']);
+    assert.deepStrictEqual([s.contractsPerOrder, s.exit, s.killRules.maxConsecutiveLosses, s.killRules.minNet, s.reviewedAt], [3, { holdToSettle: true }, s.id === 'XRPFAV10' ? 3 : 30, { afterFills: 5, net: -18 }, '2026-11-15']);
     assert.ok(slot.SLOT_HOLD_ALLOWED.includes(s.id));
     assert.deepStrictEqual(JSON.parse(JSON.stringify(slot.SLOT_SEAT_CAPS[s.id])), { perOrder: 3, daily: 9 });
     assert.ok(fs.existsSync(path.join(root, s.readme.split('#')[0])), 'its pre-registration is in the repo');
