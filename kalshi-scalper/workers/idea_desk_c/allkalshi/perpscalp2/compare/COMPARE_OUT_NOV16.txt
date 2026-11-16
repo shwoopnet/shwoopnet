@@ -1,0 +1,4 @@
+my counts: {'names_loaded': 3, 'dropped_short_history': [], 'valid_regular_candles': {'KXAAA': 4452, 'KXBBB': 4452, 'KXCCC': 4452}, 'files_read': 2, 'ticks': {'KXAAA': 0.01, 'KXBBB': 0.01, 'KXCCC': 0.01}, 'no_exit_candle': 0, 'h16_rows_dropped': 0}
+my ticks: {'KXAAA': 0.01, 'KXBBB': 0.01, 'KXCCC': 0.01}  their ticks: {'KXAAA': 0.01, 'KXBBB': 0.01, 'KXCCC': 0.01}
+lines compared: 1008 with trades: 564 of which cells x columns in first build: 1008
+differences: 0
