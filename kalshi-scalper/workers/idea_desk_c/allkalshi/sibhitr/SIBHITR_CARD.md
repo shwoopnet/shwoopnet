@@ -1,6 +1,6 @@
 # SIBHIT-R: fast NBA games, sell the overs (Idea Desk C, Nov 16, 2026, ~15:25Z; registered on the Head of R&D's GO of 15:19Z, BEFORE any further read)
 
-**Why this exists, said plainly.** SIBHIT (registered Nov 15, run once Nov 16, print 3745490b) failed on development, but in the reverse direction from the one registered. In games with a high share of rungs already hit, buying YES lost heavily; in low-share games, buying NO lost. SIBHIT-R is the reverse rule. It was chosen AFTER seeing the development result, so the development data is spent for it and proves nothing. It is scored ONCE on a window no one has read.
+**Why this exists, said plainly.** SIBHIT (registered Nov 15, run once Nov 16, print 3745490b) failed on development, but in the reverse direction from the one registered. In games with a high share of rungs already hit, buying YES lost heavily; in low-share games, buying NO lost. SIBHIT-R is the reverse rule. It was chosen AFTER seeing the development result, so the development data is spent for it and proves nothing. It is scored ONCE on a window SIBHIT never read (but see Amendment 3: the window's results were read by PROPS1, for a different purpose).
 
 **Mechanism (stated before the new read).**
 - **Fast games:** a fast-scoring game late in the fourth quarter is more often a blowout. Starters are rested, so open player-points rungs ("X or more") are reached less often than their prices imply.
@@ -58,3 +58,9 @@
 
 - **No ticker exclusion.** Because the 1,099-ticker list cannot be recovered, SIBHIT-R reads every market in the window. The disclosure: PROPS1 read pre-game candles only (tip - 2 h to tip), for a cheap-side test, on at most about 12% of the window's markets. SIBHIT-R reads the late fourth-quarter minute. It is a different question at a different minute, so the overlap cannot have selected SIBHIT-R's result.
 - **On a pass:** the forward read on the 2026-11-13 to before 2026-12-04 block (after Dec 4) is still required before any shadow, beside the second build (16b) and the Verification Analyst.
+
+## Amendment 3 (Nov 16, 2026, ~15:30Z; Auditor B's condition (1); written before any pull)
+
+- **The window is not untouched.** PROPS1's code read the Kalshi RESULTS of all its TEST markets, 55,098 with a model probability, for model calibration. That covers every KXNBAPTS 2025-26 market in this window. It also read pre-game candles of up to 1,099 sampled markets.
+- **The true statement:** SIBHIT's development data is spent for this rule, and the window's results were read by PROPS1 for a different purpose (a cheap-side calibration). No SIBHIT or SIBHIT-R rule was ever applied to it.
+- **PROPS1 is closed** (the Head of R&D, Nov 16, 15:23Z). The Head chose to accept the 1,099 sampled markets as read, disclosed, with no exclusion (choice (A), 15:24Z).
