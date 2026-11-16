@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """PERPSLANE4 INDEPENDENT SECOND BUILD (Forensics desk, Nov 16, 2026). Written from PERPSLANE4_DEFINITIONS.md, specs/PERPSLANE4.spec.json (sha256 02bd15fd...) and LANE4_HAND_CASE.md on claude/testing-desk (a5bc1912b) ONLY. The Testing Desk's plugin, loader and prints were not opened before this file was committed.
-Declared readings (each can move a count): (R1) data start of a name = its first candle end; an entry or exit end at or before it is 'boundary'. (R2) A2 needs the underlyings u[name][ET date] = (official open, previous close); this build takes them as an argument and has none (no Databento read), so A2 prints 'no underlying' skips only. (R3) trade day = the ET date of the entry end; trading days = ET dates before the boundary on which at least one POOL name has a usable candle ending 09:31 ET. (R4) the gate and BH are per fee (0.0012 and 0.0005 a side) and each uses that fee's own nets; the day z uses the h 0.0002 net of that fee. (R5) the one-position check uses the previous TAKEN trade (one that passed marks, funding and boundary) of that rule and name. (R6) ET midday offset: EDT (UTC-4) for ET dates up to 2026-10-31, EST (UTC-5) from 2026-11-01 (the change is 2026-11-01T06:00Z).
+Declared readings (each can move a count): (R1, superseded by the Nov 16 20:56Z definitions) no data-start rule: the boundary is only the cut. (R2) A2 needs the underlyings u[name][ET date] = (official open, previous close); this build takes them as an argument and has none (no Databento read), so A2 prints 'no underlying' skips only. (R3) trade day = the ET date of the entry end; trading days = ET dates before the boundary on which at least one POOL name has a usable candle ending 09:31 ET. (R4) the gate and BH are per fee (0.0012 and 0.0005 a side) and each uses that fee's own nets; the day z uses the h 0.0002 net of that fee. (R5) TAKEN = both candles usable; a trade dropped later for the boundary or for unbooked funding still occupies the position. Rule C: T = P + 86400 per print P. Closures 2026-11-26 and 2026-12-25 are no session day; 2026-11-27 and 2026-12-24 have no B2 or B3. (R6) ET midday offset: EDT (UTC-4) for ET dates up to 2026-10-31, EST (UTC-5) from 2026-11-01 (the change is 2026-11-01T06:00Z).
 usage: python3 -I perpslane4_b2.py --selftest | python3 -I perpslane4_b2.py <m_carried> <extract.sqlite> [<extract.sqlite> ...]"""
 import sys, os, math, sqlite3, collections, calendar, datetime, itertools
 BOUNDARY = 1794873600; H = (0.0002, 0.0005); FEES = (0.0012, 0.0005)
@@ -12,7 +12,8 @@ def et_date(ts):
         d = datetime.datetime.fromtimestamp(ts - off * 3600, datetime.timezone.utc).date()
         if et_offset(d) == off: return d
     return datetime.datetime.fromtimestamp(ts - 5 * 3600, datetime.timezone.utc).date()
-def is_wd(d): return d.weekday() < 5
+CLOSED = {datetime.date(2026, 11, 26), datetime.date(2026, 12, 25)}; EARLY = {datetime.date(2026, 11, 27), datetime.date(2026, 12, 24)}
+def is_wd(d): return d.weekday() < 5 and d not in CLOSED
 def next_wd(d):
     d = d + datetime.timedelta(days=1)
     while not is_wd(d): d += datetime.timedelta(days=1)
@@ -79,6 +80,7 @@ def candidates(rule, nm, days, u=None):
             out.append((eN, x, dirside(m > 0, mode), L, qN, qx, None if usable(qx) else "no mark"))
         elif kind == "B2":
             _, thr, mode, ex = rule
+            if L in EARLY: continue
             q0, q1 = q(L, 15, 0), q(L, 15, 30)
             if not (usable(q0) and usable(q1)): continue
             m = mid(q1) / mid(q0) - 1
@@ -86,12 +88,14 @@ def candidates(rule, nm, days, u=None):
             x = et_end(L, 16, 1) if ex == "T1601" else et_end(next_wd(L), 9, 31); qx = c.get(x)
             out.append((et_end(L, 15, 30), x, dirside(m > 0, mode), L, q1, qx, None if usable(qx) else "no mark"))
         elif kind == "B3":
+            if L in EARLY: continue
             e, x = et_end(L, 15, 30), et_end(L, 16, 1); qe, qx = c.get(e), c.get(x)
             out.append((e, x, rule[1], L, qe, qx, None if usable(qe) and usable(qx) else "no mark"))
     return out
 def candidates_c(rule, nm):
     _, xm, ym, sr = rule; out = []
-    for T in nm.ts:
+    for P in nm.ts:
+        T = P + 86400                       # the SCHEDULE: the previous print's timestamp plus 24 h, never the day's own print
         e, x = T - xm * 60, T + ym * 60
         if sr == "RECEIVE":
             prior = [t for t in nm.ts if t < e]
@@ -112,10 +116,10 @@ def run_rule(rule, names, days_by, u=None):
         for (e, x, side, L, qe, qx, why) in sorted(cands, key=lambda t: t[0]):
             if last_exit is not None and e < last_exit: cnt["cooldown"] += 1; continue
             if why: cnt[why] += 1; continue
+            last_exit = x                   # TAKEN once both candles are usable: a trade dropped below still occupied the position
+            if e >= BOUNDARY or x >= BOUNDARY: cnt["boundary"] += 1; continue
             ok, f = booked(nm, e, x)
             if not ok: unb[nm.tk] += 1; cnt["funding unbooked"] += 1; continue
-            if nm.start is not None and e <= nm.start or e >= BOUNDARY or x >= BOUNDARY: cnt["boundary"] += 1; continue
-            last_exit = x
             for h in H:
                 g = gross(qe, qx, side, h); fl = f if side == "long" else -f
                 for fee in FEES: trades[(h, fee)].append((e, nm.tk, L, g - 2 * fee - fl))
@@ -186,6 +190,8 @@ def main(a):
     alldays = sorted({et_date(e) for nm in pool for e in nm.c if e < BOUNDARY and is_wd(et_date(e))})
     days_by = {nm.tk: [d for d in alldays] for nm in pool}
     trading_days = len({et_date(e) for nm in pool for e in nm.c if e < BOUNDARY and is_wd(et_date(e)) and e == et_end(et_date(e), 9, 31) and usable(nm.c[e])})
+    sched_diff = sum(1 for nm in pool for a_, b_ in zip(nm.ts, nm.ts[1:]) if b_ != a_ + 86400)
+    print("days where the next actual print differs from the scheduled T:", sched_diff)
     print("names in the pool", len(pool), "of", len(cd), "with candles; ET weekdays", len(alldays), "trading days", trading_days, "rules", len(build_rules()), "m_total", mcar + 101, flush=True)
     res = []; skips = collections.Counter(); unb = collections.Counter()
     for rule in build_rules():
