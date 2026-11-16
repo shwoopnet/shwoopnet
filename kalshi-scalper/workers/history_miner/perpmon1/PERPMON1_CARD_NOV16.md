@@ -13,3 +13,6 @@ Rule (one try):
 - Counterparty and prediction: the few takers active while the perp reopens overpay for weekend news; the move partly reverses during Monday's cash session. Prediction: profit factor after cost >= 1.3, and positive on at least 5 of the 8 Mondays.
 - Bar at the read (one read only): n >= 100 trades, PF after cost >= 1.3, PF of the first 4 Mondays and of the last 4 Mondays each >= 1.0, day-clustered z (per-Monday mean over its standard error, 8 dates) >= 2.0, and a Bonferroni-Holm pass inside the perps family as the Head keeps it. Under 100 trades: "no evidence at n = x". Kill: PF after cost under 1.0.
 - Nothing is read before 2027-01-04 except the ticker list (no price). No interim look.
+
+## Amendment 1 (2026-11-16 ~16:15Z, the Head 15:29Z, before any read)
+Costs now match the perps grid, replacing the 0.10 percent round trip: taker 12 bps a side and maker 5 bps a side, both printed and both ASSUMED until Kalshi's fee page is read; plus a per-fill haircut ladder of 0.02 percent and 0.05 percent on each leg. Every figure is printed at the four combinations (taker or maker, 0.02 or 0.05 percent). The bar is judged at taker with the 0.05 percent haircut; a rule that clears only at maker is flagged, not passed. Everything else stands.
