@@ -304,3 +304,5 @@ A few tries sit in the README but not in the harness sum (rows 64: 55 tries afte
 - Verdict words are the sources' own. "No survivor" is used where a search closed with nothing frozen and the source gives no single verdict word.
 
 **Nov 13 additions (Forensics, DEFLATION_ADDITIONS_NOV13.md on claude/forensics-desk):** 11 tries (rows above, each checked against its card file). The one-sided bar stays 5.46: N 2,113,011 to 2,113,449 gives z 5.4611; it would move only past about 2,160,300.
+
+**Nov 14 to 16 additions (Head of R&D, 2026-11-16, arithmetic from Auditor B's records of the prints):** ENGINE1 binaries, one pass (19 series x 123,552 rules, counted once) 2,347,488; perps (rule, group) pairs: PERPGEN NONCRYPTO 100,000, perps passes 1 and 2 2,184, pass 3 1,260, ENGPERPS_POOL1 218 = 103,662; ADJWIN1 22; ENGINE1 batch B registered, new tries 1,725,984 (counted at registration, ruling 5); cross-market OIREL and XRPFAV10 36; FAV10-X 18; MENTBREADTH 1. N 2,113,449 to 6,290,660. Every print of 2026-11-16 carries m_carried = 6,290,660 plus its own new rules (NBALADDER 624, NBAREB 624, NBATOTAL 520, SIBHIT-R arms, ETHLATE1 96: added when they print).
