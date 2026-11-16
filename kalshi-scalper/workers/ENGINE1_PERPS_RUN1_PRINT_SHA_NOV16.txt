@@ -1,0 +1,2 @@
+ENGINE1 perps block run (SPY and QQQ, owner priority; plumbing and counts read) print sha256 (committed before reading): fa23156ca379d2e15d170fb344d8f381d186745b36163c1ebefbf588fba701a2
+files: perps driver f849a002edd7dcd4, runner fdfe4df0c6bc1a68 (5583dd1d5), split c1e6f3d9bcb1c239, loader 850ac0e81ba364fe (B1); archive extract opened and ignored.
