@@ -82,7 +82,9 @@ def load(path):
     with open(path, "rb") as fh: sha = hashlib.sha256(fh.read()).hexdigest()
     db = sqlite3.connect("file:%s?mode=ro" % path, uri=True)
     allm = [m for m in db.execute("select ticker, series, close_ts, result, strike from market") if m[1] in NC15]
-    ms = [m for m in allm if m[2] < CUT_TS]; global CUT_DROPPED; CUT_DROPPED = len(allm) - len(ms)
+    late = [m for m in allm if m[2] >= CUT_TS]
+    if late: raise SystemExit("REFUSED: %d selected markets close at or after the 2026-10-03T16:00Z cut; close_ts min %d max %d" % (len(late), min(m[2] for m in allm), max(m[2] for m in allm)))
+    ms = allm; global CUT_DROPPED; CUT_DROPPED = 0
     close_of = {m[0]: m[2] for m in ms}; cands, dropped = {}, 0
     for tk, end, bid, ask in db.execute("select ticker, end_ts, bid_c, ask_c from candle"):
         if tk not in close_of: continue
@@ -93,7 +95,7 @@ def load(path):
 
 def main(path):
     sha, ms, cands, dropped = load(path)
-    print("GAPFILL1 extract sha256", sha, "markets", len(ms), "series", len(set(m[1] for m in ms)), "candles after close dropped", dropped, "markets dropped by the 2026-10-03T16:00Z cut", CUT_DROPPED)
+    print("GAPFILL1 extract sha256", sha, "markets", len(ms), "series", len(set(m[1] for m in ms)), "candles after close dropped", dropped, "close_ts min", min(m[2] for m in ms), "max", max(m[2] for m in ms), "(refused if any >= %d)" % CUT_TS)
     tr, sk = trades(ms, cands)
     bs = {h: block(tr, h) for h in HAIRCUTS}
     print(f"n {len(tr)} skips {sk}")

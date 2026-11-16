@@ -29,5 +29,8 @@ f = os.path.join(tempfile.mkdtemp(), "t.sqlite"); db = sqlite3.connect(f)
 db.execute("create table market(ticker,series,open_ts,close_ts,result,strike,src)"); db.execute("create table candle(ticker,end_ts,bid_c,ask_c,volume,oi)")
 for r in (("KXGOLD15M-A", "KXGOLD15M", 0, 1791043199, "yes", 1.0), ("KXGOLD15M-B", "KXGOLD15M", 0, 1791043200, "yes", 1.0), ("KXBTC15M-C", "KXBTC15M", 0, 900, "yes", 1.0)): db.execute("insert into market values(?,?,?,?,?,?,'x')", r)
 db.execute("insert into candle values('KXGOLD15M-A', 1791043300, .4, .5, 1, 1)"); db.commit(); db.close()
-sha, ms, cd, dr = g.load(f); assert [m[0] for m in ms] == ["KXGOLD15M-A"] and g.CUT_DROPPED == 1 and dr == 1 and g.CUT_TS == 1791043200
+try: g.load(f); raise AssertionError("must refuse")
+except SystemExit as e: assert "REFUSED" in str(e) and "max 1791043200" in str(e) and "min 1791043199" in str(e), str(e)
+db = sqlite3.connect(f); db.execute("delete from market where ticker='KXGOLD15M-B'"); db.commit(); db.close()
+sha, ms, cd, dr = g.load(f); assert [m[0] for m in ms] == ["KXGOLD15M-A"] and dr == 1 and g.CUT_TS == 1791043200
 print("gapfill1 tests passed")
