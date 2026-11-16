@@ -1,0 +1,122 @@
+{
+ "counts": {
+  "files read": 84,
+  "rows of other tickers (dropped)": 692
+ },
+ "file_sha256": "3d357639395c8abca6cc91e1e8cbf676181fd9de3c55317b884818c7d08dfe5d",
+ "first": 1794459600,
+ "last": 1794776400,
+ "most_common_gaps_seconds": {
+  "KXBNBPERP": [
+   [
+    28800,
+    11
+   ]
+  ],
+  "KXBTCPERP": [
+   [
+    28800,
+    11
+   ]
+  ],
+  "KXHYPEPERP": [
+   [
+    28800,
+    11
+   ]
+  ]
+ },
+ "prints_per_ticker": {
+  "KXBNBPERP": 12,
+  "KXBTCPERP": 12,
+  "KXHYPEPERP": 12
+ },
+ "rows": 36,
+ "source_files": [
+  "2026-09-02.only.csv.gz",
+  "2026-09-03.only.csv.gz",
+  "2026-09-04.only.csv.gz",
+  "2026-09-05.only.csv.gz",
+  "2026-09-06.only.csv.gz",
+  "2026-09-07.only.csv.gz",
+  "2026-09-08.only.csv.gz",
+  "2026-09-09.only.csv.gz",
+  "2026-09-10.only.csv.gz",
+  "2026-09-11.only.csv.gz",
+  "2026-09-12.only.csv.gz",
+  "2026-09-13.only.csv.gz",
+  "2026-09-14.only.csv.gz",
+  "2026-09-15.only.csv.gz",
+  "2026-09-16.only.csv.gz",
+  "2026-09-17.only.csv.gz",
+  "2026-09-18.only.csv.gz",
+  "2026-09-19.only.csv.gz",
+  "2026-09-20.only.csv.gz",
+  "2026-09-21.only.csv.gz",
+  "2026-09-22.only.csv.gz",
+  "2026-09-23.only.csv.gz",
+  "2026-09-24.only.csv.gz",
+  "2026-09-25.only.csv.gz",
+  "2026-09-26.only.csv.gz",
+  "2026-09-27.only.csv.gz",
+  "2026-09-28.only.csv.gz",
+  "2026-09-29.only.csv.gz",
+  "2026-09-30.only.csv.gz",
+  "2026-10-01.only.csv.gz",
+  "2026-10-02.only.csv.gz",
+  "2026-10-03.only.csv.gz",
+  "2026-10-04.only.csv.gz",
+  "2026-10-05.only.csv.gz",
+  "2026-10-06.only.csv.gz",
+  "2026-10-07.only.csv.gz",
+  "2026-10-08.only.csv.gz",
+  "2026-10-09.only.csv.gz",
+  "2026-10-10.only.csv.gz",
+  "2026-10-11.only.csv.gz",
+  "2026-10-12.only.csv.gz",
+  "2026-10-13.only.csv.gz",
+  "2026-10-14.only.csv.gz",
+  "2026-10-15.only.csv.gz",
+  "2026-10-16.only.csv.gz",
+  "2026-10-17.only.csv.gz",
+  "2026-10-18.only.csv.gz",
+  "2026-10-19.only.csv.gz",
+  "2026-10-20.only.csv.gz",
+  "2026-10-21.only.csv.gz",
+  "2026-10-22.only.csv.gz",
+  "2026-10-23.only.csv.gz",
+  "2026-10-24.only.csv.gz",
+  "2026-10-25.only.csv.gz",
+  "2026-10-26.only.csv.gz",
+  "2026-10-27.only.csv.gz",
+  "2026-10-28.only.csv.gz",
+  "2026-10-29.only.csv.gz",
+  "2026-10-30.only.csv.gz",
+  "2026-10-31.only.csv.gz",
+  "2026-11-01.only.csv.gz",
+  "2026-11-02.only.csv.gz",
+  "2026-11-03.only.csv.gz",
+  "2026-11-04.only.csv.gz",
+  "2026-11-05.only.csv.gz",
+  "2026-11-06.csv.gz",
+  "2026-11-06.only.csv.gz",
+  "2026-11-07.only.csv.gz",
+  "2026-11-08.csv.gz",
+  "2026-11-08.only.csv.gz",
+  "2026-11-09.csv.gz",
+  "2026-11-09.only.csv.gz",
+  "2026-11-10.csv.gz",
+  "2026-11-10.only.csv.gz",
+  "2026-11-11.csv.gz",
+  "2026-11-11.only.csv.gz",
+  "2026-11-12.csv.gz",
+  "2026-11-12.only.csv.gz",
+  "2026-11-13.csv.gz",
+  "2026-11-13.only.csv.gz",
+  "2026-11-14.csv.gz",
+  "2026-11-14.only.csv.gz",
+  "2026-11-15.csv.gz",
+  "2026-11-15.only.csv.gz"
+ ],
+ "tickers_with_prints": 3
+}
