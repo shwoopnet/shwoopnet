@@ -22,7 +22,7 @@ gates.Y2 = () => {
   assert.ok(/def\.indexOf\(k\) > -1/.test(iife), 'an unknown card name in a saved order is ignored');
   assert.ok(/def\.forEach\(function\(k, i\)\{ if\(want\.indexOf\(k\) < 0\)\{ var prev = i > 0 \? want\.indexOf\(def\[i - 1\]\) : -1; want\.splice\(prev \+ 1, 0, k\); \}/.test(iife), 'a card the saved order does not mention keeps its place: right after the card before it by default, not at the end');
   assert.ok(!/OPTIONAL = \[\['strategies'/.test(html), 'Strategies is part of the Account card now, so it is not a hideable card of its own');
-  assert.ok(/var CARDS = \['account', 'status', 'positions', 'trades'\];/.test(html), 'account (with the result line inside it), status, positions, trades is the default order');
+  assert.ok(/var CARDS = \['account', 'positions', 'trades'\];/.test(html), 'account (with the result line inside it), positions, trades is the default order (Bot status removed Nov 16, 2026)');
   assert.ok(!/OPTIONAL = \[[^\]]*'account'/.test(html), 'the account card still cannot be hidden, only moved');
 };
 
@@ -48,10 +48,8 @@ gates.Y4 = () => {
 // Console layout: a rail (account, positions) beside one main column (books, the bot card with its performance, trades, detail, log), books tiles on top.
 // Y5b: the owner could not move the Strategies card ("it doesnt unlock", Oct 30, 2026) because it sat outside the layout. It is a layout card now, and its render must never override the Layout menu's hide.
 gates.Y5b = () => {
-  assert.ok(!/data-card="strategies"/.test(html) && /<div class="kal-strats" id="kalStrategies">/.test(html), 'the Strategies table lives inside the Account card (the owner, Oct 30, 2026), not as a card of its own');
-  const r = /function renderKalshiStrategies\(\)\{[\s\S]*?\n  \}\n/.exec(html); assert.ok(r, 'the render is found');
-  assert.ok(!/\.hidden\s*=/.test(r[0]), 'the render never sets hidden: that is the Layout menu\'s to set');
-  assert.ok(/\[data-card="account"\] #kalStrategies\{ grid-column:2; grid-row:1 \/ 7/.test(html), 'it sits in the right column of the Account card beside the balance');
+  // Nov 16, 2026 (the owner: "i still see the strategies"): the per-strategy table is gone from the Account card; strategy results live on the Strategies page.
+  assert.ok(!/data-card="strategies"/.test(html) && !/id="kalStrategies"|renderKalshiStrategies|kalshiStrategiesTableHtml|kal-strat-tbl/.test(html), 'no per-strategy table on the Bot page');
 };
 gates.Y5 = () => {
   const i = html.indexOf('id="kalTabBot"');
@@ -59,9 +57,9 @@ gates.Y5 = () => {
   // Nov 5, 2026: the rail and main wrappers are gone; the cards are one list on one grid, in the default order (the owner: "i don't have much say in where each card goes").
   assert.ok(!/class="kal-rail"|class="kal-main"/.test(seg), 'no rail or main wrapper');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(seg), ['account', 'status', 'positions', 'trades'], 'one list: the account card (with the Strategies table and the result line), the bot status, the positions and the trades (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
+  assert.deepStrictEqual(names(seg), ['account', 'positions', 'trades'], 'one list: the account card (with the result line), the positions and the trades (the Bot status card was removed Nov 16, 2026 (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
   const rail = [null, seg]; const main = seg.slice(seg.indexOf('data-card="positions"'));
-  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="12" data-card="status">/.exec(seg)[1];   // data-w is a span of 12 columns since Nov 5, 2026 (6 is the old Half)
+  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="12" data-card="positions">/.exec(seg)[1];   // data-w is a span of 12 columns since Nov 5, 2026 (6 is the old Half)
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
@@ -305,7 +303,7 @@ gates.Y9 = () => {
 gates.Y10 = () => {
   const acct = html.slice(html.indexOf('// No stake or reinvest pool tiles'), html.indexOf("    el.innerHTML = h;"));
   assert.ok(!/BOT_SHARDS|shardLow|DATA_SHARD_LOW/.test(html) && !/Shard '|shardRows/.test(acct), 'no shard balances or low-shard warning on the page (removed Oct 24, 2026, the owner: the shard stuff can go)');
-  assert.ok(/a\.liveSwitch \? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
+  assert.ok(!/Order switch<\/span>/.test(acct) && /switchOff \? 'Order switch OFF'/.test(html), 'no order switch row in the Account card (Nov 16, 2026, the owner); the Running badge says Order switch OFF');
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   assert.ok(/id="kalLayout"/.test(head), 'the Layout menu is in the page header, not on a row of its own');
   assert.ok(!/kal-layout-bar/.test(html), 'no leftover row for it');
@@ -687,8 +685,7 @@ gates.BS2 = () => {
   assert.strictEqual(f.kalshiRiskMeter([], { sizing: false, startCash: 100 }, NOW).limit, 10, 'without sizing the stop is $10');
 };
 gates.BS3 = () => {
-  assert.ok(/id="kalStatusBody"/.test(html) && !/id="kalRiskBody"/.test(html) && /data-card="status"/.test(html) && !/data-card="risk"/.test(html), 'the loss stop tile is gone from the page (Nov 16, 2026, the owner: remove list); the meter logic stays for the Strategies page summary');
-  assert.ok(/kalshiStatusTimer = setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiStatusTick\(\); \} \}, 1000\)/.test(html) && /clearInterval\(kalshiStatusTimer\)/.test(html), 'a one second tick moves the two live lines, only while the page is visible, and stops when it is left');
+  assert.ok(!/id="kalStatusBody"|data-card="status"|kalshiStatusTimer|kalshiStatusTick/.test(html) && !/id="kalRiskBody"/.test(html) && !/data-card="risk"/.test(html), 'the Bot status card and the loss stop tile are gone from the page (Nov 16, 2026, the owner); the meter logic stays for the Strategies page');
   const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.ok(/const L1_SIZED_STOP_FRACTION = 0\.12;/.test(src) && /const L1_WINDOW_CAP_FRACTION = 0\.055;/.test(src) && /const L1_LOSS_STOP = 10\.0;/.test(src), 'the meter quotes the same 12%, 5.5% and $10 the bot uses; change one and this gate names the other');
   assert.ok(/0\.12 \* base/.test(html) && /0\.055 \* base/.test(html), 'and the page uses those numbers');

@@ -448,9 +448,6 @@
   .kal-hold-body{ display:grid; grid-template-columns:minmax(120px,170px) minmax(0,1fr); gap:10px 28px; align-items:stretch; }
   .kal-hold-body .kal-hold-stats{ grid-template-columns:1fr; gap:10px; align-content:start; }
   /* Strategy switch (the owner, Oct 29, 2026: "i like 1"): one control above the Bot cards, shown only once a second strategy has orders; with only L1 it does not exist and the page is exactly what it was. */
-  .kal-strats{ margin:0 0 12px; }
-  .kal-strat-tbl{ width:100%; border-collapse:collapse; font-size:13px; } .kal-strat-tbl th{ font-weight:600; color:var(--muted); font-size:12px; text-align:left; padding:6px 8px; } .kal-strat-tbl td{ padding:9px 8px; border-top:1px solid var(--border); }
-  .kal-strat-tbl th:not(:first-child), .kal-strat-tbl td:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
   @media screen and (min-width:701px) and (max-width:900px) and (pointer:coarse){ #kalL1Pill, .kal-mini, #kalTradeFilter, .kal-fold > summary, .kal-btn{ min-height:40px; } }   /* tablets get the phone's touch sizes (the audit, Oct 30, 2026) */
   /* "A new version is ready": a blocking pop-up (the owner, Oct 30, 2026), shown only to a browser whose loaded copy is older than the site. One Reload button, no close; Reload keeps the user signed in. */
   .upd-modal{ position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,.74); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
@@ -460,22 +457,6 @@
   .upd-card button{ font:inherit; font-weight:700; border:0; border-radius:999px; background:var(--paper); color:var(--ink); min-height:44px; width:100%; cursor:pointer; }
   .upd-card button:focus-visible{ outline:2px solid var(--paper); outline-offset:3px; }
   .kal-pill.kal-pill-run{ color:var(--gain); border-color:var(--gain); }
-  .kal-tbl-wrap{ overflow-x:auto; }
-  /* Phones and tablets (up to 900px, where the page switches to its bottom bar): the table has nine columns, so each strategy becomes a card (the owner, Oct 30, 2026: "mobile ui isnt great"; on a phone Status, Today and Result were hidden behind a sideways scroll). Name and markets on top, then label over value in two columns. */
-  @media screen and (max-width:900px){
-    .kal-strat-tbl, .kal-strat-tbl tbody, .kal-strat-tbl tr, .kal-strat-tbl td{ display:block; }
-    .kal-strat-tbl thead{ display:none; }
-    .kal-strat-tbl tr{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px 16px; padding:16px 0; border-top:1px solid var(--border); }
-    .kal-strat-tbl tr:first-child{ border-top:0; padding-top:4px; }
-    .kal-strat-tbl td{ border:0; padding:0; text-align:left; min-width:0; overflow-wrap:anywhere; font-size:15px; font-variant-numeric:tabular-nums; }
-    .kal-strat-tbl td::before{ content:attr(data-label); display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:3px; }
-    .kal-strat-tbl td:nth-child(1), .kal-strat-tbl td:nth-child(2){ grid-column:1 / -1; }
-    .kal-strat-tbl td:nth-child(1){ font-size:17px; font-weight:700; }
-    .kal-strat-tbl td:nth-child(1)::before{ display:none; }
-    .kal-strat-tbl td .kal-pill{ white-space:nowrap; display:inline-block; }
-    .kal-strat-tbl td:not(:first-child), .kal-strat-tbl th:not(:first-child){ text-align:left; }
-  }
-  .kal-strat-tbl td:first-child, .kal-strat-tbl th:first-child{ white-space:nowrap; }
   .kal-chip{ display:inline-block; font-size:10px; font-weight:700; border:1px solid var(--border); border-radius:4px; padding:1px 5px; margin-right:6px; letter-spacing:.03em; color:var(--muted); }   /* quiet on purpose: the bright, high-contrast treatment is kept for figures and urgent items (the owner, Oct 30, 2026); every strategy's chip looks the same */
   .kal-hold-chart{ min-width:0; display:flex; flex-direction:row; align-items:stretch; gap:10px; } .kal-hold-chart svg{ flex:1 1 auto; min-width:0; } .kal-hc-y{ display:flex; flex-direction:column; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; text-align:right; min-width:36px; }
   .kal-hold-chart svg{ display:block; width:100%; height:130px; }
@@ -493,7 +474,7 @@
   .kal-pnl-ranges{ display:flex; gap:6px; flex-wrap:wrap; } .kal-pnl-ranges .kal-pill{ background:none; cursor:pointer; min-height:40px; padding:0 14px; font-family:inherit; } .kal-pnl-ranges .kal-pill.on{ color:var(--paper); border-color:var(--paper); }
   #kalPnlBody{ position:relative; } .kal-plot{ position:relative; margin-right:50px; } .kal-yaxis{ position:absolute; left:100%; top:0; bottom:0; width:50px; } .kal-yaxis span{ position:absolute; left:8px; transform:translateY(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
   .kal-xaxis{ position:relative; height:20px; margin:4px 50px 0 0; } .kal-xaxis span{ position:absolute; top:0; transform:translateX(-50%); font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; } .kal-xaxis span.l{ transform:none; } .kal-xaxis span.r{ transform:translateX(-100%); } #kalPnlBody svg{ touch-action:pan-y; cursor:crosshair; } .kal-pnl-area{ fill:rgba(255,255,255,.06); } .kal-pnl-ln{ fill:none; stroke:var(--paper); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; } .kal-pnl-end{ position:absolute; width:7px; height:7px; margin:-3.5px 0 0 -3.5px; border-radius:50%; background:var(--paper); pointer-events:none; } .kal-pnl-dot{ position:absolute; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; border-radius:50%; background:var(--paper); pointer-events:none; } .kal-pnl-when{ margin-left:auto; font-size:13px; font-weight:400; color:var(--muted); }
-  .kal-pnl-head{ display:flex; align-items:baseline; gap:12px; margin:4px 0 10px; font-variant-numeric:tabular-nums; } .kal-pnl-head b{ font-size:28px; font-weight:800; line-height:1.1; letter-spacing:-.01em; } .kal-pnl-head span{ font-size:18px; font-weight:700; }
+  .kal-pnl-head{ display:flex; align-items:baseline; gap:12px; margin:4px 0 10px; font-variant-numeric:tabular-nums; } .kal-pnl-head b{ font-size:28px; font-weight:800; line-height:1.1; letter-spacing:-.01em; } .kal-pnl-head span{ font-size:16px; font-weight:600; }
   .kal-notif{ position:relative; display:flex; flex-shrink:0; } .kal-notif[hidden]{ display:none; }
   .kal-notif-btn{ position:relative; display:inline-flex; align-items:center; gap:6px; }
   .kal-notif-badge{ position:absolute; top:-7px; right:-7px; min-width:19px; height:19px; padding:0 5px; border-radius:999px; background:var(--loss); color:#fff; font-size:12px; font-weight:800; line-height:19px; text-align:center; font-variant-numeric:tabular-nums; box-shadow:0 0 0 2px var(--ink); }
@@ -915,21 +896,6 @@
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
   /* Bot status card, redone twice Oct 31, 2026 (the owner: style B, a ring for the countdown beside a tall health line, then only information that appears nowhere else on the page). */
-  #kalStatusBody{ container-type:inline-size; }
-  .kal-st-top{ display:grid; grid-template-columns:minmax(200px,230px) minmax(0,1fr); gap:12px; margin-bottom:12px; }
-  .kal-st-tile{ border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.025); padding:14px; min-width:0; }
-  .kal-st-lbl{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
-  .kal-st-sub{ font-size:12px; color:var(--muted); margin-top:4px; white-space:normal; overflow-wrap:anywhere; min-width:0; }
-  .kal-st-ringtile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; }
-  .kal-st-ring{ display:block; max-width:100%; font-family:'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
-  .kal-st-ringtext b{ font-size:13px; font-weight:800; }
-  .kal-st-healthtile{ display:flex; flex-direction:column; }
-  .kal-st-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
-  .kal-st-head .kal-hb{ margin:0; font-size:13px; }
-  .kal-st-healthtile .kal-ecg-wrap{ margin:0; flex:1; display:flex; }
-  .kal-st-healthtile .kal-ecg{ flex:1; height:auto; min-height:150px; }
-  @container (max-width:520px){ .kal-st-top{ grid-template-columns:1fr; } }
-  @media (max-width:520px){ .kal-st-top{ grid-template-columns:1fr; } }
   .kal-ecg-wrap{ border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; margin:0 0 10px; }
   .kal-ecg-wrap.flash{ animation:ecgFlash .9s ease-out; }
   @keyframes ecgFlash{ 0%{ box-shadow:0 0 0 1px rgba(15,157,88,.9), 0 0 18px rgba(15,157,88,.45); border-color:rgba(15,157,88,.9); } 100%{ box-shadow:0 0 0 0 rgba(15,157,88,0); } }
@@ -941,14 +907,10 @@
   .kal-ecg.down .kal-ecg-line{ stroke:var(--loss); }
   .kal-ecg-gap{ stroke-width:2.2; vector-effect:non-scaling-stroke; stroke-dasharray:6 5; } .kal-ecg-gap.quiet{ stroke:var(--paper); } .kal-ecg-gap.down{ stroke:var(--loss); }
 
-  .kal-console [data-card="status"]{ align-self:stretch; }
   /* The Account result line lives inside the Account card (Nov 16, 2026, the owner: one module for Account and Account result), full width under the balance and the strategies table. The chart box has a fixed height instead of the chart's own shape (at full width that shape would be very tall); the drawing stretches to it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
-  .kal-console [data-card="account"] .kal-acct-pnl{ grid-column:1 / -1; grid-row:8; min-width:0; margin-top:6px; padding-top:16px; border-top:1px solid var(--border); }
-  .kal-acct-pnl-h{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px; } .kal-acct-pnl-h .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; margin:0; }
   .kal-acct-pnl .kal-plot{ aspect-ratio:auto !important; height:240px; } .kal-acct-pnl .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
   /* Each figure once: at rest the dollar result is the All strategies row's Result in the table above, so the chart's head shows only the percentage; the dollar figure appears while a finger or the pointer is on the line, with its date. */
-  .kal-acct-pnl .kal-pnl-head:not(.scrub) b{ display:none; }
-  @media (max-width:900px){ .kal-acct-pnl .kal-plot{ height:180px; } }
+  .kal-pnl-rng{ font-style:normal; font-size:13px; font-weight:500; color:var(--muted); margin-right:2px; }
   /* Strategies page (Nov 10, 2026, the owner: an entirely new page for strategies, same theme, new visuals). Black and white only, plain text with signs (no green or red, calm view). Prefix sp- for the shared pieces (badge, ring, bar, spark, summary, popup) and lp- / rw- for the stage board (Nov 12, 2026, the owner: "build it into the live page"): .lp the loop of four boxes, .lp-t one box, .lp-p the open box's panel, .rw one strategy row, .rw-d its detail, .rw-more the deepest layer. */
   #page-strategies .sp-lede{ font-size:12px; color:var(--muted); margin:0 0 16px; overflow-wrap:anywhere; }
   .sp-wrap{ container-type:inline-size; container-name:sp; }   /* full page width, the same as the header, the lede and the Bot page, so the top card and the stage bar line up (cleanup, Nov 13, 2026) */
@@ -1122,39 +1084,35 @@
   .kal-console [data-card="trades"]{ align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
-  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,2fr); gap:10px 28px; align-items:center; padding:20px 22px; }   /* balance and the loss stop on the left, the strategies table on the right (the owner, Oct 30, 2026: fold Strategies into the Account card) */
-  .kal-console [data-card="account"] #kalStrategies{ grid-column:2; grid-row:1 / 7; align-self:center; margin:0; min-width:0; }
-  .kal-strat-mk{ display:block; font-size:12px; font-weight:400; color:var(--muted); margin-top:2px; }
-  .kal-console [data-card="account"] .kal-strat-tbl th:nth-child(2), .kal-console [data-card="account"] .kal-strat-tbl td:nth-child(2){ display:none; }
-  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; grid-row:1; padding:0; gap:14px; }
-  .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ display:contents; }
-  .kal-console [data-card="account"] .kal-acct-total{ grid-column:1; grid-row:2; margin:0; font-size:46px; line-height:1; }
-  .kal-console [data-card="account"] .kal-today{ grid-column:1; grid-row:3; display:flex; flex-direction:row; align-items:baseline; gap:8px; }
-  .kal-console [data-card="account"] .kal-today{ justify-content:flex-start; } .kal-console [data-card="account"] .kal-today b{ font-size:16px; }
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:auto auto minmax(0,1fr) auto; gap:6px 14px; align-items:center; padding:20px 22px; }   /* ONE module (Nov 16, 2026, the owner: Account and Account result are one, not two): header, then balance and Today on the left with the period return beside Today and the range buttons on the right, then the chart full width */
+  .kal-console [data-card="account"] .kal-acct-head{ grid-column:1 / -1; grid-row:1; padding:0; gap:14px; }
+  .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows, .kal-console [data-card="account"] #kalPnl, .kal-console [data-card="account"] #kalPnlBody{ display:contents; }
+  .kal-console [data-card="account"] .kal-acct-total{ grid-column:1 / 4; grid-row:2; margin:0; font-size:44px; font-weight:700; letter-spacing:-.02em; line-height:1; font-variant-numeric:tabular-nums; }
+  .kal-console [data-card="account"] .kal-today{ grid-column:1; grid-row:3; display:flex; flex-direction:row; align-items:baseline; gap:8px; justify-content:flex-start; } .kal-console [data-card="account"] .kal-today b{ font-size:16px; font-weight:600; font-variant-numeric:tabular-nums; } .kal-console [data-card="account"] .kal-today .kal-k{ font-size:13px; font-weight:500; }
+  .kal-console [data-card="account"] .kal-pnl-head{ grid-column:1 / 4; grid-row:3; margin:0; align-self:baseline; gap:8px; } .kal-console [data-card="account"] .kal-pnl-head b{ font-size:16px; font-weight:600; } .kal-console [data-card="account"] .kal-today{ display:none; }
+  .kal-console [data-card="account"] .kal-pnl-ranges{ grid-column:4; grid-row:2 / 4; align-self:end; justify-content:flex-end; }
+  .kal-console [data-card="account"] .kal-plot{ grid-column:1 / -1; grid-row:4; aspect-ratio:auto !important; height:240px; margin-top:8px; } .kal-console [data-card="account"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
+  .kal-console [data-card="account"] .kal-xaxis{ grid-column:1 / -1; grid-row:5; }
+  .kal-console [data-card="account"] #kalPnlBody > .kal-empty, .kal-console [data-card="account"] #kalPnlBody > .kal-note{ grid-column:1 / -1; grid-row:4; }
   .kal-console [data-card="account"] .kal-sub{ font-size:12px; color:var(--muted); }
   .kal-console [data-card="account"] .kal-tile{ grid-row:1 / 4; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
   .kal-console [data-card="account"] .kal-tile b{ font:800 20px/1.15 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
   .kal-console [data-card="account"] .kal-tile .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:none; margin:0; }
-  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1; grid-row:auto; }   /* auto, not a fixed row 5 (Nov 2, 2026, the owner's screenshot): the Order switch row and the loading note both sat in row 5 and printed on top of each other; auto rows stack them under the Loss stop tile */
-  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:7; }
+  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1 / -1; grid-row:auto; }   /* auto, not a fixed row 5 (Nov 2, 2026, the owner's screenshot): the Order switch row and the loading note both sat in row 5 and printed on top of each other; auto rows stack them under the Loss stop tile */
+  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card], .kal-console > [data-card][data-w]{ grid-column:1 / -1; }   /* the second selector outranks the span rules, so a width set on a desktop never makes extra columns on a phone */
-    .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
-    .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-pnl, .kal-console [data-card="account"] #kalStrategies, .kal-console [data-card="account"] .kal-rows > div, .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
-    .kal-strat-mk{ display:none; }
-    .kal-console [data-card="account"] .kal-strat-tbl th:nth-child(2), .kal-console [data-card="account"] .kal-strat-tbl td:nth-child(2){ display:block; }
-    .kal-console [data-card="account"] .kal-strat-tbl td.kal-nil{ display:none; }   /* after the rule above, so an empty cell (the total row has no markets or status) stays hidden */
-    .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
-    /* The same order as the desktop left column, then the strategies table (mobile pass, Nov 13, 2026): balance, Today, the loss stop, then the order switch and any notes, then the table. */
-    .kal-console [data-card="account"] .kal-acct-head{ grid-row:1; } .kal-console [data-card="account"] .kal-acct-total{ grid-row:2; } .kal-console [data-card="account"] .kal-rows > div.kal-today{ grid-row:3; }
-    .kal-console [data-card="account"] #kalStrategies{ order:1; } .kal-console [data-card="account"] .kal-acct-pnl{ order:2; }   /* on a phone the result line comes after the strategies table, as on a desktop */
+    .kal-console [data-card="account"]{ grid-template-columns:auto minmax(0,1fr); gap:10px 12px; }
+    .kal-console [data-card="account"] .kal-acct-total{ grid-column:1 / -1; }
+    .kal-console [data-card="account"] .kal-pnl-head{ grid-column:1 / -1; grid-row:3; }
+    .kal-console [data-card="account"] .kal-pnl-ranges{ grid-column:1 / -1; grid-row:4; justify-content:flex-start; }
+    .kal-console [data-card="account"] .kal-plot{ grid-row:5; height:180px; }
+    .kal-console [data-card="account"] .kal-xaxis{ grid-row:6; }
+    .kal-console [data-card="account"] #kalPnlBody > .kal-empty, .kal-console [data-card="account"] #kalPnlBody > .kal-note{ grid-row:5; }
   }
   /* The Account card at less than the full width (a choice since Nov 5, 2026): about 680px is too narrow for the balance beside the strategies table, so its pieces stack, as on a phone. The table keeps its desktop columns. */
-  .kal-console [data-card="account"]:not([data-w="12"]){ grid-template-columns:minmax(0,1fr); gap:12px; }
-  .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-head, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-total, .kal-console [data-card="account"]:not([data-w="12"]) .kal-today, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-pnl, .kal-console [data-card="account"]:not([data-w="12"]) #kalStrategies, .kal-console [data-card="account"]:not([data-w="12"]) .kal-rows > div, .kal-console [data-card="account"]:not([data-w="12"]) #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
-  .kal-console [data-card="account"]:not([data-w="12"]) .kal-tile{ grid-column:auto; grid-row:auto; }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
   .tf-btn.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-contrast); }
@@ -1705,12 +1663,7 @@
         <div class="kal-note" id="kalL1Why" hidden></div>
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-rows"><div class="kal-today"><span class="kal-k">Today</span><b>loading...</b></div></div></div>
-        <div class="kal-strats" id="kalStrategies"><div class="kal-empty">Reading the strategies...</div></div>
-        <div class="kal-acct-pnl" id="kalPnl"><div class="kal-acct-pnl-h"><span class="kal-k">Account result</span><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div><div id="kalPnlBody"></div></div>
-      </div>
-      <div class="kal-card kal-compact" data-w="12" data-card="status">
-        <div class="kal-card-title">Bot status</div>
-        <div id="kalStatusBody"><div class="kal-empty">Reading the bot...</div></div>
+        <div class="kal-acct-pnl" id="kalPnl"><div class="kal-pnl-ranges" id="kalPnlRanges"></div><div id="kalPnlBody"></div></div>
       </div>
       <div class="kal-card kal-compact" data-w="12" data-card="positions">
         <div class="kal-card-title">Open positions</div>
@@ -1866,11 +1819,11 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 16</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the per strategy table is gone from the Account card (the owner: "i still see the strategies"). The card is now the balance, Today, the Running badge and the Account result chart with its range buttons. Every strategy's results are on the Strategies page. The separate "Order switch OFF" row is gone too; the Running badge already says it. Account and Account result are now one box: one header, the balance and Today on the left with the period return beside Today, the range buttons on the right, and the chart under them with no second title or divider. The whole Bot status card is gone too (the owner: "bot status needs to be pulled too"): the next look ring, the heartbeat line and the "Needs a look" note. The Running badge on the Account card is what shows a stopped bot. The red or green headline under the balance now follows the chart buttons (Today, 1W, 1M and so on) with the range name, dollars and percentage; the separate Today row is gone.</li>
                   <li>Research: the nightly perps candle archive now saves every perpetual market on Kalshi's public list, not just stocks, indexes and a few named ones (so the other crypto, platinum, palladium, aluminum, energy and any new class are kept too), and the manual back-pull can fill past dates for all of the newly added ones at once. Public data only, nothing trades.</li>
                   <li>Bot (Nov 16): the XRP favourite trial seat (XRPFAV10) now stops after 3 losses in a row instead of 30, because one loss on a favourite costs about as much as 30 wins. Its other limits are unchanged, and the Bitcoin open interest seat (OIREL1) is recorded as the owner's named exception to the one-version rule.</li>
                   <li>Strategies page: the 17 rules of the forward shadow list now have rows in Shadow. A daily job reads public Kalshi candles and settled markets from Nov 17 and scores each rule on paper (10 contracts, a 1 cent and a 2 cent worse fill); the page shows trades counted toward 100 and about how many days remain, from a small aggregate file only. Nothing trades.</li>
                   <li>Strategies page: the NC15 depth-cell rows now show how many signals they have counted toward 60 (the count comes from a small counts-only file the bot's research job writes every 6 hours; the page reads it from raw.githubusercontent.com, a host the owner allowed on Nov 16). Silver and USD/CAD are parked because they fire too rarely. Nothing trades.</li>
-                  <li>Bot page: the Account result line now sits inside the Account card, under the strategies table, so there is one module instead of two, and its dollar figure shows only while you touch the chart (the All strategies row already carries it). The separate stop meter tile and the per strategy stop line are gone; each strategy's stop rule stays in its own card. Strategies page: gold's paper record while it is off and the Bitcoin perp model place are no longer drawn as rows of their own (they are part of Closing buy and CFRTIK).</li>
                   <li>Strategies page (the owner: "clean up our shadow list"): gold's return record is no longer its own Shadow row, because it is L1's return rule (L1 comes back to normal size when its paper record wins at least 1.3 times what it loses, with 10 or more losses); the six CFRTIK wheel places and the S&amp;P 500 open interest seat (SPXOI1) are retired (CFRTIK was paused by the owner; the S&amp;P seat never traded); the shadow list keeps the seven NC15 depth cells and the politics test. No trading change.</li>
                   <li>Research: the public data pull can now list Kalshi categories whose names contain spaces, such as "Climate and Weather". Public data only, nothing trades.</li>
                   <li>Research: the in-game recorder now reads a calm game's spread and total every 5 minutes instead of every 2, so its request budget can serve the 20 second hot tier, and a 2c move on any of its three markets makes a game hot. Public data only, nothing trades.</li>
@@ -3301,8 +3254,7 @@
     else if(fire.enter){ kalshiSoundTone('enter'); }
   }
   function renderKalshiBot(){
-    renderKalshiStatus();
-    renderKalshiStrategies();
+    kalshiSyncRules();
     renderKalshiPnl();
     renderKalshiNotifications();
     kalshiSoundCheck();
@@ -3319,8 +3271,7 @@
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
       // No stake or reinvest pool tiles (the owner, Oct 30, 2026: "we don't really NEED visibility on that"): the size and the pool rule live in the bot's code and Recent trades shows what was actually bought.
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') +
-        (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
+      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '');
     }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
@@ -3610,7 +3561,7 @@
     kalshiPnlScrub = { pts: pts, startBal: startBal, t0: t0, t1: t1 };
     var ylab = yt.map(function(tk){ return '<span style="top:' + (g.Y(tk.v) / g.H * 100).toFixed(1) + '%">' + esc(tk.label) + '</span>'; }).join('');
     var xlab = chartTimeTicks(t0, t1, 5).map(function(tk){ var left = g.X(tk.t) / g.W * 100; return '<span class="' + (left < 7 ? 'l' : (left > 93 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + esc(tk.label) + '</span>'; }).join('');
-    return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '<small class="kal-pnl-when"></small></div>' +
+    return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><em class="kal-pnl-rng">' + esc(key === '1D' ? 'Today' : key) + '</em><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '<small class="kal-pnl-when"></small></div>' +
       '<div class="kal-plot" style="aspect-ratio:' + g.W + ' / ' + g.H + '">' + kalshiLineSvg(pts, esc, money, g, yt) + '<i class="kal-pnl-end" aria-hidden="true" style="left:' + (g.X(t1) / g.W * 100).toFixed(2) + '%;top:' + (g.Y(net) / g.H * 100).toFixed(2) + '%"></i><div class="kal-yaxis">' + ylab + '</div></div><div class="kal-xaxis">' + xlab + '</div>';
   }
   // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
@@ -3645,8 +3596,8 @@
         if(!api || !api.kalshiOrdersSince){ set('kalPnlBody', '<div class="kal-empty">Older orders are not available right now.</div>'); return; }
         if(!kalshiPnlFetching[key]){
           kalshiPnlFetching[key] = true;
-          api.kalshiOrdersSince(since).then(function(o){ kalshiPnlFetched[key] = { at: Date.now(), orders: o }; delete kalshiPnlFetching[key]; renderKalshiPnl(); renderKalshiStrategies(); },
-            function(err){ kalshiPnlFetched[key] = { at: Date.now(), orders: [], failed: true, code: String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60) }; delete kalshiPnlFetching[key]; renderKalshiPnl(); renderKalshiStrategies(); });   // the reason is kept so the note can say it (a permission, quota or timeout problem look the same otherwise)
+          api.kalshiOrdersSince(since).then(function(o){ kalshiPnlFetched[key] = { at: Date.now(), orders: o }; delete kalshiPnlFetching[key]; renderKalshiPnl(); },
+            function(err){ kalshiPnlFetched[key] = { at: Date.now(), orders: [], failed: true, code: String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60) }; delete kalshiPnlFetching[key]; renderKalshiPnl(); });   // the reason is kept so the note can say it (a permission, quota or timeout problem look the same otherwise)
         }
         var body = document.getElementById('kalPnlBody');      // keep the last chart on screen, dimmed, so the card does not collapse while the older read runs
         if(body && body.querySelector('svg')){ body.style.opacity = '0.45'; if(!body.querySelector('.kal-loading-note')){ body.insertAdjacentHTML('beforeend', '<div class="kal-note kal-loading-note">Reading older trades...</div>'); } } else { set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); }
@@ -3705,7 +3656,7 @@
   })();
   (function(){
     var bar = document.getElementById('kalPnlRanges');
-    if(bar){ bar.addEventListener('click', function(e){ var k = e.target && e.target.getAttribute ? e.target.getAttribute('data-pnlrange') : null; if(k){ kalshiPnlRange = k; renderKalshiPnl(); renderKalshiStrategies(); } }); }
+    if(bar){ bar.addEventListener('click', function(e){ var k = e.target && e.target.getAttribute ? e.target.getAttribute('data-pnlrange') : null; if(k){ kalshiPnlRange = k; renderKalshiPnl(); } }); }
   })();
 
   // Notification center (Oct 25, 2026, the owner: a bell with a red bubble for what is unread, a Mark all as read, and a loud banner for the worst cases). It READS what the Bot page already loads (the bot's event log and its orders): no new
@@ -4061,26 +4012,6 @@
     return '<svg class="kal-ecg ' + (state || 'off') + '" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Heartbeat of the bot over the last minute">' + grid +
       '<path d="' + p.d + '" class="kal-ecg-line"/>' + gap + '</svg>';
   }
-  // Redraws only the path (and the flat gap's start), about 30 times a second, while the Bot page is showing. A tab in the background draws nothing (the browser pauses frames), and under reduce motion the once a second tick is enough.
-  var kalshiEcgRaf = null, kalshiEcgLast = 0;
-  function kalshiEcgFrame(t){
-    kalshiEcgRaf = requestAnimationFrame(kalshiEcgFrame);
-    if(t - kalshiEcgLast < 33){ return; }
-    kalshiEcgLast = t;
-    var wrap = document.getElementById('kalEcg'), s = kalshiLiveCtl && kalshiLiveCtl.session;
-    if(!wrap || !s || s.active !== true){ return; }
-    var path = wrap.querySelector('.kal-ecg-line'), gap = wrap.querySelector('.kal-ecg-gap');
-    if(!path){ return; }
-    var nowF = Date.now(), p = kalshiHeartbeatPath(kalshiBeats, nowF, kalshiReads, kalshiOrderTimes(nowF));
-    path.setAttribute('d', p.d);
-    if(gap){ gap.setAttribute('x1', p.tail.toFixed(1)); }
-  }
-  function kalshiEcgStart(){
-    kalshiEcgStop();
-    var calm = document.documentElement.getAttribute('data-reduce-motion') === 'true' || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    if(!calm){ kalshiEcgRaf = requestAnimationFrame(kalshiEcgFrame); }
-  }
-  function kalshiEcgStop(){ if(kalshiEcgRaf){ cancelAnimationFrame(kalshiEcgRaf); kalshiEcgRaf = null; } }
   function kalshiAgeText(sec){
     return sec < 90 ? sec + ' seconds ago' : (sec < 5400 ? Math.round(sec / 60) + ' minutes ago' : Math.round(sec / 3600) + ' hours ago');
   }
@@ -4125,78 +4056,15 @@
     });
     return out;
   }
-  function renderKalshiStatus(){
-    var sEl = document.getElementById('kalStatusBody');
-    if(!sEl){ return; }
-    var s = kalshiLiveCtl && kalshiLiveCtl.session, now = Date.now();
-    var running = !!(s && s.active === true);
-    var halted = !!(kalshiBotState.control && kalshiBotState.control.halt === true);
-    var hb = kalshiHeartbeat(s, now);
-    var line = hb.state === 'off' ? 'Not running' : (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while')));
-    var note = running && s.lastNote ? kalshiSkipNote(s.lastNote, s.lastTickAt, now) : '';
-    // The routine "Watching." line says nothing the two lines above do not; only a skipped minute or a problem is worth showing.
-    if(/^\s*(watching|nothing to do)/i.test(note)){ note = ''; }
-    // The bot's own "Gold is switched off by its own kill latch ..." note repeats what the Strategies page and the Rules line already say (the owner, Nov 13, 2026: "text under bot status can be removed").
-    if(/^\s*gold is switched off by its own kill latch/i.test(note)){ note = ''; }
-    var beatsBefore = kalshiBeats.length;
-    kalshiBeatNote(kalshiBeats, s && s.active === true ? s.lastTickAt : NaN);
-    var newBeat = kalshiBeats.length !== beatsBefore && beatsBefore > 0;
-    // Redone twice (the owner, Oct 31, 2026): the countdown as a ring beside a tall animated health line (style B), and nothing under them but "Needs a look" (the prices and depth tiles that sat there were removed Nov 11, 2026). The latest-order, order-count and the
-    // win rate rows are gone from this card (the Strategies table has them), no folds, and the card covers every strategy. "Needs a look" shows only when something is wrong. The ids the one second tick and the ECG use are kept.
-    var hbText = line + (hb.ageSec !== null && running ? '. Last check ' + kalshiAgeText(hb.ageSec) : '');
-    var RING = 402;
-    sEl.innerHTML = '<div class="kal-st-top">' +
-      '<div class="kal-st-tile kal-st-ringtile"><div class="kal-st-lbl">Next look</div>' +
-      '<svg class="kal-st-ring" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="64" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/><circle id="kalRing" cx="75" cy="75" r="64" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + RING + '" stroke-dashoffset="' + RING + '" transform="rotate(-90 75 75)"/>' +
-      '<text id="kalNextIn" x="75" y="84" text-anchor="middle" fill="#fff" font-weight="800" font-size="32">&mdash;</text></svg>' +
-      (running ? '<div class="kal-st-ringtext"><b id="kalNextName">&mdash;</b><div class="kal-st-sub" id="kalNextWhat"></div><div class="kal-st-sub" id="kalNextThen"></div><div class="kal-st-sub" id="kalNextOff"></div></div>' : '<div class="kal-st-ringtext"><div class="kal-st-sub">Not running</div></div>') + '</div>' +
-      '<div class="kal-st-tile kal-st-healthtile"><div class="kal-st-head"><div class="kal-st-lbl">Health</div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(hbText) + '</span></div></div><div id="kalEcg" class="kal-ecg-wrap"></div></div></div>' +
-      '<div id="kalWork"></div>' +
-      (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
-    if(running && kalshiOrdersLoaded){
-      var work = kalshiTodayWork(kalshiAllOrders(), now);
-      if(work.problem){ document.getElementById('kalWork').insertAdjacentHTML('beforeend', '<div class="kal-warn"><b>Needs a look</b><div class="kal-note">' + String(work.problem) + (work.problem === 1 ? ' order whose answer was lost or refused' : ' orders whose answer was lost or refused') + '</div></div>'); }
-    }
-    var ecgNow = document.getElementById('kalEcg');
-    if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
-    var a = kalshiLiveAcct;
-    var orders = kalshiResolveOrders(kalshiLiveOrders, a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
-    var liveState = kalshiLiveStateNow(now);
+  // The Bot status card (countdown ring, health line, Needs a look) was removed on Nov 16, 2026 (the owner: pull the whole module); the Running, Paused or Order switch OFF badge on the Account card still shows a stopped bot.
+  // What stays is the shared state the pages read and the one line of the Rules text that follows gold's kill latch.
+  function kalshiSyncRules(){
     kalshiGoldEnsure(); kalshiRegistryEnsure();   // the Bot page needs the same shared state as the Strategies page
-    var silent = kalshiOrdersLoaded ? kalshiSilentMarkets(orders, s, now, liveState) : [];
-    if(silent.length){
-      var silentEscaped = silent.map(function(x){ return escapeHtml(x); }).join('</div><div class="kal-note">');
-      sEl.insertAdjacentHTML('beforeend', '<div class="kal-warn kal-silent"><b>Needs a look</b><div class="kal-note">' + silentEscaped + '</div><div class="kal-note">Check the bot note above and the money on each Kalshi shard.</div></div>');
-    }
-    // The Loss stop tile (meter and own stops) was removed on Nov 16, 2026 (the owner: put it on the remove list); each strategy's stop rule is in its card on the Strategies page.
-kalshiStatusTick();
+    var stNow = kalshiLiveStateNow(Date.now());
+    var rulesLiveEl = document.getElementById('kalRulesLive');   // Rules text follows the latch (Nov 13, 2026): gold shows off while it is tripped; if the latch cannot be read the static line stays
+    if(rulesLiveEl){ rulesLiveEl.textContent = stNow.L1 === 'off' ? 'Gold is off, cooling down: its kill latch tripped and it places no new orders until its paper record clears its return bar.' : 'Markets trading now: gold.'; }
   }
-  // Once a second, only the two lines that move: how long since the last check and the countdown to the next look.
-  function kalshiStatusTick(){
-    var s = kalshiLiveCtl && kalshiLiveCtl.session, now = Date.now();
-    var t = document.getElementById('kalHbText'), nx = document.getElementById('kalNextIn'), what = document.getElementById('kalNextWhat'), hbEl = document.getElementById('kalHb');
-    var ecg = document.getElementById('kalEcg');
-    if(ecg && s && s.active === true){ ecg.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, kalshiHeartbeat(s, now).state, kalshiReads, kalshiOrderTimes(now)); }
-    if(t && s && s.active === true){
-      var hb = kalshiHeartbeat(s, now), halted = !!(kalshiBotState.control && kalshiBotState.control.halt === true);
-      t.textContent = (halted ? 'Paused' : (hb.state === 'ok' ? 'Alive' : (hb.state === 'quiet' ? 'Quiet' : 'No check for a while'))) + (hb.ageSec !== null ? '. Last check ' + kalshiAgeText(hb.ageSec) : '');
-      if(hbEl){ hbEl.className = 'kal-hb ' + (halted ? '' : hb.state); }
-    }
-    if(nx){
-      var stNow = kalshiLiveStateNow(now), ne = kalshiNextEntry(now, stNow), ringEl = document.getElementById('kalRing'), nameEl = document.getElementById('kalNextName'), thenEl = document.getElementById('kalNextThen'), offEl = document.getElementById('kalNextOff');
-      var offList = KAL_LOOKS.filter(function(l){ return stNow[l.sid] === 'off'; }).map(function(l){ return l.who; });
-      if(offEl){ offEl.textContent = offList.length ? offList.join(', ') + ': off, cooling down' : ''; }
-      var rulesLiveEl = document.getElementById('kalRulesLive');   // Rules text follows the latch (Nov 13, 2026): gold shows off while it is tripped; if the latch cannot be read the static line stays
-      if(rulesLiveEl){ rulesLiveEl.textContent = stNow.L1 === 'off' ? 'Gold is off, cooling down: its kill latch tripped and it places no new orders until its paper record clears its return bar.' : 'Markets trading now: gold.'; }
-      if(!ne){ nx.textContent = '\u2014'; if(what){ what.textContent = ''; } if(nameEl){ nameEl.textContent = 'No strategy armed'; } if(thenEl){ thenEl.textContent = ''; } if(ringEl){ ringEl.setAttribute('stroke-dashoffset', '402'); } }
-      if(ne){
-        var sec = Math.ceil(ne.inMs / 1000); nx.textContent = Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60);
-        if(what){ what.textContent = ne.what; } if(nameEl){ nameEl.textContent = ne.name; } if(thenEl){ thenEl.textContent = ne.then; }
-        if(ringEl){ ringEl.setAttribute('stroke-dashoffset', String(Math.round(402 * (1 - ne.frac)))); }
-      }
-    }
-  }
-  var kalshiStatusTimer = null, kalshiBeats = [], kalshiReads = [];
+  var kalshiBeats = [], kalshiReads = [];
 
   function renderKalshiL1(){
     kalshiSoundCheck();
@@ -4222,7 +4090,7 @@ kalshiStatusTick();
     document.getElementById('kalL1Status').hidden = running;      // the running status lines are in Bot status; the pop-over keeps only the controls
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
-    renderKalshiStatus();
+    kalshiSyncRules();
   }
   // ---------- Strategies (the owner, Oct 29 to 30, 2026: "build the entire page to be 'overall' with maybe some identifiers & ... one module that displays the unique strategies") ----------
   // One Overall page, no switch: every card shows every order the bot placed, L1's and the second slot's, and a small chip on a row says which strategy it came from. The slot's orders come from kalshiSlotOrders (admin read,
@@ -4278,54 +4146,7 @@ kalshiStatusTick();
     out.net = Math.round(out.net * 10000) / 10000; out.today = Math.round(out.today * 10000) / 10000; out.pf = out.gl > 0 ? out.gw / out.gl : null; out.last = out.last.slice(-6).reverse();
     return out;
   }
-  // The Strategies module: one row per strategy. rows: [{ id, info, sum, status, ageText }]. Dollar figures go through money (Privacy view masks them); a percentage is never masked.
-  // opts (optional): { rangeLabel, age(sum), partial }. Result, Settled and Win rate follow the range chosen under Account result, so the Result column adds up to that card's figure; the last row is that total.
-  function kalshiStrategiesTableHtml(rows, esc, money, opts){
-    opts = opts || {};
-    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    var cls = function(v){ return v > 0 ? ' kal-pos' : (v < 0 ? ' kal-neg' : ''); };
-    var cell = function(r, name, chip){
-      var dec = r.sum.won + r.sum.lost, wr = dec > 0 ? (r.sum.won / dec * 100).toFixed(1) + '%' : 'n/a';
-      return '<tr' + (chip ? '' : ' class="kal-strat-total"') + '><td data-label="Strategy">' + (chip ? kalshiChipHtml(r.id, esc) : '') + esc(name) + (r.info.markets ? '<span class="kal-strat-mk">' + esc(r.info.markets) + '</span>' : '') + '</td><td data-label="Markets"' + (r.info.markets ? '' : ' class="kal-nil"') + '>' + esc(r.info.markets) + '</td>' +
-        '<td data-label="Today" class="' + cls(r.sum.today).trim() + '">' + esc(sg(r.sum.today)) + '</td><td data-label="Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '" class="' + cls(r.sum.net).trim() + '">' + esc(sg(r.sum.net)) + '</td><td data-label="Settled">' + esc(String(r.sum.n)) + '</td><td data-label="Win rate">' + esc(wr) + '</td><td data-label="Open">' + esc(String(r.sum.open.length)) + '</td><td data-label="Last order">' + esc(r.ageText) + '</td></tr>';
-    };
-    var body = '', totalRow = '';
-    if(rows.length > 1){
-      var t = { today: 0, net: 0, n: 0, won: 0, lost: 0, open: [], lastTs: null };
-      rows.forEach(function(r){ t.today += r.sum.today; t.net += r.sum.net; t.n += r.sum.n; t.won += r.sum.won; t.lost += r.sum.lost; t.open = t.open.concat(r.sum.open); if(r.sum.lastTs !== null && (t.lastTs === null || r.sum.lastTs > t.lastTs)){ t.lastTs = r.sum.lastTs; } });
-      t.today = Math.round(t.today * 10000) / 10000; t.net = Math.round(t.net * 10000) / 10000;
-      totalRow = cell({ info: { markets: '' }, sum: t, status: '', ageText: opts.age ? opts.age(t) : '' }, 'All strategies', false);
-    }
-    body = totalRow + rows.filter(function(r){ return !r.hidden; }).map(function(r){ return cell(r, r.info.name, true); }).join('');   // a hidden row (a removed strategy with nothing open) still counts in the total above   // the total is the first row (the owner, Oct 30, 2026): it is the account figure, the strategies are its parts
-    var notes = '';   // no explanatory text under the table (the owner, Oct 30, 2026); only a real problem is said
-    if(opts.slotError){ notes = '<div class="kal-note kal-warn">The second strategy\'s orders cannot be read (' + esc(opts.slotError) + '), so its row may show no orders even if it has traded. This is a page permission, not the bot.</div>' + notes; }
-    return '<div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
-      (opts.partial ? '<div class="kal-note">Older trades are still loading or could not be read, so this covers the latest orders only.</div>' : '');
-  }
-  function renderKalshiStrategies(){
-    var tbl = document.getElementById('kalStrategies');
-    if(!tbl){ return; }
-    var now = Date.now(), ses = kalshiLiveCtl && kalshiLiveCtl.session, on = !!(ses && ses.active === true);
-    var age = function(sum){ return sum.lastTs === null ? 'No order yet' : kalshiAgeText(Math.max(0, Math.round((now - sum.lastTs) / 1000))); };     // the text already ends in "ago"
-    var acct = kalshiLiveAcct, fills = acct && acct.fills && acct.fills.ok ? kalshiGroupFills(acct.fills.fills) : [];      // the same inputs as the Account card, so Today and Result agree to the cent (the owner, Oct 30, 2026: "pnl doesnt match")
-    // The same range and the same orders as the Account result card (its older read included once it has arrived), so the Result column adds up to that card's figure.
-    var key = kalshiPnlRange, since = kalshiPnlRangeStart(key, now), hit = kalshiPnlFetched[key];
-    var loaded = (kalshiLiveOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); }), oldest = loaded.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
-    var needsOlder = loaded.length >= 1000 && since < oldest, l1src = kalshiLiveOrders, partial = false;
-    if(needsOlder){ var pick = hit ? kalshiPnlSource(kalshiLiveOrders, hit) : null; if(pick && !hit.failed){ l1src = pick.orders; } else { partial = true; } }
-    var rangeLabel = (KAL_PNL_RANGES.filter(function(r){ return r.key === key; })[0] || { label: key }).label;
-    var l1Orders = kalshiResolveOrders(l1src, acct && acct.results, fills);
-    var l1 = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1' && kalshiIsActive(o); }), now, since);   // only the markets L1 trades now (the owner, Nov 4, 2026: the row said Gold but carried Dogecoin's and other paused markets' old results); those stay in All strategies
-    var liveState = kalshiLiveStateNow(now);
-    var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: !on ? 'Stopped' : (liveState.L1 === 'off' ? 'Off, cooling down' : 'Running'), ageText: age(l1) }];
-    kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
-      var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now, since);
-      // A strategy no longer in the bot's registry (FLOW1, removed Nov 4, 2026) is hidden once nothing of it is open (the owner, Nov 4, 2026: "Hide it"); its result still counts in All strategies.
-      var gone = KAL_SLOT_REGISTERED.indexOf(id) < 0;
-      rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum), hidden: gone && !sum.open.length });
-    });
-    tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney, { rangeLabel: rangeLabel, age: age, partial: partial, slotError: kalshiSlotError });     // hidden is the Layout menu's to set, never this render's
-  }
+  // The per-strategy table that sat in the Account card was removed Nov 16, 2026 (the owner: "i still see the strategies"); every strategy result lives on the Strategies page.
   // ---------- Strategies page (Nov 9, 2026 as a Bot page card; Nov 10, 2026 its own page, the owner: "an entirely new page for strategies"): every strategy in three groups, LIVE, ON DECK and RETIRED; profit factor first, always on the CASH basis ----------
   // Page only: it reads the orders the page already holds and, once per page load (kept 10 minutes), the shadow log; it writes nothing and has no timer. Dollars go through money (Privacy view masks them); PF and counts are never masked.
   // The cash rule is a port of fillCost in the bot's kalshiLiveLib (a test pins the port to it on fixtures); the kill constants and the shadow rule ids are copies (tests fail if they drift from the bot's code).
@@ -5138,7 +4959,7 @@ kalshiStatusTick();
     return kalshiStrategyState({ gold: kalshiGoldCardState(kalshiGoldCache, now, KAL_GOLD_READ_TIMEOUT), registry: kalshiRegistry.list, slotIds: KAL_SLOT_REGISTERED, shadowIds: KAL_BOARD_SHADOW.map(function(r){ return r.id; }) });
   }
   // Both the Bot page and the Strategies page need the same two reads (the latch, the registry file); either page starts them, and when one answers both are redrawn.
-  function kalshiStateChanged(){ renderStrategiesPage(); if(typeof renderKalshiStatus === 'function'){ renderKalshiStatus(); } if(typeof renderKalshiStrategies === 'function'){ renderKalshiStrategies(); } }
+  function kalshiStateChanged(){ renderStrategiesPage(); if(typeof kalshiSyncRules === 'function'){ kalshiSyncRules(); } }
   function kalshiGoldEnsure(){
     var api = window.__shwoopAPI;
     if(kalshiGoldLoading || !api || !api.readKalshiGoldKill || !currentUserIsAdmin){ return; }
@@ -5522,14 +5343,10 @@ kalshiStatusTick();
     // The account is read when the tab opens and then once a minute while it stays visible: three GET requests, read only.
     kalshiAcctRefresh();
     kalshiAcctTimer = setInterval(function(){ if(!document.hidden){ kalshiAcctRefresh(); } }, 600000);
-    kalshiStatusTimer = setInterval(function(){ if(!document.hidden){ kalshiStatusTick(); } }, 1000);
-    kalshiEcgStart();
     renderKalshiBot();
   }
   function stopKalshiBot(){
     if(kalshiAcctTimer){ clearInterval(kalshiAcctTimer); kalshiAcctTimer = null; }
-    if(kalshiStatusTimer){ clearInterval(kalshiStatusTimer); kalshiStatusTimer = null; }
-    kalshiEcgStop();
     kalshiBeats = []; kalshiReads = [];
   }
   // A heartbeat only goes stale on screen if the page keeps re-judging its age.
@@ -5586,10 +5403,10 @@ kalshiStatusTick();
   // below which its body scrolls. Both are set in Edit layout by dragging the card's bottom right corner or with its buttons, and both are ignored on a phone (one column, every card at its own height).
   // The account card can be moved and folded but never hidden: its Running pill holds Start, Pause and Flatten, which must always be on screen. Saved in this browser and to the account.
   (function(){
-    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
-    var LABELS = { account: 'Account', status: 'Bot status', positions: 'Open positions', trades: 'Recent trades' };
-    var CARDS = ['account', 'status', 'positions', 'trades'];   // the default order. The Account result card was merged into the Account card on Nov 16, 2026 (the owner); a saved layout that still names 'pnl' drops it (complete keeps known names only)
-    var WIDTHS = { account: 12, status: 12, positions: 12, trades: 12 };   // Bot status is full width since its half-width neighbour, the Account result card, moved into the Account card   // the default spans: the same look as the old Half (6) and Full (12)
+    var OPTIONAL = [['positions', 'Open positions'], ['trades', 'Recent trades']];
+    var LABELS = { account: 'Account', positions: 'Open positions', trades: 'Recent trades' };
+    var CARDS = ['account', 'positions', 'trades'];   // the default order. The Account result card was merged into the Account card on Nov 16, 2026 (the owner); a saved layout that still names 'pnl' drops it (complete keeps known names only)
+    var WIDTHS = { account: 12, positions: 12, trades: 12 };   // the default spans: the same look as the old Half (6) and Full (12)
     var SPANS = [3, 4, 6, 8, 12], SPAN_TEXT = { 3: '1/4', 4: '1/3', 6: '1/2', 8: '2/3', 12: 'Full' }, SPAN_WORDS = { 3: 'a quarter of the width', 4: 'a third of the width', 6: 'half the width', 8: 'two thirds of the width', 12: 'the full width' };
     var H_STEP = 40, H_MIN_BODY = 120, H_MAX = 3000, H_STEPS = [240, 360, 480, 600];   // a set height snaps to 40px and never goes below the head plus 120px of body (or the card's own height, if that is less)
     var NO_HEIGHT = { account: true };   // the Account card's Start, Pause and Flatten menu hangs below its head, so a set height could cut it off: that card only changes width
@@ -6182,7 +5999,6 @@ kalshiStatusTick();
   }
   renderKalshiBot = kalshiKeepScroll(renderKalshiBot);
   renderKalshiPnl = kalshiKeepScroll(renderKalshiPnl);
-  renderKalshiStatus = kalshiKeepScroll(renderKalshiStatus);
   renderKalshiBooks = kalshiKeepScroll(renderKalshiBooks);
   renderStrategiesPage = kalshiKeepScroll(renderStrategiesPage);   // the Strategies page redraws on every feed update too; keep its scroll put (Nov 13, 2026)
 
