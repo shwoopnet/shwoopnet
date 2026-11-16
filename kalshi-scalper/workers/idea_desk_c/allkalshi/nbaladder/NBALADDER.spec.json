@@ -90,8 +90,9 @@
   "sha256": "965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063",
   "hand_case_file": "test_nbaladder.py",
   "hand_case_sha256": "fd60c47a7c493eabb8016ee0d9a00c871799bff93de292ad2941aada0e8dba15",
-  "auditor_clean_date": null,
-  "note": "awaiting audit; volume extension deskc_candles_vol.py sha256 98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a"
+  "auditor_clean_date": "2026-11-16",
+  "note": "CLEAN (Auditor B, 2026-11-16); volume extension deskc_candles_vol.py sha256 98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a",
+  "volume_extension_sha256": "98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a"
  },
  "event": {
   "scorer_plugin": "nbaladder.py",
@@ -139,5 +140,6 @@
  "exits_rule": "M10: no mark = counted and held to settlement (H); printed both ways",
  "tally": {
   "carried_m": "asked of the Head; the plugin takes it as an argument and prints m_total"
- }
+ },
+ "print_note": "print the count and the names of the rungs absent from the candle jobs (5,813 requested of 5,851 listed: 38 absent, expected from clock-dropped games or rungs closed before the earliest decision)"
 }
