@@ -9,6 +9,7 @@ def main(base, out):
     rep = D.run({"archive": wa})
     rep["loader_drops_archive"] = ca; rep["loader_drops_perps"] = cp; rep["perps_block"] = "not run (separate driver)"
     rep["rule_hashes"] = {f: hashlib.sha256(open(os.path.join(here, f), "rb").read()).hexdigest()[:16] for f in ("engine1_core.py", "engine1_enum.py", "engine1_split.py", "engine1_driver.py", "engine1_extract_load.py", "engine1_run.py")}
+    rep["tried_by_series"] = {"%s|%s" % k: v for k, v in rep["tried_by_series"].items()}      # JSON keys must be strings (the first attempt of run 1 died here, after the compute, before any print)
     json.dump(rep, open(out, "w"), indent=1, default=str)
     print("wrote", out, json.dumps(rep["rule_hashes"]))
 if __name__ == "__main__":
