@@ -1,0 +1,5 @@
+ENGINE1 batch C prints (Desk A, Nov 16 2026), carried m 6,290,660. sha256 of each output file, committed BEFORE any is read. Runner engine1_batchc_run.py 34aa9171, engine engine1_batchc.py ba77f70c.
+7af0875b7357a17032498abd81efea2b1e44f22fb72edccfc97f704a9346b970  out_ENGC1ETHMOM.json
+81db4d68256e69ed7b8e94cc78b632a03bb7dcbf229e47ccfb3a6d12d2e16ad3  out_ENGC2OIACC.json
+c3539cb0f98fb5d73867fd28ce26ebd79d17872287adf30934dd7bee8eed73a3  out_ENGC3TOD.json
+a42bc17d6821bdd77e86c67c2945fb7771f0e893fac66e80afae6261e8de7f39  out_ENGC4GOLDX.json
