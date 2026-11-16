@@ -37,7 +37,7 @@ gates['EV1 the registry entry is exactly the registered probe: eight L1-free mar
     forwardReadDate: '2026-12-07', reviewedAt: '2026-11-05',
   });
   assert.ok(slot.validateSlotStrategy(ev).ok, JSON.stringify(slot.validateSlotStrategy(ev).errors));
-  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-13');   // moved with the SPXOI1 seat (Nov 13, 2026)
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-15');   // moved with the OIREL1 and XRPFAV10 seats (Nov 15, 2026)   // moved with the SPXOI1 seat (Nov 13, 2026)
   assert.ok(SERIES.every((s) => !live.L1_SERIES.includes(s)), 'none of its markets is an L1 market, so it can never sit against an L1 position');
   assert.ok(!(slot.SLOT_LIMIT_SLIP && Object.prototype.hasOwnProperty.call(slot.SLOT_LIMIT_SLIP, 'EVENT830')), 'no slip: the limit is the price it sees, never above 50c');
   const readme = fs.readFileSync(path.join(root, 'kalshi-scalper', 'README.md'), 'utf8');
@@ -109,7 +109,7 @@ gates['EV5 one contract: whatever is asked for, one contract is the most the gat
 };
 
 gates['EV6 holding to settlement and the eight markets are this id\'s alone: another strategy copying them is refused'] = () => {
-  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1']);
+  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830', 'CFRTIK', 'SPXOI1', 'OIREL1', 'XRPFAV10']);
   const copy = (o) => Object.assign(JSON.parse(JSON.stringify(ev)), o);
   assert.ok(slot.validateSlotStrategy(copy({})).ok);
   assert.ok(!slot.validateSlotStrategy(copy({ id: 'EVENT831' })).ok, 'another id may not hold, use the eight markets or the calendar');
@@ -141,7 +141,8 @@ gates['EV7 nothing stored can add a date: the calendar is a frozen constant, rea
 };
 
 gates['EV8 the extra markets are read only around a listed window: zero reads on any other minute of Nov and Dec 2026, eight series in the two minutes before each release'] = () => {
-  const strategies = slot.activeSlotStrategies();
+  const strategies = slot.SLOT_STRATEGIES;   // the full registry: EVENT830 stays registered (open orders keep their rules) but sends no new orders since Nov 15, 2026
+  assert.deepStrictEqual(slot.slotCalendarSeriesDue(slot.activeSlotStrategies(), Date.parse('2026-11-05T13:27:00Z')), [], 'production: EVENT830 is paused for new entries, so the minute function reads none of its eight markets');
   let dueMinutes = 0;
   for (let t = Date.parse('2026-11-03T00:00:00Z'); t < Date.parse('2027-01-02T00:00:00Z'); t += 60000) {
     const due = slot.slotCalendarSeriesDue(strategies, t);

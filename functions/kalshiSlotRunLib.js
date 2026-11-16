@@ -63,6 +63,15 @@ function oiRiseFromCandles(candles, closeSec) {
   return a === null || b === null ? null : Math.round((a - b) * 100) / 100;
 }
 
+// OIREL1 (Nov 15, 2026): the RELATIVE rise, (open interest at the candle ending 180 s before the close minus the one ending 360 s before it) over the latter. A missing candle or an open interest of 0 or less at the 360 s
+// candle (the denominator) is no data (null), never interpolated; the ratio uses the raw difference.
+function oiRelFromCandles(candles, closeSec) {
+  if (!Array.isArray(candles) || !Number.isFinite(closeSec)) return null;
+  const at = (sec) => { const c = candles.find((x) => x && Number(x.end_period_ts) === sec); const v = c ? num(c.open_interest_fp) : NaN; return Number.isFinite(v) ? v : null; };
+  const a = at(closeSec - 180), b = at(closeSec - 360);
+  return a === null || b === null || !(b > 0) ? null : (a - b) / b;
+}
+
 // Skip reasons (Nov 5, 2026, the owner: "Save skip reasons"). LOG ONLY: when a registered strategy has a market inside its entry time span and this tick sends no order for it, the tick hands one
 // small record per strategy and ticker to args.recordSkip (index.js writes it to kalshiSlotSkips/{strategy}_{ticker}, overwriting, so the LATEST reason of a window is what is kept). Nothing that decides an
 // order reads that collection. The records are handed over only AFTER every order of the minute was sent (or at a return that sends nothing), the writes in parallel, every error swallowed, so a
@@ -241,14 +250,17 @@ function makeRunners(flags) {
       const touch = side === "yes" ? limitSide : Math.round((1 - limitSide) * 100) / 100;     // the YES price the order goes to, which is what Kalshi's body carries
       const depth = num(side === "yes" ? m.yes_ask_size_fp : m.yes_bid_size_fp);
       // The open interest condition (public candles, no key): open interest at the candle ending 180 s before the close minus the one ending 360 s before it. Any missing candle is no order.
-      let oiRise = null;
-      if (Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMin")) {
+      let oiRise = null, oiRel = null;
+      if (Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMin") || Object.prototype.hasOwnProperty.call(s.entry, "oiRelMin")) {
         const closeSec = Math.round(Date.parse(m.close_time) / 1000);
         const cr = await live.liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
           params: { start_ts: String(closeSec - 480), end_ts: String(closeSec - 60), period_interval: "1" }, nowMs: now });
-        oiRise = oiRiseFromCandles(cr.status === 200 && cr.body ? cr.body.candlesticks : null, closeSec);
-        if (oiRise === null) { skip(job, "no_oi_candle", { http: cr.status }); results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
-        if (oiRise < s.entry.oiRiseMin) { skip(job, "oi_below", { oiRise, min: s.entry.oiRiseMin }); results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
+        const candleList = cr.status === 200 && cr.body ? cr.body.candlesticks : null;
+        oiRise = oiRiseFromCandles(candleList, closeSec);
+        if (Object.prototype.hasOwnProperty.call(s.entry, "oiRelMin")) oiRel = oiRelFromCandles(candleList, closeSec);
+        if (oiRise === null || (Object.prototype.hasOwnProperty.call(s.entry, "oiRelMin") && oiRel === null)) { skip(job, "no_oi_candle", { http: cr.status }); results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
+        if (Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMin") && oiRise < s.entry.oiRiseMin) { skip(job, "oi_below", { oiRise, min: s.entry.oiRiseMin }); results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
+        if (Object.prototype.hasOwnProperty.call(s.entry, "oiRelMin") && !(oiRel > s.entry.oiRelMin)) { const r4n = Number(oiRel.toFixed(4)); skip(job, "oi_below", { oiRise, oiRel: r4n, min: s.entry.oiRelMin }); results.push(ticker + ": open interest rose " + r4n + " of its level, not above " + s.entry.oiRelMin + ", no signal"); continue; }
       }
       if (oiRise !== null) { const qn = (x) => (typeof x === "number" && Number.isFinite(x) ? x : null); qualified.set(s.id + "|" + ticker, { qualified: true, oiRise: qn(oiRise), side: side === "yes" || side === "no" ? side : null, price: qn(sidePrice) }); }
       // A strategy that skips its very cheapest entries (SLOT_SKIP_BELOW; OICORE under 8c): the signal passed every other test, so the skip is logged with the price and nothing is sent.
@@ -298,7 +310,7 @@ function makeRunners(flags) {
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, refEdge: refDec ? refDec.edge : undefined, oiRise, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, refEdge: refDec ? refDec.edge : undefined, oiRise, oiRel, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -320,7 +332,7 @@ function makeRunners(flags) {
         if (!Number.isFinite(avail)) return { allowed: false, code: "balance_unreadable", reason: "the balance came back in a shape this code does not recognise" };
         if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, code: "shard_short", detail: { shard: Number(m.exchange_index), avail: Number(avail.toFixed(2)), need: Number((c.cost + BALANCE_MARGIN).toFixed(2)) }, reason: "only $" + avail.toFixed(2) + " on its shard" };
         const record = slotLib.slotOrderRecord({ strategyId: s.id, ticker, side, step, count: c.count, limit: touch, maxCost: Number(c.cost.toFixed(2)), ts: now });
-        Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRise: typeof oiRise === "number" && Number.isFinite(oiRise) ? oiRise : null,
+        Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRel: typeof oiRel === "number" && Number.isFinite(oiRel) ? Number(oiRel.toFixed(6)) : null, oiRise: typeof oiRise === "number" && Number.isFinite(oiRise) ? oiRise : null,
           ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
         if (flow !== null) record.flow = Number(flow.toFixed(4));
@@ -596,5 +608,5 @@ async function findOrder({ fetchFn, keyId, pem, ticker, clientOrderId }) {
 const prod = makeRunners(undefined);
 module.exports = {
   runSlotTick: prod.runSlotTick, runSlotExits: prod.runSlotExits, slotExitIdle: prod.slotExitIdle, runSlotSettle: prod.runSlotSettle, unsoldOf, EXIT_LOOKBACK_MS,
-  _testOnly: Object.freeze({ makeRunners, oiRiseFromCandles, flowFromTrades, checkReasonCode }),
+  _testOnly: Object.freeze({ makeRunners, oiRiseFromCandles, oiRelFromCandles, flowFromTrades, checkReasonCode }),
 };
