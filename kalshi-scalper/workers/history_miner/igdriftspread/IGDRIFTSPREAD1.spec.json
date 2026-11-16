@@ -27,8 +27,8 @@
  },
  "tries": {
   "rules_this_spec": 12,
-  "prior_m": "from ENGINE_TALLY.json (sha256 at signing)",
-  "note": "m printed first: 12 this spec, 23 with IGDRIFTGRID1, 24 with IGLATEDRIFT1's cell"
+  "prior_m": "m_carried = 6,290,660 (the Head's ruling of 2026-11-16 18:35Z, one value for every print of the day), printed as the header together with 12 for this spec; the in-game specs together are 33",
+  "note": "m printed first: 12 this spec, 23 with IGDRIFTGRID1, 24 with IGLATEDRIFT1's cell, 33 with every in-game spec"
  },
  "kill_fast": true,
  "uniqueness": {
@@ -88,8 +88,8 @@
    "label": "this spec's forward window (ingame rows and listing closes)",
    "start_epoch": 1794873600,
    "end_epoch": 1797292799,
-   "card": "IGFADE2 IGLATEDRIFT1 IGDOG1",
-   "status": "OPEN (owned by these three specs, Auditor B 2026-11-16 16:20Z)"
+   "card": "IGFADE2 IGLATEDRIFT1 IGDOG1 IGDRIFTGRID1 IGDRIFTSPREAD1 IGPERIOD1",
+   "status": "OPEN (owned by these in-play specs, Auditor B 2026-11-16 16:20Z; an in-play read under H04 as narrowed to in_play)"
   },
   {
    "label": "ingame rows Nov 13 to Nov 16, held and unread by any spec",
