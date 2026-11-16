@@ -7,8 +7,8 @@ Both use the historical lists of ECONHIST_LISTS (landing pending) for the event 
 - **Rule (frozen):** among the markets of the event whose mid at T-3h (hourly candle ending then) is between 0.20 and 0.80, compute rise = mid at T-30min minus mid at T-3h on 5-minute candles. Pick the market with the largest absolute rise if it is at least 0.05 (ties: lowest ticker); the side to buy is the side that rose (YES if mid rose, NO if it fell). Buy at the T-30min candle's ask plus 1c if that price is between 0.15 and 0.85, else no trade. One entry per event.
 - **Exits (both registered):** HOLD to settlement (primary read); EARLY: sell at the bid of the 5-minute candle ending T+5min, minus 1c. Both are reported; the primary is HOLD.
 - **Primary series:** KXJOBLESSCLAIMS only (weekly, up to about 100 events before 2026-09-10; the only series with enough events). KXPAYROLLS, KXUE, KXCPINDEX, KXUSPPIYOY, KXISMPMI, KXUSISMSERV, KXCONTCLAIMS are reported as description and are not tries. KXCPI and KXPCECORE, only before 2025-09-26, description.
-- **Bar:** n at least 60 trades; cash PF 1.3 or better at 1c, PF 1.0 or better at 2c, both halves (first floor(n/2) by close time) PF 1.0 or better, no event date over 30% of net. Under 60 trades: "no evidence at n = x".
-- **Prediction (written now):** n 60 to 90; PF near 1.0 at 1c; fails at 2c. Kill: a read that misses the bar closes the card; no variants.
+- **Bar:** n at least 100 trades (amended Nov 16, before any read, on the Head's order: the standing evidence floor; it was 60); cash PF 1.3 or better at 1c, PF 1.0 or better at 2c, both halves (first floor(n/2) by close time) PF 1.0 or better, no event date over 30% of net. Under 100 trades: "no evidence at n = x".
+- **Prediction (written now):** n 60 to 90, so under the floor of 100: "no evidence at n = x" is the likely read; PF near 1.0 at 1c; fails at 2c. Kill: a read that misses the bar closes the card; no variants.
 - **Data needed (pull through Main):** for the primary series' events: 5-minute candles for each event's markets whose hourly mid at T-3h is contested, T-3h to T+10min. Request count to be sized from the landed lists (events x contested markets); if over 420 requests the pull is cut to the most recent events first, stated before the read.
 
 ## FADEPRINT1: fade the first move after the release
@@ -22,3 +22,7 @@ Both use the historical lists of ECONHIST_LISTS (landing pending) for the event 
 
 ## Notes
 Both cards are for the one primary series, so each is one try. Neither touches the Fed series or FEDIMPL1's holdout. Inputs go to the Testing Desk as a list (landed folders with hashes, card file:line), no code. Expected figures and a hand case come before any scorer; Auditor B's quick check after one build.
+
+## Dated amendment (Nov 16, 2026, 15:25Z, before any data or read; the Head's order)
+1. **FADEPRINT1 is WITHDRAWN** before any read, no try counted: it is ECONFADE's mechanism re-tested, so it falls under the owner's no-variants order. Its section above is kept only as the record of what was withdrawn.
+2. **DRIFTPRINT1's evidence floor is n 100** (the standing rule), not 60; under 100 the label is "no evidence at n = x". The thresholds, series and exits are unchanged.
