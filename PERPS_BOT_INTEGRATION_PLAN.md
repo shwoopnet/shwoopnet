@@ -11,6 +11,12 @@ RESEARCH ONLY. Nothing here is built or live. A perps strategy goes live only af
 - Whether perps use a separate margin balance (a shard, like the event markets), and how money moves into it. The bot must never move money; topping up is the owner's, by hand.
 - Trading hours per class (stocks: regular session only, or 24/7 like crypto?), halts and their handling.
 
+## 1b. Early finding from the owner's live UI (Nov 16; not final until the order ticket and asset details are in)
+- The perps position appears to be funded from the SAME cash balance as the event market account, not a separate margin balance (the header's cash plus the position value equals the portfolio exactly).
+- Size is entered as a position value in dollars; leverage is chosen per position (other traders show about 2x to 4x); the ticket offers market orders.
+- One test fill implies about 12 bps a side taker cost plus spread, about 0.24% round trip, which matches the research placeholder.
+- Consequences: (a) perps P&L and margin move the event bot's sizing base and its loss stops unless the code separates them, so the Risk Analyst must decide whether the stops count perps; (b) the event bot's Flatten and exit watch iterate their own order documents and do not touch perps, so an open perp has no exit watch today; (c) any perps strategy needs its own sleeve limit as a share of the shared balance, so it can never starve the event strategies of cash.
+
 ## 2. API work (Main builds, after a passing strategy and the owner's popup)
 - Read: the perps market list, book top, candles and funding history (public), plus our own positions, orders and margin (signed, the existing key only if Kalshi uses the same key, entered only through the secure credential form).
 - Write: place a limit or immediate-or-cancel order, cancel, reduce-only close. No market order without a price cap.
