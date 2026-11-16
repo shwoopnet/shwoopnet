@@ -43,7 +43,7 @@
    "last_close_exclusive": "2026-11-17T00:00:00Z"
   },
   "held_out_map_checked_by": "PENDING (Auditor B)",
-  "independence_note": "DEVELOPMENT: the stock perps days Nov 6 to 16 have been read five times (OPENGAP1, OPENGAP2, PERPSCALP1, ENGINE1 read 1, POOL1) and gold, US 500 and US Tech 100 by ENGINE1 perps passes and PERPGEN; every development figure reads 'development, read 6 times, not independent'. The forward read from 2026-11-17 is the test."
+  "independence_note": "DEVELOPMENT: the stock perps days Nov 6 to 16 have been read 5 times (OPENGAP1, OPENGAP2, PERPSCALP1, ENGINE1 read 1, POOL1) and gold, US 500 and US Tech 100 by ENGINE1 perps passes and PERPGEN; every development figure reads 'development, read 5 times, not independent'. The forward read from 2026-11-17 is the test."
  },
  "split": {
   "mode": "fixed_dates",
