@@ -88,11 +88,12 @@ def stats(es, ex, candles, span):
         if c2 is None: continue
         ts.append((e["day"], c2, c1))
     k = len(ts); h = k // 2; v2 = [t[1] for t in ts]
-    return {"n": k, "days": len(set(t[0] for t in ts)), "per_day": (k / span) if span else 0.0, "pf2": pf(v2), "h1": pf(v2[:h]), "h2": pf(v2[h:]), "pf1": pf([t[2] for t in ts]), "z": z_day([(t[0], t[1]) for t in ts]), "marked": k}
+    ev = len(set(e["close_ts"] for e in es if cash(e, ex, H2, candles) is not None))
+    return {"n": k, "events": ev, "days": len(set(t[0] for t in ts)), "per_day": (k / span) if span else 0.0, "pf2": pf(v2), "h1": pf(v2[:h]), "h2": pf(v2[h:]), "pf1": pf([t[2] for t in ts]), "z": z_day([(t[0], t[1]) for t in ts]), "marked": k}
 
 
 def ge(x, lim): return (not math.isnan(x)) and x >= lim
-def passes(s): return s["n"] >= 100 and ge(s["pf2"], 1.3) and ge(s["h1"], 1.0) and ge(s["h2"], 1.0) and s["days"] >= 10 and s["per_day"] >= 3
+def passes(s, search=True): return s["n"] >= 100 and s["events"] >= 40 and ge(s["pf2"], 1.3) and ge(s["h1"], 1.0) and ge(s["h2"], 1.0) and s["days"] >= 10 and (s["per_day"] >= 3 if search else True)          # 3 signals a day is gated in SEARCH only (spec 20cfbf65); 40 distinct hourly closes (events) per cell
 
 
 def bh(pvals, m, q=0.05):
@@ -117,6 +118,6 @@ def run(markets, candles, m=M_TOTAL):
                 key = (band, f, ex); out["rules"][key] = (ss, vs)
                 if passes(ss):
                     out["search_passes"].append(key)
-                    if passes(vs): out["validate_passes"].append(key); pv[key] = p_upper(vs["z"])
+                    if passes(vs, search=False): out["validate_passes"].append(key); pv[key] = p_upper(vs["z"])
     out["survivors"] = sorted(bh(pv, m))
     return out

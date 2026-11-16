@@ -33,9 +33,10 @@ def day_es(days): return [{"day": d, "close_ts": d * 86400, "ticker": "t%d" % d}
 s, v, last = m.split(day_es(range(10, 29))); assert last == 18 and len(s) == 9 and len(v) == 10          # D = 19: floor(19/2) = 9 days SEARCH
 s, v, last = m.split(day_es(range(10, 20))); assert last == 14 and len(s) == 5 and len(v) == 5
 # the gate boundaries
-base = {"n": 100, "pf2": 1.3, "h1": 1.0, "h2": 1.0, "days": 10, "per_day": 3.0}
-assert m.passes(base)
-for kill in ({"n": 99}, {"pf2": 1.299}, {"h1": 0.999}, {"h2": 0.999}, {"days": 9}, {"per_day": 2.99}, {"pf2": math.nan}): assert not m.passes(dict(base, **kill)), kill
+base = {"n": 100, "events": 40, "pf2": 1.3, "h1": 1.0, "h2": 1.0, "days": 10, "per_day": 3.0}
+assert m.passes(base) and m.passes(dict(base, per_day=0.1), search=False) and not m.passes(dict(base, per_day=0.1))          # 3 a day is a SEARCH gate only
+assert not m.passes(dict(base, events=39), search=False)
+for kill in ({"events": 39}, {"n": 99}, {"pf2": 1.299}, {"h1": 0.999}, {"h2": 0.999}, {"days": 9}, {"per_day": 2.99}, {"pf2": math.nan}): assert not m.passes(dict(base, **kill)), kill
 assert m.bh({"a": 7.9e-9, "b": 0.5}, 6290756) == {"a"} and m.bh({"a": 8e-9}, 6290756) == set() and m.bh({"a": 0.05 / 6290756}, 6290756) == {"a"}
 # a rigged run: 20 days x 10 strikes, cheap YES at 10c, nine winners a day (one loser on alternate days)
 mkts, cds = {}, {}
@@ -59,4 +60,13 @@ st = m.stats([o1, o2], "H", {}, 1); assert abs(st["pf2"] - 8.72 / 1.28) < 1e-9 a
 # a rule that passes SEARCH and fails VALIDATE is not a validate pass
 mk2 = dict(mkts); mk2 = {tk: dict(v, result=("no" if v["close_ts"] >= T(2026, 10, 28, 15, 0, 0) + 10 * 86400 else v["result"])) for tk, v in mkts.items()}
 r2 = m.run(mk2, cds); assert (2, "none", "H") in r2["search_passes"] and (2, "none", "H") not in r2["validate_passes"] and r2["survivors"] == []
+# 100 entries from fewer than 40 hourly closes do not pass (the 40 event floor), the same entries from 100 closes do
+mk3, cd3 = {}, {}
+for d in range(20):
+    for j in range(10):
+        c = T(2026, 10, 28, 15, 0, 0) + d * 86400 + (0 if j < 5 else 3600); tk = "S%02d%02d" % (d, j); mk3[tk] = {"close_ts": c, "result": "no" if (j == 0 and d % 2 == 0) else "yes"}; cd3[tk] = {c - 120: (0.09, 0.10), c - 60: (0.30, 0.32)}
+r3 = m.run(mk3, cd3); assert r3["rules"][(2, "none", "H")][0]["n"] == 100 and r3["rules"][(2, "none", "H")][0]["events"] == 20 and (2, "none", "H") not in r3["search_passes"]
+assert res["rules"][(2, "none", "H")][0]["events"] == 100
+flags = []; orig_p = m.passes; m.passes = lambda s, search=True: (flags.append(search), orig_p(s, search))[1]
+m.run(mkts, cds); m.passes = orig_p; assert False in flags and True in flags
 print("ethlate1 second tests passed")
