@@ -1,5 +1,5 @@
 {
- "version": "2026-11-16T16Z+3",
+ "version": "2026-11-16T16Z+4",
  "author": "Auditor B",
  "rule": "A cell (ticker pattern, time) is REFUSED if its time is in [from, to) of any row with status OPEN or FROZEN. Time = market close_ts (binary), event occurrence where the row says so, candle end_ts or file date (perps, recorders). 'to' null = open ended. A cell in NO row is NOT cleared: the driver also refuses any time at or after forward_default_deny_from unless the signed spec names that window in its holds table. A row with a 'scope' applies only to that kind of data (archive_binary = ENGINE1 binary-market archive and NC15 extracts); a row without 'scope' applies to every kind.",
  "forward_default_deny_from": 1794787200,
@@ -318,6 +318,31 @@
    "card": "NC15DEPTH1",
    "status": "OPEN",
    "note": "scoring window from 2026-11-19; count-only logging allowed"
+  },
+  {
+   "id": "S1",
+   "name": "Shadow runner clause",
+   "kind": "clearance",
+   "tickers": [
+    "the series listed in SHADOW_LIST_Vn (list version n)"
+   ],
+   "from": "that version's own start_utc (SHADOW_LIST_V1: 1794873600 = 2026-11-17T00:00Z); a later version gets its own fixed start_utc at or after its freeze",
+   "to": null,
+   "card": "owner's forward shadow list; Head of R&D 2026-11-16",
+   "status": "APPROVED",
+   "terms": [
+    "read ONLY to score the specs of that list version, identified by their sha256 in the list",
+    "per-spec aggregates only (n, PF at 1c and 2c, net, days, income) to the Head and the page; no per-market outcome, no per-day or per-hour tables, no result by any feature another held-out card uses",
+    "no spec of a list version may be changed after its first result; new specs come only as a NEW list version (SHADOW_LIST_V2 and later), each with its own start_utc at or after its freeze, counted in m, and under this clause",
+    "exposure disclosed on BOOKIMB1, FLOWHR1, MAKERMID1, MAKERTAIL1, DEPTH1, CFRTI, NC15DEPTH1 and S3",
+    "the result is a forward development figure for the shadow decision and never a held-out verdict for any of those cards",
+    "count-only logging stays allowed on H02, H03, H22"
+   ],
+   "overrides": [
+    "H02",
+    "H20",
+    "H22 and the forward_default_deny for these cells, for the shadow runner only"
+   ]
   }
  ],
  "released": [
