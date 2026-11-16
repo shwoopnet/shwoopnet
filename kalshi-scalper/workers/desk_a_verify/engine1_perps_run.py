@@ -7,7 +7,8 @@ def main(base, out):
     wa, ca, wp, cp, wn, cn = L.load(base)
     rep = P.run_all({k: [tuple(c) for c in v] for k, v in wp.items() if k in ("KXSPYPERP", "KXQQQPERP")})
     rep["loader_drops_perps"] = cp
-    rep["boundary_note"] = "SEARCH exits may read up to 30 minutes of prices after the SEARCH/VALIDATE date boundary (candles are not cut at the boundary for an exit)"
+    rep["boundary_note"] = "SEARCH entries whose 30 minute exit horizon reaches the first VALIDATE candle are dropped and counted (exit crosses the boundary)"
+    rep["run_note"] = "plumbing and counts read: with the 10 trade day floor nothing can pass on Nov 6 to 14; the 504 tries are spent on days PERPSCALP1 and OPENGAP1 also read; loader copy 850ac0e8 (B1); archive extract opened and ignored"
     rep["rule_hashes"] = {f: hashlib.sha256(open(os.path.join(here, f), "rb").read()).hexdigest()[:16] for f in ("engine1_extract_load.py", "engine1_split.py", "engine1_perps.py", "engine1_perps_run.py")}
     json.dump(rep, open(out, "w"), indent=1, default=str); print("wrote", out, json.dumps(rep["rule_hashes"]))
 if __name__ == "__main__":
