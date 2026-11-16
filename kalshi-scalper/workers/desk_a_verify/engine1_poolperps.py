@@ -2,6 +2,7 @@
 Rule = (signal, exit); trades pooled over names, one position per name at a time (cooldown = the previous exit end exactly)."""
 import math, bisect, collections, time
 import engine1_perps as P, engine1_driver as D
+END_EPOCH = 1794873600                   # 2026-11-17T00:00:00Z: a trade whose entry or exit end is at or after it is dropped (the forward days stay unread)
 TAKER, MAKER = 0.0012, 0.0005; H_PRIMARY, H_SECOND = 0.0002, 0.0005
 KS = (1, 2); TS_MIN = (15, 30, 60)
 GAP_BP = (30, 60, 100); LOOKBACKS = (30, 60); CS = (1, 2)
@@ -53,7 +54,7 @@ def trading_days(cand):
     ds = set()
     for by in cand.values():
         for t in by:
-            if sod(t) == 9 * 3600 + 31 * 60: ds.add(et_date(t))
+            if sod(t) == 9 * 3600 + 31 * 60 and t < END_EPOCH: ds.add(et_date(t))               # a date whose 09:31 ET candle end is at or after 2026-11-17T00:00Z is not a trading day of this pass (the Testing Desk's R10)
     return sorted(ds)
 def prev_close(by, e):
     """mid of the candle ending 16:00 ET of the latest earlier ET date that has one, scanning back at most 6 days."""
@@ -156,7 +157,6 @@ SEMIS_AI = frozenset("KX%sPERP" % x for x in "ADI AMAT AMD ANET ARM ASML AVGO DE
 THIN = frozenset(("KXSPYPERP", "KXQQQPERP"))                                                                                              # thin index-fund perps, reported apart
 MAXLEV = {"KXNVDAPERP": 4.5, "KXMUPERP": 3.3, "KXSNDKPERP": 1.5, "KXTSLAPERP": 4.2, "KXAMDPERP": 3.4, "KXSPCXPERP": 3.5}; MAXLEV_DEFAULT = 4.9    # the page maxima the Head supplied; 'most large stocks 4.9x' is the default for the rest (per-name page values unverified)
 PRIOR_PERPS_M = 103444                 # perps passes 1 to 3 and PERPGEN (Auditor B: pass 3 tried 1,260 more, m 103,444)
-END_EPOCH = 1794873600                   # 2026-11-17T00:00:00Z: a trade whose entry or exit end is at or after it is dropped (the forward days stay unread)
 ALL_SIGNALS = tuple(["gap:%d:%s" % (b, m) for b in GAP_BP for m in ("follow", "fade")] + ["fl:fade", "fl:follow", "fc:fade", "fc:follow"] + ["tr:%d:%d:%s" % (L, c, m) for L in LOOKBACKS for c in CS for m in ("trend", "rev")] + ["carry:A", "carry:B"])
 def stats(rows, days):
     """rows at one haircut -> figures. net = column 2 (taker) or 3 (maker)."""

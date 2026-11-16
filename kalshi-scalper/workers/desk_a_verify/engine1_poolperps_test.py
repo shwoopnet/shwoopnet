@@ -53,4 +53,6 @@ byl = {e: (99.99, 100.00), e + 60: (100.19, 100.20), e + 120: (100.99, 101.00)} 
 assert W.simulate(byl, e, "long", 2, 1, 30, 0.0002, u, last_end=e + 120)[2] == "no mark" and W.simulate(byl, e, "long", 1, 1, 2, 0.0002, u, last_end=e + 120)[2] == "target"
 late = {U(2026, 11, 16, 23, 59, 0): (99.99, 100.0), U(2026, 11, 17, 0, 0, 0): (99.99, 100.01)}
 rr, cc = W.run_rule({"KXAAAPERP": late}, {}, [(U(2026, 11, 16, 23, 59, 0), "KXAAAPERP", "long", U(2026, 11, 17, 0, 0, 0))], None, 0.0002, None); assert rr == [] and cc["at or after 2026-11-17T00:00Z (dropped)"] == 1
+cand_late = dict(cand); cand_late["KXAAAPERP"] = dict(cand["KXAAAPERP"]); cand_late["KXAAAPERP"][W.END_EPOCH + 14 * 3600 + 31 * 60] = (100.0, 100.02)       # a 09:31 ET candle of Nov 17 is not a trading day
+assert W.trading_days(cand_late) == W.trading_days(cand) and len(W.trading_days(cand)) == 3
 print("ENGPERPS_POOL1 ENGINE OK", res["m_new"], res["m_total"])
