@@ -3,7 +3,7 @@
  "status": "active",
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/ENGINE1_HELDOUT_READ_PLAN_NOV16.md",
- "purpose": "Completion of ENGINE1_HELD_CANDLES_A1 (run 118 landed h00001 to h00047 and stopped on h00048, HTTP 400): the 201 requests of A1 never answered, unchanged, except h00048, h00118 and h00189 which were over the 10,000 minutes x tickers limit and are split in two (ids and b). 1 minute candles for the markets of ENGINE1's held-out read (closes 1791043200 to 1793144700), batched at most 44 tickers a request, from the landed ENGINE1_HELD_LISTS runs only; each request runs from its earliest close minus 21 minutes to its latest close.",
+ "purpose": "Completion of ENGINE1_HELD_CANDLES_A1: its 198 unanswered requests, 3 over-limit ones (h00048, h00118, h00189) split in two; 1 minute candles for the ENGINE1 held-out read.",
  "heldout": "Unread by ENGINE1, seen by earlier development cards. Closes outside each series' window (Auditor B, Nov 16: BTC, ETH, XRP, DOGE, GOLD before 2026-10-28T00:00Z; HYPE, SOL, NEAR, BNB, ZEC, WTI, SILVER before 2026-11-03T16:00Z; all from 2026-10-03T16:00Z) and WTI and Silver closes within 5 minutes of 13:30Z are never asked. The landed runs go into HELDOUT_PULL_RUNS.md (Main) and are readable only by the ENGINE1 held-out loader.",
  "allowed_endpoints": [
   {
