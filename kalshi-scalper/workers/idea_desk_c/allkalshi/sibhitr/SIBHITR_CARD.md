@@ -58,6 +58,11 @@
 
 - **No ticker exclusion.** Because the 1,099-ticker list cannot be recovered, SIBHIT-R reads every market in the window. The disclosure: PROPS1 read pre-game candles only (tip - 2 h to tip), for a cheap-side test, on at most about 12% of the window's markets. SIBHIT-R reads the late fourth-quarter minute. It is a different question at a different minute, so the overlap cannot have selected SIBHIT-R's result.
 - **On a pass:** the forward read on the 2026-11-13 to before 2026-12-04 block (after Dec 4) is still required before any shadow, beside the second build (16b) and the Verification Analyst.
+- **Sample and held-out (the Head of R&D, Nov 16, 15:26Z; written before the list lands).**
+  - **Pool:** the games that pass SIBHIT's base and clock checks inside the window, each game an event_ticker. Only time fields are used; no price or result.
+  - **Order:** sorted by the lowercase hex of md5("SIBHITR-2026-11-16" + event_ticker), ascending, event_ticker as the tie break.
+  - **Read sample:** the first 40 games. Candles are pulled and scored for these only (about 1,800 requests, 4 files under 470; the budget is approved).
+  - **Held-out:** every other game of the window is a HELD-OUT for SIBHIT-R. Unread, and pulled only if the 40-game read passes, as its confirmation (one read, same bar). If the 40-game read fails, the held-out is never pulled.
 
 ## Amendment 3 (Nov 16, 2026, ~15:30Z; Auditor B's condition (1); written before any pull)
 

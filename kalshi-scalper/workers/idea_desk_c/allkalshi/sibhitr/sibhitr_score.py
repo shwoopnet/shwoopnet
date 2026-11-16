@@ -54,7 +54,9 @@ def main(root):
         out["stopped"] = "list truncated: no result read"
         print(json.dumps(out, indent=1))
         return out
-    g = L.games(L.list_rows(root))
+    rows = L.list_rows(root)
+    g = L.games(rows, "read")
+    out["heldout_games_unread"] = len(L.games(rows, "heldout"))
     keep = {t for x in g.values() for t in x["open"]}
     q = {}
     base = os.path.join(root, "pull")

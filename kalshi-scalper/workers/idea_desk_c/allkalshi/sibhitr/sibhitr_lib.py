@@ -11,7 +11,21 @@ WIN = (1772323200, 1776124800)          # close_time from 2026-03-01T00:00Z to b
 LIST_JOB, LIST_ID = "SIBHITR_LISTS_A", "hist_KXNBAPTS"
 CANDLE_JOB = "SIBHITR_CANDLES"
 S_MED, BAND, EPS, LOOKBACK_S = B.S_MED, B.BAND, B.EPS, B.LOOKBACK_S
-games = B.games                          # SIBHIT's own function: base, share, clock check, arm (HIGH = fast, LOW = slow)
+import hashlib
+SEED, N_READ = "SIBHITR-2026-11-16", 40   # Amendment 2 (the Head, Nov 16 15:26Z): first 40 games by md5 are read; the rest are SIBHIT-R's held-out
+_games_all = B.games                     # SIBHIT's own function: base, share, clock check, arm (HIGH = fast, LOW = slow)
+
+
+def order(g):
+    return sorted(g, key=lambda e: (hashlib.md5((SEED + e).encode("ascii")).hexdigest(), e))
+
+
+def games(rows, part="read"):
+    """part 'read': the first N_READ games by md5; 'heldout': the rest (pulled only after a pass)."""
+    g = _games_all(rows)
+    o = order(g)
+    keep = o[:N_READ] if part == "read" else o[N_READ:]
+    return {e: g[e] for e in keep}
 
 
 def bodies(root, job, rid=None):

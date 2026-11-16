@@ -63,5 +63,21 @@ class Hand(unittest.TestCase):
         self.assertIn("stopped", o)
 
 
+class Sample(unittest.TestCase):
+    def test_split(self):
+        rows = []
+        for gi in range(45):
+            occ = L.B.iso("2026-03-10T03:00:00") + gi * 86400
+            for i in range(12):
+                rows.append(("KXNBAPTS-G%02d-P%d-10" % (gi, i), "KXNBAPTS-G%02d" % gi, occ + 600, occ))
+        r, h = L.games(rows, "read"), L.games(rows, "heldout")
+        self.assertEqual(len(r), 40)
+        self.assertEqual(len(h), 5)
+        self.assertFalse(set(r) & set(h))
+        import hashlib
+        want = sorted(("KXNBAPTS-G%02d" % gi for gi in range(45)), key=lambda e: (hashlib.md5(("SIBHITR-2026-11-16" + e).encode()).hexdigest(), e))[:40]
+        self.assertEqual(sorted(r), sorted(want))
+
+
 if __name__ == "__main__":
     unittest.main()
