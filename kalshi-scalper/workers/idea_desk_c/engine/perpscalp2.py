@@ -238,7 +238,7 @@ def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
         f = None
         for k in range(1, N + 1):
             x = t + 60 * k
-            if x in c and ((side > 0 and c[x][1] <= lim - tick - 1e-12) or (side < 0 and c[x][0] >= lim + tick + 1e-12)):
+            if x in c and ((side > 0 and c[x][1] <= lim - tick + 1e-12) or (side < 0 and c[x][0] >= lim + tick - 1e-12)):
                 f = x
                 break
         if f is None:
@@ -255,14 +255,14 @@ def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
             continue
         b, a = c[x][0], c[x][1]
         if side > 0:
-            if col == "MM" and b >= tgt + tick + 1e-12:
+            if col == "MM" and b >= tgt + tick - 1e-12:
                 ex, fee_out, tx = tgt, FEE_M, x; break
             if b <= stp:
                 ex, tx = b * (1 - h), x; break
             if col != "MM" and b >= tgt:
                 ex, tx = b * (1 - h), x; break
         else:
-            if col == "MM" and a <= tgt - tick - 1e-12:
+            if col == "MM" and a <= tgt - tick + 1e-12:
                 ex, fee_out, tx = tgt, FEE_M, x; break
             if a >= stp:
                 ex, tx = a * (1 + h), x; break
@@ -276,7 +276,7 @@ def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
             return None
         ex = c[tx][0] * (1 - h) if side > 0 else c[tx][1] * (1 + h)
         fee_out = FEE_T
-    gross = (ex / en - 1) if side > 0 else (en / ex - 1)
+    gross = (ex - en) / en if side > 0 else (en - ex) / en                # the card's formula: short = (entry - exit) / entry
     fund, crossed = funding_of(fu, side, e, tx)
     return {"e": e, "x": tx, "side": side, "net": gross - fee_in - fee_out + fund, "gross": gross, "crossed": crossed,
             "stop_dist": k_s * U, "day": datetime.fromtimestamp(e, ET).date().isoformat()}

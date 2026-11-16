@@ -31,7 +31,7 @@ def fixture(dip=False, fund=None):
         for k, mm in mids().items():
             b, a = mm - 0.005, mm + 0.005
             if dip and k == 66:
-                b, a = 100.17, 100.18                               # the ask comes down through the resting bid 100.195 by more than the tick 0.01
+                b, a = 100.17, (100.185 if dip == "eq" else 100.18)  # the ask comes down through the resting bid 100.195 by the tick 0.01 (equality) or more
             w.writerow(["KXNVDAPERP", T0 + 60 * k, "%.4f" % b, "%.4f" % a, 20 if k == 64 else 1])
     with gzip.open(os.path.join(root, "funding", "2026-11-10.csv.gz"), "wt", newline="") as f:
         w = csv.writer(f)
@@ -251,6 +251,23 @@ class Hand(unittest.TestCase):
         # exit at the time stop: bid at candle 76? none, so the last candle at or before k66 + 600 s = k76 is k75 bid 100.195: gross 0, net = -0.0005 - 0.0012
         self.assertEqual(tr["e"], T0 + 60 * 66)
         self.assertAlmostEqual(tr["net"], 100.195 / 100.195 - 1 - 0.0005 - 0.0012, 12)
+
+    def test_short_return_formula(self):
+        c, fu = P.load(fixture())
+        n = c["KXNVDAPERP"]
+        t = T0 + 60 * 64
+        h = 0.0002
+        tr = P.build_trade(n, fu["KXNVDAPERP"], 0.01, t, -1, 0.0031873, 100.2, 1.0, 1.0, 600, "TT", 0, h)
+        en, ex = 100.195 * (1 - h), 100.205 * (1 + h)                          # short: entry at candle 65's bid, time exit at candle 75's ask
+        self.assertAlmostEqual(tr["net"], (en - ex) / en - 0.0024, 12)        # the card's (entry - exit) / entry, not entry / exit - 1
+
+    def test_maker_fill_equality_counts(self):
+        c, fu = P.load(fixture(dip="eq"))
+        n = c["KXNVDAPERP"]
+        t = T0 + 60 * 64
+        tr = P.build_trade(n, fu["KXNVDAPERP"], 0.01, t, 1, 0.0031873, 100.2, 1.0, 1.0, 600, "MT", 5, 0.0)
+        self.assertIsNotNone(tr)                                               # ask 100.185 = limit 100.195 - tick 0.01: "at or below" fills
+        self.assertEqual(tr["e"], T0 + 60 * 66)
 
     def test_run_header(self):
         out = P.run(fixture(), 6290660)
