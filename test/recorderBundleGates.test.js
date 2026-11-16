@@ -225,6 +225,30 @@ print(json.dumps([m.LEV_COLUMNS, a, m.COLUMNS == ["ts_utc", "ticker", "asset_cla
   assert.deepStrictEqual(h, [['ts_utc', 'ticker', 'leverage_estimate'], [['t', 'KXAAPLPERP', '5'], ['t', 'X', '']], true], 'the hourly main file header is unchanged');
 };
 
+// RB11 (Nov 16, 2026, the History Miner's PERPCRYPTO1 and the Head's FUNDX2): FUNDING_BY_TICKER asks the funding route once per NAMED perp ticker and labels every row with that ticker (the ticker-less route returns blank tickers).
+// Consequence: a request carries only a named ticker, rows are never blank-labelled, the cursor is followed, a second run does not re-read an existing file, a non-perp word is refused before any request, and three 429s write nothing.
+gates.RB11 = () => {
+  const r = py('record_perps_candles.py', `
+u = dt.timezone.utc
+urls = []
+def get(url):
+    urls.append(url)
+    if "cursor=C2" in url: return 200, {"funding_rates": [{"funding_time": "2026-09-01T21:00:00Z", "funding_rate": 0.003, "mark_price": "9"}]}
+    return 200, {"funding_rates": [{"funding_time": "2026-11-07T21:00:00Z", "funding_rate": 0.001, "mark_price": "7"}], "cursor": "C2" if "KXBTCPERP" in url else ""}
+d = tempfile.mkdtemp(); sl = []
+now = dt.datetime(2026, 11, 16, 2, tzinfo=u)
+a = m.run(d, now, get, sl.append, day=dt.date(2026, 11, 7), only=("FUNDING_BY_TICKER", "KXBTCPERP", "KXETHPERP"))
+rows = gzip.open(os.path.join(d, 'funding', 'by-ticker.csv.gz'), 'rt').read().strip().split('\\n')
+n = len(urls)
+again = m.run(d, now, get, sl.append, day=dt.date(2026, 11, 7), only=("FUNDING_BY_TICKER", "KXBTCPERP"))
+bad = m.run(tempfile.mkdtemp(), now, get, sl.append, day=dt.date(2026, 11, 7), only=("FUNDING_BY_TICKER", "KXBTCPERP", "../x"))
+bad2 = m.run(tempfile.mkdtemp(), now, get, sl.append, day=dt.date(2026, 11, 7), only=("FUNDING_BY_TICKER",))
+def refuse(url): return 429, None
+c = m.run(tempfile.mkdtemp(), now, refuse, lambda s: None, day=dt.date(2026, 11, 7), only=("FUNDING_BY_TICKER", "KXBTCPERP"))
+print(json.dumps([a, rows[0], [x.split(',')[0] for x in rows[1:]], n, urls[0].endswith('?ticker=KXBTCPERP'), 'cursor=C2' in urls[1], urls[2].endswith('?ticker=KXETHPERP'), again, len(urls) == n, bad, bad2, c, os.path.exists(os.path.join(d, 'kalshi1m'))]))`);
+  assert.deepStrictEqual(r, [0, 'ticker,funding_time,funding_rate,mark_price', ['KXBTCPERP', 'KXBTCPERP', 'KXETHPERP'], 3, true, true, true, 0, true, 1, 1, 1, false]);
+};
+
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
 }
