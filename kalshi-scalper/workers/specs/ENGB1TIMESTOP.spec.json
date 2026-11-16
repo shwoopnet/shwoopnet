@@ -1,0 +1,168 @@
+{
+ "id": "ENGB1TIMESTOP",
+ "desk": "DESK_A",
+ "date_registered": "2026-11-16",
+ "kind": "grid15m",
+ "card": "ENGB1",
+ "needs_new_code": [
+  "exit TA3 and TA5 in engine1_core (sell at the side bid of the candle ending exactly 3 or 5 minutes after the entry end, minus h; no trade if that candle ends after close - 60: 'too late'; no mark if absent or one sided), plus the enumerator's exit list"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "ENGINE1 exits M180, M60 (time exits measured from the CLOSE)"
+  ],
+  "declined_list_rows_checked": [
+   "Dogecoin (7e: removed from the bot; any DOGE pass is dropped from a shadow list, the market stays in the grid as data)",
+   "Favourite-and-hold ban (Charter item 5; any favourite-late shape that passes is flagged, not claimed unique)",
+   "Gold L1 variants (maker entries, 94.5c floor, GOLDHOLD)",
+   "Bitcoin, Ethereum, XRP as L1 (shadow only)"
+  ],
+  "difference": "new exits measured from the ENTRY, not from the close: a 3 or 5 minute holding period after the entry, flat before settlement. Existing exits H, T, S, B hold or trigger on price, and M180 and M60 sell at fixed times before the close; these are the only time-after-entry exits.",
+  "family_flag": "none identified; any survivor is flagged by the driver's family function (favourite-late or OI) before it goes anywhere"
+ },
+ "data": {
+  "loader": "engine1_extract_load.py",
+  "loader_sha256": "5c5b0eaabdcb02371518e277ac74ec5f7557b649f1b06e9361768a4fd517b5c3",
+  "extracts": [
+   "ENGINE1_archive_extract.sqlite.xz sha256 9e4bece477ee5c5caec5b024b1cb86c1b6538061a2bb2092faa1e091bef06820 (Line B1), the archive extract: closes before 2026-10-03T16:00Z (1791043200); the same SEARCH and VALIDATE split constants as run 2"
+  ],
+  "ticker_wall": [
+   "KXBTC15M",
+   "KXETH15M",
+   "KXGOLD15M",
+   "KXDOGE15M",
+   "KXXRP15M",
+   "KXBNB15M",
+   "KXHYPE15M",
+   "KXSOL15M",
+   "KXNEAR15M",
+   "KXZEC15M",
+   "KXSILVER15M",
+   "KXWTI15M",
+   "KXCOPPER15M",
+   "KXNATGAS15M",
+   "KXEURUSD15M",
+   "KXGBPUSD15M",
+   "KXUSDJPY15M",
+   "KXPALLADIUM15M",
+   "KXPLATINUM15M"
+  ],
+  "window": {
+   "first_close": "2026-06-01T00:00:00Z",
+   "last_close_exclusive": "2026-10-03T16:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B (to be checked before any run; the window is the archive's own, H01 starts at its end)",
+  "independence_note": "NOT independent of ENGINE1 run 1 and run 2: the same SEARCH and VALIDATE data, read before for 2,347,488 other rules. Every new rule here adds to m, so run 2's 190 face a larger m if BH is redone over the union; survivors need the held-out read."
+ },
+ "split": {
+  "mode": "fixed_dates"
+ },
+ "grid": {
+  "buckets": [
+   120,
+   180,
+   240,
+   300,
+   360,
+   420,
+   480,
+   540,
+   600,
+   660,
+   720,
+   780,
+   840
+  ],
+  "bands": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15,
+   16,
+   17,
+   18
+  ],
+  "side_rules": [
+   "yes",
+   "no",
+   "cheap",
+   "favourite"
+  ],
+  "filters": [
+   "none",
+   "oi3",
+   "oi6",
+   "vol3",
+   "mom1",
+   "mom3",
+   "mom5",
+   "spread"
+  ],
+  "exits": [
+   "TA3",
+   "TA5"
+  ]
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ]
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05,
+  "min_signals_per_day": 3.0,
+  "income": "signals a day, cash edge at 1c and dollars a week at 5 contracts, ranked (engine1_driver 1281ce0a)"
+ },
+ "tries": {
+  "rules_this_spec": 782496,
+  "prior_m": "2,347,488 (ENGINE1 run 2) plus the earlier new specs of this batch, from the TALLY; every rule counts whether it passes the gate or not"
+ },
+ "prediction": "Most rules fail: a short time exit pays two fees (entry and exit) on a move of a few cents; prediction: under 1 of 100 survive VALIDATE; survivors expected only at buckets 360 and above where the 5 minute window fits.",
+ "kill": "No rule at 1c PF 1.3 and 2c PF 1.0 on both SEARCH and VALIDATE with 3 a day, or n under 100 everywhere: NOT_ENOUGH or FALSIFIED; the 41,184 x 19 tries stay in m.",
+ "kill_fast": true,
+ "outputs": {
+  "survivor_line": "x",
+  "family_flag": "x"
+ },
+ "holds": [
+  {
+   "label": "ENGINE1 archive freeze H01 (binary closes from 2026-10-03T16:00Z; this spec stays before it)",
+   "start_epoch": 1791043200,
+   "end_epoch": null,
+   "card": "ENGINE1 global freeze",
+   "status": "FROZEN"
+  }
+ ],
+ "look_ahead": {
+  "features": "candles ending at or before the entry candle end e (the cross-series feature uses the BTC15M market of the SAME close time, candles ending at or before e)",
+  "exit_price": "candles after e up to close - 60 for target, stop and the new time stops; the result only for a held trade"
+ },
+ "sources": {
+  "names": [
+   "quote-data recorder files (Kalshi public GETs recorded by record-quotes.yml)"
+  ],
+  "new_host": false
+ },
+ "subset_rationale": "The whole current grid (13 buckets x 18 bands x 4 side rules x 22 filters) with the two new exits only; 41,184 rules a series on 19 series. Chosen before any figure; the old exits are not re-run.",
+ "halves": "by order of the hourly close: the first floor(n/2) trades and the rest",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x",
+ "spec_note": "written for the Head's batch order of 2026-11-16 (toward 30 families a day); not run; the code change needs Auditor B's CLEAN and a second build (rule 16b) first"
+}
