@@ -118,8 +118,10 @@
   "cheap_side": "the lower ask of the two sides at the look (the YES ask against 1 minus the YES bid); a tie goes to YES",
   "look": "the candle ending exactly at close minus 120 s (end_ts); none = no entry for that event (a candle exists only if the minute had a ladder row; its quote can be up to 59 s older than the candle end); no earlier candle is used",
   "exit_M60": "the bid of the candle ending exactly at close minus 60 s; none = held to settlement (both printed); a missing candle at exactly that minute is not replaced by the previous one",
-  "spread_filter": "round trip spread (ask minus bid) of the side taken at most 0.03 (a number, fixed now)",
+  "spread_filter": "the engine's own: the spread (ask minus bid, whole cents rounded up) of the entry candle in three classes low, mid, high, with the two cuts computed from the SEARCH phase spreads (engine1_enum.spread_cuts: the ceil(n/3)-th and ceil(2n/3)-th sorted value); no fixed 0.03 cutoff (that earlier wording is withdrawn)",
   "z": "day-clustered",
-  "void": "a void result is passed through by the loader and scored: the price is refunded and the fee kept"
+  "void": "a void result is passed through by the loader and scored: the price is refunded and the fee kept",
+  "count_96": "12 bands x (filter none + spread low + spread mid + spread high = 4) x 2 exits (H, M60) x 1 side rule (cheap) x 1 bucket (120) = 96; the earlier text '12 x 2 x 2 x 2' counted the filter and side differently and is corrected here",
+  "phases": "SEARCH and VALIDATE are the engine's own split inside the development window: the first floor(D/2) distinct UTC close dates are SEARCH, the rest VALIDATE (D = distinct close dates of KXETHD with a quote, at most 19, from the loader's count; a dated constant for series ETHD is added to engine1_split by Desk A before any read); the forward window Nov 16 to Dec 16 is a third, later read by the one survivor"
  }
 }

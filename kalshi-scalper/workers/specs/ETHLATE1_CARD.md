@@ -23,3 +23,6 @@ Loader bound to the one run (refuses unless the run folder is under ETHD_RESULTS
 
 ## Dated line (Nov 16, 2026, 18:40Z): m written in
 m_carried = 6,290,660 (the Head's ruling of 18:35Z, one value for every print today) + 96 = **6,290,756** total; BH over that; bars on unrounded figures.
+
+## Correction (Nov 16, 2026, 18:50Z, found while building the adapter against Desk A's engine; before any outcome read)
+Two statements in my spec did not match the engine's code. (1) The spread filter is the engine's three classes (low, mid, high; cuts from the SEARCH spreads), not "round trip at most 0.03"; so 96 = 12 bands x 4 filter values (none, spread low, mid, high) x 2 exits x cheap x bucket 120, not "12 x 2 x 2 x 2". The count 96 is unchanged. (2) The engine enumerates by series name and skips a series with no split constant: "ETHD" has none, so Desk A must add a dated constant before the engine reads this series, and SEARCH and VALIDATE are the first and second half of the development window's distinct close dates (the forward window is a third read). Both are corrected in the spec (`rules`); hash changes, so Auditor B re-signs.
