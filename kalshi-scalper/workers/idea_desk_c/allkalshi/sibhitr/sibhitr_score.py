@@ -93,7 +93,7 @@ def main(root):
         for m in b.get("markets") or []:
             if m.get("ticker") in keept:
                 res[m["ticker"]] = (m.get("result") or "").strip().lower()
-    out.update({"games": len(g), "clock_drops": len(L.B.CLOCK_DROPS), "arms": {a: sum(1 for x in g.values() if x["arm"] == a) for a in ("HIGH", "LOW")}, "drops": drops,
+    out.update({"games": len(g), "clock_drops": len(L.B.CLOCK_DROPS), "clock_note": "occurrence-based T is a schedule-shaped proxy; the tip time is not in the data", "arms": {a: sum(1 for x in g.values() if x["arm"] == a) for a in ("HIGH", "LOW")}, "drops": drops,
                 "disclosure": "PROPS1 (closed) read pre-game candles of at most about 12% of this window's markets; no ticker exclusion (Amendment 2)"})
     for arm, name in (("HIGH", "R_FAST_NO"), ("LOW", "R_SLOW_YES")):
         rows = []
