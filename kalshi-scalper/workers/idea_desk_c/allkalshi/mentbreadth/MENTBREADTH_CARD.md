@@ -35,3 +35,6 @@
 - TRUMPTOPIC1's spent Aug 6 to Oct 3 and its forward window from Nov 5 are never pulled.
 
 **Joint held-out (the Head of R&D, Nov 16, 15:46Z).** The window of own occurrence 2026-10-03 to before 2026-11-05 is read ONCE for every Trump-word family that passes development (LATEWORD, MENTTWIN, MENTBREADTH and any later one), in one print, with m counting every family. No family reads it alone.
+
+## Closed Nov 16, 2026 (the Head of R&D's rate rule)
+Closed by the rate rule: n = 0 in the one development read (Nov 16; 285 words out of band, 175 with no quote), so no edge was measured. Lesson for the mentions lane: at a fixed decision time Trump mention words sit outside 30c to 70c or have no quote; no new mentions card unless it starts from a measured in-band count.
