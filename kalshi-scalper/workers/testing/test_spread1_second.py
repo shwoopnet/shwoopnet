@@ -37,8 +37,8 @@ assert s.verdict(dict(ok, n=79), dict(ok, n=79)) is False and s.verdict(ok, dict
 fl = {("X", "S", 10000, "yes")}
 cc = {"X": {10000 - 840: (.50, .51), 10000 - 780: (.50, .51), 10000 - 720: (.50, .51), 10000 - 660: (.50, .51), 10000 - 600: (.52, .545)}}
 assert s.trades(list(fl), cc)[0] == [] and s.trades(list(fl), cc)[2]["no_widen"] == 1
-cm = {"X": {10000 - 840: (.39, .41), 10000 - 780: (.39, .41), 10000 - 720: (.39, .41), 10000 - 660: (.39, .41), 10000 - 600: (.39, .43)}}
-assert (.39 + .43) / 2 - (.39 + .41) / 2 < 0.01 and len(s.trades(list(fl), cm)[0]) == 1 and s.trades(list(fl), cm)[0][0][2] == "yes"
+cm = {"X": {10000 - 840: (.31, .33), 10000 - 780: (.31, .33), 10000 - 720: (.31, .33), 10000 - 660: (.31, .33), 10000 - 600: (.31, .35)}}
+assert (.31 + .35) / 2 - (.31 + .33) / 2 < 0.01 and len(s.trades(list(fl), cm)[0]) == 1 and s.trades(list(fl), cm)[0][0][2] == "yes"
 # reader: refuses at the cut, loads below, drops after-close candles
 f = os.path.join(tempfile.mkdtemp(), "t.sqlite"); db = sqlite3.connect(f)
 db.execute("create table market(ticker,series,open_ts,close_ts,result,strike,src)"); db.execute("create table candle(ticker,end_ts,bid_c,ask_c,volume,oi)")
