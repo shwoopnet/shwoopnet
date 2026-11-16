@@ -38,6 +38,12 @@ tr, c = p.rule_trades(H, None, "none", "long", "T30", h); assert [t["e"] for t i
 # boundary clip
 tr, c = p.rule_trades(H, None, "none", "long", "T30", h, entry_range=one(E(0)), boundary=E(30)); assert tr == [] and c["clipped"] == 1
 tr, c = p.rule_trades(H, None, "none", "long", "T30", h, entry_range=one(E(0)), boundary=E(31)); assert len(tr) == 1 and c["clipped"] == 0
+# R1 (Auditor B): the clip horizon is the rule's own exit time (TS: e + 1800), checked BEFORE the exit mark and never from the realized exit
+tr, c = p.rule_trades(H, None, "none", "short", "TS15", h, entry_range=one(E(10)), boundary=E(25)); assert tr == [] and c["clipped"] == 1          # the stop at i11 would have been realized early; the horizon is e + 1800 = i40
+tr, c = p.rule_trades(H, None, "none", "long", "T3", h, entry_range=one(E(10)), boundary=E(25)); assert len(tr) == 1 and c["clipped"] == 0          # exit i13 is before the boundary: kept (a 1800 s horizon would drop it)
+tr, c = p.rule_trades(H, None, "none", "long", "T3", h, entry_range=one(E(10)), boundary=E(13)); assert tr == [] and c["clipped"] == 1          # horizon i13 reaches the boundary i13
+tr, c = p.rule_trades(H, None, "none", "long", "T30", h, entry_range=one(E(11)), boundary=E(30)); assert tr == [] and c["clipped"] == 1 and c["no_mark"] == 0          # clip first: an entry with no T30 mark is clipped, not a no-mark
+assert [p.horizon(E(0), x) - E(0) for x in ("T3", "T10", "T15", "T30", "TS15", "TS30", "T60", "T240")] == [180, 600, 900, 1800, 1800, 1800, 3600, 14400] and p.horizon(E(0), "TC") == ts(2026, 11, 10, 21, 0) and p.horizon(E(0), "TO") == ts(2026, 11, 11, 14, 31)
 # ---- KXHAND2 (Tuesday 2026-11-10; candle i ends 14:40 UTC + i min; mid 100.00 except i60 100.50, i240 99.60, i380 101.00, Wednesday 14:31 102.00)
 U0 = ts(2026, 11, 10, 14, 40); G = lambda i: U0 + 60 * i
 m2 = {i: 100.00 for i in range(381)}; m2.update({60: 100.50, 240: 99.60, 380: 101.00})

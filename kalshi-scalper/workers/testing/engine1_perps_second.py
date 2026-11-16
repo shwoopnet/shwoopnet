@@ -68,6 +68,14 @@ def next_open_ts(e):
     return d * 86400 + OPEN + 60
 
 
+def horizon(e, ex):
+    """the time by which a rule's exit is certain to have happened, whatever the path (Auditor B R1): the rule's own exit time; e + 1800 for TS15 and TS30 (the worst case)"""
+    if ex == "TC": return day(e) * 86400 + CASH_CLOSE
+    if ex == "TO": return next_open_ts(e)
+    if ex in ("TS15", "TS30"): return e + 1800
+    return e + 60 * int(ex[1:])
+
+
 def find_exit(series, e, side, fill, ex, h):
     """-> (exit_ts, exit_price) or None (no mark)"""
     long_ = side == "long"
@@ -102,12 +110,12 @@ def rule_trades(series, cuts, filt, side, ex, h, entry_range=(-math.inf, math.in
         if f is None: cnt["missing_feature"] += 1; continue
         if not f: continue
         if last_e is not None and ((ex in ("TC", "TO") and e < last_exit) or (ex not in ("TC", "TO") and e < last_e + HOLD[ex])): continue
+        if boundary is not None and e < boundary and horizon(e, ex) >= boundary: cnt["clipped"] += 1; continue          # R1: the clip horizon never depends on the outcome path
         q = series[e]; long_ = side == "long"
         fill = q[1] * (1 + h) if long_ else q[0] * (1 - h)
         r = find_exit(series, e, side, fill, ex, h)
         if r is None: cnt["no_mark"] += 1; continue
         xt, xp = r
-        if boundary is not None and e < boundary and xt >= boundary: cnt["clipped"] += 1; continue
         last_e, last_exit = e, xt
         gross = xp / fill - 1 if long_ else (fill - xp) / fill
         fund, booked = 0.0, True
