@@ -52,7 +52,8 @@
    "first_close": "2026-11-16T00:00:00Z",
    "last_close_exclusive": "2026-12-16T00:00:00Z",
    "rule": "read ONCE, by the one surviving development rule only; the series is named here so default deny does not refuse it"
-  }
+  },
+  "search_validate_note": "Nov 16 amendment: the SEARCH and VALIDATE halves of the development window are cut at Desk A's dated constant LAST_SEARCH['ETHD'] in engine1_split, which must be written before any read of the real data (2026-11-05 is a placeholder for the fixture compare only)."
  },
  "grid": {
   "buckets": [
@@ -99,7 +100,9 @@
   "pf_secondary": 1.0,
   "min_trade_days": 10,
   "bh_alpha": 0.05,
-  "min_events": 40
+  "min_events": 40,
+  "min_signals_per_day": 3,
+  "signals_per_day_note": "Nov 16 amendment: n divided by the cell's SEARCH trade days must be at least 3, counted on the SEARCH span only (the Testing Desk's build counts each half on its own span; the spec says SEARCH only). min_events 40 counts the cell's distinct hourly close times, applied to the cell as a whole."
  },
  "tries": {
   "rules_this_spec": 96,
