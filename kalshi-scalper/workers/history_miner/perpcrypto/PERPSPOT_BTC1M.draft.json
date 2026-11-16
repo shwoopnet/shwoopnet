@@ -10,7 +10,7 @@
   "stop_after_consecutive_429": 3,
   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
  },
- "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list).",
+ "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list). NOT NEEDED by the 16 cells of PERPCRYPTO1 (the BASIS rule runs on hourly spacing only); kept as an option for a later BTC-only 1 minute variant, which would be a new registration.",
  "job_id": "PERPSPOT_BTC1M",
  "purpose": "Coinbase BTC-USD spot 1 minute candles over the PERPBTC1M window, 2026-06-03 to 2026-11-13, for the PERPCRYPTO1 basis history on KXBTCPERP. 300 candles (5 hours) a request.",
  "allowed_endpoints": [

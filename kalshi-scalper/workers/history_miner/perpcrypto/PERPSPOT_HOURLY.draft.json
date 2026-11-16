@@ -10,9 +10,9 @@
   "stop_after_consecutive_429": 3,
   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
  },
- "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list).",
+ "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list). Revision 2: BTC history extended to 2026-06-03 in hourly steps (14 requests), because the BASIS rule runs on HOURLY spacing only; the 783 request 1 minute BTC job is not needed by the 16 cells.",
  "job_id": "PERPSPOT_HOURLY",
- "purpose": "Coinbase spot hourly candles for the five crypto perps' underlyings (BTC, ETH, SOL, XRP, DOGE) over the perp-data hourly snapshot window, 2026-10-21 to 2026-11-17, for the PERPCRYPTO1 basis. 300 candles a request. HYPE-USD is not requested: Coinbase may not list it (to be checked).",
+ "purpose": "Coinbase spot HOURLY candles for the PERPCRYPTO1 basis: BTC-USD 2026-06-03 to 2026-11-17 (the PERPBTC1M window plus the snapshots), ETH, SOL, XRP and DOGE 2026-10-21 to 2026-11-17 (the hourly perp snapshot window). 300 candles a request. HYPE-USD is not requested (Coinbase may not list it).",
  "allowed_endpoints": [
   {
    "name": "spot_candles",
@@ -33,32 +33,131 @@
   "XRP-USD",
   "DOGE-USD"
  ],
- "max_requests": 15,
+ "max_requests": 26,
  "requests": [
   {
-   "id": "BTC-USD_3600_1792540800",
+   "id": "BTC-USD_3600_1780444800",
    "path": "/products/BTC-USD/candles",
    "params": {
     "granularity": 3600,
-    "start": "2026-10-21T00:00:00Z",
-    "end": "2026-11-02T12:00:00Z"
+    "start": "2026-06-03T00:00:00Z",
+    "end": "2026-06-15T12:00:00Z"
    }
   },
   {
-   "id": "BTC-USD_3600_1793620800",
+   "id": "BTC-USD_3600_1781524800",
    "path": "/products/BTC-USD/candles",
    "params": {
     "granularity": 3600,
-    "start": "2026-11-02T12:00:00Z",
-    "end": "2026-11-15T00:00:00Z"
+    "start": "2026-06-15T12:00:00Z",
+    "end": "2026-06-28T00:00:00Z"
    }
   },
   {
-   "id": "BTC-USD_3600_1794700800",
+   "id": "BTC-USD_3600_1782604800",
    "path": "/products/BTC-USD/candles",
    "params": {
     "granularity": 3600,
-    "start": "2026-11-15T00:00:00Z",
+    "start": "2026-06-28T00:00:00Z",
+    "end": "2026-07-10T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1783684800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-07-10T12:00:00Z",
+    "end": "2026-07-23T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1784764800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-07-23T00:00:00Z",
+    "end": "2026-08-04T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1785844800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-08-04T12:00:00Z",
+    "end": "2026-08-17T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1786924800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-08-17T00:00:00Z",
+    "end": "2026-08-29T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1788004800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-08-29T12:00:00Z",
+    "end": "2026-09-11T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1789084800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-09-11T00:00:00Z",
+    "end": "2026-09-23T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1790164800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-09-23T12:00:00Z",
+    "end": "2026-10-06T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1791244800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-06T00:00:00Z",
+    "end": "2026-10-18T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1792324800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-18T12:00:00Z",
+    "end": "2026-10-31T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1793404800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-31T00:00:00Z",
+    "end": "2026-11-12T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1794484800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-12T12:00:00Z",
     "end": "2026-11-17T00:00:00Z"
    }
   },
