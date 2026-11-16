@@ -27,7 +27,8 @@
  },
  "tries": {
   "rules_this_spec": 11,
-  "prior_m": "from ENGINE_TALLY.json (sha256 at signing)"
+  "prior_m": "from ENGINE_TALLY.json (sha256 at signing)",
+  "note": "m printed first: 11 cells this spec, 12 with IGLATEDRIFT1's cell; BH counts every cell of IGFADE2, IGLATEDRIFT1 and these"
  },
  "kill_fast": true,
  "uniqueness": {
@@ -64,7 +65,7 @@
  },
  "event": {
   "scorer_plugin": "ingame_drift_grid.py",
-  "scorer_plugin_sha256": "0df007f880ad546f15fd586d61fadfe4e071ca1771927e8b43a9263286033517",
+  "scorer_plugin_sha256": "6a4e63c897a1ff93bd36777330398fbd5f7392274230c938d586b1b005914b4d",
   "decision_instant": "tip + 45, 75 or 120 min (tip = occurrence_datetime - 3 h; schedule test applies)",
   "signal_threshold_abs_mid_move": [
    0.05,
@@ -74,7 +75,7 @@
   "exit": "H"
  },
  "prediction": "at least one cell has 2c PF >= 1.3 at n >= 100 with each half >= 1.0, a measured rate >= 3.0 a day and a BH pass over every cell ever tried",
- "kill": "a cell is dropped when its measured rate over the first 7 forward days is under 3.0 a day (a rate failure) or when its first read has 2c PF under 1.0 (kill_fast)",
+ "kill": "a cell is dropped when its rate over the FIRST 7 distinct forward tip days (fixed once, stored) is under 3.0 a day (a rate failure) or when its first read has 2c PF under 1.0 (kill_fast)",
  "outputs": {
   "survivor_line": "market, rule, PF 1c and 2c, n, days, measured rate a day, dollars a week at 5 contracts",
   "family_flag": "none"
@@ -129,9 +130,9 @@
  },
  "plugin": {
   "file": "ingame_drift_grid.py",
-  "sha256": "0df007f880ad546f15fd586d61fadfe4e071ca1771927e8b43a9263286033517",
+  "sha256": "6a4e63c897a1ff93bd36777330398fbd5f7392274230c938d586b1b005914b4d",
   "hand_case_file": "IGDRIFTGRID1_CARD_NOV16.md",
-  "hand_case_sha256": "8dae74fda7099a44e25cf3497bf2e3616b4eec3941859bc3b83b17493b6d2d3d",
+  "hand_case_sha256": "740596963118e44ae76eeeb1c5f4f252a6a9faa5e6cb535bf6242eddc72af963",
   "auditor_clean_date": "pending"
  },
  "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",

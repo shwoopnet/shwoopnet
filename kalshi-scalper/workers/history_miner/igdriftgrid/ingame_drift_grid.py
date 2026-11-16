@@ -1,8 +1,11 @@
 """ingame_drift_grid.py: scorer plugin for IGDRIFTGRID1 (History Miner, Nov 16, 2026). Card IGDRIFTGRID1_CARD_NOV16.md. Pure functions, no I/O.
 Imports the signed ingame_events.py (4698bae0, unchanged) for fee, pf, day_z, two, tip_of, quote_at and cash; it adds only the grid. Upper bound, not fill-checked."""
-import collections, os, sys, time
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "igspecs"))
+import collections, hashlib, os, sys, time
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "igspecs"))
+SIGNED_EVENTS_SHA256 = "4698bae08dca65bebcaac7bad551bad6611099ba71a082b58b0976835f817e0b"      # Auditor B's CLEAN of ingame_events.py
+if hashlib.sha256(open(os.path.join(HERE, "..", "igspecs", "ingame_events.py"), "rb").read()).hexdigest() != SIGNED_EVENTS_SHA256:
+    raise SystemExit("REFUSED: ingame_events.py is not the signed file (sha256 %s)" % SIGNED_EVENTS_SHA256)
 import ingame_events as E
 
 EPS = 1e-9
@@ -12,6 +15,7 @@ DIRECTIONS = ("follow", "fade")
 LOOKBACK = 30
 CELLS = [(d, th, di) for d in OFFSETS for th in THRESHOLDS for di in DIRECTIONS if not (d == 120 and th == 0.08 and di == "follow")]
 RATE_GATE = 3.0
+GATE_DAYS = 7
 
 
 def rid(cell):
@@ -46,14 +50,36 @@ def decide(ev, cell):
     return "no quote at a mark", None
 
 
-def run(events):
+
+
+def tip_day(ev):
+    tp = E.tip_of(ev)
+    return time.strftime("%Y-%m-%d", time.gmtime(tp)) if tp is not None else None
+
+
+def in_scope(ev):
+    return ev["league"] in ("NBA", "NHL") and ev["kind"] in ("total", "ml")
+
+
+def compute_gate(events):
+    """The 3-a-day gate, fixed ONCE on the first 7 distinct tip days (counts of decisions only, no outcome). -> {cell id: {"rate", "dropped"}} or None while fewer than 7 tip days exist.
+    The caller stores it (the TALLY or a gate file) and passes it back to run(); it is never recomputed."""
+    days = sorted({tip_day(ev) for ev in events if in_scope(ev) and tip_day(ev)})
+    if len(days) < GATE_DAYS:
+        return None
+    first = set(days[:GATE_DAYS]); out = {}
+    for cell in CELLS:
+        n = sum(1 for ev in events if in_scope(ev) and tip_day(ev) in first and decide(ev, cell)[0] == "ok")
+        out[rid(cell)] = {"rate": n / GATE_DAYS, "dropped": n / GATE_DAYS < RATE_GATE, "days": sorted(first)}
+    return out
+
+
+def run(events, stored_gate=None):
+    """m is printed first. The gate is the stored one if given, else computed once when 7 tip days exist (returned as gate_to_store), else pending; the rank uses all days."""
     out = {}
-    tip_days = set()
-    for ev in events:
-        tp = E.tip_of(ev)
-        if tp is not None and ev["league"] in ("NBA", "NHL") and ev["kind"] in ("total", "ml"):
-            tip_days.add(time.strftime("%Y-%m-%d", time.gmtime(tp)))
-    span = max(len(tip_days), 1)
+    all_days = {tip_day(ev) for ev in events if in_scope(ev) and tip_day(ev)}
+    span = max(len(all_days), 1)
+    gate = stored_gate or compute_gate(events)
     for cell in CELLS:
         skips = collections.Counter(); rows = {h: [] for h in E.HAIRCUTS}
         for ev in events:
@@ -63,9 +89,10 @@ def run(events):
             for h in E.HAIRCUTS:
                 rows[h].append((det["t"], E.cash(ev, det, h)))
         r = {"cell": {"offset_min": cell[0], "threshold": cell[1], "direction": cell[2]}, "skips": dict(skips), "days_with_games": span}
-        n = len(rows[0.02]); rate = n / span
-        r["n"] = n; r["rate_per_day"] = rate
-        r["rate_gate"] = "ok" if rate >= RATE_GATE else "DROPPED: rate %.2f a day under %.1f (a rate failure, not a bar failure)" % (rate, RATE_GATE)
+        n = len(rows[0.02]); rate_all = n / span
+        r["n"] = n; r["rate_per_day_all_days"] = rate_all
+        g = gate.get(rid(cell)) if gate else None
+        r["rate_gate"] = "pending (fewer than %d tip days)" % GATE_DAYS if g is None else ("ok (first-7-day rate %.2f)" % g["rate"] if not g["dropped"] else "DROPPED: first-7-day rate %.2f a day under %.1f (a rate failure, not a bar failure)" % (g["rate"], RATE_GATE))
         for h in E.HAIRCUTS:
             rs = sorted(rows[h]); xs = [x for _, x in rs]; half = len(xs) // 2
             r["h%d" % round(h * 100)] = {"pf": E.pf(xs) if xs else None, "half1": E.pf(xs[:half]) if half else None, "half2": E.pf(xs[half:]) if xs else None,
@@ -73,8 +100,11 @@ def run(events):
                 "evidence": "ok" if len(xs) >= 100 else "no evidence at n = %d" % len(xs)}
         mean2 = (sum(x for _, x in rows[0.02]) / n / E.CONTRACTS) if n else None
         r["mean_net_per_contract_2c"] = mean2
-        r["dollars_a_week_at_5_contracts"] = (rate * 7 * mean2 * 5) if mean2 is not None else None
+        r["dollars_a_week_at_5_contracts"] = (rate_all * 7 * mean2 * 5) if mean2 is not None else None
         r["kill_fast"] = r["h2"]["pf"] is not None and r["h2"]["pf"] < 1.0
         out[rid(cell)] = r
-    ranked = sorted((k for k, v in out.items() if v["rate_gate"] == "ok" and v["dollars_a_week_at_5_contracts"] is not None), key=lambda k: -out[k]["dollars_a_week_at_5_contracts"])
-    return {"cells": out, "ranked_by_dollars_a_week": ranked, "tries": len(CELLS)}
+    ranked = sorted((k for k, v in out.items() if v["rate_gate"].startswith("ok") and v["dollars_a_week_at_5_contracts"] is not None), key=lambda k: -out[k]["dollars_a_week_at_5_contracts"])
+    res = {"m_cells_this_spec": len(CELLS), "m_with_iglatedrift1": len(CELLS) + 1, "cells": out, "ranked_by_dollars_a_week": ranked}
+    if stored_gate is None and gate is not None:
+        res["gate_to_store"] = gate
+    return res
