@@ -40,20 +40,23 @@ def decide(ev, cell):
     if tip is None:
         return "schedule test failed", None
     tks = sorted(ev["rows"])[:1] if ev["kind"] == "ml" else sorted(ev["rows"])
+    cands = []
     for tk in tks:
         st = stretches(ev["rows"][tk], tip)
-        if len(st) < b:
-            continue
-        _t0, level, after = st[b - 1]
-        d = (after[1] + after[2]) / 2 - level
-        if abs(d) < theta - EPS:
-            return "no signal", None
-        yes = (d > 0) if direction == "follow" else (d < 0)
-        side, ask = ("yes", after[2]) if yes else ("no", round(1 - after[1], 6))
-        if 0.20 - EPS <= ask <= 0.80 + EPS:
-            return "ok", {"ticker": tk, "side": side, "ask": ask, "t": after[0]}
-        return "ask out of range", None
-    return "no boundary", None
+        if len(st) >= b:
+            cands.append((st[b - 1][2][0], tk, st[b - 1]))           # (decision time, ticker, the b-th stretch): known at that poll
+    if not cands:
+        return "no boundary", None
+    cands.sort(key=lambda c: (c[0], c[1]))                           # the rung whose boundary comes FIRST is the one a live rule acts on (Auditor B, no end-of-game ticker choice)
+    _t, tk, (_t0, level, after) = cands[0]
+    d = (after[1] + after[2]) / 2 - level
+    if abs(d) < theta - EPS:
+        return "no signal", None
+    yes = (d > 0) if direction == "follow" else (d < 0)
+    side, ask = ("yes", after[2]) if yes else ("no", round(1 - after[1], 6))
+    if 0.20 - EPS <= ask <= 0.80 + EPS:
+        return "ok", {"ticker": tk, "side": side, "ask": ask, "t": after[0]}
+    return "ask out of range", None
 
 
 def in_scope(ev):

@@ -27,7 +27,7 @@
  },
  "tries": {
   "rules_this_spec": 8,
-  "prior_m": "from ENGINE_TALLY.json (sha256 at signing)",
+  "prior_m": "read from ENGINE_TALLY.json at signing (sha256 quoted by Auditor B)",
   "note": "m printed first: 8 here, 33 with IGFADE2 1, IGLATEDRIFT1 1, IGDRIFTGRID1 11, IGDRIFTSPREAD1 12"
  },
  "kill_fast": true,
@@ -64,13 +64,13 @@
  },
  "event": {
   "scorer_plugin": "ingame_period.py",
-  "scorer_plugin_sha256": "058b26ebbb9356cc31d5ce81229f3bac2ff88207af3328be35ccab325a7caeb5",
+  "scorer_plugin_sha256": "48ded58e793050093e124b0214635ef7a107eb1a0ab42b216db6c6b6dfa3d430",
   "decision_instant": "the first poll after a quiet stretch of at least 720 s (polls at most 360 s apart, mid within 0.005 of the first), the stretch starting between tip + 30 and tip + 140 min (tip = occurrence_datetime - 3 h, proxy, schedule test applies)",
   "signal_threshold_abs_mid_move": [
    0.02,
    0.04
   ],
-  "entry_rule": "d = mid after poll - flat level; if |d| >= threshold buy the side d moved toward (follow) or the other (fade) at the after poll's ask, 0.20 to 0.80; one per game, kind and boundary; boundary 1 or 2 = the first or second stretch; 8 cells",
+  "entry_rule": "d = mid after poll - flat level; if |d| >= threshold buy the side d moved toward (follow) or the other (fade) at the after poll's ask, 0.20 to 0.80; one per game, kind and boundary; boundary 1 or 2 = the first or second stretch; 8 cells; for totals the ticker whose b-th stretch has the EARLIEST decision poll is decided on (ties by name), never a ticker chosen by what the whole game shows",
   "exit": "H"
  },
  "prediction": "a cell with 2c PF >= 1.3 at n >= 100, each half >= 1.0, a measured rate >= 3 games a day and a BH pass over every cell ever tried",
@@ -88,8 +88,8 @@
    "label": "this spec's forward window (ingame rows and listing closes)",
    "start_epoch": 1794873600,
    "end_epoch": 1797292799,
-   "card": "IGFADE2 IGLATEDRIFT1 IGDOG1",
-   "status": "OPEN (owned by these three specs, Auditor B 2026-11-16 16:20Z)"
+   "card": "IGFADE2 IGLATEDRIFT1 IGDOG1 IGDRIFTGRID1 IGDRIFTSPREAD1 IGPERIOD1",
+   "status": "OPEN (owned by these in-play specs, Auditor B 2026-11-16 16:20Z; an in-play read under H04 as narrowed to in_play)"
   },
   {
    "label": "ingame rows Nov 13 to Nov 16, held and unread by any spec",
@@ -129,9 +129,9 @@
  },
  "plugin": {
   "file": "ingame_period.py",
-  "sha256": "058b26ebbb9356cc31d5ce81229f3bac2ff88207af3328be35ccab325a7caeb5",
+  "sha256": "48ded58e793050093e124b0214635ef7a107eb1a0ab42b216db6c6b6dfa3d430",
   "hand_case_file": "IGPERIOD1_CARD_NOV16.md",
-  "hand_case_sha256": "e82abc50691f60b852a45f31c4bc324020b90a6faed62157d43fdf5ddfe43552",
+  "hand_case_sha256": "4c8bb44e1c64ad4edcf630a79c0f6dbf3abe4575b8922eca0f88eb5c342052b5",
   "auditor_clean_date": "pending"
  },
  "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
@@ -140,7 +140,7 @@
  "n_floor": "no evidence at n = x",
  "look_ahead": {
   "decision_instant": "the after poll's time t_k",
-  "inputs": "polls at or before t_k only: the flat run (all earlier polls) and the after poll itself; the schedule tip bounds where a stretch may start",
+  "inputs": "polls at or before t_k only: the flat run (all earlier polls) and the after poll itself; the schedule tip bounds where a stretch may start; the ticker is chosen by the earliest decision poll among tickers, each decided only from polls at or before it",
   "entry_quote": "the after poll's ask",
   "exit_price": "settlement result from the listing; no later quote"
  }

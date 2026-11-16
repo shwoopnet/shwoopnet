@@ -22,6 +22,12 @@ assert P.decide(mk({"X": flat}, lg="NBA"), (1, 0.02, "follow"))[0] == "not in wa
 assert P.decide(mk({"X": flat}, occ="2026-11-20T03:10:00Z"), (1, 0.02, "follow"))[0] == "schedule test failed"
 two = flat + [(T + 3360, 0.55, 0.57)] + [(T + 5400 + 300 * i, 0.55, 0.57) for i in range(4)] + [(T + 6660, 0.60, 0.62)]
 assert len(P.stretches(two, T)) == 2
+# Auditor B's look-ahead case: two rungs; "A" sorts first but its boundary comes later, "B" has it first: B must be taken, on its own time
+late_flat = [(T + 5700 + 300 * i, 0.50, 0.52) for i in range(4)]
+rungs = mk({"A": late_flat + [(T + 6960, 0.62, 0.64)], "B": flat + [(T + 3360, 0.55, 0.57)]}, {"A": "no", "B": "yes"})
+w, d = P.decide(rungs, (1, 0.04, "follow")); assert w == "ok" and d["ticker"] == "B" and d["t"] == T + 3360 and A(d["ask"], 0.57), (w, d)
+w, d = P.decide(mk({"B": flat + [(T + 3360, 0.55, 0.57)], "A": flat + [(T + 3360, 0.45, 0.47)]}), (1, 0.04, "follow")); assert d["ticker"] == "A"       # a tie in decision time goes to the ticker name
+only_late = mk({"A": late_flat + [(T + 6960, 0.62, 0.64)], "B": flat + [(T + 3360, 0.51, 0.53)]}); assert P.decide(only_late, (1, 0.04, "follow"))[0] == "no signal"   # B decides (earlier), its move is small: no trade on A
 print("decide: ok")
 def day_events(day, k):
     occ = "2026-11-%02dT03:00:00Z" % day; tip = calendar.timegm((2026, 11, day, 0, 0, 0))
