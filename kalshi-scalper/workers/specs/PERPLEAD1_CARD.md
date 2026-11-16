@@ -37,5 +37,7 @@ Rules this card: 20 (part b, ETH) now; 80 (part a, four pairs) forward. m = m_ca
 ## Amendments (Nov 16, 2026, Auditor B's design read)
 (c) m for part (b) is m_carried + 20, the carried number being the Head's single value (6,290,660 on a print today, 7,492,484 from Nov 17). (d) Loader and adapter go to Auditor B with hand cases first; no read before Auditor B's explicit CLEAN. (e) Part (a): the `kalshi1m` candle files dated from 2026-12-01 may be the files HOLDS H17 calls cash1m (CASHCLOSE1 and successors); Forensics to confirm which they are before any forward read; files before 2026-12-01 are free.
 
+(f) Gate choices accepted by Auditor B: the 10 trade day floor counts SEARCH and VALIDATE trades together (SEARCH has only 9 dates); the 3 a day is n over the 9 SEARCH dates. Events with a gap over 500 bps are a scale screen on the first minute's data (counted, not a rule). M_CARRIED is set only by the Head's single number (6,290,660 on the Nov 16 print, 7,492,484 from Nov 17); the run refuses while it is None. The adapter pins the signed scorer by sha256 and its header names the quote-data commit and both run stamps.
+
 ## What this card does NOT claim
 No result. The perp price scale and the maintenance margin are unknowns written in as steps, not guessed. "Leads" is tested only at the minute ends the recorder gives (120 s, 60 s and 0 s before the close, three points an event), not as a continuous lead-lag correlation: the ladder is recorded only in the last 150 seconds, so a lag of more than two minutes cannot be seen here.

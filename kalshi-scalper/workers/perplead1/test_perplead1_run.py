@@ -19,5 +19,12 @@ ok += [("2 scale 1000 from 2026-10-28, m_total 6290680", rep["scale"] == 1000.0 
        ("6 next-minute column n 0, no passes, no survivors", cv["robust_next_minute"]["n"] == 0 and rep["search_passes"] == 0 and rep["validate_passes"] == 0 and rep["survivors"] == [])]
 try: R.run([ev(d, 3.9998, 4.0002) for d in days], m_carried=1); ok.append(("7 scale not within 5% of a power of ten refuses", False))
 except SystemExit as e: ok.append(("7 scale not within 5% of a power of ten refuses", "not within 5%" in str(e)))
+import hashlib
+rep["quote_data"] = "e78f54fa"; rep["runs"] = ["PERPETH1M_W8/s1", "PERPETH1M_W11/s2"]
+ok.append(("8 header names the quote-data commit and both runs", R.header(rep).startswith("quote-data e78f54fa | runs PERPETH1M_W8/s1, PERPETH1M_W11/s2 | m_total 6290680")))
+orig = R.SCORE_SHA; R.SCORE_SHA = "0" * 64
+try: R._pinned_scorer(); ok.append(("9 a changed scorer is refused", False))
+except SystemExit as e: ok.append(("9 a changed scorer is refused", "REFUSED: perplead1_score.py" in str(e)))
+R.SCORE_SHA = orig
 for k, v in ok: print("PASS" if v else "FAIL", k)
 sys.exit(0 if all(v for _, v in ok) else 1)

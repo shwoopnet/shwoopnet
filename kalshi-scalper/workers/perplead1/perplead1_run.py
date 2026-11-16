@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """PERPLEAD1 part (b) adapter (Desk B, Nov 16 2026; DRAFT, unrun, unsigned): events from perplead1_load, scale step on the first recorded day, the 20 rules, the gates (card specs/PERPLEAD1_CARD.md) and BH over m.
 Every figure is 'upper bound, zero latency'. Taker 24 bps round trip is the primary; maker 10 bps is secondary; the next-minute fill is a robustness column (information, not a rule, not in m).
-Usage: python3 perplead1_run.py <quote-data checkout> <PERPETH1M_W8 run> <PERPETH1M_W11 run>  (the loader refuses unless Main's allow lines name both runs)."""
-import os, sys, math, statistics, collections
+Usage: python3 perplead1_run.py <quote-data checkout> <quote-data commit hash> <PERPETH1M_W8 run> <PERPETH1M_W11 run>  (the loader refuses unless Main's allow lines name both runs)."""
+import os, sys, math, statistics, collections, hashlib, re
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+SCORE_SHA = "854b9835ef898e943d48bf1c677acf21b8b6ba1c33a8afd68384867567f10d6d"      # the scorer Auditor B signed
+def _pinned_scorer():
+    got = hashlib.sha256(open(os.path.join(HERE, "perplead1_score.py"), "rb").read()).hexdigest()
+    if got != SCORE_SHA: raise SystemExit("REFUSED: perplead1_score.py has sha256 %s, not the pinned %s" % (got, SCORE_SHA))
+_pinned_scorer()
 import perplead1_score as P
 M_CARRIED = None                       # the Head's single carried number on the day of the read (6,290,660 on Nov 16 print, 7,492,484 from Nov 17); run refuses while None
 THETAS = (2, 4, 6, 8, 10); EXITS = ("m60", "m0"); DIRS = ("convergence", "fade"); TAKER, MAKER = 24.0, 10.0
@@ -65,12 +70,13 @@ def run(events, m_carried=None):
     keep = bh(v_p, m_total)
     rep["search_passes"], rep["validate_passes"], rep["survivors"] = len(s_pass), len(v_res), sorted(keep)
     return rep
-def header(rep): return "m_total %d | scale %g (first day %s) | rules %d | search events %d validate events %d | %s" % (rep["m_total"], rep["scale"], rep["scale_day"], len(RULES), rep["search_events"], rep["validate_events"], rep["labels"])
+def header(rep): return "quote-data %s | runs %s | m_total %d | scale %g (first day %s) | rules %d | search events %d validate events %d | %s" % (rep.get("quote_data", "unset"), ", ".join(rep.get("runs", [])) or "unset", rep["m_total"], rep["scale"], rep["scale_day"], len(RULES), rep["search_events"], rep["validate_events"], rep["labels"])
 def main(argv=None):
     a = sys.argv[1:] if argv is None else argv
     import perplead1_load as L
-    ev, cnt = L.load(a[0], a[1:])
-    rep = run(ev)
+    if not re.fullmatch(r"[0-9a-f]{7,40}", a[1]): raise SystemExit("REFUSED: the second argument must be the quote-data commit hash")
+    ev, cnt = L.load(a[0], a[2:])
+    rep = run(ev); rep["quote_data"] = a[1]; rep["runs"] = [os.path.basename(os.path.dirname(os.path.abspath(r))) + "/" + L.check_run_name(r) for r in a[2:]]
     print(header(rep)); print("loader counts:", dict(cnt)); print("scorer counts:", dict(rep["counts"]))
     for k in sorted(rep["rules"]):
         r = rep["rules"][k]; print("theta %d exit %s %s | S n %d days %d mean %.2f pf %.3f | h1 %.3f h2 %.3f | V n %d pf %.3f | gross %.2f | maker pf %.3f | next-minute n %d pf %.3f | pass %s" % (
