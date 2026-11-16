@@ -11,10 +11,15 @@ FEES = {"net_taker": 0.0024, "net_maker": 0.0010}          # round trip (12 and 
 M_NEW = 101
 
 
+HOLIDAYS = frozenset(__import__("calendar").timegm((y, mo, d, 12, 0, 0)) // 86400 for (y, mo, d) in ((2026, 11, 26), (2026, 12, 25)))          # full US cash closures: not an ET weekday for the rules (the day number is the UTC day of that midday; ET local day = the same number at midday)
+EARLY = frozenset(__import__("calendar").timegm((y, mo, d, 12, 0, 0)) // 86400 for (y, mo, d) in ((2026, 11, 27), (2026, 12, 24)))          # early 13:00 ET closes: no B2 or B3 on those days
+
+
 def weekday(L): return (L + 3) % 7          # epoch day 0 is a Thursday; Monday = 0
+def is_session(L): return weekday(L) < 5 and L not in HOLIDAYS
 def next_weekday(L):
     L += 1
-    while weekday(L) >= 5: L += 1
+    while not is_session(L): L += 1
     return L
 def et_end(L, hh, mm): return p.day_start_of_local(L) + hh * H + mm * 60
 def usable(q): return p.two_sided(q)
@@ -56,19 +61,29 @@ def exit_ts(kind, L, e):
     raise ValueError(kind)
 
 
+def schedule_T(funding):
+    """the funding window's T (Auditor B): the previous print's timestamp plus 24 h, per name, never the day's own print; one T per print of the extract (the one after the last print included)"""
+    return [t + 86400 for t in sorted(funding or {})]
+
+
+def schedule_misses(funding):
+    """information: the number of days on which the actual next print differed from the schedule T"""
+    ps = sorted(funding or {}); return sum(1 for a, b in zip(ps, ps[1:]) if b != a + 86400)
+
+
 def candidates(rule, name, s, funding, under):
     """-> list of (e, x, long_, day) signal-true candidates of one rule for one name, in entry order (before cooldown and marks)"""
     out = []; k = rule[0]
     days = sorted(set(p.et_local_day(t) for t in s))
     if k == "A":
         for L in days:
-            if weekday(L) >= 5: continue
+            if not is_session(L): continue
             if (weekday(L) == 4) != (rule[1] == "weekend"): continue
             out.append((et_end(L, 16, 0), et_end(next_weekday(L), 9, 31), rule[2] == "long", L))
     elif k == "A2":
         _, cls, thr, mode, ex = rule
         for L in days:
-            if weekday(L) >= 5 or (weekday(L) == 0) != (cls == "mon"): continue
+            if not is_session(L) or (weekday(L) == 0) != (cls == "mon"): continue
             E, P25 = s.get(et_end(L, 9, 31)), s.get(et_end(L, 9, 25)); u = (under.get(name) or {}).get(L)
             if u is None or u[0] is None or u[1] is None or u[1] <= 0 or not (usable(E) and usable(P25)): continue
             Lp = L - 1
@@ -83,7 +98,7 @@ def candidates(rule, name, s, funding, under):
     elif k == "B1":
         _, n, thr, mode, ex = rule
         for L in days:
-            if weekday(L) >= 5: continue
+            if not is_session(L): continue
             O, En = s.get(et_end(L, 9, 31)), s.get(et_end(L, 9, 31) + 60 * n)
             if not (usable(O) and usable(En)): continue
             m = mid(En) / mid(O) - 1
@@ -93,7 +108,7 @@ def candidates(rule, name, s, funding, under):
     elif k == "B2":
         _, thr, mode, ex = rule
         for L in days:
-            if weekday(L) >= 5: continue
+            if not is_session(L) or L in EARLY: continue
             A, B = s.get(et_end(L, 15, 0)), s.get(et_end(L, 15, 30))
             if not (usable(A) and usable(B)): continue
             m = mid(B) / mid(A) - 1
@@ -102,11 +117,11 @@ def candidates(rule, name, s, funding, under):
             out.append((et_end(L, 15, 30), exit_ts(ex, L, 0), long_, L))
     elif k == "B3":
         for L in days:
-            if weekday(L) >= 5: continue
+            if not is_session(L) or L in EARLY: continue
             out.append((et_end(L, 15, 30), et_end(L, 16, 1), rule[1] == "long", L))
     elif k == "C":
         _, x, y, side = rule
-        for T in sorted(funding or {}):
+        for T in schedule_T(funding):
             e, xt = T - 60 * x, T + 60 * y
             prior = [t for t in funding if t < e]
             if side == "receive":

@@ -35,9 +35,9 @@ tr, c = first(("C", 30, 30, "receive"), dC, fC); t = tr[0]
 assert len(tr) == 1 and t["side"] == "short" and close(t["gross"], -0.0024007) and close(t["funding"], -0.0003, 1e-12) and close(t["net_taker"], -0.0045007), t
 assert first(("C", 30, 30, "long"), dC, fC)[0][0]["side"] == "long" and first(("C", 30, 30, "short"), dC, fC)[0][0]["side"] == "short"
 assert first(("C", 30, 30, "receive"), dC, {"X": {T1 - 86400: 0.0, T1: 0.0003}})[0] == [] and first(("C", 30, 30, "receive"), dC, {"X": {T1 - 86400: -0.0004, T1: 0.0003}})[0][0]["side"] == "long"
-assert first(("C", 30, 30, "receive"), dC, {"X": {T1: 0.0003}})[0] == []          # no prior rate: no receive trade
+assert m.schedule_T({"X": 1}.get("Y")) == [] and m.schedule_T({5: 0, 3: 0}) == [3 + 86400, 5 + 86400]          # T is the previous print plus 24 h, one per print
 # cooldown: two prints an hour apart with x = 15, y = 60: the second entry is inside the first hold
-T2 = T1 + 3600; dCC = {"X": {T1 - 900: q(100.0, 100.1), T1 + 3600: q(100.0, 100.1), T2 - 900: q(100.0, 100.1), T2 + 3600: q(100.0, 100.1)}}; fCC = {"X": {T1 - 86400: 1e-4, T1: 1e-4, T2: 1e-4, T2 + 86400: 1e-4}}
+T2 = T1 + 3600; dCC = {"X": {T1 - 900: q(100.0, 100.1), T1 + 3600: q(100.0, 100.1), T2 - 900: q(100.0, 100.1), T2 + 3600: q(100.0, 100.1)}}; fCC = {"X": {T1 - 86400: 1e-4, T2 - 86400: 1e-4, T1: 1e-4, T2: 1e-4}}
 tr, c = first(("C", 15, 60, "long"), dCC, fCC); assert c["blocked"] == 1 and len(tr) == 1, (c, len(tr))
 # the entry equal to the previous exit end is allowed: T2 - 15 min = T1 + 45 min vs exit T1 + 60 min is blocked; with y = 45 the exit is T1 + 45 min and the entry at the same instant is allowed
 dEq = {"X": {T1 - 900: q(100.0, 100.1), T1 + 2700: q(100.0, 100.1), T2 + 2700: q(100.0, 100.1)}}; tr, c = first(("C", 15, 45, "long"), dEq, fCC); assert c["blocked"] == 0 and len(tr) == 2, (c, len(tr))
@@ -83,4 +83,18 @@ assert m.pf([t["net_taker"] for t in weak]) < 1.3 and m.gate(good, weak, "net_ta
 # BH uses m_carried + 101
 seen = []; ob = p.bh; p.bh = lambda pv, mt, q=0.05: (seen.append(mt), ob(pv, mt, q))[1]
 m.run({"X": {}}, {}, {}, m_carried=6290660); p.bh = ob; assert seen == [6290761, 6290761], seen
+# T is the SCHEDULE (previous print + 24 h), not the day's own print: a print that lands 10 minutes late does not move the window
+fLate = {"X": {T1 - 86400: 0.0004, T1 + 600: 0.0003}}; trL, cL = first(("C", 30, 30, "receive"), dC, fLate); assert len(trL) == 1 and trL[0]["e"] == T1 - 1800 and trL[0]["exit_ts"] == T1 + 1800
+assert m.schedule_misses(fLate["X"]) == 1 and m.schedule_misses(fC["X"]) == 0 and m.schedule_misses({"X": 1}.get("Y")) == 0
+# cash holidays and early closes (forward days): Thanksgiving 2026-11-26 is no ET weekday for the rules, 2026-11-27 closes early
+L25, L26, L27 = p.et_local_day(T(2026, 11, 25, 12, 0, 0)), p.et_local_day(T(2026, 11, 26, 12, 0, 0)), p.et_local_day(T(2026, 11, 27, 12, 0, 0))
+assert m.next_weekday(L25) == L27 and not m.is_session(L26) and m.is_session(L27)
+dH = {"X": {m.et_end(L25, 16, 0): q(100.0, 100.1), m.et_end(L27, 9, 31): q(100.2, 100.3), m.et_end(L26, 9, 31): q(100.4, 100.5), m.et_end(L27, 15, 30): q(100.0, 100.1), m.et_end(L27, 16, 1): q(100.0, 100.1)}}
+cut0 = m.CUT; m.CUT = 2 ** 40          # a forward read has a later cut
+trH, cH = m.score(("A", "weeknight", "long"), dH, None, {}, 0.0002); assert [(t["e"], t["exit_ts"]) for t in trH] == [(m.et_end(L25, 16, 0), m.et_end(L27, 9, 31))]          # the exit skips the holiday
+assert m.score(("B3", "long"), dH, None, {}, 0.0002)[0] == []          # early close day: no B3 or B2
+m.CUT = cut0
+# EDT and EST days: 16:00 ET is 20:00Z on 2026-10-30 (EDT) and 21:00Z on 2026-11-02 (EST)
+L30, L2 = p.et_local_day(T(2026, 10, 30, 12, 0, 0)), p.et_local_day(T(2026, 11, 2, 12, 0, 0))
+assert m.et_end(L30, 16, 0) == T(2026, 10, 30, 20, 0, 0) and m.et_end(L2, 16, 0) == T(2026, 11, 2, 21, 0, 0) and m.et_end(L30, 9, 31) == T(2026, 10, 30, 13, 31, 0) and m.et_end(L2, 9, 31) == T(2026, 11, 2, 14, 31, 0)
 print("lane4 plugin tests passed")

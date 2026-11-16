@@ -60,8 +60,8 @@
   "B1_open": "open move over N minutes: m = mid(candle ending 09:31 + N) / mid(candle ending 09:31) - 1 for N = 5, 15, 30; fires when |m| is at least 20 or 40 bp; entry at the candle ending 09:31 + N; follow or fade; exit T30, T60 or TC = 3 x 2 x 2 x 3 = 36 rules",
   "B2_close": "close move: m = mid(candle ending 15:30 ET) / mid(candle ending 15:00 ET) - 1; fires when |m| is at least 20 or 40 bp; entry at 15:30; follow or fade; exit at the candle ending 16:01 ET or at the next 09:31 ET (TO) = 2 x 2 x 2 = 8 rules",
   "B3_closedrift": "unconditional: entry at the candle ending 15:30 ET, exit at the candle ending 16:01 ET, long or short = 2 rules",
-  "C_funding": "entry at the candle ending T - 60, 30 or 15 minutes, exit at the candle ending T + 15, 30 or 60 minutes, side long, short or the side that RECEIVES the print (short if the last rate is above 0, long if below, no trade at exactly 0); T = the name's own print timestamp of the day (the 4 PM ET print: 21:00Z in EST for the stocks) = 3 x 3 x 3 = 27 rules",
-  "common": "one position per name per rule at a time (the next entry needs e >= the previous exit end); DST aware ET clocks (the offset read at the ET day's midday: EDT 2026-03-08T07:00Z to 2026-11-01T06:00Z); boundary: no trade whose entry or exit end is at or after 2026-11-17T00:00Z in the development read; funding booked from the prints (long pays a positive rate), a trade without booked funding is out of the gates and counted; entry fills at the ask (long) or bid (short) times (1 +- h), exits at the bid or ask times (1 -+ h), h relative 0.0002 and 0.0005 primary, 0.001 and 0.002 stress counted apart"
+  "C_funding": "entry at the candle ending T - 60, 30 or 15 minutes, exit at the candle ending T + 15, 30 or 60 minutes, side long, short or the side that RECEIVES the print (short if the last rate is above 0, long if below, no trade at exactly 0); T = the SCHEDULE: the previous print's timestamp plus 24 h per name, never the day's own print (the 4 PM ET print) = 3 x 3 x 3 = 27 rules",
+  "common": "one position per name per rule at a time (the next entry needs e >= the previous exit end); DST aware ET clocks (the offset read at the ET day's midday: EDT 2026-03-08T07:00Z to 2026-11-01T06:00Z); boundary: no trade whose entry or exit end is at or after 2026-11-17T00:00Z in the development read; funding booked from the prints (long pays a positive rate), a trade without booked funding is out of the gates and counted; entry fills at the ask (long) or bid (short) times (1 +- h), exits at the bid or ask times (1 -+ h), h relative 0.0002 and 0.0005 primary, 0.001 and 0.002 stress counted apart; cash closures 2026-11-26 and 2026-12-25 are no session day; early closes 2026-11-27 and 2026-12-24 have no B2 or B3; the forward read ends before 2026-12-22"
  },
  "grid": {
   "note": "event_rule: no engine grid; the cell list above is the plugin's own enumeration"
@@ -102,6 +102,13 @@
    "end_epoch": 1796601600,
    "card": "PERPSLANE4, PERPS-FAM-F, OPENGAP1-F",
    "status": "OPEN (forward, read once on the Head's go)"
+  },
+  {
+   "label": "H16 (SPY, QQQ, NVDA, AAPL, US 500, US Tech 100) and H17 (perps30 and cash1m files) start; no forward read of this lane goes at or after 1797897600 (2026-12-22) without a clause",
+   "start_epoch": 1797897600,
+   "end_epoch": null,
+   "card": "H16, H17 (Auditor B's hold rows)",
+   "status": "OPEN: this lane stops before it"
   }
  ],
  "look_ahead": {
@@ -109,7 +116,7 @@
   "A2": "the gap uses the underlying's official open and previous close (known at 09:30 ET) and the perp candles ending at or before 09:31 ET; entry at the 09:31 candle",
   "B1": "m uses candles ending at or before the entry candle (09:31 + N); entry at that candle",
   "B2": "m uses the candles ending 15:00 and 15:30 ET; entry at 15:30",
-  "C": "T is the name's own print timestamp of the day (a schedule fact: the previous print's time of day, read from timestamps and never from a rate); the receiving side uses the last rate strictly before the entry candle end",
+  "C": "T is the previous print's timestamp plus 24 h per name (a schedule, known before the entry), never the day's own print; the receiving side uses the last rate strictly before the entry candle end; days where the actual print time differed from the schedule are counted (information)",
   "exit": "every exit price is the leave quote of the candle ending at the exit instant, never an earlier or later candle",
   "fill": "entry at the quote of the entry candle"
  },
@@ -132,7 +139,7 @@
   ],
   "fee_taker": 0.0012,
   "fee_maker": 0.0005,
-  "fee_note": "12 and 5 bps a side both ASSUMED until Kalshi's published perps fee is read (Desk A); neither is the headline; $870 notional at 1x and a 2x line in messages only"
+  "fee_note": "12 and 5 bps a side both ASSUMED until Kalshi's published perps fee is read (Desk A); neither is the headline; dollars per $1,000 of notional at 1x and a 2x line in messages only (no account figure)"
  },
  "gates": {
   "min_n": 100,
@@ -145,7 +152,7 @@
  },
  "tries": {
   "rules_this_spec": 101,
-  "prior_m": "from the TALLY (m_carried, the day's number) + 101"
+  "prior_m": "the day's single carried number (Auditor B: 6,290,761 in total today and 7,492,585 from Nov 17, i.e. m_carried 6,290,660 or 7,492,484) plus 101; read from the TALLY, never typed"
  },
  "prediction": "most rules fail (round trip 24 bp taker plus 8 bp haircuts against session moves of 10 to 40 bp); P(any rule clears the gates on development and holds on the forward read) about 3%; the weekend rules (A, class weekend) and the funding window C are the best chance",
  "kill": "no rule with n 100 or more pooled, 10 trade days and PF 1.3 at 0.02% with both halves 1.0 or more and PF 1.0 at 0.05%, or nothing survives BH; kill fast at PF under 1.0 at 0.02% on the first read",
@@ -155,7 +162,7 @@
  "fee_form": "perps: relative fee a side on the notional (12 and 5 bps), a haircut h relative to the fill price; binaries are not used; the standing ceil(round(0.07 x n x p x (1 - p) x 100, 9)) / 100 form and the void rule do not apply to perps (no settlement)",
  "n_floor": "no evidence at n = x below 100",
  "outputs": {
-  "survivor_line": "rule, pooled n, trade days, PF at 0.02% and 0.05% for 12 and 5 bps, day clustered z, dollars at $870 notional (1x and 2x), margin terms at 10, 25 and 50 percent of the maximum with liquidation distance",
+  "survivor_line": "rule, pooled n, trade days, PF at 0.02% and 0.05% for 12 and 5 bps, day clustered z, dollars per $1,000 of notional (1x and 2x), margin terms at 10, 25 and 50 percent of the page maximum (maintenance assumed 4.5%, gold 4.47% measured) with liquidation distance",
   "family_flag": "none"
  }
 }
