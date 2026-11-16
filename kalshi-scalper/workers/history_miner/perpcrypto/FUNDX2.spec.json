@@ -4,7 +4,7 @@
  "date_registered": "2026-11-16",
  "kind": "event_rule",
  "split": {
-  "mode": "search_validate",
+  "mode": "fixed_dates",
   "search": "funding prints 2026-06-03T00:00Z to before 2026-09-15T00:00Z (thresholds only)",
   "validate": "2026-09-15T00:00Z to before 2026-11-17T00:00Z",
   "forward": "2026-11-17T00:00Z on, untouched",
@@ -113,7 +113,7 @@
  },
  "subset_rationale": "a single rule registered before any forward row existed; no figure from the forward window was seen",
  "halves": "by entry time: the first floor(n/2) trades and the rest",
- "fee_form": "perps: a percentage of notional per side plus a haircut per fill (not the binary-contract fee)",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order at c = 10; a void refunds the price and keeps the fee",
  "n_floor": "no evidence at n = x",
  "look_ahead": {
   "decision_instant": "the funding print's time; the signal row is the first price row at or after it",
@@ -124,5 +124,6 @@
  "notes_v2": "approved by the Head 2026-11-16 20:47Z; margin table v2 on page-max leverage and 4.5 percent maintenance; spot accepted for research",
  "card_sha256": "25fb761d8815de61fef21ad9d95fc54bd140ee08433a77f1b513a002f3edf19d",
  "rule_count": 8,
- "status": "DRAFT spec: not signed; plugin, labelled funding file and allow line pending"
+ "status": "DRAFT spec: not signed; plugin, labelled funding file and allow line pending",
+ "fee_form_perps_note": "NOT the binary-contract fee: perps pay 12 bps of notional a side (stress 5 bps) plus a 0.02 or 0.05 percent haircut per fill, and funding; the standing form above is kept only because spec_check requires the field"
 }
