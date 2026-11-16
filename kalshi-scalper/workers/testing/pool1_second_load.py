@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reader of Forensics' stock perps extract (tag 20261116, 94 listed names) for the Testing Desk's POOL1 second build (Nov 16, 2026). Offline. REFUSES unless the allow-list file carries a line for this reader naming
 this file's own sha256 AND the two extracts' xz sha256 (no flag, no env var). The wall is exactly the names below (Forensics' cutlog wall): each row's ticker is compared with the wall before any other column is used.
-Reads only candle(ticker, end_ts, yes_bid, yes_ask) and funding(ticker, ts, rate); the market table and the columns last, volume and oi are never touched. Nothing before 2026-11-06T00:00Z and nothing at or after
+Reads only candle(ticker, end_ts, yes_bid, yes_ask) and funding(ticker, ts, rate); the market table and the columns last, volume and oi are never touched. Nothing before 2026-11-05T18:39:00Z (epoch 1793903940, spec v3.5) and nothing at or after
 2026-11-17T00:00Z (epoch 1794873600, the spec's window cut) is read; both are counted. Prints counts only.
   python3 -I pool1_second_load.py <dir with the two .xz extracts>"""
 import collections, hashlib, lzma, os, shutil, sqlite3, sys, tempfile
@@ -102,7 +102,7 @@ WALL = (
         "KXWFCPERP",
         "KXWMTPERP",
         "KXXOMPERP")
-FIRST_TS, CUTOFF = 1793923200, 1794873600          # 2026-11-06T00:00Z, 2026-11-17T00:00Z
+FIRST_TS, CUTOFF = 1793903940, 1794873600          # 2026-11-05T18:39:00Z (spec v3.5 loader wall), 2026-11-17T00:00:00Z
 CANDLE_XZ, FUNDING_XZ = "ENGINE1_stockperps_20261116_extract.sqlite.xz", "ENGINE1_stockperps_funding_20261116_extract.sqlite.xz"
 XZ_SHA = {CANDLE_XZ: "b4073e4e0464246218ad3bca4e970d5bec95f5bbfd5380a154f9da630a8b2e15", FUNDING_XZ: "e98273017794fcb017e4738f7b1df5627ee1b5c03becf59d23218c800f423e98"}
 ALLOW_FILE = os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md")
@@ -137,7 +137,8 @@ def load(directory, allow_file=None, xz_sha=None, wall=WALL):
             tk = row[0]
             if tk not in ws: c["candle row outside the wall (not parsed)"] += 1; continue
             e = row[1]
-            if e is None or e < FIRST_TS: c["candle before 2026-11-06 (dropped)"] += 1; continue
+            if e is None: c["candle without end_ts (dropped)"] += 1; continue
+            if e < FIRST_TS: c["candle before 2026-11-05T18:39Z (dropped)"] += 1; continue
             if e >= CUTOFF: c["candle at or after 2026-11-17 (dropped)"] += 1; continue
             if int(e) in data[tk] and data[tk][int(e)] != (row[2], row[3]): c["duplicate candle differs (first kept)"] += 1
             data[tk].setdefault(int(e), (row[2], row[3]))
@@ -146,7 +147,7 @@ def load(directory, allow_file=None, xz_sha=None, wall=WALL):
         for row in fdb.execute("select ticker, ts, rate from funding"):
             tk = row[0]
             if tk not in ws: c["funding row outside the wall (not parsed)"] += 1; continue
-            if row[1] is None or row[1] < FIRST_TS or row[2] is None: c["funding row before the start or without a rate (dropped)"] += 1; continue
+            if row[1] is None or row[1] < FIRST_TS or row[2] is None: c["funding row before 2026-11-05T18:39Z or without a ts or rate (dropped)"] += 1; continue
             if row[1] >= CUTOFF: c["funding row at or after 2026-11-17 (dropped)"] += 1; continue
             funding[tk][int(row[1])] = float(row[2])          # booked from the extract's own print timestamps, whatever the hour
         fdb.close()

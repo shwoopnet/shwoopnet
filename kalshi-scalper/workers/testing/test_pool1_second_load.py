@@ -24,7 +24,7 @@ open(allow, "w").write("| x | %s pool1_second_load.py %s %s %s |\n" % (L.ALLOW_M
 data, fund, c = L.load(t, allow, shas)
 assert data[n1] == {E0 + 60: (1.0, 1.1), E0 + 120: (None, None), L.CUTOFF - 60: (2.0, 2.1)} and data[n2] == {E0 + 60: (3.0, 3.1), E0: (4.0, 4.1)}, data[n1]
 assert fund[n1] == {E0 + 100: 0.0001} and "KXOUTSIDE" not in data
-assert c == {"candle before 2026-11-06 (dropped)": 1, "candle at or after 2026-11-17 (dropped)": 1, "candle row outside the wall (not parsed)": 1, "duplicate candle differs (first kept)": 1, "funding row at or after 2026-11-17 (dropped)": 2, "funding row before the start or without a rate (dropped)": 2, "funding row outside the wall (not parsed)": 1}, c
-assert len(L.WALL) == 94 and len(set(L.WALL)) == 94 and all(w.endswith("PERP") for w in L.WALL)
+assert c == {"candle before 2026-11-05T18:39Z (dropped)": 1, "candle at or after 2026-11-17 (dropped)": 1, "candle row outside the wall (not parsed)": 1, "duplicate candle differs (first kept)": 1, "funding row at or after 2026-11-17 (dropped)": 2, "funding row before 2026-11-05T18:39Z or without a ts or rate (dropped)": 2, "funding row outside the wall (not parsed)": 1}, c
+assert L.FIRST_TS == 1793903940 and L.CUTOFF == 1794873600 and len(L.WALL) == 94 and len(set(L.WALL)) == 94 and all(w.endswith("PERP") for w in L.WALL)
 lines = R.run(t, allow, shas); assert lines[1].startswith("names with candles 2") and len(lines) == 2 + 220
 shutil.rmtree(t); print("pool1 second loader tests passed")
