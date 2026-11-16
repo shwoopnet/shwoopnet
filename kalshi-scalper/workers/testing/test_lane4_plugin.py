@@ -93,6 +93,8 @@ dH = {"X": {m.et_end(L25, 16, 0): q(100.0, 100.1), m.et_end(L27, 9, 31): q(100.2
 cut0 = m.CUT; m.CUT = 2 ** 40          # a forward read has a later cut
 trH, cH = m.score(("A", "weeknight", "long"), dH, None, {}, 0.0002); assert [(t["e"], t["exit_ts"]) for t in trH] == [(m.et_end(L25, 16, 0), m.et_end(L27, 9, 31))]          # the exit skips the holiday
 assert m.score(("B3", "long"), dH, None, {}, 0.0002)[0] == []          # early close day: no B3 or B2
+dB2e = {"X": {m.et_end(L27, 15, 0): q(99.99, 100.01), m.et_end(L27, 15, 30): q(99.69, 99.71), m.et_end(L27, 16, 1): q(99.5, 99.52)}}
+assert m.score(("B2", 20, "follow", "T1601"), dB2e, None, {}, 0.0002)[0] == []          # no B2 on the early close day
 m.CUT = cut0
 # EDT and EST days: 16:00 ET is 20:00Z on 2026-10-30 (EDT) and 21:00Z on 2026-11-02 (EST)
 L30, L2 = p.et_local_day(T(2026, 10, 30, 12, 0, 0)), p.et_local_day(T(2026, 11, 2, 12, 0, 0))
