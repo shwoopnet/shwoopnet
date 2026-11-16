@@ -1,5 +1,5 @@
 {
- "id": "SPOTBASIS1",
+ "id": "PERPBASIS1",
  "desk": "History Miner",
  "date_registered": "2026-11-16",
  "kind": "event_rule",
@@ -7,7 +7,7 @@
   "mode": "fixed_dates",
   "search": "BTC 2026-06-03T00:00Z to before 2026-09-15T00:00Z (cut points only, trades never opened); ETH and XRP forward-search 2026-11-17T00:00Z to before 2026-11-24T00:00Z",
   "validate": "BTC 2026-09-15T00:00Z to before 2026-11-12T00:00Z; ETH and XRP from 2026-11-24T00:00Z; BTC forward from 2026-11-17T00:00Z (BTC VALIDATE is development on seen data; the bar is applied on the forward windows)",
-  "release_rule": "cut points computed once and committed (SPOTBASIS1_THRESHOLDS.json) with counts and the loader hash before any outcome print; gate fixed on the first 7 distinct trade days, committed before the first outcome print"
+  "release_rule": "cut points computed once and committed (PERPBASIS1_THRESHOLDS.json) with counts and the loader hash before any outcome print; gate fixed on the first 7 distinct trade days, committed before the first outcome print"
  },
  "costs": {
   "fee_taker_per_side": 0.0012,
@@ -30,8 +30,8 @@
  },
  "tries": {
   "rules_this_spec": 8,
-  "prior_m": "6,290,660 + 16 (8 SPOTBASIS1 + 8 withdrawn BASIS) = 6,290,676 for a print on 2026-11-16; 7,492,484 + 16 = 7,492,500 from 2026-11-17",
-  "note": "SPOTBASIS1 8 cells; replaces PERPCRYPTO1 BASIS 8"
+  "prior_m": "6,290,660 + 16 (8 PERPBASIS1 + 8 withdrawn BASIS) = 6,290,676 for a print on 2026-11-16; 7,492,484 + 16 = 7,492,500 from 2026-11-17",
+  "note": "PERPBASIS1 8 cells; replaces PERPCRYPTO1 BASIS 8"
  },
  "kill_fast": true,
  "uniqueness": {
@@ -46,7 +46,7 @@
    "taker order-flow family (no tape)"
   ],
   "difference": "the perp's premium over Coinbase spot at 1 minute, tail crossings, 15 or 60 minute time exit; replaces BASIS under 7g",
-  "family_flag": "VERSION of PERPCRYPTO1 BASIS (Verification Analyst 2026-11-16): replaces it, takes no new slot and no uniqueness credit"
+  "family_flag": "VERSION of PERPCRYPTO1 BASIS (Verification Analyst 2026-11-16): replaces it, no new slot, no uniqueness credit; the Head ruled 23:19Z that the lead-lag row does not bind"
  },
  "data": {
   "loader": "perpbasis1_load.py (to be written and audited)",
@@ -84,7 +84,7 @@
   "header": "BTC prints apart (history Jun 3 to Nov 12 plus forward); ETH and XRP are forward only",
   "family_flag": "none"
  },
- "card": "kalshi-scalper/workers/history_miner/spotbasis1/SPOTBASIS1_CARD_NOV16.md",
+ "card": "kalshi-scalper/workers/history_miner/perpbasis1/PERPBASIS1_CARD_NOV16.md",
  "needs_new_code": [
   "labelled funding pull for the six tickers, or crypto in the daily funding recorder (Main)",
   "a Coinbase route row in scripts/kalshi_pull.py (Main; needs the owner's typed merge and Auditor B's runner read)",
@@ -126,7 +126,7 @@
   "exit_price": "the near touch of the first minute at least H later (tolerance 2 minutes, else skipped); funding on prints strictly between entry and exit from the labelled file (positive = longs pay); a trade crossing a print the file lacks is excluded and counted"
  },
  "notes_v2": "approved by the Head 2026-11-16 20:47Z; margin table v2 on page-max leverage and 4.5 percent maintenance; spot accepted for research",
- "card_sha256": "da79d4fcc731dad990e85dbc4a939bdb91ee94e8d4956eca61a3737e844ec74f",
+ "card_sha256": "b08a6b5a1917ea0cd3766baade48aa11b0ae7dd4052776bee7024f0329cce306",
  "rule_count": 8,
  "status": "DRAFT spec: not signed; loader, plugin, allow line and the Verification Analyst's four checks pending",
  "fee_form_perps_note": "NOT the binary-contract fee: perps pay 12 bps of notional a side (stress 5 bps) plus a 0.02 or 0.05 percent haircut per fill, and funding; the standing form above is kept only because spec_check requires the field",
