@@ -234,9 +234,8 @@ def main():
         f["net"] = (1.0 - f["cost"]) if res == "no" else -f["cost"]
         settled.append(f)
     if which == "monitor":
-        wins = sum(1 for f in settled if f["net"] > 0)
-        print("MONITOR, not the registered verdict; the Nov 26 read is the verdict")
-        print(f"monitor: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | wins {wins}" + (f" | cash PF {pf(settled):.2f} | net per dollar {per_dollar(settled):+.3f}" if settled else " | no settled fills yet"))
+        print("MONITOR, counts only, not the registered verdict; the Dec 12 read is the verdict")
+        print(f"monitor: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved}")
         return
     print(f"{which}: paper fills {len(fl)} | due {len(due)} | settled {len(settled)} | unresolved {unresolved} | other result {other}")
     print(f"legs: paper fills with leg tickers stored {sum(1 for f in fl if f['legs_state'] != 'unknown')} | leg unknown {sum(1 for f in fl if f['legs_state'] == 'unknown')} | legs incomplete {sum(1 for f in fl if f['legs_state'] == 'incomplete')} | with a weather leg {sum(1 for f in fl if f['weather'])}")

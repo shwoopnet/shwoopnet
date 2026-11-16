@@ -36,7 +36,7 @@ want = boots[100]; m = re.search(r"bootstrap 5th percentile by close date ([+-]?
 ok.append(("4", bool(m) and abs(float(m.group(1)) - want) < 5e-4))
 # 5 monitor, tree T120, read 2026-11-17T00:00Z
 om = run(d["T120"], "2026-11-17T00:00:00Z", "monitor")
-ok.append(("5", "MONITOR, not the registered verdict; the Nov 26 read is the verdict" in om and "due 40 | settled 36 | unresolved 4 | wins 32 | cash PF 1.86 | net per dollar +0.096" in om and "LABEL" not in om and "KILLED" not in om and "bootstrap" not in om))
+ok.append(("5", "MONITOR, counts only, not the registered verdict; the Dec 12 read is the verdict" in om and "monitor: paper fills 120 | due 40 | settled 36 | unresolved 4" in om and not any(w in om for w in ("wins", "PF", "net per dollar", "LABEL", "KILLED", "bootstrap"))))
 # 6 the registered read is still refused early
 ok.append(("6", "REFUSED" in run(d["T120"], "2026-11-17T00:00:00Z")))
 # 7 cut leg lists (Auditor B, line 9)
