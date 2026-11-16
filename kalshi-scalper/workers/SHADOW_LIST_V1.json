@@ -1,0 +1,759 @@
+{
+ "list": "SHADOW_LIST_V1",
+ "date": "2026-11-16",
+ "n": 17,
+ "no_money_no_orders": true,
+ "specs": [
+  {
+   "spec": {
+    "id": "SH1_01_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 3,
+     "side_rule": "cheap",
+     "filter": "spread:low"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "2142dd78c680bc20a29c777d43176aae046f77d5dce755c5b3ef7252440bba94",
+   "rank": 1,
+   "family": "spread filter, cheap tail (5c to 35c)",
+   "flags": [],
+   "cluster": 1,
+   "cluster_size": 4,
+   "paper_research": {
+    "validate_n": 139,
+    "signals_per_day": 4.795,
+    "pf_1c": 1.842,
+    "pf_2c": 1.67,
+    "edge_1c_cents_per_contract": 9.729,
+    "edge_2c_cents_per_contract": 8.252,
+    "dollars_week_5c_1c": 16.33,
+    "dollars_week_5c_2c": 13.85,
+    "bh_p": 0.00033708677924274586,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_02_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 16,
+     "side_rule": "yes",
+     "filter": "none"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "ac26cae23e3356d3b3f5c13a327b2df5a79b764223017e1c2cabaf6a2d7c89bd",
+   "rank": 2,
+   "family": "plain band, middle (35c to 85c)",
+   "flags": [
+    "Ethereum high-price side: Ethereum as L1 is declined (7e); shadow only"
+   ],
+   "cluster": 2,
+   "cluster_size": 4,
+   "paper_research": {
+    "validate_n": 183,
+    "signals_per_day": 6.313,
+    "pf_1c": 1.739,
+    "pf_2c": 1.616,
+    "edge_1c_cents_per_contract": 6.089,
+    "edge_2c_cents_per_contract": 5.135,
+    "dollars_week_5c_1c": 13.45,
+    "dollars_week_5c_2c": 11.35,
+    "bh_p": 0.006154069870743898,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_03_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 660,
+     "price_band_5c": 6,
+     "side_rule": "yes",
+     "filter": "spread:low"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "35e15453fe70229a66f107a9b516e6507336dc6957ee55020b16139a6ca6b30b",
+   "rank": 3,
+   "family": "spread filter, cheap tail (5c to 35c)",
+   "flags": [],
+   "cluster": 3,
+   "cluster_size": 1,
+   "paper_research": {
+    "validate_n": 121,
+    "signals_per_day": 4.174,
+    "pf_1c": 1.539,
+    "pf_2c": 1.425,
+    "edge_1c_cents_per_contract": 9.201,
+    "edge_2c_cents_per_contract": 7.551,
+    "dollars_week_5c_1c": 13.44,
+    "dollars_week_5c_2c": 11.03,
+    "bh_p": 0.011276876160873929,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_04_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 180,
+     "price_band_5c": 5,
+     "side_rule": "cheap",
+     "filter": "spread:low"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "44ee712a587e3b631fe2bb7bd1a42bc6ac746b433b0e6baaa88a8e176de08557",
+   "rank": 4,
+   "family": "spread filter, cheap tail (5c to 35c)",
+   "flags": [],
+   "cluster": 4,
+   "cluster_size": 2,
+   "paper_research": {
+    "validate_n": 149,
+    "signals_per_day": 5.14,
+    "pf_1c": 1.366,
+    "pf_2c": 1.301,
+    "edge_1c_cents_per_contract": 6.842,
+    "edge_2c_cents_per_contract": 5.823,
+    "dollars_week_5c_1c": 12.31,
+    "dollars_week_5c_2c": 10.48,
+    "bh_p": 0.05692634059683664,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_05_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 120,
+     "price_band_5c": 2,
+     "side_rule": "cheap",
+     "filter": "mom5:down"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "319f8bcbe377bb666b8a300e619048b9717ec8931ad463d846162b0662583ebc",
+   "rank": 5,
+   "family": "momentum or volume filter, cheap tail (5c to 35c)",
+   "flags": [],
+   "cluster": 5,
+   "cluster_size": 6,
+   "paper_research": {
+    "validate_n": 160,
+    "signals_per_day": 5.519,
+    "pf_1c": 1.585,
+    "pf_2c": 1.452,
+    "edge_1c_cents_per_contract": 6.36,
+    "edge_2c_cents_per_contract": 5.299,
+    "dollars_week_5c_1c": 12.29,
+    "dollars_week_5c_2c": 10.24,
+    "bh_p": 0.0226419099258111,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_06_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 3,
+     "side_rule": "yes",
+     "filter": "oi3:up"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "0bf6a6ef88f61c8f6e6e2d678b841346848b84e56e5044ae9d6f94d1f6a5d539",
+   "rank": 6,
+   "family": "open-interest trigger, cheap tail (5c to 35c)",
+   "flags": [
+    "open-interest trigger: check against OICORE (cheap side, open interest rise); different market"
+   ],
+   "cluster": 6,
+   "cluster_size": 1,
+   "paper_research": {
+    "validate_n": 121,
+    "signals_per_day": 4.174,
+    "pf_1c": 1.689,
+    "pf_2c": 1.53,
+    "edge_1c_cents_per_contract": 8.148,
+    "edge_2c_cents_per_contract": 6.69,
+    "dollars_week_5c_1c": 11.9,
+    "dollars_week_5c_2c": 9.77,
+    "bh_p": 0.01772746830063574,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_07_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 120,
+     "price_band_5c": 2,
+     "side_rule": "cheap",
+     "filter": "mom5:down"
+    },
+    "exit": "S",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "1d09e7791868a242d86405dfb8ba88a08ec1c55ddacf6094e8272b1699fc0c00",
+   "rank": 7,
+   "family": "momentum or volume filter, cheap tail (5c to 35c)",
+   "flags": [],
+   "cluster": 7,
+   "cluster_size": 7,
+   "paper_research": {
+    "validate_n": 160,
+    "signals_per_day": 5.519,
+    "pf_1c": 1.556,
+    "pf_2c": 1.411,
+    "edge_1c_cents_per_contract": 5.783,
+    "edge_2c_cents_per_contract": 4.661,
+    "dollars_week_5c_1c": 11.17,
+    "dollars_week_5c_2c": 9.0,
+    "bh_p": 0.0345499666064413,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_08_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "oi6:up"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "8b73b86a204c1eee2ef897e28dab7c5d270383b8c85da36cdbdf3195f903843c",
+   "rank": 8,
+   "family": "open-interest trigger, cheap tail (5c to 35c)",
+   "flags": [
+    "open-interest trigger: check against OICORE (cheap side, open interest rise); different market"
+   ],
+   "cluster": 9,
+   "cluster_size": 5,
+   "paper_research": {
+    "validate_n": 268,
+    "signals_per_day": 9.245,
+    "pf_1c": 1.532,
+    "pf_2c": 1.275,
+    "edge_1c_cents_per_contract": 3.194,
+    "edge_2c_cents_per_contract": 1.918,
+    "dollars_week_5c_1c": 10.33,
+    "dollars_week_5c_2c": 6.21,
+    "bh_p": 0.018961894305350415,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_09_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 15,
+     "side_rule": "yes",
+     "filter": "none"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "3d0371e389348a5672ab21636a2f302d7a990c974405d122986112fb4a905d16",
+   "rank": 9,
+   "family": "plain band, middle (35c to 85c)",
+   "flags": [
+    "Ethereum high-price side: Ethereum as L1 is declined (7e); shadow only"
+   ],
+   "cluster": 12,
+   "cluster_size": 2,
+   "paper_research": {
+    "validate_n": 100,
+    "signals_per_day": 3.45,
+    "pf_1c": 1.764,
+    "pf_2c": 1.662,
+    "edge_1c_cents_per_contract": 7.807,
+    "edge_2c_cents_per_contract": 6.847,
+    "dollars_week_5c_1c": 9.43,
+    "dollars_week_5c_2c": 8.27,
+    "bh_p": 0.001048878997283595,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_10_NEAR",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXNEAR15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 4,
+     "side_rule": "cheap",
+     "filter": "vol3:up"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "62051a9cb594e5685ad16b0013f4af1de12236a5a025a37f9800f3034ae705ea",
+   "rank": 10,
+   "family": "momentum or volume filter, cheap tail (5c to 35c)",
+   "flags": [],
+   "cluster": 13,
+   "cluster_size": 1,
+   "paper_research": {
+    "validate_n": 107,
+    "signals_per_day": 3.691,
+    "pf_1c": 1.441,
+    "pf_2c": 1.319,
+    "edge_1c_cents_per_contract": 6.218,
+    "edge_2c_cents_per_contract": 4.74,
+    "dollars_week_5c_1c": 8.03,
+    "dollars_week_5c_2c": 6.12,
+    "bh_p": 0.056838853274906204,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_11_SOL",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXSOL15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "vol3:up"
+    },
+    "exit": "S",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "db80b17d94a8ff2be97a3b69e0e4860bdf3501df750a82c830036bc1f14e5bd4",
+   "rank": 11,
+   "family": "momentum or volume filter, middle (35c to 85c)",
+   "flags": [],
+   "cluster": 20,
+   "cluster_size": 1,
+   "paper_research": {
+    "validate_n": 122,
+    "signals_per_day": 5.45,
+    "pf_1c": 1.326,
+    "pf_2c": 1.209,
+    "edge_1c_cents_per_contract": 3.314,
+    "edge_2c_cents_per_contract": 2.196,
+    "dollars_week_5c_1c": 6.32,
+    "dollars_week_5c_2c": 4.19,
+    "bh_p": 0.1134044867814133,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_12_GOLD",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXGOLD15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "oi3:up"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "62ca90ce9cea97d00d243f9eb2c48581755d4973d28f83b89414f04d5204c3a6",
+   "rank": 12,
+   "family": "F1 favourite-late shape",
+   "flags": [
+    "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique",
+    "gold: the gold L1 family and the closed gold variants (maker entries, 94.5c floor) are on 7e; compare before any step beyond shadow"
+   ],
+   "cluster": 22,
+   "cluster_size": 8,
+   "paper_research": {
+    "validate_n": 237,
+    "signals_per_day": 8.208,
+    "pf_1c": 1.499,
+    "pf_2c": 1.275,
+    "edge_1c_cents_per_contract": 2.152,
+    "edge_2c_cents_per_contract": 1.198,
+    "dollars_week_5c_1c": 6.18,
+    "dollars_week_5c_2c": 3.44,
+    "bh_p": 0.047420246519632336,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_13_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 17,
+     "side_rule": "yes",
+     "filter": "mom3:up"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "d79dac2fba8280b3d6ef75fab3705429f00755c3a50252641d46df2015012044",
+   "rank": 13,
+   "family": "F1 favourite-late shape",
+   "flags": [
+    "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique",
+    "XRP YES held to settlement: the same mechanism as the retired XRPYES10 (7e: favourite-and-hold ban, XRP declined as an L1 market); shadow only, never live without the owner's named exception"
+   ],
+   "cluster": 24,
+   "cluster_size": 26,
+   "paper_research": {
+    "validate_n": 152,
+    "signals_per_day": 5.243,
+    "pf_1c": 1.446,
+    "pf_2c": 1.309,
+    "edge_1c_cents_per_contract": 3.112,
+    "edge_2c_cents_per_contract": 2.174,
+    "dollars_week_5c_1c": 5.71,
+    "dollars_week_5c_2c": 3.99,
+    "bh_p": 0.09411198342837111,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_14_SOL",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXSOL15M",
+    "entry": {
+     "seconds_left": 480,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "vol3:up"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "c767674e3b007fa1211a392fb91ee5e4cbbf847add25d9260ee1a7157c730808",
+   "rank": 14,
+   "family": "F1 favourite-late shape",
+   "flags": [
+    "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique"
+   ],
+   "cluster": 26,
+   "cluster_size": 2,
+   "paper_research": {
+    "validate_n": 137,
+    "signals_per_day": 6.12,
+    "pf_1c": 1.65,
+    "pf_2c": 1.411,
+    "edge_1c_cents_per_contract": 2.631,
+    "edge_2c_cents_per_contract": 1.682,
+    "dollars_week_5c_1c": 5.64,
+    "dollars_week_5c_2c": 3.6,
+    "bh_p": 0.10483133211219643,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_15_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 360,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "mom1:up"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "6fc64db4599e63dc7084352ae0f18ac52f584229794df5ac48ae3c7437eab8d6",
+   "rank": 15,
+   "family": "F1 favourite-late shape",
+   "flags": [
+    "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique"
+   ],
+   "cluster": 27,
+   "cluster_size": 2,
+   "paper_research": {
+    "validate_n": 307,
+    "signals_per_day": 10.59,
+    "pf_1c": 1.309,
+    "pf_2c": 1.114,
+    "edge_1c_cents_per_contract": 1.507,
+    "edge_2c_cents_per_contract": 0.561,
+    "dollars_week_5c_1c": 5.58,
+    "dollars_week_5c_2c": 2.08,
+    "bh_p": 0.09588948122969858,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_16_BNB",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBNB15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "spread:low"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "ae917f99875af50c90a72214f1d46fdc807b96ca4a3dec3cf49b971106b8875d",
+   "rank": 16,
+   "family": "spread filter, cheap tail (5c to 35c)",
+   "flags": [],
+   "cluster": 28,
+   "cluster_size": 2,
+   "paper_research": {
+    "validate_n": 166,
+    "signals_per_day": 5.726,
+    "pf_1c": 1.466,
+    "pf_2c": 1.213,
+    "edge_1c_cents_per_contract": 2.713,
+    "edge_2c_cents_per_contract": 1.446,
+    "dollars_week_5c_1c": 5.44,
+    "dollars_week_5c_2c": 2.9,
+    "bh_p": 0.14882932849223196,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH1_17_NEAR",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXNEAR15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "yes",
+     "filter": "mom3:up"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward"
+   },
+   "spec_sha256": "97f9133af28cd8618e0f5f2319665f4ecc400f8d3a75f818f14c2253c9a33359",
+   "rank": 17,
+   "family": "F1 favourite-late shape",
+   "flags": [
+    "favourite-late shape (88c-97c class, late look): a duplicate of gold L1 unless it differs; here it differs only by market and exit, so it is flagged, not claimed unique"
+   ],
+   "cluster": 31,
+   "cluster_size": 2,
+   "paper_research": {
+    "validate_n": 201,
+    "signals_per_day": 6.934,
+    "pf_1c": 1.497,
+    "pf_2c": 1.266,
+    "edge_1c_cents_per_contract": 2.062,
+    "edge_2c_cents_per_contract": 1.116,
+    "dollars_week_5c_1c": 5.0,
+    "dollars_week_5c_2c": 2.71,
+    "bh_p": 0.052769765364044485,
+    "note": "archive validate window to 2026-10-02; upper bound, not fill-checked; dollars scale linearly from the 10 contract cash (fees are per order, so 5 contracts differ slightly)"
+   }
+  }
+ ]
+}
