@@ -85,4 +85,6 @@ assert len(rep["rules"]) == 144 and rep["m_new"] == 144 and "6290804" in rep["he
 assert all(set(o["columns"]) == ({"TT", "ME2", "ME5"} if o["signal"].startswith("pair") else {"TT", "ME2", "ME5", "MM2", "MM5"}) for o in rep["rules"])
 assert all("candidate_blocked_no_page_max" in c and "names_traded_without_page_max" in c for o in rep["rules"] for c in o["columns"].values())
 assert any(c["names_traded_without_page_max"] == ["KXCCC"] for o in rep["rules"] for c in o["columns"].values())
+assert all("events" in c and c["signals_after_cooldown"] == c["signals"] and c["events"] >= c["signals"] and "maker_only_rule" in c for o in rep["rules"] for c in o["columns"].values())
+assert all(len({c["maker_only_rule"] for c in o["columns"].values()}) == 1 for o in rep["rules"])        # the rule-level flag is the same on every column of a rule
 print("ENGPERPS LANES OK; header:", rep["header"][:80])

@@ -223,10 +223,11 @@ def evaluate_lanes(cand, fund, levmax, m_carried, min_per_day=3.0, baskets=BASKE
                 s1, s2 = Q.stats(r1, nd), Q.stats(r2, nd); g = gate(s1, s2, min_per_day)
                 _, cnt, sg, fl, missed = res[Q.H_PRIMARY]
                 cols[col_name(mode, nn)] = {"n": s1["n"], "trades_per_day": s1["per_day"], "pf_primary": s1["pf"], "pf_second": s2["pf"], "halves_primary": [s1["half1"], s1["half2"]], "halves_second": [s2["half1"], s2["half2"]], "top_day_share": s1["top_day_share"], "gate": g, "p": D.pval(s1["day_z"]),
-                    "price_terms": {"net_bp_per_trade": s1["net_mean"] * 1e4, "mean_gross_bp": s1["mean_gross_bp"]}, "signals": sg, "filled": fl, "fill_rate": (fl / sg if sg else None), "unfilled_taker_mean_net_bp": (sum(missed) / len(missed) * 1e4 if missed else None), "skips": dict(cnt),
+                    "price_terms": {"net_bp_per_trade": s1["net_mean"] * 1e4, "mean_gross_bp": s1["mean_gross_bp"]}, "events": len(e_list), "signals": sg, "signals_after_cooldown": sg, "filled": fl, "fill_rate": (fl / sg if sg else None), "unfilled_taker_mean_net_bp": (sum(missed) / len(missed) * 1e4 if missed else None), "skips": dict(cnt),
                     "margin_view": margin_view([(r[7], r[8]) for r in r1], levmax, None), "names_traded_without_page_max": sorted({l for r in r1 for l in r[8] if levmax(l) is None}), "interest_credit": interest_credit([r[4] for r in r1]), "funding_unbooked": sum(1 for r in res[Q.H_PRIMARY][0] if r[6])}
             tt = cols["TT"]["gate"]
-            for k, c in cols.items(): c["maker_only_flag"] = bool(k != "TT" and c["gate"] and not tt); c["candidate_blocked_no_page_max"] = bool(c["gate"] and c["names_traded_without_page_max"])      # a pass that trades a name with no pinned page max is printed as a pass but cannot be named for shadow or as a CANDIDATE
+            rule_mo = bool((not tt) and any(c["gate"] for k, c in cols.items() if k != "TT"))        # the card's meaning: the RULE passes only in a maker column
+            for k, c in cols.items(): c["maker_only_flag"] = bool(k != "TT" and c["gate"] and not tt); c["maker_only_rule"] = rule_mo; c["candidate_blocked_no_page_max"] = bool(c["gate"] and c["names_traded_without_page_max"])      # a pass that trades a name with no pinned page max is printed as a pass but cannot be named for shadow or as a CANDIDATE
             out.append({"signal": sid, "exit": {"kt": ex[0], "ks": ex[1], "T": ex[2]}, "columns": cols})
     m_new = len(ALL_IDS) * len(EXITS)
     keep = D.bh({i: o["columns"]["TT"]["p"] for i, o in enumerate(out) if o["columns"]["TT"]["gate"]}, m_carried + m_new)
