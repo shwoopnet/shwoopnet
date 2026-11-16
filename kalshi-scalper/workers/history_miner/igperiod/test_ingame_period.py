@@ -33,7 +33,7 @@ g = P.compute_gate(ev9); assert A(g[CELL]["rate"], 22 / 7) and not g[CELL]["drop
 r = P.run(ev9); assert r["cells"][CELL]["rate_gate"].startswith("ok") and A(r["cells"][CELL]["games_per_day_all_days"], 22 / 9) and r["m_cells_this_spec"] == 8 and r["m_with_all_ingame_specs"] == 33 and "gate_to_store" in r
 evr = [e for d in range(20, 27) for e in day_events(d, 2)] + day_events(27, 10) + day_events(28, 10)
 rr = P.run(evr); assert rr["cells"][CELL]["rate_gate"].startswith("DROPPED") and CELL not in rr["ranked_by_dollars_a_week"]
-r2 = P.run(ev9 + day_events(29, 40), stored_gate=P.compute_gate(ev9)); assert "gate_to_store" not in r2 and CELL in r2["ranked_by_dollars_a_week"] and "IGPD_B1_04_FADE" not in r2["ranked_by_dollars_a_week"]
+r2 = P.run(ev9 + day_events(29, 40), stored_gate=P.compute_gate(ev9)); assert "gate_to_store" not in r2 and CELL in r2["ranked_by_dollars_a_week"] and r2["ranked_by_dollars_a_week"][-1].endswith("_FADE") and r2["cells"]["IGPD_B1_04_FADE"]["dollars_a_week_at_5_contracts"] < 0 and [r2["cells"][k]["dollars_a_week_at_5_contracts"] for k in r2["ranked_by_dollars_a_week"]] == sorted([r2["cells"][k]["dollars_a_week_at_5_contracts"] for k in r2["ranked_by_dollars_a_week"]], reverse=True)
 print("gate, rank and m: ok")
 import shutil, subprocess, tempfile
 tmp = tempfile.mkdtemp(); here = os.path.dirname(os.path.abspath(__file__))
