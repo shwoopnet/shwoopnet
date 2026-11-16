@@ -9,6 +9,12 @@ EX15 = {"H", "T", "S", "B", "M180", "M60"}; EXP = {"T3", "T10", "T15", "T30", "T
 F15 = {"none", "oi3", "oi6", "vol3", "mom1", "mom3", "mom5", "spread"}; FP = {"none", "mom1", "mom3", "mom5", "mom15", "spread", "tod", "orb", "sess"}
 FEATURE_OPTIONS = {"none": 1, "oi3": 3, "oi6": 3, "vol3": 3, "mom1": 3, "mom3": 3, "mom5": 3, "spread": 3}
 PERP_OPTIONS = {"none": 1, "mom1": 2, "mom3": 2, "mom5": 2, "mom15": 2, "spread": 3, "tod": 5, "orb": 2, "sess": 2}
+def wall_n(s):
+    """Series in data.ticker_wall (a list, or a comma separated string); 1 if it cannot be counted, so the count is never inflated by a guess."""
+    w = (s.get("data") or {}).get("ticker_wall")
+    if isinstance(w, list): return max(len(set(w)), 1)
+    if isinstance(w, str): return max(len({x.strip() for x in w.split(",") if x.strip()}), 1)
+    return 1
 def check(s):
     p = []
     for k in TOP:
@@ -51,7 +57,7 @@ def check(s):
         if not ex or not ex <= (EXP if perps else EX15): p.append("exits outside the library (a new one is needs_new_code)")
         if not p:
             opts = sum((PERP_OPTIONS if perps else FEATURE_OPTIONS)[f] for f in fl)
-            rules = (1 if perps else len(bk) * len(bd)) * len(sd) * len(ex) * opts
+            rules = (1 if perps else len(bk) * len(bd)) * len(sd) * len(ex) * opts * wall_n(s)     # per series times the series in the ticker wall (Nov 16: it used to count the grid once)
     else:
         e = s.get("event")
         if not e or "scorer_plugin" not in e or "scorer_plugin_sha256" not in e: p.append("event.scorer_plugin and its sha256 are required for event_rule")
@@ -65,4 +71,6 @@ if __name__ == "__main__":
     if len(sys.argv) != 2: sys.exit(__doc__)
     p, r = check(json.load(open(sys.argv[1])))
     for x in p: print("PROBLEM:", x)
-    print("rules this spec will try:", r); sys.exit(1 if p else 0)
+    sp = json.load(open(sys.argv[1])); n = wall_n(sp)
+    print("series in the ticker wall:", n); print("rules per series:", None if r is None else r // n)
+    print("rules this spec will try (per series x series):", r); sys.exit(1 if p else 0)

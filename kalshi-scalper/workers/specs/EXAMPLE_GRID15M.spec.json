@@ -71,7 +71,7 @@
   "bh_alpha": 0.05
  },
  "tries": {
-  "rules_this_spec": 32,
+  "rules_this_spec": 64,
   "prior_m": "from the TALLY"
  },
  "prediction": "example",
