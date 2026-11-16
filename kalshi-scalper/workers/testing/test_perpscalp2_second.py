@@ -75,19 +75,20 @@ class T2(unittest.TestCase):
 
 class T3(unittest.TestCase):
     def test_margin_hand(self):
-        tr = [{"name": "KXNVDAPERP", "gross": 0.002, "net": 0.0, "U": 0.0015811}, {"name": "KXNVDAPERP", "gross": -0.001, "net": -0.003, "U": 0.02}]
-        r = m.margin(tr)[0.5]                          # L = 0.5 x 4.5 = 2.25; liq = 1/2.25 - 0.045 = 0.399444...
-        ld = 1 / 2.25 - 0.045
-        self.assertAlmostEqual(r["mean_liq_dist"], ld, 12); self.assertAlmostEqual(r["mean_ret_on_margin_gross"], (0.002 - 0.001) / 2 * 2.25, 12)
-        self.assertAlmostEqual(r["mean_ret_on_margin_net"], -0.0015 * 2.25, 12); self.assertEqual(r["flagged"], 0)
-        r = m.margin(tr, {"KXNVDAPERP": 40.0})[0.5]      # L = 20, liq = 0.05 - 0.045 = 0.005: the second trade (U 0.02) is flagged, the first (0.0015811) is not
-        self.assertEqual(r["flagged"], 1); self.assertAlmostEqual(r["mean_liq_dist"], 0.005, 12)
-    def test_stress(self):
-        self.assertAlmostEqual(m.stress_net({"net": 0.001, "ef": m.TAKER, "xf": m.TAKER}), 0.001 - 0.0004, 12)
-        self.assertAlmostEqual(m.stress_net({"net": 0.001, "ef": m.MAKER, "xf": m.TAKER}), 0.001, 12)
-    def test_adverse(self):
+        tr = [{"name": "KXNVDAPERP", "net": 0.0, "U": 0.0015811}, {"name": "KXNVDAPERP", "net": -0.003, "U": 0.02}]
+        r = m.margin(tr)["50%"]                          # L = 0.5 x 4.5 = 2.25; liq = 1/2.25 - 0.045 = 0.399444
+        self.assertAlmostEqual(r["mean_pct_of_margin"], 100 * (-0.003 * 2.25) / 2, 12); self.assertEqual(r["stop_beyond_liquidation"], 0)
+        r = m.margin(tr, {"KXNVDAPERP": 40.0})["50%"]    # L = 20, liq = 0.005: U 0.02 beyond, U 0.0015811 not
+        self.assertEqual(r["stop_beyond_liquidation"], 1)
+        r = m.margin([{"name": "KXNVDAPERP", "net": 0.0, "U": 1 / 20 - 0.045}], {"KXNVDAPERP": 40.0})["50%"]; self.assertEqual(r["stop_beyond_liquidation"], 1)   # at equality counts
+    def test_adverse_hand(self):
         s = fx(); cell = (("E3", "orb", 5), "W0", 1, 600); t, d = m.signals(s, "orb", 5)[0]
-        a = m.adverse({"X": s}, {}, {"X": 0.02}, cell, "MT2"); self.assertEqual(a["signals"], 1)
         tn = m.taker_net(s, "X", {}, 0.02, cell, t, d); self.assertIsNotNone(tn)
-        if a["filled"]: self.assertAlmostEqual(a["mean_taker_net_filled"], tn, 12)
-        else: self.assertAlmostEqual(a["mean_taker_net_unfilled"], tn, 12)
+        a = m.adverse({"X": s}, {}, {"X": 0.02}, cell, 2); self.assertEqual(a["filled_n"] + a["unfilled_n"], 1)
+        v = a["filled_mean_bps"] if a["filled_n"] else a["unfilled_mean_bps"]; self.assertAlmostEqual(v, tn * 1e4, 9)
+    def test_no_taker_target_in_mm(self):
+        s = fx(); t, d = m.signals(s, "orb", 5)[0]; U = m.sigma1(s, t) * math.sqrt(10); ref = m.mid(s[t]); tgt = ref * (1 + U)
+        for u in range(t + 120, t + 60 * 40, 60): s[u] = (ref, ref + .02, 10)
+        s[t + 120] = (tgt + 0.005, tgt + 0.025, 10)          # bid above the target, below target + tick
+        self.assertEqual(m.exit_of(s, t, 1, t + 60, 0, 1, 600, .0002, "TT", .02, U)[3], "target")
+        self.assertEqual(m.exit_of(s, t, 1, t + 60, 0, 1, 600, .0002, "MM2", .02, U)[3], "time")

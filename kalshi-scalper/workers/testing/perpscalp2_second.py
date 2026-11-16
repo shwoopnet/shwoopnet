@@ -144,11 +144,11 @@ def exit_of(s, t, d, e, entry, kt, T, h, col, tick, U):
         if d > 0:
             if passive and tick is not None and c[0] >= tgt + tick - 1e-9: return u, tgt, MAKER, "ptarget"
             if c[0] <= stp: return u, c[0] * (1 - h), TAKER, "stop"
-            if c[0] >= tgt: return u, c[0] * (1 - h), TAKER, "target"
+            if not passive and c[0] >= tgt: return u, c[0] * (1 - h), TAKER, "target"
         else:
             if passive and tick is not None and c[1] <= tgt - tick + 1e-9: return u, tgt, MAKER, "ptarget"
             if c[1] >= stp: return u, c[1] * (1 + h), TAKER, "stop"
-            if c[1] <= tgt: return u, c[1] * (1 + h), TAKER, "target"
+            if not passive and c[1] <= tgt: return u, c[1] * (1 + h), TAKER, "target"
     c = s[tc]; return tc, (c[0] * (1 - h) if d > 0 else c[1] * (1 + h)), TAKER, "time"
 
 
@@ -212,11 +212,7 @@ def cells():
     return [(e, w, kt, T) for e in ENTRIES for w in WINDOWS for (kt, T) in EXITS]
 
 
-STRESS_ADD = 0.0002
 LEV_X = (0.10, 0.25, 0.50)
-
-
-def stress_net(tr): return tr["net"] - (STRESS_ADD * 2 if tr["ef"] == TAKER and tr["xf"] == TAKER else 0.0)
 
 
 def taker_net(s, name, funding, tick, cell, t, d):
@@ -229,26 +225,27 @@ def taker_net(s, name, funding, tick, cell, t, d):
     return gross - ef - xf - d * fs
 
 
-def adverse(data, funding, ticks, cell, col):
-    """maker column col: mean TAKER-model net of the signals whose maker limit filled vs did not, over signals with a valid taker trade"""
-    (eid, kind, par), w, kt, T = cell; fl, nf = [], []
-    for name in sorted(data):
-        s = data[name]
-        for (t, d) in signals(s, kind, par):
-            tn = taker_net(s, name, funding, ticks.get(name), cell, t, d)
-            if tn is None: continue
-            (fl if entry_of(s, t, d, col, HG, ticks.get(name)) is not None else nf).append(tn)
-    mf = sum(fl) / len(fl) if fl else None; mn = sum(nf) / len(nf) if nf else None
-    return {"signals": len(fl) + len(nf), "filled": len(fl), "fill_rate": len(fl) / (len(fl) + len(nf)) if fl or nf else None, "mean_taker_net_filled": mf, "mean_taker_net_unfilled": mn, "adverse": (mf < mn) if mf is not None and mn is not None else None}
-
-
 def margin(trades, lmax=LMAX):
-    """per leverage fraction x: L = x * Lmax[name]; return on margin = side-signed price return x L (gross and net), liquidation distance = 1/L - 0.045 as a price fraction and in multiples of the trade's U, flag if the stop distance U exceeds it"""
+    """per x in 10, 25, 50 percent of page max (L = x Lmax[name]): mean_pct_of_margin = 100 x mean over trades of net x L; stop_beyond_liquidation = count of trades with U >= 1/L - 0.045 (Desk C's ruling)"""
     out = {}
     for x in LEV_X:
-        g, n, dist, mult, flag, k = 0.0, 0.0, 0.0, 0.0, 0, 0
+        s, flag, k = 0.0, 0, 0
         for tr in trades:
-            L = x * lmax[tr["name"]]; ld = 1 / L - 0.045; k += 1
-            g += tr["gross"] * L; n += tr["net"] * L; dist += ld; mult += ld / tr["U"]; flag += 1 if tr["U"] > ld else 0
-        out[x] = {"n": k, "mean_ret_on_margin_gross": g / k if k else None, "mean_ret_on_margin_net": n / k if k else None, "mean_liq_dist": dist / k if k else None, "mean_liq_dist_in_U": mult / k if k else None, "flagged": flag}
+            L = x * lmax[tr["name"]]; k += 1; s += tr["net"] * L; flag += 1 if tr["U"] >= 1 / L - 0.045 else 0
+        out["%d%%" % round(x * 100)] = {"mean_pct_of_margin": 100 * s / k if k else None, "stop_beyond_liquidation": flag}
     return out
+
+
+def adverse(data, funding, ticks, cell, N):
+    """per fill window N: universe = signals with a valid taker trade (ignoring cooldown); filled = maker entry within N candles AND in window AND an exit candle (the maker-entry taker-exit build returns a trade); unfilled otherwise; means of the hypothetical taker net in bps"""
+    (eid, kind, par), w, kt, T = cell; col = "MT%d" % N; fl, nf = [], []
+    for name in sorted(data):
+        s = data[name]; tick = ticks.get(name)
+        for (t, d) in signals(s, kind, par):
+            tn = taker_net(s, name, funding, tick, cell, t, d)
+            if tn is None: continue
+            en = entry_of(s, t, d, col, HG, tick); ok = False
+            if en is not None and in_window(w, en[0]):
+                U = sigma1(s, t) * math.sqrt(10); ok = exit_of(s, t, d, en[0], en[1], kt, T, HG, col, tick, U) is not None
+            (fl if ok else nf).append(tn)
+    return {"filled_n": len(fl), "filled_mean_bps": sum(fl) / len(fl) * 1e4 if fl else None, "unfilled_n": len(nf), "unfilled_mean_bps": sum(nf) / len(nf) * 1e4 if nf else None}
