@@ -10,6 +10,13 @@ RUNNER = os.environ.get("KALSHI_PULL_PY", os.path.join(HERE, "..", "..", "..", "
 
 
 class Builder(unittest.TestCase):
+    def test_window_covers_earliest_anchor(self):
+        # the 24 h decision is D = floor_hour(K - 24 h) >= K - 25 h; its 6 h move anchor is the candle ending in (D - 7 h, D - 6 h], which starts at D - 7 h >= K - 32 h
+        for minute in (0, 15, 30, 45):
+            K = 1789000000 - 1789000000 % 3600 + minute * 60
+            D = (K - 86400) - (K - 86400) % 3600
+            self.assertLessEqual(K - 33 * 3600, D - 7 * 3600)
+
     def test_build_and_dry_run(self):
         root = TS.fixture()[0]
         pre = os.path.join(tempfile.mkdtemp(), "SOCDRIFT_CANDLES")
@@ -19,7 +26,7 @@ class Builder(unittest.TestCase):
         self.assertEqual(len(job["requests"]), 1)                                  # one game in the fixture
         q = job["requests"][0]["params"]
         K = TS.KL.iso("2026-10-25T16:30:00")
-        self.assertEqual((q["start_ts"], q["end_ts"], q["period_interval"]), (K - 31 * 3600, K, 60))
+        self.assertEqual((q["start_ts"], q["end_ts"], q["period_interval"]), (K - 33 * 3600, K, 60))
         self.assertEqual(len(q["market_tickers"].split(",")), 3)
         self.assertEqual(job["max_requests"], len(job["requests"]) + 12)
         self.assertTrue(os.path.exists(RUNNER), "runner not found: " + RUNNER)

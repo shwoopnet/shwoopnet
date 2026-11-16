@@ -59,7 +59,7 @@ class Hand(unittest.TestCase):
         self.assertEqual(m["Mh"], h(14))
         self.assertEqual(m["mark"], (.50, .54))
         self.assertEqual(c["games"], 1)
-        self.assertEqual(c["live_guard_dropped_games"], 0)
+        self.assertEqual(c["live_guard_dropped_m2"], 0)
 
     def test_hour_boundaries(self):
         root, O, Tk, h = fixture()
@@ -90,10 +90,12 @@ class Hand(unittest.TestCase):
         dec, c, g = N.decisions(root)
         self.assertEqual(c["closed_before_K_info"], 1)
 
-    def test_live_guard_drops_game(self):
+    def test_live_guard_touches_m2_only(self):
         root, O, Tk, h = fixture(jump_live=True)                        # MUN .42 at 15:00 to .62 at 16:00: the game was already live
         dec, c, g = N.decisions(root)
-        self.assertEqual((c["live_guard_dropped_games"], len(dec)), (1, 0))
+        self.assertEqual(c["live_guard_dropped_m2"], 1)
+        self.assertTrue(dec and all(d["m2_ok"] is False for d in dec))  # M2 off for every decision of the game, H decisions kept
+        self.assertTrue(any(d["D_off"] == 21600 for d in dec))
 
     def test_m2_guard_drops_m2_only(self):
         root, O, Tk, h = fixture(jump_m2=True)                          # .36 at 11:00 to .57 at 12:00, inside (D, mark]

@@ -2,7 +2,7 @@
 """SOCDRIFT plugin (Idea Desk C, Nov 16, 2026), build 1. Card: ../allkalshi/socdrift/SOCDRIFT_CARD.md (design CLEAN, Auditor B, amendment 1).
 Copied from the signed nbatotal.py (c8275094) and changed: 15 soccer GAME series (winner markets: two teams and a tie), unit the game, decision times D = the last full hour at or before
 K - 24 h, K - 12 h, K - 6 h with K = occurrence_datetime - 3 h (an ESTIMATE of kickoff), hourly candles, exits H (hold) or M2 (sell at the bid of the hourly candle ending at the last
-hour boundary at or before K - 2 h), bands up to 0.85, 10 filters, 600 rules, the Head's live guard (a game whose winner market moves 0.15 or more in the hour before K is dropped and
+hour boundary at or before K - 2 h), bands up to 0.85, 10 filters, 600 rules, the Head's live guard (a game whose winner market moves 0.15 or more in the hour before K is dropped from M2 only and
 counted) and the M2 guard. close_time is never used for timing or selection (it is the full-time early close); the count of games with close_time before K is printed as information.
 Data only through deskc_kp_load and deskc_candles_vol. Reads the result LAST."""
 import calendar, math, os, sys, time
@@ -92,7 +92,7 @@ def decisions(root):
     g, clock_drops, listed = games(root)
     cut = {r["ticker"]: x["K"] for x in g.values() for r in x["rungs"]}          # candles are read to K only (the live guard needs the hour before K)
     q = CV.candles(root, CANDLE_JOBS, cut)
-    out, c = [], {"listed": listed, "clock_dropped_games": len(clock_drops), "games": len(g), "live_guard_dropped_games": 0, "m2_dropped_games": 0,
+    out, c = [], {"listed": listed, "clock_dropped_games": len(clock_drops), "games": len(g), "live_guard_dropped_m2": 0, "m2_dropped_games": 0,
                   "closed_before_K_info": 0, "closed_by_D": 0, "not_open": 0, "no_quote": 0}
     for e, x in g.items():
         O, Kt = x["O"], x["K"]
@@ -109,13 +109,15 @@ def decisions(root):
                 live = True
                 break
         if live:
-            c["live_guard_dropped_games"] += 1
-            continue
+            c["live_guard_dropped_m2"] += 1                                    # Auditor B: a filter on the hour before K may touch the M2 exit only, never H
+        m2_any = False
         for D_off in DS:
             D = Kt - D_off
             D = D - D % HOUR                                                   # the last full hour at or before K - D_off
             # M2 guard: any two consecutive two-sided candles in (D, mark] move 0.15 or more on any outcome: dropped from M2 only
-            m2_ok = not any(jump(q.get(r["ticker"], {}), D, Mh) for r in x["rungs"])
+            m2_guard = any(jump(q.get(r["ticker"], {}), D, Mh) for r in x["rungs"])
+            m2_any = m2_any or m2_guard
+            m2_ok = not (m2_guard or live)
             for r in x["rungs"]:
                 if r["close_time"] <= D:
                     c["closed_by_D"] += 1
@@ -140,6 +142,8 @@ def decisions(root):
                 mark = qt.get(Mh)
                 mk = (mark[0], mark[1]) if mark and two(mark[0], mark[1]) and r["close_time"] > Mh and Mh > D else None
                 out.append({"t": t, "game": e, "O": O, "K": Kt, "D": D, "D_off": D_off, "Mh": Mh, "close": r["close_time"], "yb": qq[0], "ya": qq[1], "f": f, "mark": mk, "m2_ok": m2_ok})
+        if m2_any:
+            c["m2_dropped_games"] += 1                                         # the M2 guard fired at some decision time of this game (printed once per game)
     c["decisions"] = len(out)
     return out, c, g
 
