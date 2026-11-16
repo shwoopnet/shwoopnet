@@ -46,9 +46,8 @@ gates.W2 = () => {
   assert.strictEqual(f.kalshiTodayWork(null, NOW).sent, 0);
 };
 gates.W3 = () => {
-  // The rows are drawn only for a running bot whose orders have loaded, and they never write anything.
-  const render = html.slice(html.indexOf('function renderKalshiStatus('), html.indexOf('function renderKalshiStatus(') + 6000);
-  assert.ok(/running && kalshiOrdersLoaded/.test(render), 'rows need a running bot and loaded orders');
+  // The Bot status card is gone (Nov 16, 2026), so its rows are too; the helper stays pure and read only.
+  assert.ok(!html.includes('function renderKalshiStatus('), 'no status renderer');
   const helper = fnSource('kalshiTodayWork');
   assert.ok(!/setDoc|httpsCallable|runTransaction/.test(helper), 'read only');
 };

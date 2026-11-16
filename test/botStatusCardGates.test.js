@@ -16,11 +16,9 @@ const lib = (nowMs) => new Function('Date', 'Intl', 'Math', 'Number', 'Array', '
   '; return { kalshiNextEntry, kalshiGoldClosed };')(DateStub(nowMs), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + ' seconds ago', null);
 
 gates.SC1 = () => {
-  // the card's markup: the ring, the health line; no fold; the ids the one second tick writes to
-  const src = fn('renderKalshiStatus');
-  assert.ok(!/<details|<summary|collaps/i.test(src), 'no fold of any kind on the card');
-  for (const id of ['kalRing', 'kalNextIn', 'kalNextName', 'kalNextWhat', 'kalNextThen', 'kalEcg', 'kalHb', 'kalHbText']) assert.ok(new RegExp('id="' + id + '"').test(src), id + ' is on the card');
-  assert.ok(!/Last order|Orders today|Win rate|Best market|Worst market|Fill rate/.test(src), 'nothing the Strategies table shows is repeated on this card');
+  // Nov 16, 2026 (the owner: "bot status needs to be pulled too (the entire module)"): the card, its ring, health line and Needs a look block are gone from the page; the Running badge on the Account card is what says a stopped bot.
+  for (const t of ['data-card="status"', 'renderKalshiStatus', 'kalshiStatusTick', 'id="kalRing"', 'id="kalEcg"', 'id="kalHbText"', 'id="kalWork"', 'kalshiEcgStart', 'kalshiEcgFrame', '#kalStatusBody', '.kal-st-top']) assert.ok(!html.includes(t), t + ' is gone from the page');
+  assert.ok(/id="kalL1Pill"|kal-pill/.test(html), 'the Running badge stays on the Account card');
   assert.ok(!/kal-more|kalMoreBody/.test(html), 'the More numbers fold is gone from the page');
 };
 gates.SC2 = () => {
@@ -52,8 +50,7 @@ gates.SC9 = () => {
   let seen = 0; for (let t = RealDate.parse('2026-11-04T00:00:00Z'); t < RealDate.parse('2026-11-05T00:00:00Z'); t += 60000) { if (/Release day/.test(lib(t).kalshiNextEntry(t).name + lib(t).kalshiNextEntry(t).then)) seen++; } assert.strictEqual(seen, 0, 'Nov 4 has no release window at any minute');
 };
 gates.SC7 = () => {
-  assert.ok(/\.kal-st-top\{[^}]*grid-template-columns/.test(html) && /@container \(max-width:520px\)\{ \.kal-st-top\{ grid-template-columns:1fr; \} \}/.test(html) && /@media \(max-width:520px\)\{ \.kal-st-top\{ grid-template-columns:1fr; \}/.test(html), 'the two tiles stack on a narrow card');
-  assert.ok(/#kalStatusBody\{ container-type:inline-size; \}/.test(html), 'the card measures its own width, not the window (it sits in a rail)');
+  assert.ok(!/\.kal-st-top|#kalStatusBody|\[data-card="status"\]/.test(html), 'no style of the removed card is left');
 };
 // SC10 (Nov 11, 2026, the owner: "this can probably go too, not sure of much use for this anymore"): the prices and depth tiles are gone.
 // Consequence: nothing of the two tiles is left on the page, and the page asks Firestore or the network for nothing new.
@@ -61,16 +58,11 @@ gates.SC10 = () => {
   for (const name of ['kalPrices', 'kalDepth', 'kalshiPriceWatch', 'KAL_PRICE_WATCH', 'kalshiRenderPrices', 'kalshiEventNext', 'kalshiEscapedEventCell', 'kalshiEscapedPriceCell', 'kalshiLastOrderSizes', 'kalshiEscapedDepthRow', 'kalshiEscapedDepthRows', 'kal-st-bottom', 'kal-st-prices', 'kal-st-depth', 'kal-st-pgrid', 'kal-st-pcell', 'kal-st-drow'])
     assert.ok(!html.includes(name), name + ' is gone from the page');
   assert.ok(!/Prices right now, against what each strategy buys|Depth at the touch, against our order size/.test(html), 'neither tile title is on the page');
-  const status = fn('renderKalshiStatus');
-  assert.ok(/id="kalWork"/.test(status), 'the Needs a look block still has its place');
-  assert.deepStrictEqual(html.match(/fetch\([^,)]*/g), ["fetch('strategies-registry.json'", 'fetch(KAL_COUNTS_URL', 'fetch(KAL_SHADOW_URL', 'fetch(location.pathname'], 'the only fetches are the page freshness HEAD check, the committed strategy list (same origin, no figures) and the two counts-only files (NC15 and the shadow runner aggregates, Nov 16, 2026, test/nc15CountsFeedGates.test.js): removing tiles added no request');
+  assert.deepStrictEqual(html.match(/fetch\([^,)]*/g), ["fetch('strategies-registry.json'", 'fetch(KAL_COUNTS_URL', 'fetch(KAL_SHADOW_URL', 'fetch(location.pathname'], 'the only fetches are the page freshness HEAD check and the committed strategy list (same origin, no figures) and the counts-only file the owner allowed on Nov 16, 2026: removing tiles added no request');
 };
-// What stays: the ring and the health line, and the relay read that Open positions still needs.
+// What stays: the countdown helpers (pure, tested above) and the relay read that Open positions still needs.
 gates.SC11 = () => {
-  const status = fn('renderKalshiStatus');
-  for (const id of ['kalRing', 'kalEcg', 'kalHbText']) assert.ok(new RegExp('id="' + id + '"').test(status), id + ' is still on the card');
-  assert.ok(/Needs a look/.test(status), 'the Needs a look block stays');
   assert.ok(/kalshiBooksLast = data \|\| null;\n    renderKalshiPositions\(\);/.test(html), 'the relay read still feeds Open positions (time left, price and chart)');
-  assert.ok(/function kalshiNextEntry\(/.test(html) && /var KAL_LOOKS = \[/.test(html), 'the countdown ring keeps its looks');
+  assert.ok(/function kalshiNextEntry\(/.test(html) && /var KAL_LOOKS = \[/.test(html), 'the look helpers are kept as pure code');
 };
 (async () => { let failed = 0; for (const [name, g] of Object.entries(gates)) { try { await g(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } } process.exit(failed ? 1 : 0); })();
