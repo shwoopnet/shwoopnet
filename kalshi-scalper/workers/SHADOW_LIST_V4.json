@@ -1,0 +1,639 @@
+{
+ "list": "SHADOW_LIST_V4",
+ "date": "2026-11-16",
+ "start_utc": "DRAFT_START_AT_FREEZE",
+ "start_rule": "picks on KXBTC15M start no earlier than 2026-11-21T00:00:00Z (H09); others at start_utc (the next whole UTC hour after the freeze commit)",
+ "n": 12,
+ "source": "batch C VALIDATE-bar passes (68; BH survivors 0 at carried 6,290,660 + own tries and at 7,492,484)",
+ "c1_duplicates_dropped_by_day_correlation_0.3": 31,
+ "passes_by_spec": {
+  "ENGC1ETHMOM": 36,
+  "ENGC2OIACC": 19,
+  "ENGC3TOD": 4,
+  "ENGC4GOLDX": 9
+ },
+ "excluded_dogecoin_7e": 7,
+ "dropped_by_3_a_day_gate": 0,
+ "clusters": 24,
+ "spec_sha256_covers": "the spec object only",
+ "no_money_no_orders": true,
+ "specs": [
+  {
+   "spec": {
+    "id": "SH4_01_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 480,
+     "price_band_5c": 15,
+     "side_rule": "no",
+     "filter": "oiacc:down"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC2OIACC",
+    "feature_definition": {
+     "name": "oiacc",
+     "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
+    }
+   },
+   "spec_sha256": "4b97c501eb8e67d91505b0fea16984f755e5db6b57274f89660017744aac8740",
+   "rank": 1,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "plain band, middle",
+   "cluster": 1,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 128,
+    "signals_per_day": 4.415,
+    "pf_1c": 1.499,
+    "pf_2c": 1.413,
+    "edge_1c_cents_per_contract": 5.899,
+    "dollars_week_5c_1c": 9.12,
+    "dollars_week_5c_2c": 7.63,
+    "p_day_clustered": 0.05301214687255608,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_02_BNB",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBNB15M",
+    "entry": {
+     "seconds_left": 300,
+     "price_band_5c": 17,
+     "side_rule": "favourite",
+     "filter": "oiacc:down"
+    },
+    "exit": "S",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC2OIACC",
+    "feature_definition": {
+     "name": "oiacc",
+     "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
+    }
+   },
+   "spec_sha256": "890d8c00e43d06b3077a3fde4e0b276fb2904a0d867ef1d89f7b20827233ab95",
+   "rank": 2,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 2,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 109,
+    "signals_per_day": 3.76,
+    "pf_1c": 2.564,
+    "pf_2c": 2.299,
+    "edge_1c_cents_per_contract": 6.602,
+    "dollars_week_5c_1c": 8.69,
+    "dollars_week_5c_2c": 7.38,
+    "p_day_clustered": 0.0006620945839976747,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_03_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 15,
+     "side_rule": "favourite",
+     "filter": "oiacc:down"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC2OIACC",
+    "feature_definition": {
+     "name": "oiacc",
+     "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
+    }
+   },
+   "spec_sha256": "a66673ee5b025eb47b11500319df2c90ee1af5c84efbb29581953d1f9a521198",
+   "rank": 3,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "plain band, middle",
+   "cluster": 3,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 142,
+    "signals_per_day": 4.898,
+    "pf_1c": 1.372,
+    "pf_2c": 1.292,
+    "edge_1c_cents_per_contract": 4.727,
+    "dollars_week_5c_1c": 8.1,
+    "dollars_week_5c_2c": 6.45,
+    "p_day_clustered": 0.044250254875795925,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_04_BNB",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBNB15M",
+    "entry": {
+     "seconds_left": 300,
+     "price_band_5c": 17,
+     "side_rule": "favourite",
+     "filter": "oiacc:down"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC2OIACC",
+    "feature_definition": {
+     "name": "oiacc",
+     "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
+    }
+   },
+   "spec_sha256": "6e829d495e729cfc13eecf31b1282c4375d67495172454d6b459003a758b9595",
+   "rank": 4,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 4,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 109,
+    "signals_per_day": 3.76,
+    "pf_1c": 2.199,
+    "pf_2c": 1.996,
+    "edge_1c_cents_per_contract": 5.902,
+    "dollars_week_5c_1c": 7.77,
+    "dollars_week_5c_2c": 6.52,
+    "p_day_clustered": 0.00426228926725009,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_05_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 480,
+     "price_band_5c": 15,
+     "side_rule": "no",
+     "filter": "oiacc:down"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC2OIACC",
+    "feature_definition": {
+     "name": "oiacc",
+     "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
+    }
+   },
+   "spec_sha256": "56ea71e5bdb4946426f2a198701e05e9344aa0d518bba75f493b5f03fdd819e8",
+   "rank": 5,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "plain band, middle",
+   "cluster": 5,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 128,
+    "signals_per_day": 4.415,
+    "pf_1c": 1.422,
+    "pf_2c": 1.292,
+    "edge_1c_cents_per_contract": 4.988,
+    "dollars_week_5c_1c": 7.71,
+    "dollars_week_5c_2c": 5.39,
+    "p_day_clustered": 0.08423391433541064,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_06_WTI",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXWTI15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "ethmom3:up"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC1ETHMOM",
+    "cross_series_feature": {
+     "series": "KXETH15M",
+     "definition": "mid (bid+ask)/2 of the KXETH15M market with the same close at the candle ending e minus the one at e - 180; class up, flat or down by cls() (1e-12); both candles present, no two sided test (B4's rule)",
+     "name": "ethmom3"
+    }
+   },
+   "spec_sha256": "bfcd8de4bd62be9d7e577ce346ebad499c1c6ec4fe61a255397962b48c5b8ea9",
+   "rank": 6,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "plain band, middle",
+   "cluster": 6,
+   "cluster_size": 2,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 105,
+    "signals_per_day": 3.751,
+    "pf_1c": 1.646,
+    "pf_2c": 1.531,
+    "edge_1c_cents_per_contract": 5.662,
+    "dollars_week_5c_1c": 7.43,
+    "dollars_week_5c_2c": 6.19,
+    "p_day_clustered": 0.05134893963629529,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_07_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 360,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "oiacc:down"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC2OIACC",
+    "feature_definition": {
+     "name": "oiacc",
+     "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
+    }
+   },
+   "spec_sha256": "07f966909ac3894a36d5daed46f937702f4bacd07c81ab709ce3011bc5255a5c",
+   "rank": 7,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 7,
+   "cluster_size": 2,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 185,
+    "signals_per_day": 6.382,
+    "pf_1c": 1.859,
+    "pf_2c": 1.585,
+    "edge_1c_cents_per_contract": 3.029,
+    "dollars_week_5c_1c": 6.76,
+    "dollars_week_5c_2c": 4.65,
+    "p_day_clustered": 0.007807949664884444,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_08_WTI",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXWTI15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "ethmom3:up"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC1ETHMOM",
+    "cross_series_feature": {
+     "series": "KXETH15M",
+     "definition": "mid (bid+ask)/2 of the KXETH15M market with the same close at the candle ending e minus the one at e - 180; class up, flat or down by cls() (1e-12); both candles present, no two sided test (B4's rule)",
+     "name": "ethmom3"
+    }
+   },
+   "spec_sha256": "618b84df3ceb7094860d48eb656936e2cd99957cfcc3b1ddd0bbfa0e716c1541",
+   "rank": 8,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "plain band, middle",
+   "cluster": 8,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 105,
+    "signals_per_day": 3.751,
+    "pf_1c": 1.55,
+    "pf_2c": 1.38,
+    "edge_1c_cents_per_contract": 4.82,
+    "dollars_week_5c_1c": 6.33,
+    "dollars_week_5c_2c": 4.43,
+    "p_day_clustered": 0.0810866483882109,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_09_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 360,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "goldmom3:down"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC4GOLDX",
+    "cross_series_feature": {
+     "series": "KXGOLD15M",
+     "definition": "mid (bid+ask)/2 of the KXGOLD15M market with the same close at the candle ending e minus the one at e - 180; class up, flat or down by cls() (1e-12); both candles present, no two sided test; missing on a gold break or weekend (no entry)",
+     "name": "goldmom3"
+    }
+   },
+   "spec_sha256": "980c3844c25693069d3aec014165039762c20e480d2e76481b00228ecc386931",
+   "rank": 9,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "plain band, cheap tail",
+   "cluster": 9,
+   "cluster_size": 2,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 105,
+    "signals_per_day": 3.622,
+    "pf_1c": 1.789,
+    "pf_2c": 1.489,
+    "edge_1c_cents_per_contract": 4.638,
+    "dollars_week_5c_1c": 5.88,
+    "dollars_week_5c_2c": 4.23,
+    "p_day_clustered": 0.033654302611052095,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_10_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 17,
+     "side_rule": "favourite",
+     "filter": "goldmom3:up"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC4GOLDX",
+    "cross_series_feature": {
+     "series": "KXGOLD15M",
+     "definition": "mid (bid+ask)/2 of the KXGOLD15M market with the same close at the candle ending e minus the one at e - 180; class up, flat or down by cls() (1e-12); both candles present, no two sided test; missing on a gold break or weekend (no entry)",
+     "name": "goldmom3"
+    }
+   },
+   "spec_sha256": "f155c1dceecc4fe4bd06fec44deddd9d115c1b029a3cc17d956448b58a52a304",
+   "rank": 10,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 10,
+   "cluster_size": 2,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 125,
+    "signals_per_day": 4.312,
+    "pf_1c": 1.602,
+    "pf_2c": 1.45,
+    "edge_1c_cents_per_contract": 3.844,
+    "dollars_week_5c_1c": 5.8,
+    "dollars_week_5c_2c": 4.39,
+    "p_day_clustered": 0.07201274145183492,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_11_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 480,
+     "price_band_5c": 18,
+     "side_rule": "yes",
+     "filter": "oiacc:down"
+    },
+    "exit": "S",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC2OIACC",
+    "feature_definition": {
+     "name": "oiacc",
+     "definition": "(open interest at e minus at e - 180) minus (at e - 180 minus at e - 360) of the market's own candles, all three present; class up, flat or down by cls()"
+    }
+   },
+   "spec_sha256": "ab3d7fa964ebbe5b82e69b27094df6d6eedf73c3ffc425ac13ea1ad8a8a09e05",
+   "rank": 11,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 11,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 118,
+    "signals_per_day": 4.07,
+    "pf_1c": 2.317,
+    "pf_2c": 1.936,
+    "edge_1c_cents_per_contract": 3.661,
+    "dollars_week_5c_1c": 5.22,
+    "dollars_week_5c_2c": 3.81,
+    "p_day_clustered": 0.013741584894244789,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH4_12_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 240,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "goldmom3:down"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "DRAFT_START_AT_FREEZE",
+    "found_by_spec": "ENGC4GOLDX",
+    "cross_series_feature": {
+     "series": "KXGOLD15M",
+     "definition": "mid (bid+ask)/2 of the KXGOLD15M market with the same close at the candle ending e minus the one at e - 180; class up, flat or down by cls() (1e-12); both candles present, no two sided test; missing on a gold break or weekend (no entry)",
+     "name": "goldmom3"
+    }
+   },
+   "spec_sha256": "5504f64072e86aa132c02f4514f7ac3d9a52a5ac037fc38dce38e8604d6e8ae0",
+   "rank": 12,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "plain band, cheap tail",
+   "cluster": 21,
+   "cluster_size": 1,
+   "heldout_verdict": "not read",
+   "paper_research": {
+    "validate_n": 118,
+    "signals_per_day": 4.07,
+    "pf_1c": 1.395,
+    "pf_2c": 1.131,
+    "edge_1c_cents_per_contract": 2.152,
+    "dollars_week_5c_1c": 3.07,
+    "dollars_week_5c_2c": 1.2,
+    "p_day_clustered": 0.1143733567655231,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  }
+ ]
+}
