@@ -10,13 +10,14 @@ cr = []
 for tk, days in (("KXAAAPERP", (9, 10, 11, 12, 13, 16)), ("KXBBBPERP", (9, 10)), ("KXCCCPERP", (9, 10, 11, 12, 13))):
     for dd in days:
         for k in range(0, 391): t = U(2026, 11, dd, 14, 30, 0) + 60 * k; cr.append((tk, t, 99.99, 100.01, 100.0, 1.0, 1.0))
-cr.append(("KXAAAPERP", 5, None, 100.0, 100.0, 1, 1))
+cr.append(("KXAAAPERP", 1793904000, None, 100.0, 100.0, 1, 1)); cr.append(("KXAAAPERP", 1794873600, 99.99, 100.01, 100.0, 1.0, 1.0)); cr.append(("KXAAAPERP", 1793903939, 99.99, 100.01, 100.0, 1.0, 1.0))
 L.CANDLES = mkxz("c", "create table candle(ticker, end_ts, yes_bid, yes_ask, last, volume, oi)", cr, "insert into candle values(?,?,?,?,?,?,?)")
-fr = [("KXAAAPERP", U(2026, 11, 9, 21, 0, 0), 0.0001), ("KXAAAPERP", U(2026, 11, 10, 21, 0, 0), 0.0002), ("KXBBBPERP", U(2026, 11, 9, 21, 0, 0), 0.0001), ("KXBBBPERP", U(2026, 11, 10, 21, 0, 0), 0.0), ("KXCCCPERP", U(2026, 11, 9, 21, 0, 0), 0.0001)]
+fr = [("KXAAAPERP", U(2026, 11, 9, 21, 0, 0), 0.0001), ("KXAAAPERP", U(2026, 11, 10, 21, 0, 0), 0.0002), ("KXBBBPERP", U(2026, 11, 9, 21, 0, 0), 0.0001), ("KXBBBPERP", U(2026, 11, 10, 21, 0, 0), 0.0), ("KXCCCPERP", U(2026, 11, 9, 21, 0, 0), 0.0001), ("KXAAAPERP", 1794873600, 0.5)]
 L.FUNDING = mkxz("f", "create table funding(ticker, ts, rate)", fr, "insert into funding values(?,?,?)")
 try: L.load(d); raise AssertionError("loaded without an allow line")
 except SystemExit as e: assert "REFUSED" in str(e)
 cand, fund, c, drop = L.load(d, check_allow=False)
+assert c["candle outside the window (dropped)"] == 2 and c["print outside the window (dropped)"] == 1 and 1794873600 not in cand["KXAAAPERP"] and 1793903939 not in cand["KXAAAPERP"] and 1794873600 not in fund["KXAAAPERP"]
 assert sorted(cand) == ["KXAAAPERP"] and "KXBBBPERP" in drop and "fewer than 5" in drop["KXBBBPERP"] and drop["KXCCCPERP"] == "fewer than 2 funding prints" and c["candle without bid or ask"] == 1, (list(cand), drop, c)
 assert cand["KXAAAPERP"][U(2026, 11, 9, 14, 30, 0)] == (99.99, 100.01) and fund["KXAAAPERP"][U(2026, 11, 10, 21, 0, 0)] == 0.0002
 L.CANDLES = (L.CANDLES[0], "0" * 64)

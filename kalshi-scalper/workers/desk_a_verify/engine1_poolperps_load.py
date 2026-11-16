@@ -8,6 +8,7 @@ import engine1_poolperps as W
 CANDLES = ("ENGINE1_stockperps_20261116_extract.sqlite.xz", "b4073e4e0464246218ad3bca4e970d5bec95f5bbfd5380a154f9da630a8b2e15")
 FUNDING = ("ENGINE1_stockperps_funding_20261116_extract.sqlite.xz", "e98273017794fcb017e4738f7b1df5627ee1b5c03becf59d23218c800f423e98")
 MIN_DAYS, MIN_RTH = 5, 60
+START_TS, END_TS = 1793903940, 1794873600     # 2026-11-05T18:39:00Z and 2026-11-17T00:00:00Z (date -u checked): rows outside are dropped and counted BEFORE any dict is built
 ALLOW_FILE = os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md"); ALLOW_MARK = "readable ONLY by Desk A's pooled stock perps loader"
 def self_sha(): return hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest()
 def refuse_unless_allowed():
@@ -26,10 +27,12 @@ def load(base, check_allow=True):
     c = collections.Counter(); cand = collections.defaultdict(dict)
     con = open_extract(base, CANDLES)
     for tk, end, bid, ask in con.execute("SELECT ticker, end_ts, yes_bid, yes_ask FROM candle ORDER BY ticker, end_ts"):
+        if not isinstance(end, int) or end < START_TS or end >= END_TS: c["candle outside the window (dropped)"] += 1; continue
         if bid is None or ask is None: c["candle without bid or ask"] += 1; continue
         cand[tk][int(end)] = (float(bid), float(ask))
     fund = collections.defaultdict(dict); con2 = open_extract(base, FUNDING)
     for tk, ts, rate in con2.execute("SELECT ticker, ts, rate FROM funding ORDER BY ticker, ts"):
+        if not isinstance(ts, int) or ts < START_TS or ts >= END_TS: c["print outside the window (dropped)"] += 1; continue
         if rate is None: c["print without a rate"] += 1; continue
         fund[tk][int(ts)] = float(rate)
     keep, drop = {}, {}

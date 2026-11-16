@@ -38,13 +38,13 @@ assert any(k.startswith("gap") for k in ev) or True
 fl = [x for x in ev["fl:fade"] if True]; assert {x[1] for x in fl} == {"KXAAAPERP", "KXCCCPERP"} and all((x[2] == "short") == (x[1] == "KXCCCPERP") for x in fl)    # top third = the highest rate (C): FADE shorts it; the bottom third (A) longs
 assert all(x[0] % 86400 == (14 * 3600 + 31 * 60) for x in fl)                                                  # entries at the 09:31 ET candle (14:31Z in EST)
 res = W.evaluate(cand, {}, m_prior=102184)
-assert res["m_total"] == res["m_new"] + 102184 and res["trading_days"] and res["header"].startswith("BH m = %d" % res["m_total"]) and "DEVELOPMENT" in res["label"] and "unverified" in res["label"], res["header"]
+assert res["m_total"] == res["m_new"] + 102184 and res["trading_days"] and res["header"].startswith("BH m = %d" % res["m_total"]) and "DEVELOPMENT" in res["label"] and "ONE regime" in res["label"], res["header"]
 assert all(set(o) >= {"signal", "n", "trades_per_day", "pf_primary", "pf_second", "per_name_trades", "weekly_pct_of_account", "gate"} for o in res["rules"])
 assert all(not o["gate"] for o in res["rules"])                                                                # with no funding prints every trade is 'funding not booked': out of the gates
 tr = [o for o in res["rules"] if o["signal"].startswith("tr:")]; assert tr and all(o["n"] == 0 for o in tr)       # (all trades unbooked here, counted in skips? n is the booked ones)
 fund = {nm: {U(2026, 11, d, 21, 0, 0): 0.00001 for d in (9, 10, 11)} for nm in cand}
 res2 = W.evaluate(cand, fund); tr2 = [o for o in res2["rules"] if o["signal"].startswith("tr:") and o["n"] > 0]; assert tr2, "no trend trade with funding prints"
-o = tr2[0]; assert sum(o["per_name_trades"].values()) == o["n"] and o["weekly_pct_of_account"]["5x"] == o["weekly_pct_of_account"]["1x"] * 5 and o["liquidation_distance_pct_approx"]["2x"] == 50.0
+o = tr2[0]; assert sum(o["per_name_trades"].values()) == o["n"] and abs(o["weekly_pct_of_account"]["max (4.9x)"] - o["weekly_pct_of_account"]["1x"] * 4.9) < 1e-9 and o["liquidation_distance_pct_approx"]["2x"] == 50.0 and set(o["by_group"]) == {"all", "liquid (without SPY and QQQ)", "SPY and QQQ", "semis and AI", "other names"} and o["by_group"]["all"]["n"] == o["n"]
 assert res["m_new"] == 218 == len(W.ALL_SIGNALS[:-2]) * 12 + 2 and res["m_total"] == 102402 and len(res["rules"]) == 218, res["m_new"]
 assert W.PRIOR_PERPS_M == 103444 and W.evaluate(cand, fund)["m_total"] == 103662 and W.evaluate(cand, fund)["header"].startswith("BH m = 103662")
 # (Nov 16, Auditor B and the Testing Desk's readings) R4: the previous 16:00 ET key present but unusable skips the gap; R8: e + 60 T after the name's last candle = no mark; the END_EPOCH drop

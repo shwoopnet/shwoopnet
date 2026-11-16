@@ -152,6 +152,9 @@ def run_rule(cand, fund, evs, exit_, h, sig_cache):
 def pf(xs):
     w = sum(x for x in xs if x > 0); l = -sum(x for x in xs if x < 0)
     return float("inf") if l == 0 and w > 0 else (w / l if l else float("nan"))
+SEMIS_AI = frozenset("KX%sPERP" % x for x in "ADI AMAT AMD ANET ARM ASML AVGO DELL INTC KLAC LRCX MU NVDA ORCL PLTR QCOM SKHY SNDK TSM TXN".split())      # Desk A's classification of the AI and semis names, information only
+THIN = frozenset(("KXSPYPERP", "KXQQQPERP"))                                                                                              # thin index-fund perps, reported apart
+MAXLEV = {"KXNVDAPERP": 4.5, "KXMUPERP": 3.3, "KXSNDKPERP": 1.5, "KXTSLAPERP": 4.2, "KXAMDPERP": 3.4, "KXSPCXPERP": 3.5}; MAXLEV_DEFAULT = 4.9    # the page maxima the Head supplied; 'most large stocks 4.9x' is the default for the rest (per-name page values unverified)
 PRIOR_PERPS_M = 103444                 # perps passes 1 to 3 and PERPGEN (Auditor B: pass 3 tried 1,260 more, m 103,444)
 END_EPOCH = 1794873600                   # 2026-11-17T00:00:00Z: a trade whose entry or exit end is at or after it is dropped (the forward days stay unread)
 ALL_SIGNALS = tuple(["gap:%d:%s" % (b, m) for b in GAP_BP for m in ("follow", "fade")] + ["fl:fade", "fl:follow", "fc:fade", "fc:follow"] + ["tr:%d:%d:%s" % (L, c, m) for L in LOOKBACKS for c in CS for m in ("trend", "rev")] + ["carry:A", "carry:B"])
@@ -182,12 +185,18 @@ def evaluate(cand, fund, m_prior=PRIOR_PERPS_M, min_per_day=3.0):
         gate = (s1["per_day"] >= min_per_day and s1["pf"] >= 1.3 and s1["half1"] >= 1.3 and s1["half2"] >= 1.3 and s2["pf"] >= 1.0 and s2["half1"] >= 1.0 and s2["half2"] >= 1.0
                 and s2["net_total"] > 0 and (s1["top_day_share"] is None or s1["top_day_share"] <= 0.30))
         pn = collections.Counter(r[1] for r in ok1)
+        grp = {"all": ok1, "liquid (without SPY and QQQ)": [r for r in ok1 if r[1] not in THIN], "SPY and QQQ": [r for r in ok1 if r[1] in THIN], "semis and AI": [r for r in ok1 if r[1] in SEMIS_AI], "other names": [r for r in ok1 if r[1] not in SEMIS_AI and r[1] not in THIN]}
+        by_group = {k: {"n": len(v), "pf_primary": pf([r[2] for r in v]), "net_pct_per_trade": (sum(r[2] for r in v) / len(v) * 100 if v else 0.0)} for k, v in grp.items()}
+        binding = min([MAXLEV.get(nm, MAXLEV_DEFAULT) for nm in pn] or [MAXLEV_DEFAULT])
         out.append({"signal": sid, "exit": (None if x is None else {"kt": x[0], "ks": x[1], "T": x[2]}), "n": s1["n"], "trades_per_day": s1["per_day"], "pf_primary": s1["pf"], "pf_second": s2["pf"], "halves_primary": [s1["half1"], s1["half2"]], "halves_second": [s2["half1"], s2["half2"]],
                     "net_pct_per_trade": s1["net_mean"] * 100, "mean_hold_min": s1["mean_hold_min"], "mean_gross_bp": s1["mean_gross_bp"], "maker_pf_flag": s1["maker_pf"], "top_day_share": s1["top_day_share"], "per_name_trades": dict(sorted(pn.items())),
                     "funding_unbooked_by_name": dict(unb), "skips": dict(c1), "p": D.pval(s1["day_z"]), "gate": bool(gate),
-                    "weekly_pct_of_account": {"%dx" % L: s1["net_mean"] * s1["per_day"] * 5 * L * 100 for L in (1, 2, 5)}, "liquidation_distance_pct_approx": {"%dx" % L: 100.0 / L for L in (1, 2, 5)}})
+                    "by_group": by_group,
+                    "max_leverage_binding": binding, "weekly_pct_of_account": dict({"%dx" % L: s1["net_mean"] * s1["per_day"] * 5 * L * 100 for L in (1, 2)}, **{"max (%.1fx)" % binding: s1["net_mean"] * s1["per_day"] * 5 * binding * 100}),
+                    "liquidation_distance_pct_approx": dict({"%dx" % L: 100.0 / L for L in (1, 2)}, **{"max (%.1fx)" % binding: 100.0 / binding})})
     keep = D.bh({i: o["p"] for i, o in enumerate(out) if o["gate"]}, m_new + m_prior)
     for i, o in enumerate(out): o["bh_survivor"] = i in keep
     out.sort(key=lambda o: (-o["weekly_pct_of_account"]["1x"], o["signal"], str(o["exit"])))
+    regime = "DEVELOPMENT, about %d trading days in ONE regime (an AI and semis selloff): no evidence at n < 100; seven days in one regime is not evidence" % nd
     return {"header": "BH m = %d (%d new rules + %d carried perps tries) before any result" % (m_new + m_prior, m_new, m_prior), "m_new": m_new, "m_total": m_new + m_prior, "trading_days": days, "names": names, "n_names": len(names),
-            "label": "DEVELOPMENT, about %d trading days: no evidence at n < 100; funding cadence unverified (one print a day in the extract)" % nd, "gate_passes": sum(1 for o in out if o["gate"]), "bh_survivors": len(keep), "rules": out}
+            "label": regime, "funding": "one print a day at 4:00 PM ET (Kalshi page, per the Head); rates under 0.01% are set to zero by Kalshi; positive = longs pay shorts; booked from the extract's own print timestamps", "fees": "taker 12 bp and maker 5 bp a side on notional, open and close: still OPEN until the fee-tier endpoint is read", "dividends": "NOT BOOKED: no ex-date list was supplied; dividends pass through as cash (a long receives, a short pays), so trades in names with an ex-date from Nov 6 to Nov 16 are NOT adjusted and must be treated as flagged until the list is read", "leverage_note": "max leverage per name is the page maximum the Head supplied (default 4.9x for the rest, unverified); the table uses the lowest maximum among the names a rule traded; liquidation distance is approximately 100 / L percent, margin rules unconfirmed", "gate_passes": sum(1 for o in out if o["gate"]), "bh_survivors": len(keep), "rules": out}
