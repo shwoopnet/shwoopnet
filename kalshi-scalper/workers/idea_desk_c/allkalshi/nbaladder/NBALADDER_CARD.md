@@ -12,20 +12,23 @@
 - Decision time D, as time to scheduled end: **120, 60 or 30 minutes**. Rungs closed by D are skipped.
 - Price band of the side's ask: **30 to 40, 40 to 50, 50 to 60, 60 to 70 cents**.
 - Side: **yes or no** (a search dimension).
-- Exit: **H** (hold to settlement) or **M10** (sell at the mark ending 10 minutes before the scheduled end, if the rung is still open; else held).
+- Exit: **H** (hold to settlement) or **M10** (sell at the bid of the candle ending exactly 10 minutes before the scheduled end). **No mark (Auditor B, Nov 16):** if the rung has no two-sided candle at that minute, or closed before it, the trade is counted as "no mark" and HELD to settlement at H; the print shows M10 both ways (with the held fallback, and on rungs with a mark only), so a missing mark can never pick H for winners only.
 - Filter (none, or exactly one; additive options as the engine counts them): none (1); recent move over 30 minutes in the rung's YES mid: down 5c or more, flat, up 5c or more (3); rung distance from the player's current line (the same player's rung whose YES mid is closest to 0.50 at D, ties to the higher strike): below it, at it, above it (3); spread at D: 3c or less, 6c or less (2); volume change (last 10 minutes against the 10 before): rising, not rising (2); rung age (D minus the rung's open_time): under 6 hours, 6 hours or more (2). That is 13 options.
 - **Rules this spec tries: 3 x 4 x 2 x 2 x 13 = 624.** The spec checker's number and the engine's must match.
 
-**Gates (the Head's, Nov 16).** Each rule must have **3 signals a day or more** (at least 48 trades on the 16 development days), n of 100 or more for a pass, cash PF 1.3 or more at 1c with both halves 1.0 or more, 2c PF 1.0 or more, and Benjamini-Hochberg alpha 0.05 over every cell ever tried (the TALLY). Ranking: dollars a week at 5 contracts, among rules that clear the gates.
+**Gates (the Head's, Nov 16, with Auditor B's additions).** Each rule must have **3 signals a day or more** (at least 48 trades on the 16 development days, a filter on the printed table: every one of the 624 cells stays in m), then for a pass: n of 100 or more, **at least 40 games and 10 trade days** (about a third of the roughly 120 development games), cash PF 1.3 or more at 1c with both halves 1.0 or more, 2c PF 1.0 or more, and Benjamini-Hochberg alpha 0.05 over every cell ever tried (the TALLY). Ranking: dollars a week at 5 contracts, among rules that clear the gates.
 
 **The unit, so n is honest.** A game has about 49 correlated rungs. The engine's `day` is the UTC date (several games share a date). The print adds: the number of games, the number of player-games, and a **z clustered by game**. A pass needs the game-clustered z, and the card states n in games first, rungs second.
 
 **Cost model.** 5 contracts for the dollars-a-week rank, 10 contracts for the engine's PF (fee per order, rounded: the standing form). Haircuts 1c (primary) and 2c. "Candle replay, upper bound, not fill-checked."
 
+**Label on every figure:** "development; this block is spent for SIBHIT and the NBA fade and follow cards (counts and prices were read there); candle replay, upper bound, not fill-checked".
+
 **Windows, as epochs (re-derived with timegm).**
 - Development: KXNBAPTS closes **1792540800 (2026-10-21) to before 1793923200 (2026-11-06)**.
 - **Never pulled:** closes 1793923200 to before 1794528000 (2026-11-13): PROPUNDER's reserve.
-- **Validate:** closes **1794528000 (2026-11-13) to before 1796342400 (2026-12-04)**, pulled after Dec 4, read once on the Head's go. This is also SIBHIT-R's fallback window: **one joint read for both, one print, one m.**
+- **Validate:** closes **1794528000 (2026-11-13) to before 1796342400 (2026-12-04)**, pulled after Dec 4, read once on the Head's go. This is also SIBHIT-R's fallback window: **one joint read for both, written into both cards before any pull of that window: one print, one m** (all 624 NBALADDER rules plus SIBHIT-R's tries plus the carried tally). The pull of that window is made once, after Dec 4, never earlier.
+- **Carried tally (open, asked of the Head):** if m carries ENGINE1's 2.3 million, no rule here can survive Benjamini-Hochberg, so the Head states which tally applies. The plugin takes the carried m as an argument and prints m_total.
 - PROPS1's 2025-26 window is not used (no occurrence field).
 
 **Independence.** The development days are the same days SIBHIT and the NBA fade/follow cards read for counts and prices. PROPUNDER (closed unread) is read-exposed. Any pass here still needs the Dec 4 read.

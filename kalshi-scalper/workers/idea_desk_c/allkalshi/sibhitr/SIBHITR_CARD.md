@@ -102,3 +102,7 @@
 - The same md5 split applies: 40 games read, all other games of the window held out and pulled only if the read passes.
 - The 2025-26 window is not used. Its list (SIBHITR_LISTS_A) stays LOADED; only the time fields named in Amendment 6 were seen.
 - Reminder set for Dec 5 to build the list job (live endpoint, close bounds).
+
+## Amendment 8 (Nov 16, 2026, ~16:40Z; before any pull of the window)
+
+**Joint validate read with NBALADDER.** SIBHIT-R's fallback window (KXNBAPTS closes 2026-11-13 to before 2026-12-04) is also NBALADDER's validate window. The two read it ONCE together, after Dec 4, with one print and one m (all 624 NBALADDER rules plus SIBHIT-R's tries plus the carried tally). The pull is made once, never earlier. This is written in both cards before any pull of that window.

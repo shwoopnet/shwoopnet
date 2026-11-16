@@ -5,9 +5,9 @@
  "kind": "event_rule",
  "card": "kalshi-scalper/workers/idea_desk_c/allkalshi/nbaladder/NBALADDER_CARD.md",
  "needs_new_code": [
-  "engine/nbaladder.py (ladder-grid plugin, first audit, hand case)",
-  "engine/deskc_kp_load.py: add candle volume (first audit of the extension)",
-  "NBALADDER_CANDLES_P1, P2 (candle jobs, built from the landed list)"
+  "engine/nbaladder.py (plugin, built, awaiting audit)",
+  "engine/deskc_candles_vol.py (candle volume, separate file)",
+  "NBALADDER_CANDLES_P1, P2 (built from the landed list)"
  ],
  "uniqueness": {
   "closest_existing": [
@@ -31,7 +31,7 @@
   "loader_sha256": "c76c7f7d03aaec243f0f92fe465382a4a4d292f315c5f27e78e139d22e716fea",
   "extracts": [
    "kalshi-pull-data: KXNBAPTS_LISTS_A/2026-11-15T1457Z_43727127463",
-   "NBALADDER_CANDLES_P1, P2 (not yet built)"
+   "NBALADDER_CANDLES_P1, P2 (to be pulled)"
   ],
   "ticker_wall": [
    "KXNBAPTS"
@@ -40,9 +40,8 @@
    "first_close": "2026-10-21T00:00:00Z",
    "last_close_exclusive": "2026-11-06T00:00:00Z"
   },
-  "held_out_map_checked_by": "Auditor B (pending)",
-  "independence_note": "the same development days as SIBHIT and the dropped NBA fade and follow cards; PROPUNDER (closed unread) is read-exposed",
-  "loader_note": "hash of the loader as audited (c76c7f7d); the volume extension will change it and needs its own audit"
+  "held_out_map_checked_by": "Auditor B, 2026-11-16 (design review of d0810197)",
+  "independence_note": "the same development days as SIBHIT and the dropped NBA fade and follow cards; PROPUNDER (closed unread) is read-exposed"
  },
  "split": {
   "mode": "fixed_dates",
@@ -88,15 +87,15 @@
  },
  "plugin": {
   "file": "nbaladder.py",
-  "sha256": null,
-  "hand_case_file": null,
-  "hand_case_sha256": null,
+  "sha256": "965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063",
+  "hand_case_file": "test_nbaladder.py",
+  "hand_case_sha256": "fd60c47a7c493eabb8016ee0d9a00c871799bff93de292ad2941aada0e8dba15",
   "auditor_clean_date": null,
-  "note": "not built: waiting on design approval"
+  "note": "awaiting audit; volume extension deskc_candles_vol.py sha256 98955e4128998b3773ed5e4f2dbd151eae22e4f98028986db68d1ee11279779a"
  },
  "event": {
   "scorer_plugin": "nbaladder.py",
-  "scorer_plugin_sha256": null,
+  "scorer_plugin_sha256": "965d9ffe17ca8dc1f93c214bddcaac3a814a3a5c40d5dd43c136d4f7ed26f063",
   "decision_instant": "scheduled end minus 120, 60 or 30 minutes",
   "signal_threshold": "the grid's 624 cells",
   "entry_rule": "every rung open at D whose side ask is in the cell's band and passes the cell's filter, one contract set per rung",
@@ -119,7 +118,8 @@
   "min_trade_days": 10,
   "min_signals_per_day": 3,
   "bh_alpha": 0.05,
-  "unit": "game (z clustered by game; n stated in games first)"
+  "unit": "game (z and the BH p from game-level sums; n stated in games first)",
+  "min_games": 40
  },
  "tries": {
   "rules_this_spec": 624,
@@ -135,5 +135,9 @@
  "outputs": {
   "survivor_line": "rule, PF 1c and 2c, n in games and rungs, dollars a week at 5 contracts",
   "family_flag": "none"
+ },
+ "exits_rule": "M10: no mark = counted and held to settlement (H); printed both ways",
+ "tally": {
+  "carried_m": "asked of the Head; the plugin takes it as an argument and prints m_total"
  }
 }
