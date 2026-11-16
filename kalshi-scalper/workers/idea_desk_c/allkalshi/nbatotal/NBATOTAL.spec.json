@@ -108,7 +108,7 @@
  },
  "plugin": {
   "file": "nbatotal.py",
-  "sha256": "44214a1255b0d7ece5197f80a5b2738faa08cfcd564308cccacf3d9af3825ee7",
+  "sha256": "c8275094d3f0593d91800f7a610a4e6f191a806084c512b904157897f21ef373",
   "hand_case_file": "test_nbatotal.py",
   "hand_case_sha256": "dfa843c254923beefb3658911431f7f12f4b8c8e65f809d7f639b7c937ae7a61",
   "auditor_clean_date": null,
@@ -118,7 +118,7 @@
  },
  "event": {
   "scorer_plugin": "nbatotal.py",
-  "scorer_plugin_sha256": "44214a1255b0d7ece5197f80a5b2738faa08cfcd564308cccacf3d9af3825ee7",
+  "scorer_plugin_sha256": "c8275094d3f0593d91800f7a610a4e6f191a806084c512b904157897f21ef373",
   "decision_instant": "9 h, 5 h or 4 h before the scheduled end",
   "signal_threshold": "the grid's 520 cells",
   "entry_rule": "every rung open at D whose side ask is in the cell's band and passes the cell's filter",

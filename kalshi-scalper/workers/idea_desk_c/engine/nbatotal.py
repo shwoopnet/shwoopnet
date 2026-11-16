@@ -75,7 +75,7 @@ def decisions(root):
             cut[r["ticker"]] = x["O"] - MARK_S
             rec[r["ticker"]] = (e, x["O"], r)
     q = CV.candles(root, CANDLE_JOBS, cut)
-    out, c = [], {"listed": listed, "clock_dropped_games": len(clock_drops), "games": len(g), "closed_by_D": 0, "no_quote": 0, "m35_dropped_games": 0}
+    out, c = [], {"listed": listed, "clock_dropped_games": len(clock_drops), "games": len(g), "closed_by_D": 0, "not_open": 0, "no_quote": 0, "m35_dropped_games": 0}
     for e, x in g.items():
         O = x["O"]
         # the Head's guard (Nov 16, 18:40Z): a game whose real tip came more than 3.5 h before the scheduled end shows an in-play jump at the 3.5 h mark.
@@ -94,7 +94,7 @@ def decisions(root):
             c["m35_dropped_games"] += 1
         for D_off in DS:
             D = O - D_off
-            qs = {r["ticker"]: at(q.get(r["ticker"], {}), D) for r in x["rungs"] if r["close_time"] > D}
+            qs = {r["ticker"]: at(q.get(r["ticker"], {}), D) for r in x["rungs"] if r["close_time"] > D and (r["open_time"] is None or r["open_time"] <= D)}
             # the game's current line at D: the rung of the same game whose YES mid is nearest 0.50 (ties to the higher strike)
             line = {}
             for r in x["rungs"]:
@@ -109,6 +109,9 @@ def decisions(root):
             for r in x["rungs"]:
                 if r["close_time"] <= D:
                     c["closed_by_D"] += 1
+                    continue
+                if r["open_time"] is not None and r["open_time"] > D:      # the rung is not open at D (found by the compare against the second build)
+                    c["not_open"] += 1
                     continue
                 t = r["ticker"]; qt = q.get(t, {}); qq = qs.get(t)
                 if qq is None:
