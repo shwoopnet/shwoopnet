@@ -1,0 +1,3 @@
+# POOL1 second build: real run log (Testing Desk, Nov 16, 2026)
+Run ONCE with pool1_second_run.py (sha256 82e182ea18670a293728d5c12609a6adfacfbab6f1f3e0178b2753f48071dcb4) through pool1_second_load.py (0d2888f85e1bdc3323ad099d62fcfa301022d1e8d9a1e9c2916f07dd09af8234) on the two Forensics extracts (xz b4073e4e..., e9827301...), allow line from main's HELDOUT_PULL_RUNS.md (a copy of main's file was passed as the allow file). Output: 222 lines (counts, names line, trading days header and m line, 218 rule lines) in scratch only (not in any repo).
+Print sha256 (committed BEFORE reading it): 636981254df92989066013e6f3f1f6196c2d7bc763f944e3e4eeeb3e96964fef
