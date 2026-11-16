@@ -11,3 +11,5 @@ Haircut and cash: C1 to C11 as in the standing rules: price paid = ask + h, neve
 Pass bar (lighter gate, paper): n >= 300 trades; at the 2c haircut profit factor >= 1.3 with both halves (floor(n/2) by close time) >= 1.0 and the 1c PF >= 1.3; day-clustered z >= 2.0 at 2c; both variants counted as tried 2 (the pass needs the variant's bar, not the better of two by a lower bar). Anything else is a fail, reported as "tried 2, passed 0". No other parameters will be tried; the band, look and window are fixed above.
 
 Process: hand case before code (SERIAL1_HAND_CASE.md); one build; Auditor B sanity check of the hash and the printout; run once; commit the print sha256 before reading it. Figures by message only; no extract data in the repo.
+
+## WITHDRAWN Nov 16, 2026, before any read (Head's order): duplicates Desk A's ADJWIN1. No read, no code run on the extract, no tries counted. serial1_second.py and its hand case stay as unused files.
