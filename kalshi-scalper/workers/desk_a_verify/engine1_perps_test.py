@@ -12,7 +12,7 @@ for i in range(0, 41):
     elif i == 13: C.append((e, 100.60, 100.70, 0, 0, 0))
     else: m = mids.get(i, 100.0); C.append((e, round(m - .05, 6), round(m + .05, 6), 0, 0, 0))
 by = {c[0]: c for c in C}; e = T0 + 600; h = 1e-4
-assert P.RULES_PER_TICKER == 204 and len(P.FILTERS) == 17
+assert P.RULES_PER_TICKER == 252 and len(P.FILTERS) == 21 and P.HAIRCUTS == (0.001, 0.002) and P.FEE == 0.0012 and P.FEE_MAKER == 0.0005
 # features
 assert P.feature_ok(by, e, ("mom1", "down"), None) is True and P.feature_ok(by, e, ("mom1", "up"), None) is False
 assert P.feature_ok(by, e, ("mom3", "up"), None) is True and P.feature_ok(by, e, ("mom5", "up"), None) is True
@@ -31,8 +31,16 @@ by11 = {k: v for k, v in by.items()}; assert P.trade(by, T0 + 660, "long", "T30"
 assert by[T0 + 720][1] == 100.25 and 100.25 < 100.10 * 1.0001 * 1.0015
 # cooldown: entry at i10 taken, i11 to i39 refused, i40 allowed
 rows, cnt = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41)
-assert [t for t, _ in rows] == [e], rows            # i11 to i39 refused by the cooldown; i40 has no T3 mark (i43 missing), so nothing else is entered
+assert [r[0] for r in rows] == [e], rows            # i11 to i39 refused by the cooldown; i40 has no T3 mark (i43 missing), so nothing else is entered
 assert all(rows[i + 1][0] - rows[i][0] >= 1800 for i in range(len(rows) - 1))
+# the break filters on the invented series (candle i ends 14:50 UTC + i minutes; here T0 = 14:50 UTC of Nov 9): hand values of ENGINE1_PERPS_HAND_CASE_NOV16.md
+byx = {c[0]: c for c in C}
+E_ = lambda i: T0 + 60 * i
+assert P.feature_ok(byx, E_(10), ("orb", "up"), None) is None                       # i10 ends 15:00: the break needs an entry at 15:01 or later
+assert P.feature_ok(byx, E_(11), ("orb", "up"), None) is True and P.feature_ok(byx, E_(11), ("orb", "down"), None) is False and P.feature_ok(byx, E_(12), ("orb", "up"), None) is True
+assert P.feature_ok(byx, E_(10), ("sess", "high"), None) is False and P.feature_ok(byx, E_(11), ("sess", "high"), None) is True and P.feature_ok(byx, E_(12), ("sess", "high"), None) is True
+assert P.feature_ok(byx, E_(13), ("sess", "high"), None) is True and P.feature_ok(byx, E_(14), ("sess", "high"), None) is False
+assert all(P.feature_ok(byx, E_(i), ("sess", "low"), None) is False for i in (10, 11, 12, 13))
 # time of day boundaries
 d = calendar.timegm((2026, 11, 9, 0, 0, 0))
 for (hh, mm, ss), want in (((15, 0, 0), "open"), ((14, 29, 59), "pre"), ((20, 0, 0), "close"), ((21, 0, 0), "post"), ((15, 30, 0), "mid"), ((8, 59, 59), "post"), ((9, 0, 0), "pre")):
@@ -40,17 +48,18 @@ for (hh, mm, ss), want in (((15, 0, 0), "open"), ((14, 29, 59), "pre"), ((20, 0,
 # a one-sided candle is never an entry or an exit mark
 bad = [c if c[0] != T0 + 780 else (c[0], 0, 100.7, 0, 0, 0) for c in C]
 assert P.trade({c[0]: c for c in bad if P.ok(c)}, e, "long", "T3", h) == (None, "no mark")
-s = P.stats([(T0, .01), (T0 + 86400, -.005), (T0 + 2 * 86400, .02)]); assert s["n"] == 3 and near(s["pf"], .03 / .005) and s["evidence"] == "no evidence at n = 3"
+s = P.stats([(T0, .0124, 180), (T0 + 86400, -.0026, 300), (T0 + 2 * 86400, .0224, 60)]); assert s["n"] == 3 and near(s["pf"], .03 / .005) and s["evidence"] == "no evidence at n = 3" and near(s["avg_hold_min"], 180 / 60 / 1 * 0 + (180 + 300 + 60) / 3 / 60) and near(s["avg_gross_bp"], (.0124 - .0026 + .0224) / 3 * 1e4)
+sm = P.stats([(T0, .0124, 180)], P.FEE_MAKER); assert near(sm["net"], .0124 - .0010)
 # (1) the boundary: an entry whose e + 1800 reaches the boundary is dropped and counted
 rows, cnt = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=T0 + 2400)
-assert cnt["exit crosses the boundary"] >= 1 and [t for t, _ in rows] == [], (rows, cnt)       # e + 1800 = i40 = the boundary: dropped
+assert cnt["exit crosses the boundary"] >= 1 and [r[0] for r in rows] == [], (rows, cnt)       # e + 1800 = i40 = the boundary: dropped
 rows2, cnt2 = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=T0 + 2401)
-assert [t for t, _ in rows2] == [e] and cnt2.get("exit crosses the boundary", 0) == 0 or [t for t, _ in rows2] == [e]
+assert [r[0] for r in rows2] == [e]
 # (2) the days floor: a rule with n and PF above the bar but under 10 days cannot pass
-assert P.days([(T0, .01), (T0 + 60, .01)]) == 1 and P.MIN_DAYS == 10
+assert P.days([(T0, .01, 0), (T0 + 60, .01, 0)]) == 1 and P.MIN_DAYS == 10
 # run_all: tried = 204 per ticker with a constant; a ticker without one is counted apart; thin data passes nothing
 rep = P.run_all({"KXHAND": C, "KXSPYPERP": C})
-assert rep["tried"] == 204 and rep["no_split_constant"] == ["KXHAND"] and rep["search_passes"] == 0 and rep["validate_passes"] == 0 and rep["survivors"] == [] and "insufficient_days" in rep, rep
+assert rep["tried"] == 252 and rep["no_split_constant"] == ["KXHAND"] and rep["search_passes"] == 0 and rep["validate_passes"] == 0 and rep["survivors"] == [] and "insufficient_days" in rep, rep
 # the days floor in run_all on an invented rising series (every long T3 entry is profitable): under MIN_DAYS it is counted and cannot pass
 cs = []
 for d in (9, 10, 11, 12):

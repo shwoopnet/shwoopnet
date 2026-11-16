@@ -5,7 +5,7 @@ here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import engine1_extract_load as L, engine1_perps as P
 def main(base, out):
     wa, ca, wp, cp, wn, cn = L.load(base)
-    rep = P.run_all({k: [tuple(c) for c in v] for k, v in wp.items() if k in ("KXSPYPERP", "KXQQQPERP", "KXNVDAPERP", "KXAAPLPERP")})
+    rep = P.run_all({k: [tuple(c) for c in v] for k, v in wp.items() if k in ("KXSPYPERP", "KXQQQPERP")})
     rep["loader_drops_perps"] = cp
     rep["boundary_note"] = "SEARCH exits may read up to 30 minutes of prices after the SEARCH/VALIDATE date boundary (candles are not cut at the boundary for an exit)"
     rep["rule_hashes"] = {f: hashlib.sha256(open(os.path.join(here, f), "rb").read()).hexdigest()[:16] for f in ("engine1_extract_load.py", "engine1_split.py", "engine1_perps.py", "engine1_perps_run.py")}
