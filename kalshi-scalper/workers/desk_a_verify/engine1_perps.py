@@ -59,12 +59,13 @@ def day_z(rows):
     if n < 2: return None
     m = sum(v) / n; sd = math.sqrt(sum((x - m) ** 2 for x in v) / (n - 1))
     return None if sd == 0 else m / (sd / math.sqrt(n))
-def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None):
+def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None, boundary=None):
     """All entries of one rule with the 1800 s cooldown; lo and hi bound the entry end (inclusive lo, exclusive hi). -> rows [(e, net)], counters."""
     by = {c[0]: c for c in candles if ok(c)}; rows, cnt, last = [], collections.Counter(), None
     for e in sorted(by):
         if (lo is not None and e < lo) or (hi is not None and e >= hi): continue
         if last is not None and e < last + COOLDOWN: continue
+        if boundary is not None and e + COOLDOWN >= boundary: cnt["exit crosses the boundary"] += 1; continue          # (Auditor B) SEARCH never touches VALIDATE prices
         f = feature_ok(by, e, filt, cuts)
         if f is None: cnt["missing feature candle"] += 1; continue
         if not f: continue
@@ -72,17 +73,18 @@ def run_rule(candles, filt, side, exit_, h, cuts, lo=None, hi=None):
         if r is None: cnt[why] += 1; continue
         rows.append((e, r)); cnt[why] += 1; last = e
     return rows, cnt
+def days(rows): return len({time.strftime('%Y-%m-%d', time.gmtime(t)) for t, _ in rows})
 def stats(rows):
     xs = [x for _, x in rows]; half = len(xs) // 2
     return {"n": len(xs), "pf": pf(xs), "half1": pf(xs[:half]), "half2": pf(xs[half:]), "net": sum(xs), "day_z": day_z(rows), "evidence": "ok" if len(xs) >= 100 else "no evidence at n = %d" % len(xs)}
 
 import engine1_split as S
-ALPHA = 0.05; MIN_N = 100; PF1 = 1.3; PF2 = 1.0
+ALPHA = 0.05; MIN_N = 100; PF1 = 1.3; PF2 = 1.0; MIN_DAYS = 10     # trade days needed in SEARCH and in VALIDATE (Auditor B): fewer prints 'insufficient days' and the rule cannot pass
 def pval(z): return 0.5 * math.erfc(z / math.sqrt(2)) if z is not None else 1.0
 def short(t): return t[2:] if t.startswith("KX") else t
 def run_all(perps):
     """perps: {ticker: candles}. SEARCH then VALIDATE by engine1_split dates (the UTC date of the entry candle end), spread cuts from SEARCH entries only, BH over m = every rule tried. Returns a report; perps block only."""
-    rep = {"label": "perps block: upper bound, not fill-checked; fee 12 bps a leg ASSUMED (not confirmed); haircuts 1 and 2 bp stand in for 1c and 2c; funding not booked; information for the forward shadow only", "tried": 0, "search_passes": 0, "validate_bar_passes": 0, "validate_passes": 0, "survivors": [], "no_split_constant": []}
+    rep = {"label": "perps block: upper bound, not fill-checked; fee 12 bps a leg ASSUMED (not confirmed); haircuts 1 and 2 bp stand in for 1c and 2c; funding not booked; information for the forward shadow only", "tried": 0, "search_passes": 0, "validate_bar_passes": 0, "validate_passes": 0, "survivors": [], "no_split_constant": [], "insufficient_days": 0}
     m = 0; cand = []
     for tk, cs in perps.items():
         key = short(tk)
@@ -96,15 +98,18 @@ def run_all(perps):
             for side in SIDES:
                 for x in EXITS:
                     m += 1
-                    r1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, hi=first_val); r2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, hi=first_val)
+                    r1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, hi=first_val, boundary=first_val); r2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, hi=first_val, boundary=first_val)
                     a, b = stats(r1), stats(r2)
-                    if a["n"] >= MIN_N and a["pf"] >= PF1 and b["pf"] >= PF2: cand.append((tk, f, side, x, cuts, first_val, a, b))
+                    if a["n"] >= MIN_N and a["pf"] >= PF1 and b["pf"] >= PF2:
+                        if days(r1) < MIN_DAYS: rep["insufficient_days"] += 1; continue
+                        cand.append((tk, f, side, x, cuts, first_val, a, b))
     rep["tried"] = m; rep["search_passes"] = len(cand)
     vp = {}
     for tk, f, side, x, cuts, fv, a, b in cand:
         good = [c for c in perps[tk] if ok(c)]
         v1, _ = run_rule(good, f, side, x, HAIRCUTS[0], cuts, lo=fv); v2, _ = run_rule(good, f, side, x, HAIRCUTS[1], cuts, lo=fv)
         sa, sb = stats(v1), stats(v2)
+        if sa["n"] >= MIN_N and sa["pf"] >= PF1 and sb["pf"] >= PF2 and days(v1) < MIN_DAYS: rep["insufficient_days"] += 1; continue
         if sa["n"] >= MIN_N and sa["pf"] >= PF1 and sb["pf"] >= PF2: vp[(tk, f, side, x)] = (pval(sa["day_z"]), sa, sb)
     rep["validate_bar_passes"] = len(vp)
     items = sorted(vp.items(), key=lambda kv: kv[1][0]); k = 0

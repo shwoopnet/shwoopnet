@@ -41,7 +41,24 @@ for (hh, mm, ss), want in (((15, 0, 0), "open"), ((14, 29, 59), "pre"), ((20, 0,
 bad = [c if c[0] != T0 + 780 else (c[0], 0, 100.7, 0, 0, 0) for c in C]
 assert P.trade({c[0]: c for c in bad if P.ok(c)}, e, "long", "T3", h) == (None, "no mark")
 s = P.stats([(T0, .01), (T0 + 86400, -.005), (T0 + 2 * 86400, .02)]); assert s["n"] == 3 and near(s["pf"], .03 / .005) and s["evidence"] == "no evidence at n = 3"
+# (1) the boundary: an entry whose e + 1800 reaches the boundary is dropped and counted
+rows, cnt = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=T0 + 2400)
+assert cnt["exit crosses the boundary"] >= 1 and [t for t, _ in rows] == [], (rows, cnt)       # e + 1800 = i40 = the boundary: dropped
+rows2, cnt2 = P.run_rule(C, None, "long", "T3", h, None, lo=e, hi=T0 + 60 * 41, boundary=T0 + 2401)
+assert [t for t, _ in rows2] == [e] and cnt2.get("exit crosses the boundary", 0) == 0 or [t for t, _ in rows2] == [e]
+# (2) the days floor: a rule with n and PF above the bar but under 10 days cannot pass
+assert P.days([(T0, .01), (T0 + 60, .01)]) == 1 and P.MIN_DAYS == 10
 # run_all: tried = 204 per ticker with a constant; a ticker without one is counted apart; thin data passes nothing
 rep = P.run_all({"KXHAND": C, "KXSPYPERP": C})
-assert rep["tried"] == 204 and rep["no_split_constant"] == ["KXHAND"] and rep["search_passes"] == 0 and rep["validate_passes"] == 0 and rep["survivors"] == [], rep
+assert rep["tried"] == 204 and rep["no_split_constant"] == ["KXHAND"] and rep["search_passes"] == 0 and rep["validate_passes"] == 0 and rep["survivors"] == [] and "insufficient_days" in rep, rep
+# the days floor in run_all on an invented rising series (every long T3 entry is profitable): under MIN_DAYS it is counted and cannot pass
+cs = []
+for d in (9, 10, 11, 12):
+    base = calendar.timegm((2026, 11, d, 15, 30, 0))
+    for i in range(100):
+        m = 100 * (1.0017 ** i); cs.append((base + 60 * i, m - .001, m + .001, 0, 0, 0))
+P.MIN_N = 3; P.MIN_DAYS = 10
+r1 = P.run_all({"KXSPYPERP": cs}); assert r1["search_passes"] == 0 and r1["insufficient_days"] > 0 and r1["survivors"] == [], r1
+P.MIN_DAYS = 2
+r2 = P.run_all({"KXSPYPERP": cs}); assert r2["search_passes"] > 0 and r2["insufficient_days"] >= 0, r2
 print("ALL OK")
