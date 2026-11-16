@@ -1788,3 +1788,7 @@ The runner sha in the ENGPERPS lanes 1 and 6 line of `kalshi-scalper/workers/HEL
 ## Held-out log: ENGPERPS lanes 1 and 6 engine updated (Nov 16, 2026, Auditor B's update of PR 1026)
 
 The engine sha in the ENGPERPS lanes 1 and 6 line of `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` is now `engine1_perps_lanes.py` ff1a1270... (commit b384dc11e on `claude/idea-desk-a`; two printed labels changed only; I hashed it and the unchanged runner ea1f51f4... before merging). The old engine sha d7c7a1ec... no longer reads. Still not a go to run. Docs only.
+
+## Held-out log: FUNDX2 thresholds step (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the History Miner's FUNDX2 thresholds step (`fundx2_thresholds.py` with its run, load and events modules, commit faafdd6db on `claude/history-miner`) and the funding file `perp-data` `funding/by-ticker.csv.gz`. I hashed the four code files and the funding file myself and they match Auditor B's values. Funding prints only, no price; the price step needs a second line later. Docs only.
