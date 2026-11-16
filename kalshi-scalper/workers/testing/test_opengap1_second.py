@@ -48,7 +48,7 @@ d = tempfile.mkdtemp(); hdr = "ticker,end_period_ts,bid_open,bid_high,bid_low,bi
 def row(t, ts, b, a): return f"{t},{ts},0,0,0,{b},0,0,0,{a},0,0,0,0,0,0,0,0"
 t16, t25, t31, t32 = g._ts("2026-11-06", 16, 0), g._ts("2026-11-09", 9, 25), g._ts("2026-11-09", 9, 31), g._ts("2026-11-09", 9, 32)
 bad = "KXUS500PERP,NOT_A_TS,x,x,x,BAD,x,x,x,BAD,x,x,x,x,x,x,x,x"          # a US500 row that raises on any column but ticker
-with gzip.open(os.path.join(d, "2026-11-06.csv.gz"), "wt") as f: f.write(hdr + "\n" + row("KXSPYPERP", t16, 9.99, 10.01) + "\n" + row("KXOTHERPERP", t16, 1, 2) + "\n" + bad + "\n" + row("KXSPYPERP", g.FIRST_TS - 60, 1.0, 2.0) + "\n")
+with gzip.open(os.path.join(d, "2026-11-06.csv.gz"), "wt") as f: f.write(hdr + "\n" + row("KXSPYPERP", t16, 9.99, 10.01) + "\n" + row("KXOTHERPERP", t16, 1, 2) + "\n" + bad + "\n" + bad + ",extra,extra,extra\n" + "KXUS500PERP,1\n" + row("KXSPYPERP", g.FIRST_TS - 60, 1.0, 2.0) + "\n")
 with gzip.open(os.path.join(d, "2026-11-09.csv.gz"), "wt") as f: f.write(hdr + "\n" + row("KXSPYPERP", t25, 10.04, 10.06) + "\n" + row("KXSPYPERP", t31, 10.06, 10.08) + "\n" + row("KXSPYPERP", t32, 10.07, 10.09) + "\n")
 uf = os.path.join(d, "u.csv")
 with open(uf, "w") as f: f.write("perp,date,prev_date,u_open,u_prev_close,x_open,x_prev_close\nKXSPYPERP,2026-11-09,2026-11-06,101,100,101.01,100\nKXSPYPERP,2026-12-02,2026-11-30,101,100,101,100\n")
