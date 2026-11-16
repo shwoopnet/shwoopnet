@@ -1,10 +1,10 @@
 {
- "id": "DEPTH1",
+ "id": "PERPDEPTH1",
  "desk": "FORENSICS",
  "date_registered": "2026-11-16",
- "status": "DRAFT, unsigned, nothing run, no data exists yet",
+ "status": "DRAFT v2 (Auditor B fixes of Nov 16), unsigned, nothing run; the recorder must be merged first",
  "kind": "event_rule",
- "card": "kalshi-scalper/workers/forensics/depth/DEPTH1_CARD.md",
+ "card": "kalshi-scalper/workers/forensics/depth/PERPDEPTH1_CARD.md",
  "needs_new_code": [
   "loader for the perp-live-data book.csv and markets.csv (columns in scripts/record_perps_live.py: BOOK_COLS, MARKET_COLS), audited once with its wall",
   "event scorer plugin: one decision per ticker per minute grid point, entry at the next recorded quote, exit by hold; hand case first"
@@ -47,16 +47,17 @@
   "start_utc_check": "2026-11-17T00:00:00Z",
   "first_read_not_before_epoch": 1796688000,
   "first_read_check": "2026-12-08T00:00:00Z",
-  "release_rule": "one read, after 10 trade days and at least 100 decisions in a cell, never a running tally"
+  "release_rule": "first read on or after 1796688000 only if 10 trade days and 100 decisions a cell exist, else it waits and says so; one read",
+  "start_rule": "decisions from max(1794873600, the first recorded row of each ticker); the recorder exists only once Main merges it"
  },
  "holds": [
   {
-   "label": "H16 perps stock and ETF perps (NVDA) forward window",
+   "label": "H16 perps (KXSPYPERP*, KXQQQPERP*, KXNVDAPERP*, KXAAPLPERP*, KXUS500PERP*, KXUSTECH100PERP*)",
    "start_epoch": 1797897600,
    "end_epoch": 1801440000,
    "card": "H16",
    "status": "OPEN",
-   "handling": "last_decision_utc is 2026-12-21T00:00Z = 1797811200, before the hold; no NVDA decision at or after 1797897600 is scored; Auditor B to confirm MU is or is not in H16"
+   "handling": "last decision 1797811200 (2026-12-21T00:00Z); the longest hold (60 min) from it ends 2026-12-21T01:00Z, before 1797897600. Applies to NVDA, US Tech 100 and US Large Cap. MU is not in H16 (Auditor B)."
   },
   {
    "label": "H17 perps30 and cash1m files",
@@ -107,12 +108,13 @@
   "decision": "book row and markets row with t_recv_ms at or before the decision minute end",
   "entry": "the first quote recorded after the decision minute (ask for a buy, bid for a sell), never the decision row",
   "exit": "the first quote at or after entry plus the hold; a missing quote within 2 minutes voids the event and counts it",
-  "funding": "booked when a funding print falls inside the hold, from the funding file; sign positive = longs pay"
+  "funding": "events whose hold spans a funding print are dropped and counted; the recorder holds no funding file (a funding pull is a separate audited item)"
  },
  "costs": {
   "price_terms": "return in basis points of entry price after the spread paid at entry and exit, a fee assumption of taker fee ASSUMED until Kalshi's schedule is read, haircuts two numbers 0.0002 and 0.0004 of price",
   "margin_terms": "return on margin = bps x leverage_estimate for the notional at the size used (from the recorder's long_lev or short_lev at 10000), shown beside price terms, never in place of them",
-  "income": "decisions a day x cash edge in bps x contract value x leverage, ranked; figures by message only"
+  "income": "decisions a day x cash edge in bps x contract value x leverage, ranked; figures by message only",
+  "fee": "perps taker fee NOT YET FIXED: before the one read a number from Kalshi's published schedule is written here, and the pass is shown also at 2x that fee; until then every figure is labelled 'fee assumed, not a result'"
  },
  "gates": {
   "min_n": 100,
@@ -124,7 +126,7 @@
  },
  "tries": {
   "rules_this_spec": 420,
-  "prior_m": "read from ENGINE_TALLY.json by the engine, not typed"
+  "prior_m": "the one carried number the Head rules for all prints (Auditor B proposed 6,290,605, pending); BH over carried + 420; bars on unrounded figures"
  },
  "prediction": "none positive is expected: a top-5 book on a thin perp is mostly stale or spoofed; if any cell passes, expected PF under 1.15 at the primary haircut",
  "kill": "drop the family if the first read has PF under 1.0 at the primary haircut in 5 of 7 markets",
@@ -136,5 +138,7 @@
    "perp-live-data recorder files"
   ],
   "new_host": false
- }
+ },
+ "name_note": "renamed from DEPTH1: that id is the R6 depth card (S1, H20) and NC15DEPTH1",
+ "wall": "loader walls the 7 tickers copied from static.csv of the first file; the tickers and their sha256 go in this spec before any outcome-bearing column is joined; rows with a missing level or a crossed top are skipped and counted; two-sided top means 0 < bid < ask"
 }
