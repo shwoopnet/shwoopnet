@@ -10,7 +10,7 @@ PLACES = (("WH-NC15-SILVER", "KXSILVER15M"), ("WH-NC15-COPPER", "KXCOPPER15M"), 
 START_UTC, TARGET = "2026-11-13T02:40:00Z", 60
 START_TS = calendar.timegm(time.strptime(START_UTC, "%Y-%m-%dT%H:%M:%SZ"))
 CORE_FILE = os.path.join(HERE, "..", "desk_a_held", "nc15_wheel_counts.py")
-CORE_SHA = "TO BE PINNED AFTER DESK A'S NEW HASH"
+CORE_SHA = "23f5932d7f3f2abd7e42a71ffacdf4accc31e6878312f8cccd41cee8a7f8f44c"          # Desk A's nc15_wheel_counts.py with count_places(root, start_ts=None) -> (st, closes), claude/idea-desk-a 1ac684a3c
 CORE_FUNC = "count_places"
 ALLOW_FILE = os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md")
 ALLOW_MARK = "readable ONLY by the Testing Desk's NC15 place-count job"
@@ -44,7 +44,7 @@ def build(counts, as_of):
     rows = []
     for pid, series in PLACES:
         if series not in counts: raise SystemExit("REFUSED: the core's answer has no %s" % series)
-        n = counts[series]["fill-checked"] if "fill-checked" in counts[series] else None
+        n = counts[series].get("fill-checked", 0)          # the core's Counters hold only the keys that were incremented: an absent "fill-checked" is a true 0
         if not (type(n) is int and n >= 0): raise SystemExit("REFUSED: %s fill-checked is not a non-negative integer" % series)
         rows.append({"id": pid, "fill_checked_signals": n, "target": TARGET, "start_utc": START_UTC, "as_of_utc": as_of})
     return {"places": rows}
@@ -58,7 +58,7 @@ def write(obj, out):
 
 def run(root, out, as_of, core_file=None, core_sha=None, func=None, allow_file=None):
     sha = core_sha or CORE_SHA; refuse_unless_allowed(sha, allow_file)
-    counts = load_core(core_file, sha, func)(root, START_TS)
+    counts, _closes = load_core(core_file, sha, func)(root, START_TS)          # (st, closes): only st, the per-series counters, is used
     obj = build(counts, as_of); write(obj, out); return obj
 
 
