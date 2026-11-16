@@ -1740,3 +1740,7 @@ One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the Testing D
 ## Held-out log: ETHD_RESULTS2 for Desk B's ETHLATE1 loader (Nov 16, 2026, Auditor B's allow line)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`: the run `ETHD_RESULTS2/2026-11-16T2059Z_43950254867` (structure CLEAN, 14 of 14, 3,231 hourly Ethereum ladder markets, closes 2026-10-28 to before 2026-11-16) is readable ONLY by Desk B's ETHLATE1 loader `ethlate1_load.py` (sha256 0c4d4f05...; I checked the file on `claude/idea-desk-b` before merging). The first `ETHD_RESULTS` folder stays unlisted. Docs only.
+
+## Held-out log: PERPSLANE4 second-build extractor (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Forensics' independent PERPSLANE4 extractor `lane4_extract_b2.py` (sha256 53490d8a..., commit 13d09700 on `claude/forensics-desk`; I hashed the file before merging) and the same file manifest as the Testing Desk's reader (sha256 1b46f85d...). The extractor refuses unless the log names its file, its own sha256 and the manifest's. Docs only.
