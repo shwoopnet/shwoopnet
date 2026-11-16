@@ -1,0 +1,45 @@
+{
+ "job_id": "SIBHITR_LISTS_A",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/sibhitr/SIBHITR_CARD.md",
+ "purpose": "SIBHIT-R (Idea Desk C) stage A: the historical KXNBAPTS market list (2025-26 season, before the 2026-09-13 historical cutoff), for tickers and time fields. No candle.",
+ "heldout": "The historical list has no date filter. The scorer keeps only markets whose close_time is inside the window written in the card from Auditor B's hold map, tested before any other field; everything else is LOADED, NOT LOOKED AT. PROPS1's TEST third (read by PROPS1 for price and result) is outside the window. Nothing from the 2026-27 season (live list) is requested.",
+ "allowed_endpoints": [
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNBAPTS"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 20,
+ "notes": "PROPS1 counted about 9,000 KXNBAPTS markets in 299 events (Mar to Jun 2026), a lower bound. Up to 18 pages of 1,000, cap 20. A last page with a cursor means truncated: the scorer stops.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "hist_KXNBAPTS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNBAPTS",
+    "limit": 1000
+   },
+   "max_pages": 18
+  }
+ ]
+}
