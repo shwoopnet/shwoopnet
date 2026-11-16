@@ -2,13 +2,14 @@
 """ETHLATE1 fixture, BUILD 2: invented hourly Ethereum ladders: 19 UTC days, 16 hourly closes a day, 6 strikes each, a look candle at close - 120 and a mark candle at close - 60 (some missing, some crossed), invented quotes, results and a few voids.
 Usage: ethlate1_fixture_second.py <out.json.gz>"""
 import gzip, json, random, sys
-def build():
-    rng = random.Random(20261116); markets, candles = {}, {}
+def build(): return build_with(random.Random(20261116), 6, 16)
+def build_with(rng, strikes=6, hours=16):
+    markets, candles = {}, {}
     day0 = 1793059200          # 2026-10-27T00:00Z
     for d in range(1, 20):
-        for hh in range(6, 22):
+        for hh in range(6, 6 + hours):
             close = day0 + d * 86400 + hh * 3600
-            for k in range(6):
+            for k in range(strikes):
                 tk = "KXETHD-%d-%02d-T%d" % (d, hh, k); p = min(0.9, max(0.04, rng.betavariate(0.8, 1.3))); sp = rng.choice([0.01, 0.02, 0.02, 0.03, 0.05, 0.08])
                 r = rng.random(); res = "yes" if rng.random() < p else "no"
                 if rng.random() < 0.02: res = "void"
