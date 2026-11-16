@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Hand case of ethlate1_run.py on INVENTED markets (EXPECTED_ethlate1_run_nov16.md). Needs the four pinned engine files in a folder (ENGINE_DIR env is NOT used; pass the path as argv[1])."""
-import os, sys, time, calendar
+import os, sys, time, calendar, hashlib
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import ethlate1_run as R
 eng = sys.argv[1]
@@ -25,5 +25,22 @@ ok = [("1 header first line", R.header(rep).startswith("m_total 6290756 | cells 
 R.PINS["engine1_core"] = "0" * 64
 try: R.import_engine(eng); ok.append(("7 a changed engine file is refused", False))
 except SystemExit as e: ok.append(("7 a changed engine file is refused", "REFUSED" in str(e)))
+# 8 the VALIDATE and BH path (EXPECTED_ethlate1_run_nov16.md, Test 8; figures from hand_validate_case.py)
+R.PINS["engine1_core"] = hashlib.sha256(open(os.path.join(eng, "engine1_core.py"), "rb").read()).hexdigest()
+WIN = {"A_S": [3, 7, 2, 8, 4, 6, 5, 7, 3, 6, 4, 8], "A_V": [3, 7, 2, 8, 4, 6, 5, 7, 3, 6, 4, 8], "B_S": [6, 7, 5, 6, 7, 5, 6, 7, 5, 6, 7, 5], "B_V": [9, 9, 9, 9, 9, 8, 1, 1, 0, 0, 1, 1]}
+mk8 = []
+for ph, d0 in (("S", 0), ("V", 12)):
+    for d in range(12):
+        for cellname, bid, ask, side in (("A", 0.28, 0.30, "yes"), ("B", 0.58, 0.60, "no")):
+            w = WIN[cellname + "_" + ph][d]
+            for j in range(9):
+                close = base + (d0 + d) * 86400 + 14 * 3600 + (j if cellname == "A" else 9 + j) * 3600
+                mk8.append({"series": "KXETHD", "ticker": "KXETHD-%s%s%02d%d" % (cellname, ph, d, j), "close": close, "result": side if j < w else ("no" if side == "yes" else "yes"),
+                            "candles": [(close - 120, bid, ask, None, 0, 0), (close - 60, bid + 0.01, ask + 0.01, None, 0, 0)]})
+S.LAST_SEARCH["ETHD"] = "2026-11-12"
+big = R.run({"KXETHD": mk8}, m_total=6290756, engine_dir=eng); small = R.run({"KXETHD": mk8}, m_total=2, engine_dir=eng)
+ok.append(("8a search cells 8, passes 4, validate bar passes 2", big["search_cells_scored"] == 8 and big["search_passes"] == 4 and big["validate_bar_passes"] == 2))
+ok.append(("8b BH at m_total keeps none", big["survivors"] == []))
+ok.append(("8c the same p-values at m = 2 keep both A cells, not B", len(small["survivors"]) == 2 and all(s["cell"][1] == 6 for s in small["survivors"]) and all(abs(s["pf_2c"] - 2.7667) < 5e-4 for s in small["survivors"])))
 for k, v in ok: print("PASS" if v else "FAIL", k)
 sys.exit(0 if all(v for _, v in ok) else 1)
