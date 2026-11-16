@@ -82,12 +82,14 @@ def decisions(root):
         # If ANY rung's last two two-sided candles ending at or before the mark differ in mid by 0.15 or more, the whole game is counted and dropped from M35 (it stays in H).
         mark_inplay = False
         for r in x["rungs"]:
-            tw = sorted(k for k, v in q.get(r["ticker"], {}).items() if k <= O - MARK_S and two(v[0], v[1]))
-            if len(tw) >= 2:
-                a_, b_ = q[r["ticker"]][tw[-1]], q[r["ticker"]][tw[-2]]
-                if abs((a_[0] + a_[1]) / 2 - (b_[0] + b_[1]) / 2) >= GUARD_T - EPS:
+            # Auditor B (Nov 16): ANY two consecutive two-sided candles ending in (O - 4 h, O - 3.5 h] that differ in mid by 0.15 or more, on any rung
+            tw = sorted(k for k, v in q.get(r["ticker"], {}).items() if O - 14400 < k <= O - MARK_S and two(v[0], v[1]))
+            for k0, k1 in zip(tw, tw[1:]):
+                if abs((q[r["ticker"]][k1][0] + q[r["ticker"]][k1][1]) / 2 - (q[r["ticker"]][k0][0] + q[r["ticker"]][k0][1]) / 2) >= GUARD_T - EPS:
                     mark_inplay = True
                     break
+            if mark_inplay:
+                break
         if mark_inplay:
             c["m35_dropped_games"] += 1
         for D_off in DS:

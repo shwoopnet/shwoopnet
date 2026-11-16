@@ -73,7 +73,7 @@ class Mark(unittest.TestCase):
         b = json.load(gzip.open(f, "rt"))
         for m in b["markets"]:
             if m["market_ticker"] == Tk(205):
-                m["candlesticks"] += [cd(O - 12660, .30, .34, 0), cd(O - 12600, .60, .64, 0)]
+                m["candlesticks"] += [cd(O - 13200, .30, .34, 0), cd(O - 13140, .60, .64, 0)]
         with gzip.open(f, "wt") as fh:
             json.dump(b, fh)
         dec, c, g = N.decisions(root)
@@ -92,6 +92,13 @@ class Mark(unittest.TestCase):
         root2, _O, _a, _b, Tk2 = fixture(False)
         dec2, c2, _ = N.decisions(root2)
         self.assertEqual(c2["m35_dropped_games"], 0)            # the clean fixture: jump at the mark is below 0.15
+
+
+class Edge(unittest.TestCase):
+    def test_jump_ending_at_4h_is_outside_window(self):
+        root, *_ = fixture(True)          # rung 220 jumps .20 into the candle ending exactly O - 4 h: that candle is the window's open, not inside it
+        dec, c, g = N.decisions(root)
+        self.assertEqual(c["m35_dropped_games"], 0)
 
 
 class RunPrint(unittest.TestCase):
