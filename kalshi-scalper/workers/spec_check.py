@@ -3,7 +3,7 @@
 Checks presence and shape only; Auditor B signs the content (data, cuts, look-ahead)."""
 import sys, json, re
 KINDS = ("grid15m", "perps_grid", "event_rule")
-TOP = ("id", "desk", "date_registered", "kind", "card", "needs_new_code", "uniqueness", "data", "split", "costs", "gates", "tries", "prediction", "kill", "kill_fast", "outputs")
+TOP = ("holds", "look_ahead", "sources", "subset_rationale", "halves", "fee_form", "n_floor", "id", "desk", "date_registered", "kind", "card", "needs_new_code", "uniqueness", "data", "split", "costs", "gates", "tries", "prediction", "kill", "kill_fast", "outputs")
 BUCKETS = set(range(120, 841, 60)); BANDS = set(range(1, 19)); SIDES15 = {"yes", "no", "cheap", "favourite"}; SIDESP = {"long", "short"}
 EX15 = {"H", "T", "S", "B", "M180", "M60"}; EXP = {"T3", "T10", "T15", "T30", "TS15", "TS30", "T60", "T240", "TC", "TO"}
 F15 = {"none", "oi3", "oi6", "vol3", "mom1", "mom3", "mom5", "spread"}; FP = {"none", "mom1", "mom3", "mom5", "mom15", "spread", "tod", "orb", "sess"}
@@ -22,6 +22,16 @@ def check(s):
     for k in ("loader", "loader_sha256", "ticker_wall", "window", "held_out_map_checked_by", "independence_note"):
         if k not in s["data"]: p.append("data." + k + " is required")
     if "loader_sha256" in s["data"] and not re.fullmatch(r"[0-9a-f]{64}", s["data"]["loader_sha256"]): p.append("data.loader_sha256 must be 64 hex characters")
+    for h in s["holds"]:
+        for k in ("label", "start_epoch", "card", "status"):
+            if k not in h: p.append("holds entry missing " + k)
+        if not isinstance(h.get("start_epoch"), int): p.append("holds start_epoch must be an integer epoch (re-derive with calendar.timegm)")
+        if h.get("end_epoch") is not None and not isinstance(h.get("end_epoch"), int): p.append("holds end_epoch must be an integer epoch or null")
+    if not s["holds"]: p.append("holds must list every window the spec touches (an empty table is a claim, say so in a row)")
+    if not s["look_ahead"]: p.append("look_ahead must say, for each input, the last timestamp it may use")
+    if s["sources"].get("new_host") is not False or not s["sources"].get("names"): p.append("sources must name the data sources and state new_host false")
+    if "ceil(round(" not in s["fee_form"]: p.append("fee_form must be the standing ceil(round(...)) form with the void rule")
+    if "no evidence" not in s["n_floor"]: p.append("n_floor must carry the standing 'no evidence at n = x' text")
     if s["split"].get("mode") not in ("fixed_dates", "forward_only"): p.append("split.mode must be fixed_dates or forward_only")
     for k in ("min_n", "pf_primary", "pf_secondary", "bh_alpha"):
         if k not in s["gates"]: p.append("gates." + k + " is required")
@@ -45,6 +55,9 @@ def check(s):
     else:
         e = s.get("event")
         if not e or "scorer_plugin" not in e or "scorer_plugin_sha256" not in e: p.append("event.scorer_plugin and its sha256 are required for event_rule")
+        pl = s.get("plugin") or {}
+        for k in ("file", "sha256", "hand_case_sha256", "auditor_clean_date"):
+            if k not in pl: p.append("plugin." + k + " is required for event_rule (a spec cannot name a plugin Auditor B has not cleared)")
         rules = s["tries"].get("rules_this_spec")
     if rules is not None and s["tries"].get("rules_this_spec") != rules: p.append("tries.rules_this_spec is %r, the grid gives %r" % (s["tries"].get("rules_this_spec"), rules))
     return p, rules

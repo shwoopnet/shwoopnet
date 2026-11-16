@@ -80,5 +80,28 @@
  "outputs": {
   "survivor_line": "x",
   "family_flag": "x"
- }
+ },
+ "holds": [
+  {
+   "label": "example",
+   "start_epoch": 1791043200,
+   "end_epoch": null,
+   "card": "example",
+   "status": "OPEN"
+  }
+ ],
+ "look_ahead": {
+  "features": "candles ending at or before the entry candle end e",
+  "exit_price": "candles after e up to close - 60 for target and stop; the result only for a held trade"
+ },
+ "sources": {
+  "names": [
+   "quote-data recorder files (Kalshi public GETs recorded by record-quotes.yml)"
+  ],
+  "new_host": false
+ },
+ "subset_rationale": "the subset was chosen without any figure from the same data (example)",
+ "halves": "by order of the hourly close: the first floor(n/2) trades and the rest",
+ "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x"
 }

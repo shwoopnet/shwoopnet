@@ -31,3 +31,13 @@ A family that needs a new loader, a new exit or a new feature is a spec PLUS a l
 
 ## Rules that do not change
 Hand case before code; one build only (a survivor needs a second build and rule 16b); a read of a held-out or a forward window follows the hold map; figures by message only; no account size or leverage until a survivor exists; the declined list (7e) and 7g (a variant is a version) apply to a spec like to any idea.
+
+## Added 2026-11-16 at Auditor B's request (what he needs to sign a spec; spec_check.py enforces them)
+- `holds`: a TABLE of every window the spec touches as integer epoch constants (re-derived with calendar.timegm, never dates alone), each with `label`, `start_epoch`, `end_epoch` (null if open-ended), `card` and `status` (OPEN, spent or released). This is the evidence; `held_out_map_checked_by` is only a claim.
+- `look_ahead`: for each feature or decision the last timestamp it may use and the rule that keeps it at or before the decision instant (event_rule: the decision instant AND the entry quote's time and the exit price source; perps: the bar the signal uses against the entry bar).
+- `sources`: `names` of the data sources and `new_host: false` (a new host is a spec the Head must approve).
+- `plugin` (event_rule): the scorer plugin `file` and `sha256`, the `hand_case_sha256` and Auditor B's CLEAN date, or the spec is unsigned (a spec cannot name a plugin that has not been cleared).
+- `subset_rationale`: one line that the grid subset was chosen without any figure from the same data (a subset picked after a read is a new try on the same days; the tally counts the full cell count of the subset).
+- `halves`, `fee_form` (the standing ceil(round(...)) form and the void rule) and `n_floor` ("no evidence at n = x").
+**What Auditor B signs by sha256:** the spec file's bytes; the loader hash and the merged allow line; every epoch in `holds` and `split` re-derived; `ENGINE_TALLY.json`'s sha256 at the signing time (so `prior_m` is read, not typed); `rules_this_spec` equal to spec_check's count; and the rule that no outcome of the window is read before his message and the print sha256 is committed first.
+**The auto-run must refuse** any date or ticker inside an OPEN hold: it loads a machine-readable HOLDS table (ticker pattern, start epoch, end epoch, card, status) that Auditor B supplies, instead of each spec carrying its own claim. A dropped family's tries stay in m, one line per drop in the TALLY.

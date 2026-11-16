@@ -1,0 +1,54 @@
+{
+ "note": "COUNTS OF TRIES ONLY, never a figure or a result; one line per family; a dropped family's tries stay in m",
+ "as_of": "2026-11-16",
+ "families": [
+  {
+   "id": "ENGINE1-ARCHIVE",
+   "tries": 2347488,
+   "passes": 0,
+   "status": "read twice (listing rerun), closed for this data"
+  },
+  {
+   "id": "ENGINE1-PERPS-1",
+   "tries": 504,
+   "passes": 0,
+   "status": "plumbing read (SPY, QQQ)"
+  },
+  {
+   "id": "ENGINE1-PERPS-2",
+   "tries": 1680,
+   "passes": 0,
+   "status": "plumbing read (SPY, QQQ, US 500, US Tech 100)"
+  },
+  {
+   "id": "PERPSCALP1",
+   "tries": 8,
+   "passes": 0,
+   "status": "read once"
+  },
+  {
+   "id": "OPENGAP1",
+   "tries": 4,
+   "passes": 0,
+   "status": "read once (Testing Desk)"
+  },
+  {
+   "id": "HOURBRIDGE1",
+   "tries": 1,
+   "passes": 0,
+   "status": "NOT_ENOUGH_DATA (n = 1)"
+  },
+  {
+   "id": "ENGINE1-PERPS-3",
+   "tries": 0,
+   "passes": 0,
+   "status": "registered, 1260 rules to count, waits on the loader line and PERPGEN's count"
+  },
+  {
+   "id": "PERPGEN",
+   "tries": null,
+   "passes": null,
+   "status": "count from the Head (about 100,000)"
+  }
+ ]
+}
