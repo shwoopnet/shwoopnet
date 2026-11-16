@@ -5,7 +5,7 @@ here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import engine1_poolperps_load as PL, engine1_perps_lanes as L
 def read_census(path):
     rows = list(csv.reader(open(path, encoding="utf-8"), delimiter="\t")); head = [h.strip().lower() for h in rows[0]]
-    ti = next((i for i, h in enumerate(head) if "ticker" in h or h == "name"), None); pi = next((i for i, h in enumerate(head) if h in ("page max", "page_max_leverage")), None)
+    ti = next((i for i, h in enumerate(head) if "ticker" in h or h == "name"), None); pi = next((i for i, h in enumerate(head) if h in ("page_max_leverage", "page_max_owner_pasted")), None)
     if ti is None or pi is None: raise SystemExit("REFUSED: the census has no ticker column or no 'page max' column: %r" % head)
     out = {}
     for r in rows[1:]:
@@ -21,7 +21,7 @@ def main(base, census, m_carried, out):
         if n not in lev: raise SystemExit("REFUSED: no page max in the census for " + n)
         return lev[n]
     rep = L.evaluate_lanes(cand, fund, levmax, int(m_carried))
-    rep["loader_counts"] = counts; rep["names_dropped"] = dropped; rep["names_refused_no_page_max"] = refused; rep["page_max_used"] = {n: lev[n] for n in sorted({x for v in rep["kept_baskets"].values() for x in v})}
+    rep["loader_counts"] = counts; rep["page_max_file_sha256"] = hashlib.sha256(open(census, "rb").read()).hexdigest(); rep["names_dropped"] = dropped; rep["names_refused_no_page_max"] = refused; rep["page_max_used"] = {n: lev[n] for n in sorted({x for v in rep["kept_baskets"].values() for x in v})}
     rep["rule_hashes"] = {f: hashlib.sha256(open(os.path.join(here, f), "rb").read()).hexdigest()[:16] for f in ("engine1_perps.py", "engine1_driver.py", "engine1_poolperps.py", "engine1_poolperps_load.py", "engine1_perps_lanes.py", "engine1_perps_lanes_run.py")}
     json.dump(rep, open(out, "w"), indent=1, default=str); print("wrote", out, json.dumps(rep["rule_hashes"]))
 if __name__ == "__main__":
