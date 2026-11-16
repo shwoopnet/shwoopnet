@@ -1,0 +1,81 @@
+{
+ "job_id": "NHLPROP_LISTS_A",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/nhlprops/NHLPROP_CENSUS.md",
+ "purpose": "NHL player-prop census (Idea Desk C, Head's idle-check order): settled market lists of the NHL goals, assists and points ladders with close times in the development block only. Counts and time fields: games a day, rungs per game. No candle, no result used for a rule.",
+ "heldout": "none read: close_time from 2026-09-18T00:00Z to before 2026-10-30T02:53:19Z only (min_close_ts 1789689600, max_close_ts 1793328798). Not requested: closes from 2026-10-30T02:53:19Z (the frozen third) and anything later.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNHLGOAL",
+  "KXNHLAST",
+  "KXNHLPTS"
+ ],
+ "ticker_allowlist": [
+  "KXNHLGOAL",
+  "KXNHLAST",
+  "KXNHLPTS"
+ ],
+ "max_requests": 48,
+ "notes": "Estimate from the Nov 10 settled listing: about 3 games that day with goals 188, assists 119 and points 149 rungs (about 40 to 63 rungs a game); over 6 weeks that is up to a few thousand markets a series, so up to 12 pages of 1,000 a series = 36 pages, cap 48. Pacing 5 s. The reader keeps ticker, event_ticker, open_time, close_time and occurrence_datetime only for the counts.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 5.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "dev_KXNHLGOAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLGOAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789689600,
+    "max_close_ts": 1793328798
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "dev_KXNHLAST",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLAST",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789689600,
+    "max_close_ts": 1793328798
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "dev_KXNHLPTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLPTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789689600,
+    "max_close_ts": 1793328798
+   },
+   "max_pages": 12
+  }
+ ]
+}
