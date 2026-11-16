@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Perps live recorder (Nov 16, 2026, the Head's order, research only; needs the owner's popup before it is merged because of its runner minutes). What Kalshi's PUBLIC perps (margin) API
 shows only LIVE and cannot back-serve: every 60 seconds (1) the perps list, one request for all markets (bid, ask, sizes, last price, reference price, settlement and liquidation marks,
-open interest, 24 hour volume, leverage estimate), and (2) the order books of the active markets, depth 5, one request of at most 100 tickers. Candles, funding and the trade tape DO back-serve
+open interest, 24 hour volume, leverage estimate and the long and short leverage estimates at each notional size; the static fields (contract size, tick, funding cap, schedule and so on) once per job in static.csv), and (2) the order books of the active markets, depth 5, one request of at most 100 tickers. Candles, funding and the trade tape DO back-serve
 (candles by ticker, funding in one request, trades with time filters) and are NOT recorded here.
 
 Public GET only: no key, no signing, no auth header, no account path, no order, no Firestore. Host kalshi external-api only, redirects refused, a generic User-Agent. At most 2 requests a minute, at least
@@ -25,10 +25,13 @@ POLL_EVERY_S = 60
 MIN_GAP_S = 5.0
 BACKOFF_S, BACKOFF_MAX_S, MAX_429_IN_ROW = 5.0, 60.0, 3
 BOOK_BATCH_MAX = 100
+LEV_SIZES = ("1000", "10000", "100000", "1000000")      # the notional keys the list gives its size-aware leverage estimates under (long and short)
 DEPTH = 5
 REQUEST_BUDGET = 2 * (4 * 60 + 90)          # two requests a minute for a 4 hour job plus a margin
 MARKET_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "asset_class", "status", "bid", "ask", "bid_size", "ask_size", "price", "reference_price", "settlement_mark_price",
-               "liquidation_mark_price", "open_interest", "volume_24h", "leverage_estimate"]
+               "liquidation_mark_price", "open_interest", "volume_24h", "leverage_estimate"] + ["long_lev_%s" % k for k in LEV_SIZES] + ["short_lev_%s" % k for k in LEV_SIZES]
+STATIC_COLS = ["t_recv_ms", "ticker", "asset_class", "market_version", "contract_size", "underlying_multiplier", "tick_size", "minimum_quantity", "fractional_trading_enabled", "funding_cap", "funding_deadband",
+               "funding_limit_unit", "funding_invalid_premium_handling", "halt_sources", "schedule", "leverage_estimates_json"]
 BOOK_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker"] + ["bid_px_%d" % i for i in range(1, DEPTH + 1)] + ["bid_sz_%d" % i for i in range(1, DEPTH + 1)] \
     + ["ask_px_%d" % i for i in range(1, DEPTH + 1)] + ["ask_sz_%d" % i for i in range(1, DEPTH + 1)]
 COVER_COLS = ["t_local_ms", "list_ok", "list_rows", "book_ok", "book_rows", "n429", "note"]
@@ -80,9 +83,26 @@ def levels(lv):
     return out + [("", "")] * (DEPTH - len(out))
 
 
+def px(x):
+    return num(x.get("price")) if isinstance(x, dict) else num(x)
+
+
+def lev(m, side, k):
+    d = m.get(side + "_leverage_estimates")
+    return num(d.get(k)) if isinstance(d, dict) else ""
+
+
 def market_row(m, t0, t1, date):
     return [t0, t1, date, m.get("ticker", ""), m.get("asset_class", ""), m.get("status", ""), num(m.get("bid")), num(m.get("ask")), num(m.get("bid_size_fp")), num(m.get("ask_size_fp")), num(m.get("price")),
-            num(m.get("reference_price")), num(m.get("settlement_mark_price")), num(m.get("liquidation_mark_price")), num(m.get("open_interest")), num(m.get("volume_24h")), num(m.get("leverage_estimate"))]
+            px(m.get("reference_price")), px(m.get("settlement_mark_price")), px(m.get("liquidation_mark_price")), num(m.get("open_interest")), num(m.get("volume_24h")), num(m.get("leverage_estimate"))] \
+        + [lev(m, "long", k) for k in LEV_SIZES] + [lev(m, "short", k) for k in LEV_SIZES]
+
+
+def static_row(m, t1):
+    hs = m.get("halt_sources")
+    return [t1, m.get("ticker", ""), m.get("asset_class", ""), m.get("market_version", ""), m.get("contract_size", ""), m.get("underlying_multiplier", ""), m.get("tick_size", ""), m.get("minimum_quantity", ""),
+            m.get("fractional_trading_enabled", ""), m.get("funding_cap", ""), m.get("funding_deadband", ""), m.get("funding_limit_unit", ""), m.get("funding_invalid_premium_handling", ""),
+            "|".join(str(x) for x in hs) if isinstance(hs, list) else "", json.dumps(m.get("schedule"), sort_keys=True), json.dumps(m.get("leverage_estimates"), sort_keys=True)]
 
 
 def book_row(e, t0, t1, date):
@@ -101,9 +121,9 @@ def main(argv):
         print("past the end date: nothing to record"); return 0
     os.makedirs(a.out, exist_ok=True)
     step = int(a.cycle_hours * 3600); stop = (int(time.time()) // step + 1) * step
-    fm, fb, fc = (open(os.path.join(a.out, n), "w", newline="") for n in ("markets.csv", "book.csv", "coverage.csv"))
-    wm, wb, wc = csv.writer(fm), csv.writer(fb), csv.writer(fc)
-    wm.writerow(MARKET_COLS); wb.writerow(BOOK_COLS); wc.writerow(COVER_COLS)
+    fm, fb, fc, fs = (open(os.path.join(a.out, n), "w", newline="") for n in ("markets.csv", "book.csv", "coverage.csv", "static.csv"))
+    wm, wb, wc, ws = csv.writer(fm), csv.writer(fb), csv.writer(fc), csv.writer(fs)
+    wm.writerow(MARKET_COLS); wb.writerow(BOOK_COLS); wc.writerow(COVER_COLS); ws.writerow(STATIC_COLS); static_done = False
     budget = REQUEST_BUDGET; last_req = 0.0; in_row = 0; wait = BACKOFF_S
 
     def paced():
@@ -124,8 +144,11 @@ def main(argv):
             for m in obj["markets"]:
                 if isinstance(m, dict) and m.get("ticker"):
                     wm.writerow(market_row(m, t0, t1, date)); lrows += 1
+                    if not static_done:
+                        ws.writerow(static_row(m, t1))
                     if m.get("status") == "active":
                         active.append(m["ticker"])
+            static_done = True
         else:
             note = "list status %s" % st
         if in_row >= MAX_429_IN_ROW:
@@ -145,7 +168,7 @@ def main(argv):
             else:
                 note += " book status %s" % st
         wc.writerow([now_ms(), lok, lrows, bok, brows, n429, note.strip()])
-        for f in (fm, fb, fc):
+        for f in (fm, fb, fc, fs):
             f.flush()
         if in_row >= MAX_429_IN_ROW:
             break
@@ -154,7 +177,7 @@ def main(argv):
         else:
             wait = BACKOFF_S
         time.sleep(max(0.0, POLL_EVERY_S - (time.time() - t_poll)))
-    for f in (fm, fb, fc):
+    for f in (fm, fb, fc, fs):
         f.close()
     return 0
 

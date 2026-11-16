@@ -47,7 +47,7 @@ class Boom:
 R.OPENER = Boom()
 R.MIN_GAP_S = 0.0; R.POLL_EVERY_S = 0.3; R.BACKOFF_S = 0.01
 calls = []
-mk = [{"ticker": "KXAAAPERP", "asset_class": "Equities", "status": "active", "bid": "10.00", "ask": "10.02", "bid_size_fp": "5", "ask_size_fp": "6", "price": "10.01", "reference_price": "10.00", "settlement_mark_price": "10.01", "liquidation_mark_price": "10.02", "open_interest": "123", "volume_24h": "456", "leverage_estimate": 4.9},
+mk = [{"ticker": "KXAAAPERP", "asset_class": "Equities", "status": "active", "bid": "10.00", "ask": "10.02", "bid_size_fp": "5", "ask_size_fp": "6", "price": "10.01", "reference_price": "10.00", "settlement_mark_price": "10.01", "liquidation_mark_price": {"price": "10.02", "ts_ms": 1}, "open_interest": "123", "volume_24h": "456", "leverage_estimate": 4.9, "long_leverage_estimates": {"1000": 5.1, "10000": 5.0}, "short_leverage_estimates": {"1000": 4.8}, "contract_size": "0.001", "funding_cap": 0.02, "halt_sources": ["a", "b"], "schedule": {"x": 1}},
       {"ticker": "KXBBBPERP", "asset_class": "Crypto", "status": "inactive", "bid": "0", "ask": "0"}]
 def fake(path):
     calls.append(path)
@@ -58,10 +58,12 @@ R.get = fake
 out = sys.argv[1]
 R.main([out, "--cycle-hours", "0.0008"])
 rows = list(csv.reader(open(os.path.join(out, "markets.csv"))))
-assert rows[0] == R.MARKET_COLS and rows[1][3] == "KXAAAPERP" and rows[1][6] == "10.0" and rows[1][16] == "4.9" and any(r[3] == "KXBBBPERP" for r in rows), rows[:3]
+assert rows[0] == R.MARKET_COLS and rows[1][3] == "KXAAAPERP" and rows[1][6] == "10.0" and rows[1][16] == "4.9" and rows[1][13] == "10.02" and rows[1][17] == "5.1" and rows[1][18] == "5.0" and rows[1][19] == "" and rows[1][21] == "4.8" and any(r[3] == "KXBBBPERP" for r in rows), rows[:3]
 b = list(csv.reader(open(os.path.join(out, "book.csv"))))
 assert b[0] == R.BOOK_COLS and b[1][3] == "KXAAAPERP" and b[1][4] == "10.0" and b[1][5] == "9.99" and b[1][6] == "" and b[1][9] == "5.0" and b[1][10] == "7.0" and b[1][11] == "" and b[1][14] == "10.02" and b[1][15] == "" and b[1][19] == "6.0" and b[1][20] == "", b[:2]
 c = list(csv.reader(open(os.path.join(out, "coverage.csv"))))
+st = list(csv.reader(open(os.path.join(out, "static.csv"))))
+assert st[0] == R.STATIC_COLS and len(st) == 3 and st[1][1] == "KXAAAPERP" and st[1][4] == "0.001" and st[1][13] == "a|b", st
 assert c[0] == R.COVER_COLS and len(c) >= 2 and c[1][1] == "1" and c[1][3] == "1", c
 assert all(p == "/markets" or p.startswith("/markets/orderbooks") for p in calls) and len(calls) <= R.REQUEST_BUDGET
 print("fixture ok", len(rows) - 1, "market rows", len(b) - 1, "book rows", len(calls), "requests")
@@ -91,5 +93,5 @@ assert.strictEqual(r.status, 0, 'PL7 ' + r.stderr + r.stdout);
 console.log('ok   PL7 three 429s end the run; nothing is recorded after the end date');
 
 // PL8: it only writes its three csv files in the directory it is given.
-assert.deepStrictEqual(fs.readdirSync(path.join(t, 'a')).sort(), ['book.csv', 'coverage.csv', 'markets.csv'], 'PL8 three files');
+assert.deepStrictEqual(fs.readdirSync(path.join(t, 'a')).sort(), ['book.csv', 'coverage.csv', 'markets.csv', 'static.csv'], 'PL8 four files');
 console.log('ok   PL8 outputs');
