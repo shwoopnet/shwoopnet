@@ -1,0 +1,112 @@
+{
+ "id": "LADHOUR1",
+ "desk": "Idea Desk B",
+ "date_registered": "2026-11-16",
+ "kind": "grid15m",
+ "status": "FORWARD CARD: waits for the owner's approval of the recorder change (branch claude/idea-desk-b-ladder-ext eb85615c), Auditor B's hold rows and signature, a loader and a settled-list pull",
+ "card": "kalshi-scalper/workers/specs/LADHOUR1_CARD.md",
+ "needs_new_code": [
+  "quote recorder change (4 series, branch claude/idea-desk-b-ladder-ext, owner approval through the EA)",
+  "loader for the four ladders (ladder.csv, ticker wall first, same shape as ethlate1_load.py) and its sha and allow line",
+  "settled-list pull of the four series after the read window (results are not in results.csv)",
+  "engine1_split constants for the four series (Desk A, dated)"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "ETHLATE1",
+   "LADL1",
+   "HOURBRIDGE1",
+   "SPXSCALP",
+   "ESLEAD1"
+  ],
+  "declined_list_rows_checked": [
+   "favourite-and-hold (no favourite band: nothing above 60c, cheap and mid bands only)",
+   "GOLDHOLD (gold hourly is held to settlement only as the one registered exit beside M60; no favourite side)",
+   "forecast against the market (no outside forecast)"
+  ],
+  "difference": "the hourly S&P, Nasdaq, WTI and gold ladders (never recorded before) read in the last 150 seconds on the recorder's near-the-money strikes, cheap side and mid bands with the engine's spread classes; ETHLATE1 is the same family on Ethereum (a version of the same mechanism on other underlyings; the Head rules whether it is a new family or a 7g version; tries are counted either way); LADL1 took the favourite band on BTC and ETH hourly and gold daily and weekly; SPXSCALP and ESLEAD1 are the S&P 15 minute market with ES data",
+  "family_flag": "none (the mechanism is ETHLATE1's; Head to rule whether it is a new family or a version)"
+ },
+ "data": {
+  "loader": "PENDING (a new loader, ethlate1_load.py's shape)",
+  "loader_sha256": "PENDING",
+  "extracts": [
+   "quote-data ladder.csv.gz files written after the recorder change merges (forward only)",
+   "settled lists of KXINXU, KXNASDAQ100U, KXWTIH, KXGOLDH for the closes in the read window"
+  ],
+  "ticker_wall": [
+   "KXINXU",
+   "KXNASDAQ100U",
+   "KXWTIH",
+   "KXGOLDH"
+  ],
+  "window": {
+   "first_close": "PENDING: start_utc = the close time of the first ladder row of the first recorder file after the merge (Main writes it)",
+   "last_close_exclusive": "PENDING: the read date"
+  },
+  "held_out_map_checked_by": "PENDING (Auditor B: hold rows for the hourly ladders asked)",
+  "independence_note": "forward data, recorded after this card; no earlier use of these four ladders by any card is known to me; Auditor B maps holds"
+ },
+ "split": {
+  "mode": "forward_only",
+  "first_close_of_read": "PENDING: start_utc as above",
+  "release_rule": "each series is read ONCE when its SEARCH and VALIDATE halves each hold the registered n, or after 60 days, whichever is first; SEARCH and VALIDATE are the first and second half of the distinct close dates (Desk A's dated constant per series)"
+ },
+ "grid": {
+  "buckets": [
+   120
+  ],
+  "bands": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12
+  ],
+  "side_rules": [
+   "cheap"
+  ],
+  "filters": [
+   "none",
+   "spread"
+  ],
+  "exits": [
+   "H",
+   "M60"
+  ]
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.02,
+   0.02
+  ],
+  "haircut_note": "C8: entry at 120 s and exit at 60 s before the close are inside the last 2 minutes: 2c PRIMARY (PF 1.3 at 2c, halves 1.0 or more), 1c secondary; upper bound, not fill-checked"
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "bh_alpha": 0.05,
+  "signals_per_day_min": 3
+ },
+ "tries": {
+  "rules_this_spec": 384,
+  "prior_m": "m_carried (the one number Auditor B and the Head fix for the day this spec is frozen) + 384 (96 cells x 4 series)"
+ },
+ "prediction": "no survivor in most series: round trip 2c to 5c on hourly strikes near 50c; n per cell about 100 after 10 to 20 days for the index ladders (7 events a day) and 20 to 40 days for the commodity ladders; cells under n 100 print 'no evidence at n = x'",
+ "kill": "no cell with PF 1.3 at 2c, both halves 1.0 or more, n 100, 10 days; kill_fast drops a series at PF under 1.0 at 2c on its first read",
+ "kill_fast": true,
+ "outputs": {
+  "survivor_line": "market, rule, PF 1c and 2c, n, days",
+  "family_flag": "none"
+ }
+}
