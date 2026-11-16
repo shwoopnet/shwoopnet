@@ -98,3 +98,9 @@ a = E.basis_trades({"KXBTCPERP": rows}, (10, "converge", 1)); rp = E.report(a, [
 assert rp["snapshot_rows"]["n"] == 1 and rp["proxy_rows"]["n"] == 0 and "not the basis against Kalshi's reference_price" in rp["proxy_rows"]["note"] and "not a pass" in rp["rule"]
 rp2 = E.report(a, a + a); assert rp2["snapshot_rows"]["n"] == 1 and rp2["proxy_rows"]["n"] == 2
 print("proxy rows apart: ok")
+# margin lines: page-maximum names apart from API-estimate names, labelled (Auditor B condition 2)
+mk = lambda tk: {"ticker": tk, "signal_ts": 1, "trade": {"side": 1, "entry": 1.0, "exit": 1.01, "adverse": 0.0, "entry_ts": 1, "exit_ts": 2}}
+sm = E.summarise([mk("KXBTCPERP"), mk("KXSOLPERP"), mk("KXHYPEPERP")])
+assert sm["margin"]["n"] == 1 and "page maximum" in sm["margin"]["label"]
+assert sm["margin_estimate"]["n"] == 2 and "not a page maximum" in sm["margin_estimate"]["label"]
+print("margin labels: ok")

@@ -45,3 +45,8 @@ Needs: (1) a labelled funding pull for the six tickers or a recorder class chang
 ## Amendment 4 (2026-11-16 ~22:40Z, Auditor B 20:52Z, before any perp value is read)
 - A basis computed against spot is not the basis against Kalshi's reference_price. The BTC history before Oct 21 (perp 1 minute candle at the top of the hour against Coinbase hourly spot) is a labelled PROXY with its error unmeasured. Every table prints the proxy rows APART from the snapshot rows (report() in perps_crypto_events.py, tested) and never pools them; a pass on proxy rows alone is not a pass.
 - PERPSPOT_HOURLY.draft.json: max_requests is the request count plus 12 (26 + 12 = 38), as in every cleared job, so a 429 re-ask does not stop the run. PERPSPOT_BTC1M stays marked NOT NEEDED (do not dispatch). Both remain drafts until Auditor B has read the runner's Coinbase route (Main's PR, the owner's typed merge).
+
+## Amendment 5 (2026-11-16 ~23:00Z, Auditor B 20:56Z, before any perp value is read)
+- Condition 1: the file-level reader is perps_crypto_run.py (hand case test_perps_run.py). It calls its allow check first; the allow line must carry the mark, the runner's sha256, perps_crypto_load.py's sha256 and the sha256 of every source (a csv.gz file's bytes; a pull run folder's manifest.json bytes); a run folder is accepted only on STATUS complete, files equal to the manifest rows, and every body's sha256 and byte count equal to its row. It prints counts only.
+- Condition 2: margin lines print apart: BTC, ETH and XRP "page maximum"; SOL, DOGE and HYPE "leverage estimate, not a page maximum" (summarise: margin and margin_estimate). Neither group is pooled with the other.
+- Condition 3: FUNDX stays unrun until the labelled funding pull exists.

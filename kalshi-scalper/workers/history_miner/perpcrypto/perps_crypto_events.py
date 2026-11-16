@@ -129,13 +129,16 @@ def summarise(trades, ticker_of=lambda x: x["ticker"]):
         xs = [net(t["trade"], FEE_TAKER, hc, t.get("funding", 0.0)) for t in tr]; half = len(xs) // 2
         res["taker_h%d" % round(hc * 1e4)] = {"pf": pf(xs) if xs else None, "half1": pf(xs[:half]) if half else None, "half2": pf(xs[half:]) if xs else None}
     xm = [net(t["trade"], FEE_MAKER, HAIRCUTS[0], t.get("funding", 0.0)) for t in tr]; res["maker_h2"] = {"pf": pf(xm) if xm else None}
-    res["margin"] = {}
-    for f in FRACTIONS:
-        rets, liq = [], 0
-        for t in tr:
-            r, l = margin_return(t["trade"], ticker_of(t), f, net(t["trade"], FEE_TAKER, HAIRCUTS[0], t.get("funding", 0.0)))
-            rets.append(r); liq += l
-        res["margin"]["%d" % round(f * 100)] = {"mean_margin_return": (sum(rets) / len(rets)) if rets else None, "liquidated_share": (liq / len(tr)) if tr else None}
+    PAGE = ("KXBTCPERP", "KXETHPERP", "KXXRPPERP")                  # page maximum known; the other three are API estimates and print APART (Auditor B condition 2)
+    for key, group, label in (("margin", [t for t in tr if ticker_of(t) in PAGE], "page maximum (BTC, ETH, XRP)"),
+                              ("margin_estimate", [t for t in tr if ticker_of(t) not in PAGE], "leverage estimate, not a page maximum (SOL, DOGE, HYPE)")):
+        res[key] = {"label": label, "n": len(group)}
+        for f in FRACTIONS:
+            rets, liq = [], 0
+            for t in group:
+                r, l = margin_return(t["trade"], ticker_of(t), f, net(t["trade"], FEE_TAKER, HAIRCUTS[0], t.get("funding", 0.0)))
+                rets.append(r); liq += l
+            res[key]["%d" % round(f * 100)] = {"mean_margin_return": (sum(rets) / len(rets)) if rets else None, "liquidated_share": (liq / len(group)) if group else None}
     return res
 
 
