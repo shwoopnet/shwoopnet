@@ -54,3 +54,16 @@ def fundx2_trades(rows_by_ticker, prints_by_ticker, cell, window="validate", cnt
             fund = sum(r for t, r in pr if tr["entry_ts"] < t <= tr["exit_ts"])
             out.append({"ticker": tk, "signal_ts": ts, "trade": tr, "funding": fund}); busy_until = tr["exit_ts"]
     return out
+
+
+def extreme_counts(prints_by_ticker):
+    """-> {ticker: {q: {"search_prints", "validate_prints", "search_extremes", "validate_extremes"}}}. COUNTS ONLY, no rate or price. Ties at a cut are all extremes (the test is at-or-beyond), so a tied or clamped series can catch far more than q of the prints; this is the number the 3 a day gate and the one-position cap depend on."""
+    out = {}
+    for tk, pr in prints_by_ticker.items():
+        out[tk] = {}
+        for q in QS:
+            cuts = cut_points(pr, q)
+            srch = [r for t, r in pr if SEARCH_START <= t < SEARCH_END]; val = [r for t, r in pr if SEARCH_END <= t < VALIDATE_END]
+            out[tk][q] = {"search_prints": len(srch), "validate_prints": len(val), "has_threshold": cuts is not None,
+                          "search_extremes": sum(1 for r in srch if extreme(r, cuts)), "validate_extremes": sum(1 for r in val if extreme(r, cuts))}
+    return out

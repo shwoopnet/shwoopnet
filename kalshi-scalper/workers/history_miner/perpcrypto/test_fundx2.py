@@ -41,4 +41,10 @@ assert A(t2[0]["funding"], 0.6)
 try: F.fundx2_trades({"KXBTCPERP": rows}, {}, (0.05, "fade", 8)); assert False
 except SystemExit: pass
 assert len(F.FUNDX2_CELLS) == 8
+# extreme counts: ties at a cut are ALL extremes (a clamped series: 150 prints at 0.01, 50 distinct larger; q 10 percent -> upper cut 0.01? no: upper = s[n-20] = largest-20th)
+tied = [(S0 + 3600 * i, 0.01) for i in range(190)] + [(S0 + 3600 * (190 + i), 0.02) for i in range(10)]
+cc = F.extreme_counts({"KXBTCPERP": tied + [(V0 + 1, 0.01), (V0 + 2, 0.0)]})["KXBTCPERP"][0.10]
+# n = 200, k = 20: upper = s[180] = 0.01 (ranks 1..190 are 0.01), so every 0.01 print is at or above the cut and above 0: 200 SEARCH extremes
+assert cc["search_prints"] == 200 and cc["search_extremes"] == 200 and cc["validate_prints"] == 2 and cc["validate_extremes"] == 1 and cc["has_threshold"]
+assert F.extreme_counts({"KXETHPERP": pr[:50]})["KXETHPERP"][0.05]["has_threshold"] is False
 print("fundx2: ok")
