@@ -1,0 +1,7082 @@
+{
+ "status": "draft",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/perpcrypto/PERPCRYPTO1_CARD_NOV16.md",
+ "heldout": "none: public spot candles, no Kalshi outcome; any read of them follows the signed PERPCRYPTO1 spec and Auditor B's hold line",
+ "route": "coinbase",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list).",
+ "job_id": "PERPSPOT_BTC1M",
+ "purpose": "Coinbase BTC-USD spot 1 minute candles over the PERPBTC1M window, 2026-06-03 to 2026-11-13, for the PERPCRYPTO1 basis history on KXBTCPERP. 300 candles (5 hours) a request.",
+ "allowed_endpoints": [
+  {
+   "name": "spot_candles",
+   "method": "GET",
+   "path_pattern": "/products/(?P<product>BTC-USD)/candles",
+   "params_allowed": [
+    "granularity",
+    "start",
+    "end"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [
+  "BTC-USD"
+ ],
+ "max_requests": 783,
+ "requests": [
+  {
+   "id": "BTC-USD_60_1780444800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-03T00:00:00Z",
+    "end": "2026-06-03T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780462800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-03T05:00:00Z",
+    "end": "2026-06-03T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780480800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-03T10:00:00Z",
+    "end": "2026-06-03T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780498800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-03T15:00:00Z",
+    "end": "2026-06-03T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780516800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-03T20:00:00Z",
+    "end": "2026-06-04T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780534800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-04T01:00:00Z",
+    "end": "2026-06-04T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780552800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-04T06:00:00Z",
+    "end": "2026-06-04T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780570800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-04T11:00:00Z",
+    "end": "2026-06-04T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780588800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-04T16:00:00Z",
+    "end": "2026-06-04T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780606800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-04T21:00:00Z",
+    "end": "2026-06-05T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780624800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-05T02:00:00Z",
+    "end": "2026-06-05T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780642800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-05T07:00:00Z",
+    "end": "2026-06-05T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780660800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-05T12:00:00Z",
+    "end": "2026-06-05T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780678800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-05T17:00:00Z",
+    "end": "2026-06-05T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780696800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-05T22:00:00Z",
+    "end": "2026-06-06T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780714800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-06T03:00:00Z",
+    "end": "2026-06-06T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780732800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-06T08:00:00Z",
+    "end": "2026-06-06T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780750800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-06T13:00:00Z",
+    "end": "2026-06-06T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780768800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-06T18:00:00Z",
+    "end": "2026-06-06T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780786800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-06T23:00:00Z",
+    "end": "2026-06-07T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780804800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-07T04:00:00Z",
+    "end": "2026-06-07T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780822800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-07T09:00:00Z",
+    "end": "2026-06-07T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780840800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-07T14:00:00Z",
+    "end": "2026-06-07T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780858800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-07T19:00:00Z",
+    "end": "2026-06-08T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780876800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-08T00:00:00Z",
+    "end": "2026-06-08T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780894800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-08T05:00:00Z",
+    "end": "2026-06-08T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780912800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-08T10:00:00Z",
+    "end": "2026-06-08T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780930800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-08T15:00:00Z",
+    "end": "2026-06-08T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780948800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-08T20:00:00Z",
+    "end": "2026-06-09T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780966800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-09T01:00:00Z",
+    "end": "2026-06-09T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1780984800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-09T06:00:00Z",
+    "end": "2026-06-09T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781002800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-09T11:00:00Z",
+    "end": "2026-06-09T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781020800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-09T16:00:00Z",
+    "end": "2026-06-09T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781038800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-09T21:00:00Z",
+    "end": "2026-06-10T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781056800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-10T02:00:00Z",
+    "end": "2026-06-10T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781074800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-10T07:00:00Z",
+    "end": "2026-06-10T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781092800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-10T12:00:00Z",
+    "end": "2026-06-10T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781110800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-10T17:00:00Z",
+    "end": "2026-06-10T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781128800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-10T22:00:00Z",
+    "end": "2026-06-11T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781146800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-11T03:00:00Z",
+    "end": "2026-06-11T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781164800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-11T08:00:00Z",
+    "end": "2026-06-11T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781182800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-11T13:00:00Z",
+    "end": "2026-06-11T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781200800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-11T18:00:00Z",
+    "end": "2026-06-11T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781218800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-11T23:00:00Z",
+    "end": "2026-06-12T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781236800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-12T04:00:00Z",
+    "end": "2026-06-12T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781254800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-12T09:00:00Z",
+    "end": "2026-06-12T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781272800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-12T14:00:00Z",
+    "end": "2026-06-12T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781290800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-12T19:00:00Z",
+    "end": "2026-06-13T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781308800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-13T00:00:00Z",
+    "end": "2026-06-13T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781326800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-13T05:00:00Z",
+    "end": "2026-06-13T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781344800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-13T10:00:00Z",
+    "end": "2026-06-13T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781362800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-13T15:00:00Z",
+    "end": "2026-06-13T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781380800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-13T20:00:00Z",
+    "end": "2026-06-14T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781398800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-14T01:00:00Z",
+    "end": "2026-06-14T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781416800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-14T06:00:00Z",
+    "end": "2026-06-14T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781434800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-14T11:00:00Z",
+    "end": "2026-06-14T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781452800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-14T16:00:00Z",
+    "end": "2026-06-14T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781470800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-14T21:00:00Z",
+    "end": "2026-06-15T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781488800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-15T02:00:00Z",
+    "end": "2026-06-15T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781506800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-15T07:00:00Z",
+    "end": "2026-06-15T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781524800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-15T12:00:00Z",
+    "end": "2026-06-15T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781542800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-15T17:00:00Z",
+    "end": "2026-06-15T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781560800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-15T22:00:00Z",
+    "end": "2026-06-16T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781578800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-16T03:00:00Z",
+    "end": "2026-06-16T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781596800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-16T08:00:00Z",
+    "end": "2026-06-16T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781614800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-16T13:00:00Z",
+    "end": "2026-06-16T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781632800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-16T18:00:00Z",
+    "end": "2026-06-16T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781650800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-16T23:00:00Z",
+    "end": "2026-06-17T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781668800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-17T04:00:00Z",
+    "end": "2026-06-17T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781686800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-17T09:00:00Z",
+    "end": "2026-06-17T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781704800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-17T14:00:00Z",
+    "end": "2026-06-17T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781722800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-17T19:00:00Z",
+    "end": "2026-06-18T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781740800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-18T00:00:00Z",
+    "end": "2026-06-18T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781758800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-18T05:00:00Z",
+    "end": "2026-06-18T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781776800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-18T10:00:00Z",
+    "end": "2026-06-18T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781794800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-18T15:00:00Z",
+    "end": "2026-06-18T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781812800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-18T20:00:00Z",
+    "end": "2026-06-19T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781830800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-19T01:00:00Z",
+    "end": "2026-06-19T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781848800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-19T06:00:00Z",
+    "end": "2026-06-19T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781866800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-19T11:00:00Z",
+    "end": "2026-06-19T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781884800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-19T16:00:00Z",
+    "end": "2026-06-19T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781902800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-19T21:00:00Z",
+    "end": "2026-06-20T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781920800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-20T02:00:00Z",
+    "end": "2026-06-20T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781938800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-20T07:00:00Z",
+    "end": "2026-06-20T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781956800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-20T12:00:00Z",
+    "end": "2026-06-20T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781974800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-20T17:00:00Z",
+    "end": "2026-06-20T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1781992800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-20T22:00:00Z",
+    "end": "2026-06-21T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782010800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-21T03:00:00Z",
+    "end": "2026-06-21T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782028800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-21T08:00:00Z",
+    "end": "2026-06-21T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782046800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-21T13:00:00Z",
+    "end": "2026-06-21T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782064800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-21T18:00:00Z",
+    "end": "2026-06-21T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782082800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-21T23:00:00Z",
+    "end": "2026-06-22T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782100800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-22T04:00:00Z",
+    "end": "2026-06-22T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782118800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-22T09:00:00Z",
+    "end": "2026-06-22T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782136800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-22T14:00:00Z",
+    "end": "2026-06-22T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782154800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-22T19:00:00Z",
+    "end": "2026-06-23T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782172800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-23T00:00:00Z",
+    "end": "2026-06-23T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782190800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-23T05:00:00Z",
+    "end": "2026-06-23T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782208800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-23T10:00:00Z",
+    "end": "2026-06-23T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782226800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-23T15:00:00Z",
+    "end": "2026-06-23T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782244800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-23T20:00:00Z",
+    "end": "2026-06-24T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782262800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-24T01:00:00Z",
+    "end": "2026-06-24T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782280800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-24T06:00:00Z",
+    "end": "2026-06-24T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782298800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-24T11:00:00Z",
+    "end": "2026-06-24T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782316800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-24T16:00:00Z",
+    "end": "2026-06-24T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782334800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-24T21:00:00Z",
+    "end": "2026-06-25T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782352800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-25T02:00:00Z",
+    "end": "2026-06-25T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782370800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-25T07:00:00Z",
+    "end": "2026-06-25T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782388800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-25T12:00:00Z",
+    "end": "2026-06-25T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782406800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-25T17:00:00Z",
+    "end": "2026-06-25T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782424800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-25T22:00:00Z",
+    "end": "2026-06-26T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782442800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-26T03:00:00Z",
+    "end": "2026-06-26T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782460800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-26T08:00:00Z",
+    "end": "2026-06-26T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782478800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-26T13:00:00Z",
+    "end": "2026-06-26T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782496800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-26T18:00:00Z",
+    "end": "2026-06-26T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782514800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-26T23:00:00Z",
+    "end": "2026-06-27T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782532800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-27T04:00:00Z",
+    "end": "2026-06-27T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782550800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-27T09:00:00Z",
+    "end": "2026-06-27T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782568800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-27T14:00:00Z",
+    "end": "2026-06-27T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782586800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-27T19:00:00Z",
+    "end": "2026-06-28T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782604800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-28T00:00:00Z",
+    "end": "2026-06-28T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782622800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-28T05:00:00Z",
+    "end": "2026-06-28T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782640800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-28T10:00:00Z",
+    "end": "2026-06-28T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782658800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-28T15:00:00Z",
+    "end": "2026-06-28T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782676800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-28T20:00:00Z",
+    "end": "2026-06-29T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782694800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-29T01:00:00Z",
+    "end": "2026-06-29T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782712800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-29T06:00:00Z",
+    "end": "2026-06-29T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782730800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-29T11:00:00Z",
+    "end": "2026-06-29T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782748800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-29T16:00:00Z",
+    "end": "2026-06-29T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782766800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-29T21:00:00Z",
+    "end": "2026-06-30T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782784800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-30T02:00:00Z",
+    "end": "2026-06-30T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782802800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-30T07:00:00Z",
+    "end": "2026-06-30T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782820800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-30T12:00:00Z",
+    "end": "2026-06-30T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782838800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-30T17:00:00Z",
+    "end": "2026-06-30T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782856800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-06-30T22:00:00Z",
+    "end": "2026-07-01T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782874800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-01T03:00:00Z",
+    "end": "2026-07-01T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782892800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-01T08:00:00Z",
+    "end": "2026-07-01T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782910800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-01T13:00:00Z",
+    "end": "2026-07-01T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782928800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-01T18:00:00Z",
+    "end": "2026-07-01T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782946800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-01T23:00:00Z",
+    "end": "2026-07-02T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782964800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-02T04:00:00Z",
+    "end": "2026-07-02T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1782982800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-02T09:00:00Z",
+    "end": "2026-07-02T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783000800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-02T14:00:00Z",
+    "end": "2026-07-02T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783018800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-02T19:00:00Z",
+    "end": "2026-07-03T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783036800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-03T00:00:00Z",
+    "end": "2026-07-03T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783054800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-03T05:00:00Z",
+    "end": "2026-07-03T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783072800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-03T10:00:00Z",
+    "end": "2026-07-03T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783090800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-03T15:00:00Z",
+    "end": "2026-07-03T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783108800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-03T20:00:00Z",
+    "end": "2026-07-04T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783126800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-04T01:00:00Z",
+    "end": "2026-07-04T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783144800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-04T06:00:00Z",
+    "end": "2026-07-04T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783162800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-04T11:00:00Z",
+    "end": "2026-07-04T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783180800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-04T16:00:00Z",
+    "end": "2026-07-04T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783198800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-04T21:00:00Z",
+    "end": "2026-07-05T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783216800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-05T02:00:00Z",
+    "end": "2026-07-05T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783234800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-05T07:00:00Z",
+    "end": "2026-07-05T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783252800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-05T12:00:00Z",
+    "end": "2026-07-05T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783270800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-05T17:00:00Z",
+    "end": "2026-07-05T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783288800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-05T22:00:00Z",
+    "end": "2026-07-06T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783306800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-06T03:00:00Z",
+    "end": "2026-07-06T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783324800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-06T08:00:00Z",
+    "end": "2026-07-06T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783342800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-06T13:00:00Z",
+    "end": "2026-07-06T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783360800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-06T18:00:00Z",
+    "end": "2026-07-06T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783378800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-06T23:00:00Z",
+    "end": "2026-07-07T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783396800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-07T04:00:00Z",
+    "end": "2026-07-07T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783414800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-07T09:00:00Z",
+    "end": "2026-07-07T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783432800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-07T14:00:00Z",
+    "end": "2026-07-07T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783450800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-07T19:00:00Z",
+    "end": "2026-07-08T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783468800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-08T00:00:00Z",
+    "end": "2026-07-08T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783486800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-08T05:00:00Z",
+    "end": "2026-07-08T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783504800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-08T10:00:00Z",
+    "end": "2026-07-08T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783522800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-08T15:00:00Z",
+    "end": "2026-07-08T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783540800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-08T20:00:00Z",
+    "end": "2026-07-09T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783558800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-09T01:00:00Z",
+    "end": "2026-07-09T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783576800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-09T06:00:00Z",
+    "end": "2026-07-09T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783594800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-09T11:00:00Z",
+    "end": "2026-07-09T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783612800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-09T16:00:00Z",
+    "end": "2026-07-09T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783630800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-09T21:00:00Z",
+    "end": "2026-07-10T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783648800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-10T02:00:00Z",
+    "end": "2026-07-10T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783666800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-10T07:00:00Z",
+    "end": "2026-07-10T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783684800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-10T12:00:00Z",
+    "end": "2026-07-10T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783702800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-10T17:00:00Z",
+    "end": "2026-07-10T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783720800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-10T22:00:00Z",
+    "end": "2026-07-11T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783738800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-11T03:00:00Z",
+    "end": "2026-07-11T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783756800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-11T08:00:00Z",
+    "end": "2026-07-11T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783774800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-11T13:00:00Z",
+    "end": "2026-07-11T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783792800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-11T18:00:00Z",
+    "end": "2026-07-11T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783810800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-11T23:00:00Z",
+    "end": "2026-07-12T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783828800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-12T04:00:00Z",
+    "end": "2026-07-12T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783846800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-12T09:00:00Z",
+    "end": "2026-07-12T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783864800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-12T14:00:00Z",
+    "end": "2026-07-12T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783882800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-12T19:00:00Z",
+    "end": "2026-07-13T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783900800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-13T00:00:00Z",
+    "end": "2026-07-13T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783918800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-13T05:00:00Z",
+    "end": "2026-07-13T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783936800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-13T10:00:00Z",
+    "end": "2026-07-13T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783954800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-13T15:00:00Z",
+    "end": "2026-07-13T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783972800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-13T20:00:00Z",
+    "end": "2026-07-14T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1783990800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-14T01:00:00Z",
+    "end": "2026-07-14T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784008800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-14T06:00:00Z",
+    "end": "2026-07-14T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784026800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-14T11:00:00Z",
+    "end": "2026-07-14T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784044800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-14T16:00:00Z",
+    "end": "2026-07-14T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784062800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-14T21:00:00Z",
+    "end": "2026-07-15T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784080800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-15T02:00:00Z",
+    "end": "2026-07-15T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784098800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-15T07:00:00Z",
+    "end": "2026-07-15T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784116800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-15T12:00:00Z",
+    "end": "2026-07-15T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784134800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-15T17:00:00Z",
+    "end": "2026-07-15T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784152800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-15T22:00:00Z",
+    "end": "2026-07-16T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784170800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-16T03:00:00Z",
+    "end": "2026-07-16T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784188800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-16T08:00:00Z",
+    "end": "2026-07-16T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784206800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-16T13:00:00Z",
+    "end": "2026-07-16T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784224800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-16T18:00:00Z",
+    "end": "2026-07-16T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784242800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-16T23:00:00Z",
+    "end": "2026-07-17T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784260800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-17T04:00:00Z",
+    "end": "2026-07-17T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784278800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-17T09:00:00Z",
+    "end": "2026-07-17T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784296800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-17T14:00:00Z",
+    "end": "2026-07-17T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784314800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-17T19:00:00Z",
+    "end": "2026-07-18T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784332800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-18T00:00:00Z",
+    "end": "2026-07-18T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784350800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-18T05:00:00Z",
+    "end": "2026-07-18T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784368800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-18T10:00:00Z",
+    "end": "2026-07-18T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784386800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-18T15:00:00Z",
+    "end": "2026-07-18T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784404800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-18T20:00:00Z",
+    "end": "2026-07-19T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784422800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-19T01:00:00Z",
+    "end": "2026-07-19T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784440800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-19T06:00:00Z",
+    "end": "2026-07-19T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784458800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-19T11:00:00Z",
+    "end": "2026-07-19T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784476800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-19T16:00:00Z",
+    "end": "2026-07-19T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784494800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-19T21:00:00Z",
+    "end": "2026-07-20T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784512800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-20T02:00:00Z",
+    "end": "2026-07-20T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784530800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-20T07:00:00Z",
+    "end": "2026-07-20T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784548800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-20T12:00:00Z",
+    "end": "2026-07-20T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784566800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-20T17:00:00Z",
+    "end": "2026-07-20T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784584800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-20T22:00:00Z",
+    "end": "2026-07-21T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784602800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-21T03:00:00Z",
+    "end": "2026-07-21T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784620800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-21T08:00:00Z",
+    "end": "2026-07-21T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784638800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-21T13:00:00Z",
+    "end": "2026-07-21T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784656800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-21T18:00:00Z",
+    "end": "2026-07-21T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784674800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-21T23:00:00Z",
+    "end": "2026-07-22T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784692800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-22T04:00:00Z",
+    "end": "2026-07-22T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784710800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-22T09:00:00Z",
+    "end": "2026-07-22T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784728800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-22T14:00:00Z",
+    "end": "2026-07-22T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784746800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-22T19:00:00Z",
+    "end": "2026-07-23T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784764800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-23T00:00:00Z",
+    "end": "2026-07-23T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784782800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-23T05:00:00Z",
+    "end": "2026-07-23T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784800800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-23T10:00:00Z",
+    "end": "2026-07-23T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784818800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-23T15:00:00Z",
+    "end": "2026-07-23T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784836800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-23T20:00:00Z",
+    "end": "2026-07-24T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784854800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-24T01:00:00Z",
+    "end": "2026-07-24T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784872800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-24T06:00:00Z",
+    "end": "2026-07-24T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784890800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-24T11:00:00Z",
+    "end": "2026-07-24T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784908800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-24T16:00:00Z",
+    "end": "2026-07-24T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784926800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-24T21:00:00Z",
+    "end": "2026-07-25T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784944800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-25T02:00:00Z",
+    "end": "2026-07-25T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784962800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-25T07:00:00Z",
+    "end": "2026-07-25T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784980800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-25T12:00:00Z",
+    "end": "2026-07-25T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1784998800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-25T17:00:00Z",
+    "end": "2026-07-25T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785016800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-25T22:00:00Z",
+    "end": "2026-07-26T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785034800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-26T03:00:00Z",
+    "end": "2026-07-26T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785052800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-26T08:00:00Z",
+    "end": "2026-07-26T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785070800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-26T13:00:00Z",
+    "end": "2026-07-26T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785088800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-26T18:00:00Z",
+    "end": "2026-07-26T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785106800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-26T23:00:00Z",
+    "end": "2026-07-27T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785124800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-27T04:00:00Z",
+    "end": "2026-07-27T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785142800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-27T09:00:00Z",
+    "end": "2026-07-27T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785160800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-27T14:00:00Z",
+    "end": "2026-07-27T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785178800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-27T19:00:00Z",
+    "end": "2026-07-28T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785196800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-28T00:00:00Z",
+    "end": "2026-07-28T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785214800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-28T05:00:00Z",
+    "end": "2026-07-28T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785232800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-28T10:00:00Z",
+    "end": "2026-07-28T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785250800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-28T15:00:00Z",
+    "end": "2026-07-28T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785268800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-28T20:00:00Z",
+    "end": "2026-07-29T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785286800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-29T01:00:00Z",
+    "end": "2026-07-29T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785304800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-29T06:00:00Z",
+    "end": "2026-07-29T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785322800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-29T11:00:00Z",
+    "end": "2026-07-29T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785340800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-29T16:00:00Z",
+    "end": "2026-07-29T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785358800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-29T21:00:00Z",
+    "end": "2026-07-30T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785376800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-30T02:00:00Z",
+    "end": "2026-07-30T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785394800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-30T07:00:00Z",
+    "end": "2026-07-30T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785412800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-30T12:00:00Z",
+    "end": "2026-07-30T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785430800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-30T17:00:00Z",
+    "end": "2026-07-30T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785448800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-30T22:00:00Z",
+    "end": "2026-07-31T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785466800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-31T03:00:00Z",
+    "end": "2026-07-31T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785484800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-31T08:00:00Z",
+    "end": "2026-07-31T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785502800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-31T13:00:00Z",
+    "end": "2026-07-31T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785520800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-31T18:00:00Z",
+    "end": "2026-07-31T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785538800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-07-31T23:00:00Z",
+    "end": "2026-08-01T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785556800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-01T04:00:00Z",
+    "end": "2026-08-01T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785574800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-01T09:00:00Z",
+    "end": "2026-08-01T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785592800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-01T14:00:00Z",
+    "end": "2026-08-01T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785610800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-01T19:00:00Z",
+    "end": "2026-08-02T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785628800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-02T00:00:00Z",
+    "end": "2026-08-02T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785646800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-02T05:00:00Z",
+    "end": "2026-08-02T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785664800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-02T10:00:00Z",
+    "end": "2026-08-02T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785682800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-02T15:00:00Z",
+    "end": "2026-08-02T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785700800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-02T20:00:00Z",
+    "end": "2026-08-03T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785718800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-03T01:00:00Z",
+    "end": "2026-08-03T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785736800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-03T06:00:00Z",
+    "end": "2026-08-03T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785754800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-03T11:00:00Z",
+    "end": "2026-08-03T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785772800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-03T16:00:00Z",
+    "end": "2026-08-03T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785790800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-03T21:00:00Z",
+    "end": "2026-08-04T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785808800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-04T02:00:00Z",
+    "end": "2026-08-04T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785826800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-04T07:00:00Z",
+    "end": "2026-08-04T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785844800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-04T12:00:00Z",
+    "end": "2026-08-04T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785862800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-04T17:00:00Z",
+    "end": "2026-08-04T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785880800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-04T22:00:00Z",
+    "end": "2026-08-05T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785898800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-05T03:00:00Z",
+    "end": "2026-08-05T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785916800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-05T08:00:00Z",
+    "end": "2026-08-05T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785934800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-05T13:00:00Z",
+    "end": "2026-08-05T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785952800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-05T18:00:00Z",
+    "end": "2026-08-05T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785970800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-05T23:00:00Z",
+    "end": "2026-08-06T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1785988800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-06T04:00:00Z",
+    "end": "2026-08-06T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786006800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-06T09:00:00Z",
+    "end": "2026-08-06T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786024800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-06T14:00:00Z",
+    "end": "2026-08-06T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786042800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-06T19:00:00Z",
+    "end": "2026-08-07T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786060800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-07T00:00:00Z",
+    "end": "2026-08-07T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786078800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-07T05:00:00Z",
+    "end": "2026-08-07T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786096800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-07T10:00:00Z",
+    "end": "2026-08-07T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786114800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-07T15:00:00Z",
+    "end": "2026-08-07T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786132800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-07T20:00:00Z",
+    "end": "2026-08-08T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786150800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-08T01:00:00Z",
+    "end": "2026-08-08T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786168800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-08T06:00:00Z",
+    "end": "2026-08-08T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786186800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-08T11:00:00Z",
+    "end": "2026-08-08T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786204800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-08T16:00:00Z",
+    "end": "2026-08-08T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786222800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-08T21:00:00Z",
+    "end": "2026-08-09T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786240800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-09T02:00:00Z",
+    "end": "2026-08-09T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786258800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-09T07:00:00Z",
+    "end": "2026-08-09T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786276800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-09T12:00:00Z",
+    "end": "2026-08-09T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786294800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-09T17:00:00Z",
+    "end": "2026-08-09T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786312800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-09T22:00:00Z",
+    "end": "2026-08-10T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786330800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-10T03:00:00Z",
+    "end": "2026-08-10T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786348800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-10T08:00:00Z",
+    "end": "2026-08-10T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786366800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-10T13:00:00Z",
+    "end": "2026-08-10T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786384800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-10T18:00:00Z",
+    "end": "2026-08-10T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786402800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-10T23:00:00Z",
+    "end": "2026-08-11T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786420800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-11T04:00:00Z",
+    "end": "2026-08-11T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786438800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-11T09:00:00Z",
+    "end": "2026-08-11T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786456800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-11T14:00:00Z",
+    "end": "2026-08-11T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786474800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-11T19:00:00Z",
+    "end": "2026-08-12T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786492800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-12T00:00:00Z",
+    "end": "2026-08-12T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786510800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-12T05:00:00Z",
+    "end": "2026-08-12T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786528800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-12T10:00:00Z",
+    "end": "2026-08-12T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786546800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-12T15:00:00Z",
+    "end": "2026-08-12T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786564800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-12T20:00:00Z",
+    "end": "2026-08-13T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786582800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-13T01:00:00Z",
+    "end": "2026-08-13T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786600800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-13T06:00:00Z",
+    "end": "2026-08-13T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786618800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-13T11:00:00Z",
+    "end": "2026-08-13T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786636800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-13T16:00:00Z",
+    "end": "2026-08-13T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786654800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-13T21:00:00Z",
+    "end": "2026-08-14T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786672800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-14T02:00:00Z",
+    "end": "2026-08-14T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786690800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-14T07:00:00Z",
+    "end": "2026-08-14T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786708800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-14T12:00:00Z",
+    "end": "2026-08-14T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786726800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-14T17:00:00Z",
+    "end": "2026-08-14T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786744800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-14T22:00:00Z",
+    "end": "2026-08-15T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786762800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-15T03:00:00Z",
+    "end": "2026-08-15T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786780800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-15T08:00:00Z",
+    "end": "2026-08-15T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786798800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-15T13:00:00Z",
+    "end": "2026-08-15T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786816800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-15T18:00:00Z",
+    "end": "2026-08-15T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786834800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-15T23:00:00Z",
+    "end": "2026-08-16T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786852800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-16T04:00:00Z",
+    "end": "2026-08-16T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786870800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-16T09:00:00Z",
+    "end": "2026-08-16T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786888800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-16T14:00:00Z",
+    "end": "2026-08-16T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786906800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-16T19:00:00Z",
+    "end": "2026-08-17T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786924800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-17T00:00:00Z",
+    "end": "2026-08-17T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786942800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-17T05:00:00Z",
+    "end": "2026-08-17T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786960800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-17T10:00:00Z",
+    "end": "2026-08-17T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786978800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-17T15:00:00Z",
+    "end": "2026-08-17T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1786996800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-17T20:00:00Z",
+    "end": "2026-08-18T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787014800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-18T01:00:00Z",
+    "end": "2026-08-18T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787032800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-18T06:00:00Z",
+    "end": "2026-08-18T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787050800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-18T11:00:00Z",
+    "end": "2026-08-18T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787068800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-18T16:00:00Z",
+    "end": "2026-08-18T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787086800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-18T21:00:00Z",
+    "end": "2026-08-19T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787104800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-19T02:00:00Z",
+    "end": "2026-08-19T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787122800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-19T07:00:00Z",
+    "end": "2026-08-19T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787140800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-19T12:00:00Z",
+    "end": "2026-08-19T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787158800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-19T17:00:00Z",
+    "end": "2026-08-19T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787176800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-19T22:00:00Z",
+    "end": "2026-08-20T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787194800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-20T03:00:00Z",
+    "end": "2026-08-20T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787212800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-20T08:00:00Z",
+    "end": "2026-08-20T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787230800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-20T13:00:00Z",
+    "end": "2026-08-20T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787248800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-20T18:00:00Z",
+    "end": "2026-08-20T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787266800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-20T23:00:00Z",
+    "end": "2026-08-21T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787284800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-21T04:00:00Z",
+    "end": "2026-08-21T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787302800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-21T09:00:00Z",
+    "end": "2026-08-21T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787320800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-21T14:00:00Z",
+    "end": "2026-08-21T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787338800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-21T19:00:00Z",
+    "end": "2026-08-22T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787356800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-22T00:00:00Z",
+    "end": "2026-08-22T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787374800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-22T05:00:00Z",
+    "end": "2026-08-22T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787392800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-22T10:00:00Z",
+    "end": "2026-08-22T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787410800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-22T15:00:00Z",
+    "end": "2026-08-22T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787428800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-22T20:00:00Z",
+    "end": "2026-08-23T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787446800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-23T01:00:00Z",
+    "end": "2026-08-23T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787464800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-23T06:00:00Z",
+    "end": "2026-08-23T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787482800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-23T11:00:00Z",
+    "end": "2026-08-23T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787500800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-23T16:00:00Z",
+    "end": "2026-08-23T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787518800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-23T21:00:00Z",
+    "end": "2026-08-24T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787536800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-24T02:00:00Z",
+    "end": "2026-08-24T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787554800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-24T07:00:00Z",
+    "end": "2026-08-24T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787572800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-24T12:00:00Z",
+    "end": "2026-08-24T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787590800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-24T17:00:00Z",
+    "end": "2026-08-24T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787608800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-24T22:00:00Z",
+    "end": "2026-08-25T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787626800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-25T03:00:00Z",
+    "end": "2026-08-25T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787644800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-25T08:00:00Z",
+    "end": "2026-08-25T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787662800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-25T13:00:00Z",
+    "end": "2026-08-25T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787680800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-25T18:00:00Z",
+    "end": "2026-08-25T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787698800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-25T23:00:00Z",
+    "end": "2026-08-26T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787716800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-26T04:00:00Z",
+    "end": "2026-08-26T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787734800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-26T09:00:00Z",
+    "end": "2026-08-26T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787752800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-26T14:00:00Z",
+    "end": "2026-08-26T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787770800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-26T19:00:00Z",
+    "end": "2026-08-27T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787788800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-27T00:00:00Z",
+    "end": "2026-08-27T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787806800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-27T05:00:00Z",
+    "end": "2026-08-27T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787824800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-27T10:00:00Z",
+    "end": "2026-08-27T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787842800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-27T15:00:00Z",
+    "end": "2026-08-27T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787860800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-27T20:00:00Z",
+    "end": "2026-08-28T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787878800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-28T01:00:00Z",
+    "end": "2026-08-28T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787896800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-28T06:00:00Z",
+    "end": "2026-08-28T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787914800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-28T11:00:00Z",
+    "end": "2026-08-28T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787932800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-28T16:00:00Z",
+    "end": "2026-08-28T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787950800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-28T21:00:00Z",
+    "end": "2026-08-29T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787968800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-29T02:00:00Z",
+    "end": "2026-08-29T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1787986800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-29T07:00:00Z",
+    "end": "2026-08-29T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788004800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-29T12:00:00Z",
+    "end": "2026-08-29T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788022800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-29T17:00:00Z",
+    "end": "2026-08-29T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788040800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-29T22:00:00Z",
+    "end": "2026-08-30T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788058800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-30T03:00:00Z",
+    "end": "2026-08-30T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788076800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-30T08:00:00Z",
+    "end": "2026-08-30T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788094800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-30T13:00:00Z",
+    "end": "2026-08-30T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788112800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-30T18:00:00Z",
+    "end": "2026-08-30T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788130800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-30T23:00:00Z",
+    "end": "2026-08-31T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788148800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-31T04:00:00Z",
+    "end": "2026-08-31T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788166800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-31T09:00:00Z",
+    "end": "2026-08-31T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788184800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-31T14:00:00Z",
+    "end": "2026-08-31T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788202800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-08-31T19:00:00Z",
+    "end": "2026-09-01T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788220800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-01T00:00:00Z",
+    "end": "2026-09-01T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788238800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-01T05:00:00Z",
+    "end": "2026-09-01T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788256800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-01T10:00:00Z",
+    "end": "2026-09-01T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788274800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-01T15:00:00Z",
+    "end": "2026-09-01T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788292800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-01T20:00:00Z",
+    "end": "2026-09-02T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788310800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-02T01:00:00Z",
+    "end": "2026-09-02T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788328800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-02T06:00:00Z",
+    "end": "2026-09-02T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788346800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-02T11:00:00Z",
+    "end": "2026-09-02T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788364800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-02T16:00:00Z",
+    "end": "2026-09-02T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788382800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-02T21:00:00Z",
+    "end": "2026-09-03T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788400800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-03T02:00:00Z",
+    "end": "2026-09-03T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788418800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-03T07:00:00Z",
+    "end": "2026-09-03T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788436800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-03T12:00:00Z",
+    "end": "2026-09-03T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788454800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-03T17:00:00Z",
+    "end": "2026-09-03T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788472800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-03T22:00:00Z",
+    "end": "2026-09-04T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788490800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-04T03:00:00Z",
+    "end": "2026-09-04T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788508800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-04T08:00:00Z",
+    "end": "2026-09-04T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788526800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-04T13:00:00Z",
+    "end": "2026-09-04T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788544800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-04T18:00:00Z",
+    "end": "2026-09-04T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788562800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-04T23:00:00Z",
+    "end": "2026-09-05T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788580800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-05T04:00:00Z",
+    "end": "2026-09-05T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788598800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-05T09:00:00Z",
+    "end": "2026-09-05T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788616800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-05T14:00:00Z",
+    "end": "2026-09-05T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788634800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-05T19:00:00Z",
+    "end": "2026-09-06T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788652800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-06T00:00:00Z",
+    "end": "2026-09-06T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788670800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-06T05:00:00Z",
+    "end": "2026-09-06T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788688800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-06T10:00:00Z",
+    "end": "2026-09-06T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788706800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-06T15:00:00Z",
+    "end": "2026-09-06T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788724800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-06T20:00:00Z",
+    "end": "2026-09-07T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788742800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-07T01:00:00Z",
+    "end": "2026-09-07T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788760800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-07T06:00:00Z",
+    "end": "2026-09-07T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788778800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-07T11:00:00Z",
+    "end": "2026-09-07T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788796800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-07T16:00:00Z",
+    "end": "2026-09-07T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788814800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-07T21:00:00Z",
+    "end": "2026-09-08T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788832800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-08T02:00:00Z",
+    "end": "2026-09-08T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788850800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-08T07:00:00Z",
+    "end": "2026-09-08T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788868800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-08T12:00:00Z",
+    "end": "2026-09-08T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788886800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-08T17:00:00Z",
+    "end": "2026-09-08T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788904800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-08T22:00:00Z",
+    "end": "2026-09-09T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788922800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-09T03:00:00Z",
+    "end": "2026-09-09T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788940800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-09T08:00:00Z",
+    "end": "2026-09-09T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788958800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-09T13:00:00Z",
+    "end": "2026-09-09T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788976800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-09T18:00:00Z",
+    "end": "2026-09-09T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1788994800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-09T23:00:00Z",
+    "end": "2026-09-10T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789012800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-10T04:00:00Z",
+    "end": "2026-09-10T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789030800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-10T09:00:00Z",
+    "end": "2026-09-10T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789048800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-10T14:00:00Z",
+    "end": "2026-09-10T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789066800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-10T19:00:00Z",
+    "end": "2026-09-11T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789084800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-11T00:00:00Z",
+    "end": "2026-09-11T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789102800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-11T05:00:00Z",
+    "end": "2026-09-11T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789120800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-11T10:00:00Z",
+    "end": "2026-09-11T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789138800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-11T15:00:00Z",
+    "end": "2026-09-11T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789156800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-11T20:00:00Z",
+    "end": "2026-09-12T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789174800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-12T01:00:00Z",
+    "end": "2026-09-12T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789192800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-12T06:00:00Z",
+    "end": "2026-09-12T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789210800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-12T11:00:00Z",
+    "end": "2026-09-12T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789228800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-12T16:00:00Z",
+    "end": "2026-09-12T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789246800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-12T21:00:00Z",
+    "end": "2026-09-13T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789264800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-13T02:00:00Z",
+    "end": "2026-09-13T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789282800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-13T07:00:00Z",
+    "end": "2026-09-13T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789300800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-13T12:00:00Z",
+    "end": "2026-09-13T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789318800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-13T17:00:00Z",
+    "end": "2026-09-13T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789336800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-13T22:00:00Z",
+    "end": "2026-09-14T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789354800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-14T03:00:00Z",
+    "end": "2026-09-14T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789372800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-14T08:00:00Z",
+    "end": "2026-09-14T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789390800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-14T13:00:00Z",
+    "end": "2026-09-14T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789408800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-14T18:00:00Z",
+    "end": "2026-09-14T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789426800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-14T23:00:00Z",
+    "end": "2026-09-15T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789444800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-15T04:00:00Z",
+    "end": "2026-09-15T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789462800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-15T09:00:00Z",
+    "end": "2026-09-15T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789480800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-15T14:00:00Z",
+    "end": "2026-09-15T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789498800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-15T19:00:00Z",
+    "end": "2026-09-16T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789516800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-16T00:00:00Z",
+    "end": "2026-09-16T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789534800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-16T05:00:00Z",
+    "end": "2026-09-16T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789552800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-16T10:00:00Z",
+    "end": "2026-09-16T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789570800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-16T15:00:00Z",
+    "end": "2026-09-16T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789588800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-16T20:00:00Z",
+    "end": "2026-09-17T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789606800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-17T01:00:00Z",
+    "end": "2026-09-17T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789624800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-17T06:00:00Z",
+    "end": "2026-09-17T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789642800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-17T11:00:00Z",
+    "end": "2026-09-17T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789660800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-17T16:00:00Z",
+    "end": "2026-09-17T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789678800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-17T21:00:00Z",
+    "end": "2026-09-18T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789696800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-18T02:00:00Z",
+    "end": "2026-09-18T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789714800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-18T07:00:00Z",
+    "end": "2026-09-18T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789732800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-18T12:00:00Z",
+    "end": "2026-09-18T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789750800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-18T17:00:00Z",
+    "end": "2026-09-18T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789768800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-18T22:00:00Z",
+    "end": "2026-09-19T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789786800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-19T03:00:00Z",
+    "end": "2026-09-19T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789804800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-19T08:00:00Z",
+    "end": "2026-09-19T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789822800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-19T13:00:00Z",
+    "end": "2026-09-19T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789840800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-19T18:00:00Z",
+    "end": "2026-09-19T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789858800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-19T23:00:00Z",
+    "end": "2026-09-20T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789876800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-20T04:00:00Z",
+    "end": "2026-09-20T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789894800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-20T09:00:00Z",
+    "end": "2026-09-20T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789912800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-20T14:00:00Z",
+    "end": "2026-09-20T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789930800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-20T19:00:00Z",
+    "end": "2026-09-21T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789948800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-21T00:00:00Z",
+    "end": "2026-09-21T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789966800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-21T05:00:00Z",
+    "end": "2026-09-21T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1789984800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-21T10:00:00Z",
+    "end": "2026-09-21T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790002800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-21T15:00:00Z",
+    "end": "2026-09-21T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790020800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-21T20:00:00Z",
+    "end": "2026-09-22T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790038800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-22T01:00:00Z",
+    "end": "2026-09-22T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790056800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-22T06:00:00Z",
+    "end": "2026-09-22T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790074800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-22T11:00:00Z",
+    "end": "2026-09-22T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790092800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-22T16:00:00Z",
+    "end": "2026-09-22T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790110800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-22T21:00:00Z",
+    "end": "2026-09-23T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790128800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-23T02:00:00Z",
+    "end": "2026-09-23T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790146800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-23T07:00:00Z",
+    "end": "2026-09-23T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790164800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-23T12:00:00Z",
+    "end": "2026-09-23T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790182800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-23T17:00:00Z",
+    "end": "2026-09-23T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790200800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-23T22:00:00Z",
+    "end": "2026-09-24T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790218800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-24T03:00:00Z",
+    "end": "2026-09-24T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790236800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-24T08:00:00Z",
+    "end": "2026-09-24T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790254800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-24T13:00:00Z",
+    "end": "2026-09-24T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790272800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-24T18:00:00Z",
+    "end": "2026-09-24T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790290800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-24T23:00:00Z",
+    "end": "2026-09-25T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790308800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-25T04:00:00Z",
+    "end": "2026-09-25T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790326800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-25T09:00:00Z",
+    "end": "2026-09-25T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790344800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-25T14:00:00Z",
+    "end": "2026-09-25T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790362800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-25T19:00:00Z",
+    "end": "2026-09-26T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790380800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-26T00:00:00Z",
+    "end": "2026-09-26T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790398800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-26T05:00:00Z",
+    "end": "2026-09-26T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790416800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-26T10:00:00Z",
+    "end": "2026-09-26T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790434800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-26T15:00:00Z",
+    "end": "2026-09-26T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790452800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-26T20:00:00Z",
+    "end": "2026-09-27T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790470800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-27T01:00:00Z",
+    "end": "2026-09-27T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790488800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-27T06:00:00Z",
+    "end": "2026-09-27T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790506800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-27T11:00:00Z",
+    "end": "2026-09-27T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790524800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-27T16:00:00Z",
+    "end": "2026-09-27T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790542800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-27T21:00:00Z",
+    "end": "2026-09-28T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790560800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-28T02:00:00Z",
+    "end": "2026-09-28T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790578800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-28T07:00:00Z",
+    "end": "2026-09-28T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790596800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-28T12:00:00Z",
+    "end": "2026-09-28T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790614800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-28T17:00:00Z",
+    "end": "2026-09-28T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790632800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-28T22:00:00Z",
+    "end": "2026-09-29T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790650800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-29T03:00:00Z",
+    "end": "2026-09-29T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790668800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-29T08:00:00Z",
+    "end": "2026-09-29T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790686800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-29T13:00:00Z",
+    "end": "2026-09-29T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790704800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-29T18:00:00Z",
+    "end": "2026-09-29T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790722800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-29T23:00:00Z",
+    "end": "2026-09-30T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790740800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-30T04:00:00Z",
+    "end": "2026-09-30T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790758800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-30T09:00:00Z",
+    "end": "2026-09-30T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790776800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-30T14:00:00Z",
+    "end": "2026-09-30T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790794800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-09-30T19:00:00Z",
+    "end": "2026-10-01T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790812800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-01T00:00:00Z",
+    "end": "2026-10-01T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790830800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-01T05:00:00Z",
+    "end": "2026-10-01T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790848800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-01T10:00:00Z",
+    "end": "2026-10-01T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790866800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-01T15:00:00Z",
+    "end": "2026-10-01T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790884800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-01T20:00:00Z",
+    "end": "2026-10-02T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790902800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-02T01:00:00Z",
+    "end": "2026-10-02T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790920800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-02T06:00:00Z",
+    "end": "2026-10-02T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790938800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-02T11:00:00Z",
+    "end": "2026-10-02T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790956800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-02T16:00:00Z",
+    "end": "2026-10-02T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790974800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-02T21:00:00Z",
+    "end": "2026-10-03T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1790992800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-03T02:00:00Z",
+    "end": "2026-10-03T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791010800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-03T07:00:00Z",
+    "end": "2026-10-03T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791028800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-03T12:00:00Z",
+    "end": "2026-10-03T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791046800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-03T17:00:00Z",
+    "end": "2026-10-03T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791064800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-03T22:00:00Z",
+    "end": "2026-10-04T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791082800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-04T03:00:00Z",
+    "end": "2026-10-04T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791100800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-04T08:00:00Z",
+    "end": "2026-10-04T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791118800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-04T13:00:00Z",
+    "end": "2026-10-04T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791136800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-04T18:00:00Z",
+    "end": "2026-10-04T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791154800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-04T23:00:00Z",
+    "end": "2026-10-05T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791172800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-05T04:00:00Z",
+    "end": "2026-10-05T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791190800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-05T09:00:00Z",
+    "end": "2026-10-05T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791208800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-05T14:00:00Z",
+    "end": "2026-10-05T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791226800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-05T19:00:00Z",
+    "end": "2026-10-06T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791244800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-06T00:00:00Z",
+    "end": "2026-10-06T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791262800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-06T05:00:00Z",
+    "end": "2026-10-06T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791280800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-06T10:00:00Z",
+    "end": "2026-10-06T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791298800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-06T15:00:00Z",
+    "end": "2026-10-06T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791316800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-06T20:00:00Z",
+    "end": "2026-10-07T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791334800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-07T01:00:00Z",
+    "end": "2026-10-07T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791352800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-07T06:00:00Z",
+    "end": "2026-10-07T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791370800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-07T11:00:00Z",
+    "end": "2026-10-07T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791388800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-07T16:00:00Z",
+    "end": "2026-10-07T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791406800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-07T21:00:00Z",
+    "end": "2026-10-08T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791424800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-08T02:00:00Z",
+    "end": "2026-10-08T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791442800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-08T07:00:00Z",
+    "end": "2026-10-08T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791460800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-08T12:00:00Z",
+    "end": "2026-10-08T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791478800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-08T17:00:00Z",
+    "end": "2026-10-08T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791496800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-08T22:00:00Z",
+    "end": "2026-10-09T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791514800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-09T03:00:00Z",
+    "end": "2026-10-09T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791532800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-09T08:00:00Z",
+    "end": "2026-10-09T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791550800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-09T13:00:00Z",
+    "end": "2026-10-09T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791568800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-09T18:00:00Z",
+    "end": "2026-10-09T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791586800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-09T23:00:00Z",
+    "end": "2026-10-10T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791604800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-10T04:00:00Z",
+    "end": "2026-10-10T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791622800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-10T09:00:00Z",
+    "end": "2026-10-10T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791640800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-10T14:00:00Z",
+    "end": "2026-10-10T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791658800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-10T19:00:00Z",
+    "end": "2026-10-11T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791676800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-11T00:00:00Z",
+    "end": "2026-10-11T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791694800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-11T05:00:00Z",
+    "end": "2026-10-11T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791712800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-11T10:00:00Z",
+    "end": "2026-10-11T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791730800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-11T15:00:00Z",
+    "end": "2026-10-11T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791748800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-11T20:00:00Z",
+    "end": "2026-10-12T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791766800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-12T01:00:00Z",
+    "end": "2026-10-12T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791784800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-12T06:00:00Z",
+    "end": "2026-10-12T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791802800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-12T11:00:00Z",
+    "end": "2026-10-12T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791820800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-12T16:00:00Z",
+    "end": "2026-10-12T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791838800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-12T21:00:00Z",
+    "end": "2026-10-13T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791856800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-13T02:00:00Z",
+    "end": "2026-10-13T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791874800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-13T07:00:00Z",
+    "end": "2026-10-13T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791892800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-13T12:00:00Z",
+    "end": "2026-10-13T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791910800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-13T17:00:00Z",
+    "end": "2026-10-13T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791928800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-13T22:00:00Z",
+    "end": "2026-10-14T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791946800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-14T03:00:00Z",
+    "end": "2026-10-14T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791964800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-14T08:00:00Z",
+    "end": "2026-10-14T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1791982800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-14T13:00:00Z",
+    "end": "2026-10-14T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792000800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-14T18:00:00Z",
+    "end": "2026-10-14T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792018800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-14T23:00:00Z",
+    "end": "2026-10-15T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792036800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-15T04:00:00Z",
+    "end": "2026-10-15T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792054800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-15T09:00:00Z",
+    "end": "2026-10-15T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792072800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-15T14:00:00Z",
+    "end": "2026-10-15T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792090800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-15T19:00:00Z",
+    "end": "2026-10-16T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792108800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-16T00:00:00Z",
+    "end": "2026-10-16T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792126800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-16T05:00:00Z",
+    "end": "2026-10-16T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792144800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-16T10:00:00Z",
+    "end": "2026-10-16T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792162800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-16T15:00:00Z",
+    "end": "2026-10-16T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792180800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-16T20:00:00Z",
+    "end": "2026-10-17T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792198800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-17T01:00:00Z",
+    "end": "2026-10-17T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792216800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-17T06:00:00Z",
+    "end": "2026-10-17T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792234800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-17T11:00:00Z",
+    "end": "2026-10-17T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792252800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-17T16:00:00Z",
+    "end": "2026-10-17T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792270800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-17T21:00:00Z",
+    "end": "2026-10-18T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792288800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-18T02:00:00Z",
+    "end": "2026-10-18T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792306800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-18T07:00:00Z",
+    "end": "2026-10-18T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792324800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-18T12:00:00Z",
+    "end": "2026-10-18T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792342800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-18T17:00:00Z",
+    "end": "2026-10-18T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792360800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-18T22:00:00Z",
+    "end": "2026-10-19T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792378800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-19T03:00:00Z",
+    "end": "2026-10-19T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792396800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-19T08:00:00Z",
+    "end": "2026-10-19T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792414800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-19T13:00:00Z",
+    "end": "2026-10-19T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792432800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-19T18:00:00Z",
+    "end": "2026-10-19T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792450800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-19T23:00:00Z",
+    "end": "2026-10-20T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792468800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-20T04:00:00Z",
+    "end": "2026-10-20T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792486800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-20T09:00:00Z",
+    "end": "2026-10-20T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792504800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-20T14:00:00Z",
+    "end": "2026-10-20T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792522800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-20T19:00:00Z",
+    "end": "2026-10-21T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792540800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-21T00:00:00Z",
+    "end": "2026-10-21T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792558800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-21T05:00:00Z",
+    "end": "2026-10-21T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792576800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-21T10:00:00Z",
+    "end": "2026-10-21T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792594800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-21T15:00:00Z",
+    "end": "2026-10-21T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792612800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-21T20:00:00Z",
+    "end": "2026-10-22T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792630800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-22T01:00:00Z",
+    "end": "2026-10-22T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792648800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-22T06:00:00Z",
+    "end": "2026-10-22T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792666800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-22T11:00:00Z",
+    "end": "2026-10-22T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792684800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-22T16:00:00Z",
+    "end": "2026-10-22T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792702800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-22T21:00:00Z",
+    "end": "2026-10-23T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792720800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-23T02:00:00Z",
+    "end": "2026-10-23T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792738800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-23T07:00:00Z",
+    "end": "2026-10-23T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792756800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-23T12:00:00Z",
+    "end": "2026-10-23T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792774800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-23T17:00:00Z",
+    "end": "2026-10-23T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792792800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-23T22:00:00Z",
+    "end": "2026-10-24T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792810800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-24T03:00:00Z",
+    "end": "2026-10-24T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792828800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-24T08:00:00Z",
+    "end": "2026-10-24T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792846800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-24T13:00:00Z",
+    "end": "2026-10-24T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792864800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-24T18:00:00Z",
+    "end": "2026-10-24T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792882800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-24T23:00:00Z",
+    "end": "2026-10-25T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792900800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-25T04:00:00Z",
+    "end": "2026-10-25T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792918800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-25T09:00:00Z",
+    "end": "2026-10-25T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792936800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-25T14:00:00Z",
+    "end": "2026-10-25T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792954800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-25T19:00:00Z",
+    "end": "2026-10-26T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792972800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-26T00:00:00Z",
+    "end": "2026-10-26T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1792990800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-26T05:00:00Z",
+    "end": "2026-10-26T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793008800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-26T10:00:00Z",
+    "end": "2026-10-26T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793026800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-26T15:00:00Z",
+    "end": "2026-10-26T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793044800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-26T20:00:00Z",
+    "end": "2026-10-27T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793062800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-27T01:00:00Z",
+    "end": "2026-10-27T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793080800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-27T06:00:00Z",
+    "end": "2026-10-27T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793098800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-27T11:00:00Z",
+    "end": "2026-10-27T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793116800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-27T16:00:00Z",
+    "end": "2026-10-27T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793134800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-27T21:00:00Z",
+    "end": "2026-10-28T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793152800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-28T02:00:00Z",
+    "end": "2026-10-28T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793170800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-28T07:00:00Z",
+    "end": "2026-10-28T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793188800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-28T12:00:00Z",
+    "end": "2026-10-28T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793206800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-28T17:00:00Z",
+    "end": "2026-10-28T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793224800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-28T22:00:00Z",
+    "end": "2026-10-29T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793242800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-29T03:00:00Z",
+    "end": "2026-10-29T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793260800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-29T08:00:00Z",
+    "end": "2026-10-29T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793278800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-29T13:00:00Z",
+    "end": "2026-10-29T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793296800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-29T18:00:00Z",
+    "end": "2026-10-29T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793314800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-29T23:00:00Z",
+    "end": "2026-10-30T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793332800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-30T04:00:00Z",
+    "end": "2026-10-30T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793350800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-30T09:00:00Z",
+    "end": "2026-10-30T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793368800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-30T14:00:00Z",
+    "end": "2026-10-30T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793386800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-30T19:00:00Z",
+    "end": "2026-10-31T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793404800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-31T00:00:00Z",
+    "end": "2026-10-31T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793422800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-31T05:00:00Z",
+    "end": "2026-10-31T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793440800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-31T10:00:00Z",
+    "end": "2026-10-31T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793458800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-31T15:00:00Z",
+    "end": "2026-10-31T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793476800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-10-31T20:00:00Z",
+    "end": "2026-11-01T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793494800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-01T01:00:00Z",
+    "end": "2026-11-01T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793512800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-01T06:00:00Z",
+    "end": "2026-11-01T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793530800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-01T11:00:00Z",
+    "end": "2026-11-01T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793548800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-01T16:00:00Z",
+    "end": "2026-11-01T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793566800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-01T21:00:00Z",
+    "end": "2026-11-02T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793584800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-02T02:00:00Z",
+    "end": "2026-11-02T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793602800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-02T07:00:00Z",
+    "end": "2026-11-02T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793620800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-02T12:00:00Z",
+    "end": "2026-11-02T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793638800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-02T17:00:00Z",
+    "end": "2026-11-02T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793656800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-02T22:00:00Z",
+    "end": "2026-11-03T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793674800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-03T03:00:00Z",
+    "end": "2026-11-03T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793692800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-03T08:00:00Z",
+    "end": "2026-11-03T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793710800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-03T13:00:00Z",
+    "end": "2026-11-03T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793728800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-03T18:00:00Z",
+    "end": "2026-11-03T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793746800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-03T23:00:00Z",
+    "end": "2026-11-04T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793764800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-04T04:00:00Z",
+    "end": "2026-11-04T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793782800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-04T09:00:00Z",
+    "end": "2026-11-04T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793800800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-04T14:00:00Z",
+    "end": "2026-11-04T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793818800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-04T19:00:00Z",
+    "end": "2026-11-05T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793836800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-05T00:00:00Z",
+    "end": "2026-11-05T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793854800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-05T05:00:00Z",
+    "end": "2026-11-05T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793872800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-05T10:00:00Z",
+    "end": "2026-11-05T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793890800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-05T15:00:00Z",
+    "end": "2026-11-05T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793908800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-05T20:00:00Z",
+    "end": "2026-11-06T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793926800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-06T01:00:00Z",
+    "end": "2026-11-06T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793944800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-06T06:00:00Z",
+    "end": "2026-11-06T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793962800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-06T11:00:00Z",
+    "end": "2026-11-06T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793980800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-06T16:00:00Z",
+    "end": "2026-11-06T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1793998800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-06T21:00:00Z",
+    "end": "2026-11-07T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794016800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-07T02:00:00Z",
+    "end": "2026-11-07T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794034800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-07T07:00:00Z",
+    "end": "2026-11-07T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794052800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-07T12:00:00Z",
+    "end": "2026-11-07T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794070800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-07T17:00:00Z",
+    "end": "2026-11-07T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794088800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-07T22:00:00Z",
+    "end": "2026-11-08T03:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794106800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-08T03:00:00Z",
+    "end": "2026-11-08T08:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794124800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-08T08:00:00Z",
+    "end": "2026-11-08T13:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794142800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-08T13:00:00Z",
+    "end": "2026-11-08T18:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794160800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-08T18:00:00Z",
+    "end": "2026-11-08T23:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794178800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-08T23:00:00Z",
+    "end": "2026-11-09T04:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794196800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-09T04:00:00Z",
+    "end": "2026-11-09T09:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794214800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-09T09:00:00Z",
+    "end": "2026-11-09T14:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794232800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-09T14:00:00Z",
+    "end": "2026-11-09T19:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794250800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-09T19:00:00Z",
+    "end": "2026-11-10T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794268800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-10T00:00:00Z",
+    "end": "2026-11-10T05:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794286800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-10T05:00:00Z",
+    "end": "2026-11-10T10:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794304800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-10T10:00:00Z",
+    "end": "2026-11-10T15:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794322800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-10T15:00:00Z",
+    "end": "2026-11-10T20:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794340800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-10T20:00:00Z",
+    "end": "2026-11-11T01:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794358800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-11T01:00:00Z",
+    "end": "2026-11-11T06:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794376800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-11T06:00:00Z",
+    "end": "2026-11-11T11:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794394800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-11T11:00:00Z",
+    "end": "2026-11-11T16:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794412800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-11T16:00:00Z",
+    "end": "2026-11-11T21:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794430800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-11T21:00:00Z",
+    "end": "2026-11-12T02:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794448800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-12T02:00:00Z",
+    "end": "2026-11-12T07:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794466800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-12T07:00:00Z",
+    "end": "2026-11-12T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794484800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-12T12:00:00Z",
+    "end": "2026-11-12T17:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794502800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-12T17:00:00Z",
+    "end": "2026-11-12T22:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_60_1794520800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 60,
+    "start": "2026-11-12T22:00:00Z",
+    "end": "2026-11-13T00:00:00Z"
+   }
+  }
+ ]
+}

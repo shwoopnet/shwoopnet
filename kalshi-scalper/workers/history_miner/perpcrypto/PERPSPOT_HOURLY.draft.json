@@ -1,0 +1,174 @@
+{
+ "status": "draft",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/perpcrypto/PERPCRYPTO1_CARD_NOV16.md",
+ "heldout": "none: public spot candles, no Kalshi outcome; any read of them follows the signed PERPCRYPTO1 spec and Auditor B's hold line",
+ "route": "coinbase",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "notes": "DRAFT: needs a new row in the ROUTES table of scripts/kalshi_pull.py (host api.exchange.coinbase.com, a runner change that is Main's and security-relevant, Auditor B to read it): GET only, no key, a generic user agent, public candles only. Research only (the Head's 20:47Z ruling: Coinbase and Bitstamp public candles ACCEPTED for research, on the standing list).",
+ "job_id": "PERPSPOT_HOURLY",
+ "purpose": "Coinbase spot hourly candles for the five crypto perps' underlyings (BTC, ETH, SOL, XRP, DOGE) over the perp-data hourly snapshot window, 2026-10-21 to 2026-11-17, for the PERPCRYPTO1 basis. 300 candles a request. HYPE-USD is not requested: Coinbase may not list it (to be checked).",
+ "allowed_endpoints": [
+  {
+   "name": "spot_candles",
+   "method": "GET",
+   "path_pattern": "/products/(?P<product>BTC-USD|ETH-USD|SOL-USD|XRP-USD|DOGE-USD)/candles",
+   "params_allowed": [
+    "granularity",
+    "start",
+    "end"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [
+  "BTC-USD",
+  "ETH-USD",
+  "SOL-USD",
+  "XRP-USD",
+  "DOGE-USD"
+ ],
+ "max_requests": 15,
+ "requests": [
+  {
+   "id": "BTC-USD_3600_1792540800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-21T00:00:00Z",
+    "end": "2026-11-02T12:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1793620800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-02T12:00:00Z",
+    "end": "2026-11-15T00:00:00Z"
+   }
+  },
+  {
+   "id": "BTC-USD_3600_1794700800",
+   "path": "/products/BTC-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-15T00:00:00Z",
+    "end": "2026-11-17T00:00:00Z"
+   }
+  },
+  {
+   "id": "ETH-USD_3600_1792540800",
+   "path": "/products/ETH-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-21T00:00:00Z",
+    "end": "2026-11-02T12:00:00Z"
+   }
+  },
+  {
+   "id": "ETH-USD_3600_1793620800",
+   "path": "/products/ETH-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-02T12:00:00Z",
+    "end": "2026-11-15T00:00:00Z"
+   }
+  },
+  {
+   "id": "ETH-USD_3600_1794700800",
+   "path": "/products/ETH-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-15T00:00:00Z",
+    "end": "2026-11-17T00:00:00Z"
+   }
+  },
+  {
+   "id": "SOL-USD_3600_1792540800",
+   "path": "/products/SOL-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-21T00:00:00Z",
+    "end": "2026-11-02T12:00:00Z"
+   }
+  },
+  {
+   "id": "SOL-USD_3600_1793620800",
+   "path": "/products/SOL-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-02T12:00:00Z",
+    "end": "2026-11-15T00:00:00Z"
+   }
+  },
+  {
+   "id": "SOL-USD_3600_1794700800",
+   "path": "/products/SOL-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-15T00:00:00Z",
+    "end": "2026-11-17T00:00:00Z"
+   }
+  },
+  {
+   "id": "XRP-USD_3600_1792540800",
+   "path": "/products/XRP-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-21T00:00:00Z",
+    "end": "2026-11-02T12:00:00Z"
+   }
+  },
+  {
+   "id": "XRP-USD_3600_1793620800",
+   "path": "/products/XRP-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-02T12:00:00Z",
+    "end": "2026-11-15T00:00:00Z"
+   }
+  },
+  {
+   "id": "XRP-USD_3600_1794700800",
+   "path": "/products/XRP-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-15T00:00:00Z",
+    "end": "2026-11-17T00:00:00Z"
+   }
+  },
+  {
+   "id": "DOGE-USD_3600_1792540800",
+   "path": "/products/DOGE-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-10-21T00:00:00Z",
+    "end": "2026-11-02T12:00:00Z"
+   }
+  },
+  {
+   "id": "DOGE-USD_3600_1793620800",
+   "path": "/products/DOGE-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-02T12:00:00Z",
+    "end": "2026-11-15T00:00:00Z"
+   }
+  },
+  {
+   "id": "DOGE-USD_3600_1794700800",
+   "path": "/products/DOGE-USD/candles",
+   "params": {
+    "granularity": 3600,
+    "start": "2026-11-15T00:00:00Z",
+    "end": "2026-11-17T00:00:00Z"
+   }
+  }
+ ]
+}
