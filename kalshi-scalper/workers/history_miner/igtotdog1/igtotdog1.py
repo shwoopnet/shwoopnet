@@ -21,10 +21,10 @@ def entry(ml_rows, tot_rows):
         if t < lt or not I.two_sided(b, a):
             continue
         if LO - I.EPS <= a <= HI + I.EPS:
-            return (tk, "yes", a, t)
+            return (tk, "yes", a, t, lt)
         n = round(1 - b, 6)
         if LO - I.EPS <= n <= HI + I.EPS:
-            return (tk, "no", n, t)
+            return (tk, "no", n, t, lt)
     return None
 
 
@@ -40,15 +40,26 @@ def run(ingame, result_dirs):
     for d in result_dirs:
         res.update(I.load_results(d))
     trs = []
+    no_result = defaultdict(int)
     for k in sorted(games):
         G = games[k]; en = entry(G["ml"], G["total"])
-        if not en or en[0] not in res:
+        if not en:
             continue
+        if en[0] not in res:
+            no_result[G["league"]] += 1; continue
         cl, r = res[en[0]]
         trs.append({"game": "%s|%s" % k, "league": G["league"], "ticker": en[0], "side": en[1], "e": en[2], "t": en[3], "close": cl,
-                    "third": 1 if cl < I.T12 else 2, "res": r})
+                    "third": 1 if cl < I.T12 else 2, "res": r, "mins_after_live": (en[3] - en[4]) / 60})
     S = I.summarise(trs); S["verdict"] = I.verdict(S)
     S["by_league"] = {lg: I.summarise([x for x in trs if x["league"] == lg]) for lg in ("NBA", "NHL", "NFL")}
+    S["entry_mix"] = {}
+    for lg in ("NBA", "NHL", "NFL"):
+        xs = [x for x in trs if x["league"] == lg]
+        m = sorted(x["mins_after_live"] for x in xs)
+        S["entry_mix"][lg] = {"n": len(xs), "yes_share": (sum(1 for x in xs if x["side"] == "yes") / len(xs)) if xs else None,
+                              "median_mins_after_live": (m[len(m) // 2] if len(m) % 2 else (m[len(m) // 2 - 1] + m[len(m) // 2]) / 2) if m else None,
+                              "entry_no_result_dropped": no_result[lg]}
+    S["note"] = "tail strike at tip-off: ties by ticker order; same games as IGUNDER1, one sample, do not add n"
     return {"label": "IGTOTDOG1 quick read, thirds 1 and 2 only; upper bound, not fill-checked; live = first hot poll (may precede tip-off)",
             "tries": 1, "games": len(games), "card": S}
 
