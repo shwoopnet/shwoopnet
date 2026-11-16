@@ -55,8 +55,13 @@ def games(rows):
     for t, e, c, o in rows:
         ev.setdefault(e, []).append((t, c, o))
     out = {}
+    CLOCK_DROPS.clear()
     for e, L in sorted(ev.items()):
-        occ = min(o for _, _, o in L)
+        occs = {o for _, _, o in L}
+        occ = min(occs)
+        if len(occs) != 1 or occ % 1800 != 0:      # the Head's check B (Nov 16): one value per game, on :00 or :30 to the second
+            CLOCK_DROPS.append(e)
+            continue
         A, T = occ - A_MIN * 60, occ - T_MIN * 60
         base = [x for x in L if x[1] > A]
         if len(base) < MIN_BASE:
@@ -66,6 +71,9 @@ def games(rows):
         out[e] = {"T": T, "s": s, "arm": "HIGH" if s >= S_MED - EPS else "LOW", "open": sorted(x[0] for x in base if x[1] > T),
                   "close": {x[0]: x[1] for x in base}}
     return out
+
+
+CLOCK_DROPS = []   # games whose occurrence is not a single schedule-shaped time; dropped and counted
 
 
 def fee(p):

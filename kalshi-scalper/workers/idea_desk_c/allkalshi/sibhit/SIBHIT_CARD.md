@@ -34,6 +34,8 @@
 - S_MED is the median over all 120 development games, so the arm split is in-sample: it is built from close times only, with no price or result. The scorer also prints both arms with the split set at the median of the FIRST half of games in time order.
 - The per-game share is printed as its spread (min, quartiles, max). A rung that closes early for a reason other than a hit (a player ruled out) counts in s.
 
+**Clock check (the Head's choice B, Nov 16), before scoring.** The list carries no tip time, so the check tests the shape of a schedule. A game is dropped and counted (printed as `clock_check`) unless its occurrence_datetime is ONE value across all its rungs, exactly on :00 or :30 to the second. A recorded end would be irregular. On the landed list all 120 games pass (80 on :00, 40 on :30; measured from time fields only, Nov 16). Residual risk, stated for the held-out check: Kalshi rescheduling a game and rewriting the value to another round time.
+
 **Reading order.**
 1. Time fields from the list (ticker, event, close, occurrence) fix the games, the arm and the open rungs.
 2. The candles at T for those rungs.

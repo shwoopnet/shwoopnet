@@ -137,6 +137,7 @@ def main(root, info_split=True):
         z = lambda v: 0.0 if v is None else v
         blk["bar"] = "PASS (paper bar)" if (z(p1) >= 1.3 and z(a1) >= 1.0 and z(b1) >= 1.0 and z(p2) >= 1.0) else "fail"
         out[arm] = blk
+    out["clock_check"] = {"dropped_games": len(L.CLOCK_DROPS), "rule": "occurrence must be one value per game, exactly on :00 or :30 (a schedule time); the tip time itself is not in the data"}
     shares = sorted(x["s"] for x in g.values())
     if shares:
         import statistics as st

@@ -58,6 +58,16 @@ class Hand(unittest.TestCase):
         self.assertEqual(o["share_per_game"]["max"], round(2 / 11, 4))
 
 
+class Clock(unittest.TestCase):
+    def test_off_schedule_dropped(self):
+        rows = [("KXNBAPTS-26OCT24AAA-P%d-10" % i, "KXNBAPTS-26OCT24AAA", L.iso("2026-10-25T03:30:00"), L.iso("2026-10-25T03:00:00") + (900 if i == 0 else 0)) for i in range(12)]
+        rows += [("KXNBAPTS-26OCT24BBB-P%d-10" % i, "KXNBAPTS-26OCT24BBB", L.iso("2026-10-25T03:30:00"), L.iso("2026-10-25T03:17:00")) for i in range(12)]
+        rows += [("KXNBAPTS-26OCT24CCC-P%d-10" % i, "KXNBAPTS-26OCT24CCC", L.iso("2026-10-25T03:30:00"), L.iso("2026-10-25T02:30:00")) for i in range(12)]
+        g = L.games(rows)
+        self.assertEqual(sorted(L.CLOCK_DROPS), ["KXNBAPTS-26OCT24AAA", "KXNBAPTS-26OCT24BBB"])
+        self.assertEqual(list(g), ["KXNBAPTS-26OCT24CCC"])
+
+
 class InfoSplit(unittest.TestCase):
     def test_two_games(self):
         root = tempfile.mkdtemp()
