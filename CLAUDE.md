@@ -1756,3 +1756,7 @@ One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's `per
 ## Held-out log: Desk A's ENGINE1 loader replaced by the amended one (Nov 16, 2026, Auditor B's allow line)
 
 The ENGINE1 loader line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` now names the amended `engine1_heldout_load.py` (sha256 94e25241..., commit ebd2d1c2c on `claude/idea-desk-a`; I hashed the file before merging) in place of the earlier one (c42b5426...), over the same five runs; the amendment covers the registered partial A1 run (request h00048, the unanswered 400, only). The old sha no longer reads these runs, because the loader line is the one place that decides. Forensics' extractor and second-build reader lines are unchanged. Docs only.
+
+## Held-out log: PERPSCALP2 replacement line (Nov 16, 2026, Auditor B's allow line)
+
+The PERPSCALP2 line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` now names the corrected `perpscalp2.py` (sha256 b2c98390..., commit 60c1f8bc on `claude/idea-desk-c`; I hashed it and its runner `perpscalp2_run.py` ed3d9d8b... before merging) in place of bc77a611..., which no longer reads. Scope unchanged: perp-data `kalshi1m` and `funding` per-day files, candles through 1794787199, H16 rows dropped, H17 folders not read, no new source or host. Desk C ran PERPSCALP2_PRINT2 before this line existed (a procedural deviation on development files, not a hold breach). Docs only.
