@@ -2,7 +2,7 @@
  "job_id": "NHLPROP_LISTS_A",
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/idea_desk_c/allkalshi/nhlprops/NHLPROP_CENSUS.md",
- "purpose": "NHL player-prop census (Idea Desk C, Head's idle-check order, lowest priority): settled market lists of the NHL goals, assists and points ladders for four whole UTC days (Oct 6, 13, 20, 27), one request window per day and series, at most 3 pages of 1,000 each. Counts and time fields: games a day, rungs a game, markets a day, per series. No candle, no result used for a rule. A cursor left after 3 pages makes that day and series void.",
+ "purpose": "NHL player-prop census (Idea Desk C, lowest priority): settled lists of the goals, assists and points ladders for four whole UTC days; counts and time fields only, a cursor left at the page cap voids that day.",
  "heldout": "none read: four whole UTC days in the development block (closes 2026-10-06, 10-13, 10-20 and 10-27, all before the 2026-10-30T02:53:19Z cut). Overlaps NHLAST1's window (research V2, spent; read closes after 2026-10-03 to 2026-11-03 for KXNHLAST and sister series) and the registry's NHLALL1, NHLFG1, NHLG1 and NHLROUND1 reads of KXNHLGOAL: labelled. Not requested: closes from 2026-10-30T02:53:19Z.",
  "allowed_endpoints": [
   {
