@@ -1,0 +1,26 @@
+# NBATOTAL: a many-rule search on the pre-game NBA game-total ladder (Idea Desk C, Nov 16, 2026; engine family spec, DESIGN ONLY; the Head of R&D's order of 18:23Z)
+
+**Question.** Before tip-off, does any simple rule on timing, rung position, price, recent move, spread, volume or listing age earn more than it costs on the NBA game-total ladder (KXNBATOTAL: over or under a points line)? The engine searches many rules at once and ranks them by dollars a week.
+
+**Checks the Head asked for, said first.**
+- **SPORTS-PRE's hold** covers KXNFLGAME, KXNCAAFGAME and KXNBAGAME (the moneyline) only, forward, read 2027-01-01 (HELDOUT_REGISTRY). KXNBATOTAL is not in it.
+- **The declined list (7e)** has no row for game totals. Related and NOT declined, but a version relationship to disclose: **F7** (every market with a YES mid of 0.40 to 0.60 and a spread of 3c or less, buy NO at the ask, hold; 1,788 games; win rate equal to the price; failed on cost), **FAMSPORTS** (a totals model on KXNBATOTAL, KXNFLTOTAL, KXNHLTOTAL; thirds by game date; result file exists, which I have not read), **NHLG1 and NHLOT** (NHL totals, closed or spent). The lifecycle note lists a near miss "NBA total NO PF 1.26, 261 trades" (I do not know its source or window). **The cells of this grid with side NO, mid 0.40 to 0.60 and exit H are F7's rule on one sport: a version (7g)**, counted in m, not new. Auditor B and the Verification Analyst are asked to map F7's and FAMSPORTS's data windows against my development days before I read anything; if they overlap, development is labelled "read for F7".
+- **Clock.** There is no tip time in the data. KXNBATOTAL's occurrence_datetime is a schedule-shaped game END estimate (all Nov 9 games in the census listing sit on :00 or :30), about 2.5 to 3 hours after the tip. So decision times are set **before the scheduled end** so that all of them are pre-game whatever the true tip: **9, 5 and 3.5 hours before the end**, which is 6.5 to 7 h, 2.5 to 3 h and 1 to 1.5 h before the tip if the tip is 2 to 3 hours before the end (6, 2 and 0.5 hours before the tip at the extreme). The same clock check as before (one occurrence per game, exactly on :00 or :30) applies.
+
+**The grid.** NBA only: the NHL total ladder has about 10 rungs a game (3 NHL games in the census sample: 29 rungs), so a cell reaches about 1 signal a day, under the 3-a-day gate. NHL stays out until a rate says otherwise.
+- **Decision time D (before the scheduled end):** 9 h, 5 h, 3.5 h.
+- **Band of the side's ask:** 30 to 40, 40 to 50, 50 to 60, 60 to 70 cents.
+- **Side:** yes or no.
+- **Exit:** H (hold to settlement), or M35 (sell at the bid of the candle ending exactly 3.5 h before the scheduled end, a pre-game exit), valid only for D of 9 h and 5 h. **No mark = counted and held to settlement, printed both ways** (Auditor B's rule). That is 5 time and exit combinations.
+- **Filter (none, or exactly one; 13 options):** none; 60 minute move in the rung's YES mid (down 3c or more, flat, up 3c or more); rung distance from the game's line (the rung of the same game whose YES mid is nearest 0.50, ties to the higher strike): below, at, above; spread at D (3c or less, 6c or less); volume (last 30 minutes against the 30 before): rising, not rising; listing age (D minus open_time): under 24 h, 24 h or more.
+- **Rules this spec tries: 5 x 4 x 2 x 13 = 520.** All count in m.
+
+**Gates, unit, label (NBALADDER's, with the same Auditor B changes).** 3 signals a day (48 trades on 16 days) as a filter on the printed table, then n 100 or more, 40 or more games, 10 or more trade days, PF 1.3 or more at the primary haircut with both halves 1.0 or more, 2c PF 1.0 or more, Benjamini-Hochberg over m; z and p from game-level sums; n stated in games first; ranking by dollars a week at 5 contracts. Label: "development; candle replay, upper bound, not fill-checked".
+
+**Windows, as epochs.** Development: KXNBATOTAL closes **1792540800 (2026-10-21) to before 1793923200 (2026-11-06)**. Reserve week 1793923200 to 1794528000 never pulled. Validate: closes **1794528000 to before 1796342400**, after Dec 4, **one joint print with NBALADDER, NBAREB and SIBHIT-R, one m** (520 + 624 + 624 + SIBHIT-R's tries + the carried tally the Head names).
+
+**New code (not built; builds after the design review).**
+1. A plugin `engine/nbatotal.py`, copied from the audited `nbaladder.py` and changed in five places: the decision offsets, the exit mark, the line (grouped by game, not by player), the features' windows, and the grid size. Its own hand case, audited.
+2. A list job KXNBATOTAL_LISTS_A (live, settled, closes 1792540800 to 1793923199) and candle jobs built from it: windows [D_earliest - 63 min, scheduled end - 3.5 h] for rungs open at the earliest decision, about 31 rungs a game, 120 games, so about 3,700 tickers, under 2 files; size estimated from the points run once the list lands.
+
+**Prediction (numeric, before any read).** Under no edge the best of 520 cells reaches PF 1.15 to 1.30 by luck on 16 days; P(a rule clears every gate on development and holds on the joint read) about 3%. Pre-game ladders are the most heavily traded quotes of the day, so the prior is lower than for the player ladders. Kill fast: no rule with 48 or more trades and PF 1.3 or more at 1c with both halves 1.0 or more.

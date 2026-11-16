@@ -1,0 +1,143 @@
+{
+ "id": "NBATOTAL",
+ "desk": "Idea Desk C",
+ "date_registered": "2026-11-16",
+ "kind": "event_rule",
+ "card": "kalshi-scalper/workers/idea_desk_c/allkalshi/nbatotal/NBATOTAL_CARD.md",
+ "needs_new_code": [
+  "engine/nbatotal.py (plugin copied from the audited nbaladder.py with five changes, NOT BUILT)",
+  "KXNBATOTAL_LISTS_A (list job, not built)",
+  "NBATOTAL_CANDLES_P1, P2 (built from the landed list)"
+ ],
+ "uniqueness": {
+  "closest_existing": [
+   "F7",
+   "FAMSPORTS",
+   "NBALADDER",
+   "NBAREB",
+   "SPORTS-PRE (moneyline only)"
+  ],
+  "declined_list_rows_checked": [
+   "7e has no row for game totals",
+   "cells with side NO, mid 0.40 to 0.60, exit H are F7 on one sport: a version (7g)",
+   "lock and parity scans (no cross-market price)",
+   "favourite-and-hold (the bands are 30c to 70c and the side is a search dimension)"
+  ],
+  "difference": "a counted many-rule search on the pre-game NBA total ladder with timing, rung position, price, move, spread, volume and listing age; a version of F7 where it overlaps",
+  "family_flag": "none"
+ },
+ "data": {
+  "loader": "deskc_kp_load.py",
+  "loader_sha256": "c76c7f7d03aaec243f0f92fe465382a4a4d292f315c5f27e78e139d22e716fea",
+  "extracts": [
+   "KXNBATOTAL_LISTS_A (not built)",
+   "NBATOTAL_CANDLES_P1, P2 (not built)"
+  ],
+  "ticker_wall": [
+   "KXNBATOTAL"
+  ],
+  "window": {
+   "first_close": "2026-10-21T00:00:00Z",
+   "last_close_exclusive": "2026-11-06T00:00:00Z"
+  },
+  "held_out_map_checked_by": "Auditor B (pending: F7 and FAMSPORTS data windows against the development days)",
+  "independence_note": "the same development days as NBALADDER and SIBHIT; F7 and FAMSPORTS may have read KXNBATOTAL prices on some of them (windows to be mapped)"
+ },
+ "split": {
+  "mode": "fixed_dates",
+  "search_last_close_exclusive": "2026-11-06T00:00:00Z",
+  "validate_first_close": "2026-11-13T00:00:00Z",
+  "validate_last_close_exclusive": "2026-12-04T00:00:00Z",
+  "validate_note": "pulled after Dec 4; one joint print with NBALADDER, NBAREB and SIBHIT-R, one m; on the Head's go"
+ },
+ "holds": [
+  {
+   "label": "development closes",
+   "start_epoch": 1792540800,
+   "end_epoch": 1793923200,
+   "card": "this spec (spent for SIBHIT)",
+   "status": "OPEN (development)"
+  },
+  {
+   "label": "PROPUNDER reserve; never pulled",
+   "start_epoch": 1793923200,
+   "end_epoch": 1794528000,
+   "card": "PROPUNDER (closed unread)",
+   "status": "OPEN"
+  },
+  {
+   "label": "joint validate window with SIBHIT-R",
+   "start_epoch": 1794528000,
+   "end_epoch": 1796342400,
+   "card": "NBATOTAL, NBAREB, NBALADDER, SIBHIT, SIBHIT-R",
+   "status": "OPEN"
+  }
+ ],
+ "look_ahead": {
+  "decision_instant": "D = scheduled end minus 9 h, 5 h or 3.5 h; clock check as NBALADDER",
+  "features": "each feature uses candles ending at or before D",
+  "entry_quote": "latest two-sided candle ending in [D - 180 s, D]",
+  "exit": "H settles on the result, read last for traded rungs; M35 sells at the mark ending 3.5 h before the scheduled end"
+ },
+ "sources": {
+  "names": [
+   "Kalshi public API through kalshi-pull (api.elections.kalshi.com), landed runs only"
+  ],
+  "new_host": false
+ },
+ "plugin": {
+  "file": "nbatotal.py",
+  "sha256": null,
+  "hand_case_file": null,
+  "hand_case_sha256": null,
+  "auditor_clean_date": null,
+  "note": "not built: waiting on the design review"
+ },
+ "event": {
+  "scorer_plugin": "nbatotal.py",
+  "scorer_plugin_sha256": null,
+  "decision_instant": "9 h, 5 h or 3.5 h before the scheduled end",
+  "signal_threshold": "the grid's 520 cells",
+  "entry_rule": "every rung open at D whose side ask is in the cell's band and passes the cell's filter",
+  "exit": "H or M35 (the candle ending exactly 3.5 h before the scheduled end; no mark = held, printed both ways)"
+ },
+ "costs": {
+  "contracts": 10,
+  "haircuts_primary": [
+   0.01,
+   0.02
+  ],
+  "haircuts_stress": [],
+  "fee_taker": null,
+  "fee_maker": null
+ },
+ "gates": {
+  "min_n": 100,
+  "pf_primary": 1.3,
+  "pf_secondary": 1.0,
+  "min_trade_days": 10,
+  "min_signals_per_day": 3,
+  "bh_alpha": 0.05,
+  "unit": "game (z and the BH p from game-level sums; n stated in games first)",
+  "min_games": 40
+ },
+ "tries": {
+  "rules_this_spec": 520,
+  "prior_m": "from the TALLY"
+ },
+ "prediction": "best of 520 cells reaches PF 1.15 to 1.30 by luck on 16 days; P(a rule clears every gate on development and holds on the joint read) about 3%",
+ "kill": "no rule with 48 or more trades and PF 1.3 or more at 1c with both halves 1.0 or more; or nothing survives BH",
+ "kill_fast": true,
+ "subset_rationale": "the grid values were fixed from round numbers and the feature definitions before any price of these markets was read; 5 x 4 x 2 x 13 = 520",
+ "halves": "floor(n/2) in entry order",
+ "fee_form": "ceil(round(0.07 x n x p x (1 - p) x 100, 9)) / 100 per order; a void refunds the price and keeps the fee",
+ "n_floor": "no evidence at n = x below 100",
+ "outputs": {
+  "survivor_line": "rule, PF 1c and 2c, n in games and rungs, dollars a week at 5 contracts",
+  "family_flag": "none"
+ },
+ "tally": {
+  "carried_m": "asked of the Head; the plugin takes it as an argument and prints m_total"
+ },
+ "exits_rule": "M35: no mark = counted and held to settlement (H); printed both ways"
+}
