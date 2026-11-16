@@ -4,13 +4,11 @@
 
 ## LANE 1: relative strength and pairs inside baskets (one pooled pass, the POOL1 engine)
 
-**Baskets (fixed in this spec, a name may sit in two baskets; each basket is evaluated on its own and pooled by trade, a trade carries its basket id and a trade never repeats across baskets because one position per name at a time holds):**
+**Baskets (version 2, Nov 16 after Auditor B's row 1: STOCK baskets only; the metals and crypto baskets are dropped from this spec because their perps live in the ENGINE1 perps extracts, a different file, loader, window and cut, not in POOL1's 94 name wall; a later spec may add them with their own extract, loader, window and allow line and the identical date window):**
 - semis: NVDA, MU, AMD, AVGO, AMAT;
-- mega-cap tech: AAPL, MSFT, GOOGL, AMZN, META (only names that have a live perp in the census; a basket with fewer than 3 names with at least 5 trading days of candles is dropped and listed);
-- energy: XOM, CVX, COP;
-- metals: gold, silver, platinum (the metals perps);
-- crypto: the crypto perps with at least 5 trading days of candles.
-Index and ETF perps (SPY, QQQ, US500, US Tech 100) are not in any basket (thin; kept for hedging reads later).
+- mega-cap tech: AAPL, MSFT, GOOGL (KXGOOGLPERP), AMZN, META;
+- energy: XOM, CVX, COP.
+All 13 names are in the POOL1 wall (Auditor B checked). A basket needs at least 3 names with at least 5 trading days of candles, and every name at least 5 trading days; the names that fail are printed and dropped. A name sits in one basket only, so no trade repeats across baskets. Each basket is evaluated on its own and pooled by trade; a trade carries its basket id. Index and ETF perps are not in any basket. **Data and window:** POOL1's loader (a13fd79b, allow line merged), the same extract and the same window, Nov 5 18:39Z to before Nov 17 00:00Z. **Development label on every result:** "development; the same seven days as POOL1 and the ENGINE1 perps passes".
 
 **Conventions** are the POOL1 spec's (v3.5): ET clocks, mid and usable-candle rules, fill at ask or bid with haircut h of 0.0002 (gate) and 0.0005, taker 12 bp a side, funding booked from print timestamps (a position pays or receives a print iff entry end < print < exit end, everything before the first print counts as not booked), one position per name, cooldown, `END_EPOCH` 2026-11-17T00:00Z, loader behind a wall, allow line, Auditor B's CLEAN and a second build.
 
@@ -20,7 +18,7 @@ Index and ETF perps (SPY, QQQ, US500, US Tech 100) are not in any basket (thin; 
 **Both legs' fees and funding are booked:** a pair trade has 4 taker fees (12 bp x 4 = 48 bp on the notional of one leg, 24 bp on the pair's combined notional) and each leg's funding is booked by its own side and prints, summed; the gate and the display use net on the sum of both legs' notional (so a pair with a 2 bp edge on its spread is read against 24 bp of cost, not 12). A pair trade counts as ONE trade in n.
 
 **Pool, gate and counts:** as POOL1: pooled trades per trading day at least 3; PF 1.3 at taker + h 0.0002 and PF 1.0 at taker + h 0.0005, each also in both halves; no single ET day above 30% of net; net positive at 0.0005. Each rule's n counts trades with a mark. p from the day-clustered one-sided z where the day count allows (with 7 days it is a rough guide only; BH is run and printed but cannot be read as evidence).
-**m, counted in full:** the carried perps tally 103,444 plus POOL1's 218 = 103,662, plus these **144 new rules** (96 + 48), which are pooled rules (one rule, applied to every basket and name; the baskets are NOT tested separately, so a basket-by-basket split is a display only; a single basket picked from a split afterwards would be a new try and is counted as one) = **103,806** printed first.
+**m, counted in full:** the Head's single carried number for every print: today 6,290,660 (it already contains the perps passes, POOL1's 218 and everything else), from Nov 17 7,492,484, plus anything registered after, plus these **144 new rules** (96 + 48), which count as new tries even though the data repeats. A print on Nov 16 reads m = 6,290,804; from Nov 17, 7,492,628. These are pooled rules (one rule applied to every basket and name; the baskets are NOT tested separately, so a basket-by-basket split is display only; a single basket picked from a split afterwards would be a new try and is counted as one by me). BH over that m, printed first.
 
 ## LANE 6: maker execution in the perps engine
 
