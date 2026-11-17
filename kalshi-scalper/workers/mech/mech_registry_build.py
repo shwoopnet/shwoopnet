@@ -27,6 +27,11 @@ def build():
                 if e["verified"] and not mine["verified"]: out[have[e["id"]]] = e        # a hand-read row replaces my unverified one
                 continue
             have[e["id"]] = len(out); out.append(e)
+    OVERRIDES = {"SPIKE1": dict(market="15m_noncrypto", signal="price_change", clock="fixed_time_to_close", exit="hold_to_settle", side="fade", confidence="hand_read", source="VA Nov 17: 15 minute mid spike (3 sd and 5c in 2 minutes), non-crypto series, buy the cheap side, held"),
+                 "SNAPBACK1": dict(clock="any_minute", confidence="hand_read", source="VA Nov 17: liquidation-cascade fade on the Kalshi BTC and ETH perps (1 hour move of k ATR with open interest down), stop and target, 6 hour time stop"),
+                 "MENT1": dict(market="mentions")}
+    for e in out:
+        if e["id"] in OVERRIDES: e.update(OVERRIDES[e["id"]]); e["verified"] = (e["confidence"] == "hand_read"); e["source_note"] = "field override by Desk A on the VA's second-pass reading"
     ids = [e["id"] for e in out]
     if len(set(ids)) != len(ids): raise SystemExit("duplicate ids")
     return out

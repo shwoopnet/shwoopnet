@@ -5,7 +5,7 @@ NEW rule (rewritten Nov 17, 2026 after the VA's audit and the owner's "Keep it a
   2. SAME MECHANISM: some registry entry has the same signal field, the same clock CLASS and the same exit logic. The clock class is the `clock` field (relative to close, time of day, scheduled event, print, reopen, any minute); a new clock VALUE inside a class is a parameter, never a new signature. If the market family differs it is VERSION_NEW_MARKET (the owner: same signal on a new instrument class is a version, never NEW); if it is the same it is DUPLICATE.
   3. Otherwise NEW: a new signal field, a new clock class or a new exit logic. Every NEW is PROVISIONAL until the Verification Analyst signs it (the verdict carries provisional true).
 Entry type and side rule never make a signature new."""
-MARKET = ("15m_crypto", "15m_noncrypto", "hourly_ladder", "stock_perp", "index_perp", "metal_perp", "crypto_perp", "combo", "politics", "sports", "weather", "economics", "entertainment", "other")
+MARKET = ("15m_crypto", "15m_noncrypto", "hourly_ladder", "stock_perp", "index_perp", "metal_perp", "crypto_perp", "combo", "politics", "sports", "weather", "economics", "entertainment", "weekly_fx", "daily_yield", "mentions", "other")
 SIGNAL = ("price_level", "price_change", "spread", "book_depth_imbalance", "open_interest", "volume", "funding_rate", "settlement_mark", "tape_flow", "spot_elsewhere", "event_calendar", "cross_market_residual",
           "none", "external_model")   # ADDED: "none" (no signal: liquidity provision or a pure calendar rule) and "external_model" (a public forecast or model that is not a price); both used by declined rows
 CLOCK = ("fixed_time_to_close", "time_of_day", "scheduled_event", "print", "reopen", "any_minute")
