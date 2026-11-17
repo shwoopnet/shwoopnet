@@ -2,11 +2,11 @@
  "registry": "MECH_REGISTRY v0",
  "date": "2026-11-17",
  "spec": "MECHANISM_ENGINE_SPEC.md (rnd-queue 785fe85a4)",
- "count": 396,
- "signatures": 377,
+ "count": 398,
+ "signatures": 379,
  "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "be78306332ea286f038f96fcb5ec11eb356b7fe5500bd604c5ee0106768a3010",
+ "rows_sha256": "b96804c1db0c7c94bbecb0aacf63bbf6be0ec5fe18ae34004e3f313ce29fe763",
  "entries": [
   {
    "id": "L1",
@@ -725,6 +725,37 @@
    "kind": "signature",
    "signal_source": "kalshi_tape",
    "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
+  },
+  {
+   "id": "TAPEFLOW1",
+   "status": "falsified",
+   "market": "15m_crypto",
+   "signal": "tape_flow",
+   "clock": "any_minute",
+   "entry": "taker",
+   "exit": "fixed_time",
+   "side": "follow",
+   "source": "VA Nov 17: 15 minute tape flow test of Nov 11, FALSIFIED (7e row); fields set to the family reading, not read from its registration",
+   "confidence": "hand_read",
+   "verified": true,
+   "kind": "signature",
+   "signal_source": "kalshi_tape",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
+  },
+  {
+   "id": "SWEEP1",
+   "status": "retired",
+   "market": "15m_crypto",
+   "signal": "tape_flow",
+   "clock": "any_minute",
+   "entry": "taker",
+   "exit": "none",
+   "side": "any",
+   "source": "VA Nov 17: V2 Oct 27 Bitcoin big-print study (a print of 5 times the median and 50 contracts or more); retired with the footprint fold, never a trading rule; fields set to the family reading",
+   "confidence": "hand_read",
+   "verified": true,
+   "kind": "signature",
+   "signal_source": "kalshi_tape"
   },
   {
    "id": "QUOTE2B",
@@ -3766,7 +3797,8 @@
    ],
    "note": "net flow share over 5, 15, 30 minutes, followed and faded",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
+   "signal_source": "kalshi_tape"
   },
   {
    "id": "CARRY1_OCT28",

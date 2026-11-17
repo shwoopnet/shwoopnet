@@ -1,0 +1,13 @@
+# Draft change to docs/STRATEGY_LIFECYCLE.md section 7e (for Main to open as a PR for the owner's merge; docs only)
+
+Deletes: nothing. One row of the declined list is replaced by a wider one (the old text is kept inside it).
+
+## Row to replace (line 180 on main at the time of writing)
+
+| Taker order-flow signals on the 15 minute tape (flow imbalance, tape flow, sweep and refill) | Nov 12, 2026 | FLOW1 (Nov 4), TAPEFLOW1 (Nov 11) and RESIL1 FALSIFIED; RESIL1 on development: n 1,061, cash PF 0.90, mean -2.11c, independently re-run by the Verification Analyst (n 1,071, PF 0.90, mean -2.09c; the 17 events with no second post-sweep poll are the only open point) | Closed by evidence (the three-falsified rule) | FLOW1, S-FLOW1, TAPEFLOW1, RESIL1, RETAILFRAC1, any rule whose signal is the direction or persistence of taker flow on the same tape without a new data source. OICORE's open-interest trigger is a different field and is not covered |
+
+## Proposed row
+
+| Taker order-flow signals on the 15 minute tape and on the perps tape (flow imbalance, tape flow, sweep and refill, same-side run, largest print) | Nov 12, 2026; extended to the perps tape Nov 17, 2026 | FLOW1 (Nov 4), TAPEFLOW1 (Nov 11) and RESIL1 FALSIFIED on the 15 minute tape; RESIL1 on development: n 1,061, cash PF 0.90, mean -2.11c, independently re-run by the Verification Analyst (n 1,071, PF 0.90, mean -2.09c; the 17 events with no second post-sweep poll are the only open point). PERPFLOW1 FALSIFIED on the perps tape (a fourth falsified test of the same mechanism). Nov 17: the Verification Analyst ruled sweep, same-side run and largest print on the perps tape VERSIONs of PERPFLOW1, RESIL1, FLOW1, TAPEFLOW1 and SWEEP1, none NEW (the matcher agrees: tape_flow, any minute, timed exit is a DUPLICATE of PERPFLOW1 on crypto perps and a version on metal and index perps); the tape-field MECH1 run was stopped on that ruling | Closed by evidence (the three-falsified rule, now four) | FLOW1, S-FLOW1, TAPEFLOW1, RESIL1, PERPFLOW1, RETAILFRAC1, SWEEP1, any rule whose signal is the direction, persistence, size or sweep structure of taker flow on a Kalshi trade tape (15 minute markets or perps) without a new data source. OICORE's open-interest trigger is a different field and is not covered |
+
+Evidence line for the PR: Verification Analyst pre-check of Nov 17 (all three tape signals VERSIONs, none NEW; registry v2.8 and the matcher agree), the Head's ruling of Nov 17 ("yes to extending the taker-flow row to the perps tape, closed by evidence"). Registry: MECH_REGISTRY.json v2.9 adds the rows TAPEFLOW1 and SWEEP1 and PERPFLOW1's signal_source; the declined-pattern change in the registry (D_15M_TAKER_FLOW to include the perps markets) is applied only after this PR merges.

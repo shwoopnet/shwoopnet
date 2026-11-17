@@ -54,6 +54,8 @@ R = [
 ("SPXFV1", "idea", N15, "cross_market_residual", "fixed_time_to_close", "taker", "hold_to_settle", "cheap", "ledger: S&P futures-implied fair value", "from_ledger_row"),
 ("SPXEVENT1", "idea", N15, "event_calendar", "scheduled_event", "taker", "hold_to_settle", "cheap", "ledger: EVENT830's rule on KXINX15M, a version", "from_ledger_row"),
 ("RESIL1", "falsified", C15, "tape_flow", "any_minute", "taker", "fixed_time", "follow", "ledger: order-flow resilience after a sweep", "from_ledger_row"),
+("TAPEFLOW1", "falsified", C15, "tape_flow", "any_minute", "taker", "fixed_time", "follow", "VA Nov 17: 15 minute tape flow test of Nov 11, FALSIFIED (7e row); fields set to the family reading, not read from its registration", "hand_read"),
+("SWEEP1", "retired", "15m_crypto", "tape_flow", "any_minute", "taker", "none", "any", "VA Nov 17: V2 Oct 27 Bitcoin big-print study (a print of 5 times the median and 50 contracts or more); retired with the footprint fold, never a trading rule; fields set to the family reading", "hand_read"),
 ("QUOTE2B", "falsified", "hourly_ladder", "none", "any_minute", "maker_touch", "none", "both", "ledger: maker on the Bitcoin hourly ladder", "from_ledger_row"),
 ("W_SPREAD_CELL1", "falsified", C15, "spread", "fixed_time_to_close", "taker", "hold_to_settle", "cheap", "ledger: spread cell, FAIL Nov 12", "from_ledger_row"),
 ("INPLAYJUMP", "closed_by_evidence", "sports", "price_change", "any_minute", "taker", "fixed_time", "follow", "ledger: follow a one-minute in-play jump", "from_ledger_row"),

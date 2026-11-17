@@ -60,4 +60,9 @@ pats = [e for e in reg if e["kind"] == "pattern"]; assert len(pats) == 19, len(p
 # 15. an UNVERIFIED row alone never decides DUPLICATE or VERSION: it returns UNVERIFIED_MATCH (scored, labelled)
 u = [dict(id="ZZ_UNV", status="idea", market="politics", signal="volume", clock="any_minute", entry="taker", exit="fixed_time", side="follow", source="t", confidence="from_title", kind="signature", verified=False)]
 r = S.classify(c(market="politics", signal="volume", clock="any_minute", exit="fixed_time", side="follow"), u); assert r[0] == "UNVERIFIED_MATCH" and r[1] == "ZZ_UNV" and r[3]["provisional"], r
+# v2.9 (Nov 17): TAPEFLOW1 and SWEEP1 are rows, PERPFLOW1 has its signal_source; the three perps tape signals the VA ruled VERSIONs still classify as the VA read them
+byid = {e["id"]: e for e in reg}
+assert byid["TAPEFLOW1"]["status"] == "falsified" and byid["TAPEFLOW1"]["signal_source"] == "kalshi_tape" and byid["SWEEP1"]["status"] == "retired" and byid["SWEEP1"]["signal_source"] == "kalshi_tape" and byid["PERPFLOW1"]["signal_source"] == "kalshi_tape"
+r = S.classify(c(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"), reg); assert r[0] == "DUPLICATE" and r[1] == "PERPFLOW1", r
+r = S.classify(c(market="metal_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="fade"), reg); assert r[0] == "VERSION_NEW_MARKET" and r[1] in ("PERPFLOW1", "TAPEFLOW1"), r
 print("ok:", len(reg), "entries; all hand cases pass;", sum(1 for e in reg if not e["verified"]), "rows unverified")
