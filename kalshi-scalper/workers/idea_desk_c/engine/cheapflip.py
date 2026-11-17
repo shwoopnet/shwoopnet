@@ -40,7 +40,7 @@ def fee(p, n=N_CONTRACTS):
 
 R6_FIVE = ("KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXGOLD15M")
 # HOLDS.json 2026-11-16T16Z+7, copied by hand: a window is dropped, before any outcome is read, if its series and close are inside [from, to) of an open or frozen row.
-HOLDS = (("H20", R6_FIVE, 1793145600, None), ("H02", ("KXBTC15M",), 1793721600, None), ("H21", ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M"), 1793836800, 1798070400))
+HOLDS = (("H20", R6_FIVE, 1793145600, None), ("H02", ("KXBTC15M",), 1793721600, None), ("H21", ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXAUDUSD15M", "KXUSDCAD15M"), 1793836800, 1798070400))
 M_CARRIED = 7492484                                                    # Nov 17 value; any other is refused
 
 
