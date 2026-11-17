@@ -710,9 +710,23 @@ exports.kalshiLiveArmed = onSchedule(
               // CFRTIK (Nov 12, 2026): the Bitcoin perpetual's public one minute candles (keyless GET, no signing, 3 s abort, no retry), and a short sleep for the bounded wait for the decision minute's candle.
               // The ticker is fixed here: nothing the engine or a caller passes can read another market.
               readPerpCandles: require("./kalshiCfrtiKReadLib").perpCandleReader(live.liveRequest, fetch),
+              // OICORE's sizing base (kalshiOicoreBaseLib, the owner's Nov 16 decision): the perps account document, read once per tick and ONLY when OICORE has a market in its entry span. The engine fails closed on a missing or stale figure.
+              readPerpsDoc: async () => { const d = await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).get(); return d.exists ? d.data() : null; },
               sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
             });
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
+            // A slot order skipped for short cash on its shard raises the same low money phone alert as L1 (same six hour cooldown document). It moves no money: the owner moves cash between shards.
+            try {
+              if (slotResult && slotResult.shardShort) {
+                const sRef = db.collection("kalshiLiveControl").doc("shardAlert");
+                await shardAlertLib.runShardAlert({
+                  now, short: slotResult.shardShort,
+                  claim: (at) => db.runTransaction(async (tx) => { const cur = await tx.get(sRef), last = cur.exists && Number.isFinite(Number(cur.data().at)) ? Number(cur.data().at) : null; if (!shardAlertLib.claimable(at, last)) return false; tx.set(sRef, { at }, { merge: true }); return last; }),
+                  release: (prev) => sRef.set({ at: prev }, { merge: true }),
+                  raise: (a) => sessRef.set({ shardAlert: a }, { merge: true }),
+                });
+              }
+            } catch (e) { console.error("kalshiLiveArmed: slot shard alert failed: " + String((e && e.message) || e).slice(0, 160)); }
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
         }
       }
