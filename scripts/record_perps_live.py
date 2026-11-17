@@ -4,7 +4,7 @@ shows only LIVE and cannot back-serve: every 60 seconds (1) the perps list, one 
 open interest, 24 hour volume, leverage estimate and the long and short leverage estimates at each notional size; the static fields (contract size, tick, funding cap, schedule and so on) once per job in static.csv), and (2) the order books of the active markets, depth 5, one request of at most 100 tickers. Candles, funding and the trade tape DO back-serve
 (candles by ticker, funding in one request, trades with time filters) and are NOT recorded here.
 
-Added Nov 17, 2026 (Forensics' spec, the Head's order): (3) the public TRADE TAPE (/trades, no ticker), built but OFF (TAPE_ON; see the constant), once a minute when on, bounded to 20 seconds and 5 pages after the list read, into tape.csv with a coverage row per poll
+Added Nov 17, 2026 (Forensics' spec, the Head's order): (3) the public TRADE TAPE (/trades, no ticker), once a minute (TAPE_ON), bounded to 20 seconds and 5 pages after the list read, into tape.csv with a coverage row per poll
 (tape_cover.csv; the tape now also back-serves, so a truncated poll names the window it did not reach); (4) settle.csv, the list rows read between 16:55 and 17:05 UTC with settle_window=1 (no extra request); (5) funding_day.csv,
 one request after 21:15 UTC for every market's funding prints of the day (the route's field is market_ticker). Same host, no key, same job, no new schedule.
 
@@ -49,8 +49,8 @@ FAST_COVER_COLS = ["t_local_ms", "ok", "rows", "n429", "note"]
 # TAPE, SETTLEMENT MARKS AND THE DAILY FUNDING READ (Nov 17, 2026, Forensics' spec RECORDER_SPEC_TAPE_SETTLE_NOV17, the Head's order; same job, no new schedule). The perps public trade tape
 # (GET /margin/trades, NO ticker, newest first, limit 1000, cursor) is read every 5 minutes after the list read, bounded to 20 seconds and 5 pages; the probe of Nov 17 showed it also BACK-SERVES at
 # least 60 days (a one hour window 60 days back answered with a full page), so a truncated poll writes the window it did not reach in its coverage row and a back-pull can fill it.
-TAPE_ON = False                            # OFF by default (Nov 17, 2026 live test: about 25 trades a second, 5,000 rows in 200 s, so about 2 million rows and an estimated 40 to 60 MB gzipped a day, far over the spec's 2 to 8 MB; the tape also back-serves 60 days). Turn on only with a decision on the branch size.
-TAPE_EVERY_S = 60.0                        # once a minute when on: at the live rate 5 minutes is about 7,500 trades, over the 5 page cap, so a 5 minute poll would truncate every time
+TAPE_ON = True                             # ON (the Head: a live copy is still needed past the 60 day serve window). Measured Nov 17: 40 to 450 trades a minute in 60 second windows across 59 days, with one burst of about 25 a second; at a minute's cadence that is 1 to 2 pages a poll.
+TAPE_EVERY_S = 60.0                        # once a minute: a 5 minute poll would hit the 5 page cap in a burst (about 7,500 trades in 5 minutes at the burst rate) and truncate
 TAPE_BUDGET_S = 20.0
 TAPE_MAX_PAGES = 5
 TAPE_LIMIT = 1000

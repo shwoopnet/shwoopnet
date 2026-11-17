@@ -182,8 +182,8 @@ assert.ok(/2027-02-26T23:59:00Z/.test(py) && /2027-02-26T23:59:00Z/.test(wf), 'P
 assert.ok(/gzip -9 -f data\/perplive\/\$STAMP\/\*\.csv/.test(wf), 'PLT8 the workflow already compresses every csv of the job folder, so the new files are gzipped and pushed with the rest');
 console.log('ok   PLT8 daily funding read and the stop date');
 
-// PLT9: the tape step ships OFF (the live test showed about 25 trades a second, which is far above the spec's size estimate and makes a 5 minute poll truncate every time); with it off no tape file is created and nothing is requested for it.
-assert.ok(/^TAPE_ON = False/m.test(code), 'PLT9 the tape step is off by default');
+// PLT9: the tape step is ON at a one minute cadence (the Head's order: a live copy is still needed past the 60 day serve window; at the measured 40 to 450 trades a minute a poll is 1 to 2 pages), behind one switch.
+assert.ok(/^TAPE_ON = True/m.test(code), 'PLT9 the tape step is on');
 assert.ok(/if TAPE_ON and now >= next_tape/.test(code) && /if TAPE_ON:\n\s+ft, ftc = open/.test(code), 'PLT9 the tape files and polls are behind the switch');
-assert.ok(/TAPE_EVERY_S = 60\.0/.test(code), 'PLT9 once a minute when on');
-console.log('ok   PLT9 tape step off by default');
+assert.ok(/TAPE_EVERY_S = 60\.0/.test(code), 'PLT9 once a minute');
+console.log('ok   PLT9 tape step on, once a minute');

@@ -98,7 +98,7 @@ assert.strictEqual(r.status, 0, 'PL7 ' + r.stderr + r.stdout);
 console.log('ok   PL7 three 429s end the run; nothing is recorded after the end date');
 
 // PL8: it only writes its three csv files in the directory it is given.
-assert.deepStrictEqual(fs.readdirSync(path.join(t, 'a')).sort(), ['book.csv', 'coverage.csv', 'markets.csv', 'static.csv'], 'PL8 four files (the tape step is off by default; settle.csv and funding_day.csv only when they have rows)');
+assert.deepStrictEqual(fs.readdirSync(path.join(t, 'a')).sort(), ['book.csv', 'coverage.csv', 'markets.csv', 'static.csv', 'tape.csv', 'tape_cover.csv'], 'PL8 six files (the tape files are opened with the tape step; settle.csv and funding_day.csv only when they have rows)');
 console.log('ok   PL8 outputs');
 
 // PL9: the fast lane (Nov 16, 2026): 5 second batched orderbooks polls of ten tickers inside 8:30 to 15:00 Central on weekdays, a step of the same job, its own files, ends on three 429s, never changes the minute poll.
