@@ -79,7 +79,7 @@ gates.SR5 = () => {
   // Consequence (S1): the published files carry per-spec aggregates only: no ticker, no per-trade amount, no per-day table, and the two labels are on the results file.
   const o = JSON.parse(execFileSync('python3', [path.join(__dirname, 'shadowRunnerHandCase.py')], { encoding: 'utf8' }).trim().split('\n').pop());
   const text = JSON.stringify(o.counts);
-  assert.ok(!/KXTEST|x1|x2|"c":|"d":/.test(text) && Object.keys(o.counts).sort().join() === ['as_of_utc', 'expected_days_to_100', 'id', 'settled', 'signals', 'start_utc', 'status', 'target', 'voids', 'wins'].join());
+  assert.ok(!/KXTEST|x1|x2|"c":|"d":/.test(text) && Object.keys(o.counts).sort().join() === ['as_of_utc', 'expected_days_to_100', 'id', 'scored_at_settlement', 'settled', 'signals', 'start_utc', 'status', 'target', 'voids', 'wins'].join());
   assert.deepStrictEqual(o.labels, ['forward', 'paper']);
   const r = py(`print(json.dumps([R.LABEL_PAPER, R.LABEL_FWD]))`);
   assert.ok(/validate-window income, upward biased, not a forecast/.test(r[0]) && /calendar days, weekends included/.test(r[1]));
