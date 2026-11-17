@@ -1,8 +1,9 @@
 const fs=require('fs'),assert=require('assert');
 const h=fs.readFileSync('index.html','utf8');
+
 const m=h.match(/function kalshiPerpRisk[\s\S]*?function kalshiPerpRows\(a\)\{[^\n]*\n/);
 assert(m,'PP1 functions present');
-const f=new Function(m[0]+';return {kalshiPerpCushion,kalshiPerpsHtml,kalshiPerpRisk,kalshiPerpRows,kalshiPerpsFromDoc,kalshiPerpsNote};')();
+const f=new Function('KAL_TZ',m[0]+';return {kalshiPerpChartHtml,kalshiPerpCushion,kalshiPerpsHtml,kalshiPerpRisk,kalshiPerpRows,kalshiPerpsFromDoc,kalshiPerpsNote};')('America/Chicago');
 const esc=s=>String(s).replace(/</g,'&lt;'), money=v=>'$'+v.toFixed(2);
 const row={market:'Bitcoin <x>',up:true,multiplier:27.4,cost:10,size:274,entry:90000,index:91000,value:12.5,pnl:2.5,pnlPct:25,takeProfit:95000,stopLoss:88000,closeAt:87000,bufferPct:27};
 const out=f.kalshiPerpsHtml([row],esc,money);
@@ -55,3 +56,11 @@ w.kalshiPerpsState.hist=[{t:now-2*86400000,total:40},{t:now-86400000,total:45}];
 v=w.kalshiPerpsView(base,now);assert.strictEqual(v.perpsTotal,50);assert.strictEqual(v.perpsDay,5,'PP8 today is equity minus the last earlier-day snapshot');assert.strictEqual(v.perpsHistory.length,3);
 w.kalshiPerpsState.doc.at=now-21*60000;v=w.kalshiPerpsView(base,now);assert.strictEqual(v.perpsTotal,undefined);assert(/older than 20 minutes/.test(v.perpsNote),'PP8 stale drops perps and says why');
 console.log('perpPositionsGates ok');
+// PP10: a perp row draws a price line with a dashed entry line once there are two marks; before that it says what it waits for, and a missing mark list never breaks the row.
+const mk=[{t:1e12,v:90000},{t:1e12+240000,v:91000},{t:1e12+480000,v:90500}];
+const chh=f.kalshiPerpsHtml([row],esc,money,null,{[row.market]:mk});
+assert(chh.includes('kal-perp-chart')&&chh.includes('kal-hc-target-line')&&chh.includes('Dashed line: entry price')&&chh.includes('data-hv='),'PP10 chart with entry line and hover');
+assert(f.kalshiPerpsHtml([row],esc,money,null,{[row.market]:[mk[0]]}).includes('Price line appears after two reads'),'PP10 one mark: says what it waits for');
+assert(f.kalshiPerpsHtml([row],esc,money).includes('Price line appears'),'PP10 no marks: no chart, no error');
+// PP11: the result line is never cut to the first perps snapshot (the page code does not move `since` to ph.first)
+assert(!/since = Math\.max\(since, ph\.first\)/.test(h),'PP11 range not cut by perps history');
