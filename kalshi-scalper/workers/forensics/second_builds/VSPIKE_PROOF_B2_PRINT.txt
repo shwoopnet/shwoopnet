@@ -1,0 +1,7 @@
+cuts file sha256 bac4e22ec6d4dcf1b9736757c35f160e47344d4f322af94e54f5857a4e354750
+SH3_08 KXETH15M (540, 14, 'favourite', 'mid', 'H') phase SEARCH | their cuts [0.6951379763469121, 1.1205622204213312]: n 125 PF1c 1.436008311338 PF2c 1.363989134653 | my SEARCH terciles equal their cuts: True
+SH3_08 KXETH15M (540, 14, 'favourite', 'mid', 'H') phase VALIDATE | their cuts [0.6951379763469121, 1.1205622204213312]: n 104 PF1c 1.430750702529 PF2c 1.359426608535 | my SEARCH terciles equal their cuts: True
+SH3_11 KXETH15M (540, 14, 'favourite', 'mid', 'T') phase SEARCH | their cuts [0.6951379763469121, 1.1205622204213312]: n 125 PF1c 1.372325489976 PF2c 1.260934641610 | my SEARCH terciles equal their cuts: True
+SH3_11 KXETH15M (540, 14, 'favourite', 'mid', 'T') phase VALIDATE | their cuts [0.6951379763469121, 1.1205622204213312]: n 104 PF1c 1.369731031714 PF2c 1.261130928788 | my SEARCH terciles equal their cuts: True
+SH3_17 KXHYPE15M (420, 1, 'cheap', 'low', 'M60') phase SEARCH | their cuts [0.7269671417587515, 1.3775667238271116]: n 107 PF1c 2.134822028207 PF2c 1.778935185185 | my SEARCH terciles equal their cuts: True
+SH3_17 KXHYPE15M (420, 1, 'cheap', 'low', 'M60') phase VALIDATE | their cuts [0.7269671417587515, 1.3775667238271116]: n 105 PF1c 1.607154112827 PF2c 1.340720598232 | my SEARCH terciles equal their cuts: True
