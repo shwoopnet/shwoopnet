@@ -6,8 +6,8 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const root = path.join(__dirname, '..');
 const rd = (...p) => fs.readFileSync(path.join(root, ...p), 'utf8');
-const wfs = { candles: rd('.github', 'workflows', 'record-perps-candles.yml'), sunday: rd('.github', 'workflows', 'record-perps-sunday.yml') };
-const scripts = { candles: rd('scripts', 'record_perps_candles.py'), sunday: rd('scripts', 'record_perps_sunday.py'), fast: rd('scripts', 'record_perps_fast.py'), daily: rd('scripts', 'record_daily.py') };
+const wfs = { candles: rd('.github', 'workflows', 'record-perps-candles.yml') };
+const scripts = { candles: rd('scripts', 'record_perps_candles.py'), daily: rd('scripts', 'record_daily.py') };
 const strip = (s) => s.replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
 const py = (file, body) => JSON.parse(execFileSync('python3', ['-I', '-c', `
 import importlib.util, json, datetime as dt, tempfile, os, gzip, time
@@ -26,14 +26,13 @@ gates.RB1 = () => {
     assert.ok(/ref: main/.test(wf), k + ': code from main');
   }
   assert.ok(/STOP_DATE = dt\.date\(2027, 2, 26\)/.test(scripts.candles), 'candles script stop date');
-  assert.ok(/STOP_DATE = dt\.date\(2027, 2, 26\)/.test(scripts.sunday), 'sunday script stop date');
   const cfg = rd('_config.yml');
   assert.ok(/- \.github/.test(cfg) && /- scripts/.test(cfg), 'not published with the site');
 };
 
 // RB2: public GET only. No key, no signing, no account or order endpoint, no write call.
 gates.RB2 = () => {
-  for (const k of ['candles', 'sunday']) {
+  for (const k of ['candles']) {
     const code = strip(scripts[k]);
     assert.ok(!/PRIVATE|SECRET|Authorization|ACCESS[-_]?KEY|method\s*=\s*["'](POST|PUT|DELETE)|data\s*=/i.test(code), k + ': no key, no signing, no write call');
     assert.ok(!/\/portfolio|\/orders|order_id|create_order/i.test(code), k + ': no account or order endpoint');
@@ -41,47 +40,7 @@ gates.RB2 = () => {
   assert.ok(/external-api\.kalshi\.com\/trade-api\/v2\/margin/.test(scripts.candles) && /candlesticks/.test(scripts.candles) && /funding_rates\/historical/.test(scripts.candles), 'candles and funding endpoints');
 };
 
-// RB3: the 30 second recorder (and so the 10 second Sunday one) carry halt_sources and is_open, from the same market object with no extra read; absent fields are empty.
-gates.RB3 = () => {
-  assert.ok(/EXTRA_COLUMNS = \["halt_sources", "is_open", "leverage_estimate"\]/.test(scripts.fast), 'columns declared');
-  assert.ok(/base\.COLUMNS \+ EXTRA_COLUMNS/.test(scripts.fast) && /base\.COLUMNS \+ fast\.EXTRA_COLUMNS/.test(scripts.sunday), 'both recorders write the new header');
-  const r = py('record_perps_fast.py', `
-a = m.rows_with_flags([{"ticker": "KXAAPLPERP", "halt_sources": [], "schedule": {"is_open": False}, "leverage_estimate": "5"}, {"ticker": "KXBTCPERP", "halt_sources": ["a", "b"], "schedule": {"is_open": True}}, {"ticker": "X"}], "t")
-print(json.dumps([m.base.COLUMNS + m.EXTRA_COLUMNS == m.base.COLUMNS + ["halt_sources", "is_open", "leverage_estimate"], [x[-3:] for x in a], len(a[0]) == len(m.base.COLUMNS) + 3]))`);
-  assert.deepStrictEqual(r, [true, [['', 'false', '5'], ['a|b', 'true', ''], ['', '', '']], true]);
-};
-
-// RB4: the Sunday window is 17:55 to 18:35 New York on Sundays only (so daylight saving moves it), writes one file, a second start does nothing, a failed read costs one sample, past the stop date nothing.
-gates.RB4 = () => {
-  const r = py('record_perps_sunday.py', `
-u = dt.timezone.utc
-f = lambda s: (m.current_window(dt.datetime.fromisoformat(s).replace(tzinfo=u)) or [None])[0]
-w = [f('2026-11-08T22:58:00'), f('2026-11-08T22:50:00'), f('2026-11-08T23:36:00'), f('2026-11-09T22:58:00'), f('2026-07-05T21:58:00'), f('2026-07-05T22:58:00')]
-d = tempfile.mkdtemp()
-clock = [dt.datetime(2026, 11, 8, 23, 33, 0, tzinfo=u)]
-def now(): return clock[0]
-def sleep(s): clock[0] = clock[0] + dt.timedelta(seconds=10)
-calls = [0]
-def fetch():
-    calls[0] += 1
-    if calls[0] == 2: raise RuntimeError('429')
-    return [{"ticker": "KXAAPLPERP", "price": "6.9", "halt_sources": [], "schedule": {"is_open": True}}]
-a = m.main(d, now, fetch, sleep)
-rows = gzip.open(os.path.join(d, '2026-11-08', 'sunday.csv.gz'), 'rt').read().strip().split('\\n')
-clock[0] = dt.datetime(2026, 11, 8, 23, 33, 30, tzinfo=u)
-b = m.main(d, now, fetch, sleep)
-clock[0] = dt.datetime(2027, 2, 28, 22, 58, 0, tzinfo=u)
-c = m.main(d, now, fetch, sleep)
-print(json.dumps([w, a, len(rows) - 1, calls[0], b, c, rows[0].endswith('halt_sources,is_open,leverage_estimate'), os.listdir(d)]))`);
-  assert.deepStrictEqual(r[0], ['sunday', null, null, null, 'sunday', null], 'Nov 22:58Z in, 22:50Z before, 23:36Z after, Monday no; July (EDT) 21:58Z in, 22:58Z after');
-  assert.strictEqual(r[1], 0);
-  assert.strictEqual(r[3], 12, 'a window of 12 reads in the last 2 minutes');
-  assert.strictEqual(r[2], 11, 'one read failed, so one sample fewer');
-  assert.strictEqual(r[4], 0);
-  assert.strictEqual(r[5], 0);
-  assert.ok(r[6], 'header has the flags');
-  assert.deepStrictEqual(r[7], ['2026-11-08']);
-};
+// RB3 and RB4 (the 30 second and Sunday recorders' columns and window) were deleted with those recorders on Nov 16, 2026; the 60 second live recorder covers the same list.
 
 // RB5: the nightly archive records the previous UTC date for the Equities and Indices perps only, spaced at least 1.2 s, keeps only that date's funding rows, stops after three 429s in a row without writing, and does nothing twice.
 gates.RB5 = () => {

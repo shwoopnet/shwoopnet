@@ -23,21 +23,11 @@ gates.OM1 = () => {
   assert.deepStrictEqual(hits, [], 'no Open-Meteo host anywhere a job could read it: ' + hits.join(', '));
 };
 
-// OM2: the signal logger's allowlist (where a registry entry could add a host) does not hold it, and the weather recorder has no ensemble table or member parser left.
+// OM2: the signal logger and the weather recorder (the two files that could name an Open-Meteo host or variable) were deleted Nov 16, 2026 and stay gone.
 gates.OM2 = () => {
-  const sig = fs.readFileSync(path.join(root, 'scripts', 'record_signals.py'), 'utf8');
-  const m = /ALLOWLIST\s*=\s*frozenset\(\{([\s\S]*?)\}\)/.exec(sig);
-  assert.ok(m, 'the allowlist is found');
-  assert.ok(!BLOCKED.test(m[1]));
-  assert.ok(/"api\.weather\.gov"/.test(m[1]), 'NWS stays allowed');
-  const wx = fs.readFileSync(path.join(root, 'scripts', 'record_wxens.py'), 'utf8');
-  assert.ok(!/parse_ensemble|temperature_2m/.test(wx), 'no ensemble parser or Open-Meteo variable name');
-};
-
-// OM3: the signal registry does not point a signal at it.
-gates.OM3 = () => {
-  const reg = path.join(root, 'kalshi-scalper', 'signals', 'REGISTRY.json');
-  if (fs.existsSync(reg)) assert.ok(!BLOCKED.test(fs.readFileSync(reg, 'utf8')), 'REGISTRY.json names no Open-Meteo URL');
+  assert.ok(!fs.existsSync(path.join(root, 'scripts', 'record_signals.py')), 'record_signals.py is gone');
+  assert.ok(!fs.existsSync(path.join(root, 'scripts', 'record_wxens.py')), 'record_wxens.py is gone');
+  assert.ok(!fs.existsSync(path.join(root, 'kalshi-scalper', 'signals', 'REGISTRY.json')), 'the signal registry is gone');
 };
 
 let failed = 0;

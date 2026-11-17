@@ -35,21 +35,11 @@ gates.NS2 = () => {
   assert.ok(!fs.existsSync(path.join(root, 'scripts', 'record_sportspre.py')), 'the script is gone');
 };
 
-// NS4: the REF recorder's watchlist and adapters name none of the blocked hosts or sources.
+// NS4: the REF recorder, its adapters and the signal logger were deleted Nov 16, 2026 and stay gone; the REF watchlist (kept as the research record) names none of the blocked hosts.
 gates.NS4 = () => {
   const w = fs.readFileSync(path.join(root, 'kalshi-scalper', 'workers', 'RECREF_WATCHLIST.json'), 'utf8').split('\n').filter((l) => !/"_parked"/.test(l)).join('\n');
   assert.ok(!BLOCKED.test(w), 'the watchlist names no blocked host');
-  assert.ok(!BLOCKED.test(fs.readFileSync(path.join(root, 'scripts', 'ref_adapters.py'), 'utf8')), 'the adapters name no blocked host');
-};
-
-// NS3: record_signals.py's allowlist (the one place a new host could be added by a registry entry) holds none of them either.
-gates.NS3 = () => {
-  const src = fs.readFileSync(path.join(root, 'scripts', 'record_signals.py'), 'utf8');
-  const m = /ALLOWLIST\s*=\s*frozenset\(\{([\s\S]*?)\}\)/.exec(src);
-  assert.ok(m, 'the allowlist is found');
-  const hosts = [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
-  assert.ok(hosts.length >= 5, 'hosts parsed');
-  for (const h of hosts) assert.ok(!BLOCKED.test(h), h + ' is a blocked site (sports score, Polymarket, Rotten Tomatoes, or a parked unchecked-terms host)');
+  for (const f of ['ref_adapters.py', 'record_ref.py', 'record_signals.py']) assert.ok(!fs.existsSync(path.join(root, 'scripts', f)), f + ' is gone');
 };
 
 let failed = 0;
