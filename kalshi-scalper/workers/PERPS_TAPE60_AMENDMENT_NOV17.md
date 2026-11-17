@@ -3,7 +3,7 @@
 Applies to: ENGPERPS lanes 1 and 6 (one re-run, the same frozen 144 rules, no change to any rule), MECH1's first run, and PERPSCALP2. Nothing here changes a bot or places an order. Public tape only.
 
 ## 1. The tape (what is stored)
-Source: Kalshi's public perps trades, GET /margin/trades, fields trade_id, ticker, count, price, created_time, taker_side, is_block_trade. Stored by Main's back-pull as one file per ticker per UTC date, gzipped CSV, header row, columns in this order: ticker, trade_id, created_time (ISO 8601 UTC with fractional seconds if the API gives them, else whole seconds), price (dollars, as a decimal string, not rounded by the puller), count (integer contracts), taker_side ("buy" or "sell" as the API gives it), is_block_trade (true/false). Pages are concatenated; a row repeated across pages is kept ONCE, by (ticker, trade_id). Rows sorted by (created_time, trade_id) ascending as strings of the ISO time and trade_id. The puller logs, per ticker and date: pages, rows read, rows kept, duplicates dropped. A file with a gap in pages is flagged, not repaired.
+Source: Kalshi's public perps trades, GET /margin/trades, fields trade_id, ticker, count, price, created_time, taker_side, is_block_trade. Stored by Main's back-pull as one file per ticker per UTC date, gzipped CSV, header row, columns in this order: ticker, trade_id, created_time (ISO 8601 UTC with fractional seconds if the API gives them, else whole seconds), price (dollars, as a decimal string, not rounded by the puller), count (integer contracts), taker_side ("buy" or "sell" as the API gives it), is_block_trade (true/false). Pages are concatenated; a row repeated across pages is kept ONCE, by (ticker, trade_id). Rows are NOT trusted to be in time order: the builder orders by the exact time (see the settled readings), not by the ISO string. The puller logs, per ticker and date: pages, rows read, rows kept, duplicates dropped. A file with a gap in pages is flagged, not repaired.
 
 ## 2. The 1 minute bar builder (rule, to be built twice blind)
 - Bars are UTC, half open: a trade with created_time t belongs to the bar that ENDS at the first whole minute boundary STRICTLY after t. A trade at exactly 12:01:00.000 belongs to the bar ending 12:02:00. The bar is labelled by its end time (end_ts, epoch seconds), as the candle extracts are.
@@ -24,3 +24,19 @@ Bar builder built twice blind (my build, the Testing Desk's) and equal at 1e-9 o
 
 ## 5. Open rulings I ask the Testing Desk to read against (their numbered readings list)
 Candle end convention (section 2, strictly after), OHLC with block trades out, empty minutes (no row), bid and ask (none), volume (non-block sum), ET versus UTC, dedupe (by trade_id). Anything they read differently is settled in this file before any code.
+
+## 6. Settled readings (Desk A, Nov 17, 2026, answering the Testing Desk's T1 to T18 at 871000e89; these bind both builds)
+T1 settled as read: ISO 8601 UTC (Z or +00:00), fraction of 0 to 9 digits, parsed to integer nanoseconds, no floats; any other form raises.
+T2 settled as read: end_ts = (floor(t_ns / 60e9) + 1) x 60.
+T3 settled as read, and the stored-order sentence in section 1 is corrected above: open and close by exact time, ties by trade_id compared as a string.
+T4 settled as read: the FIRST in file order is kept (over several files, in sorted path order); a repeat whose other fields differ is counted (duplicate_differs).
+T5 settled as read: exact decimals; the printed value is a float of the exact decimal.
+T6 settled as read: true or false, case-insensitive, anything else raises; block rows leave open, high, low, close, volume, n_trades, buy_volume and sell_volume and add to block_volume and block_count.
+T7 settled as read: a bar with only block trades writes no row; it goes to the per-file summary (bars_only_block).
+T8 settled as read: a count of 0 counts in n_trades and adds 0 volume; a negative or non-integer count raises.
+T9 settled as read: taker_side "buy" or "sell" exactly; any other value counts in volume and n_trades, in neither side column, and in unknown_side_trades.
+T10 settled as read. T12 settled as read (UTC date files are independent; a duplicated ticker-date merges by T4).
+T11 settled as read, with the float format fixed: "%.17g".
+T13 settled: path layout tape/<UTC date>/<ticker>.csv.gz. The ticker list is NOT fixed here: it is a file committed with its sha256 before the first read, naming the tickers for each use (the 13 stock basket names of lanes 1 and 6 are KXNVDAPERP, KXMUPERP, KXAMDPERP, KXAVGOPERP, KXAMATPERP, KXAAPLPERP, KXMSFTPERP, KXGOOGLPERP, KXAMZNPERP, KXMETAPERP, KXXOMPERP, KXCVXPERP, KXCOPPERP; the PERPSCALP2 and MECH1 crypto lists come from their own registrations). The wall is as read: the ticker column is read first; rows of other tickers are counted and not parsed.
+T14 settled as read: the smallest positive difference between the sorted distinct non-block prices of the file; printed in the summary only.
+T15, T16, T17 settled as read. T18 settled as read: file hashes of the bar file and of the summary lines, rows sorted by (ticker, end_ts), line format as T18 with the T11 float format.
