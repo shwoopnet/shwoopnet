@@ -10,7 +10,7 @@ Goal, in the owner's words: a full-time paying job, not a hobby, that keeps earn
 ## 2. New markets to be early in (perps)
 - Stock perps, gold and index perps are weeks old, thin, and priced by few makers. That is where edges are widest and shortest-lived.
 - First test per lane: stock perps: relative strength and pairs (lanes 1 and 6, code done, running this week). Gold and metals: the gold move filter (V4 shadow). Indices: the funding print, already tested as SPFUND1 (development to Dec 18). Crypto perps: FUNDX2, extreme funding (runs this week).
-- Honest status: 0 perps rules have passed so far (PERPSCALP2, PERPSLANE4 and POOL1 all failed). The cost of a round trip (about 24 bp a side, taker) is the main enemy.
+- Honest status: 0 perps rules have passed so far (PERPSCALP2, PERPSLANE4 and POOL1 all failed). The cost of a round trip (about 24 bp, 12 bp a side as taker) is the main enemy.
 
 ## 3. The testing machine, and how it stays honest
 - Every test is written down before any data is read: rule, cut dates, kill rule, expected trades a day.
@@ -33,5 +33,5 @@ Goal, in the owner's words: a full-time paying job, not a hobby, that keeps earn
 
 ## Honest income math
 - A full-time income of $4,000 a month needs, at a steady 3% a month, about $133,000 working; at 2% a month, $200,000; at 5% a month, $80,000. Returns of 2% to 5% a month, held for years, would be exceptional for anyone; nothing here has proven any rate yet.
-- Capacity matters as much as rate: the 15 minute Kalshi books hold a few hundred contracts near the touch, so most Kalshi edges cap out far below $100,000. Perps scale further.
+- Capacity matters as much as rate: the 15 minute Kalshi books hold a few hundred to about a thousand contracts near the touch, so most Kalshi edges cap out far below $100,000. Perps scale further.
 - Deposits of $250 a month alone take about 33 years to reach $100,000. With 2% a month on top, about 9 years; with 3%, about 7. So in year one the realistic aim is a proven edge with a known capacity, not an income. Income follows a proven edge plus deposits, over years.
