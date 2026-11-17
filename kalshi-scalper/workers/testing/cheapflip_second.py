@@ -100,7 +100,7 @@ def collect(markets, results):
 
 
 def cell(ents, k, held_missing=None):
-    n = len(ents); out = {"n": n, "days": len(set(utc_day(e["close"]) for e in ents)), "windows": len(set(e["ticker"] for e in ents))}
+    n = len(ents); out = {"n": n, "days": len(set(utc_day(e["close"]) for e in ents)), "windows": len(set(e["close"] for e in ents))}      # windows = distinct 15 minute close times in the cell (the card author's meaning, Auditor B's ruling)
     out["first_day"] = min((utc_day(e["close"]) for e in ents), default=None); out["last_day"] = max((utc_day(e["close"]) for e in ents), default=None)
     tch = [e for e in ents if e["touches"][k] is not None]
     out["reach_share"] = len(tch) / n if n else None; mm = median([e["touches"][k][0] for e in tch]); out["median_touch_s"] = None if mm is None else mm / 1000

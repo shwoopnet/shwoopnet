@@ -65,5 +65,9 @@ class T(unittest.TestCase):
         self.assertEqual(c.find_touch(ps, C, "yes", i, a, 2)[0], 2)                      # 2 x 34 = 68 mills: 0.067 does not touch, 0.068 does
         self.assertAlmostEqual(c.trade_net(34, 10, (0, 68, 4), "yes", "yes"), 10 * (0.058 - 0.044) - c.fee(44) - c.fee(58), 12)
         self.assertEqual(c.fee(34), 0.03)                                                # 0.07 x 10 x 0.034 x 0.966 x 100 = 2.299 -> 3
+    def test_windows_are_distinct_closes(self):
+        mk = {"A": ("KXHYPE15M", C, [poll(300, no=[(0.97, 7)])]), "B": ("KXBNB15M", C, [poll(300, no=[(0.97, 7)])]), "D": ("KXBNB15M", C + 900, [(int((C + 900 - 300) * 1000), "D", C + 900, bids(), bids((0.97, 7)))])}
+        ents, cnt = c.collect(mk, {"A": "yes", "B": "yes", "D": "yes"}); rows = c.table(ents, cnt); cell = [r for r in rows if r[0] == 3 and r[1] == 2][0][2]
+        self.assertEqual((cell["POOLED"]["n"], cell["POOLED"]["windows"]), (3, 2)); self.assertEqual((cell["KXBNB15M"]["n"], cell["KXBNB15M"]["windows"]), (2, 2)); self.assertEqual((cell["KXHYPE15M"]["n"], cell["KXHYPE15M"]["windows"]), (1, 1))
     def test_median_even(self):
         self.assertEqual(c.median([1, 2, 3, 10]), 2.5); self.assertEqual(c.median([5, 1, 3]), 3)
