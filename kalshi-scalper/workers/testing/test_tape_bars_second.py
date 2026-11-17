@@ -40,7 +40,7 @@ class TT(unittest.TestCase):
         bad = {"file": "2026-11-17.csv.gz", "ticker": "KXOTHER"}; bars, summ, ticks = T.build([bad] + ROWS, {"KXT"}); self.assertEqual(len(bars), 3); self.assertEqual(summ[("2026-11-17.csv.gz", "_outside_wall")]["rows"], 1)
     def test_two_tickers_one_file(self):
         rs = [row("2026-11-17T12:00:20Z", "5.0", "1", "buy", "false", tk="KXA"), row("2026-11-17T12:00:20Z", "9.0", "1", "buy", "false", tk="KXB")]
-        bars, summ, _ = T.build(rs, {"KXA", "KXB"}); self.assertEqual((float(bars[("KXA", 1794916860)]["close"]), float(bars[("KXB", 1794916860)]["close"])), (5.0, 9.0)); self.assertEqual(len(T.summary_lines(summ, {})), 2)
+        bars, summ, _ = T.build(rs, {"KXA", "KXB"}); self.assertEqual((float(bars[("KXA", 1794916860)]["close"]), float(bars[("KXB", 1794916860)]["close"])), (5.0, 9.0)); self.assertEqual(len(T.summary_lines(summ, {})), 3)         # header and two lines
     def test_files_and_allow(self):
         d = tempfile.mkdtemp()
         try:

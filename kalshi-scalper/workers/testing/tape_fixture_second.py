@@ -1,18 +1,26 @@
 #!/usr/bin/env python3
-"""Invented tape (seeded, no real data): tape/<UTC date>/<ticker>.csv.gz for 3 tickers over 2 UTC dates, with fractions of 0 to 9 digits, block trades, a duplicated page, a duplicate that differs, count 0, unknown taker_side, trades on exact minute boundaries. python3 tape_fixture_second.py <out dir>"""
+"""Invented tape in the real layout (seeded, no real data): tape/YYYY-MM-DD.csv.gz, ONE file per UTC date holding all tickers, columns t_recv_ms, server_date_header, ticker, created_time, price, count, taker_side, is_block_trade, rows newest first within each page, pages with an overlap (the same rows again with a later t_recv_ms), genuine repeats (same row and same t_recv_ms), fractions of 0 to 9 digits, block trades, count 0, unknown taker_side, trades on exact minute boundaries, a ticker outside the wall. python3 tape_fixture_second.py <out dir>"""
 import csv, gzip, os, random, sys
 def build(out):
-    rnd = random.Random(20261117); H = ["ticker", "trade_id", "created_time", "price", "count", "taker_side", "is_block_trade"]
+    rnd = random.Random(20261117); H = ["t_recv_ms", "server_date_header", "ticker", "created_time", "price", "count", "taker_side", "is_block_trade"]
+    os.makedirs(os.path.join(out, "tape"), exist_ok=True)
     for day in ("2026-11-17", "2026-11-18"):
-        os.makedirs(os.path.join(out, "tape", day), exist_ok=True)
-        for tk, base in (("KXGOLDPERP", 40.0), ("KXUS500PERP", 13.4), ("KXUSTECH100PERP", 3.8)):
-            rows = []; px = base; n = 0
-            for sec in range(0, 3600, rnd.choice((3, 5, 7))):
-                for k in range(rnd.choice((0, 1, 1, 2, 4))):
-                    n += 1; px = round(px * (1 + rnd.gauss(0, 0.0003)), 4); frac = rnd.choice(("", ".5", ".123", ".000000001", ".999999999", ".25"))
+        trades = []; px = {"KXGOLDPERP": 40.0, "KXUS500PERP": 13.4, "KXUSTECH100PERP": 3.8, "KXOTHERPERP": 5.0}
+        for sec in range(0, 1800):
+            for tk in px:
+                if rnd.random() < 0.08:
+                    px[tk] = round(px[tk] * (1 + rnd.gauss(0, 0.0003)), 4); frac = rnd.choice(("", ".5", ".123", ".000000001", ".999999999", ".25"))
                     t = "%sT%02d:%02d:%02d%sZ" % (day, 12 + sec // 3600, (sec % 3600) // 60, sec % 60, frac)
-                    rows.append([tk, "%s-%s-%d" % (tk[2:6], day[-2:], n), t, repr(px), str(rnd.choice((0, 1, 1, 2, 5, 12))), rnd.choice(("buy", "sell", "buy", "sell", "", "x")), rnd.choice(("false",) * 12 + ("true", "TRUE", "False"))])
-            rows += [list(r) for r in rows[:5]]; d = list(rows[7]); d[3] = repr(float(d[3]) + 0.01); rows.append(d)
-            with gzip.open(os.path.join(out, "tape", day, tk + ".csv.gz"), "wt", newline="") as f:
-                w = csv.writer(f); w.writerow(H); w.writerows(rows)
+                    row = [tk, t, repr(px[tk]), str(rnd.choice((0, 1, 1, 2, 5, 12))), rnd.choice(("buy", "sell", "buy", "sell", "", "x")), rnd.choice(("false",) * 12 + ("true", "TRUE", "False"))]
+                    trades.append(row)
+                    if rnd.random() < 0.05: trades.append(list(row))                       # a genuine repeat inside one page
+        rows = []; page = 0
+        for i in range(0, len(trades), 40):
+            chunk = trades[i:i + 40]; page += 1; recv = 1000 * page
+            for r in reversed(chunk): rows.append([str(recv), "Mon, 16 Nov 2026 00:00:00 GMT"] + r)           # newest first within the page
+            if i >= 40 and rnd.random() < 0.6:                                                              # the next page overlaps the previous page's last rows
+                page += 1; recv = 1000 * page
+                for r in reversed(trades[i - 5:i + 35]): rows.append([str(recv), "Mon, 16 Nov 2026 00:00:00 GMT"] + r)
+        with gzip.open(os.path.join(out, "tape", day + ".csv.gz"), "wt", newline="") as f:
+            w = csv.writer(f); w.writerow(H); w.writerows(rows)
 if __name__ == "__main__": build(sys.argv[1])

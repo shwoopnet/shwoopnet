@@ -88,7 +88,7 @@ def f17(x): return "%.17g" % float(x)
 def bar_line(b): return ",".join([b["ticker"], str(b["end_ts"]), f17(b["open"]), f17(b["high"]), f17(b["low"]), f17(b["close"]), str(b["volume"]), str(b["n_trades"]), str(b["buy_volume"]), str(b["sell_volume"]), str(b["block_volume"]), str(b["block_count"])])
 
 
-def bar_text(bars): return "".join(bar_line(bars[k]) + "\n" for k in sorted(bars))
+def bar_text(bars): return ",".join(BAR_COLS) + "\n" + "".join(bar_line(bars[k]) + "\n" for k in sorted(bars))             # header line first
 
 
 def summary_lines(summ, ticks):
@@ -97,7 +97,7 @@ def summary_lines(summ, ticks):
     for fk in sorted(k for k in summ if k[1] != "_outside_wall"):
         s = summ[fk]; tick = ticks.get(fk)
         L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["null" if tick is None else f17(tick)]))
-    return L
+    return ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick"] + L
 
 
 def sha(text): return hashlib.sha256(text.encode()).hexdigest()

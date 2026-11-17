@@ -1,0 +1,7 @@
+file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick
+2026-11-17.csv.gz,KXGOLDPERP,230,136,94,8,13,41,29,1,5,0.0001
+2026-11-17.csv.gz,KXUS500PERP,273,173,100,7,27,61,30,0,0,0.0001
+2026-11-17.csv.gz,KXUSTECH100PERP,244,153,91,7,18,51,30,0,0,0.0001
+2026-11-18.csv.gz,KXGOLDPERP,183,141,42,8,26,41,30,0,0,0.0001
+2026-11-18.csv.gz,KXUS500PERP,217,155,62,9,24,47,30,0,0,0.0001
+2026-11-18.csv.gz,KXUSTECH100PERP,193,145,48,8,19,41,29,1,4,0.0001
