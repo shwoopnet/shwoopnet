@@ -11,7 +11,8 @@ GATE_DAYS = [calendar.timegm((2026, 11, 17, 0, 0, 0)) + 86400 * i for i in range
 
 
 def sha(p):
-    return hashlib.sha256(open(p, "rb").read()).hexdigest()
+    with open(p, "rb") as fh:
+        return hashlib.sha256(fh.read()).hexdigest()
 
 
 def build_rows(out):
