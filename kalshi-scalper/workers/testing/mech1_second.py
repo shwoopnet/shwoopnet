@@ -164,7 +164,10 @@ def run(lines, registry, windows, m_carried, option_a=True, extra_summary=None, 
         h = r["h"]; tr = r["trades"]; S = [t for t in tr if t["window"] == "search"]; V = [t for t in tr if t["window"] == "validate"]
         r["search"] = block(S, h, h["search_from"], h["search_to"], h["calendar_days_search"])
         r["validate"] = block(V, h, h["validate_from"], h["validate_to"], h["calendar_days_validate"])
-        r["screen1"] = bool(r["search"]["n"] > 0 and r["search"]["trades_per_day"] is not None and r["search"]["trades_per_day"] >= 3 and r["search"]["net_edge_c"] is not None and sum(t["net"] for t in S if t["traded"]) / r["search"]["n"] > 0)
+        PERPS = ("crypto_perp", "metal_perp", "index_perp", "stock_perp")
+        mean_ok = r["search"]["n"] > 0 and sum(t["net"] for t in S if t["traded"]) / r["search"]["n"] > 0
+        if h["sig"]["market"] in PERPS: r["screen1"] = bool(mean_ok)                                                   # 12.19: perps have no trades a day floor
+        else: r["screen1"] = bool(mean_ok and r["search"]["trades_per_day"] is not None and r["search"]["trades_per_day"] >= 3)
         U = sort_trades([t for t in S + V if t["traded"]]); u1, u2 = halves_at(U, h["half1_to"], h["half2_from"]); pf1, pf2 = pf([t["net"] for t in u1]), pf([t["net"] for t in u2]); r["s2h1"], r["s2h2"] = pf1, pf2
         r["screen2"] = bool(r["screen1"] and len(U) >= 100 and len(set(t["day"] for t in U)) >= 10 and pf_ok(pf1) and pf_ok(pf2) and sum(t["net"] for t in U) / len(U) > 0)
         z, p = day_z_p(U); r["p_raw"] = p; r["p_union"] = 1.0 if p is None else p

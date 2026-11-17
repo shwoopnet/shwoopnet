@@ -66,7 +66,7 @@ class T2(unittest.TestCase):
         sid, L = build(days, sig); return sid, m.run(L + list(extra), REG, self.W, carried)
     def test_screen1_threshold(self):
         # 105 traded trades over 35 calendar days = 3.0 a day: passes; 104 = 2.97 fails; mean net must be strictly positive
-        sig = cand(market="index_perp", signal="open_interest", clock="any_minute")
+        sig = cand(market="15m_noncrypto", signal="open_interest", clock="any_minute")
         days = {"2026-09-%02d" % (2 + i % 28): [0.001] for i in range(105)}; sid, out = self.run_sig(sig, {"2026-09-02": [0.001] * 105})
         d = json.loads(out[0]); self.assertTrue(d["screen1"]); self.assertEqual(d["search"]["n"], 105); self.assertAlmostEqual(d["search"]["trades_per_day"], 3.0, 12)
         sid, out = self.run_sig(sig, {"2026-09-02": [0.001] * 104}); self.assertFalse(json.loads(out[0])["screen1"])
@@ -120,7 +120,7 @@ class T2(unittest.TestCase):
 
 class T3(unittest.TestCase):
     W = {"search": ["2026-09-02", "2026-10-06"], "validate": ["2026-10-07", "2026-10-26"]}
-    SIG = cand(market="index_perp", signal="open_interest", clock="any_minute")
+    SIG = cand(market="15m_noncrypto", signal="open_interest", clock="any_minute")
     def lines(self, search_days, per_day, val_days=(), val_per=0, cal=20, neg_every=7, sig=None):
         sig = sig or self.SIG; sid = m.sig_id(sig); L = [json.dumps(head(sig, 2.0, cal))]; i = 0
         for d in search_days:
@@ -155,7 +155,7 @@ class T3(unittest.TestCase):
         d = json.loads(out[0]); self.assertEqual((d["class"], d["scored"], d["m"]), ("NEW", False, 9)); self.assertEqual(json.loads(out[1])["summary"]["tried"], 0)
     def test_bh_equal_p_both_survive_and_failing_s2_keeps_slot(self):
         days = ["2026-09-%02d" % d for d in (2, 3, 4, 5, 6, 29, 30)] + ["2026-10-01", "2026-10-02", "2026-10-05"]
-        a = cand(market="index_perp", signal="spread", clock="any_minute"); b = cand(market="index_perp", signal="book_depth_imbalance", clock="any_minute")
+        a = cand(market="15m_noncrypto", signal="spread", clock="any_minute"); b = cand(market="15m_noncrypto", signal="book_depth_imbalance", clock="any_minute")
         L = self.lines(days, 10, sig=a, neg_every=7) + self.lines(days, 10, sig=b, neg_every=7)[:-1]       # b has 99 trades: fails screen 2
         out = m.run(L, REG, self.W, 0); s = json.loads(out[-1])["summary"]; ds = [json.loads(x) for x in out[:-1]]
         self.assertEqual((s["tried"], s["m_total"], s["screen2_pass"]), (2, 2, 1)); self.assertEqual(sum(1 for x in ds if x["bh_survivor"]), 1)
@@ -201,3 +201,17 @@ class T6(unittest.TestCase):
         a = cand(signal="price_change", clock="any_minute"); b = cand(market="weather", signal="spread", clock="time_of_day", exit="stop"); c = cand(market="index_perp", signal="open_interest", clock="any_minute")
         out = m.run([json.dumps(head(x)) for x in (a, b, c)], REG, self.W, 7); s = json.loads(out[-1])["summary"]
         self.assertEqual(s["classes"], {"DECLINED": 1, "UNVERIFIED_MATCH": 1, "NEW": 1}); self.assertEqual((s["windows"]["half1_to"], s["windows"]["half2_from"]), ("2026-09-28", "2026-09-29")); self.assertEqual(s["windows"]["search"], ["2026-09-02", "2026-10-06"])
+
+
+class T7(unittest.TestCase):
+    W = {"search": ["2026-09-02", "2026-10-06"], "validate": ["2026-10-07", "2026-10-26"]}
+    def one(self, market, ntr, net=0.001):
+        sig = cand(market=market, signal="open_interest", clock="any_minute"); sid = m.sig_id(sig)
+        L = [json.dumps(head(sig, 2.0, 35, units="usd10" if market.startswith("15m") else "bp", primary="1c" if market.startswith("15m") else "bp"))]
+        for i in range(ntr): L.append(json.dumps(tr(sid, "search", "2026-09-02", i, "M", net, n1=net, n2=net)))
+        return json.loads(m.run(L, REG, self.W, 7)[0])
+    def test_perps_screen1_has_no_trades_a_day_floor(self):
+        for mk in ("crypto_perp", "metal_perp", "index_perp", "stock_perp"): d = self.one(mk, 1); self.assertTrue(d["screen1"]); self.assertAlmostEqual(d["search"]["trades_per_day"], 1 / 35, 12)
+        self.assertFalse(self.one("index_perp", 0)["screen1"]); self.assertFalse(self.one("index_perp", 5, -0.001)["screen1"]); self.assertFalse(self.one("index_perp", 5, 0.0)["screen1"])
+        d = self.one("15m_noncrypto", 5); self.assertFalse(d["screen1"])                      # binary keeps 3 a day
+        d = self.one("15m_noncrypto", 105); self.assertTrue(d["screen1"])
