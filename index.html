@@ -1004,12 +1004,12 @@
   .sp-sum-none{ height:100%; display:flex; align-items:center; font-size:12px; color:var(--muted); border-top:1px dashed var(--border); }
   .sp-sum-cap{ display:flex; justify-content:space-between; gap:8px; font-size:11px; color:var(--muted); margin-top:4px; }
   .sp-sum-grid{ display:grid; grid-template-columns:1fr; gap:8px; }
-  .sp-sum > .sp-sum-grid{ grid-column:1 / -1; grid-template-columns:repeat(3,minmax(0,1fr)); }   /* Today, Last 7 days and All time: one compact row of tiles inside the card, the pop-up tile style (cleanup, Nov 13, 2026) */ .sp-sum > .sp-sum-grid .sp-sum-c{ padding:9px 12px; gap:2px; }
+  .sp-sum > .sp-sum-grid{ grid-column:1 / -1; grid-template-columns:repeat(4,minmax(0,1fr)); }   /* Today, Last 7 days and All time: one compact row of tiles inside the card, the pop-up tile style (cleanup, Nov 13, 2026) */ .sp-sum > .sp-sum-grid .sp-sum-c{ padding:9px 12px; gap:2px; }
   .sp-sum-c{ display:flex; flex-direction:column; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:10px 12px; } .sp-sum-c span{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); } .sp-sum-c b{ font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin-top:2px; } .sp-sum-c small{ font-size:12px; font-weight:600; color:var(--muted); }
   .sp-sum-sub{ font-style:normal; font-size:10.5px; color:var(--muted); margin-top:2px; font-variant-numeric:tabular-nums; }
   .sp-det-body .sp-sum-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } .sp-det-body .sp-sum-c{ background:none; border:0; border-top:1px solid var(--border); border-radius:0; padding:8px 0 0; } .sp-det-body .sp-sum-c b{ font-size:16px; }
   @media (max-width:900px){ .sp-sum.kal-card{ gap:16px 18px; } .sp-sum-ring{ width:104px; height:104px; } .sp-sum-in b{ font-size:28px; } }
-  @media (max-width:560px){ .sp-sum.kal-card{ padding:16px; gap:12px; grid-template-columns:minmax(0,1fr); } .sp-sum-pf{ display:flex; justify-content:center; } .sp-sum-ring{ width:96px; height:96px; } .sp-sum-in b{ font-size:26px; } .sp-sum > .sp-sum-grid{ gap:6px; } .sp-sum > .sp-sum-grid .sp-sum-c{ padding:8px 9px; } .sp-sum .sp-sum-c b{ font-size:14px; } .sp-sum .sp-sum-sub{ font-size:10px; } }   /* phone: the ring sits above a full-width chart, then the three tiles in one row (cleanup, Nov 13, 2026) */
+  @media (max-width:560px){ .sp-sum.kal-card{ padding:16px; gap:12px; grid-template-columns:minmax(0,1fr); } .sp-sum-pf{ display:flex; justify-content:center; } .sp-sum-ring{ width:96px; height:96px; } .sp-sum-in b{ font-size:26px; } .sp-sum > .sp-sum-grid{ gap:6px; grid-template-columns:repeat(2,minmax(0,1fr)); } .sp-sum > .sp-sum-grid .sp-sum-c{ padding:8px 9px; } .sp-sum .sp-sum-c b{ font-size:14px; } .sp-sum .sp-sum-sub{ font-size:10px; } }   /* phone: the ring sits above a full-width chart, then the three tiles in one row (cleanup, Nov 13, 2026) */
   .sp-det-body{ display:flex; flex-direction:column; gap:12px; margin-top:12px; min-width:0; }
   .sp-plot{ min-width:0; } .sp-plot svg{ width:100%; height:64px; display:block; overflow:visible; }
   .sp-rt-h{ margin-bottom:-6px; } .sp-rt{ list-style:none; margin:0; padding:0; }
@@ -1420,7 +1420,14 @@
     },
     readKalshiPerpsHistory: function(){
       return getDocs(query(collection(db, 'kalshiBalanceSnaps'), orderBy('ts', 'desc'), limit(800))).then(function(snap){
-        return snap.docs.map(function(d){ var x = d.data(); return { t: Number(x.ts), total: x.perpsTotal }; }).filter(function(p){ return Number.isFinite(p.t) && p.total !== null && p.total !== undefined && Number.isFinite(Number(p.total)); });
+        // total is the PERPS part (null when that hour had none), pred the prediction balance of the same hour (the Strategies page total falls back to it when the live account read is not loaded).
+        return snap.docs.map(function(d){ var x = d.data(); return { t: Number(x.ts), total: x.perpsTotal === null || x.perpsTotal === undefined ? null : Number(x.perpsTotal), pred: x.total === null || x.total === undefined ? null : Number(x.total) }; }).filter(function(p){ return Number.isFinite(p.t); });
+      });
+    },
+    // Perps position changes (Nov 17, 2026): the newest 60 events the server saved by comparing two reads of the perps account (admin read only, display only). Reads, never writes; a refused read (the rule is not published yet) rejects and the page shows none.
+    readKalshiPerpsEvents: function(){
+      return getDocs(query(collection(db, 'kalshiPerpsEvents'), orderBy('at', 'desc'), limit(60))).then(function(snap){
+        return snap.docs.map(function(d){ var x = d.data(); return { at: Number(x.at), market: typeof x.market === 'string' ? x.market.slice(0, 40) : '', kind: typeof x.kind === 'string' ? x.kind : '', up: x.up === true, size: Number(x.size), prevSize: Number(x.prevSize), lastPnl: x.lastPnl === null || x.lastPnl === undefined ? null : Number(x.lastPnl) }; }).filter(function(e){ return Number.isFinite(e.at) && e.market; });
       });
     },
     // The shadow log (admin read only, written only by the server), newest first in pages of 2,000, at most 3 pages, from a time on: the Strategy board's ON DECK rows. A read, never a write; a refused read rejects and the board says so.
@@ -1835,6 +1842,8 @@
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
                   <li>Bot: OICORE's size now has a cap: never more than 12% of the account base divided by $4.50 a contract, and never fewer than 1. It can only lower the size. OICORE (and only OICORE) now counts the perps account too when its figure is under 20 minutes old, so it is sized off the whole account; if that figure is missing or old it falls back to trading cash only, which is the cap. A short shard sends a phone alert so cash can be moved. With trading cash under $150 OICORE sends nothing until it is back at $150 or more.</li>
+                  <li>Strategies page: the top card has a fourth tile, Account total (the prediction balance plus the perps equity when its data is under 20 minutes old; it says "predictions only" otherwise, and says when an hourly snapshot was used). Recent trades on the Bot page now also lists closed perps, once the server's position events are deployed: the last profit the server saw (labelled so, not a final result), seen at the next 5 minute read. Display only.</li>
+                  <li>Bot page: one line is back under the perp rows: the account margin cushion (equity minus maintenance, in dollars, with a Low, Medium or High label and a bar; not a forced-close price), plus a one line note while the perp price line waits for its second read.</li>
                   <li>Bot page: the Account chart's hover dot now sits on the curve at the pointer (it was drawn off to the right and near the bottom), on a phone drag too.</li>
                   <li>Bot page: cards that sit side by side in a row are now the same height (the row follows the taller card). A card you resized yourself keeps its height.</li>
                   <li>Bot page: charts are back. The Account result line no longer cuts its range to start at the first perps reading (it hid earlier trades on YTD, 1M and All and left Today empty); perps now just add steps from their first hourly reading, and Today says what it is waiting for. Each perp row is plain (market, direction, value, return, entry, now) with a small price line once the page has two reads.</li>
@@ -3250,13 +3259,12 @@
   function kalshiPerpCushionHtml(c, esc, money){
     if(!c){ return ''; }
     var sg = (c.dollars >= 0 ? '' : '-') + money(Math.abs(c.dollars));
-    return '<div class="kal-perp-risk kal-perp-cushion"><div class="kal-perp-riskhead"><span>Margin cushion (whole perps account): ' + esc(sg) + '</span><span>' + esc(c.risk.label.replace(/ buffer$/, ' of equity')) + '</span></div>' +
-      '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + c.risk.w.toFixed(1) + '%"></i></div>' +
-      '<div class="kal-hold-sub">Equity minus maintenance margin' + (c.move !== null ? '; a move of about ' + esc(c.move.toFixed(1)) + '% against the position uses it up (before fees and funding)' : '') + '. Not a forced-close price.</div></div>';
+    return '<div class="kal-perp-risk kal-perp-cushion"><div class="kal-perp-riskhead"><span>Account margin cushion (equity minus maintenance, not a forced-close price): ' + esc(sg) + '</span><span>' + esc(c.risk.label.replace(/ buffer$/, ' of equity')) + '</span></div>' +
+      '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + c.risk.w.toFixed(1) + '%"></i></div></div>';
   }
   function kalshiPerpChartHtml(marks, entry, esc){
     var m = (marks || []).filter(function(x){ return x && Number.isFinite(x.v) && Number.isFinite(x.t); });
-    if(m.length < 2){ return ''; }
+    if(m.length < 2){ return '<div class="kal-perp-chart-note">Price line builds while this page is open (needs two reads).</div>'; }
     var W = 600, H = 90, e = Number.isFinite(Number(entry)) && entry !== null ? Number(entry) : null;
     var vals = m.map(function(x){ return x.v; }).concat(e !== null ? [e] : []), lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if(hi - lo < 1e-9){ hi += 1; lo -= 1; } var pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
@@ -3277,7 +3285,7 @@
       return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
         '<div class="kal-hold-stats kal-perp-stats">' + (num(r.value) ? stat('Position value', money(Number(r.value))) : '') + stat('Return', pnlTxt, num(r.pnl) ? (r.pnl >= 0 ? 'kal-pos' : 'kal-neg') : '') +
         stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Now', px(r.index)) : '') + '</div>' + kalshiPerpChartHtml(marks && marks[r.market], r.entry, esc) + '</div>';
-    }).join('');
+    }).join('') + kalshiPerpCushionHtml(cushion, esc, money);
   }
   // The perps account document (Main, Nov 17, 2026: admin doc kalshiLiveControl/perpsAccount, refreshed every 5 minutes) turned into what the card and the total draw. PURE and not wired to a read yet: the page makes no new read until Main confirms the
   // units. Older than 20 minutes (or no document) hides the perps part and says why, never a stale figure. Units (Main, confirmed): pnl and equity are dollars, size is contracts, size times mark is the position value; margin is the maintenance margin, so there is no Cost or return percent. The multiplier is the public list's ESTIMATE and is labelled so; closeAt, bufferPct, takeProfit and stopLoss are null for now, so Closes at and the buffer say n/a and auto close says "not readable".
@@ -3301,7 +3309,24 @@
   function kalshiPerpRows(a){ return a && Array.isArray(a.perps) ? a.perps : []; }
   // The page's one perps feed (display only, see kalshiAccountTotal): the account document is read at most every 4 minutes and the hourly snapshots at most every 30, only while the Bot page draws; a failed read keeps what was
   // there and tries again later. kalshiPerpsView lays the perps figures over the account read, so a fresh account read never wipes them.
-  var kalshiPerpsState = { doc: null, hist: [], docAt: 0, histAt: 0, loaded: false, marks: {} };
+  var kalshiPerpsState = { doc: null, hist: [], docAt: 0, histAt: 0, loaded: false, marks: {}, events: [], evAt: 0, snap: null };
+  // The Strategies page's one account total (Nov 17, 2026, the owner via the EA: one total account everywhere). The prediction balance is the live account read when the Bot page has loaded it, otherwise the newest hourly snapshot (labelled with its time);
+  // the perps equity counts only from a fresh document (kalshiPerpsFromDoc, under 20 minutes). Display only, like kalshiAccountTotal: never read by a stop, a limit or a size. With no prediction balance there is no total.
+  function kalshiStratAccount(acct, snap, perpsTotal){
+    var live = acct && acct.balance && acct.balance.ok && acct.balance.totalDollars !== null && acct.balance.totalDollars !== undefined && Number.isFinite(Number(acct.balance.totalDollars)) ? Number(acct.balance.totalDollars) : null;
+    var pred = live !== null ? live : (snap && snap.pred !== null && snap.pred !== undefined && Number.isFinite(Number(snap.pred)) ? Number(snap.pred) : null);
+    if(pred === null){ return { total: null, perps: false, asOf: null }; }
+    var perps = perpsTotal !== null && perpsTotal !== undefined && Number.isFinite(Number(perpsTotal)) ? Number(perpsTotal) : null;
+    return { total: Math.round((pred + (perps || 0)) * 100) / 100, perps: perps !== null, asOf: live !== null ? null : Number(snap.t) };
+  }
+  // Closed perps as trade rows (Nov 17, 2026, the owner via the EA: perps tracked like trades). From the server's position events (kalshiPerpsEventsLib): only CLOSES are shown, with the last profit the server SAW, labelled so (it is not a realized result and the
+  // time is the read that saw the close, not the fill). Pure: the dollar goes through money(), so Privacy view masks it.
+  function kalshiPerpClosedRows(events){ return (Array.isArray(events) ? events : []).filter(function(e){ return e && e.kind === 'closed' && Number.isFinite(Number(e.at)) && typeof e.market === 'string' && e.market; }).sort(function(x, y){ return y.at - x.at; }); }
+  function kalshiPerpTradeRowHtml(e, esc, money, timeText){
+    var pnl = e.lastPnl !== null && e.lastPnl !== undefined && Number.isFinite(Number(e.lastPnl)) ? Number(e.lastPnl) : null;
+    var cell = pnl === null ? '<span style="color:var(--muted)">last seen n/a</span>' : '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + money(Math.abs(pnl)) + ' <small>last seen</small></span>';
+    return '<div class="kal-tr kal-tr-perp"><span class="kal-tr-t">' + esc(timeText(e.at)) + '</span><span class="kal-tr-m">' + esc(String(e.market)) + '</span><span class="kal-tr-f">Closed ' + (e.up ? 'UP' : 'DOWN') + (Number.isFinite(Number(e.prevSize)) && Number(e.prevSize) > 0 ? ' ' + esc(String(Math.round(Number(e.prevSize) * 100) / 100)) : '') + '<span class="kal-tr-sub">seen at the next 5 minute read</span></span><span class="kal-tr-p">' + cell + '</span><span class="kal-tr-s"><span class="kal-chip">Perp</span></span></div>';
+  }
   // Price history for the perp rows: the page keeps each market's mark from every document read it makes (one every 4 minutes while the Bot page is open), at most 120 per market, so the line starts when the page opened. Kalshi's data here has no price series.
   function kalshiPerpMarksAdd(st, doc){
     if(!doc || !Number.isFinite(Number(doc.at)) || !Array.isArray(doc.rows)){ return; }
@@ -3325,16 +3350,27 @@
     out.perpsDay = prior ? Math.round((res.total - Number(prior.total)) * 100) / 100 : 0;
     return out;
   }
+  // The Strategies page shows the account total too, so it redraws when a perps read answers (only while that page is showing).
+  function kalshiPerpsRedrawStrategies(){ var p = document.getElementById('page-strategies'); if(p && !p.hidden && typeof renderStrategiesPage === 'function'){ try{ renderStrategiesPage(); }catch(e){} } }
   function kalshiPerpsEnsure(){
     var api = window.__shwoopAPI, now = Date.now();
     if(!api || !currentUserIsAdmin){ return; }
     if(api.readKalshiPerpsAccount && now - kalshiPerpsState.docAt > 240000){
       kalshiPerpsState.docAt = now;
-      api.readKalshiPerpsAccount().then(function(d){ kalshiPerpsState.doc = d; kalshiPerpMarksAdd(kalshiPerpsState, d); kalshiPerpsState.loaded = true; renderKalshiBot(); }, function(){ kalshiPerpsState.loaded = true; });
+      api.readKalshiPerpsAccount().then(function(d){ kalshiPerpsState.doc = d; kalshiPerpMarksAdd(kalshiPerpsState, d); kalshiPerpsState.loaded = true; renderKalshiBot(); kalshiPerpsRedrawStrategies(); }, function(){ kalshiPerpsState.loaded = true; });
     }
     if(api.readKalshiPerpsHistory && now - kalshiPerpsState.histAt > 1800000){
       kalshiPerpsState.histAt = now;
-      api.readKalshiPerpsHistory().then(function(h){ kalshiPerpsState.hist = h; renderKalshiBot(); }, function(){});
+      api.readKalshiPerpsHistory().then(function(h){
+        kalshiPerpsState.hist = h.filter(function(p){ return p.total !== null && Number.isFinite(p.total); });   // the perps part only, as before
+        kalshiPerpsState.snap = h.filter(function(p){ return p.pred !== null && Number.isFinite(p.pred); }).sort(function(x, y){ return y.t - x.t; })[0] || null;   // the newest hourly prediction balance
+        renderKalshiBot(); kalshiPerpsRedrawStrategies();
+      }, function(){});
+    }
+    // The position events, at most every 10 minutes (a close is only seen at a 5 minute read anyway); a refused read (rules not published yet) just leaves the list empty.
+    if(api.readKalshiPerpsEvents && now - kalshiPerpsState.evAt > 600000){
+      kalshiPerpsState.evAt = now;
+      api.readKalshiPerpsEvents().then(function(ev){ kalshiPerpsState.events = ev; renderKalshiBot(); }, function(){});
     }
   }
   // Today's result as a share of the account (Oct 22, 2026, the owner's request). The base is the account total at the START of today, taken as the total now minus today's bot result, so a good day is not
@@ -3487,12 +3523,20 @@
       // Manual trades are hidden by default (the owner's choice, Oct 9, 2026); the dropdown on the card brings them back.
       var shownFills = (kalshiTradeFilter === 'all' ? gfills : gfills.filter(function(x){ return kalshiFillIsBot(x, kalshiAllOrders()); })).filter(function(x){ return !kalshiIsExitFill(x, kalshiAllOrders()); });
       var allRows = shownFills.map(function(x){ return { fill: x }; }).concat(olderBot.map(function(o){ return { order: o }; }));
+      // Closed perps (Nov 17, 2026) go in by time, newest first, among the rows above; they are never counted in the settled totals.
+      var rowAt = function(item){ return item.order ? Number(item.order.ts) : item.perp ? Number(item.perp.at) : (item.fill && item.fill.time ? Date.parse(item.fill.time) : NaN); };
+      kalshiPerpClosedRows(kalshiPerpsState.events).forEach(function(e){
+        var at = Number(e.at), i = 0;
+        while(i < allRows.length && !(Number.isFinite(rowAt(allRows[i])) && rowAt(allRows[i]) < at)){ i++; }
+        allRows.splice(i, 0, { perp: e });
+      });
       var pageSize = kalshiLiveShow.pageSize, pages = Math.max(1, Math.ceil(allRows.length / pageSize));
       if(kalshiLiveShow.page > pages - 1){ kalshiLiveShow.page = pages - 1; }
       if(kalshiLiveShow.page < 0){ kalshiLiveShow.page = 0; }
       var fillsShown = allRows.slice(kalshiLiveShow.page * pageSize, (kalshiLiveShow.page + 1) * pageSize);
       var settled = 0, open = 0, sum = 0, nowD = new Date();
       var rowsHtml = fillsShown.map(function(item){
+        if(item.perp){ return kalshiPerpTradeRowHtml(item.perp, escapeHtml, kalshiMoney, kalshiHoverWhen); }
         if(item.order){
           var o = item.order, pnl = kalshiOrderPnl(o), cnt = Number(o.fillCount), paid = Number.isFinite(Number(o.maxCost)) && Number(o.count) > 0 ? Number(o.maxCost) / Number(o.count) : Number(o.price);
           var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl)) + kalshiPctText(pnl, paid * cnt) + '</span>' : (o.settled === true && o.result === 'hand' ? '<span style="color:var(--muted)">sold by hand</span>' : '<span style="color:var(--muted)">open</span>');
@@ -4666,6 +4710,11 @@
   }
   var kalshiStratOpen = {};   // which Details are open, kept across the page's redraws
   // The "All strategies" bar (Nov 13, 2026, the owner: "the top (all strategies) needs an updated visual", option A, dial and curve): the blended 30 day cash PF in a ring (0 to 2, a tick at 1.0, the figure counts up), net cash since the start over the 30 day cash curve (dashed zero line, a dot on today), and three chips: today, the last 7 days and what is open now with its worst case. Every dollar goes through money(), so Privacy view masks it.
+  // The fourth tile: the one account total, predictions plus perps (display only). "predictions only" says so when the perps data is missing or older than 20 minutes; a total from the hourly snapshot says when it was taken (US Central).
+  function kalshiStratAccountChip(acct, i, esc, money){
+    var a = acct || { total: null }, sub = a.total === null ? 'not loaded yet' : (a.perps ? 'predictions + perps' : 'predictions only') + (a.asOf ? ' · hourly, ' + new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }).format(new Date(a.asOf)) : '');
+    return '<div class="sp-sum-c" style="--i:' + i + '"><span>Account total</span><b>' + esc(a.total === null ? 'n/a' : money(a.total)) + '</b><em class="sp-sum-sub">' + esc(sub) + '</em></div>';
+  }
   function kalshiStratSummaryHtml(s, esc, money){
     var sg = function(x){ return (x > 0 ? '+' : '') + money(x); };
     var ci = 0, chip = function(label, val, small){ return '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>' + esc(label) + '</span><b>' + esc(val) + (small ? ' <small>' + esc(small) + '</small>' : '') + '</b></div>'; };
@@ -4679,7 +4728,7 @@
     return '<div class="kal-card sp-sum">' + ring +
       '<div class="sp-sum-mid"><div class="sp-sum-top"><div class="sp-sum-k">All strategies &middot; ' + esc(rg.word) + ' &middot; ' + s.w30.n + ' trades</div>' + kalshiStratRangeHtml(rg.key, esc) + '</div>' +
       '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? rg.from : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || rg.from) + '</span><span>Today</span></div>' + (s.note ? '<div class="sp-sub sp-sum-note">' + esc(s.note) + '</div>' : '') + '</div>' +
-      '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>All time</span><b>' + esc(sg(s.net)) + '</b><em class="sp-sum-sub">' + esc(s.open + ' open · ' + money(s.atRisk) + ' at risk') + '</em></div>' + '</div></div>';
+      '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>All time</span><b>' + esc(sg(s.net)) + '</b><em class="sp-sum-sub">' + esc(s.open + ' open · ' + money(s.atRisk) + ' at risk') + '</em></div>' + kalshiStratAccountChip(s.account, ci++, esc, money) + '</div></div>';
   }
   var kalshiStratDayText = function(k){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(k)); return m ? new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))) : ''; };
   function kalshiStratDetailHtml(d, esc, money, timeText){
@@ -5265,6 +5314,9 @@
     var summary = kalshiStratSummary(all, now, kalshiRiskMeter(all, kalshiLiveCtl && kalshiLiveCtl.session, now).openCost, kalDayKey, kalshiStratRange);
     // Say so on the chart when part of the range is missing, never start silently later (the owner, Nov 13, 2026)
     var hDay = function(ms){ return kalshiStratDayText(new Date(ms).toISOString().slice(0, 10)); };
+    kalshiPerpsEnsure();
+    var perpsRes = kalshiPerpsFromDoc(kalshiPerpsState.doc, now);
+    summary.account = kalshiStratAccount(kalshiLiveAcct, kalshiPerpsState.snap, perpsRes.ok ? perpsRes.total : null);
     summary.note = hist.loading ? 'Reading older trades...' : hist.failed ? 'Older trades could not be read, so this starts at ' + hDay(hist.from) + '.' : hist.slotShort ? 'Second-slot trades before ' + hDay(hist.slotShort) + ' are not loaded.' : '';
     kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser), rows: rows.filter(function(r){ return r && r.rule === x.code.shadow && r.settled === true && r.wouldFill === true && isFinite(Number(r.pnl)) && isFinite(Number(r.atMs)); }).sort(function(a, b){ return Number(a.atMs) - Number(b.atMs); }).map(function(r){ return { ts: Number(r.atMs), p: Number(r.pnl) }; }) }; } });
     var regRetired = kalshiRegistry.list.filter(function(x){ return x.stage === 'Retired'; });

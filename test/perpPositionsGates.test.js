@@ -19,7 +19,7 @@ assert(r.ok&&r.total===50&&r.rows.length===1,'PP5 ok');
 assert.strictEqual(r.rows[0].value,273000);assert.strictEqual(r.rows[0].cost,null);assert.strictEqual(r.rows[0].pnlPct,null);assert.strictEqual(r.rows[0].size,3);
 const html=f.kalshiPerpsHtml(r.rows,esc,money);
 assert(!html.includes('Cost')&&!html.includes('Leveraged size')&&!/\(\+?-?[\d.]+%\)/.test(html),'PP5 no Cost and no return percent: margin is maintenance margin');
-assert(!/Buffer|Closes at|Auto close|not one of the bot|est\.|cushion/i.test(html),'PP5 bare minimum: no extra text');
+assert(!/Buffer|Closes at|Auto close|not one of the bot|est\./i.test(html),'PP5 bare minimum: no extra text');
 assert(html.includes('Position value')&&html.includes('+$2.50'),'PP5 position value, contracts and pnl in dollars');
 assert(html.includes('Now'),'PP5 now');
 // PP6: a missing mark hides Index now
@@ -39,7 +39,7 @@ assert.strictEqual(f.kalshiPerpCushion({equity:0,maintenance:0},1),null,'PP9 no 
 assert.strictEqual(f.kalshiPerpCushion({equity:50},1),null,'PP9 no maintenance figure, no cushion');
 const cdoc=f.kalshiPerpsFromDoc({at:now,equity:100,maintenance:20,positionValue:400,rows:[{market:'X',up:true,size:1,entry:1,pnl:0,margin:20,mark:1,multiplierEstimate:5}]},now);
 const ch=f.kalshiPerpsHtml(cdoc.rows,esc,money,cdoc.cushion);
-assert(!f.kalshiPerpsHtml(cdoc.rows,esc,money,cdoc.cushion).includes("Margin cushion"),"PP9 the cushion is not drawn on the rows (bare minimum)");
+{const cu1=f.kalshiPerpsHtml(cdoc.rows,esc,money,cdoc.cushion);assert(cu1.includes('Account margin cushion (equity minus maintenance, not a forced-close price): $80.00')&&cu1.includes('kal-perp-bar')&&/Low risk/.test(cu1),'PP9 one line: dollars, label, bar, account level');assert(!/move of about|before fees/.test(cu1),'PP9 no extra sentence');assert(!f.kalshiPerpsHtml(cdoc.rows,esc,money,null).includes('cushion'),'PP9 no cushion without data');}
 // PP8: wired (Nov 17): one read of the perps doc and one of the hourly snapshots, never a write; the view lays the perps over the account read and Today uses the last snapshot of an earlier Central day.
 const live=h.replace(/\/\/[^\n]*/g,'');
 assert(/getDoc\(doc\(db, 'kalshiLiveControl', 'perpsAccount'\)\)/.test(live)&&/collection\(db, 'kalshiBalanceSnaps'\)/.test(live),'PP8 reads the two sources');
@@ -56,7 +56,7 @@ console.log('perpPositionsGates ok');
 const mk=[{t:1e12,v:90000},{t:1e12+240000,v:91000},{t:1e12+480000,v:90500}];
 const chh=f.kalshiPerpsHtml([row],esc,money,null,{[row.market]:mk});
 assert(chh.includes('kal-perp-chart')&&chh.includes('kal-hc-target-line')&&chh.includes('data-hv='),'PP10 chart with entry line and hover');
-assert(!f.kalshiPerpsHtml([row],esc,money,null,{[row.market]:[mk[0]]}).includes('kal-perp-chart'),'PP10 one mark: no chart, no text');
-assert(!f.kalshiPerpsHtml([row],esc,money).includes('kal-perp-chart'),'PP10 no marks: no chart, no error');
+{const one=f.kalshiPerpsHtml([row],esc,money,null,{[row.market]:[mk[0]]});assert(!one.includes('kal-perp-chart"')&&one.includes('Price line builds while this page is open (needs two reads).'),'PP10 one mark: no chart, one plain line');}
+assert(!f.kalshiPerpsHtml([row],esc,money).includes('kal-perp-chart"')&&f.kalshiPerpsHtml([row],esc,money).includes('needs two reads'),'PP10 no marks: no chart, no error, one plain line');
 // PP11: the result line is never cut to the first perps snapshot (the page code does not move `since` to ph.first)
 assert(!/since = Math\.max\(since, ph\.first\)/.test(h),'PP11 range not cut by perps history');
