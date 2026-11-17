@@ -22,9 +22,9 @@ gates.SC1 = () => {
   assert.ok(!slot.validLadder(Object.assign({}, L, { sizeCapPerContract: undefined }), OI), 'one key without the other is refused');
 };
 
-// The stop math at the four bases the owner named: the size, the drawdown stop (the smaller of 5 a contract, 12% of the base and the $150 ceiling) and dollars of stop per contract.
+// The stop math at the bases the owner and the Risk Analyst named ($200, $225, $300, $500, $835): the size, the drawdown stop (the smaller of 5 a contract, 12% of the base and the $150 ceiling) and dollars of stop per contract.
 gates.SC2 = () => {
-  const rows = [[200, 5, 24], [225, 6, 27], [500, 13, 60], [835, 20, 100]];
+  const rows = [[200, 5, 24], [225, 6, 27], [300, 8, 36], [500, 13, 60], [835, 20, 100]];
   for (const [base, size, stop] of rows) {
     const s = slot.slotLadderState(OI, [], base);
     assert.strictEqual(s.size, size, 'size at a $' + base + ' base');
