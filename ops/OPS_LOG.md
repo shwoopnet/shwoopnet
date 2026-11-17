@@ -59,3 +59,9 @@ Calls: none (0 of 5). No idle research chat to redirect (credit guard step norma
 - Main (Chief of Staff): lifetime list cost 1740.46 (1728.07 at the 6:10 AM look), context 812k of 1M (compaction at 901k). ABOVE the Charter's 780k line: recommend a fresh Main session with a short handoff.
 - V2 (Head of Strategy Research): archived since Nov 12 (lifetime 1066.67, frozen). Its two reminder routines (trig_015gCDujdTJw8DmFcWVpENaz, trig_01WmHDa9KHEbkH6MkrVVo6cn) are already disabled. The Nov 6 and 7 stored COO prompt still names V2 and Refinement as the chats; research now runs under the Head of R&D and desks.
 - Calls made: none.
+
+## 2026-11-17 7:39 AM CT (COO run in main)
+- Guard: status allowed_warning (rateLimitType seven_day, no overage). Per the Charter's warning step: no new worker or direction calls, burn logged only.
+- Main (Chief of Staff): lifetime list cost 1910.78 (1740.46 at the Nov 16 look, so about 170 in a day), context 784k of 1M (compaction at 901k). Still ABOVE the Charter's 780k line: a fresh Main session with a short handoff is still recommended (handoff note exists in the scratchpad); it must wait until PR 1059 is deployed.
+- Other chats not read (warning step).
+- Calls made: none.
