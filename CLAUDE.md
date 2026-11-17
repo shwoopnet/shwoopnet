@@ -1793,6 +1793,10 @@ The engine sha in the ENGPERPS lanes 1 and 6 line of `kalshi-scalper/workers/HEL
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the History Miner's FUNDX2 thresholds step (`fundx2_thresholds.py` with its run, load and events modules, commit faafdd6db on `claude/history-miner`) and the funding file `perp-data` `funding/by-ticker.csv.gz`. I hashed the four code files and the funding file myself and they match Auditor B's values. Funding prints only, no price; the price step needs a second line later. Docs only.
 
-## Held-out log: FUNDX2 price steps (Nov 17, 2026, Auditor B's allow line)
+## Held-out log: FUNDX2 price steps (Nov 16, 2026, Auditor B's allow line)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the History Miner's FUNDX2 gate and score steps (`fundx2_run.py` with its run, load, events and funding modules, commit ce632b110 on `claude/history-miner`) and every source they read: the funding file, the BTC one minute pull run (`PERPBTC1M/2026-11-12T1550Z_43252136600`, registered readers only; this line registers this reader of it) and the 26 plain perps day files for Oct 21 to Nov 15 (the Nov 16 file is excluded, still growing). I hashed every code file, the funding file, the run's manifest and all 26 day files myself and each matches Auditor B's values. Scope is the six crypto perps, VALIDATE prints from 2026-09-15 to before 2026-11-17; GATE first, SCORE only with the committed gate file's sha. The thresholds line stays as it is. Docs only.
+
+## Held-out log: CHEAPFLIP read (Nov 16, 2026, Auditor B's allow line)
+
+One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's CHEAPFLIP reader (`cheapflip.py` and `cheapflip_run.py`, commit 747c33b23 on `claude/idea-desk-c`), an owner-requested descriptive read with no shadow or candidate path. I hashed both files myself and they match Auditor B's values. Scope: the `nc15` book and coverage files of KXHYPE15M, KXBNB15M and KXNATGAS15M for closes 2026-11-11 to 2026-11-15; no R6 file. Not a go to run: the second build and the print sha committed first come before any read. Docs only.
