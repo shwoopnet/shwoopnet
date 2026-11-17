@@ -2,31 +2,32 @@
 """CHEAPFLIP descriptive read, BUILD 2 (Testing Desk, Nov 17, 2026), blind from Desk C's card CHEAPFLIP_CARD.md at aa822bc85 (sha256 8a070a17...) with Amendments 1 and 2 and my readings Q1 to Q24. Pure functions on in-memory polls.
 poll = (recv_ms, ticker, close_epoch, yes_bids, no_bids), bids = [(price dollars or None, size or None) x 5]; results {ticker: 'yes'|'no'|'void'}; series {ticker: series}."""
 import math, time
-BANDS = (3, 5, 10); KS = (2, 3, 5); HS = (1, 2); CONTRACTS = 10
+BANDS = (3, 5, 10); KS = (2, 3, 5); HS = (10, 20); CONTRACTS = 10      # prices in integer mills (thousandths of a dollar): the book carries up to 3 decimals; HS is the haircut 1c, 2c in mills
+MILL = 1000
 M_CARRIED, M_NEW = 7492484, 9
 SERIES = ("KXHYPE15M", "KXBNB15M", "KXNATGAS15M")
 
 
-def fee(price_cents, n=CONTRACTS):
-    p = price_cents / 100.0
+def fee(price_mills, n=CONTRACTS):
+    p = price_mills / 1000.0
     return math.ceil(round(0.07 * n * p * (1 - p) * 100, 9)) / 100
 
 
 def best_bid(levels):
-    """-> (cents, size) of the highest price among the levels with price and size both non-empty, or None"""
+    """-> (mills, size) of the highest price among the levels with price and size both non-empty, or None"""
     best = None
     for px, sz in levels:
         if px is None or sz is None: continue
-        c = round(px * 100)
+        c = round(px * 1000)
         if best is None or c > best[0]: best = (c, sz)
     return best
 
 
 def side_view(poll, side):
-    """-> (ask_cents, ask_size, bid_cents, bid_size) of one side; None parts when the quote is missing"""
+    """-> (ask_mills, ask_size, bid_mills, bid_size) of one side; None parts when the quote is missing"""
     own, opp = (poll[3], poll[4]) if side == "yes" else (poll[4], poll[3])
     ob, bb = best_bid(opp), best_bid(own)
-    return (100 - ob[0] if ob else None, ob[1] if ob else None, bb[0] if bb else None, bb[1] if bb else None)
+    return (1000 - ob[0] if ob else None, ob[1] if ob else None, bb[0] if bb else None, bb[1] if bb else None)
 
 
 def find_entries(polls, close, side, upper):
@@ -35,13 +36,13 @@ def find_entries(polls, close, side, upper):
         recv = pl[0] / 1000.0
         if recv >= close: continue
         ask, asz, _b, _s = side_view(pl, side)
-        if ask is None or not (1 <= ask <= upper) or close - recv < 120: continue
+        if ask is None or not (10 <= ask <= upper * 10) or close - recv < 120: continue
         return i, ask, asz
     return None
 
 
 def find_touch(polls, close, side, i0, a, k):
-    """first later poll strictly before the close with bid >= k x a (cents) -> (index, bid cents, bid size) or None"""
+    """first later poll strictly before the close with bid >= k x a (mills) -> (index, bid mills, bid size) or None"""
     for j in range(i0 + 1, len(polls)):
         pl = polls[j]
         if pl[0] / 1000.0 >= close: continue
@@ -51,15 +52,15 @@ def find_touch(polls, close, side, i0, a, k):
 
 
 def trade_net(a, h, touch, result, side):
-    """net dollars at 10 contracts, or None (a hold with no result is dropped)"""
-    pe = min(a + h, 99)
+    """net dollars at 10 contracts (a, h and the touch bid in mills), or None (a hold with no result is dropped)"""
+    pe = min(a + h, 990)
     if touch is not None:
-        ps = max(touch[1] - h, 1)
-        return CONTRACTS * (ps - pe) / 100.0 - fee(pe) - fee(ps)
+        ps = max(touch[1] - h, 10)
+        return CONTRACTS * (ps - pe) / 1000.0 - fee(pe) - fee(ps)
     if result not in ("yes", "no", "void"): return None
     if result == "void": return -fee(pe)
     payoff = 1.0 if result == side else 0.0
-    return CONTRACTS * (payoff - pe / 100.0) - fee(pe)
+    return CONTRACTS * (payoff - pe / 1000.0) - fee(pe)
 
 
 def median(v):
