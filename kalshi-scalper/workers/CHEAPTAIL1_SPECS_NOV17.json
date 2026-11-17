@@ -1,0 +1,111 @@
+{
+ "date": "2026-11-17",
+ "list": "CHEAPTAIL1_SPECS",
+ "note": "Frozen specs, no new setting. Rows 1 and 2 are the V1 specs unchanged (same hash). Rows 3 and 4 are off-list held-out holds written in the V1 spec format; their hash is computed here, not by a picker. filter null means no filter.",
+ "specs": [
+  {
+   "spec": {
+    "costs": {
+     "contracts": 10,
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order",
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ]
+    },
+    "entry": {
+     "filter": "spread:low",
+     "price_band_5c": 3,
+     "seconds_left": 600,
+     "side_rule": "cheap"
+    },
+    "exit": "M60",
+    "id": "SH1_01_HYPE",
+    "kind": "grid15m",
+    "market": "KXHYPE15M",
+    "mode": "log_only_forward",
+    "size_in_log": 1,
+    "source": "archive"
+   },
+   "spec_sha256": "2142dd78c680bc20a29c777d43176aae046f77d5dce755c5b3ef7252440bba94"
+  },
+  {
+   "spec": {
+    "costs": {
+     "contracts": 10,
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order",
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ]
+    },
+    "entry": {
+     "filter": "spread:low",
+     "price_band_5c": 1,
+     "seconds_left": 420,
+     "side_rule": "cheap"
+    },
+    "exit": "M60",
+    "id": "SH1_16_BNB",
+    "kind": "grid15m",
+    "market": "KXBNB15M",
+    "mode": "log_only_forward",
+    "size_in_log": 1,
+    "source": "archive"
+   },
+   "spec_sha256": "ae917f99875af50c90a72214f1d46fdc807b96ca4a3dec3cf49b971106b8875d"
+  },
+  {
+   "spec": {
+    "costs": {
+     "contracts": 10,
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order",
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ]
+    },
+    "entry": {
+     "filter": null,
+     "price_band_5c": 5,
+     "seconds_left": 840,
+     "side_rule": "cheap"
+    },
+    "exit": "M60",
+    "id": "CT1_03_HYPE",
+    "kind": "grid15m",
+    "market": "KXHYPE15M",
+    "mode": "log_only_forward",
+    "size_in_log": 1,
+    "source": "archive"
+   },
+   "spec_sha256": "03a731f83ba16661ab9feda15ff1d7bbb7fd294ae3c64ab74719e1ea9cb669b5"
+  },
+  {
+   "spec": {
+    "costs": {
+     "contracts": 10,
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order",
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ]
+    },
+    "entry": {
+     "filter": "mom5:down",
+     "price_band_5c": 1,
+     "seconds_left": 420,
+     "side_rule": "cheap"
+    },
+    "exit": "M60",
+    "id": "CT1_04_HYPE",
+    "kind": "grid15m",
+    "market": "KXHYPE15M",
+    "mode": "log_only_forward",
+    "size_in_log": 1,
+    "source": "archive"
+   },
+   "spec_sha256": "080db8b9987ee310dd2ee185ca6fa52c5084d764fe56e26e9689078bb7cc8862"
+  }
+ ]
+}
