@@ -203,6 +203,17 @@ class Amendment7(unittest.TestCase):
         self.assertTrue(P.entry_ok(calendar.timegm((2026, 11, 27, 17, 35, 0)), 9 * 60 + 35, 15 * 60 + 35, True))    # 12:35 ET
         self.assertFalse(P.entry_ok(calendar.timegm((2026, 11, 27, 17, 36, 0)), 9 * 60 + 35, 15 * 60 + 35, True))   # 12:36 ET
 
+    def test_taker_and_maker_use_their_own_entry_candle(self):
+        w1, w2 = P.WINDOWS["W1"], P.WINDOWS["W2"]
+        s = calendar.timegm((2026, 10, 30, 13, 59, 0))                          # signal 09:59 ET
+        taker, fill = s + 60, s + 180                                           # taker entry 10:00 ET, first touch 10:02 ET
+        self.assertEqual((P.entry_ok(taker, *w1, True), P.entry_ok(fill, *w1, True)), (True, False))     # W1: a taker trade, not a maker trade
+        self.assertEqual((P.entry_ok(taker, *w2, False), P.entry_ok(fill, *w2, False)), (False, True))   # W2: a maker trade, not a taker trade
+        s2 = calendar.timegm((2026, 10, 30, 13, 58, 0))                         # signal 09:58 ET: taker entry 09:59 ET, first touch 10:02 ET
+        taker2, fill2 = s2 + 60, s2 + 240
+        self.assertEqual((P.entry_ok(taker2, *w1, True), P.entry_ok(fill2, *w1, True)), (True, False))
+        self.assertEqual((P.entry_ok(taker2, *w2, False), P.entry_ok(fill2, *w2, False)), (False, True))
+
     def test_halves_key_is_entry_then_ticker(self):
         a = {"e": 100, "side": -1, "name": "KXB", "net": 1.0, "day": "d", "crossed": False, "stop_dist": 0}
         b = {"e": 100, "side": 1, "name": "KXA", "net": -1.0, "day": "d", "crossed": False, "stop_dist": 0}

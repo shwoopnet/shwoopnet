@@ -374,29 +374,25 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
                     last_e = {k: -10 ** 12 for k in COLS}
                     for (t, side) in sig[(n, ent[0])]:
                         e = t + 60
-                        wd, m, d = et_min(e)
-                        end_d = sess_end(d)
-                        if end_d is None:
-                            continue
-                        hi_d = min(hi, end_d - 10)                              # no entry in the last 10 minutes of the session
-                        if not ((lo <= m <= hi_d) if WIN_OPEN[w] else (lo < m <= hi_d)):
-                            continue
+                        taker_ok = entry_ok(e, lo, hi, WIN_OPEN[w])             # the taker entry candle: the window and session test for TT, TS and the hypothetical taker trade only (Amendment 8)
                         s1 = sigma(n, t)
                         if s1 is None or s1 == 0:
                             continue
                         U = s1 * math.sqrt(10)
                         ref = mid(cc[t])
-                        # the hypothetical taker trade of this signal (adverse-selection comparison; ignores the position rule)
-                        hyp = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[0])
-                        if hyp is None:
-                            continue
-                        if e >= busy["TT"] and e - last_e["TT"] >= COOLDOWN:
-                            hyp["name"] = n
-                            trs = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[1])
-                            if trs is not None:
-                                trs["name"] = n
-                                res["TT"].append(hyp); res["TS"].append(trs)
-                                busy["TT"], last_e["TT"] = hyp["x"], e
+                        hyp = None
+                        if taker_ok:
+                            # the hypothetical taker trade of this signal (adverse-selection comparison; ignores the position rule)
+                            hyp = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[0])
+                            if hyp is None:
+                                continue
+                            if e >= busy["TT"] and e - last_e["TT"] >= COOLDOWN:
+                                hyp["name"] = n
+                                trs = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, "TT", 0, HAIRCUTS[1])
+                                if trs is not None:
+                                    trs["name"] = n
+                                    res["TT"].append(hyp); res["TS"].append(trs)
+                                    busy["TT"], last_e["TT"] = hyp["x"], e
                         for N in N_fill:
                             filled = False
                             for col in ("MT", "MM"):
@@ -413,7 +409,8 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
                                     tr["name"] = n
                                     res[key].append(tr)
                                     busy[key], last_e[key] = tr["x"], tr["e"]
-                            (filled_taker if filled else unfilled_taker)[N].append(hyp["net"])
+                            if hyp is not None:                                              # only a signal whose taker entry candle is inside the window has a taker comparison
+                                (filled_taker if filled else unfilled_taker)[N].append(hyp["net"])
                 g, s = metrics(res["TT"]), metrics(res["TS"])
                 by = {}
                 for t in res["TT"]:
