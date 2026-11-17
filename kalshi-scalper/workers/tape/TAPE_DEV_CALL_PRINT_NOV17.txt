@@ -1,0 +1,4 @@
+Tape bars development call (tape_bars.py 55eb14adee162c5ba837017cb3d3e56cb8028c79027f731b482d25f74c0478f9, amendment 5), --from 2026-09-18 --to 2026-10-27, 40 files, file list sha256 dda42c643c6a44c4fdcfd4ae8219b506b889dd2f191e13264a516091a57dfb30 (allow line PR 1068), tickers TICKERS_TAPE_DEV_NOV17.txt sha256 043e3bb0629f76f5c920270148857a137dbf2d384c984ad6ba8d7b8a93b12084.
+bars.csv: 291980 bars, sha256 867dcacc8ac43824c76a527d34ae563cf371b316f3822c69ca32ccad7d1a3a17 (31 MB, NOT opened).
+summary.csv: sha256 9b342fbb3c035f9d321b05576a35194e98e6ddb7129fcda6941a221c316b0a26 (counts only; opened after this commit, for the count columns).
+Held-out (Oct 28 to Nov 15) never read; Nov 16 never read.
