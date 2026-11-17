@@ -88,7 +88,9 @@ def main(rec_path, reg_path, m_carried, schema_dir=None, holds_sha=None, holds_e
         bs = block(rs, units, primary, cds, sf, st, scale); bv = block(rv, units, primary, cdv, vf, vt, scale)
         L["setting"] = {"threshold_value": h["threshold_value"], "tail": h.get("tail"), "hold_s": h.get("hold_s"), "tp_mult": h.get("tp_mult"), "stop_mult": h.get("stop_mult")}
         L["search"] = bs; L["validate"] = bv
-        s1 = bs["trades_per_day"] is not None and bs["trades_per_day"] >= 3 and bs["net_edge_c"] is not None and bs["net_edge_c"] > 0
+        PERPS = ("crypto_perp", "metal_perp", "index_perp", "stock_perp")        # 12.19: perps have no trades a day floor
+        edge_ok = bs["net_edge_c"] is not None and bs["net_edge_c"] > 0
+        s1 = edge_ok if s["market"] in PERPS else (bs["trades_per_day"] is not None and bs["trades_per_day"] >= 3 and edge_ok)
         L["screen1"] = bool(s1)
         union = sorted([x for x in rs + rv if x["traded"]], key=lambda r: (r["entry_end"], r["market_id"]))
         h1t = h.get("half1_to", HALF1_TO); 
