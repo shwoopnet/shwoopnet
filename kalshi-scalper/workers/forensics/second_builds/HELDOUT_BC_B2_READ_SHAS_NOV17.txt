@@ -1,0 +1,6 @@
+Forensics held-out batch B and C second-build outputs (heldout_bc_b2.py sha256 2a5bfa0bcb8e04022e1c508a5508082ed026a1b93407d0e8e3e94cac22154382), shas committed BEFORE the outputs were opened.
+batch B per-rule lines (80): 8b72da64958e90d4353e9d39cf09da109437d5dc8601c7f300c316483162a8f4
+batch C per-rule lines (68): 42c8cd33bebe09d6cda5b3ed057e1ce2e9e9e6921ed83f6a6a55e0223654b3fb
+batch B print: 5a47c69e6c2531a22b5f778d9e34ea3d0e7a4963edfa74e89097438e8a364b91
+batch C print: 62d243b656b2638f2409348371e732fd4d0c84c4c6968e984ecde51ca028860f
+Desk A's print files hashed only, never opened: batch B 89363527d6b2e68197a01122a444129f0bfdfed1c3f173961ed02e8bfd5eb29a, batch C e47eb90b9f2e4345e3fbbf03712b30cd55d4a0826671430113cd2389cf608bb6.
