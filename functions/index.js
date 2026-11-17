@@ -710,9 +710,23 @@ exports.kalshiLiveArmed = onSchedule(
               // CFRTIK (Nov 12, 2026): the Bitcoin perpetual's public one minute candles (keyless GET, no signing, 3 s abort, no retry), and a short sleep for the bounded wait for the decision minute's candle.
               // The ticker is fixed here: nothing the engine or a caller passes can read another market.
               readPerpCandles: require("./kalshiCfrtiKReadLib").perpCandleReader(live.liveRequest, fetch),
+              // OICORE's sizing base (kalshiOicoreBaseLib, the owner's Nov 16 decision): the perps account document, read once per tick and ONLY when OICORE has a market in its entry span. The engine fails closed on a missing or stale figure.
+              readPerpsDoc: async () => { const d = await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).get(); return d.exists ? d.data() : null; },
               sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
             });
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
+            // A slot order skipped for short cash on its shard raises the same low money phone alert as L1 (same six hour cooldown document). It moves no money: the owner moves cash between shards.
+            try {
+              if (slotResult && slotResult.shardShort) {
+                const sRef = db.collection("kalshiLiveControl").doc("shardAlert");
+                await shardAlertLib.runShardAlert({
+                  now, short: slotResult.shardShort,
+                  claim: (at) => db.runTransaction(async (tx) => { const cur = await tx.get(sRef), last = cur.exists && Number.isFinite(Number(cur.data().at)) ? Number(cur.data().at) : null; if (!shardAlertLib.claimable(at, last)) return false; tx.set(sRef, { at }, { merge: true }); return last; }),
+                  release: (prev) => sRef.set({ at: prev }, { merge: true }),
+                  raise: (a) => sessRef.set({ shardAlert: a }, { merge: true }),
+                });
+              }
+            } catch (e) { console.error("kalshiLiveArmed: slot shard alert failed: " + String((e && e.message) || e).slice(0, 160)); }
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
         }
       }
@@ -1055,6 +1069,8 @@ exports.kalshiPerpsProbe = onSchedule(
 // /margin/positions through the bot's own signer plus the PUBLIC perps list, shaped into one document the Bot page reads (functions/kalshiPerpsAccountLib.js, test/perpsAccountGates.test.js).
 // No order, no POST, nothing written to Kalshi; nothing that decides a trade reads the document. A failed read leaves the last document as it was (the page shows its age). Deploy: bash functions/deploy-sizing.sh.
 const perpsAccount = require("./kalshiPerpsAccountLib");
+const perpsCushion = require("./kalshiPerpsCushionLib");
+const perpsEvents = require("./kalshiPerpsEventsLib");
 exports.kalshiPerpsAccount = onSchedule(
   { schedule: "every 5 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 40, retryCount: 0, memory: "256MiB" },
   async () => {
@@ -1062,8 +1078,37 @@ exports.kalshiPerpsAccount = onSchedule(
       ensureDefaultAdminApp();
       const publicGet = async (url) => { const r = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(6000) }); return r.ok ? r.json() : null; };
       const doc = await perpsAccount.runPerpsAccount({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(), publicGet });
-      if (doc) await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).set(doc);
+      // The earlier document is read BEFORE it is replaced, only to compare for position changes (kalshiPerpsEventsLib); a failed read just means no events this time.
+      const accRef = getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id);
+      let prevDoc = null;
+      if (doc) { try { const ps = await accRef.get(); prevDoc = ps.exists ? ps.data() : null; } catch (e) { prevDoc = null; } }
+      if (doc) await accRef.set(doc);
+      if (doc) {
+        try {
+          const evNote = await perpsEvents.recordEvents({ prev: prevDoc, next: doc, write: (id, e) => getFirestore().collection(perpsEvents.COLLECTION).doc(id).set(e) });
+          if (/^events|^error/.test(evNote)) console.log("kalshiPerpsAccount: position events: " + evNote);
+        } catch (e) { console.error("kalshiPerpsAccount: events failed: " + String((e && e.message) || e).slice(0, 160)); }
+      }
       console.log("kalshiPerpsAccount: " + (doc ? "rows=" + doc.count : "unreadable, document left as it was"));
+      // Margin cushion phone alert (kalshiPerpsCushionLib, Nov 17, 2026): only when the cushion is under a line; each level has its own cooldown claimed in a transaction. Its one write is a field on the session
+      // document that kalshiPushSession turns into an alert. Fenced off so it can never fail the read above.
+      if (doc) {
+        try {
+          const db = getFirestore(), cushionRef = db.collection("kalshiLiveControl").doc("perpsCushionAlert"), sessRef = db.collection("kalshiLiveControl").doc("session");
+          const note = await perpsCushion.runCushionAlert({
+            now: doc.at, doc,
+            claim: (at, level) => db.runTransaction(async (tx) => {
+              const cur = await tx.get(cushionRef), last = cur.exists && Number.isFinite(Number(cur.data()[level])) ? Number(cur.data()[level]) : null;
+              if (!perpsCushion.claimable(level, at, last)) return false;
+              tx.set(cushionRef, { [level]: at }, { merge: true });
+              return last;
+            }),
+            release: (level, prev) => cushionRef.set({ [level]: prev }, { merge: true }),
+            raise: (a) => sessRef.set({ perpsCushionAlert: a }, { merge: true }),
+          });
+          if (/^alerted|^error|failed/.test(note)) console.warn("kalshiPerpsAccount: cushion alert: " + note);
+        } catch (e) { console.error("kalshiPerpsAccount: cushion alert failed: " + String((e && e.message) || e).slice(0, 160)); }
+      }
     } catch (e) { console.error("kalshiPerpsAccount: " + String((e && e.message) || e).slice(0, 160)); }
   }
 );

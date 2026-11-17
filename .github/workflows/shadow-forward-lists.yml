@@ -7,7 +7,7 @@
 name: shadow-forward-lists
 on:
   schedule:
-    - cron: "53 3 * * *"
+    - cron: "53 1,5,9,13,17,21 * * *"
   workflow_dispatch: {}
 permissions:
   contents: write

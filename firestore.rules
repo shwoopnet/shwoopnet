@@ -142,6 +142,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Perpetuals position changes (Nov 17, 2026): opens, closes and size changes found by comparing two 5 minute reads of the perps account. Written by the server, read by the admin.
+    match /kalshiPerpsEvents/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // What the live bot did (armed, disarmed, scan ended), shown on the Bot tab. Written only by the server.
     match /kalshiLiveEvents/{id} {
       allow read: if isAdmin();

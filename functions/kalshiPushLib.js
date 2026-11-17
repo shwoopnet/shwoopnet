@@ -53,6 +53,9 @@ function sessionKinds(before, after) {
   // The hard account stop tripped (kalshiHardStopLib): same rule, only a CHANGED stamp alerts, and it does not need the session to be on (the stop holds either way).
   const wasHard = before.hardStopAlert && before.hardStopAlert.at, nowHard = after.hardStopAlert && after.hardStopAlert.at;
   if (Number.isFinite(Number(nowHard)) && Number(nowHard) !== Number(wasHard)) out.push("hardstop");
+  // The perpetuals margin cushion fell under a line (kalshiPerpsCushionLib): same rule, only a CHANGED stamp alerts; it needs no session on (the perps account is separate from the bot).
+  const wasCush = before.perpsCushionAlert && before.perpsCushionAlert.at, nowCush = after.perpsCushionAlert && after.perpsCushionAlert.at;
+  if (Number.isFinite(Number(nowCush)) && Number(nowCush) !== Number(wasCush)) out.push("perpscushion");
   return out;
 }
 
@@ -99,6 +102,10 @@ function message(kind, o, ctx) {
   if (kind === "shard") {
     const a = (o && o.shardAlert) || {}, have = Number(a.avail), need = Number(a.need);
     return { title: "Check the bot: a market cannot trade, low money on exchange " + String(a.shard || "?").slice(0, 3), body: (Number.isFinite(have) && Number.isFinite(need) ? "Only $" + have.toFixed(2) + " there and an order needs $" + need.toFixed(2) + ". " : "") + "Money on another exchange does not count. Top it up in Kalshi under Transfers.", tag: "issue-shard" };
+  }
+  if (kind === "perpscushion") {
+    const a = (o && o.perpsCushionAlert) || {}, pct = Number(a.pct), usd = Number(a.dollars), high = a.level === "high";
+    return { title: (high ? "Perps margin cushion is very low" : "Perps margin cushion is getting low") + (Number.isFinite(pct) ? ": " + pct.toFixed(1) + "%" : ""), body: (Number.isFinite(usd) ? "$" + usd.toFixed(2) + " of cushion left. " : "") + "Add margin or close a position by hand in Kalshi. The bot trades no perps and cannot do this for you. This is the cushion, not a forced-close price.", tag: "issue-perpscushion" };
   }
   if (kind === "hardstop") {
     return { title: "Hard stop: all new buys are off", body: "The account fell to the hard stop line on trading results. No strategy will buy until you re-arm it with a reviewed change. Open positions are still sold. Open the Bot page and look.", tag: "issue-hardstop" };

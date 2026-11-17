@@ -56,7 +56,9 @@ gates.BS3 = async () => {   // idempotent: the document id is the UTC hour, so t
   assert.strictEqual(a.written[0].id, '2026-11-12T14'); assert.strictEqual(a.written[0].id, b.written[0].id);
   assert.notStrictEqual(lib.hourId(Date.parse('2026-11-12T15:00:00Z')), '2026-11-12T14');
   const idx = code(src('functions/index.js'));
-  const fn = idx.slice(idx.indexOf('exports.kalshiBalanceSnapshot = onSchedule('), idx.indexOf('exports.kalshiBookRecorder'));
+  // ends at the perps account function (it writes the cushion alert stamp on the session document, on purpose, test CU7); the snapshot function sits before it
+  const from = idx.indexOf('exports.kalshiBalanceSnapshot = onSchedule('), ends = ['exports.kalshiPerpsAccount', 'exports.kalshiBookRecorder'].map((m) => idx.indexOf(m)).filter((i) => i > from);
+  const fn = idx.slice(from, Math.min(...ends));
   assert.ok(/col\.doc\(id\)\.set\(doc, \{ merge: true \}\)/.test(fn), 'set with merge on the hour id');
 };
 gates.BS4 = async () => {   // retention: 90 days, once a day, bounded, and a failed read does not stop it
@@ -67,7 +69,9 @@ gates.BS4 = async () => {   // retention: 90 days, once a day, bounded, and a fa
   assert.ok(lib.PRUNE_BATCH > 0 && lib.PRUNE_BATCH <= 500);
   const other = world(); await other.run({ now: NOW }); assert.strictEqual(other.pruned.length, 0, 'not on the other 23 runs');
   const idx = code(src('functions/index.js'));
-  const fn = idx.slice(idx.indexOf('exports.kalshiBalanceSnapshot = onSchedule('), idx.indexOf('exports.kalshiBookRecorder'));
+  // ends at the perps account function (it writes the cushion alert stamp on the session document, on purpose, test CU7); the snapshot function sits before it
+  const from = idx.indexOf('exports.kalshiBalanceSnapshot = onSchedule('), ends = ['exports.kalshiPerpsAccount', 'exports.kalshiBookRecorder'].map((m) => idx.indexOf(m)).filter((i) => i > from);
+  const fn = idx.slice(from, Math.min(...ends));
   assert.ok(/\.where\("ts", "<", beforeMs\)\.limit\(limit\)/.test(fn), 'the delete query is bounded');
 };
 gates.BS5 = async () => {   // GET only, one request, only the balance path; no order code anywhere in the snapshot path
@@ -80,7 +84,9 @@ gates.BS5 = async () => {   // GET only, one request, only the balance path; no 
   assert.ok(!/POST|PUT|DELETE|PATCH|\/orders|placeOrder|sellOrder|createOrder/.test(l), 'no write verb or order path in the library');
   assert.ok(/method: "GET"/.test(l));
   const idx = code(src('functions/index.js'));
-  const fn = idx.slice(idx.indexOf('exports.kalshiBalanceSnapshot = onSchedule('), idx.indexOf('exports.kalshiBookRecorder'));
+  // ends at the perps account function (it writes the cushion alert stamp on the session document, on purpose, test CU7); the snapshot function sits before it
+  const from = idx.indexOf('exports.kalshiBalanceSnapshot = onSchedule('), ends = ['exports.kalshiPerpsAccount', 'exports.kalshiBookRecorder'].map((m) => idx.indexOf(m)).filter((i) => i > from);
+  const fn = idx.slice(from, Math.min(...ends));
   assert.ok(/secrets: \[KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(fn) && !/KALSHI_REPORT_TOKEN|VAPID/.test(fn), 'only the two secrets the account read already uses');
   assert.ok(!/kalshiLiveOrders|kalshiLiveControl|runL1Tick|runExitWatch/.test(fn), 'it touches no order, session or control data');
 };
