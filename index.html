@@ -1833,6 +1833,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the perps part of Open positions now shows a Margin cushion line: the whole perps account's equity minus its maintenance margin, in dollars, with a risk label and bar by how much of the equity it is (20% or more Low, 10 to 20% Medium, under 10% High). With one open perp it also says how big a move against it uses the cushion up. It is the account's cushion, not Kalshi's forced-close price (Closes at stays n/a). Display only.</li>
                   <li>Bot page: your perpetuals are now live on the Bot page. The Account total is the prediction balance plus the perps account value (total only), Today and the result line include the perps change (the result line starts from the first hourly snapshot that has a perps total), and each open perp shows on Open positions with its return in dollars, position value, contracts, entry price and the price now; the multiplier is marked as an estimate, and the cost, return percent, forced-close price and auto close levels say n/a or not readable because Kalshi's data does not give them. If the perps data is older than 20 minutes it is left out of the total and the page says so. Display only: the loss stops, limits and sizing never read it.</li>
                   <li>Research: a second paper only runner follows the picks of three new shadow lists (V2, V3 and V4) once a day, beside the first one, from public data: no order, no key, results as totals only. The Bitcoin picks wait until Nov 21. The three picks that needed frozen cut points now run on them.</li>
                 </ul>
@@ -3228,7 +3229,24 @@
     if(!Number.isFinite(buf)){ return { label: 'Buffer n/a', w: 0, none: true }; }
     return { label: (buf >= 20 ? 'Low' : (buf >= 10 ? 'Medium' : 'High')) + ' risk, ' + Math.round(buf) + '% buffer', w: Math.max(0, Math.min(100, buf)) };
   }
-  function kalshiPerpsHtml(rows, esc, money){
+  // Account-level margin cushion (the owner, Nov 17, 2026): equity minus maintenance margin, from the perps account document, in dollars. It is NOT Kalshi's forced-close price (the data carries none): it says how much
+  // the whole perps account can lose before it falls to the maintenance margin. Risk label by cushion percent of equity (20 or more Low, 10 to 20 Medium, under 10 High). moveShare is stated only for ONE open position
+  // (cushion over its position value, the move against it that uses the cushion up, before fees and funding); with several positions it is left out because their directions can offset. Display only.
+  function kalshiPerpCushion(doc, nRows){
+    var fin = function(v){ return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)); };
+    if(!doc || !fin(doc.equity) || !fin(doc.maintenance) || !(Number(doc.equity) > 0)){ return null; }
+    var eq = Number(doc.equity), cushion = Math.round((eq - Number(doc.maintenance)) * 100) / 100, pct = cushion / eq * 100;
+    var pv = fin(doc.positionValue) ? Math.abs(Number(doc.positionValue)) : null;
+    return { dollars: cushion, pct: pct, move: nRows === 1 && pv > 0 ? cushion / pv * 100 : null, risk: kalshiPerpRisk(pct) };
+  }
+  function kalshiPerpCushionHtml(c, esc, money){
+    if(!c){ return ''; }
+    var sg = (c.dollars >= 0 ? '' : '-') + money(Math.abs(c.dollars));
+    return '<div class="kal-perp-risk kal-perp-cushion"><div class="kal-perp-riskhead"><span>Margin cushion (whole perps account): ' + esc(sg) + '</span><span>' + esc(c.risk.label.replace(/ buffer$/, ' of equity')) + '</span></div>' +
+      '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + c.risk.w.toFixed(1) + '%"></i></div>' +
+      '<div class="kal-hold-sub">Equity minus maintenance margin' + (c.move !== null ? '; a move of about ' + esc(c.move.toFixed(1)) + '% against the position uses it up (before fees and funding)' : '') + '. Not a forced-close price.</div></div>';
+  }
+  function kalshiPerpsHtml(rows, esc, money, cushion){
     if(!rows || !rows.length){ return ''; }
     var num = function(v){ return Number.isFinite(Number(v)) && v !== null && v !== ''; };
     var px = function(v){ return num(v) ? Number(v).toLocaleString('en-US', { maximumFractionDigits: 4 }) : 'n/a'; };
@@ -3244,7 +3262,7 @@
         (num(r.cost) ? stat('Cost', money(Number(r.cost))) : '') + (num(r.size) ? stat('Contracts', String(Number(r.size))) : '') + stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Now', px(r.index)) : '') + '</div>' +
         '<div class="kal-perp-risk"><div class="kal-perp-riskhead"><span>' + esc(risk.label) + '</span><span>Closes at ' + esc(px(r.closeAt)) + '</span></div>' + (risk.none ? '' : '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + risk.w.toFixed(0) + '%"></i></div>') + '</div>' +
         '<div class="kal-hold-sub">' + esc(auto) + ' · Perp, not one of the bot\'s trades.</div></div>';
-    }).join('');
+    }).join('') + kalshiPerpCushionHtml(cushion, esc, money);
   }
   // The perps account document (Main, Nov 17, 2026: admin doc kalshiLiveControl/perpsAccount, refreshed every 5 minutes) turned into what the card and the total draw. PURE and not wired to a read yet: the page makes no new read until Main confirms the
   // units. Older than 20 minutes (or no document) hides the perps part and says why, never a stale figure. Units (Main, confirmed): pnl and equity are dollars, size is contracts, size times mark is the position value; margin is the maintenance margin, so there is no Cost or return percent. The multiplier is the public list's ESTIMATE and is labelled so; closeAt, bufferPct, takeProfit and stopLoss are null for now, so Closes at and the buffer say n/a and auto close says "not readable".
@@ -3262,7 +3280,7 @@
         size: size, entry: fin(r.entry) ? Number(r.entry) : null, index: mark, closeAt: fin(r.closeAt) ? Number(r.closeAt) : null, bufferPct: fin(r.bufferPct) ? Number(r.bufferPct) : null,
         takeProfit: fin(r.takeProfit) ? Number(r.takeProfit) : null, stopLoss: fin(r.stopLoss) ? Number(r.stopLoss) : null, autoKnown: false };
     });
-    return { ok: true, reason: '', total: Number.isFinite(eq) ? eq : null, rows: rows };
+    return { ok: true, reason: '', total: Number.isFinite(eq) ? eq : null, rows: rows, cushion: kalshiPerpCushion(doc, rows.length) };
   }
   function kalshiPerpsNote(res){ return res && res.reason === 'stale' ? 'Perps are not in the total: their data is older than 20 minutes.' : (res && res.reason === 'missing' ? 'Perps are not in the total: no perps data.' : ''); }
   function kalshiPerpRows(a){ return a && Array.isArray(a.perps) ? a.perps : []; }
@@ -3278,7 +3296,7 @@
     var hist = (kalshiPerpsState.hist || []).concat([{ t: Number(kalshiPerpsState.doc.at), total: res.total }]);
     var todayKey = kalDayKey(now), prior = null;
     hist.forEach(function(p){ if(kalDayKey(p.t) < todayKey && (prior === null || p.t > prior.t)){ prior = p; } });
-    out.perps = res.rows; out.perpsTotal = res.total; out.perpsHistory = hist;
+    out.perps = res.rows; out.perpsCushion = res.cushion; out.perpsTotal = res.total; out.perpsHistory = hist;
     out.perpsDay = prior ? Math.round((res.total - Number(prior.total)) * 100) / 100 : 0;
     return out;
   }
@@ -3319,7 +3337,7 @@
     });
     Object.keys(kalshiPosPaths).forEach(function(k){ if(!openNow[k]){ delete kalshiPosPaths[k]; } });
     rows.forEach(function(r){ var L = kalshiPosPaths[r.ticker] || []; r.path = L.map(function(x){ return x.v; }); r.pathT = L.map(function(x){ return x.t; }); });
-    var perpHtml = kalshiPerpsHtml(kalshiPerpRows(a), escapeHtml, kalshiMoney);
+    var perpHtml = kalshiPerpsHtml(kalshiPerpRows(a), escapeHtml, kalshiMoney, a.perpsCushion);
     posEl.innerHTML = (rows.length || !perpHtml ? kalshiPositionsHtml(rows, escapeHtml, kalshiMoney) : '') + perpHtml;
   }
   var kalshiBooksLast = null;

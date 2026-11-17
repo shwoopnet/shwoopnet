@@ -2,7 +2,7 @@ const fs=require('fs'),assert=require('assert');
 const h=fs.readFileSync('index.html','utf8');
 const m=h.match(/function kalshiPerpRisk[\s\S]*?function kalshiPerpRows\(a\)\{[^\n]*\n/);
 assert(m,'PP1 functions present');
-const f=new Function(m[0]+';return {kalshiPerpsHtml,kalshiPerpRisk,kalshiPerpRows,kalshiPerpsFromDoc,kalshiPerpsNote};')();
+const f=new Function(m[0]+';return {kalshiPerpCushion,kalshiPerpsHtml,kalshiPerpRisk,kalshiPerpRows,kalshiPerpsFromDoc,kalshiPerpsNote};')();
 const esc=s=>String(s).replace(/</g,'&lt;'), money=v=>'$'+v.toFixed(2);
 const row={market:'Bitcoin <x>',up:true,multiplier:27.4,cost:10,size:274,entry:90000,index:91000,value:12.5,pnl:2.5,pnlPct:25,takeProfit:95000,stopLoss:88000,closeAt:87000,bufferPct:27};
 const out=f.kalshiPerpsHtml([row],esc,money);
@@ -31,6 +31,18 @@ assert.strictEqual(f.kalshiPerpsFromDoc({at:now-21*60000,equity:50,rows:[]},now)
 assert(/older than 20 minutes/.test(f.kalshiPerpsNote(f.kalshiPerpsFromDoc({at:now-21*60000,equity:50,rows:[]},now))));
 assert(/no perps data/.test(f.kalshiPerpsNote(f.kalshiPerpsFromDoc(null,now))));
 assert.strictEqual(f.kalshiPerpsFromDoc({at:now-19*60000,equity:50,rows:[]},now).ok,true);
+// PP9: the account-level margin cushion (equity minus maintenance, dollars), labelled as NOT a forced-close price; a move share only for one position; risk by percent of equity; invented numbers.
+let cu=f.kalshiPerpCushion({equity:100,maintenance:20,positionValue:400},1);
+assert.strictEqual(cu.dollars,80);assert.strictEqual(Math.round(cu.pct),80);assert.strictEqual(cu.move,20,'PP9 one position: cushion over position value');
+assert.strictEqual(f.kalshiPerpCushion({equity:100,maintenance:20,positionValue:400},2).move,null,'PP9 several positions: no move share');
+assert(f.kalshiPerpCushion({equity:100,maintenance:95},1).risk.label.startsWith('High'),'PP9 under 10% is High');
+assert(f.kalshiPerpCushion({equity:100,maintenance:85},1).risk.label.startsWith('Medium'),'PP9 10 to 20% is Medium');
+assert.strictEqual(f.kalshiPerpCushion({equity:0,maintenance:0},1),null,'PP9 no equity, no cushion');
+assert.strictEqual(f.kalshiPerpCushion({equity:50},1),null,'PP9 no maintenance figure, no cushion');
+const cdoc=f.kalshiPerpsFromDoc({at:now,equity:100,maintenance:20,positionValue:400,rows:[{market:'X',up:true,size:1,entry:1,pnl:0,margin:20,mark:1,multiplierEstimate:5}]},now);
+const ch=f.kalshiPerpsHtml(cdoc.rows,esc,money,cdoc.cushion);
+assert(ch.includes('Margin cushion (whole perps account): $80.00')&&ch.includes('Not a forced-close price')&&ch.includes('about 20.0%')&&ch.includes('Closes at n/a'),'PP9 labelled, move share, Closes at stays n/a');
+assert(!f.kalshiPerpsHtml(cdoc.rows,esc,money,null).includes('Margin cushion'),'PP9 no cushion block without data');
 // PP8: wired (Nov 17): one read of the perps doc and one of the hourly snapshots, never a write; the view lays the perps over the account read and Today uses the last snapshot of an earlier Central day.
 const live=h.replace(/\/\/[^\n]*/g,'');
 assert(/getDoc\(doc\(db, 'kalshiLiveControl', 'perpsAccount'\)\)/.test(live)&&/collection\(db, 'kalshiBalanceSnaps'\)/.test(live),'PP8 reads the two sources');
