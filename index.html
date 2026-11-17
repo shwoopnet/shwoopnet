@@ -1413,6 +1413,15 @@
         return { goldKill: g && typeof g === 'object' ? { tripped: g.tripped === true, rearmAt: g.rearmAt, rule: typeof g.rule === 'string' ? g.rule.slice(0, 24) : null, trippedAt: g.trippedAt } : null };
       });
     },
+    // The perpetuals account (Nov 17, 2026): ONE plain read of the document the server copies every 5 minutes (admin read only, display only), and the hourly balance snapshots' perps total. Reads, never writes.
+    readKalshiPerpsAccount: function(){
+      return getDoc(doc(db, 'kalshiLiveControl', 'perpsAccount')).then(function(s){ return s.exists() ? s.data() : null; });
+    },
+    readKalshiPerpsHistory: function(){
+      return getDocs(query(collection(db, 'kalshiBalanceSnaps'), orderBy('ts', 'desc'), limit(800))).then(function(snap){
+        return snap.docs.map(function(d){ var x = d.data(); return { t: Number(x.ts), total: x.perpsTotal }; }).filter(function(p){ return Number.isFinite(p.t) && p.total !== null && p.total !== undefined && Number.isFinite(Number(p.total)); });
+      });
+    },
     // The shadow log (admin read only, written only by the server), newest first in pages of 2,000, at most 3 pages, from a time on: the Strategy board's ON DECK rows. A read, never a write; a refused read rejects and the board says so.
     readKalshiShadowRows: function(sinceMs){
       var all = [], seen = {}, cursor = null, pages = 0;
@@ -1824,7 +1833,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
-                  <li>Bot page: the perp rows now follow the real data shape (value is margin plus return, cost is margin, the multiplier is shown as an estimate, and Closes at, the buffer and auto close levels say n/a or not readable until they can be read). Perps older than 20 minutes drop out of the total and say so. No perps read is wired yet, so nothing shows.</li>
+                  <li>Bot page: your perpetuals are now live on the Bot page. The Account total is the prediction balance plus the perps account value (total only), Today and the result line include the perps change (the result line starts from the first hourly snapshot that has a perps total), and each open perp shows on Open positions with its return in dollars, position value, contracts, entry price and the price now; the multiplier is marked as an estimate, and the cost, return percent, forced-close price and auto close levels say n/a or not readable because Kalshi's data does not give them. If the perps data is older than 20 minutes it is left out of the total and the page says so. Display only: the loss stops, limits and sizing never read it.</li>
                   <li>Research: a second paper only runner follows the picks of three new shadow lists (V2, V3 and V4) once a day, beside the first one, from public data: no order, no key, results as totals only. The Bitcoin picks wait until Nov 21, and three picks wait for their frozen cut points.</li>
                 </ul>
                 <div class="changelog-day">Nov 16</div>
@@ -3231,15 +3240,14 @@
       var auto = (num(r.takeProfit) || num(r.stopLoss)) ? 'Take profit ' + px(r.takeProfit) + ' · Stop loss ' + px(r.stopLoss) : (r.autoKnown === true ? 'No auto close set' : 'Auto close levels not readable');   // never claim none is set unless the data says so
       return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + (num(r.multiplier) ? ' <span class="kal-mult">' + (r.multiplierEst ? '~' : '') + esc(Number(r.multiplier).toFixed(1)) + 'x' + (r.multiplierEst ? ' est.' : '') + '</span>' : '') +
         '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
-        '<div class="kal-hold-stats kal-perp-stats">' + stat('Current value', num(r.value) ? money(Number(r.value)) : 'n/a') + stat('Return', pnlTxt, num(r.pnl) ? (r.pnl >= 0 ? 'kal-pos' : 'kal-neg') : '') +
-        stat('Cost', num(r.cost) ? money(Number(r.cost)) : 'n/a') + (num(r.size) ? stat('Leveraged size', money(Number(r.size))) : '') + stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Index now', px(r.index)) : '') + '</div>' +
+        '<div class="kal-hold-stats kal-perp-stats">' + (num(r.value) ? stat('Position value', money(Number(r.value))) : '') + stat('Return', pnlTxt, num(r.pnl) ? (r.pnl >= 0 ? 'kal-pos' : 'kal-neg') : '') +
+        (num(r.cost) ? stat('Cost', money(Number(r.cost))) : '') + (num(r.size) ? stat('Contracts', String(Number(r.size))) : '') + stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Now', px(r.index)) : '') + '</div>' +
         '<div class="kal-perp-risk"><div class="kal-perp-riskhead"><span>' + esc(risk.label) + '</span><span>Closes at ' + esc(px(r.closeAt)) + '</span></div>' + (risk.none ? '' : '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + risk.w.toFixed(0) + '%"></i></div>') + '</div>' +
         '<div class="kal-hold-sub">' + esc(auto) + ' · Perp, not one of the bot\'s trades.</div></div>';
     }).join('');
   }
   // The perps account document (Main, Nov 17, 2026: admin doc kalshiLiveControl/perpsAccount, refreshed every 5 minutes) turned into what the card and the total draw. PURE and not wired to a read yet: the page makes no new read until Main confirms the
-  // units. Older than 20 minutes (or no document) hides the perps part and says why, never a stale figure. Value is margin plus pnl and cost is margin (Main: units to be confirmed after the first real read); Leveraged size is left out because the
-  // size's unit is not confirmed. The multiplier is the public list's ESTIMATE and is labelled so; closeAt, bufferPct, takeProfit and stopLoss are null for now, so Closes at and the buffer say n/a and auto close says "not readable".
+  // units. Older than 20 minutes (or no document) hides the perps part and says why, never a stale figure. Units (Main, confirmed): pnl and equity are dollars, size is contracts, size times mark is the position value; margin is the maintenance margin, so there is no Cost or return percent. The multiplier is the public list's ESTIMATE and is labelled so; closeAt, bufferPct, takeProfit and stopLoss are null for now, so Closes at and the buffer say n/a and auto close says "not readable".
   var KAL_PERPS_MAX_AGE_MS = 20 * 60 * 1000;
   function kalshiPerpsFromDoc(doc, now){
     if(!doc || typeof doc !== 'object' || !Number.isFinite(Number(doc.at))){ return { ok: false, reason: 'missing', total: null, rows: [] }; }
@@ -3247,16 +3255,45 @@
     var eq = Number(doc.equity);
     var fin = function(v){ return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)); };
     var rows = (Array.isArray(doc.rows) ? doc.rows : []).filter(function(r){ return r && typeof r.market === 'string'; }).map(function(r){
-      var margin = fin(r.margin) ? Number(r.margin) : null, pnl = fin(r.pnl) ? Number(r.pnl) : null;
+      var pnl = fin(r.pnl) ? Number(r.pnl) : null, size = fin(r.size) ? Number(r.size) : null, mark = fin(r.mark) ? Number(r.mark) : null;
+      // Units confirmed by Main (Nov 17): pnl is dollars; size is contracts; size times mark is the position's notional value. margin is the MAINTENANCE margin, not cash put in, so there is no Cost and no return percent.
       return { market: r.market, up: r.up === true, multiplier: fin(r.multiplierEstimate) ? Number(r.multiplierEstimate) : null, multiplierEst: true,
-        cost: margin, value: margin !== null && pnl !== null ? Math.round((margin + pnl) * 100) / 100 : null, pnl: pnl, pnlPct: margin && pnl !== null ? Math.round(pnl / margin * 1000) / 10 : null,
-        size: null, entry: fin(r.entry) ? Number(r.entry) : null, index: fin(r.mark) ? Number(r.mark) : null, closeAt: fin(r.closeAt) ? Number(r.closeAt) : null, bufferPct: fin(r.bufferPct) ? Number(r.bufferPct) : null,
+        cost: null, value: size !== null && mark !== null ? Math.round(size * mark * 100) / 100 : null, pnl: pnl, pnlPct: null,
+        size: size, entry: fin(r.entry) ? Number(r.entry) : null, index: mark, closeAt: fin(r.closeAt) ? Number(r.closeAt) : null, bufferPct: fin(r.bufferPct) ? Number(r.bufferPct) : null,
         takeProfit: fin(r.takeProfit) ? Number(r.takeProfit) : null, stopLoss: fin(r.stopLoss) ? Number(r.stopLoss) : null, autoKnown: false };
     });
     return { ok: true, reason: '', total: Number.isFinite(eq) ? eq : null, rows: rows };
   }
   function kalshiPerpsNote(res){ return res && res.reason === 'stale' ? 'Perps are not in the total: their data is older than 20 minutes.' : (res && res.reason === 'missing' ? 'Perps are not in the total: no perps data.' : ''); }
-  function kalshiPerpRows(a){ return a && Array.isArray(a.perps) ? a.perps : []; }   // no source yet: the account read carries no perp positions, so this is empty until the data is named
+  function kalshiPerpRows(a){ return a && Array.isArray(a.perps) ? a.perps : []; }
+  // The page's one perps feed (display only, see kalshiAccountTotal): the account document is read at most every 4 minutes and the hourly snapshots at most every 30, only while the Bot page draws; a failed read keeps what was
+  // there and tries again later. kalshiPerpsView lays the perps figures over the account read, so a fresh account read never wipes them.
+  var kalshiPerpsState = { doc: null, hist: [], docAt: 0, histAt: 0, loaded: false };
+  function kalshiPerpsView(base, now){
+    if(!base){ return base; }
+    var res = kalshiPerpsFromDoc(kalshiPerpsState.doc, now), out = {};
+    Object.keys(base).forEach(function(k){ out[k] = base[k]; });
+    out.perpsNote = kalshiPerpsState.loaded ? kalshiPerpsNote(res) : '';
+    if(!res.ok || res.total === null){ return out; }
+    var hist = (kalshiPerpsState.hist || []).concat([{ t: Number(kalshiPerpsState.doc.at), total: res.total }]);
+    var todayKey = kalDayKey(now), prior = null;
+    hist.forEach(function(p){ if(kalDayKey(p.t) < todayKey && (prior === null || p.t > prior.t)){ prior = p; } });
+    out.perps = res.rows; out.perpsTotal = res.total; out.perpsHistory = hist;
+    out.perpsDay = prior ? Math.round((res.total - Number(prior.total)) * 100) / 100 : 0;
+    return out;
+  }
+  function kalshiPerpsEnsure(){
+    var api = window.__shwoopAPI, now = Date.now();
+    if(!api || !currentUserIsAdmin){ return; }
+    if(api.readKalshiPerpsAccount && now - kalshiPerpsState.docAt > 240000){
+      kalshiPerpsState.docAt = now;
+      api.readKalshiPerpsAccount().then(function(d){ kalshiPerpsState.doc = d; kalshiPerpsState.loaded = true; renderKalshiBot(); }, function(){ kalshiPerpsState.loaded = true; });
+    }
+    if(api.readKalshiPerpsHistory && now - kalshiPerpsState.histAt > 1800000){
+      kalshiPerpsState.histAt = now;
+      api.readKalshiPerpsHistory().then(function(h){ kalshiPerpsState.hist = h; renderKalshiBot(); }, function(){});
+    }
+  }
   // Today's result as a share of the account (Oct 22, 2026, the owner's request). The base is the account total at the START of today, taken as the total now minus today's bot result, so a good day is not
   // measured against a balance it already grew. The total includes anything done outside the bot (your own trades, deposits), which is why this is "of the account" and not a return on the bot alone.
   // '' when the total is unknown or not above zero. It is a percentage, not a dollar figure, so the Privacy toggle leaves it showing.
@@ -3267,7 +3304,7 @@
     return ' (' + (pct >= 0 ? '+' : '-') + Math.abs(pct).toFixed(2) + '%)';
   }
   function renderKalshiPositions(){
-    var posEl = document.getElementById('kalBotOpen'), a = kalshiLiveAcct;
+    var posEl = document.getElementById('kalBotOpen'), a = kalshiPerpsView(kalshiLiveAcct, Date.now());
     if(!posEl){ return; }
     if(!a){ posEl.innerHTML = ''; return; }
     if(!a.positions || !a.positions.ok){ posEl.innerHTML = '<div class="kal-note">Could not read positions: ' + escapeHtml(a.positions ? 'HTTP ' + a.positions.status + ' ' + (a.positions.error || '') : '') + '</div>'; return; }
@@ -3343,7 +3380,8 @@
     renderKalshiPnl();
     renderKalshiNotifications();
     kalshiSoundCheck();
-    var a = kalshiLiveAcct;
+    kalshiPerpsEnsure();
+    var a = kalshiPerpsView(kalshiLiveAcct, Date.now());
     var el = document.getElementById('kalBotStatus');
     var halted = kalshiBotState.control && kalshiBotState.control.halt === true;
     var haltUnset = kalshiBotState.control !== null && kalshiBotState.control.halt === undefined;
@@ -3356,7 +3394,7 @@
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
       // No stake or reinvest pool tiles (the owner, Oct 30, 2026: "we don't really NEED visibility on that"): the size and the pool rule live in the bot's code and Recent trades shows what was actually bought.
-      h += '<div class="kal-acct-total">' + (kalshiAccountTotal(a).total === null ? 'unknown' : kalshiMoney(kalshiAccountTotal(a).total)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '');
+      h += '<div class="kal-acct-total">' + (kalshiAccountTotal(a).total === null ? 'unknown' : kalshiMoney(kalshiAccountTotal(a).total)) + '</div>' + (a.perpsNote ? '<div class="kal-note">' + escapeHtml(a.perpsNote) + '</div>' : '') + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '');
     }
     el.innerHTML = h;
     // Shown the moment the switch is flipped, not only after the next read.
@@ -3696,7 +3734,8 @@
     source = source.concat(kalshiSlotOrders || []);     // the second strategy's orders are part of the account's result
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var pb = document.getElementById('kalPnlBody'); if(pb){ pb.style.opacity = ''; }
-    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiAccountTotal(kalshiLiveAcct).total, kalshiLiveAcct && kalshiLiveAcct.perpsHistory) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders' + (hit && hit.code ? ' (' + escapeHtml(hit.code) + ')' : '') + '. It tries again in a minute.</div>' : ''));
+    var pv = kalshiPerpsView(kalshiLiveAcct, Date.now());
+    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiAccountTotal(pv).total, pv && pv.perpsHistory) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders' + (hit && hit.code ? ' (' + escapeHtml(hit.code) + ')' : '') + '. It tries again in a minute.</div>' : ''));
   }
   // Touch or hover on the result line (the owner, Oct 24, 2026: "do that with our account balance chart too"): a guide and a dot follow the pointer to the nearest trade, and the figure at the top shows the running result at
   // that trade with its date and time (Central), as dollars (masked in Privacy view) and as a share of the account at the start of the range. It goes back to the range's result when the pointer leaves. Reads only the points drawn.
