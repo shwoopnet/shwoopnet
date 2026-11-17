@@ -1,0 +1,38 @@
+{
+ "config": "SHADOW_LIST_V3 runner config (Desk A, Nov 17 2026)",
+ "list_file": "kalshi-scalper/workers/SHADOW_LIST_V3.json",
+ "list_sha256": "3f5a2bb385f46cf108c425b163ef09547ca27cb324bc22c5e6dec0be07d908eb",
+ "n_picks": 17,
+ "features": {
+  "swid": 14,
+  "vspike": 3
+ },
+ "feature_code": {
+  "file": "kalshi-scalper/workers/desk_a_verify/engine1_batchb2.py",
+  "sha256": "aa6e06824b2799f49812d201f69cba0b8621844710be6e8e89680582c8f62344",
+  "functions": "swid, vspike, klass; candle tuple (end, bid, ask, last, volume, oi): volume is index 4"
+ },
+ "cuts": {
+  "file": "kalshi-scalper/workers/SHADOW_VSPIKE_CUTS_V1.json",
+  "sha256": "c5272db2887186cf75938fa8fa894c3971567b52a2fdb73baed829146f35ae50",
+  "reads": {
+   "SH3_08_ETH": "picks.SH3_08_ETH (KXETH15M, 540, class mid)",
+   "SH3_11_ETH": "picks.SH3_11_ETH (same cell as SH3_08)",
+   "SH3_17_HYPE": "picks.SH3_17_HYPE (KXHYPE15M, 420, class low)"
+  },
+  "note": "swid picks use the sign class and need no cuts file; built from the archive SEARCH half only",
+  "runner_shape_file": {
+   "file": "kalshi-scalper/workers/SHADOW_VSPIKE_CUTS_V1_SHAPE.json",
+   "sha256": "bac4e22ec6d4dcf1b9736757c35f160e47344d4f322af94e54f5857a4e354750"
+  },
+  "null_cells": "95 series/bucket cells hold no cut (null): no vspike entry there",
+  "status": "PENDING: Auditor B code CLEAN; values need a blind second compare (rule 16b) before Main pins"
+ },
+ "fixture": {
+  "file": "kalshi-scalper/workers/V3_RUNNER_FIXTURE_NOV17.json",
+  "sha256": "56fbc90b26d2ae3c2c79123ef843d69d13420e7f0644b778e701236077884648"
+ },
+ "start_rule": "a pick's start is the later of its spec start_utc and the runner PR merge; BTC picks (SH3_01 to SH3_03) never before 2026-11-21T00:00:00Z (H09); real start = first runner log after merge, recorded in the notes; no outcome before that first log counts",
+ "state_and_output_keys": "prefix SH3_, list key SHADOW_LIST_V3, separate from V1, V2, V4",
+ "list_note": "SHADOW_LIST_V3 was a DRAFT until commit 047642cd (14 non-Bitcoin picks start_utc DRAFT_START_AT_FREEZE became 2026-11-17T01:00:00Z, BTC picks 2026-11-21T00:00:00Z; spec_sha256 changed with the start, that is the freeze step, not the attach). The file sha changes with every attach, so pin the sha in this config, not the older one."
+}

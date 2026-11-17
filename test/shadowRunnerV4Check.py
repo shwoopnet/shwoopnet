@@ -120,9 +120,9 @@ out["v2_other_class_trades"] = len(V.score_spec_v4(mods2, spec2, [eth2], btc(*ot
 out["v2_btc_absent_trades"] = len(V.score_spec_v4(mods2, spec2, [eth2], {}, cfg2["start_utc"], ok_guard, ["KXETH15M", "KXBTC15M"], sha2)[0])
 out["v2_start"] = cfg2["start_utc"]
 cfg3 = V.load_config(root, "V3"); lst3, mods3, _t3, _h3, _c3 = V.verified_inputs(root, cfg3)
-out["v3_excluded"] = sorted(cfg3["excluded_picks"]); out["v3_vspike_ids"] = sorted(i["spec"]["id"] for i in lst3["specs"] if i["spec"]["entry"]["filter"].startswith("vspike"))
+out["v3_excluded"] = sorted(cfg3.get("excluded_picks", {})); out["v3_cuts_loaded"] = _c3 is not None; out["v3_vspike_ids"] = sorted(i["spec"]["id"] for i in lst3["specs"] if i["spec"]["entry"]["filter"].startswith("vspike"))
 # a vspike pick that is not excluded and has no cuts refuses the whole list (no silent guess)
-bad_cfg = json.loads(json.dumps(cfg3)); bad_cfg["excluded_picks"] = {}
+bad_cfg = json.loads(json.dumps(cfg3)); bad_cfg["excluded_picks"] = {}; bad_cfg.pop("vspike_cuts_file", None); bad_cfg.pop("vspike_cuts_sha256", None)
 try:
     V.verified_inputs(root, bad_cfg); out["v3_unexcluded_refused"] = False
 except V.R.Refused:
@@ -144,4 +144,20 @@ mm, ee = vs(20, [10] * 5); out["vspike_high"] = V.feature_class(mods3, "vspike",
 mm, ee = vs(10, [10] * 5); out["vspike_nullcut"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 600)
 mm, ee = vs(10, [10, 10, None, 10, 10]); out["vspike_missing"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 540)
 mm, ee = vs(10, [0, 0, 0, 0, 0]); out["vspike_zero_mean"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 540)
+
+# Desk A's V3 fixture: the cases that carry numbers run through the runner's feature code (class must match); the rest are checked by Desk A's own test
+fx3 = json.load(open(os.path.join(root, "kalshi-scalper", "workers", "V3_RUNNER_FIXTURE_NOV17.json")))
+bad3 = []; n3 = 0
+for c in fx3["cases"]:
+    if "volumes_e_to_e_minus_300_step_60" in c and "cuts_used_in_this_case" in c:
+        vols = c["volumes_e_to_e_minus_300_step_60"]; ee = 20000
+        cs = [(ee - 60 * i, .5, .6, None, v, 0) for i, v in enumerate(vols)]
+        cc = {"all_series_buckets": {"KXETH15M": {"540": {"c1": c["cuts_used_in_this_case"][0], "c2": c["cuts_used_in_this_case"][1]}}}}
+        got = V.feature_class(mods3, "vspike", {"close": ee + 540, "candles": cs[::-1], "series": "KXETH15M"}, None, ee, cc, 540); n3 += 1
+        if got != c["expected_class"]: bad3.append(c)
+    elif c["feature"] == "swid" and "e_minus_180" in c:
+        by = {10000 - 180: (10000 - 180, c["e_minus_180"][0], c["e_minus_180"][1], 0, 5, 0), 10000: (10000, c["e"][0], c["e"][1], 0, 5, 0)}
+        x = B2.swid(by, 10000); n3 += 1
+        if x != c["expected_x"]: bad3.append(c)
+out["v3_fixture_checked"] = n3; out["v3_fixture_bad"] = bad3
 print(json.dumps(out))

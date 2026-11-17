@@ -52,7 +52,7 @@ gates.V4_5 = () => {
   assert.strictEqual(o.btc_start, Date.parse('2026-11-21T00:00:00Z') / 1000);
   assert.strictEqual(o.other_start, cfg.start_utc);
   assert.ok(Number.isInteger(cfg.start_utc) && cfg.start_utc >= Date.parse('2026-11-17T00:00:00Z') / 1000, 'never earlier than the list start');
-  assert.ok(/^shadow-state-v234-71bc18fb-ecc64e55-b8c4f727-/.test(o.cache_key), 'its own state key, built from the three list shas');
+  assert.ok(/^shadow-state-v234-71bc18fb-3f5a2bb3-b8c4f727-/.test(o.cache_key), 'its own state key, built from the three list shas');
 };
 gates.V4_6 = () => {
   // Consequence: V1 is untouched and keeps its own state and files; V4 cannot overwrite V1's results, and the runner holds no key and places no order.
@@ -88,18 +88,26 @@ gates.V4_7 = () => {
   assert.strictEqual(o.v2_start, Date.parse('2026-11-21T00:00:00Z') / 1000);
 };
 gates.V4_8 = () => {
-  // Consequence: V3's swid picks run on the audited function (a wider spread than 180 s earlier is up, a missing candle is no feature); V3's three vspike picks are NOT run, because their frozen cuts are not pinned, and a list that carries a vspike pick that is neither excluded nor given cuts refuses to run at all (no guessed cut).
+  // Consequence: V3's swid and vspike picks all run on the audited functions and the pinned frozen cuts (Desk A's file, never refit here): ETH 540 and HYPE 420 carry the pinned pairs, a null or missing cell gives no entry, and a config without the cuts file refuses to run (no guessed cut).
   const c3 = JSON.parse(read('kalshi-scalper/workers/shadow/SHADOW_RUNNER_V3_CONFIG.json'));
   assert.strictEqual(c3.list_sha256, sha('kalshi-scalper/workers/SHADOW_LIST_V3.json'));
+  assert.strictEqual(c3.list_sha256, '3f5a2bb385f46cf108c425b163ef09547ca27cb324bc22c5e6dec0be07d908eb');
   assert.strictEqual(c3.modules.engine1_batchb2, sha('kalshi-scalper/workers/desk_a_verify/engine1_batchb2.py'));
   assert.strictEqual(c3.modules.engine1_batchb2, 'aa6e06824b2799f49812d201' + c3.modules.engine1_batchb2.slice(24));
-  assert.deepStrictEqual(o.v3_excluded, o.v3_vspike_ids);
-  assert.strictEqual(o.v3_excluded.length, 3);
+  assert.strictEqual(c3.vspike_cuts_sha256, sha('kalshi-scalper/workers/' + c3.vspike_cuts_file));
+  assert.strictEqual(c3.vspike_cuts_sha256, 'c5272db2887186cf75938fa8fa894c3971567b52a2fdb73baed829146f35ae50');
+  assert.strictEqual(c3.fixture_sha256, sha('kalshi-scalper/workers/' + c3.fixture_file));
+  assert.ok(!c3.excluded_picks, 'nothing is excluded now');
+  assert.strictEqual(o.v3_cuts_loaded, true);
+  assert.strictEqual(o.v3_vspike_ids.length, 3);
   assert.strictEqual(o.v3_unexcluded_refused, true);
+  const cuts = JSON.parse(read('kalshi-scalper/workers/' + c3.vspike_cuts_file)).all_series_buckets;
+  assert.deepStrictEqual(cuts.KXETH15M['540'], { c1: 0.6951379763469121, c2: 1.1205622204213312 });
+  assert.deepStrictEqual(cuts.KXHYPE15M['420'], { c1: 0.7269671417587515, c2: 1.3775667238271116 });
   assert.strictEqual(o.swid_up, 2);
   assert.strictEqual(o.swid_missing, null);
-  assert.ok(!c3.vspike_cuts_file, 'no cuts file is pinned yet');
-  // the vspike class code, on invented numbers and the real cuts shape: ratio 1.0 is mid (between 0.7 and 1.1), 0.5 is low, 2.0 is high; a null cut, a missing volume candle or a zero mean is no feature
+  assert.ok(o.v3_fixture_checked >= 10, 'the numeric cases of Desk A fixture ran');
+  assert.deepStrictEqual(o.v3_fixture_bad, []);
   assert.deepStrictEqual([o.vspike_mid_ratio1, o.vspike_low, o.vspike_high, o.vspike_nullcut, o.vspike_missing, o.vspike_zero_mean], ['mid', 'low', 'high', null, null, null]);
 };
 

@@ -1,0 +1,260 @@
+{
+ "fixture": "V3 runner features",
+ "rules": {
+  "swid": "cents(ask - bid) of the entry candle (ends at e = close - the pick's seconds_left) minus the same at the candle ending EXACTLY e - 180; each candle must exist and have 0 < yes_bid < yes_ask < 1, else missing (no entry); class up if x > 1e-12, down if x < -1e-12, else flat (cls); x is a whole number of cents",
+  "vspike": "volume(e) / mean(volume of the 5 candles ending e - 60, e - 120, e - 180, e - 240, e - 300); volume is index 4 of the candle tuple (volume_fp, null means missing); all six candles must exist with a non-null volume and the mean must be > 0, else missing; class low if x <= c1, mid if x <= c2, else high, with c1 and c2 read from SHADOW_VSPIKE_CUTS_V1.json for the pick's series and bucket",
+  "entry_candle": "also needs 0 < bid < ask < 1 at e, as for every ENGINE1 entry"
+ },
+ "pins": {
+  "engine1_batchb2.py": "aa6e06824b2799f49812d201f69cba0b8621844710be6e8e89680582c8f62344",
+  "engine1_batchb.py": "68a5ab435d8246be30681a703179d88608b0384ce2ca50f4f6bad458cea07f1e",
+  "engine1_enum.py": "e42ee1a45f67b76e8560cd9cbefac352fce9a765c8300bc04d5ce05a27e4d5a7"
+ },
+ "n": 23,
+ "cases": [
+  {
+   "feature": "swid",
+   "e_minus_180": [
+    0.5,
+    0.51
+   ],
+   "e": [
+    0.5,
+    0.52
+   ],
+   "expected_x": 1,
+   "expected_class": "up"
+  },
+  {
+   "feature": "swid",
+   "e_minus_180": [
+    0.5,
+    0.52
+   ],
+   "e": [
+    0.5,
+    0.52
+   ],
+   "expected_x": 0,
+   "expected_class": "flat"
+  },
+  {
+   "feature": "swid",
+   "e_minus_180": [
+    0.5,
+    0.53
+   ],
+   "e": [
+    0.5,
+    0.52
+   ],
+   "expected_x": -1,
+   "expected_class": "down"
+  },
+  {
+   "feature": "swid",
+   "e_minus_180": [
+    0.4,
+    0.41
+   ],
+   "e": [
+    0.4,
+    0.46
+   ],
+   "expected_x": 5,
+   "expected_class": "up"
+  },
+  {
+   "feature": "swid",
+   "e_minus_180": [
+    0.6,
+    0.64
+   ],
+   "e": [
+    0.6,
+    0.61
+   ],
+   "expected_x": -3,
+   "expected_class": "down"
+  },
+  {
+   "feature": "swid",
+   "case": "candle e - 180 absent",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "swid",
+   "case": "candle e absent",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "swid",
+   "case": "e - 180 not two sided (bid 0)",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "swid",
+   "case": "e crossed or locked (bid = ask)",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "swid",
+   "case": "e ask = 1",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "vspike",
+   "volumes_e_to_e_minus_300_step_60": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 1.0,
+   "expected_class": "mid"
+  },
+  {
+   "feature": "vspike",
+   "volumes_e_to_e_minus_300_step_60": [
+    20,
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 2.0,
+   "expected_class": "high"
+  },
+  {
+   "feature": "vspike",
+   "volumes_e_to_e_minus_300_step_60": [
+    5,
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 0.5,
+   "expected_class": "low"
+  },
+  {
+   "feature": "vspike",
+   "volumes_e_to_e_minus_300_step_60": [
+    7,
+    10,
+    20,
+    0,
+    5,
+    15
+   ],
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 0.7,
+   "expected_class": "low"
+  },
+  {
+   "feature": "vspike",
+   "volumes_e_to_e_minus_300_step_60": [
+    0,
+    10,
+    10,
+    10,
+    10,
+    10
+   ],
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 0.0,
+   "expected_class": "low"
+  },
+  {
+   "feature": "vspike",
+   "case": "volume at e null",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "vspike",
+   "case": "volume at e - 120 null",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "vspike",
+   "case": "candle e - 240 absent",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "vspike",
+   "case": "mean of the five is 0",
+   "expected_x": null,
+   "expected_class": "missing"
+  },
+  {
+   "feature": "vspike",
+   "case": "class edge: at c1 (low)",
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 0.7,
+   "expected_class": "low"
+  },
+  {
+   "feature": "vspike",
+   "case": "class edge: just over c1 (mid)",
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 0.7000001,
+   "expected_class": "mid"
+  },
+  {
+   "feature": "vspike",
+   "case": "class edge: at c2 (mid)",
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 1.1,
+   "expected_class": "mid"
+  },
+  {
+   "feature": "vspike",
+   "case": "class edge: just over c2 (high)",
+   "cuts_used_in_this_case": [
+    0.7,
+    1.1
+   ],
+   "expected_x": 1.1000001,
+   "expected_class": "high"
+  }
+ ]
+}
