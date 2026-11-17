@@ -65,9 +65,9 @@ def direction(name, cs, t, x, side):
         d = (mid(a) > mid(b)) - (mid(a) < mid(b))
     return d if side == "follow" else -d
 def sig_id(s): return hashlib.sha256("|".join(s[k] for k in ("market", "signal", "clock", "entry", "exit", "side")).encode()).hexdigest()[:16]
-def main(base, out_path):
-    files = window_files(base); mfs = refuse_unless_allowed(files)
-    tickers = [t for v in FAMILIES.values() for t in v]; data, first = load(base, tickers); lines = []
+def build(data, first, FAMILIES, WIN, label):
+    """-> the record lines for the families in FAMILIES under the window constants WIN (header and trades)."""
+    lines = []
     for fam, tks in FAMILIES.items():
         have = [t for t in tks if first.get(t)]
         if not have: continue
@@ -85,7 +85,7 @@ def main(base, out_path):
             thr = sorted(vals)[math.ceil(0.9 * n) - 1] if n else None
             for side in ("follow", "fade"):
                 s = {"market": fam, "signal": name, "clock": "any_minute", "entry": "taker", "exit": "fixed_time", "side": side}; sid = sig_id(s)
-                head = {"sig": s, "settings": 1, "primary": "bp", "units": "bp", "tail": "abs", "threshold_value": thr, "hold_s": HOLD_S, "tp_mult": None, "stop_mult": None, "calendar_days_search": cds, "calendar_days_validate": cdv, "data": "kalshi1m (funding not booked)", "tickers": have}
+                head = {"sig": s, "settings": 1, "primary": "bp", "units": "bp", "tail": "abs", "threshold_value": thr, "hold_s": HOLD_S, "tp_mult": None, "stop_mult": None, "calendar_days_search": cds, "calendar_days_validate": cdv, "data": label, "tickers": have}
                 head.update({k: WIN[k] for k in ("search_from", "search_to", "validate_from", "validate_to", "half1_to", "half2_from")})
                 lines.append(head)
                 if thr is None: continue
@@ -113,6 +113,11 @@ def main(base, out_path):
                         gross = dr * (exitp - entry) / entry * 1e4; cost = 2 * FEE_BP
                         if traded: busy_until = x_end
                         lines.append({"sig_id": sid, "window": window, "day": d, "entry_end": e_end, "market_id": t, "traded": bool(traded), "gross": gross, "cost": cost, "net": round(gross - cost, 9), "net_1c": None, "net_2c": None})
+    return lines
+def main(base, out_path):
+    files = window_files(base); mfs = refuse_unless_allowed(files)
+    tickers = [t for v in FAMILIES.values() for t in v]; data, first = load(base, tickers)
+    lines = build(data, first, FAMILIES, WIN, "kalshi1m (funding not booked)")
     with open(out_path, "w") as fo:
         for L in lines: fo.write(json.dumps(L, sort_keys=True, separators=(",", ":")) + "\n")
     json.dump({"file_list_sha256": mfs, "counts": dict(LOG), "generator_sha256": hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest(), "funding": "not booked", "files_read": len(files)}, open(out_path + ".log.json", "w"), sort_keys=True, indent=1)
