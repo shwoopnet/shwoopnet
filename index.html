@@ -1834,8 +1834,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
-                  <li>Bot page: charts are back. The Account result line no longer cuts its range to start at the first perps reading (it hid earlier trades on YTD, 1M and All and left Today empty); perps now just add steps from their first hourly reading, and Today says what it is waiting for. Each perp row also draws a small price line with its entry price, built from the reads the page makes while it is open.</li>
-                  <li>Bot page: the perps part of Open positions now shows a Margin cushion line: the whole perps account's equity minus its maintenance margin, in dollars, with a risk label and bar by how much of the equity it is (20% or more Low, 10 to 20% Medium, under 10% High). With one open perp it also says how big a move against it uses the cushion up. It is the account's cushion, not Kalshi's forced-close price (Closes at stays n/a). Display only.</li>
+                  <li>Bot page: charts are back. The Account result line no longer cuts its range to start at the first perps reading (it hid earlier trades on YTD, 1M and All and left Today empty); perps now just add steps from their first hourly reading, and Today says what it is waiting for. Each perp row is plain (market, direction, value, return, entry, now) with a small price line once the page has two reads.</li>
                   <li>Bot page: your perpetuals are now live on the Bot page. The Account total is the prediction balance plus the perps account value (total only), Today and the result line include the perps change (the result line starts from the first hourly snapshot that has a perps total), and each open perp shows on Open positions with its return in dollars, position value, contracts, entry price and the price now; the multiplier is marked as an estimate, and the cost, return percent, forced-close price and auto close levels say n/a or not readable because Kalshi's data does not give them. If the perps data is older than 20 minutes it is left out of the total and the page says so. Display only: the loss stops, limits and sizing never read it.</li>
                   <li>Research: a second paper only runner follows the picks of three new shadow lists (V2, V3 and V4) once a day, beside the first one, from public data: no order, no key, results as totals only. The Bitcoin picks wait until Nov 21. The three picks that needed frozen cut points now run on them.</li>
                 </ul>
@@ -3250,7 +3249,7 @@
   }
   function kalshiPerpChartHtml(marks, entry, esc){
     var m = (marks || []).filter(function(x){ return x && Number.isFinite(x.v) && Number.isFinite(x.t); });
-    if(m.length < 2){ return '<div class="kal-perp-chart-note">Price line appears after two reads (about every 4 minutes while this page is open).</div>'; }
+    if(m.length < 2){ return ''; }
     var W = 600, H = 90, e = Number.isFinite(Number(entry)) && entry !== null ? Number(entry) : null;
     var vals = m.map(function(x){ return x.v; }).concat(e !== null ? [e] : []), lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
     if(hi - lo < 1e-9){ hi += 1; lo -= 1; } var pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
@@ -3258,7 +3257,7 @@
     var d = m.map(function(x, i){ return (i ? 'L' : 'M') + X(i) + ' ' + Y(x.v); }).join(' ');
     var hm = function(ms){ return new Date(ms).toLocaleTimeString('en-US', { timeZone: KAL_TZ, hour: 'numeric', minute: '2-digit' }); };
     var hv = ' data-hv="' + JSON.stringify(m.map(function(x, i){ return [Math.round(i / (m.length - 1) * 10000) / 10000, Math.round((1 - (x.v - lo) / (hi - lo)) * 10000) / 10000, x.v.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' · ' + hm(x.t)]; })).replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"';
-    return '<div class="kal-perp-chart hv"' + hv + '><svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Price since this page was opened' + (e !== null ? ', with the entry price line' : '') + '">' + (e !== null ? '<line class="kal-hc-target-line" x1="0" x2="' + W + '" y1="' + Y(e) + '" y2="' + Y(e) + '"/>' : '') + '<path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(m.length - 1) + '" cy="' + Y(m[m.length - 1].v) + '" r="4"/></svg></div><div class="kal-hc-x"><span>' + esc(hm(m[0].t)) + '</span>' + (e !== null ? '<span>Dashed line: entry price</span>' : '') + '<span>Now</span></div>';
+    return '<div class="kal-perp-chart hv"' + hv + '><svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Price since this page was opened' + (e !== null ? ', with the entry price line' : '') + '">' + (e !== null ? '<line class="kal-hc-target-line" x1="0" x2="' + W + '" y1="' + Y(e) + '" y2="' + Y(e) + '"/>' : '') + '<path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(m.length - 1) + '" cy="' + Y(m[m.length - 1].v) + '" r="4"/></svg></div><div class="kal-hc-x"><span>' + esc(hm(m[0].t)) + '</span>' + (e !== null ? '' : '') + '<span>Now</span></div>';
   }
   function kalshiPerpsHtml(rows, esc, money, cushion, marks){
     if(!rows || !rows.length){ return ''; }
@@ -3268,15 +3267,10 @@
     return rows.map(function(r){
       var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
       var pnlTxt = num(r.pnl) ? sg(Number(r.pnl)) + (num(r.pnlPct) ? ' (' + (r.pnlPct >= 0 ? '+' : '-') + Math.abs(Number(r.pnlPct)).toFixed(1) + '%)' : '') : 'n/a';
-      var risk = kalshiPerpRisk(num(r.bufferPct) ? Number(r.bufferPct) : NaN);
-      var auto = (num(r.takeProfit) || num(r.stopLoss)) ? 'Take profit ' + px(r.takeProfit) + ' · Stop loss ' + px(r.stopLoss) : (r.autoKnown === true ? 'No auto close set' : 'Auto close levels not readable');   // never claim none is set unless the data says so
-      return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + (num(r.multiplier) ? ' <span class="kal-mult">' + (r.multiplierEst ? '~' : '') + esc(Number(r.multiplier).toFixed(1)) + 'x' + (r.multiplierEst ? ' est.' : '') + '</span>' : '') +
-        '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
+      return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
         '<div class="kal-hold-stats kal-perp-stats">' + (num(r.value) ? stat('Position value', money(Number(r.value))) : '') + stat('Return', pnlTxt, num(r.pnl) ? (r.pnl >= 0 ? 'kal-pos' : 'kal-neg') : '') +
-        (num(r.cost) ? stat('Cost', money(Number(r.cost))) : '') + (num(r.size) ? stat('Contracts', String(Number(r.size))) : '') + stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Now', px(r.index)) : '') + '</div>' +
-        '<div class="kal-perp-risk"><div class="kal-perp-riskhead"><span>' + esc(risk.label) + '</span><span>Closes at ' + esc(px(r.closeAt)) + '</span></div>' + (risk.none ? '' : '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + risk.w.toFixed(0) + '%"></i></div>') + '</div>' +
-        kalshiPerpChartHtml(marks && marks[r.market], r.entry, esc) + '<div class="kal-hold-sub">' + esc(auto) + ' · Perp, not one of the bot\'s trades.</div></div>';
-    }).join('') + kalshiPerpCushionHtml(cushion, esc, money);
+        stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Now', px(r.index)) : '') + '</div>' + kalshiPerpChartHtml(marks && marks[r.market], r.entry, esc) + '</div>';
+    }).join('');
   }
   // The perps account document (Main, Nov 17, 2026: admin doc kalshiLiveControl/perpsAccount, refreshed every 5 minutes) turned into what the card and the total draw. PURE and not wired to a read yet: the page makes no new read until Main confirms the
   // units. Older than 20 minutes (or no document) hides the perps part and says why, never a stale figure. Units (Main, confirmed): pnl and equity are dollars, size is contracts, size times mark is the position value; margin is the maintenance margin, so there is no Cost or return percent. The multiplier is the public list's ESTIMATE and is labelled so; closeAt, bufferPct, takeProfit and stopLoss are null for now, so Closes at and the buffer say n/a and auto close says "not readable".
