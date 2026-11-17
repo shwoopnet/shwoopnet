@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """60-day tape, 1 minute bar builder, BUILD 2 (Testing Desk, Nov 17, 2026), blind from Desk A's PERPS_TAPE60_AMENDMENT_NOV17.md at be97878d7 (sha256 fe3d8144a845303571cad5cb53dc82fdfd681a06dcea029b20c684d6914f7e71): sections 2 and 6 (bars, readings T1 to T18) as changed by sections 7 and 8 (one file per UTC date holding all tickers, no trade_id, dedupe by the six fields and the earliest t_recv_ms, ties by reverse file order). Pure functions on rows; the file reader below checks an allow line.
 Rows: dicts with file, t_recv_ms, ticker, created_time, price, count, taker_side, is_block_trade (strings as stored)."""
-import calendar, collections, csv, glob, gzip, hashlib, os, re, sys
+import calendar, collections, csv, fnmatch, glob, gzip, hashlib, json, os, re, sys, time
 from decimal import Decimal, InvalidOperation
 
 TIME_RE = re.compile(r"^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d{1,9}))?(?:Z|\+00:00)$")
@@ -17,6 +17,9 @@ def parse_ns(s):
     if not m: raise ValueError("bad created_time %r" % s)
     y, mo, d, h, mi, se = (int(m.group(i)) for i in range(1, 7)); frac = (m.group(7) or "").ljust(9, "0")
     return calendar.timegm((y, mo, d, h, mi, se, 0, 0, 0)) * NS + int(frac)
+
+
+def time_date(t_ns): return time.strftime("%Y-%m-%d", time.gmtime(t_ns // NS))
 
 
 def end_ts_of(t_ns): return (t_ns // (60 * NS) + 1) * 60                                   # T2: strictly after
@@ -41,7 +44,7 @@ def parse_block(s):
     raise ValueError("bad is_block_trade %r" % s)
 
 
-def build(rows, wall):
+def build(rows, wall, held=None):
     """Amendment sections 7 and 8. rows: dicts in FILE ORDER (sorted path order, then the row order of each file) with file, t_recv_ms, ticker, created_time, price, count, taker_side, is_block_trade (strings as stored).
     The wall first (other tickers are counted, never parsed). The same six fields with DIFFERENT t_recv_ms are one trade seen on two pages: only the rows with the EARLIEST t_recv_ms are kept (merged_by_repeat counts the dropped rows); the same six fields with the SAME t_recv_ms are real repeated prints, all kept (kept_same_recv counts the kept rows beyond the first).
     Inside a bar: exact created_time ascending, ties by REVERSE file order (the last row of the file first). -> (bars, summary {(file, ticker): Counter}, ticks {(file, ticker): Decimal})"""
@@ -49,7 +52,10 @@ def build(rows, wall):
     for i, r in enumerate(rows):
         tk = r["ticker"]; fk = (r["file"], tk)
         if tk not in wall: summ[(r["file"], "_outside_wall")]["rows"] += 1; continue
-        summ[fk]["rows_read"] += 1; recv = int(r["t_recv_ms"]); key = tuple(r[c] for c in SIX)
+        summ[fk]["rows_read"] += 1; t_ns = parse_ns(r["created_time"])
+        if time_date(t_ns) != r["file"][:10]: summ[fk]["rows_other_date"] += 1; continue          # Amendment 4 (3): the trade belongs to the file of its own date
+        if held is not None and held(tk, t_ns // NS): summ[fk]["rows_held"] += 1; continue          # Amendment 4 (2): holds and the default deny
+        recv = int(r["t_recv_ms"]); key = tuple(r[c] for c in SIX)
         g = groups.setdefault(key, []); g.append((recv, i, r))
     kept = []
     for key, g in groups.items():
@@ -62,6 +68,7 @@ def build(rows, wall):
         fk = (r["file"], r["ticker"]); summ[fk]["rows_kept"] += 1
         t_ns = parse_ns(r["created_time"]); price = parse_price(r["price"]); count = parse_count(r["count"]); block = parse_block(r["is_block_trade"]); side = r["taker_side"]
         b = bars.setdefault((r["ticker"], end_ts_of(t_ns)), {"trades": [], "block_volume": 0, "block_count": 0, "files": set()}); b["files"].add(r["file"])
+        if len(b["files"]) > 1: raise RuntimeError("a bar in two date files: %s %s" % (r["ticker"], end_ts_of(t_ns)))
         if block: b["block_volume"] += count; b["block_count"] += 1; summ[fk]["block_rows"] += 1
         else:
             b["trades"].append((t_ns, -i, price, count, side, r["file"]))
@@ -92,12 +99,12 @@ def bar_text(bars): return ",".join(BAR_COLS) + "\n" + "".join(bar_line(bars[k])
 
 
 def summary_lines(summ, ticks):
-    """one line per (file, ticker) sorted: file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick"""
+    """one line per (file, ticker) sorted: file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held"""
     L = []
     for fk in sorted(k for k in summ if k[1] != "_outside_wall"):
         s = summ[fk]; tick = ticks.get(fk)
-        L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["null" if tick is None else f17(tick)]))
-    return ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick"] + L
+        L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["null" if tick is None else f17(tick)] + [str(s["rows_other_date"]), str(s["rows_held"])]))
+    return ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held"] + L
 
 
 def sha(text): return hashlib.sha256(text.encode()).hexdigest()
@@ -119,12 +126,38 @@ def read_file(path, wall):
     return rows
 
 
-def build_from_files(root, wall, allow_file, mark="readable ONLY by the Testing Desk's tape bar builder"):
-    """REFUSES unless the allow-list file has a line with the mark naming this file's sha256; reads <root>/tape/YYYY-MM-DD.csv.gz in sorted path order"""
+DEV = ("2026-09-18", "2026-10-27"); HELD = ("2026-10-28", "2026-11-15"); CUT_DATE = "2026-11-16"; DENY_FROM = 1794787200
+
+
+def load_holds(path, pinned_sha256):
+    """the pinned HOLDS.json (sha256 checked): a function held(ticker, t_seconds). A cell is held if its time is at or after forward_default_deny_from, or in [from, to) of a row with status OPEN or FROZEN whose ticker pattern matches (fnmatch; '*' matches anything; 'to' null is open ended); rows with scope archive_binary do not apply to perps tape rows."""
+    raw = open(path, "rb").read()
+    if hashlib.sha256(raw).hexdigest() != pinned_sha256: raise SystemExit("REFUSED: the holds file does not match the pinned sha256")
+    d = json.loads(raw); deny = d["forward_default_deny_from"]; rows = [r for r in d["rows"] if r["status"] in ("OPEN", "FROZEN") and r.get("scope") != "archive_binary"]
+    def held(ticker, t):
+        if t >= deny: return True
+        return any(r["from"] <= t and (r["to"] is None or t < r["to"]) and any(fnmatch.fnmatchcase(ticker, p) for p in r["tickers"]) for r in rows)
+    return held
+
+
+def check_range(date_from, date_to):
+    for d in (date_from, date_to):
+        if not re.match(r"^\d{4}-\d\d-\d\d$", d): raise SystemExit("REFUSED: bad date %r" % d)
+    if date_from > date_to: raise SystemExit("REFUSED: from is after to")
+    if date_to >= CUT_DATE: raise SystemExit("REFUSED: a range reaching 2026-11-16 or later")
+    for lo, hi in (DEV, HELD):
+        if lo <= date_from and date_to <= hi: return
+    raise SystemExit("REFUSED: the range is not wholly inside development (%s to %s) or held-out (%s to %s)" % (DEV + HELD))
+
+
+def build_from_files(root, wall, allow_file, date_from, date_to, holds_path=None, holds_sha=None, mark="readable ONLY by the Testing Desk's tape bar builder"):
+    """REFUSES unless the allow-list file has a line with the mark naming this file's sha256 and the range is legal; lists, hashes and opens ONLY the <root>/tape/YYYY-MM-DD.csv.gz files inside [date_from, date_to], in sorted path order"""
     text = open(allow_file, encoding="utf-8").read(); me = sha(open(os.path.abspath(__file__)).read())
     line = [l for l in text.splitlines() if mark in l]
     if not line or "tape_bars_second.py" not in line[0] or me not in line[0]: raise SystemExit("REFUSED: no allow-list line naming tape_bars_second.py with sha256 %s" % me)
-    paths = sorted(p for p in glob.glob(os.path.join(root, "tape", "*.csv.gz")) if re.match(r"^\d{4}-\d\d-\d\d\.csv\.gz$", os.path.basename(p)))
+    check_range(date_from, date_to)
+    held = load_holds(holds_path, holds_sha) if holds_path else None
+    paths = sorted(p for p in glob.glob(os.path.join(root, "tape", "*.csv.gz")) if re.match(r"^\d{4}-\d\d-\d\d\.csv\.gz$", os.path.basename(p)) and date_from <= os.path.basename(p)[:10] <= date_to)
     man = sorted((os.path.relpath(p, root), hashlib.sha256(open(p, "rb").read()).hexdigest()) for p in paths); rows = []
     for p in paths: rows.extend(read_file(p, set(wall)))
-    bars, summ, ticks = build(rows, set(wall)); return bars, summ, ticks, man
+    bars, summ, ticks = build(rows, set(wall), held); return bars, summ, ticks, man

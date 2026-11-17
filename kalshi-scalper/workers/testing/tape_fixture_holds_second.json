@@ -1,0 +1,28 @@
+{
+ "forward_default_deny_from": 1794787200,
+ "rows": [
+  {
+   "from": 1791288900,
+   "id": "HX",
+   "name": "invented hold",
+   "note": "invented",
+   "status": "OPEN",
+   "tickers": [
+    "KXUS500PERP*"
+   ],
+   "to": null
+  },
+  {
+   "from": 1,
+   "id": "HY",
+   "name": "archive",
+   "scope": "archive_binary",
+   "status": "FROZEN",
+   "tickers": [
+    "*"
+   ],
+   "to": null
+  }
+ ],
+ "version": "fixture"
+}

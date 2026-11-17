@@ -41,16 +41,39 @@ class TT(unittest.TestCase):
     def test_two_tickers_one_file(self):
         rs = [row("2026-11-17T12:00:20Z", "5.0", "1", "buy", "false", tk="KXA"), row("2026-11-17T12:00:20Z", "9.0", "1", "buy", "false", tk="KXB")]
         bars, summ, _ = T.build(rs, {"KXA", "KXB"}); self.assertEqual((float(bars[("KXA", 1794916860)]["close"]), float(bars[("KXB", 1794916860)]["close"])), (5.0, 9.0)); self.assertEqual(len(T.summary_lines(summ, {})), 3)         # header and two lines
+    def test_other_date_and_held_rows(self):
+        rs = [row("2026-11-17T23:59:59Z", "5.0", "1", "buy", "false"), row("2026-11-18T00:00:00Z", "6.0", "1", "buy", "false"), row("2026-11-17T12:00:00Z", "7.0", "1", "sell", "false")]
+        bars, summ, _ = T.build(rs, {"KXT"}); s = summ[("2026-11-17.csv.gz", "KXT")]; self.assertEqual((s["rows_read"], s["rows_other_date"], s["rows_kept"]), (3, 1, 2)); self.assertEqual(len(bars), 2)
+        held = lambda tk, t: t >= 1794916860 + 1000       # everything from 12:17:20 on
+        rs2 = [row("2026-11-17T12:00:00Z", "7.0", "1", "sell", "false"), row("2026-11-17T12:20:00Z", "8.0", "1", "sell", "false"), row("2026-11-17T12:17:19Z", "9.0", "1", "sell", "false")]
+        bars, summ, _ = T.build(rs2, {"KXT"}, held); s = summ[("2026-11-17.csv.gz", "KXT")]; self.assertEqual((s["rows_held"], s["rows_kept"], len(bars)), (1, 2, 2))      # t < from is not held, the boundary is inclusive from 12:17:20
+        self.assertEqual(T.summary_lines(summ, {})[1].split(",")[-2:], ["0", "1"])
+    def test_holds_loader(self):
+        import json as J
+        d = tempfile.mkdtemp()
+        try:
+            p = os.path.join(d, "h.json"); J.dump({"forward_default_deny_from": 1794787200, "rows": [{"id": "H1", "tickers": ["KXGOLDPERP*"], "from": 1000, "to": 2000, "status": "OPEN"}, {"id": "H2", "tickers": ["*"], "from": 0, "to": None, "status": "FROZEN", "scope": "archive_binary"},
+                {"id": "H3", "tickers": ["KXAAA"], "from": 5000, "to": None, "status": "APPROVED"}, {"id": "H4", "tickers": ["KXFRZ"], "from": 3000, "to": 4000, "status": "FROZEN"}]}, open(p, "w"))
+            sh = T.hashlib.sha256(open(p, "rb").read()).hexdigest(); h = T.load_holds(p, sh)
+            self.assertTrue(h("KXGOLDPERP", 1000)); self.assertFalse(h("KXGOLDPERP", 2000)); self.assertFalse(h("KXGOLDPERP", 999)); self.assertFalse(h("KXOTHER", 1500)); self.assertFalse(h("KXAAA", 6000))      # APPROVED and archive_binary rows do not hold
+            self.assertTrue(h("KXFRZ", 3500)); self.assertTrue(h("KXOTHER", 1794787200)); self.assertFalse(h("KXOTHER", 1794787199))
+            with self.assertRaises(SystemExit): T.load_holds(p, "00")
+        finally: shutil.rmtree(d)
+    def test_range_rules(self):
+        for a, b in (("2026-09-18", "2026-10-27"), ("2026-10-28", "2026-11-15"), ("2026-09-20", "2026-09-20")): T.check_range(a, b)
+        for a, b in (("2026-10-27", "2026-10-28"), ("2026-11-15", "2026-11-16"), ("2026-11-16", "2026-11-16"), ("2026-09-17", "2026-09-18"), ("2026-10-02", "2026-10-01"), ("x", "2026-10-01")):
+            with self.assertRaises(SystemExit): T.check_range(a, b)
     def test_files_and_allow(self):
         d = tempfile.mkdtemp()
         try:
             H = ["t_recv_ms", "server_date_header", "ticker", "created_time", "price", "count", "taker_side", "is_block_trade"]; os.makedirs(os.path.join(d, "tape"))
-            for day, rs in (("2026-11-17", ROWS[:5]), ("2026-11-18", ROWS[5:])):
+            for day in ("2026-10-05", "2026-10-06", "2026-10-30"):
                 with gzip.open(os.path.join(d, "tape", day + ".csv.gz"), "wt", newline="") as f:
-                    w = csv.writer(f); w.writerow(H); [w.writerow([r["t_recv_ms"], "hdr", r["ticker"], r["created_time"], r["price"], r["count"], r["taker_side"], r["is_block_trade"]]) for r in rs]; w.writerow(["1", "h", "KXOTHER", "bad", "bad", "bad", "bad", "bad"])
+                    w = csv.writer(f); w.writerow(H); w.writerow(["100", "hdr", "KXT", day + "T12:00:10Z", "5.0", "1", "buy", "false"]); w.writerow(["100", "hdr", "KXT", day + "T12:00:20Z", "5.5", "1", "sell", "false"]); w.writerow(["1", "h", "KXOTHER", "bad", "bad", "bad", "bad", "bad"])
             open(os.path.join(d, "tape", "all-history.csv.gz"), "wb").write(b"junk")
             allow = os.path.join(d, "a.md"); open(allow, "w").write("x readable ONLY by the Testing Desk's tape bar builder tape_bars_second.py " + T.sha(open(T.__file__).read()) + "\n")
-            bars, summ, ticks, man = T.build_from_files(d, ["KXT"], allow); self.assertEqual(len(man), 2)
+            bars, summ, ticks, man = T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06"); self.assertEqual(len(man), 2); self.assertEqual(len(bars), 2)            # the 10-30 file is neither listed nor opened
+            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-30")
             open(allow, "w").write("x readable ONLY by the Testing Desk's tape bar builder tape_bars_second.py 00\n")
-            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow)
+            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06")
         finally: shutil.rmtree(d)

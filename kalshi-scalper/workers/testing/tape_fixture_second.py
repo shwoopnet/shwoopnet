@@ -4,7 +4,7 @@ import csv, gzip, os, random, sys
 def build(out):
     rnd = random.Random(20261117); H = ["t_recv_ms", "server_date_header", "ticker", "created_time", "price", "count", "taker_side", "is_block_trade"]
     os.makedirs(os.path.join(out, "tape"), exist_ok=True)
-    for day in ("2026-11-17", "2026-11-18"):
+    for day in ("2026-10-05", "2026-10-06"):
         trades = []; px = {"KXGOLDPERP": 40.0, "KXUS500PERP": 13.4, "KXUSTECH100PERP": 3.8, "KXOTHERPERP": 5.0}
         for sec in range(0, 1800):
             for tk in px:
@@ -14,6 +14,7 @@ def build(out):
                     row = [tk, t, repr(px[tk]), str(rnd.choice((0, 1, 1, 2, 5, 12))), rnd.choice(("buy", "sell", "buy", "sell", "", "x")), rnd.choice(("false",) * 12 + ("true", "TRUE", "False"))]
                     trades.append(row)
                     if rnd.random() < 0.05: trades.append(list(row))                       # a genuine repeat inside one page
+        d0 = int(day[-2:]); trades.append(["KXGOLDPERP", "2026-10-%02dT23:59:59Z" % (d0 - 1), "40.0", "1", "buy", "false"]); trades.append(["KXGOLDPERP", "2026-10-%02dT00:00:01Z" % (d0 + 1), "40.1", "2", "sell", "false"])        # midnight overlap rows of the neighbouring dates
         rows = []; page = 0
         for i in range(0, len(trades), 40):
             chunk = trades[i:i + 40]; page += 1; recv = 1000 * page
