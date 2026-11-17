@@ -16,7 +16,7 @@ const RETENTION_MS = RETENTION_DAYS * 86400000;
 const PRUNE_HOUR_UTC = 3;          // the prune runs in this UTC hour's run only, once a day
 const PRUNE_BATCH = 200;           // and deletes at most this many documents per day (about 2 days of hours; a backlog clears over days)
 const MAX_SHARDS = 10;
-const ALLOWED_FIELDS = Object.freeze(["ts", "at", "total", "shards"]);
+const ALLOWED_FIELDS = Object.freeze(["ts", "at", "total", "shards", "perpsTotal"]);
 
 const HOUR_MS = 3600000;
 const hourStart = (ms) => Math.floor(ms / HOUR_MS) * HOUR_MS;
@@ -35,13 +35,20 @@ function snapshotDoc(shaped, nowMs) {
 }
 
 // The I/O is injected so this is testable without Firebase or a network. Returns a short string for the log; never throws.
-async function runBalanceSnapshot({ now, fetchFn, keyId, pem, write, prune } = {}) {
+async function runBalanceSnapshot({ now, fetchFn, keyId, pem, write, prune, readPerpsEquity } = {}) {
   let result = "ok";
   try {
     const r = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/balance", nowMs: now });
     const doc = snapshotDoc(account.shapeBalance(r), now);
     if (!doc) result = "balance unreadable, no snapshot";
-    else await write(hourId(now), doc);
+    else {
+      // The perpetuals account equity (Nov 16, 2026, the owner: one account total, predictions plus perps). Display only, no backfill before the first snapshot that carries it; an unreadable
+      // perps account leaves the field out (never a zero), and never stops the prediction balance from being written.
+      if (typeof readPerpsEquity === "function") {
+        try { const pe = await readPerpsEquity(); if (Number.isFinite(pe)) doc.perpsTotal = cents(pe); } catch (e) { result += "; perps unreadable"; }
+      }
+      await write(hourId(now), doc);
+    }
   } catch (e) {
     result = "error: " + String((e && e.message) || e).slice(0, 80);
   }

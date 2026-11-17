@@ -1828,6 +1828,7 @@
                 </ul>
                 <div class="changelog-day">Nov 16</div>
                 <ul class="changelog-list">
+                  <li>Bot: a new read only function copies the perpetuals account (equity and each open perp, with the public perps list's price and leverage estimate) every 5 minutes, and the hourly balance snapshot now also records the perps total. Display only: no order, and the stops, limits and sizing do not read it. Nothing on the page shows it yet (the next change does).</li>
                   <li>Bot page: the Open positions card has a layout for perpetual (perp) positions, copied from the Kalshi app: market and Up or Down, the multiplier, current value, return in dollars and percent, cost, leveraged size, entry and index price, a risk label with a buffer bar, the forced-close price and any auto close levels. They are marked Perp and are not the bot's trades. No perp data is connected yet, so nothing shows until it is.</li>
                   <li>Research: a new recorder saves Kalshi's whole perpetual markets list and the order books of the active ones every minute, to its own data branch (public data, nothing trades; the owner approved the extra Actions minutes).</li>
                   <li>Research: the perps recorders now also keep each perp's leverage estimate, and the nightly archive can pull every market's funding payments in one request, including the whole history. Public data only, nothing trades.</li>
