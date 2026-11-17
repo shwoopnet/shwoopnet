@@ -36,4 +36,32 @@ async function runPerpsProbe({ liveRequest, fetchFn, keyId, pem, now }) {
   return { at: now, results };
 }
 
-module.exports = { PATHS, fieldNames, runPerpsProbe, DOC: { collection: "kalshiLiveControl", id: "perpsProbe" } };
+// PORTFOLIO PROBE (Nov 17, 2026, the Head of Engineering under the owner's reconciliation job): which of Kalshi's own record routes answer, and what FIELD NAMES they carry, so the nightly reconciliation can
+// later compare the bot's books with Kalshi's own fills, settlements and any transfer or deposit history. Same rules as above: GET only, no retry, only the HTTP status and the NAMES of the fields,
+// never a value (no amount, price, count, id or time is stored), nothing written to Kalshi. A 404 or 403 is a result. Candidate routes that do not exist simply answer 404. Delete with the function.
+const PORTFOLIO_PROBES = Object.freeze([
+  { path: "/portfolio/settlements", params: { limit: "3" } },
+  { path: "/portfolio/fills", params: { limit: "3" } },
+  { path: "/portfolio/subaccounts/transfers", params: { limit: "3" } },
+  { path: "/portfolio/deposits", params: { limit: "3" } },
+  { path: "/portfolio/withdrawals", params: { limit: "3" } },
+  { path: "/portfolio/transfers", params: { limit: "3" } },
+  { path: "/margin/fills", params: { limit: "3" } },
+  { path: "/margin/settlements", params: { limit: "3" } },
+  { path: "/margin/transfers", params: { limit: "3" } },
+]);
+async function runPortfolioProbe({ liveRequest, fetchFn, keyId, pem, now }) {
+  const results = {};
+  for (const p of PORTFOLIO_PROBES) {
+    let status = 0, fields = [];
+    try {
+      const r = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: p.path, params: p.params, nowMs: now, timeoutMs: 8000, noRetry: true });
+      status = Number(r && r.status) || 0;
+      fields = status === 200 && r && typeof r.body === "object" ? fieldNames(r.body) : [];
+    } catch (e) { status = 0; }
+    results[p.path] = { status, fields };
+  }
+  return { at: now, results };
+}
+
+module.exports = { PATHS, PORTFOLIO_PROBES, fieldNames, runPerpsProbe, runPortfolioProbe, DOC: { collection: "kalshiLiveControl", id: "perpsProbe" }, PORTFOLIO_DOC: { collection: "kalshiLiveControl", id: "portfolioProbe" } };
