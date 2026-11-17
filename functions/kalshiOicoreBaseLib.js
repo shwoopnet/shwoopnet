@@ -15,6 +15,8 @@ const CLOCK_SKEW_MS = 60000;             // a document stamped more than a minut
 function oicoreBase({ predictionBase, perpsDoc, now } = {}) {
   const pred = Number(predictionBase);
   if (!Number.isFinite(pred) || !(pred > 0)) return { base: 0, source: "prediction_only", perps: 0 };
+  // The cash floor (the Risk Analyst): a perps liquidation or an auto pull of cash from Predictions leaves the total unchanged while prediction cash falls, so under the floor the total is never used.
+  if (pred < MIN_PREDICTION_CASH) return { base: pred, source: "prediction_only", perps: 0 };
   const d = perpsDoc && typeof perpsDoc === "object" ? perpsDoc : null;
   const eq = d ? Number(d.equity) : NaN, at = d ? Number(d.at) : NaN, t = Number(now);
   if (!d || !Number.isFinite(eq) || !(eq > 0) || !Number.isFinite(at) || !Number.isFinite(t)) return { base: pred, source: "prediction_only", perps: 0 };

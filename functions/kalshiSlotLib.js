@@ -686,6 +686,7 @@ function slotOrderCheckWith(flags, input) {
   const regIds = new Set(activeSlotStrategiesWith(flags).map((x) => x.id));
   const own = slotRiskContract(i.slotOrders.filter((t) => isSlotOrder(t) && (t.slotId === strategy.id || !regIds.has(t.slotId))), i.now);
   const caps = slotCaps(i.sizingBase);
+  { const wc = slotCaps(isNum(i.windowBase) && i.windowBase > 0 ? i.windowBase : i.sizingBase); caps.perWindow = wc.perWindow; caps.openTotal = wc.openTotal; }   // the shared window and open money caps are account risk: prediction cash base only
   // A seat's own caps (SLOT_SEAT_CAPS) can only lower the base-scaled ones.
   const seatCaps = Object.prototype.hasOwnProperty.call(SLOT_SEAT_CAPS, strategy.id) ? SLOT_SEAT_CAPS[strategy.id] : null;
   if (seatCaps) for (const k of Object.keys(seatCaps)) if (isNum(seatCaps[k]) && seatCaps[k] >= 0) caps[k] = Math.min(caps[k], seatCaps[k]);

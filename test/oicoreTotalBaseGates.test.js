@@ -25,6 +25,15 @@ gates.OB1 = () => {
 };
 
 // The stops on the new base, in dollars (the Risk Analyst sets these for the owner; this pins what the code does today at the $886 account).
+gates.OB1b = () => {
+  const at = (p) => base.oicoreBase({ predictionBase: p, perpsDoc: { equity: 674.33, at: NOW - 60000 }, now: NOW });
+  assert.strictEqual(at(149).source, 'prediction_only', 'at $149 with fresh perps equity the total is not used'); assert.strictEqual(at(149).base, 149);
+  assert.strictEqual(at(150).source, 'total', 'at $150 it is the total'); assert.strictEqual(at(150).base, 824.33);
+  // The shared window and open money caps come from the prediction base even with a large OICORE base.
+  const o = slot.SLOT_STRATEGIES[0], d = (sizing, win) => slot.slotOrderCheck({ strategyId: 'OICORE', ticker: 'KXBTC15M-26NOV201200-00', side: 'yes', limit: 0.13, step: 1, depthAtTouch: 1000, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null, position: 0, sizingBase: sizing, windowBase: win, windowCapFraction: 0.055, killLatch: null, secondsLeft: 150, now: NOW, oiRise: 90000 });
+  assert.ok(d(886, 886).count >= d(886, 212).count, 'a smaller window base never allows more');
+  void o;
+};
 gates.OB2 = () => {
   const s = slot.slotLadderState(slot.SLOT_STRATEGIES[0], [], 886.33);
   assert.strictEqual(s.size, 20, 'the bottom step at a $886 base');
