@@ -1056,6 +1056,7 @@ exports.kalshiPerpsProbe = onSchedule(
 // No order, no POST, nothing written to Kalshi; nothing that decides a trade reads the document. A failed read leaves the last document as it was (the page shows its age). Deploy: bash functions/deploy-sizing.sh.
 const perpsAccount = require("./kalshiPerpsAccountLib");
 const perpsCushion = require("./kalshiPerpsCushionLib");
+const perpsEvents = require("./kalshiPerpsEventsLib");
 exports.kalshiPerpsAccount = onSchedule(
   { schedule: "every 5 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 40, retryCount: 0, memory: "256MiB" },
   async () => {
@@ -1063,7 +1064,17 @@ exports.kalshiPerpsAccount = onSchedule(
       ensureDefaultAdminApp();
       const publicGet = async (url) => { const r = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(6000) }); return r.ok ? r.json() : null; };
       const doc = await perpsAccount.runPerpsAccount({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(), publicGet });
-      if (doc) await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).set(doc);
+      // The earlier document is read BEFORE it is replaced, only to compare for position changes (kalshiPerpsEventsLib); a failed read just means no events this time.
+      const accRef = getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id);
+      let prevDoc = null;
+      if (doc) { try { const ps = await accRef.get(); prevDoc = ps.exists ? ps.data() : null; } catch (e) { prevDoc = null; } }
+      if (doc) await accRef.set(doc);
+      if (doc) {
+        try {
+          const evNote = await perpsEvents.recordEvents({ prev: prevDoc, next: doc, write: (id, e) => getFirestore().collection(perpsEvents.COLLECTION).doc(id).set(e) });
+          if (/^events|^error/.test(evNote)) console.log("kalshiPerpsAccount: position events: " + evNote);
+        } catch (e) { console.error("kalshiPerpsAccount: events failed: " + String((e && e.message) || e).slice(0, 160)); }
+      }
       console.log("kalshiPerpsAccount: " + (doc ? "rows=" + doc.count : "unreadable, document left as it was"));
       // Margin cushion phone alert (kalshiPerpsCushionLib, Nov 17, 2026): only when the cushion is under a line; each level has its own cooldown claimed in a transaction. Its one write is a field on the session
       // document that kalshiPushSession turns into an alert. Fenced off so it can never fail the read above.

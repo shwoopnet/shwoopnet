@@ -1834,6 +1834,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
+                  <li>Perps positions are now tracked like trades on the server: every 5 minutes the perps account is compared with the read before it, and an opened, closed, added or reduced position is saved as an event (admin read only). A close shows the last profit it was seen at, not a result, and a position opened and closed between two reads is never seen. Nothing shows on the page yet and the bot trades no perps. Needs the server deploy and the rules deploy to start.</li>
                   <li>Phone alert for the perps margin cushion: when the cushion (equity minus maintenance, as a share of equity) falls under 20 percent you get one warning (then at most one every 6 hours), and under 10 percent a critical alert (at most one an hour). It only tells you; it moves no money and the bot trades no perps. It is the cushion, not a forced-close price. Needs the server deploy to start.</li>
                   <li>Bot page: one line is back under the perp rows: the account margin cushion (equity minus maintenance, in dollars, with a Low, Medium or High label and a bar; not a forced-close price), plus a one line note while the perp price line waits for its second read.</li>
                   <li>Bot page: the Account chart's hover dot now sits on the curve at the pointer (it was drawn off to the right and near the bottom), on a phone drag too.</li>
