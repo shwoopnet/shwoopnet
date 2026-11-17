@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reader of Forensics' ENGINE1 archive extract for the Testing Desk's OICORE-every-market second build (Nov 17, 2026). Refuses to read unless the allow-list line in HELDOUT_PULL_RUNS.md names this file's own sha256,
 oicore_all_second.py's sha256 AND the archive xz sha256 (no flag, no env var). The wall is the 19 series of Desk A's split constants: each market's series is compared with the wall before any other column is used.
-Reads market(ticker, close_ts, result, series) and candle(ticker, end_ts, yes_bid, yes_ask, oi) only. Cuts (Desk A's loader text): closes at or after 2026-10-03T16:00Z (epoch computed in the file) are dropped; candles ending after their market's close are dropped; markets without a yes or no result are dropped; all counted.
+Reads market(ticker, close_ts, series) first, then result and candle(ticker, end_ts, yes_bid, yes_ask, oi) for the kept tickers only (outside the wall or at or after the cut: nothing else is read). Cuts (Desk A's loader text): closes at or after 2026-10-03T16:00Z (epoch computed in the file) are dropped; candles ending after their market's close are dropped; markets without a yes or no result are dropped; all counted.
 Prints counts and the screen's lines (per series and pooled). Run ONCE.   python3 -I oicore_all_second_load.py <archive xz>"""
 import collections, datetime, hashlib, lzma, os, sqlite3, sys, tempfile
 import oicore_all_second as O
@@ -35,18 +35,22 @@ def load(xz_path, allow_file=None, arch_sha=ARCHIVE_SHA, splits=SPLITS):
     raw = open(xz_path, "rb").read()
     if hashlib.sha256(raw).hexdigest() != arch_sha: raise SystemExit("REFUSED: the archive does not match the allowed xz sha256")
     tmp = tempfile.mkdtemp(); db = os.path.join(tmp, "a.sqlite"); open(db, "wb").write(lzma.decompress(raw))
-    c = sqlite3.connect(db); cnt = collections.Counter(); markets = []; keep = {}
-    for tk, close, result, series in c.execute("select ticker, close_ts, result, series from market"):
+    c = sqlite3.connect(db); cnt = collections.Counter(); kept = {}; ser = {}
+    for tk, close, series in c.execute("select ticker, close_ts, series from market"):                # ticker, close_ts and series only: the wall and the cut come before any other column
         s = series_of(tk, series)
         if s not in splits: cnt["outside_wall"] += 1; continue
         if close is None or close >= CUT_TS: cnt["cut_close"] += 1; continue
-        if result not in ("yes", "no"): cnt["no_result"] += 1; continue
-        markets.append((tk, int(close), result, s)); keep[tk] = int(close)
-    candles = {}
-    for tk, end, bid, ask, oi in c.execute("select ticker, end_ts, yes_bid, yes_ask, oi from candle"):
-        if tk not in keep: continue
-        if end > keep[tk]: cnt["candle_after_close"] += 1; continue
-        candles[(tk, int(end))] = (bid, ask, oi)
+        kept[tk] = int(close); ser[tk] = s
+    tks = sorted(kept); res = {}; markets = []; candles = {}
+    for i in range(0, len(tks), 500):                                                                 # result and candles for kept tickers only, in batches
+        b = tks[i:i + 500]; q = ",".join("?" * len(b))
+        for tk, r in c.execute("select ticker, result from market where ticker in (%s)" % q, b): res[tk] = r
+        for tk, end, bid, ask, oi in c.execute("select ticker, end_ts, yes_bid, yes_ask, oi from candle where ticker in (%s)" % q, b):
+            if end > kept[tk]: cnt["candle_after_close"] += 1; continue
+            candles[(tk, int(end))] = (bid, ask, oi)
+    for tk in tks:
+        if res.get(tk) not in ("yes", "no"): cnt["no_result"] += 1; continue
+        markets.append((tk, kept[tk], res[tk], ser[tk]))
     return markets, candles, {k: datetime.date.fromisoformat(v) for k, v in splits.items()}, cnt
 
 if __name__ == "__main__":
