@@ -1,10 +1,28 @@
-"""ENGINE1 held-out read of BATCH B's validate-bar passes (Desk A, Nov 16 2026): ENGB4XBTC (33) and ENGB1TIMESTOP, ENGB2VSPIKE, ENGB3SPRW (3 + 16 + 28 = 47), registered in each spec's heldout_read_registered and in ENGINE1_HELDOUT_READ_PLAN_NOV16.md v3. Each rule is re-scored UNCHANGED on the held-out markets the held-out loader returns (the same windows, floors and bar as the 190's read); its feature classes use SEARCH-only cuts from the archive (vspike and spread terciles), swid and btcmom3 need none. btcmom3 reads the held KXBTC15M candles of the same close (a held market whose Bitcoin candle pair is missing, e.g. a series window past the Bitcoin window, is skipped and counted). One run, the report read after its sha256 is committed. BH over m = the number of batch B rules read (80), printed; the bar 'holds' = n at the floor, PF 1.3 at 1c, PF 1.0 at 2c.
+"""ENGINE1 held-out read of BATCH B's validate-bar passes (Desk A, Nov 16 2026): ENGB4XBTC (33) and ENGB1TIMESTOP, ENGB2VSPIKE, ENGB3SPRW (3 + 16 + 28 = 47), registered in each spec's heldout_read_registered and in ENGINE1_HELDOUT_READ_PLAN_NOV16.md v3. Each rule is re-scored UNCHANGED on the held-out markets the held-out loader returns (the same windows, floors and bar as the 190's read); its feature classes use SEARCH-only cuts from the archive (vspike and spread terciles), swid and btcmom3 need none. btcmom3 reads the held KXBTC15M candles of the same close (a held market whose Bitcoin candle pair is missing, e.g. a series window past the Bitcoin window, is skipped and counted). One run, the report read after its sha256 is committed. BH: the standard step-up over m = the number of batch B rules read (80), EVERY rule ranked (the 190 lesson), printed; the bar 'holds' = n at the floor, PF 1.3 at 1c, PF 1.0 at 2c.
   python3 -I engine1_heldout_run_b.py <dir holding the archive extracts> <dir holding the pull run folders> <out_engb4.json> <out_ENGB1TIMESTOP.json> <out_ENGB2VSPIKE.json> <out_ENGB3SPRW.json> <out.json>
   python3 -I engine1_heldout_run_b.py --dry <archive dir> <the same four lists> <out.json>   (reproduces the VALIDATE rows from the archive's validate half; no held-out data)"""
 import sys, os, json, hashlib, collections
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import engine1_driver as D, engine1_enum as N, engine1_split as S, engine1_batchb as B, engine1_batchb2 as B2, engine1_core as K
 LABEL = "unread by ENGINE1, seen by earlier development cards"
+def bh_all(ps, m, alpha=0.05):
+    """standard step-up over m, EVERY rule ranked (the 190's lesson: no-evidence rules count in the ranking)."""
+    order = sorted(range(len(ps)), key=lambda i: (ps[i], i)); k = 0
+    for r, i in enumerate(order, 1):
+        if ps[i] <= alpha * r / m: k = r
+    return {order[j] for j in range(k)}
+def missing_feature_skips(mkts, fname, btc_idx, bucket):
+    """candidate entries of ONE bucket whose entry candle is usable but whose feature cannot be computed (a missing Bitcoin candle pair for btcmom3; fewer than the six volume candles for vspike; a missing e - 180 spread for swid); the number a rule's n is short by because the market was not covered."""
+    n = 0
+    for m in mkts:
+        by_end = {c[0]: c for c in m["candles"] if c[0] <= m["close"]}; e = m["close"] - bucket
+        if e not in by_end or not (0 < by_end[e][1] < by_end[e][2] < 1): continue
+        if fname == "btcmom3": o = btc_idx.get(m["close"]); v = B.btcmom3(o, e) if o is not None else None
+        elif fname == "vspike": v = B2.vspike(by_end, e)
+        elif fname == "swid": v = B2.swid(by_end, e)
+        else: v = 0
+        if v is None: n += 1
+    return n
 def score(items, x):
     if x in ("TA3", "TA5"):
         k = 3 if x == "TA3" else 5; es = [D.to_core(m, ent) for m, ent in items]
@@ -31,10 +49,10 @@ def evaluate(rules, held, search, floors, windows_days, stats):
         agg, p = score(items, x["exit"]) if items else ({0.01: {"n": 0, "pf": float("nan"), "net": 0.0}, 0.02: {"n": 0, "pf": float("nan"), "net": 0.0}}, 1.0)
         a1, a2 = agg[0.01], agg[0.02]; fl = floors[s]; days = windows_days(s)
         holds = a1["n"] >= fl and a1["pf"] >= D.PF1 and a2["pf"] >= D.PF2
-        rows.append({"spec": spec, "series": s, "bucket": x["bucket"], "band": x["band"], "side": x["side"], "filter": x["filter"], "exit": x["exit"], "n": a1["n"], "n_floor": fl, "pf_1c": a1["pf"], "pf_2c": a2["pf"], "p": p, "income_1c": D.income(a1, days), "income_2c": D.income(a2, days), "validate_pf_1c": x["pf_1c"], "validate_pf_2c": x["pf_2c"], "validate_n": x["n"], "holds_bar": bool(holds),
+        rows.append({"spec": spec, "series": s, "bucket": x["bucket"], "band": x["band"], "side": x["side"], "filter": x["filter"], "exit": x["exit"], "n": a1["n"], "n_floor": fl, "pf_1c": a1["pf"], "pf_2c": a2["pf"], "p": p, "income_1c": D.income(a1, days), "income_2c": D.income(a2, days), "validate_pf_1c": x["pf_1c"], "validate_pf_2c": x["pf_2c"], "validate_n": x["n"], "missing_feature_skips_at_bucket": missing_feature_skips(held.get(s, []), f, btc_idx, x["bucket"]), "markets_in_window": len(held.get(s, [])), "holds_bar": bool(holds),
                      "verdict": ("holds" if holds else ("no evidence at n = %d" % a1["n"] if a1["n"] < fl else "does not hold"))})
-    pv = {i: r["p"] for i, r in enumerate(rows) if r["holds_bar"]}; keep = D.bh(pv, len(rows))
-    for i, r in enumerate(rows): r["bh_survivor_80"] = i in keep
+    keep = bh_all([r["p"] for r in rows], len(rows))
+    for i, r in enumerate(rows): r["bh_survivor_all"] = i in keep; r["verdict_full"] = r["verdict"] + (", BH survivor at 5%% over %d (all ranked)" % len(rows) if i in keep and r["holds_bar"] else "")
     return rows, len(keep)
 def load_rules(paths):
     rules = []
