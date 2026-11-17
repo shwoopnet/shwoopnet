@@ -1,6 +1,6 @@
 {
  "job_id": "PERPETH1M_W8",
- "status": "active",
+ "status": "paused",
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/specs/PERPLEAD1_CARD.md",
  "purpose": "Kalshi's Ethereum perpetual KXETHPERP, public 1 minute candles, one UTC day per request, 2026-10-28 to 2026-11-04 (the 8 days of the ladder window BEFORE the nightly archive's back-pull from 2026-11-05, PR 993), to score PERPLEAD1 part (b). Data pull only.",
@@ -103,5 +103,5 @@
    }
   }
  ],
- "notes": "8 requests, one per UTC day; adjacent windows may share a boundary candle: de-duplicate on end_period_ts. Replaces PERPETH1M_W19 (the Head, Nov 16: request only the dates the back-pull does not cover). If the back-pull does not carry KXETHPERP for 2026-11-05 to 2026-11-15, a second job for those dates is needed."
+ "notes": "PAUSED (Nov 17, 2026, owner order via the Head): do not dispatch. 8 requests, one per UTC day; adjacent windows may share a boundary candle: de-duplicate on end_period_ts. Replaces PERPETH1M_W19 (the Head, Nov 16: request only the dates the back-pull does not cover). If the back-pull does not carry KXETHPERP for 2026-11-05 to 2026-11-15, a second job for those dates is needed."
 }

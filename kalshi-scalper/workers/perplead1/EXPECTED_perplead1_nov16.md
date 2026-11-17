@@ -1,3 +1,4 @@
+PAUSED UNRUN (Nov 17, 2026).
 # PERPLEAD1 scorer: expected figures, written BEFORE the code (Desk B, Nov 16, 2026)
 
 Scope: the pure scoring functions only (no file read, no allow line); the loader that reads the ladder files and the perp candle runs comes after the pull jobs land and Auditor B has cleared the design (the card, specs/PERPLEAD1_CARD.md).

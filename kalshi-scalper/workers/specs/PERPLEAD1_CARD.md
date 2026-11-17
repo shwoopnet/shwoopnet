@@ -1,3 +1,4 @@
+# PAUSED UNRUN (Nov 17, 2026, owner order via the Head: no waste; an index or perp leading another market is the declined lead-lag row). Nothing was read; the pull jobs PERPETH1M_W8 and PERPETH1M_W11 are NOT to be dispatched.
 # PERPLEAD1 card (Desk B, Nov 16, 2026): does the ladder-implied price lead Kalshi's own perp? LANE 2, DRAFT for the Head and Auditor B
 
 **Question.** Kalshi lists hourly "above K" binaries (the ladder) and a perpetual on the same underlying. Near each hourly close the ladder's strike prices give an implied distribution of the price at the close. Does the MEDIAN of that distribution lead the perp's mid over the last minutes before the close, and does the gap (implied median minus perp mid) predict the perp's next move by more than the round trip fee?

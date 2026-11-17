@@ -1,3 +1,4 @@
+PAUSED UNRUN (Nov 17, 2026).
 # LADHOUR1 loader, job generator and adapter: expected figures, written BEFORE the code (Desk B, Nov 16, 2026)
 
 Scope: forward only. Four hourly ladders: KXINXU (S&P 500), KXNASDAQ100U (Nasdaq-100), KXWTIH (WTI), KXGOLDH (gold). Same shapes as the signed ETHLATE1 package (ethlate1_load.py, build_ethd_results2_job.py, ethlate1_run.py); everything below that is not named is copied from there.
