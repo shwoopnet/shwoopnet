@@ -1,2 +1,3 @@
-file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick
-2026-09-18.csv.gz,KXAAA,11,10,1,1,2,1,3,1,9,0.10000000000000001
+file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held
+2026-09-18.csv.gz,KXAAA,12,10,1,1,2,1,3,1,9,0.10000000000000001,1,0
+2026-09-18.csv.gz,KXHELD,1,0,0,0,0,0,0,0,0,,0,1
