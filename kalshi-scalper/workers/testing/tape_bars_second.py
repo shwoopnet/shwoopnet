@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""60-day tape, 1 minute bar builder, BUILD 2 (Testing Desk, Nov 17, 2026), blind from Desk A's PERPS_TAPE60_AMENDMENT_NOV17.md at be97878d7 (sha256 fe3d8144a845303571cad5cb53dc82fdfd681a06dcea029b20c684d6914f7e71): sections 2 and 6 (bars, readings T1 to T18) as changed by sections 7 and 8 (one file per UTC date holding all tickers, no trade_id, dedupe by the six fields and the earliest t_recv_ms, ties by reverse file order). Pure functions on rows; the file reader below checks an allow line.
+"""60-day tape, 1 minute bar builder, BUILD 2 (Testing Desk, Nov 17, 2026), blind from Desk A's PERPS_TAPE60_AMENDMENT_NOV17.md at ae49a84e6 (sha256 f5dd88589bde6d59bfff8940317452586003837218a256530a10c4ce4ca3ea03), sections 7 to 9 and amendment 5 (exact decimal counts): sections 2 and 6 (bars, readings T1 to T18) as changed by sections 7 and 8 (one file per UTC date holding all tickers, no trade_id, dedupe by the six fields and the earliest t_recv_ms, ties by reverse file order). Pure functions on rows; the file reader below checks an allow line.
 Rows: dicts with file, t_recv_ms, ticker, created_time, price, count, taker_side, is_block_trade (strings as stored)."""
 import calendar, collections, csv, fnmatch, glob, gzip, hashlib, json, os, re, sys, time
 from decimal import Decimal, InvalidOperation
@@ -33,8 +33,18 @@ def parse_price(s):
 
 
 def parse_count(s):
-    if not re.match(r"^\d+$", s): raise ValueError("bad count %r" % s)                  # T8: negative or non-integer raises
-    return int(s)
+    """Amendment 5: an exact decimal (digits, optionally one dot and digits; no sign, exponent, empty or trailing dot); zero or negative raises"""
+    if not re.match(r"^\d+(\.\d+)?$", s): raise ValueError("bad count %r" % s)
+    v = Decimal(s)
+    if v <= 0: raise ValueError("count not positive %r" % s)
+    return v
+
+
+def plain(d):
+    """exact decimal text without exponent and without trailing zeros: 12.5, 15, 0.03, 0"""
+    s = format(Decimal(d), "f")
+    if "." in s: s = s.rstrip("0").rstrip(".")
+    return "0" if s in ("", "-0") else s
 
 
 def parse_block(s):
@@ -67,7 +77,8 @@ def build(rows, wall, held=None):
     for recv, i, r in kept:
         fk = (r["file"], r["ticker"]); summ[fk]["rows_kept"] += 1
         t_ns = parse_ns(r["created_time"]); price = parse_price(r["price"]); count = parse_count(r["count"]); block = parse_block(r["is_block_trade"]); side = r["taker_side"]
-        b = bars.setdefault((r["ticker"], end_ts_of(t_ns)), {"trades": [], "block_volume": 0, "block_count": 0, "files": set()}); b["files"].add(r["file"])
+        if "." in r["count"]: summ[fk]["count_whole_dot" if count == count.to_integral_value() else "count_fraction"] += 1
+        b = bars.setdefault((r["ticker"], end_ts_of(t_ns)), {"trades": [], "block_volume": Decimal(0), "block_count": 0, "files": set()}); b["files"].add(r["file"])
         if len(b["files"]) > 1: raise RuntimeError("a bar in two date files: %s %s" % (r["ticker"], end_ts_of(t_ns)))
         if block: b["block_volume"] += count; b["block_count"] += 1; summ[fk]["block_rows"] += 1
         else:
@@ -80,8 +91,8 @@ def build(rows, wall, held=None):
             s["bars_only_block"] += 1; s["block_volume_in_those"] += b["block_volume"]; continue
         tr = sorted(b["trades"], key=lambda x: (x[0], x[1])); ps = [x[2] for x in tr]
         for x in tr: prices[(x[5], tk)].add(x[2])
-        out[(tk, e)] = {"ticker": tk, "end_ts": e, "open": ps[0], "high": max(ps), "low": min(ps), "close": ps[-1], "volume": sum(x[3] for x in tr), "n_trades": len(tr),
-                        "buy_volume": sum(x[3] for x in tr if x[4] == "buy"), "sell_volume": sum(x[3] for x in tr if x[4] == "sell"), "block_volume": b["block_volume"], "block_count": b["block_count"]}
+        out[(tk, e)] = {"ticker": tk, "end_ts": e, "open": ps[0], "high": max(ps), "low": min(ps), "close": ps[-1], "volume": sum((x[3] for x in tr), Decimal(0)), "n_trades": len(tr),
+                        "buy_volume": sum((x[3] for x in tr if x[4] == "buy"), Decimal(0)), "sell_volume": sum((x[3] for x in tr if x[4] == "sell"), Decimal(0)), "block_volume": b["block_volume"], "block_count": b["block_count"]}
         s["bars_written"] += 1
     ticks = {}
     for fk, ps in prices.items():
@@ -92,19 +103,19 @@ def build(rows, wall, held=None):
 def f17(x): return "%.17g" % float(x)
 
 
-def bar_line(b): return ",".join([b["ticker"], str(b["end_ts"]), f17(b["open"]), f17(b["high"]), f17(b["low"]), f17(b["close"]), str(b["volume"]), str(b["n_trades"]), str(b["buy_volume"]), str(b["sell_volume"]), str(b["block_volume"]), str(b["block_count"])])
+def bar_line(b): return ",".join([b["ticker"], str(b["end_ts"]), f17(b["open"]), f17(b["high"]), f17(b["low"]), f17(b["close"]), plain(b["volume"]), str(b["n_trades"]), plain(b["buy_volume"]), plain(b["sell_volume"]), plain(b["block_volume"]), str(b["block_count"])])
 
 
 def bar_text(bars): return ",".join(BAR_COLS) + "\n" + "".join(bar_line(bars[k]) + "\n" for k in sorted(bars))             # header line first
 
 
 def summary_lines(summ, ticks):
-    """one line per (file, ticker) sorted: file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held"""
+    """one line per (file, ticker) sorted: file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held,count_whole_dot,count_fraction"""
     L = []
     for fk in sorted(k for k in summ if k[1] != "_outside_wall"):
         s = summ[fk]; tick = ticks.get(fk)
-        L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["" if tick is None else f17(tick)] + [str(s["rows_other_date"]), str(s["rows_held"])]))
-    return ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held"] + L
+        L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block")] + [plain(s["block_volume_in_those"])] + ["" if tick is None else f17(tick)] + [str(s["rows_other_date"]), str(s["rows_held"]), str(s["count_whole_dot"]), str(s["count_fraction"])]))
+    return ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held,count_whole_dot,count_fraction"] + L
 
 
 def sha(text): return hashlib.sha256(text.encode()).hexdigest()

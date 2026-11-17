@@ -3,7 +3,7 @@ import tape_bars_second as T
 
 def row(t, p, c, side, blk, recv="100", tk="KXT", f="2026-11-17.csv.gz"): return {"file": f, "t_recv_ms": recv, "ticker": tk, "created_time": t, "price": p, "count": c, "taker_side": side, "is_block_trade": blk}
 # file order is NEWEST FIRST within a page (reverse time), as the stored tape
-ROWS = [row("2026-11-17T12:04:00Z", "10.40", "0", "sell", "false"), row("2026-11-17T12:03:05Z", "9.00", "7", "buy", "TRUE"), row("2026-11-17T12:01:45Z", "10.50", "2", "xxx", "false"), row("2026-11-17T12:01:30Z", "9.90", "4", "buy", "true"),
+ROWS = [row("2026-11-17T12:04:00Z", "10.40", "1", "sell", "false"), row("2026-11-17T12:03:05Z", "9.00", "7", "buy", "TRUE"), row("2026-11-17T12:01:45Z", "10.50", "2", "xxx", "false"), row("2026-11-17T12:01:30Z", "9.90", "4", "buy", "true"),
         row("2026-11-17T12:01:00Z", "10.30", "1", "sell", "false"), row("2026-11-17T12:01:00.000Z", "10.10", "5", "buy", "false"), row("2026-11-17T12:00:59.999999999Z", "10.20", "3", "sell", "false"), row("2026-11-17T12:00:10Z", "10.00", "2", "buy", "false"),
         row("2026-11-17T12:00:10Z", "10.00", "2", "buy", "false", recv="200"), row("2026-11-17T12:00:59.999999999Z", "10.20", "3", "sell", "false", recv="100")]       # last two: a page overlap (later recv: dropped) and a genuine repeat (same recv: kept)
 
@@ -14,7 +14,7 @@ class TT(unittest.TestCase):
         b = bars[("KXT", E0 + 60)]; self.assertEqual((float(b["open"]), float(b["high"]), float(b["low"]), float(b["close"]), b["volume"], b["n_trades"], b["buy_volume"], b["sell_volume"], b["block_volume"], b["block_count"]), (10.0, 10.2, 10.0, 10.2, 8, 3, 2, 6, 0, 0))   # a2 repeated (same recv): two prints of 3
         b = bars[("KXT", E0 + 120)]      # ties at 12:01:00: file order 10.30 then 10.10, reverse file order: 10.10 (later in file) first, then 10.30, then 10.50 at 12:01:45
         self.assertEqual((float(b["open"]), float(b["high"]), float(b["low"]), float(b["close"]), b["volume"], b["n_trades"], b["buy_volume"], b["sell_volume"], b["block_volume"], b["block_count"]), (10.1, 10.5, 10.1, 10.5, 8, 3, 5, 1, 4, 1))
-        b = bars[("KXT", E0 + 300)]; self.assertEqual((float(b["open"]), b["volume"], b["n_trades"]), (10.4, 0, 1)); self.assertNotIn(("KXT", E0 + 240), bars)
+        b = bars[("KXT", E0 + 300)]; self.assertEqual((float(b["open"]), b["volume"], b["n_trades"]), (10.4, 1, 1)); self.assertNotIn(("KXT", E0 + 240), bars)
         s = summ[("2026-11-17.csv.gz", "KXT")]; self.assertEqual((s["rows_read"], s["rows_kept"], s["merged_by_repeat"], s["kept_same_recv"], s["block_rows"], s["unknown_side_trades"], s["bars_written"], s["bars_only_block"], s["block_volume_in_those"]), (10, 9, 1, 1, 2, 1, 3, 1, 7))
         self.assertEqual(ticks[("2026-11-17.csv.gz", "KXT")], T.Decimal("0.10"))
     def test_tie_close_by_reverse_file_order(self):
@@ -27,13 +27,20 @@ class TT(unittest.TestCase):
         bars, summ, _ = T.build([a, b, c], {"KXT"}); bb = bars[("KXT", 1794916860)]; s = summ[("2026-11-17.csv.gz", "KXT")]
         self.assertEqual((bb["n_trades"], bb["volume"], s["merged_by_repeat"], s["kept_same_recv"]), (2, 2, 1, 1))
         d = row("2026-11-17T12:00:20Z", "5.0", "1", "sell", "false", recv="500"); self.assertEqual(T.build([b, d], {"KXT"})[0][("KXT", 1794916860)]["n_trades"], 2)       # a different side is a different trade
+    def test_decimal_counts(self):
+        rs = [row("2026-11-17T12:00:10Z", "5.0", "0.02", "buy", "false"), row("2026-11-17T12:00:11Z", "5.0", "0.01", "buy", "false"), row("2026-11-17T12:00:12Z", "5.0", "10.0", "sell", "false"), row("2026-11-17T12:00:13Z", "5.0", "12.5", "sell", "false"), row("2026-11-17T12:00:14Z", "5.0", "5", "buy", "true"), row("2026-11-17T12:00:15Z", "5.0", "2.50", "buy", "true")]
+        bars, summ, _ = T.build(rs, {"KXT"}); b = bars[("KXT", 1794916860)]; s = summ[("2026-11-17.csv.gz", "KXT")]
+        self.assertEqual((T.plain(b["volume"]), T.plain(b["buy_volume"]), T.plain(b["sell_volume"]), T.plain(b["block_volume"]), b["n_trades"], b["block_count"]), ("22.53", "0.03", "22.5", "7.5", 4, 2))
+        self.assertEqual((s["count_whole_dot"], s["count_fraction"]), (1, 4))          # 10.0 is whole with a dot; 0.02, 0.01, 12.5 and 2.50 are fractions
+        self.assertEqual(T.bar_line(b).split(",")[6:], ["22.53", "4", "0.03", "22.5", "7.5", "2"])
+        for d, e in ((T.Decimal("12.50"), "12.5"), (T.Decimal("15"), "15"), (T.Decimal("0.03"), "0.03"), (T.Decimal("1E+1"), "10"), (T.Decimal("0.0"), "0"), (0, "0")): self.assertEqual(T.plain(d), e)
     def test_time_parse(self):
         a = T.parse_ns("2026-11-17T12:01:00.000Z"); self.assertEqual(a, T.parse_ns("2026-11-17T12:01:00Z")); self.assertEqual(a, T.parse_ns("2026-11-17T12:01:00+00:00")); self.assertEqual(T.parse_ns("2026-11-17T12:01:00.000000001Z"), a + 1)
         for bad in ("2026-11-17T12:01:00+01:00", "2026-11-17 12:01:00Z", "2026-11-17T12:01:00.1234567891Z", "2026-11-17T12:01Z", ""):
             with self.assertRaises(ValueError): T.parse_ns(bad)
         self.assertEqual(T.end_ts_of(T.parse_ns("2026-11-17T12:00:59.999999999Z")), 1794916860); self.assertEqual(T.end_ts_of(a), 1794916920)
     def test_bad_rows_raise(self):
-        for kw in ({"count": "-1"}, {"count": "1.5"}, {"price": "0"}, {"price": "abc"}, {"is_block_trade": "maybe"}, {"price": "-1"}):
+        for kw in ({"count": "-1"}, {"count": "0"}, {"count": "0.0"}, {"count": ""}, {"count": "1e3"}, {"count": "x"}, {"count": "1."}, {"count": ".5"}, {"count": "+1"}, {"price": "0"}, {"price": "abc"}, {"is_block_trade": "maybe"}, {"price": "-1"}):
             r = row("2026-11-17T12:00:10Z", "1.0", "1", "buy", "false"); r.update(kw)
             with self.assertRaises(ValueError): T.build([r], {"KXT"})
     def test_wall_not_parsed(self):
@@ -47,7 +54,7 @@ class TT(unittest.TestCase):
         held = lambda tk, t: t >= 1794916860 + 1000       # everything from 12:17:20 on
         rs2 = [row("2026-11-17T12:00:00Z", "7.0", "1", "sell", "false"), row("2026-11-17T12:20:00Z", "8.0", "1", "sell", "false"), row("2026-11-17T12:17:19Z", "9.0", "1", "sell", "false")]
         bars, summ, _ = T.build(rs2, {"KXT"}, held); s = summ[("2026-11-17.csv.gz", "KXT")]; self.assertEqual((s["rows_held"], s["rows_kept"], len(bars)), (1, 2, 2))      # t < from is not held, the boundary is inclusive from 12:17:20
-        self.assertEqual(T.summary_lines(summ, {})[1].split(",")[-2:], ["0", "1"])
+        self.assertEqual(T.summary_lines(summ, {})[1].split(",")[-4:-2], ["0", "1"])
     def test_holds_loader(self):
         import json as J
         d = tempfile.mkdtemp()
