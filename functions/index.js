@@ -1069,6 +1069,7 @@ exports.kalshiPerpsProbe = onSchedule(
 // /margin/positions through the bot's own signer plus the PUBLIC perps list, shaped into one document the Bot page reads (functions/kalshiPerpsAccountLib.js, test/perpsAccountGates.test.js).
 // No order, no POST, nothing written to Kalshi; nothing that decides a trade reads the document. A failed read leaves the last document as it was (the page shows its age). Deploy: bash functions/deploy-sizing.sh.
 const perpsAccount = require("./kalshiPerpsAccountLib");
+const perpsCushion = require("./kalshiPerpsCushionLib");
 exports.kalshiPerpsAccount = onSchedule(
   { schedule: "every 5 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 40, retryCount: 0, memory: "256MiB" },
   async () => {
@@ -1078,6 +1079,25 @@ exports.kalshiPerpsAccount = onSchedule(
       const doc = await perpsAccount.runPerpsAccount({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(), publicGet });
       if (doc) await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).set(doc);
       console.log("kalshiPerpsAccount: " + (doc ? "rows=" + doc.count : "unreadable, document left as it was"));
+      // Margin cushion phone alert (kalshiPerpsCushionLib, Nov 17, 2026): only when the cushion is under a line; each level has its own cooldown claimed in a transaction. Its one write is a field on the session
+      // document that kalshiPushSession turns into an alert. Fenced off so it can never fail the read above.
+      if (doc) {
+        try {
+          const db = getFirestore(), cushionRef = db.collection("kalshiLiveControl").doc("perpsCushionAlert"), sessRef = db.collection("kalshiLiveControl").doc("session");
+          const note = await perpsCushion.runCushionAlert({
+            now: doc.at, doc,
+            claim: (at, level) => db.runTransaction(async (tx) => {
+              const cur = await tx.get(cushionRef), last = cur.exists && Number.isFinite(Number(cur.data()[level])) ? Number(cur.data()[level]) : null;
+              if (!perpsCushion.claimable(level, at, last)) return false;
+              tx.set(cushionRef, { [level]: at }, { merge: true });
+              return last;
+            }),
+            release: (level, prev) => cushionRef.set({ [level]: prev }, { merge: true }),
+            raise: (a) => sessRef.set({ perpsCushionAlert: a }, { merge: true }),
+          });
+          if (/^alerted|^error|failed/.test(note)) console.warn("kalshiPerpsAccount: cushion alert: " + note);
+        } catch (e) { console.error("kalshiPerpsAccount: cushion alert failed: " + String((e && e.message) || e).slice(0, 160)); }
+      }
     } catch (e) { console.error("kalshiPerpsAccount: " + String((e && e.message) || e).slice(0, 160)); }
   }
 );
