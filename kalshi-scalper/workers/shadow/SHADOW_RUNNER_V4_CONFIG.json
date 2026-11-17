@@ -3,7 +3,7 @@
  "list_file": "SHADOW_LIST_V4.json",
  "list_sha256": "b8c4f727c38fa52c81800ef58319b15e74872f8359e3d3752468a9af41878cd2",
  "start_utc": 1794960000,
- "start_utc_note": "2026-11-18T00:00:00Z. Desk A's rule: the real start is the later of the list's start_utc (2026-11-17T00:00Z) and this runner's merge, never earlier than the merge. A written constant, never computed from the run date. If this pull request is merged at or after this time, raise this constant to the next whole UTC hour after the merge in the same pull request BEFORE the merge, so no market that closed before the runner existed is counted as forward. The two KXBTC15M picks carry their own later start (2026-11-21T00:00Z, H09) in the list.",
+ "start_utc_note": "2026-11-18T00:00:00Z. The real start is the later of the list's start_utc and this runner's merge, never earlier than the merge. A written constant, never computed from the run date. If this pull request is merged at or after this time, raise this constant to the next whole UTC hour after the merge in the same pull request BEFORE the merge, so no market that closed before the runner existed is counted as forward. A pick may carry its own later start in the list.",
  "modules": {
   "engine1_core": "53317e4b56a8328fb616d460d5cb4597af13a2b9020d73aefaa37717439694bf",
   "engine1_enum": "e42ee1a45f67b76e8560cd9cbefac352fce9a765c8300bc04d5ce05a27e4d5a7",
@@ -12,7 +12,7 @@
   "engine1_batchb": "68a5ab435d8246be30681a703179d88608b0384ce2ca50f4f6bad458cea07f1e",
   "engine1_batchc": "ba77f70c7d86152539ad01cbd958d1056e3e78b40b3a568693f6ea444f77a279"
  },
- "fixture_sha256": "38e875a2665c1e420a2c4fcb058b7c1e879c81e65abb01798c5e4e7f5dfbd461",
- "state_and_outputs": "own state cache key (shadow-state-v4-...), own files shadow_results_v4.json and shadow_counts_v4.json on the shadow-data branch; V1 is untouched and keeps running",
- "clause": "S1 of kalshi-scalper/workers/HOLDS.json: per-spec aggregates only; no spec changes after the first result; new specs only as a new list version with its own start_utc"
+ "state_and_outputs": "own state file shadow_state_v4.json and own files shadow_results_v4.json, shadow_counts_v4.json on the shadow-data branch; V1 is untouched and keeps running",
+ "clause": "S1 of kalshi-scalper/workers/HOLDS.json: per-spec aggregates only; no spec changes after the first result; new specs only as a new list version with its own start_utc",
+ "fixture_sha256": "38e875a2665c1e420a2c4fcb058b7c1e879c81e65abb01798c5e4e7f5dfbd461"
 }

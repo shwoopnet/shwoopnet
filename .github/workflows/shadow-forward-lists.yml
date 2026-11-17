@@ -1,10 +1,10 @@
-# Nov 17, 2026 (the Head of R&D's order, Desk A's V4 package): the forward shadow runner for SHADOW_LIST_V4, beside V1 (shadow-forward.yml, untouched). Once a day it reads PUBLIC Kalshi candles and settled markets for the 12 specs of SHADOW_LIST_V4
+# Nov 17, 2026 (the Head of R&D's order, Desk A's V2, V3 and V4 packages): the forward shadow runner for SHADOW_LIST_V2, V3 and V4, beside V1 (shadow-forward.yml, untouched). Once a day it reads PUBLIC Kalshi candles and settled markets for the picks of each list
 # (start in SHADOW_RUNNER_V4_CONFIG.json; the two Bitcoin picks start later, H09), scores them through Desk A's audited ENGINE1 modules (pinned by sha256 in kalshi-scalper/workers/shadow/SHADOW_RUNNER_V4_CONFIG.json) behind the held-out guard (HOLDS.json, S1 row),
 # and publishes per-spec AGGREGATES only (shadow_results_v4.json, shadow_counts_v4.json) to its OWN orphan branch `shadow-data` (never main). Research only: no key, no order, no Firestore.
 # State (Auditor B, option B): the per-spec ordered net amounts live only in the GitHub Actions cache, keyed by the list sha, the runner sha and the HOLDS.json sha; a miss rebuilds from the public pulls to the identical sequence
 # (test SR6). The cache is never printed, committed, uploaded as an artifact or logged. Public GETs only, one host, at most 1 request a second, 1,200 requests a run is not exceeded (the puller stops on three 429s).
 # Nothing else may be added to this file without a new check. Stops by itself: from 2027-01-31 23:59 UTC every run exits at once. NOTE for the reviewer: the actions/cache pin below could not be verified from the build sandbox; check it before merge.
-name: shadow-forward-v4
+name: shadow-forward-lists
 on:
   schedule:
     - cron: "53 3 * * *"
@@ -12,7 +12,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: shadow-forward-v4
+  group: shadow-forward-lists
   cancel-in-progress: false
 jobs:
   run:
@@ -59,14 +59,13 @@ jobs:
           git init -q
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           if git fetch -q --depth 1 origin shadow-data; then git checkout -q -b shadow-data FETCH_HEAD; else git checkout -q --orphan shadow-data; fi
-          cp ../out/shadow_results_v4.json shadow_results_v4.json
-          cp ../out/shadow_counts_v4.json shadow_counts_v4.json
-          git config user.name "shadow-forward-v4"
+          cp ../out/shadow_results_v*.json ../out/shadow_counts_v*.json .
+          git config user.name "shadow-forward-lists"
           git config user.email "shadow-forward@users.noreply.github.com"
-          git add shadow_results_v4.json shadow_counts_v4.json
-          # the commit must hold exactly these two files (Auditor B): fail on any other changed path
-          [ "$(git diff --cached --name-only | sort | tr '\n' ' ')" = "shadow_counts_v4.json shadow_results_v4.json " ] || [ -z "$(git diff --cached --name-only)" ] || { echo "unexpected path in the commit"; exit 1; }
-          [ -z "$(git status --porcelain | grep -v -e shadow_results_v4.json -e shadow_counts_v4.json)" ] || { echo "unexpected changed path"; exit 1; }
+          git add -- $(ls shadow_results_v[234].json shadow_counts_v[234].json 2>/dev/null)
+          # the commit may hold only the aggregate files of lists V2, V3 and V4 (Auditor B's rule: fail on any other changed path)
+          [ -z "$(git diff --cached --name-only | grep -Ev '^shadow_(results|counts)_v[234]\.json$')" ] || { echo "unexpected path in the commit"; exit 1; }
+          [ -z "$(git status --porcelain | grep -Ev 'shadow_(results|counts)_v[234]\.json$')" ] || { echo "unexpected changed path"; exit 1; }
           git commit -q -m "shadow aggregates $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           for i in 1 2 3 4 5 6; do git push -q origin shadow-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin shadow-data || true; done
           exit 1

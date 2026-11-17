@@ -1,5 +1,5 @@
 'use strict';
-// The forward shadow runner for SHADOW_LIST_V4 (Nov 17, 2026). Each gate states the consequence. Data in test/shadowRunnerV4Check.py is invented; nothing here reads the network.
+// The forward shadow runner for SHADOW_LIST_V2, V3 and V4 (Nov 17, 2026). Each gate states the consequence. Data in test/shadowRunnerV4Check.py is invented; nothing here reads the network.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -52,7 +52,7 @@ gates.V4_5 = () => {
   assert.strictEqual(o.btc_start, Date.parse('2026-11-21T00:00:00Z') / 1000);
   assert.strictEqual(o.other_start, cfg.start_utc);
   assert.ok(Number.isInteger(cfg.start_utc) && cfg.start_utc >= Date.parse('2026-11-17T00:00:00Z') / 1000, 'never earlier than the list start');
-  assert.ok(/shadow-state-v4-/.test(o.cache_key), 'its own state key');
+  assert.ok(/^shadow-state-v234-71bc18fb-ecc64e55-b8c4f727-/.test(o.cache_key), 'its own state key, built from the three list shas');
 };
 gates.V4_6 = () => {
   // Consequence: V1 is untouched and keeps its own state and files; V4 cannot overwrite V1's results, and the runner holds no key and places no order.
@@ -61,16 +61,44 @@ gates.V4_6 = () => {
   const v4 = read('scripts/shadow_runner_v4.py').replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
   assert.ok(!/POST|Authorization|KALSHI_|\/orders|\/portfolio|requests\.post|firestore/i.test(v4));
   assert.ok(!/https?:\/\//.test(v4), 'no host named here: the only host is V1 Puller\'s elections host');
-  assert.ok(/shadow_results_v4\.json/.test(v4) && /shadow_counts_v4\.json/.test(v4));
+  assert.ok(/shadow_results_%s\.json/.test(v4) && /shadow_counts_%s\.json/.test(v4) && /v\.lower\(\)/.test(v4));
   assert.ok(!/"shadow_results\.json"|"shadow_counts\.json"/.test(v4));
-  const wf = read('.github/workflows/shadow-forward-v4.yml');
-  assert.ok(/group: shadow-forward-v4/.test(wf) && /cancel-in-progress: false/.test(wf));
+  const wf = read('.github/workflows/shadow-forward-lists.yml');
+  assert.ok(/group: shadow-forward-lists/.test(wf) && /cancel-in-progress: false/.test(wf));
   assert.ok(/shadow_runner_v4\.py/.test(wf) && !/shadow_runner\.py/.test(wf));
-  assert.ok(/shadow_results_v4\.json shadow_counts_v4\.json/.test(wf) && !/cp \.\.\/out\/shadow_results\.json/.test(wf));
+  assert.ok(/shadow_\(results\|counts\)_v\[234\]/.test(wf) && !/cp \.\.\/out\/shadow_results\.json/.test(wf));
   assert.ok(/2027-01-31T23:59:00Z/.test(wf), 'it stops by itself');
   assert.ok(/contents: write/.test(wf) && !/actions: write|id-token/.test(wf));
   const v1wf = read('.github/workflows/shadow-forward.yml');
   assert.ok(/group: shadow-forward$/m.test(v1wf) && /shadow_runner\.py/.test(v1wf), 'V1 workflow is as it was');
+};
+
+gates.V4_7 = () => {
+  // Consequence: V2 reads the Bitcoin market of the SAME close (btcmom3): the matching class enters, the other does not, a missing Bitcoin candle or market gives no entry; Desk A's 17 case fixture passes; V2 starts no earlier than 2026-11-21.
+  const c2 = JSON.parse(read('kalshi-scalper/workers/shadow/SHADOW_RUNNER_V2_CONFIG.json'));
+  assert.strictEqual(c2.list_sha256, sha('kalshi-scalper/workers/SHADOW_LIST_V2.json'));
+  assert.strictEqual(c2.list_sha256, '71bc18fb8200dcb48bd7e280' + c2.list_sha256.slice(24));
+  assert.strictEqual(c2.fixture_sha256, sha('kalshi-scalper/workers/BTCMOM3_RUNNER_FIXTURE_NOV16.json'));
+  for (const [n, h] of Object.entries(c2.modules)) assert.strictEqual(sha('kalshi-scalper/workers/desk_a_verify/' + n + '.py'), h, n);
+  assert.strictEqual(o.btcmom3_fixture_cases, 17);
+  assert.deepStrictEqual(o.btcmom3_fixture_bad, []);
+  assert.strictEqual(o.v2_match_trades, 1);
+  assert.strictEqual(o.v2_other_class_trades, 0);
+  assert.strictEqual(o.v2_btc_absent_trades, 0);
+  assert.strictEqual(o.v2_start, Date.parse('2026-11-21T00:00:00Z') / 1000);
+};
+gates.V4_8 = () => {
+  // Consequence: V3's swid picks run on the audited function (a wider spread than 180 s earlier is up, a missing candle is no feature); V3's three vspike picks are NOT run, because their frozen cuts are not pinned, and a list that carries a vspike pick that is neither excluded nor given cuts refuses to run at all (no guessed cut).
+  const c3 = JSON.parse(read('kalshi-scalper/workers/shadow/SHADOW_RUNNER_V3_CONFIG.json'));
+  assert.strictEqual(c3.list_sha256, sha('kalshi-scalper/workers/SHADOW_LIST_V3.json'));
+  assert.strictEqual(c3.modules.engine1_batchb2, sha('kalshi-scalper/workers/desk_a_verify/engine1_batchb2.py'));
+  assert.strictEqual(c3.modules.engine1_batchb2, 'aa6e06824b2799f49812d201' + c3.modules.engine1_batchb2.slice(24));
+  assert.deepStrictEqual(o.v3_excluded, o.v3_vspike_ids);
+  assert.strictEqual(o.v3_excluded.length, 3);
+  assert.strictEqual(o.v3_unexcluded_refused, true);
+  assert.strictEqual(o.swid_up, 2);
+  assert.strictEqual(o.swid_missing, null);
+  assert.ok(!c3.vspike_cuts_file, 'no cuts file is pinned yet');
 };
 
 let failed = 0;

@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
-"""The forward shadow runner for SHADOW_LIST_V4 (Nov 17, 2026, the Head of R&D's order, Desk A's package, Auditor B's pins). LOG ONLY: it places no order, holds no key, writes no Firestore and touches nothing under functions/.
-It is a SEPARATE file from shadow_runner.py (V1) on purpose: V1's runner sha, state key and output files are untouched, V1 keeps running beside it, and V4 has its own state key and its own output files (shadow_results_v4.json, shadow_counts_v4.json).
-What V4 adds over V1 (Desk A's V4_RUNNER_CONFIG_NOV16.json): the filters oiacc (open interest acceleration of the pick's own market) and ethmom3 / goldmom3 (the YES mid change of the OTHER series' market with the SAME close, KXETH15M or KXGOLD15M),
-computed by Desk A's audited functions pinned by sha256 (engine1_batchc.oiacc and xmom, engine1_batchb.btcmom3, engine1_enum.cls). A feature with any candle missing is no feature and no entry. There is no cuts file (no V4 pick uses a spread or volume cut).
+"""The forward shadow runner for SHADOW_LIST_V2, V3 and V4 (Nov 17, 2026, the Head of R&D's order, Desk A's packages, Auditor B's pins). LOG ONLY: it places no order, holds no key, writes no Firestore and touches nothing under functions/.
+It is a SEPARATE file from shadow_runner.py (V1) on purpose: V1's runner sha, state key and output files are untouched, V1 keeps running beside it, and every list here has its own config, its own state and its own output files (shadow_results_<v>.json, shadow_counts_<v>.json, v in v2, v3, v4).
+What these lists add over V1 (Desk A's configs): the filters oiacc (open interest acceleration of the pick's own market), btcmom3, ethmom3 and goldmom3 (the YES mid change of the OTHER series' market with the SAME close: KXBTC15M, KXETH15M or KXGOLD15M) and swid (the change of the entry candle's spread against the candle 180 s earlier), all sign classes by the enumerator's cls,
+and vspike (volume of the entry candle against the mean of the 5 earlier minutes, low, mid or high by FROZEN tercile cuts from the archive SEARCH half; a list whose picks need cuts must carry the cuts file, pinned by sha256, or those picks are listed in the config as excluded and are not run).
+Features come from Desk A's audited functions pinned by sha256 (engine1_batchc.oiacc and xmom, engine1_batchb.btcmom3, engine1_batchb2.swid and vspike, engine1_enum.cls). A feature with any candle missing is no feature and no entry.
 Everything else is V1's code, imported unchanged: the Puller (public GETs only, api.elections.kalshi.com, one request a second, three 429s stop the run, no redirects, no key), the held-out guard (scripts/shadow_holds.py reading HOLDS.json, S1 row), the engine core's scoring
-at a 1c and a 2c worse fill, void scored as minus the entry fee, aggregates only (clause S1). The start is a written constant (the later of the list's start_utc and this runner's merge, recorded in the config); a pick may start later (the two Bitcoin picks, H09)."""
+at a 1c and a 2c worse fill, void scored as minus the entry fee, aggregates only (clause S1). The start is a written constant per list (the later of the list's start_utc and this runner's merge); a pick may start later (the Bitcoin picks, H09)."""
 import json, os, sys, time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import shadow_runner as R   # V1's pure helpers and Puller, unchanged
 
-OTHER = {"ethmom3": "KXETH15M", "goldmom3": "KXGOLD15M"}
-LIST_FILE = "SHADOW_LIST_V4.json"
-OUT_RESULTS, OUT_COUNTS = "shadow_results_v4.json", "shadow_counts_v4.json"
+OTHER = {"btcmom3": "KXBTC15M", "ethmom3": "KXETH15M", "goldmom3": "KXGOLD15M"}
+OWN = ("oiacc", "swid", "vspike")
+LISTS = ("V2", "V3", "V4")
+
+
+def out_names(v):
+    return "shadow_results_%s.json" % v.lower(), "shadow_counts_%s.json" % v.lower()
 
 
 def candle_rows_v4(body, kept_close):
@@ -36,21 +41,29 @@ def candle_rows_v4(body, kept_close):
     return out
 
 
-def feature_class(mods, name, market, other_idx, e):
-    """-> 'up', 'flat', 'down' or None (missing). oiacc reads the market's own candles at e, e - 180, e - 360; ethmom3 and goldmom3 read the other series' market with the same close (other_idx = {end: candle} of it)."""
+def feature_class(mods, name, market, other_idx, e, cuts=None, bucket=None):
+    """-> 'up', 'flat', 'down' (or 'low', 'mid', 'high' for vspike) or None (missing). oiacc, swid and vspike read the market's own candles; btcmom3, ethmom3 and goldmom3 read the other series' market with the same close (other_idx = {end: candle} of it)."""
     N, C = mods["engine1_enum"], mods["engine1_batchc"]
+    by_end = {c[0]: c for c in market["candles"] if c[0] <= market["close"]}
     if name == "oiacc":
-        by_end = {c[0]: c for c in market["candles"] if c[0] <= market["close"]}
         x = C.oiacc(by_end, e)
+    elif name == "swid":
+        x = mods["engine1_batchb2"].swid(by_end, e)
+    elif name == "vspike":
+        v = mods["engine1_batchb2"].vspike(by_end, e)
+        c = (cuts or {}).get(market["series"], {}).get(str(bucket))
+        if v is None or not c:
+            return None
+        return "low" if v <= c[0] else ("mid" if v <= c[1] else "high")
     elif name in OTHER:
         x = None if other_idx is None else C.xmom(other_idx, e)
     else:
-        raise R.Refused("feature %s is not one V4 knows" % name)
+        raise R.Refused("feature %s is not one this runner knows" % name)
     return None if x is None else N.cls(x)
 
 
-def v4_entry(mods, spec, market, other_idx):
-    """The enumerator's entry rules (engine1_enum.entries) with a V4 filter: -> entry dict or None."""
+def v4_entry(mods, spec, market, other_idx, cuts=None):
+    """The enumerator's entry rules (engine1_enum.entries) with one of these filters: -> entry dict or None."""
     N = mods["engine1_enum"]
     e_ = spec["entry"]; name, want = R.parse_filter(e_["filter"]); bucket, band, side_rule = e_["seconds_left"], e_["price_band_5c"], e_["side_rule"]
     by_end = {c[0]: c for c in market["candles"] if c[0] <= market["close"]}
@@ -61,7 +74,7 @@ def v4_entry(mods, spec, market, other_idx):
     ya, na = N.asks(c); side = N.side_for(side_rule, ya, na); a = ya if side == "yes" else na
     if not (5 <= a <= 94) or a // 5 != band:
         return None
-    k = feature_class(mods, name, market, other_idx, e)
+    k = feature_class(mods, name, market, other_idx, e, cuts, bucket)
     if k is None or k != want:
         return None
     ra = N.raw_ask(c, side)
@@ -73,7 +86,7 @@ def spec_start(spec, cfg_start):
     return max(cfg_start, t) if t is not None else cfg_start
 
 
-def score_spec_v4(mods, spec, markets, other_by_close, cfg_start, guard, guard_series, sha256):
+def score_spec_v4(mods, spec, markets, other_by_close, cfg_start, guard, guard_series, sha256, cuts=None):
     """-> (new trades, refused count). Same trade shape and scoring as V1's score_spec; a market is skipped unless the guard clears it for this spec."""
     K, D = mods["engine1_core"], mods["engine1_driver"]
     start = spec_start(spec, cfg_start); bucket = spec["entry"]["seconds_left"]
@@ -96,7 +109,7 @@ def score_spec_v4(mods, spec, markets, other_by_close, cfg_start, guard, guard_s
             if not ok2 or not om["candles"]:
                 continue
             other = {c[0]: c for c in om["candles"] if c[0] <= om["close"]}
-        ent = v4_entry(mods, spec, m, other)
+        ent = v4_entry(mods, spec, m, other, cuts)
         if ent is None:
             continue
         core = D.to_core(m, ent)
@@ -107,8 +120,12 @@ def score_spec_v4(mods, spec, markets, other_by_close, cfg_start, guard, guard_s
     return trades, refused
 
 
-def load_config(root):
-    with open(os.path.join(root, "kalshi-scalper", "workers", "shadow", "SHADOW_RUNNER_V4_CONFIG.json"), encoding="utf-8") as f:
+def config_path(root, v):
+    return os.path.join(root, "kalshi-scalper", "workers", "shadow", "SHADOW_RUNNER_%s_CONFIG.json" % v)
+
+
+def load_config(root, v="V4"):
+    with open(config_path(root, v), encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -116,25 +133,44 @@ def verified_inputs(root, cfg):
     w = os.path.join(root, "kalshi-scalper", "workers")
     lp = os.path.join(w, cfg["list_file"])
     if R.sha_of(lp) != cfg["list_sha256"]:
-        raise R.Refused("the V4 shadow list is not the pinned one")
+        raise R.Refused("the shadow list is not the pinned one")
+    cuts = None
+    if cfg.get("vspike_cuts_file"):
+        cp = os.path.join(w, cfg["vspike_cuts_file"])
+        if R.sha_of(cp) != cfg["vspike_cuts_sha256"]:
+            raise R.Refused("the vspike cuts file is not the pinned one")
+        with open(cp, encoding="utf-8") as f:
+            cuts = json.load(f)
     mods = R.load_modules(os.path.join(w, "desk_a_verify"), cfg["modules"])
     import shadow_holds as H
     table = H.load(os.path.join(w, "HOLDS.json"))
     with open(lp, encoding="utf-8") as f:
         lst = json.load(f)
-    return lst, mods, table, H
+    excluded = set(cfg.get("excluded_picks", {}))
+    for item in lst["specs"]:
+        name = R.parse_filter(item["spec"]["entry"]["filter"])[0]
+        if name == "vspike" and cuts is None and item["spec"]["id"] not in excluded:
+            raise R.Refused("pick %s needs vspike cuts and the config has none (list it in excluded_picks or add the pinned cuts file)" % item["spec"]["id"])
+    return lst, mods, table, H, cuts
 
 
-def cache_key(cfg, root):
-    return "shadow-state-v4-%s-%s-%s" % (cfg.get("list_sha256", "")[:12], R.sha_of(os.path.abspath(__file__))[:12], R.sha_of(os.path.join(root, "kalshi-scalper", "workers", "HOLDS.json"))[:12])
+def cache_key(root, lists=LISTS):
+    parts = []
+    for v in lists:
+        if os.path.exists(config_path(root, v)):
+            parts.append(load_config(root, v).get("list_sha256", "")[:8])
+    return "shadow-state-v234-%s-%s-%s" % ("-".join(parts), R.sha_of(os.path.abspath(__file__))[:12], R.sha_of(os.path.join(root, "kalshi-scalper", "workers", "HOLDS.json"))[:12])
 
 
-def run_once(root, now, puller, state, cfg=None):
-    cfg = cfg or load_config(root)
-    lst, mods, table, H = verified_inputs(root, cfg)
+def run_list(root, v, now, puller, state):
+    """One daily run of ONE list. -> (results_doc, counts_doc, state)."""
+    cfg = load_config(root, v)
+    lst, mods, table, H, cuts = verified_inputs(root, cfg)
     start = cfg["start_utc"]
-    own = sorted({s["spec"]["market"] for s in lst["specs"]})
-    others = sorted({OTHER[R.parse_filter(s["spec"]["entry"]["filter"])[0]] for s in lst["specs"] if R.parse_filter(s["spec"]["entry"]["filter"])[0] in OTHER})
+    excluded = set(cfg.get("excluded_picks", {}))
+    specs = [i for i in lst["specs"] if i["spec"]["id"] not in excluded]
+    own = sorted({s["spec"]["market"] for s in specs})
+    others = sorted({OTHER[R.parse_filter(s["spec"]["entry"]["filter"])[0]] for s in specs if R.parse_filter(s["spec"]["entry"]["filter"])[0] in OTHER})
     series_all = sorted(set(own) | set(others))
     guard = lambda info, ticker, close: H.decide(table, info, ticker, close)
     st = json.loads(json.dumps(state)) if state else {}
@@ -145,16 +181,16 @@ def run_once(root, now, puller, state, cfg=None):
         lo = max(start, st["pulled_until"].get(series, start))
         if max_close < lo:
             continue
-        users = [(i["spec"], i["spec_sha256"]) for i in lst["specs"] if i["spec"]["market"] == series or OTHER.get(R.parse_filter(i["spec"]["entry"]["filter"])[0]) == series]
+        users = [(i["spec"], i["spec_sha256"]) for i in specs if i["spec"]["market"] == series or OTHER.get(R.parse_filter(i["spec"]["entry"]["filter"])[0]) == series]
         def keep(m, users=users):
             return any(m["close"] >= spec_start(sp, start) and guard({"sha256": sh, "series": series_all, "start_utc": spec_start(sp, start)}, m["ticker"], m["close"])[0] for sp, sh in users)
         fetched[series] = fetch_v4(puller, series, lo, max_close, keep)
     by_close = {s: {m["close"]: m for m in ms} for s, ms in fetched.items()}
     results, counts = {}, []
-    for item in lst["specs"]:
+    for item in specs:
         spec, sha = item["spec"], item["spec_sha256"]
         mine = st["trades"].setdefault(spec["id"], {"seq": [], "n_days": 0, "last_day": ""})
-        new, refused = score_spec_v4(mods, spec, fetched.get(spec["market"], []), by_close, start, guard, series_all, sha)
+        new, refused = score_spec_v4(mods, spec, fetched.get(spec["market"], []), by_close, start, guard, series_all, sha, cuts)
         for t in sorted(new, key=lambda t: (t["c"], t["t"])):
             mine["seq"].append([t["x1"], t["x2"], t["v"]])
             if t["d"] != mine["last_day"]:
@@ -164,13 +200,14 @@ def run_once(root, now, puller, state, cfg=None):
         a["status"] = R.status_of(a); a["days_to_100"] = R.days_to_100(a)
         a["refused_by_guard"] = st.setdefault("refused", {}).get(spec["id"], 0) + refused
         st["refused"][spec["id"]] = a["refused_by_guard"]
-        results[spec["id"]] = dict(a, admission=item.get("admission"), market=spec["market"], spec_sha256=sha, start_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(sstart)))
+        stamp0 = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(sstart))
+        results[spec["id"]] = dict(a, admission=item.get("admission"), market=spec["market"], spec_sha256=sha, start_utc=stamp0)
         counts.append({"id": spec["id"], "signals": a["n"], "settled": a["n"], "wins": a["wins"], "voids": a["voids"], "target": 100, "status": a["status"], "expected_days_to_100": a["days_to_100"],
-                       "start_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(sstart)), "as_of_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))})
+                       "start_utc": stamp0, "as_of_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))})
     for series in fetched:
         st["pulled_until"][series] = max_close + 1
     stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))
-    doc = {"list": lst["list"], "as_of_utc": stamp, "labels": {"forward": R.LABEL_FWD, "paper": R.LABEL_PAPER}, "specs": results}
+    doc = {"list": lst["list"], "as_of_utc": stamp, "labels": {"forward": R.LABEL_FWD, "paper": R.LABEL_PAPER}, "excluded_picks": cfg.get("excluded_picks", {}), "specs": results}
     return doc, {"as_of_utc": stamp, "rebuilt_from_scratch": not state, "specs": counts}, st
 
 
@@ -191,25 +228,32 @@ def main(argv):
     ap.add_argument("--state", default="state")
     ap.add_argument("--out", default="out")
     ap.add_argument("--now", type=int, default=None)
+    ap.add_argument("--lists", default=",".join(LISTS))
     ap.add_argument("--print-key", action="store_true")
     a = ap.parse_args(argv)
     root = os.path.abspath(a.root)
+    lists = [x for x in a.lists.split(",") if x in LISTS]
     if a.print_key:
-        print(cache_key(load_config(root), root)); return 0
+        print(cache_key(root, lists)); return 0
     now = a.now if a.now is not None else int(time.time())
-    sp = os.path.join(a.state, "shadow_state_v4.json")
-    state = json.load(open(sp)) if os.path.exists(sp) else {}
-    try:
-        res, cnt, st = run_once(root, now, R.Puller(), state)
-    except R.Refused as e:
-        print("REFUSED:", e); return 1
     os.makedirs(a.state, exist_ok=True); os.makedirs(a.out, exist_ok=True)
-    for path, obj in ((sp, st), (os.path.join(a.out, OUT_RESULTS), res), (os.path.join(a.out, OUT_COUNTS), cnt)):
-        with open(path + ".tmp", "w") as f:
-            json.dump(obj, f, indent=1); f.write("\n")
-        os.replace(path + ".tmp", path)
-    print("ok: %d specs" % len(res["specs"]))
-    return 0
+    rc = 0
+    for v in lists:
+        if not os.path.exists(config_path(root, v)):
+            print("skip %s: no config" % v); continue
+        sp = os.path.join(a.state, "shadow_state_%s.json" % v.lower())
+        state = json.load(open(sp)) if os.path.exists(sp) else {}
+        try:
+            res, cnt, st = run_list(root, v, now, R.Puller(), state)
+        except R.Refused as e:
+            print("REFUSED %s:" % v, e); rc = 1; continue
+        rn, cn = out_names(v)
+        for path, obj in ((sp, st), (os.path.join(a.out, rn), res), (os.path.join(a.out, cn), cnt)):
+            with open(path + ".tmp", "w") as f:
+                json.dump(obj, f, indent=1); f.write("\n")
+            os.replace(path + ".tmp", path)
+        print("ok %s: %d specs" % (v, len(res["specs"])))
+    return rc
 
 
 if __name__ == "__main__":
