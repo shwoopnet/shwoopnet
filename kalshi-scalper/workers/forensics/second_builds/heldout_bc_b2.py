@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """ENGINE1 BATCH B (80 rules) AND BATCH C (68 rules) HELD-OUT EVALUATOR, INDEPENDENT SECOND BUILD (Forensics desk, Nov 17, 2026). Written from ENGINE_BATCHB_HELDOUT_PLAN_NOV16.md (sha256 ca2f0c35...) and ENGINE_BATCHC_HELDOUT_PLAN_NOV16.md (sha256 af3b024e...) ONLY; Desk A's engine1_heldout_run_b.py, run_c, the pooled BH script and any print were not opened. The rule universe is read from MY OWN committed VALIDATE lists (ENGB4XBTC_B2_VALIDATE33.txt, ENGB2_B2_{TS,VS,SW}_VALIDATE.txt, ENGBC_B2_C{1..4}_VALIDATE.txt), which Auditor B matched to Desk A's prints.
-Per rule: n (scored entries at 1c), PF 1c and 2c, one sided day clustered p (1c cash, UTC close date), verdict by the floors (74 for KXBTC15M KXETH15M KXXRP15M KXDOGE15M KXGOLD15M, 90 others): n >= floor and PF1c >= 1.3 and PF2c >= 1.0 = 'holds', n < floor = 'no evidence', else 'does not hold'; BH step-up at 5% over m = 80 (batch B) or 68 (batch C) ranking EVERY rule (no-evidence rules included, p = 1 when undefined); per row missing_feature_skips_at_bucket (markets of the series with a valid entry candle at the rule's bucket under its side rule whose feature is missing) and markets_in_window. A pooled step-up over m = 338 is available as pooled_bh() (batch B and C p values plus the 190's).
+Per rule: n (scored entries at 1c), PF 1c and 2c, one sided day clustered p (1c cash, UTC close date), verdict by the floors (74 for KXBTC15M KXETH15M KXXRP15M KXDOGE15M KXGOLD15M, 90 others): n >= floor and PF1c >= 1.3 and PF2c >= 1.0 = 'holds', n < floor = 'no evidence', else 'does not hold'; BH step-up at 5% over m = 80 (batch B) or 68 (batch C) ranking EVERY rule (no-evidence rules included, p = 1 when undefined); per row missing_feature_skips_at_bucket (markets of the series whose entry candle at the rule's bucket is usable, 0 < bid < ask < 1, and whose feature cannot be computed: the plan's wording, any side rule and any price) and markets_in_window. A pooled step-up over m = 338 is available as pooled_bh() (batch B and C p values plus the 190's).
 Cross-series features (btcmom3, ethmom3, goldmom3) read the same-close market of THE TEST SET; a close with no such candle is a counted missing feature, never filled in. Terciles (spread, vspike) come from the archive SEARCH half only.
 Modes: --dry <archive>: the TEST set is the archive VALIDATE half and every rule must reproduce its listed n, PF1c, PF2c (n exact, PFs 1e-9); no held-out row is opened. --read <archive> <heldout extract> <print file of Desk A>: refuses unless HELDOUT_PULL_RUNS.md carries a line naming this file, its own sha256 and the extract sha256, hashes the extract, opens Desk A's print FILE only to hash it, and pins its imports.
 usage: python3 -I heldout_bc_b2.py <B|C> --dry <archive.sqlite> | <B|C> --read <archive> <heldout.sqlite> <print file> | --selftest"""
@@ -78,10 +78,15 @@ def nets_for(m, B, side, h, ex):
 def score_rule(r, test_by, fby, cuts):
     ms = test_by.get(r["series"], []); x1, x2, cn = [], [], []; mfs = 0
     for m in ms:
+        e = m.close - r["bucket"]; q = m.c.get(e)
+        if q is None or not P.two(q[0], q[1]): continue                 # the entry candle must be usable (0 < bid < ask < 1), as the plan counts missing features
+        ya, na = P.cents(q[1]), P.cents(1 - q[0]); sr = r["side"]
+        side = "yes" if sr == "yes" else "no" if sr == "no" else (("yes" if ya <= na else "no") if sr == "cheap" else ("yes" if ya >= na else "no"))
+        cl = feature_cls(r, m, e, side, fby, cuts)
+        if cl is None: mfs += 1; continue
         en = E.entries(m, r["bucket"], r["side"])
         if en is None: continue
-        side, ca = en; e = m.close - r["bucket"]; cl = feature_cls(r, m, e, side, fby, cuts)
-        if cl is None: mfs += 1; continue
+        ca = en[1]
         if ca // 5 != r["band"] or cl != r["cls"]: continue
         a = nets_for(m, r["bucket"], side, 0.01, r["exit"]); b = nets_for(m, r["bucket"], side, 0.02, r["exit"])
         if a is not None: x1.append(a); cn.append((m.close, a))
