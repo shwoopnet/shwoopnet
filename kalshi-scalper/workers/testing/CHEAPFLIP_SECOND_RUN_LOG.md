@@ -1,3 +1,7 @@
 # CHEAPFLIP second build, real run log (Testing Desk, Nov 17, 2026)
 Run once: python3 -B cheapflip_second_run.py <nc15 folder of the nc-data checkout at ed82612b9, 31 book.csv.gz and 31 coverage.csv.gz> <allow file = HELDOUT_PULL_RUNS.md at main 13e165915 (PR 1039)>. Reader cheapflip_second_load.py sha256 38f848880813e17e362b6cf339ae87ef0275bfefd1ffc96c4788a9b6032044fd, code cheapflip_second.py 3559dc438595c66ab3b510bddeaa0148cc49e4fec39bf38604265937cd14ccde, driver and run script as at commit 45b18d615. m_carried 7,492,484, m_new 9, m_total 7,492,493.
 Print: 12 lines, sha256 (committed BEFORE reading): e3172a3a7ea496292206faac02cc50e230856609a0a2707b5dbb1332537bb95c. Print file in scratch (/tmp/claude-0/cheapflip_real_print.txt), not in the repo.
+
+# Rerun 2 for a code bug (Nov 17, 2026): exact mills
+The first real print (e3172a3a7ea496292206faac02cc50e230856609a0a2707b5dbb1332537bb95c, build 3559dc43) used prices rounded to whole cents: a BUG (the book has 3-decimal prices). It is NOT used. Auditor B's go for the fix; code cheapflip_second.py sha256 9a8a99a71673da31cb41fd8c7ec9b428a7bcf93189a96bfb563d7271f2bc7847 (commit 8f8b208ff, integer mills), test 5b2d0a16f3c2344b555bb68981edbac33b55b157f120ff14c39585f48c8353da, loader unchanged 38f84888..., same nc-data ed82612b9 files, same allow line (main 13e165915), same m (7,492,484 + 9). One more real run, a rerun for a code bug:
+Print sha256 (committed BEFORE reading): 6232a768c916c3cdd6581094351eb688ad7a774d7e59203b6e3e7aacda3cf7ce. Print file in scratch /tmp/claude-0/cheapflip_real_print2.txt.
