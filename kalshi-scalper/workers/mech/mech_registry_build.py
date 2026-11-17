@@ -39,6 +39,14 @@ def build():
     SOURCES = {"PERPBIN1": "btc_perp", "PERPOI1": "btc_perp", "SNAPBACK1": "btc_perp", "LIQREV": "okx_liquidations", "OICORE": "kalshi_market", "OIREL1": "kalshi_market", "SPXOI1": "kalshi_market"}
     for e in out:
         if e["id"] in SOURCES: e["signal_source"] = SOURCES[e["id"]]
+    SRC_VA = {"H6_LAG": "spot", "H7": "spot", "N1_N2": "spot", "LEADLAG1": "spot", "CFRTIK": "external", "SPXFV1": "external", "IDXFUT1": "stock_perp", "IV1": "external",
+              "FLOW1": "kalshi_tape", "T1_T2": "kalshi_tape", "TAPEFLOW1": "kalshi_tape", "RESIL1": "kalshi_tape", "D_FRACTIONAL_SIZE_FLOW": "kalshi_tape", "D_CRON_CLUSTER": "kalshi_tape", "D_15M_TAKER_FLOW": "kalshi_tape",
+              "DEPTH1": "kalshi_book", "NC15DEPTH1": "kalshi_book", "CFRTI_B": "kalshi_book", "WITHDRAW1": "kalshi_book", "W_SPREAD_CELL1": "kalshi_market", "SPIKE1": "kalshi_market", "SWING1": "kalshi_market", "Q1": "spot", "Q3": "kalshi_market",
+              "PERPBASIS1": "spot", "PERPCRYPTO1_BASIS": "btc_perp", "WXDAYEND": "external", "HOURLYNOW": "external", "RAINCAL": "external", "WX1": "external",
+              "PERPEQ1": "stock_perp", "OVN1": "stock_perp", "OVN2": "stock_perp", "SPW1": "stock_perp", "SPHALT1": "stock_perp", "POOL1": "stock_perp", "PERPEQ3": "stock_perp",
+              "EVENT830": "external", "NEWH10": "external", "MENT1": "external", "COUNT1": "external", "FUNDP1": "stock_perp", "SPFUND1": "stock_perp", "PERPSLANE4_C": "stock_perp"}
+    for e in out:
+        if e["id"] in SRC_VA and "signal_source" not in e: e["signal_source"] = SRC_VA[e["id"]]; e["signal_source_by"] = "VA Nov 17, from its reading (not checked against each rule text)"
     ids = [e["id"] for e in out]
     if len(set(ids)) != len(ids): raise SystemExit("duplicate ids")
     return out

@@ -6,7 +6,7 @@
  "signatures": 377,
  "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "f48126d72b34c8c6da0296756e14257fa8fb175f91f3cac50ee4888fa32554c0",
+ "rows_sha256": "be78306332ea286f038f96fcb5ec11eb356b7fe5500bd604c5ee0106768a3010",
  "entries": [
   {
    "id": "L1",
@@ -78,7 +78,9 @@
    "source": "CLAUDE.md SLOT-EVENT830",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "external",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "CFRTIK",
@@ -92,7 +94,9 @@
    "source": "CLAUDE.md SLOT-CFRTIK (perp reference model, one look at 120 s)",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "external",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "SPXOI1",
@@ -149,7 +153,9 @@
    "source": "CLAUDE.md FLOW1 removed Nov 4",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_tape",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "GOLDALL",
@@ -219,7 +225,9 @@
    "source": "ledger: five-level imbalance, thin side, look 600 s",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_book",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "DEPTH1",
@@ -233,7 +241,9 @@
    "source": "ledger: R6 order-book features, gold and Bitcoin",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_book",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "ENGINE1_GRID",
@@ -359,7 +369,9 @@
    "source": "README: does Kalshi lag spot Bitcoin",
    "confidence": "from_title",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "spot",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "H7",
@@ -373,7 +385,9 @@
    "source": "README H7: spot distance to the target",
    "confidence": "from_title",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "spot",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "PATH_SITUATIONS",
@@ -415,7 +429,9 @@
    "source": "README Q1: spot support filter on L1 (VA second pass)",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "spot",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "Q2",
@@ -443,7 +459,9 @@
    "source": "README Q3: the other series agrees (VA second pass)",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_market",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "OP4",
@@ -485,7 +503,9 @@
    "source": "README H7 distance rule near settlement",
    "confidence": "from_title",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "spot",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "X1_X8",
@@ -555,7 +575,9 @@
    "source": "README early taker flow",
    "confidence": "from_title",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_tape",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "T3_T5",
@@ -654,7 +676,9 @@
    "source": "ledger: signal and price from the R6 book",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_book",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "SPXFV1",
@@ -668,7 +692,9 @@
    "source": "ledger: S&P futures-implied fair value",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "external",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "SPXEVENT1",
@@ -696,7 +722,9 @@
    "source": "ledger: order-flow resilience after a sweep",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_tape",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "QUOTE2B",
@@ -724,7 +752,9 @@
    "source": "ledger: spread cell, FAIL Nov 12",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_market",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "INPLAYJUMP",
@@ -906,7 +936,9 @@
    "source": "ledger: book levels withdrawing, closed at intake as not unique",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_book",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "PERPEQ1",
@@ -920,7 +952,9 @@
    "source": "VA read PERPEQ1_REGISTRATION.md (claude/epic-ptolemy-0amjd9): fade the overnight perp gap of a stock into the cash open, exit 10:00 ET",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "PERPEQ2",
@@ -950,7 +984,9 @@
    "confidence": "hand_read",
    "verified": true,
    "kind": "signature",
-   "source_note": "field override by Desk A on the VA's second-pass reading"
+   "source_note": "field override by Desk A on the VA's second-pass reading",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "ROLLOFF",
@@ -1146,7 +1182,9 @@
    "source": "strategies-registry RAINCAL, retired unread",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "external",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "ENGINE1_FILTER_SPREAD",
@@ -1525,7 +1563,9 @@
    "verdict": "UNKNOWN",
    "note": "the VA expected signal settlement_mark and clock time_of_day; the card shows a snapshot rule on any snapshot (clock any_minute) with the basis to the reference index, so I used cross_market_residual",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH6_PRIORITY.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH6_PRIORITY.json",
+   "signal_source": "btc_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "LIQREV",
@@ -1592,7 +1632,9 @@
    "source": "7e: taker order flow on the 15 minute tape",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "pattern"
+   "kind": "pattern",
+   "signal_source": "kalshi_tape",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "D_FAVOURITE_AND_HOLD",
@@ -1687,7 +1729,9 @@
    ],
    "evidence_market_scope": "VA, Nov 17: CRONCLUSTER1 stage A ran only on the R6 recorder book15r6 (Oct 29 to Nov 11): Bitcoin, Ethereum, XRP, Dogecoin and gold 15 minute windows, tape and book, no outcome column; no hourly, perps, sports or other-family data; the 11 NC15 series were never measured",
    "verified": true,
-   "kind": "pattern"
+   "kind": "pattern",
+   "signal_source": "kalshi_tape",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "D_FRACTIONAL_SIZE_FLOW",
@@ -1712,7 +1756,9 @@
    ],
    "evidence_market_scope": "VA, Nov 17: RETAILFRAC1 stage A ran only on the R6 recorder book15r6 (same five series); no other family",
    "verified": true,
-   "kind": "pattern"
+   "kind": "pattern",
+   "signal_source": "kalshi_tape",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "D_CHEAP_REGIME_GRAMMAR_15M",
@@ -1817,7 +1863,9 @@
    "kind": "signature",
    "verdict": "NOT_ENOUGH_DATA",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "CARRY1_PERP",
@@ -1934,7 +1982,9 @@
    "verdict": "NOT_ENOUGH_DATA",
    "note": "STOCKPERP4",
    "verified": false,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "SPW1",
@@ -1951,7 +2001,9 @@
    "verdict": "NOT_ENOUGH_DATA",
    "note": "STOCKPERP5",
    "verified": false,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "SPHALT1",
@@ -1968,7 +2020,9 @@
    "verdict": "NOT_ENOUGH_DATA",
    "note": "STOCKPERP6",
    "verified": false,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "OVN1",
@@ -1984,7 +2038,9 @@
    "kind": "signature",
    "verdict": "NOT_ENOUGH_DATA",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "OVN2",
@@ -2000,7 +2056,9 @@
    "kind": "signature",
    "verdict": "NOT_ENOUGH_DATA",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "OVN3",
@@ -2390,7 +2448,9 @@
    "kind": "signature",
    "verdict": "UNKNOWN",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH2_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH2_PERPS.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "PERPCRYPTO1",
@@ -2587,7 +2647,9 @@
    ],
    "note": "numerical forecast against the bracket price (declined D09)",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
+   "signal_source": "external",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "LOSSCL1",
@@ -3679,7 +3741,9 @@
    "note": "mention markets, word key against the call, decision 8 hours before the earliest close",
    "verified": true,
    "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
-   "source_note": "field override by Desk A on the VA's second-pass reading"
+   "source_note": "field override by Desk A on the VA's second-pass reading",
+   "signal_source": "external",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "PERPFLOW1",
@@ -4479,7 +4543,9 @@
    "note": "spike on non-crypto 15 minute markets",
    "verified": true,
    "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
-   "source_note": "field override by Desk A on the VA's second-pass reading"
+   "source_note": "field override by Desk A on the VA's second-pass reading",
+   "signal_source": "kalshi_market",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "VOLSLOT1",
@@ -4573,7 +4639,9 @@
    ],
    "verified": true,
    "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
-   "source_note": "field override by Desk A on the VA's second-pass reading"
+   "source_note": "field override by Desk A on the VA's second-pass reading",
+   "signal_source": "kalshi_market",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "HRSEAS1",
@@ -4715,7 +4783,9 @@
    "fields_keyword_matched": [],
    "note": "Truth Social post count markets (KXTRUTHSOCIAL, D), strike semantics fixed; side and signal only partly read",
    "verified": false,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
+   "signal_source": "external",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "COUNT2",
@@ -6644,7 +6714,9 @@
    "kind": "signature",
    "verdict": "UNKNOWN",
    "verified": false,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH4_S01_S42.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH4_S01_S42.json",
+   "signal_source": "stock_perp",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   },
   {
    "id": "LEDGER_L1",
@@ -7193,7 +7265,9 @@
    "verdict": "CLOSED",
    "note": "Kalshi series leading other Kalshi series; closed per Desk A",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH6_PRIORITY.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH6_PRIORITY.json",
+   "signal_source": "spot",
+   "signal_source_by": "VA Nov 17, from its reading (not checked against each rule text)"
   }
  ]
 }
