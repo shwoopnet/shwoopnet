@@ -12,6 +12,7 @@ CLOCK = ("fixed_time_to_close", "time_of_day", "scheduled_event", "print", "reop
 ENTRY = ("taker", "maker_touch", "both")                 # ADDED: "both" for two sided quoting
 EXIT = ("hold_to_settle", "fixed_time", "take_profit_multiple", "stop", "bracket", "next_print", "none")   # "bracket" = target AND stop (the Head, Nov 17 02:06Z)   # ADDED: "none" for rows with no exit (declined patterns, ideas)
 SIDE = ("favourite", "cheap", "follow", "fade", "both", "any")
+SOURCE = ("kalshi_market", "kalshi_tape", "kalshi_book", "btc_perp", "eth_perp", "gold_perp", "index_perp", "stock_perp", "okx_liquidations", "spot", "external")   # OPTIONAL field signal_source: the instrument the signal is READ from (the VA, Nov 17); the row's market is the traded market
 FIELDS = (("market", MARKET), ("signal", SIGNAL), ("clock", CLOCK), ("entry", ENTRY), ("exit", EXIT), ("side", SIDE))
 STATUS = ("live", "trial", "shadow", "paused", "retired", "falsified", "declined", "closed_by_evidence", "closed_unread", "idea", "paper", "exploratory")
 def _vals(v): return ["*"] if v == "*" else (list(v) if isinstance(v, (list, tuple)) else [v])
@@ -22,6 +23,7 @@ def validate_entry(e):
     if errs: return errs
     if e["status"] not in STATUS: errs.append("bad status %r" % e["status"])
     if e["confidence"] not in ("hand_read", "from_title", "from_ledger_row"): errs.append("bad confidence")
+    if "signal_source" in e and e["signal_source"] not in SOURCE: errs.append("signal_source %r not in vocabulary" % (e["signal_source"],))
     pattern = e.get("kind") == "pattern"
     if "tickers" in e and e["tickers"] != "*" and not (isinstance(e["tickers"], list) and all(isinstance(t, str) and t.startswith("KX") for t in e["tickers"])): errs.append("tickers must be a list of KX... tickers or *")
     for f, vocab in FIELDS:
@@ -34,7 +36,14 @@ def validate_entry(e):
 def field_match(entry_v, cand_v):
     vs = _vals(entry_v)
     return "*" in vs or cand_v in vs
+def related(cand, registry, ref=None):
+    """ids of non-pattern entries with the SAME signal and the SAME signal_source as the candidate (reported beside the verdict, never deciding it)."""
+    src = cand.get("signal_source")
+    if not src: return []
+    return sorted(e["id"] for e in registry if e.get("kind") != "pattern" and e["signal"] == cand["signal"] and e.get("signal_source") == src and e["id"] != ref)
 def classify(cand, registry):
+    r = _classify(cand, registry); extra = dict(r[3]); extra["related"] = related(cand, registry, r[1]); return (r[0], r[1], r[2], extra)
+def _classify(cand, registry):
     """-> (verdict, entry id or None, why, extra). verdict: DECLINED | DUPLICATE | VERSION_NEW_MARKET | UNVERIFIED_MATCH | NEW. cand: dict with the six fields, one value each; optional `tickers` (list) and `idea` (a name). extra: {"provisional": bool, "excluded_tickers": [...]}."""
     for f, vocab in FIELDS:
         if cand.get(f) not in vocab: raise ValueError("candidate %s %r not in vocabulary" % (f, cand.get(f)))

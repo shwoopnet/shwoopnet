@@ -6,7 +6,7 @@
  "signatures": 377,
  "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "60583fffe0efa2f51c900e52d61a176b6f86889a030f002424886afb529c2fe5",
+ "rows_sha256": "f48126d72b34c8c6da0296756e14257fa8fb175f91f3cac50ee4888fa32554c0",
  "entries": [
   {
    "id": "L1",
@@ -34,7 +34,8 @@
    "source": "CLAUDE.md SLOT-OICORE",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_market"
   },
   {
    "id": "OIREL1",
@@ -48,7 +49,8 @@
    "source": "CLAUDE.md Nov 15; a version of OICORE (relative rise)",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_market"
   },
   {
    "id": "XRPFAV10",
@@ -104,7 +106,8 @@
    "source": "CLAUDE.md SLOT-SPXOI1",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "kalshi_market"
   },
   {
    "id": "XRPYES10",
@@ -622,7 +625,8 @@
    "source": "ledger: Bitcoin perp 15 minute OI change as signal",
    "confidence": "from_ledger_row",
    "verified": false,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "btc_perp"
   },
   {
    "id": "CFRTI1",
@@ -1535,7 +1539,8 @@
    "source": "VA Nov 17, read the Idea Desk C card (Nov 13): fade the 15 minute market after OKX liquidation flow, first trigger 12 to 3 minutes before the close; a different venue's forced flow, not Kalshi tape",
    "confidence": "hand_read",
    "verified": true,
-   "kind": "signature"
+   "kind": "signature",
+   "signal_source": "okx_liquidations"
   },
   {
    "id": "D_TWO_SIDED_MM",
@@ -2236,7 +2241,8 @@
    "kind": "signature",
    "verdict": "NOT_ENOUGH_DATA",
    "verified": true,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json"
+   "source_batch": "Desk B MECH_ROWS_B_BATCH1_PERPS.json",
+   "signal_source": "btc_perp"
   },
   {
    "id": "LL1",
@@ -4541,7 +4547,8 @@
    ],
    "verified": true,
    "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
-   "source_note": "field override by Desk A on the VA's second-pass reading"
+   "source_note": "field override by Desk A on the VA's second-pass reading",
+   "signal_source": "btc_perp"
   },
   {
    "id": "SWING1",

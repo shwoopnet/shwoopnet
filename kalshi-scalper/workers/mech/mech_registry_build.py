@@ -36,6 +36,9 @@ def build():
                  "PERPEQ4": dict(side="fade", confidence="hand_read", source="VA Nov 17 read the registration: ETF perp against the index perp, grid as PERPEQ2, fade")}
     for e in out:
         if e["id"] in OVERRIDES: e.update(OVERRIDES[e["id"]]); e["verified"] = (e["confidence"] == "hand_read"); e["source_note"] = "field override by Desk A on the VA's second-pass reading"
+    SOURCES = {"PERPBIN1": "btc_perp", "PERPOI1": "btc_perp", "SNAPBACK1": "btc_perp", "LIQREV": "okx_liquidations", "OICORE": "kalshi_market", "OIREL1": "kalshi_market", "SPXOI1": "kalshi_market"}
+    for e in out:
+        if e["id"] in SOURCES: e["signal_source"] = SOURCES[e["id"]]
     ids = [e["id"] for e in out]
     if len(set(ids)) != len(ids): raise SystemExit("duplicate ids")
     return out
