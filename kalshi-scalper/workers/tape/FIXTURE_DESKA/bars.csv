@@ -1,0 +1,4 @@
+ticker,end_ts,open,high,low,close,volume,n_trades,buy_volume,sell_volume,block_volume,block_count
+KXAAA,1789689660,10.5,10.5,10.5,10.5,3,1,0,3,0,0
+KXAAA,1789689720,10.699999999999999,10.9,10.6,10.6,12,5,3,4,500,1
+KXAAA,1789689840,11,11,11,11,14,2,14,0,0,0
