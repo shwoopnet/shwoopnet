@@ -12,6 +12,29 @@ import math, sys
 
 FEE = 0.0012
 HOLD_TOL = 1800
+MAXGAP_NEXT = 5400
+
+
+def two(r):
+    return 0 < r[1] <= r[2]
+
+
+def merge_funding(files):
+    """files: list of (date, [(ticker,t,rate)]) read in DATE ORDER. Repeat same ticker,t, same rate kept once and
+    counted; different rate keeps the first (earlier file), conflict counted."""
+    seen, out, dup, conf = {}, [], 0, 0
+    for _, f in sorted(files, key=lambda x: x[0]):
+        for tk, t, r in f:
+            k = (tk, t)
+            if k in seen:
+                if seen[k] == r:
+                    dup += 1
+                else:
+                    conf += 1
+                continue
+            seen[k] = r
+            out.append((tk, t, r))
+    return out, dup, conf
 
 
 def cuts_from(rates, q, minn=120):
@@ -29,7 +52,7 @@ def is_extreme(rate, c):
 
 def build_trades(prints, rows, c, side, hold_h, t0, t1, h):
     """prints [(t,rate)], rows [(t,bid,ask)] sorted. Returns (trades, counts)."""
-    cnt = {"no_prior": 0, "no_after": 0, "open": 0, "no_exit": 0}
+    cnt = {"no_prior": 0, "no_after": 0, "open": 0, "no_exit": 0, "gap": 0, "one_sided": 0}
     trades, busy_until, ri = [], None, 0
     for t, r in sorted(prints):
         if not (t0 <= t < t1) or not is_extreme(r, c):
@@ -46,22 +69,30 @@ def build_trades(prints, rows, c, side, hold_h, t0, t1, h):
             cnt["no_after"] += 1
             continue
         e = after[0]
+        if e[0] - before[-1][0] > MAXGAP_NEXT:
+            cnt["gap"] += 1
+            continue
+        if not two(e):
+            cnt["one_sided"] += 1
+            continue
         long_ = (r < 0) if side == "fade" else (r > 0)
         tgt = e[0] + hold_h * 3600
         ex = next((x for x in rows if x[0] >= tgt), None)
         if ex is None or ex[0] - tgt > HOLD_TOL:
             cnt["no_exit"] += 1
             continue
+        if not two(ex):
+            cnt["one_sided"] += 1
+            continue
         busy_until = ex[0]
+        # Auditor B ruling: additive haircut on notional; touches unadjusted
         if long_:
-            ep, xp = e[2] * (1 + h), ex[1] * (1 - h)
-            gross = xp / ep - 1
+            gross = ex[1] / e[2] - 1
         else:
-            ep, xp = e[1] * (1 - h), ex[2] * (1 + h)
-            gross = 1 - xp / ep
-        fund = sum(rr for ft, rr in prints if e[0] < ft <= ex[0])
-        fund = -fund if long_ else fund
-        net = gross - 2 * FEE + fund
+            gross = 1 - ex[2] / e[1]
+        fund = sum(rr for ft, rr in prints if e[0] < ft < ex[0])   # strictly between
+        fund = fund if long_ else -fund
+        net = gross - 2 * FEE - 2 * h - fund
         trades.append({"entry": e[0], "exit": ex[0], "long": long_, "net": net})
     return trades, cnt
 
@@ -91,15 +122,25 @@ def selftest():
     pr = [(int(9.5 * H), 0.0003), (14 * H, 0.0001)]
     tr, k = build_trades(pr, rows, c, "fade", 8, 0, 10**9, 0.0)
     assert len(tr) == 1 and not tr[0]["long"], tr
-    exp = (1 - 101.2 / 100.0) - 0.0024 + 0.0001   # short receives funding at ft=14h
+    exp = (1 - 101.2 / 100.0) - 0.0024 + 0.0001   # short receives funding at ft=14h (strictly between)
     assert abs(tr[0]["net"] - exp) < 1e-12, (tr[0]["net"], exp)
     # follow = long: buys 100.2, sells 101.0, pays funding
     tr, _ = build_trades(pr, rows, c, "follow", 8, 0, 10**9, 0.0)
     exp = (101.0 / 100.2 - 1) - 0.0024 - 0.0001
     assert abs(tr[0]["net"] - exp) < 1e-12
-    # haircut worsens
+    # additive haircut: exactly 2h lower
     tr2, _ = build_trades(pr, rows, c, "follow", 8, 0, 10**9, 0.0005)
-    assert tr2[0]["net"] < tr[0]["net"]
+    assert abs(tr2[0]["net"] - (tr[0]["net"] - 0.001)) < 1e-12
+    # funding exactly at entry or exit is not booked
+    tr3, _ = build_trades([(int(9.5 * H), 0.0003), (10 * H, 0.0005), (18 * H, 0.0005)], rows, c, "follow", 8, 0, 10**9, 0.0)
+    assert abs(tr3[0]["net"] - ((101.0 / 100.2 - 1) - 0.0024)) < 1e-12, tr3
+    # entry row too far (> 5400 s) and one-sided rows are skipped
+    far = [(0, 99.9, 100.1), (4 * H, 99.9, 100.1)] + [(i * H, 99.9, 100.1) for i in range(5, 40)]
+    assert build_trades([(1 * H, 0.0003)], far, c, "fade", 8, 0, 10**9, 0)[1]["gap"] == 1
+    os_ = [(i * H, 99.9, 100.1) for i in range(40)]; os_[10] = (10 * H, 0.0, 100.2)
+    assert build_trades([(int(9.5 * H), 0.0003)], os_, c, "fade", 8, 0, 10**9, 0)[1]["one_sided"] == 1
+    m, d, cf = merge_funding([("2026-11-18", [("A", 5, 0.1), ("A", 6, 0.2)]), ("2026-11-17", [("A", 5, 0.1), ("A", 6, 0.3)])])
+    assert d == 1 and cf == 1 and ("A", 6, 0.3) in m and ("A", 6, 0.2) not in m
     # print exactly at a row: entry is the next row, never the print instant
     tr, _ = build_trades([(10 * H, 0.0003)], rows, c, "fade", 8, 0, 10**9, 0.0)
     assert tr[0]["entry"] == 11 * H
