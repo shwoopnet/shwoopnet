@@ -202,6 +202,7 @@ function balanceSection(docs) {
   const rows = (Array.isArray(docs) ? docs : []).filter((d) => d && Number.isFinite(Number(d.ts)) && Number.isFinite(Number(d.total))).map((d) => ({
     ts: new Date(Number(d.ts)).toISOString(), total: Number(d.total),
     shards: (Array.isArray(d.shards) ? d.shards : []).slice(0, 10).filter((s) => s && Number.isFinite(Number(s.dollars))).map((s) => ({ shard: Number(s.shard), dollars: Number(s.dollars) })),
+    ...(Number.isFinite(Number(d.perpsTotal)) && d.perpsTotal !== null ? { perpsTotal: Number(d.perpsTotal) } : {}),
   })).sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0)).slice(-MAX_BALANCE_ROWS);
   return { count: rows.length, rows };
 }
@@ -251,6 +252,9 @@ function makeReportHandler(deps) {
       // The one-shot perps account probe (Nov 16, 2026): HTTP statuses and field NAMES only, never a value. Optional; a failure leaves it out.
       let perpsProbe;
       if (typeof deps.readPerpsProbe === "function") { try { const pp = await deps.readPerpsProbe(); if (pp && typeof pp === "object") perpsProbe = { at: Number(pp.at) || null, results: pp.results && typeof pp.results === "object" ? pp.results : {} }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      // The perps account snapshot (Nov 16, 2026): the shaped document the Bot page reads, first rows included RAW so one real read can confirm the units. Optional; a failure leaves it out.
+      let perps;
+      if (typeof deps.readPerpsAccount === "function") { try { const pa = await deps.readPerpsAccount(); if (pa && typeof pa === "object") perps = { at: Number(pa.at) || null, scale: pa.scale, equity: pa.equity, positionValue: pa.positionValue, maintenance: pa.maintenance, available: pa.available, pnlTotal: pa.pnlTotal, count: pa.count, rows: Array.isArray(pa.rows) ? pa.rows.slice(0, 5) : [] }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       const report = buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders);
       if (deploys !== undefined) report.deploys = deploys;
       if (skips !== undefined) report.skips = skips;
@@ -258,6 +262,7 @@ function makeReportHandler(deps) {
       if (longhold !== undefined) report.longhold = longhold;
       if (balanceHistory !== undefined) report.balanceHistory = balanceHistory;
       if (perpsProbe !== undefined) report.perpsProbe = perpsProbe;
+      if (perps !== undefined) report.perps = perps;
       res.status(200).json(report);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
