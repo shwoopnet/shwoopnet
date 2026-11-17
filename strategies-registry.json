@@ -43,7 +43,7 @@
    "name": "Open interest jump",
    "stage": "Probe",
    "rule": "Bitcoin: buys the cheaper side at 8c to 50c when lots of new contracts were just opened, and holds it until the market closes",
-   "goesLive": "Starts at 20 contracts and steps up to 25 and 30 as its record and the account allow",
+   "goesLive": "Starts at 20 contracts and steps up to 25 and 30 as its record allows, never above 12% of the account base divided by $4.50 a contract",
    "label": null,
    "startDate": null,
    "nextRead": "2026-11-13",

@@ -44,7 +44,7 @@ const ch=f.kalshiPerpsHtml(cdoc.rows,esc,money,cdoc.cushion);
 const live=h.replace(/\/\/[^\n]*/g,'');
 assert(/getDoc\(doc\(db, 'kalshiLiveControl', 'perpsAccount'\)\)/.test(live)&&/collection\(db, 'kalshiBalanceSnaps'\)/.test(live),'PP8 reads the two sources');
 assert(!/(setDoc|updateDoc|addDoc)\([^)]*perpsAccount/.test(live),'PP8 never writes it');
-const w=new Function('kalDayKey','kalshiPerpsFromDoc','kalshiPerpsNote',h.match(/var kalshiPerpsState[\s\S]*?function kalshiPerpsEnsure/)[0].replace(/function kalshiPerpsEnsure$/,'')+';return {kalshiPerpsView,kalshiPerpsState};')(t=>new Date(t).toISOString().slice(0,10),f.kalshiPerpsFromDoc,f.kalshiPerpsNote);
+const w=new Function('kalDayKey','kalshiPerpsFromDoc','kalshiPerpsNote','kalshiPerpsSteps',h.match(/var kalshiPerpsState[\s\S]*?function kalshiPerpsEnsure/)[0].replace(/function kalshiPerpsEnsure$/,'')+';return {kalshiPerpsView,kalshiPerpsState};')(t=>new Date(t).toISOString().slice(0,10),f.kalshiPerpsFromDoc,f.kalshiPerpsNote,new Function(h.match(/function kalshiPerpsSteps[\s\S]*?\n  }\n  \/\/ A step is a TRANSFER[\s\S]*?\n  }\n/)[0]+';return kalshiPerpsSteps;')());
 const base={balance:{ok:true,totalDollars:100}};
 let v=w.kalshiPerpsView(base,now);assert.strictEqual(v.perpsTotal,undefined,'PP8 no doc, no perps');
 w.kalshiPerpsState.loaded=true;w.kalshiPerpsState.doc={at:now-1000,equity:50,rows:[]};
