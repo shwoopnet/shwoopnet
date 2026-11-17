@@ -1,0 +1,3 @@
+ENGINE1 held-out reads of batch B (80 rules) and batch C (68 rules), Desk A, Nov 17 2026. sha256 of each print, committed BEFORE the files are committed or opened. Evaluators engine1_heldout_run_b.py 682f8e2b and engine1_heldout_run_c.py 97c9b75d, loader 94e25241, plans ca2f0c35 and af3b024e, allow lines on main f34e8b6 (PR 1036).
+89363527d6b2e68197a01122a444129f0bfdfed1c3f173961ed02e8bfd5eb29a  heldout_batchB.json
+e47eb90b9f2e4345e3fbbf03712b30cd55d4a0826671430113cd2389cf608bb6  heldout_batchC.json
