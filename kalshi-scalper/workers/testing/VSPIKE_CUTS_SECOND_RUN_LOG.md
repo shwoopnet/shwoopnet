@@ -1,0 +1,4 @@
+# V3 vspike cuts second build, real run log (Testing Desk, Nov 17, 2026)
+Run once: python3 -B vspike_cuts_second_run.py <dir with ENGINE1_archive_extract.sqlite.xz (sha256 9e4bece477ee5c5caec5b024b1cb86c1b6538061a2bb2092faa1e091bef06820, from claude/forensics-desk extracts)> <allow file = HELDOUT_PULL_RUNS.md at main fc91c6d5 (PR 1040)>. Reader vspike_cuts_second_load.py sha256 8a3f64ec97e25d99160dfbd7bbddafabab78693acec4afff41aa5057be9be6d9, code vspike_cuts_second.py sha256 86131526439df926b1c760bdac5ae4a906f8b9fc0960759867dbef6b710f8052.
+Table (JSON, 1,035 lines): sha256 (committed BEFORE reading): d468cb5813e1031395dcd82cfffd905e0348e3ad9cede85ca3233fca876303b6. File in scratch /tmp/claude-0/vspike_real_table.json.
+Seen before the build (disclosed): the first 1,500 bytes of the shape file (BNB, BTC 120 to 540, COPPER 120 and part of 180): SEEN cells per Auditor B's ruling.
