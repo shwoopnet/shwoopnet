@@ -39,7 +39,8 @@ gates.BS2 = async () => {   // the document holds only the allowed fields: no or
   const w = world(); await w.run();
   assert.strictEqual(w.written.length, 1);
   const d = w.written[0].doc;
-  assert.deepStrictEqual(Object.keys(d).sort(), lib.ALLOWED_FIELDS.slice().sort());
+  // perpsTotal (Nov 16, 2026) is added by runBalanceSnapshot only when the perps account was readable, so the bare document has the other four.
+  assert.deepStrictEqual(Object.keys(d).sort(), lib.ALLOWED_FIELDS.filter((k) => k !== 'perpsTotal').sort());
   assert.deepStrictEqual(d.shards, [{ shard: 0, dollars: 10.5 }, { shard: 2, dollars: 20.25 }]);
   assert.strictEqual(d.total, 30.75);
   assert.strictEqual(d.ts, Date.parse('2026-11-12T14:00:00Z'));

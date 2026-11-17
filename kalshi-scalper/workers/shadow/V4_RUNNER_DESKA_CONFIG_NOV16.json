@@ -1,0 +1,67 @@
+{
+ "config": "SHADOW_LIST_V4 runner config (Desk A, Nov 16 2026)",
+ "list_file": "kalshi-scalper/workers/SHADOW_LIST_V4.json",
+ "list_sha256": "b8c4f727c38fa52c81800ef58319b15e74872f8359e3d3752468a9af41878cd2",
+ "list_commit": "29501ade8",
+ "n_picks": 12,
+ "cuts": "NONE: no V4 pick uses a spread or volume tercile cut; oiacc, ethmom3, goldmom3 use the sign class (cls, 1e-12) and todct is not used by any V4 pick. There is no cut file and no cuts sha.",
+ "start_utc_default": "2026-11-17T00:00:00Z",
+ "start_utc_btc_picks": "2026-11-21T00:00:00Z (SH4_01_BTC and SH4_05_BTC; H09)",
+ "real_start_rule": "the shadow start slips to the runner pull request's merge; the real start is recorded in the V4 notes and is never earlier than the merge (and never earlier than the list's own start_utc)",
+ "state_and_output_keys": "separate from V1: prefix SH4_ (every pick id starts with SH4_), list key SHADOW_LIST_V4; V1 keeps running beside it",
+ "pairing_rule": "for ethmom3 and goldmom3 the OTHER series' market with the SAME close time (KXETH15M for ethmom3, KXGOLD15M for goldmom3); the candles ending exactly at e - 180 and at e, where e = close_time - the pick's seconds_left; mid = (yes_bid + yes_ask)/2 of the candles' close fields; both present or no feature and no entry; class by cls(): up if x > 1e-12, down if x < -1e-12, else flat. oiacc reads only the pick's own market's candles at e, e - 180, e - 360: the open interest (open_interest_fp else open_interest, the candle tuple's index 5 in the archive path), all three present and non-null.",
+ "feature_modules": {
+  "engine1_batchc.py": {
+   "sha256": "ba77f70c7d86152539ad01cbd958d1056e3e78b40b3a568693f6ea444f77a279",
+   "functions": [
+    "oiacc(by_end, e)",
+    "xmom(idx_by_end, e) (= engine1_batchb.btcmom3)",
+    "todct(e) (unused by V4)"
+   ],
+   "status": "Auditor B CLEAN at fed6e8a88 (the runner e0431b92 / 02843af67 for the batch run is a separate file)"
+  },
+  "engine1_batchb.py": {
+   "sha256": "68a5ab435d8246be30681a703179d88608b0384ce2ca50f4f6bad458cea07f1e",
+   "functions": [
+    "btcmom3 / btc_index"
+   ]
+  },
+  "engine1_enum.py": {
+   "sha256": "e42ee1a45f67b76e8560cd9cbefac352fce9a765c8300bc04d5ce05a27e4d5a7",
+   "functions": [
+    "cls",
+    "asks",
+    "side_for",
+    "raw_ask",
+    "BUCKETS",
+    "BANDS"
+   ]
+  }
+ },
+ "feature_fixture": {
+  "file": "kalshi-scalper/workers/V4_RUNNER_FIXTURE_NOV16.json",
+  "note": "invented cases for oiacc, ethmom3, goldmom3 with expected x and class, plus missing cases; gate the runner's pure functions against it"
+ },
+ "picks_by_feature": {
+  "oiacc:down": [
+   "SH4_01_BTC",
+   "SH4_02_BNB",
+   "SH4_03_ETH",
+   "SH4_04_BNB",
+   "SH4_05_BTC",
+   "SH4_07_XRP",
+   "SH4_11_XRP"
+  ],
+  "ethmom3:up": [
+   "SH4_06_WTI",
+   "SH4_08_WTI"
+  ],
+  "goldmom3:up": [
+   "SH4_10_XRP"
+  ],
+  "goldmom3:down": [
+   "SH4_09_HYPE",
+   "SH4_12_HYPE"
+  ]
+ }
+}
