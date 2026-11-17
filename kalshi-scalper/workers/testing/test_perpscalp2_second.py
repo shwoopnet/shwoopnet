@@ -95,7 +95,7 @@ class T3(unittest.TestCase):
 
 class T4(unittest.TestCase):
     def test_equal_bid_ask_usable(self):
-        self.assertTrue(m.usable((100.0, 100.0, 1))); self.assertFalse(m.usable((100.01, 100.0, 1))); self.assertFalse(m.usable((0, 1, 1)))
+        self.assertTrue(m.usable((100.0, 100.0, 1))); self.assertFalse(m.usable((100.01, 100.0, 1))); self.assertFalse(m.usable((0, 1, 1))); self.assertFalse(m.usable((3.8, 922337203685477.6, 5))); self.assertFalse(m.usable((3.8, 1e9, 5))); self.assertTrue(m.usable((3.8, 999999999.0, 5)))
 
 
 class T5(unittest.TestCase):

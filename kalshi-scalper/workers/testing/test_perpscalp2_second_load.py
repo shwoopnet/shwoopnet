@@ -11,7 +11,7 @@ class T(unittest.TestCase):
         self.d = tempfile.mkdtemp(); self.allow = os.path.join(self.d, "allow.md")
         open(self.allow, "w").write("x " + LD.ALLOW_MARK + " perpscalp2_second_load.py " + LD.self_sha() + "\n")
         H = ["ticker", "end_period_ts", "bid_close", "ask_close", "volume"]; r = os.path.join(self.d, "root")
-        w(r + "/kalshi1m/2026-11-10.csv.gz", [["KXNVDAPERP", 1000, 101, 100, 5], ["KXNVDAPERP", 2000, 100, 100, 5], ["KXOTHERPERP", 1, 1, 2, 3], ["KXNVDAPERP", 1794787200, 1, 2, 3]], H)
+        w(r + "/kalshi1m/2026-11-10.csv.gz", [["KXNVDAPERP", 1000, 101, 100, 5], ["KXNVDAPERP", 2000, 100, 100, 5], ["KXNVDAPERP", 2500, 3.8, 922337203685477.6, 5], ["KXNVDAPERP", 2600, 3.8, 1000000000, 5], ["KXOTHERPERP", 1, 1, 2, 3], ["KXNVDAPERP", 1794787200, 1, 2, 3]], H)
         w(r + "/kalshi1m/2026-11-11.csv.gz", [["KXNVDAPERP", 1000, 99, 100, 7]], H)   # the crossed first copy must not block this good one
         w(r + "/kalshi1m/all-history.csv.gz", [["KXNVDAPERP", 3000, 99, 100, 7]], H)
         F = ["ticker", "funding_time", "funding_rate"]
