@@ -710,9 +710,23 @@ exports.kalshiLiveArmed = onSchedule(
               // CFRTIK (Nov 12, 2026): the Bitcoin perpetual's public one minute candles (keyless GET, no signing, 3 s abort, no retry), and a short sleep for the bounded wait for the decision minute's candle.
               // The ticker is fixed here: nothing the engine or a caller passes can read another market.
               readPerpCandles: require("./kalshiCfrtiKReadLib").perpCandleReader(live.liveRequest, fetch),
+              // OICORE's sizing base (kalshiOicoreBaseLib, the owner's Nov 16 decision): the perps account document, read once per tick and ONLY when OICORE has a market in its entry span. The engine fails closed on a missing or stale figure.
+              readPerpsDoc: async () => { const d = await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).get(); return d.exists ? d.data() : null; },
               sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
             });
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
+            // A slot order skipped for short cash on its shard raises the same low money phone alert as L1 (same six hour cooldown document). It moves no money: the owner moves cash between shards.
+            try {
+              if (slotResult && slotResult.shardShort) {
+                const sRef = db.collection("kalshiLiveControl").doc("shardAlert");
+                await shardAlertLib.runShardAlert({
+                  now, short: slotResult.shardShort,
+                  claim: (at) => db.runTransaction(async (tx) => { const cur = await tx.get(sRef), last = cur.exists && Number.isFinite(Number(cur.data().at)) ? Number(cur.data().at) : null; if (!shardAlertLib.claimable(at, last)) return false; tx.set(sRef, { at }, { merge: true }); return last; }),
+                  release: (prev) => sRef.set({ at: prev }, { merge: true }),
+                  raise: (a) => sessRef.set({ shardAlert: a }, { merge: true }),
+                });
+              }
+            } catch (e) { console.error("kalshiLiveArmed: slot shard alert failed: " + String((e && e.message) || e).slice(0, 160)); }
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
         }
       }
@@ -1018,8 +1032,10 @@ exports.kalshiPushSession = onDocumentWritten({ document: "kalshiLiveControl/ses
 // Hourly balance snapshot (Nov 12, 2026, the owner): total cash and cash per shard once an hour, for the bank-side check of booked results (functions/kalshiBalanceSnapshotLib.js,
 // test/kalshiBalanceSnapshotGates.test.js). One GET of the balance, no order, no POST; its own function, so the tick and the exit watch are untouched. Deploy: bash functions/deploy-sizing.sh.
 const balanceSnap = require("./kalshiBalanceSnapshotLib");
+const reconcileLib = require("./kalshiReconcileLib");
+const reconcileRun = require("./kalshiReconcileRunLib");
 exports.kalshiBalanceSnapshot = onSchedule(
-  { schedule: "every 60 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30, retryCount: 0, memory: "256MiB" },
+  { schedule: "every 60 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },
   async () => {
     try {
       ensureDefaultAdminApp();
@@ -1032,6 +1048,14 @@ exports.kalshiBalanceSnapshot = onSchedule(
         prune: async (beforeMs, limit) => { const old = await col.where("ts", "<", beforeMs).limit(limit).get(); await Promise.all(old.docs.map((d) => d.ref.delete())); },
       });
       console.log("kalshiBalanceSnapshot: " + out);
+      // The nightly reconciliation (kalshiReconcileLib, Nov 17, 2026): once a day, in the 05:00 UTC run (before the 06:04 UTC report fetch). READ ONLY apart from its own result document and, on a mismatch, one
+      // alert stamp (claimed in a transaction, at most one a day). No Kalshi request, no order, nothing that decides a trade reads any of it. Fenced off so it can never fail the snapshot above.
+      if (new Date().getUTCHours() === reconcileLib.RECONCILE_HOUR_UTC) {
+        try {
+          const db = getFirestore();
+          console.log("kalshiBalanceSnapshot: " + await reconcileRun.runReconcileNightly({ db, now: Date.now(), perpsRef: db.collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id), readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; return (await db.collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); } }));
+        } catch (e) { console.error("kalshiBalanceSnapshot: reconcile failed: " + String((e && e.message) || e).slice(0, 160)); }
+      }
     } catch (e) { console.error("kalshiBalanceSnapshot: " + String((e && e.message) || e).slice(0, 160)); }
   }
 );
@@ -1040,7 +1064,7 @@ exports.kalshiBalanceSnapshot = onSchedule(
 // (functions/kalshiPerpsProbeLib.js, test/perpsProbeGates.test.js). The answer shows in the nightly report as perpsProbe. Delete this function once the answer is known.
 const perpsProbe = require("./kalshiPerpsProbeLib");
 exports.kalshiPerpsProbe = onSchedule(
-  { schedule: "every 60 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30, retryCount: 0, memory: "256MiB" },
+  { schedule: "every 60 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 120, retryCount: 0, memory: "256MiB" },
   async () => {
     try {
       ensureDefaultAdminApp();
@@ -1048,6 +1072,12 @@ exports.kalshiPerpsProbe = onSchedule(
       await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).set(out);
       console.log("kalshiPerpsProbe: " + Object.keys(out.results).map((p) => p + "=" + out.results[p].status).join(" "));
     } catch (e) { console.error("kalshiPerpsProbe: " + String((e && e.message) || e).slice(0, 160)); }
+    // The portfolio probe (Nov 17, 2026, reconciliation job): which of Kalshi's own record routes answer and their field NAMES, GET only, no value stored. Its own try, so it never blocks the probe above.
+    try {
+      const out2 = await perpsProbe.runPortfolioProbe({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now() });
+      await getFirestore().collection(perpsProbe.PORTFOLIO_DOC.collection).doc(perpsProbe.PORTFOLIO_DOC.id).set(out2);
+      console.log("kalshiPortfolioProbe: " + Object.keys(out2.results).map((p) => p + "=" + out2.results[p].status).join(" "));
+    } catch (e) { console.error("kalshiPortfolioProbe: " + String((e && e.message) || e).slice(0, 160)); }
   }
 );
 
@@ -1055,6 +1085,8 @@ exports.kalshiPerpsProbe = onSchedule(
 // /margin/positions through the bot's own signer plus the PUBLIC perps list, shaped into one document the Bot page reads (functions/kalshiPerpsAccountLib.js, test/perpsAccountGates.test.js).
 // No order, no POST, nothing written to Kalshi; nothing that decides a trade reads the document. A failed read leaves the last document as it was (the page shows its age). Deploy: bash functions/deploy-sizing.sh.
 const perpsAccount = require("./kalshiPerpsAccountLib");
+const perpsCushion = require("./kalshiPerpsCushionLib");
+const perpsEvents = require("./kalshiPerpsEventsLib");
 exports.kalshiPerpsAccount = onSchedule(
   { schedule: "every 5 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 40, retryCount: 0, memory: "256MiB" },
   async () => {
@@ -1062,8 +1094,37 @@ exports.kalshiPerpsAccount = onSchedule(
       ensureDefaultAdminApp();
       const publicGet = async (url) => { const r = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(6000) }); return r.ok ? r.json() : null; };
       const doc = await perpsAccount.runPerpsAccount({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(), publicGet });
-      if (doc) await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).set(doc);
+      // The earlier document is read BEFORE it is replaced, only to compare for position changes (kalshiPerpsEventsLib); a failed read just means no events this time.
+      const accRef = getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id);
+      let prevDoc = null;
+      if (doc) { try { const ps = await accRef.get(); prevDoc = ps.exists ? ps.data() : null; } catch (e) { prevDoc = null; } }
+      if (doc) await accRef.set(doc);
+      if (doc) {
+        try {
+          const evNote = await perpsEvents.recordEvents({ prev: prevDoc, next: doc, write: (id, e) => getFirestore().collection(perpsEvents.COLLECTION).doc(id).set(e) });
+          if (/^events|^error/.test(evNote)) console.log("kalshiPerpsAccount: position events: " + evNote);
+        } catch (e) { console.error("kalshiPerpsAccount: events failed: " + String((e && e.message) || e).slice(0, 160)); }
+      }
       console.log("kalshiPerpsAccount: " + (doc ? "rows=" + doc.count : "unreadable, document left as it was"));
+      // Margin cushion phone alert (kalshiPerpsCushionLib, Nov 17, 2026): only when the cushion is under a line; each level has its own cooldown claimed in a transaction. Its one write is a field on the session
+      // document that kalshiPushSession turns into an alert. Fenced off so it can never fail the read above.
+      if (doc) {
+        try {
+          const db = getFirestore(), cushionRef = db.collection("kalshiLiveControl").doc("perpsCushionAlert"), sessRef = db.collection("kalshiLiveControl").doc("session");
+          const note = await perpsCushion.runCushionAlert({
+            now: doc.at, doc,
+            claim: (at, level) => db.runTransaction(async (tx) => {
+              const cur = await tx.get(cushionRef), last = cur.exists && Number.isFinite(Number(cur.data()[level])) ? Number(cur.data()[level]) : null;
+              if (!perpsCushion.claimable(level, at, last)) return false;
+              tx.set(cushionRef, { [level]: at }, { merge: true });
+              return last;
+            }),
+            release: (level, prev) => cushionRef.set({ [level]: prev }, { merge: true }),
+            raise: (a) => sessRef.set({ perpsCushionAlert: a }, { merge: true }),
+          });
+          if (/^alerted|^error|failed/.test(note)) console.warn("kalshiPerpsAccount: cushion alert: " + note);
+        } catch (e) { console.error("kalshiPerpsAccount: cushion alert failed: " + String((e && e.message) || e).slice(0, 160)); }
+      }
     } catch (e) { console.error("kalshiPerpsAccount: " + String((e && e.message) || e).slice(0, 160)); }
   }
 );
@@ -1128,6 +1189,8 @@ exports.kalshiNightlyReport = onRequest(
     // The perps probe answer (Nov 16, 2026): statuses and field names only.
     readPerpsAccount: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).get(); return d.exists ? d.data() : null; },
     readPerpsProbe: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).get(); return d.exists ? d.data() : null; },
+    readPortfolioProbe: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsProbe.PORTFOLIO_DOC.collection).doc(perpsProbe.PORTFOLIO_DOC.id).get(); return d.exists ? d.data() : null; },
+    readReconcile: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(reconcileLib.DOC.collection).doc(reconcileLib.DOC.id).get(); return d.exists ? d.data() : null; },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.
     readSkips: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SKIPS).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
