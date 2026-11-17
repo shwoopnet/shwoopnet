@@ -21,8 +21,8 @@ class T(unittest.TestCase):
         M, K, v0, h0 = build(); r = O.run(M, K, v0, h0, floor_n=10)["S"]
         self.assertEqual(r["T"], 9); self.assertEqual(r["search_rises"], 10); self.assertEqual(r["no_signal"], {"band": 1, "no_candle": 1})
         v = r["windows"]["VALIDATE"]; self.assertEqual((v["n"], v["wins"], v["days"], v["signals_a_day"]), (3, 1, 2, 1.5))
-        self.assertAlmostEqual(v["pf_1c"], .654 / .894, 12); self.assertAlmostEqual(v["pf_2c"], .644 / .915, 12); self.assertAlmostEqual(v["net_cents_1c"], -8, 9); self.assertAlmostEqual(v["net_cents_2c"], -.271 / 3 * 100, 9)
-        h = r["windows"]["HELD"]; self.assertEqual((h["n"], h["wins"], h["days"], h["pf_1c"]), (1, 1, 1, None)); self.assertAlmostEqual(h["net_cents_1c"], 75.7, 9); self.assertAlmostEqual(h["net_cents_2c"], 74.7, 9)
+        self.assertAlmostEqual(v["pf_1c"], .675 / .874, 12); self.assertAlmostEqual(v["pf_2c"], .664 / .894, 12); self.assertAlmostEqual(v["net_cents_1c"], -.199 / 3 * 100, 9); self.assertAlmostEqual(v["net_cents_2c"], -.230 / 3 * 100, 9)
+        h = r["windows"]["HELD"]; self.assertEqual((h["n"], h["wins"], h["days"], h["pf_1c"]), (1, 1, 1, None)); self.assertAlmostEqual(h["net_cents_1c"], 77.8, 9); self.assertAlmostEqual(h["net_cents_2c"], 76.7, 9)
     def test_floor_and_pooled(self):
         M, K, v0, h0 = build(); r = O.run(M, K, v0, h0)             # real floor 20: 10 rises is too few
         self.assertIsNone(r["S"]["T"]); self.assertEqual(r["S"]["windows"]["VALIDATE"]["n"], 0)
@@ -34,7 +34,7 @@ class T(unittest.TestCase):
         K = {("X", 1000 - 180): (.5, .6, float("nan")), ("X", 1000 - 360): (.5, .6, 1)}; self.assertIsNone(O.rise("X", 1000, K)); K[("X", 820)] = (.5, .6, True); self.assertIsNone(O.rise("X", 1000, K))
     def test_price_edges(self):
         for p, ok in ((.08, True), (.50, True), (.0799, False), (.5001, False)):
-            K = {("X", 820): (p - .01, p, 1), ("X", 880): (p - .01, p, 1)}; self.assertEqual(O.entry("X", 1000, K)[0] == "ok", ok, p)
+            K = {("X", 820): (p - .01, p, 1)}; self.assertEqual(O.entry("X", 1000, K)[0] == "ok", ok, p)
     def test_not_two_sided(self):
-        K = {("X", 820): (.3, .3, 1), ("X", 880): (.3, .35, 1)}; self.assertEqual(O.entry("X", 1000, K), ("no", "quote_signal"))
+        K = {("X", 820): (.3, .3, 1)}; self.assertEqual(O.entry("X", 1000, K), ("no", "quote_signal"))
 if __name__ == "__main__": unittest.main()

@@ -35,10 +35,8 @@ def entry(tk, close, candles):
     """-> ('ok', side, price) or ('no', reason)"""
     qs = quote(candles.get((tk, close - 180)))
     if qs is None: return ("no", "quote_signal")
-    qf = quote(candles.get((tk, close - 120)))
-    if qf is None: return ("no", "quote_fill")
-    side = "yes" if qs[0] <= qs[1] else "no"                    # cheaper side by ask on the signal candle, ties YES
-    price = qf[0] if side == "yes" else qf[1]                   # the ask of that side on the candle ending 120 s before the close
+    side = "yes" if qs[0] <= qs[1] else "no"                    # cheaper side by ask, ties YES
+    price = qs[0] if side == "yes" else qs[1]                   # O5 (the Head): side AND price on the candle ending 180 s before the close
     if price < LO - EPS or price > HI + EPS: return ("no", "band")
     return ("ok", side, price)
 
