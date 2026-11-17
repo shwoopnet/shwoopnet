@@ -1,0 +1,16 @@
+{
+ "counts": {
+  "candle_duplicate_first_kept": 68,
+  "fire_dropped_missing_entry_or_exit_bar": 214,
+  "fire_dropped_unusable_entry_or_exit_pair": 8,
+  "fire_exit_after_validate_to_dropped_not_read": 12,
+  "signal_candle_unusable_or_missing": 98
+ },
+ "file_list_sha256": "c95c1540c31e22021cee0f1c3e7a7a1bfd3a0776176c8012748ddb0ecf6e7542",
+ "files_read": 55,
+ "funding": "not booked",
+ "generator_sha256": "b9d47879ff04f69815bd0224292a846e2188bc68fbcee59634d2f08304aa7e22",
+ "holds_excluded": 0,
+ "holds_file_sha256": "38a559fcda7fe8a9d0e8a5696af3c9f0bc47addfa50f9c5dcc779c7a4b3fdfa4",
+ "holds_version": "2026-11-16T16Z+7"
+}
