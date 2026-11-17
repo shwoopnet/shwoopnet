@@ -92,6 +92,10 @@ const SLOT_LADDERS = Object.freeze({
     downDrawdownPerContract: 3, downWindow: 40, downWinRate: 0.10, downNetPerContract: -2,
     dailyPerContract: 2.5, dailyMaxFraction: 0.06, dailyCeiling: 75,
     stopPerContract: 5, stopMaxFraction: 0.12, stopCeiling: 150,
+    // Size cap (Nov 16, 2026, the owner's popup: "YES, ship the OICORE size cap"): the size may never exceed (sizeCapFraction x the sizing base) / sizeCapPerContract, floored at 1 contract.
+    // Why: the drawdown stop is held to 12% of the base, so at a small base a 20 contract step would reach that stop after about 2.4 contracts' worth of normal losing streak; this keeps the
+    // stop at least sizeCapPerContract dollars a contract. It can only LOWER a size (never raises one) and reads only the sizing base, which is prediction cash (the perps account is display only).
+    sizeCapFraction: 0.12, sizeCapPerContract: 4.5,
   }),
 });
 const SLOT_DEPTH_SHARE = 0.25;                         // never more than this share of the size resting at the touch (Kalshi gives the top level only)
@@ -562,7 +566,17 @@ function validLadder(L, strategy) {
   const pos = ["upFills", "upDays", "upNetPerContract", "upPf", "upMaxDrawdownPerContract", "downDrawdownPerContract", "downWindow", "dailyPerContract", "dailyMaxFraction", "dailyCeiling", "stopPerContract", "stopMaxFraction", "stopCeiling"];
   if (pos.some((k) => !(isNum(L[k]) && L[k] > 0))) return false;
   if (!(isNum(L.upWinRate) && L.upWinRate > 0 && L.upWinRate < 1) || !(isNum(L.downWinRate) && L.downWinRate >= 0 && L.downWinRate < L.upWinRate) || !(isNum(L.downNetPerContract) && L.downNetPerContract <= 0)) return false;
+  // The size cap is optional (both keys or neither), and a present one must be a positive per contract figure with a fraction no looser than 12% of the base.
+  if (L.sizeCapFraction !== undefined || L.sizeCapPerContract !== undefined) {
+    if (!(isNum(L.sizeCapFraction) && L.sizeCapFraction > 0 && L.sizeCapFraction <= 0.12) || !(isNum(L.sizeCapPerContract) && L.sizeCapPerContract > 0)) return false;
+  }
   return L.dailyMaxFraction <= 0.12 && L.stopMaxFraction <= 0.12;
+}
+// The most contracts the size cap allows at this base: floor(fraction x base / per contract dollars), never under 1. No cap in the ladder means no limit.
+function ladderSizeCap(L, base) {
+  if (!L || L.sizeCapFraction === undefined || L.sizeCapPerContract === undefined) return Infinity;
+  const b = isNum(base) && base > 0 ? base : 0;
+  return Math.max(1, Math.floor((L.sizeCapFraction * b) / L.sizeCapPerContract + 1e-9));
 }
 // One strategy's own final results since reviewedAt, in settlement order (the same order and the same filter as killCheck), plus what its unsettled orders would add if counted as lost.
 function ownResults(strategy, slotOrders) {
@@ -607,12 +621,13 @@ function slotLadderState(strategy, slotOrders, sizingBase) {
   }
   let eff = idx;
   while (eff > 0 && !(base >= L.minBase[eff])) eff -= 1;
-  const size = L.steps[eff];
+  const sizeCap = ladderSizeCap(L, base);
+  const size = Math.min(L.steps[eff], sizeCap);   // the cap only lowers the step's size (Nov 16, 2026); the caps below are then computed from the size actually sent
   const baseCaps = slotCaps(base);
   const dailyCap = Math.min(Math.max(baseCaps.daily, L.dailyPerContract * size), L.dailyMaxFraction * base, L.dailyCeiling);
   const ddStop = Math.min(L.stopPerContract * size, L.stopMaxFraction * base, L.stopCeiling);
   const drawdown = Math.max(0, peak - (cum + openWorst));
-  return { laddered: true, step: idx, size, fillsAtStep: at.length, drawdown, ddStop, dailyCap };
+  return { laddered: true, step: idx, size, sizeCap, fillsAtStep: at.length, drawdown, ddStop, dailyCap };
 }
 
 // ---- The one gate every slot order passes ----------------------------------------------------------------------------------------------
