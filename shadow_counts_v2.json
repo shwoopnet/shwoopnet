@@ -1,0 +1,138 @@
+{
+ "as_of_utc": "2026-11-17T01:35:32Z",
+ "rebuilt_from_scratch": true,
+ "specs": [
+  {
+   "id": "SH2_01_HYPE",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_02_ETH",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_03_ETH",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_04_ETH",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_05_HYPE",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_06_XRP",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_07_XRP",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_08_XRP",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_09_SOL",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_10_BNB",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  },
+  {
+   "id": "SH2_11_NEAR",
+   "signals": 0,
+   "settled": 0,
+   "wins": 0,
+   "voids": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": null,
+   "start_utc": "2026-11-21T00:00:00Z",
+   "as_of_utc": "2026-11-17T01:35:32Z"
+  }
+ ]
+}
