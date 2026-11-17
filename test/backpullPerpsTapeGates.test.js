@@ -120,3 +120,8 @@ console.log('ok   BP5 resumable, chunked, finished days only');
 // BP7
 assert.strictEqual(o.bp7_path, '/trades?limit=1000&min_ts=' + o.bp7_lo_hi[0] + '&max_ts=' + o.bp7_lo_hi[1], 'BP7 one UTC day, limit 1000, newest first by default');
 console.log('ok   BP7 the request brackets one UTC day');
+
+// BP8: a blobless clone has no files of earlier chunks, so a plain `git add tape` stages their DELETION.
+const wfText = require('fs').readFileSync(require('path').join(__dirname, '..', '.github', 'workflows', 'backpull-perps-tape.yml'), 'utf8');
+assert(/git add --ignore-removal tape/.test(wfText) && !/git add tape/.test(wfText), 'BP8 stage with --ignore-removal');
+console.log('ok   BP8 the push step never stages removals');

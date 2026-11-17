@@ -114,10 +114,10 @@ def score_spec_v4(mods, spec, markets, other_by_close, cfg_start, guard, guard_s
         if ent is None:
             continue
         core = D.to_core(m, ent)
-        x1, _r1 = K.score(core, spec["exit"], 0.01, R.CONTRACTS); x2, _r2 = K.score(core, spec["exit"], 0.02, R.CONTRACTS)
+        x1, x2, held = R.score_both(K, core, spec["exit"])
         if x1 is None or x2 is None:
             continue
-        trades.append({"t": m["ticker"], "c": m["close"], "d": R.day_of(m["close"]), "x1": x1, "x2": x2, "w": 1 if m["result"] == ent["side"] else 0, "v": 1 if m["result"] == "void" else 0})
+        trades.append({"t": m["ticker"], "c": m["close"], "d": R.day_of(m["close"]), "x1": x1, "x2": x2, "w": 1 if m["result"] == ent["side"] else 0, "v": 1 if m["result"] == "void" else 0, "h": held})
     return trades, refused
 
 
@@ -193,7 +193,7 @@ def run_list(root, v, now, puller, state):
         mine = st["trades"].setdefault(spec["id"], {"seq": [], "n_days": 0, "last_day": ""})
         new, refused = score_spec_v4(mods, spec, fetched.get(spec["market"], []), by_close, start, guard, series_all, sha, cuts)
         for t in sorted(new, key=lambda t: (t["c"], t["t"])):
-            mine["seq"].append([t["x1"], t["x2"], t["v"]])
+            mine["seq"].append([t["x1"], t["x2"], t["v"], t.get("h", 0)])
             if t["d"] != mine["last_day"]:
                 mine["n_days"] += 1; mine["last_day"] = t["d"]
         sstart = spec_start(spec, start)
@@ -203,7 +203,7 @@ def run_list(root, v, now, puller, state):
         st["refused"][spec["id"]] = a["refused_by_guard"]
         stamp0 = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(sstart))
         results[spec["id"]] = dict(a, admission=item.get("admission"), market=spec["market"], spec_sha256=sha, start_utc=stamp0)
-        counts.append({"id": spec["id"], "signals": a["n"], "settled": a["n"], "wins": a["wins"], "voids": a["voids"], "target": 100, "status": a["status"], "expected_days_to_100": a["days_to_100"],
+        counts.append({"id": spec["id"], "signals": a["n"], "settled": a["n"], "wins": a["wins"], "voids": a["voids"], "scored_at_settlement": a["scored_at_settlement"], "target": 100, "status": a["status"], "expected_days_to_100": a["days_to_100"],
                        "start_utc": stamp0, "as_of_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))})
     for series in fetched:
         st["pulled_until"][series] = max_close + 1
