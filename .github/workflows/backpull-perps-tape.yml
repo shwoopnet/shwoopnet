@@ -1,0 +1,81 @@
+# Nov 17, 2026 (the owner's yes via the EA, the Head of R&D's order): ONE-TIME back-pull of Kalshi's PUBLIC perps trade tape (GET /margin/trades, no ticker, every perp), one UTC day per file, to its OWN orphan
+# data branch `perp-tape-data` under tape/<date>.csv.gz (never main). Manual start only (workflow_dispatch), public GET only: no secret but the built-in token, no key, no order, no Firestore. At least 1.2 seconds
+# between requests (about 50 a minute, far under the published read budget). A day is written only when its cursor ended; a started run skips days already on the branch, so a stopped run is simply started again.
+# The job works in chunks of 5 days and pushes after every chunk (a lost runner loses at most 5 days). One concurrency group that never cancels a running job. Stops for good on 2027-02-26.
+# Estimate (NOT measured): 150 to 600 pages of 1000 trades a day, so about 20,000 requests for 60 days, about 9 hours in two starts; about 3 to 20 MB gzipped a day on the branch.
+name: backpull-perps-tape
+on:
+  workflow_dispatch:
+    inputs:
+      from_date:
+        description: "First UTC day to pull, YYYY-MM-DD (the tape serves about 60 days: 2026-09-18 is the oldest day tested)"
+        required: true
+        type: string
+      to_date:
+        description: "Last UTC day to pull, YYYY-MM-DD (a finished day)"
+        required: true
+        type: string
+permissions:
+  contents: write
+concurrency:
+  group: backpull-perps-tape
+  cancel-in-progress: false
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      FROM_DATE: ${{ inputs.from_date }}
+      TO_DATE: ${{ inputs.to_date }}
+    steps:
+      - name: Check the inputs and the end date (2027-02-26 23:59 UTC)
+        id: gate
+        run: |
+          [[ "$FROM_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "bad from_date"; exit 1; }
+          [[ "$TO_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "bad to_date"; exit 1; }
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-26T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to pull"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time; file names only are read, no data is downloaded)
+        if: steps.gate.outputs.go == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          if git fetch -q --depth 1 --filter=blob:none origin perp-tape-data; then
+            git symbolic-ref HEAD refs/heads/perp-tape-data
+            git reset -q --mixed FETCH_HEAD
+            git ls-tree -r --name-only FETCH_HEAD > ../existing.txt
+          else
+            git checkout -q --orphan perp-tape-data
+            : > ../existing.txt
+          fi
+      - name: Pull in chunks of 5 days and push after each chunk (the script exits 10 while days remain)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          START=$(date -u +%s)
+          cd data
+          git config user.name "perps-tape-backpull"
+          git config user.email "perps-tape-backpull@users.noreply.github.com"
+          while true; do
+            LEFT=$(( 19800 - ( $(date -u +%s) - START ) ))
+            [ "$LEFT" -gt 600 ] || { echo "time budget used; start the workflow again to carry on"; break; }
+            set +e
+            python3 -I ../code/scripts/backpull_perps_tape.py . --from "$FROM_DATE" --to "$TO_DATE" --skip-list ../existing.txt --max-days 5 --deadline-s "$LEFT"
+            RC=$?
+            set -e
+            git add --ignore-removal tape 2>/dev/null || true
+            if ! git diff --cached --quiet; then
+              git commit -q -m "perps tape back-pull $(date -u +%Y-%m-%dT%H:%MZ)"
+              for i in 1 2 3 4 5 6; do git push -q origin perp-tape-data && break; [ "$i" -lt 6 ] || exit 1; sleep $((2 ** i)); git pull -q --rebase origin perp-tape-data || true; done
+              git ls-tree -r --name-only HEAD > ../existing.txt
+            fi
+            [ "$RC" -eq 10 ] || break
+          done
