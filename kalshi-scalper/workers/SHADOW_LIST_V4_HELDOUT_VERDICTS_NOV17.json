@@ -17,11 +17,7 @@
  "clusters": 24,
  "spec_sha256_covers": "the spec object only",
  "no_money_no_orders": true,
- "notes": [
-  "Strict C1 day-correlation rule as written (the Head, Nov 16): every C1 pass at 0.3 or more against ANY ENGB4XBTC pass is dropped (31 of 36). 19 of those 31 are same-market copies (up to 0.99); 12 reach 0.3 only against a different market (0.31 to 0.60).",
-  "PROPOSAL FOR FUTURE SPECS, NOT APPLIED NOW: a cross-market 0.3 to 0.4 is the maximum over about 33 comparisons on 29 days (noise per correlation about +/-0.19), so it is plausibly chance; a future spec may use same-market only, or a threshold adjusted for the number of comparisons, written before any pass is seen.",
-  "Held-out: not read for batch C; a plan comes after the freeze."
- ],
+ "notes": "Held-out verdicts attached Nov 17 2026 (read n times by ENGINE1 batches; not forward n, not a pass). Pooled step-up over m = 338: 25 survivors, 17 holds. real start = first runner log after merge; the start_utc in the spec is the earliest, never earlier than the merge. No outcome before that first log counts.",
  "specs": [
   {
    "spec": {
@@ -69,7 +65,8 @@
     "validate_pf_1c": 1.499,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 0,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 128,
@@ -130,7 +127,8 @@
     "validate_pf_1c": 2.564,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 0,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 109,
@@ -191,7 +189,8 @@
     "validate_pf_1c": 1.372,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 0,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 142,
@@ -252,7 +251,8 @@
     "validate_pf_1c": 2.199,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 0,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 109,
@@ -313,7 +313,8 @@
     "validate_pf_1c": 1.422,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 0,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 128,
@@ -375,7 +376,8 @@
     "validate_pf_1c": 1.646,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 455,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 105,
@@ -436,7 +438,8 @@
     "validate_pf_1c": 1.859,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 0,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 185,
@@ -498,7 +501,8 @@
     "validate_pf_1c": 1.55,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 455,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 105,
@@ -560,7 +564,8 @@
     "validate_pf_1c": 1.789,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 1415,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 105,
@@ -622,7 +627,8 @@
     "validate_pf_1c": 1.602,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 783,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 125,
@@ -683,7 +689,8 @@
     "validate_pf_1c": 2.317,
     "bh_rank_survivor_in_own_read": false,
     "missing_feature_skips_at_bucket": 0,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": false
    },
    "paper_research": {
     "validate_n": 118,
@@ -745,7 +752,8 @@
     "validate_pf_1c": 1.395,
     "bh_rank_survivor_in_own_read": true,
     "missing_feature_skips_at_bucket": 1414,
-    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded",
+    "pooled338_bh_survivor": true
    },
    "paper_research": {
     "validate_n": 118,
