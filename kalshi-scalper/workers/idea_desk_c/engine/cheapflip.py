@@ -41,6 +41,7 @@ def fee(p, n=N_CONTRACTS):
 R6_FIVE = ("KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXGOLD15M")
 # HOLDS.json 2026-11-16T16Z+7, copied by hand: a window is dropped, before any outcome is read, if its series and close are inside [from, to) of an open or frozen row.
 HOLDS = (("H20", R6_FIVE, 1793145600, None), ("H02", ("KXBTC15M",), 1793721600, None), ("H21", ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXAUDUSD15M", "KXUSDCAD15M"), 1793836800, 1798070400))
+WALL = ("KXHYPE15M", "KXBNB15M", "KXNATGAS15M")                   # the card names only these; any other series is counted and never parsed
 M_CARRIED = 7492484                                                    # Nov 17 value; any other is refused
 
 
@@ -63,6 +64,10 @@ def read_windows(bases, stats):
                     raise ValueError("%s lacks %s" % (fd, miss))
                 stats["book_files"] = stats.get("book_files", 0) + 1
                 for r in rd:
+                    if r["series"] not in WALL:
+                        ow = stats.setdefault("_outside", {}).setdefault(r["series"], set()); ow.add(r["ticker"])
+                        stats["rows_outside_wall"] = stats.get("rows_outside_wall", 0) + 1
+                        continue
                     try:
                         ct = iso(r["close_time"]); t = int(r["t_recv_ms"])
                     except ValueError:
@@ -160,6 +165,7 @@ def run(bases, m_carried=M_CARRIED):
         raise ValueError("m_carried must be %d" % M_CARRIED)
     stats = {}
     wins = read_windows(bases, stats)
+    stats["windows_outside_wall"] = {sr: len(v) for sr, v in sorted(stats.pop("_outside", {}).items())}
     held = stats.pop("_held", {})
     stats["windows_dropped_by_hold"] = {h: {sr: len(v) for sr, v in sorted(d.items())} for h, d in sorted(held.items())}
     res = read_results(bases, wins, stats)                              # LAST

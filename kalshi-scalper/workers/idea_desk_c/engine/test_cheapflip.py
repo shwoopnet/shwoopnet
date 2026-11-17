@@ -94,20 +94,25 @@ class Hand(unittest.TestCase):
         self.assertEqual(out["stats"]["polls_at_or_after_close"], 1)
         self.assertEqual(T[(0.03, 2)]["median_touch_s"], 200.0)
 
+    def test_wall(self):
+        base = tempfile.mkdtemp()
+        rows = [brow("KXINX15M-X", "KXINX15M", CLOSE, -600, "0.02", "5", "0.97", "20"), brow("KXGOLD15M-X", "KXGOLD15M", CLOSE, -600, "0.02", "5", "0.97", "20"),
+                brow("KXBNB15M-X", "KXBNB15M", CLOSE, -600, "0.02", "5", "0.97", "20")]
+        write(base, "2026-11-10", "1500", rows, [[ISO(CLOSE), "KXBNB15M", "KXBNB15M-X", "yes"]])
+        out = C.run([base])
+        self.assertEqual(out["windows"], 1)
+        self.assertEqual(out["stats"]["windows_outside_wall"], {"KXGOLD15M": 1, "KXINX15M": 1})
+        self.assertEqual(out["stats"]["rows_outside_wall"], 2)
+        self.assertEqual(out["stats"]["windows_dropped_by_hold"], {})
+
     def test_holds(self):
         self.assertEqual(C.held_by("KXGOLD15M", CLOSE), "H20")
         self.assertEqual(C.held_by("KXWTI15M", CLOSE), "H21")
         self.assertIsNone(C.held_by("KXWTI15M", 1798070400))
         self.assertEqual(C.held_by("KXEURUSD15M", CLOSE), "H21")
         self.assertIsNone(C.held_by("KXHYPE15M", CLOSE))
-        base = tempfile.mkdtemp()
-        s = "KXGOLD15M"; tk = "KXGOLD15M-X"
-        write(base, "2026-11-10", "1500", [brow(tk, s, CLOSE, -600, "0.02", "5", "0.97", "20")], [[ISO(CLOSE), s, tk, "yes"]])
-        out = C.run([base])
-        self.assertEqual(out["windows"], 0)
-        self.assertEqual(out["stats"]["windows_dropped_by_hold"], {"H20": {"KXGOLD15M": 1}})
         with self.assertRaises(ValueError):
-            C.run([base], 6290660)
+            C.run([fixture()], 6290660)
 
     def test_header_first(self):
         import cheapflip_run as R
