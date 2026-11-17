@@ -58,7 +58,9 @@ function shapePerps(balanceBody, positionsBody, listBody, now) {
     });
   }
   const pnlTotal = rows.reduce((a, r) => a + (r.pnl || 0), 0);
-  return { at: now, scale: PERPS_SCALE, equity, positionValue, maintenance, available, pnlTotal: Math.round(pnlTotal * 100) / 100, count: rows.length, rows, listRead: Object.keys(byTicker).length > 0 };
+  return { at: now, scale: PERPS_SCALE, equity, positionValue, maintenance, available, pnlTotal: Math.round(pnlTotal * 100) / 100, count: rows.length, rows, listRead: Object.keys(byTicker).length > 0,
+    // true only when the positions answer itself was read (an empty list of positions is a real answer); the events log needs it, because a failed read looks like every position closing
+    positionsOk: !!(positionsBody && typeof positionsBody === "object" && Array.isArray(positionsBody.positions)) };
 }
 
 // liveRequest is injected (the bot's own signer); publicGet is a keyless GET of the public list. A failed balance read gives null (the page then shows no perps total, never a made up one).

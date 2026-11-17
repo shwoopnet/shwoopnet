@@ -26,5 +26,7 @@ assert(riskFiles.length >= 8, 'AT5 sees the risk files: ' + riskFiles.join(','))
 for(const file of riskFiles){
   assert(!FIELDS.test(fs.readFileSync('functions/' + file, 'utf8')), 'AT5 ' + file + ' is risk code and must not read the display total');
 }
+// The ONE named exception (Nov 16, 2026, the owner's decision): kalshiOicoreBaseLib.js (not in the scan above, because it has no perps field names) lets OICORE's own size and its own daily and drawdown figures read the perps
+// equity when it is fresh; test/oicoreTotalBaseGates.test.js OB3 pins that only the engine and the minute function name it, and OB4 that no stop or the window cap uses it.
 assert(/never read by the 40% hard stop/.test(h)||/is never read by the 40% hard stop/.test(h),'AT5 comment says display only');
 console.log('accountTotalGates ok');
