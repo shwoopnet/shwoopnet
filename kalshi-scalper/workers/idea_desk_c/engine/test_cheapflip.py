@@ -29,15 +29,15 @@ def write(base, date, hhmm, book, cover):
 
 def fixture(extra=False):
     base = tempfile.mkdtemp()
-    t, s = "KXGOLD15M-26NOV101500-00", "KXGOLD15M"
+    t, s = "KXEURUSD15M-26NOV101500-00", "KXEURUSD15M"
     book = [brow(t, s, CLOSE, -700, "0.01", "5", "0.90", "3"), brow(t, s, CLOSE, -600, "0.02", "5", "0.97", "20"), brow(t, s, CLOSE, -500, "0.03", "4", "0.96", "9"),
             brow(t, s, CLOSE, -400, "0.06", "8", "0.93", "9"), brow(t, s, CLOSE, -300, "0.09", "3", "0.90", "9"), brow(t, s, CLOSE, -200, "0.15", "9", "0.84", "9"),
             brow(t, s, CLOSE, -100, "0.02", "5", "0.97", "20")]
     cover = [[ISO(CLOSE), s, t, "yes"]]
     if extra:                                                        # a window after the cut, and the same polls again in a second folder
         late = CLOSE + 10 * 86400
-        book += [brow("KXGOLD15M-LATE", s, late, -600, "0.02", "5", "0.97", "20")]
-        cover += [[ISO(late), s, "KXGOLD15M-LATE", "yes"]]
+        book += [brow("KXEURUSD15M-LATE", s, late, -600, "0.02", "5", "0.97", "20")]
+        cover += [[ISO(late), s, "KXEURUSD15M-LATE", "yes"]]
         write(base, "2026-11-10", "1600", book[:2], cover)           # a second folder repeats the first two polls
     write(base, "2026-11-10", "1500", book, cover)
     return base
@@ -80,13 +80,27 @@ class Hand(unittest.TestCase):
         self.assertEqual(out["stats"]["duplicate_polls"], 2)
         self.assertEqual(out["windows"], 1)
 
+    def test_holds(self):
+        self.assertEqual(C.held_by("KXGOLD15M", CLOSE), "H20")
+        self.assertEqual(C.held_by("KXWTI15M", CLOSE), "H21")
+        self.assertIsNone(C.held_by("KXWTI15M", 1798070400))
+        self.assertIsNone(C.held_by("KXEURUSD15M", CLOSE))
+        base = tempfile.mkdtemp()
+        s = "KXGOLD15M"; tk = "KXGOLD15M-X"
+        write(base, "2026-11-10", "1500", [brow(tk, s, CLOSE, -600, "0.02", "5", "0.97", "20")], [[ISO(CLOSE), s, tk, "yes"]])
+        out = C.run([base])
+        self.assertEqual(out["windows"], 0)
+        self.assertEqual(out["stats"]["windows_dropped_by_hold"], {"H20": {"KXGOLD15M": 1}})
+        with self.assertRaises(ValueError):
+            C.run([base], 6290660)
+
     def test_header_first(self):
         import cheapflip_run as R
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             R.main([fixture()])
         h = json.loads(buf.getvalue().split("\n")[0])
-        self.assertEqual((h["m_carried"], h["m_new"], h["m_total"]), (6290660, 9, 6290669))
+        self.assertEqual((h["m_carried"], h["m_new"], h["m_total"]), (7492484, 9, 7492493))
 
 
 if __name__ == "__main__":

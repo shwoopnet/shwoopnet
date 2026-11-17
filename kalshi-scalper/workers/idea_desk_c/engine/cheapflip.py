@@ -38,6 +38,19 @@ def fee(p, n=N_CONTRACTS):
     return K.fee_up_order(p, n)
 
 
+R6_FIVE = ("KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXGOLD15M")
+# HOLDS.json 2026-11-16T16Z+7, copied by hand: a window is dropped, before any outcome is read, if its series and close are inside [from, to) of an open or frozen row.
+HOLDS = (("H20", R6_FIVE, 1793145600, None), ("H02", ("KXBTC15M",), 1793721600, None), ("H21", ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M"), 1793836800, 1798070400))
+M_CARRIED = 7492484                                                    # Nov 17 value; any other is refused
+
+
+def held_by(series, close):
+    for hid, ser, a, b in HOLDS:
+        if series in ser and close >= a and (b is None or close < b):
+            return hid
+    return None
+
+
 def read_windows(bases, stats):
     """-> {ticker_window_key: {"series", "close", "polls": [(t_ms, yes_bid, yes_sz, no_bid, no_sz)]}}, keyed by (ticker, close epoch); duplicates by (key, t_recv_ms) keep the first."""
     wins, seen = {}, set()
@@ -57,6 +70,10 @@ def read_windows(bases, stats):
                         continue
                     if ct > CUT:
                         stats["rows_after_cut"] = stats.get("rows_after_cut", 0) + 1
+                        continue
+                    hid = held_by(r["series"], ct)
+                    if hid:
+                        stats.setdefault("_held", {}).setdefault(hid, {}).setdefault(r["series"], set()).add(r["ticker"])
                         continue
                     key = (r["ticker"], ct)
                     if (key, t) in seen:
@@ -134,15 +151,20 @@ def pf(xs):
     return None if not xs else (float("inf") if l == 0 and w > 0 else (w / l if l else None))
 
 
-def run(bases, m_carried=6290660):
+def run(bases, m_carried=M_CARRIED):
+    if m_carried != M_CARRIED:
+        raise ValueError("m_carried must be %d" % M_CARRIED)
     stats = {}
     wins = read_windows(bases, stats)
+    held = stats.pop("_held", {})
+    stats["windows_dropped_by_hold"] = {h: {sr: len(v) for sr, v in sorted(d.items())} for h, d in sorted(held.items())}
     res = read_results(bases, wins, stats)                              # LAST
     rows = {}
     for key, w in wins.items():
         r = res.get(key)
         if r is None:
             stats["windows_without_result"] = stats.get("windows_without_result", 0) + 1
+            nr = stats.setdefault("no_result_by_series", {}); nr[w["series"]] = nr.get(w["series"], 0) + 1
             continue
         day = time.strftime("%Y-%m-%d", time.gmtime(w["close"]))
         for hi in BANDS:
