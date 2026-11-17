@@ -446,6 +446,7 @@
   .kal-perp .kal-chip{ margin-right:6px; } .kal-mult{ font-size:12px; font-weight:700; padding:1px 7px; border-radius:999px; border:1px solid var(--border); color:var(--muted); margin-left:4px; }
   .kal-perp-stats{ grid-template-columns:repeat(3,minmax(0,1fr)); } .kal-perp-stats > div:nth-child(n+4){ margin-top:2px; }
   .kal-perp-riskhead{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); margin-bottom:5px; }
+  .kal-perp-chart{ position:relative; height:90px; margin:10px 0 2px; } .kal-perp-chart svg{ width:100%; height:100%; display:block; overflow:visible; } .kal-perp-chart-note{ font-size:12px; color:var(--muted); margin:8px 0; }
   .kal-perp-bar{ height:6px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; } .kal-perp-bar i{ display:block; height:100%; background:var(--paper); border-radius:999px; }
   @media screen and (max-width:700px){ .kal-perp-stats{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
   .kal-hold-stats{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
@@ -1833,8 +1834,10 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
+                  <li>Bot page: charts are back. The Account result line no longer cuts its range to start at the first perps reading (it hid earlier trades on YTD, 1M and All and left Today empty); perps now just add steps from their first hourly reading, and Today says what it is waiting for. Each perp row is plain (market, direction, value, return, entry, now) with a small price line once the page has two reads.</li>
                   <li>Bot page: your perpetuals are now live on the Bot page. The Account total is the prediction balance plus the perps account value (total only), Today and the result line include the perps change (the result line starts from the first hourly snapshot that has a perps total), and each open perp shows on Open positions with its return in dollars, position value, contracts, entry price and the price now; the multiplier is marked as an estimate, and the cost, return percent, forced-close price and auto close levels say n/a or not readable because Kalshi's data does not give them. If the perps data is older than 20 minutes it is left out of the total and the page says so. Display only: the loss stops, limits and sizing never read it.</li>
                   <li>Research: a second paper only runner follows the picks of three new shadow lists (V2, V3 and V4) once a day, beside the first one, from public data: no order, no key, results as totals only. The Bitcoin picks wait until Nov 21. The three picks that needed frozen cut points now run on them.</li>
+                  <li>Research: the 60 second perps recorder now also keeps the prices around the 17:00 UTC settlement and one daily funding read; the public perps trade tape once a minute. Public data only; no order, key or change to the bot.</li>
                 </ul>
                 <div class="changelog-day">Nov 16</div>
                 <ul class="changelog-list">
@@ -3228,7 +3231,36 @@
     if(!Number.isFinite(buf)){ return { label: 'Buffer n/a', w: 0, none: true }; }
     return { label: (buf >= 20 ? 'Low' : (buf >= 10 ? 'Medium' : 'High')) + ' risk, ' + Math.round(buf) + '% buffer', w: Math.max(0, Math.min(100, buf)) };
   }
-  function kalshiPerpsHtml(rows, esc, money){
+  // Account-level margin cushion (the owner, Nov 17, 2026): equity minus maintenance margin, from the perps account document, in dollars. It is NOT Kalshi's forced-close price (the data carries none): it says how much
+  // the whole perps account can lose before it falls to the maintenance margin. Risk label by cushion percent of equity (20 or more Low, 10 to 20 Medium, under 10 High). moveShare is stated only for ONE open position
+  // (cushion over its position value, the move against it that uses the cushion up, before fees and funding); with several positions it is left out because their directions can offset. Display only.
+  function kalshiPerpCushion(doc, nRows){
+    var fin = function(v){ return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)); };
+    if(!doc || !fin(doc.equity) || !fin(doc.maintenance) || !(Number(doc.equity) > 0)){ return null; }
+    var eq = Number(doc.equity), cushion = Math.round((eq - Number(doc.maintenance)) * 100) / 100, pct = cushion / eq * 100;
+    var pv = fin(doc.positionValue) ? Math.abs(Number(doc.positionValue)) : null;
+    return { dollars: cushion, pct: pct, move: nRows === 1 && pv > 0 ? cushion / pv * 100 : null, risk: kalshiPerpRisk(pct) };
+  }
+  function kalshiPerpCushionHtml(c, esc, money){
+    if(!c){ return ''; }
+    var sg = (c.dollars >= 0 ? '' : '-') + money(Math.abs(c.dollars));
+    return '<div class="kal-perp-risk kal-perp-cushion"><div class="kal-perp-riskhead"><span>Margin cushion (whole perps account): ' + esc(sg) + '</span><span>' + esc(c.risk.label.replace(/ buffer$/, ' of equity')) + '</span></div>' +
+      '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + c.risk.w.toFixed(1) + '%"></i></div>' +
+      '<div class="kal-hold-sub">Equity minus maintenance margin' + (c.move !== null ? '; a move of about ' + esc(c.move.toFixed(1)) + '% against the position uses it up (before fees and funding)' : '') + '. Not a forced-close price.</div></div>';
+  }
+  function kalshiPerpChartHtml(marks, entry, esc){
+    var m = (marks || []).filter(function(x){ return x && Number.isFinite(x.v) && Number.isFinite(x.t); });
+    if(m.length < 2){ return ''; }
+    var W = 600, H = 90, e = Number.isFinite(Number(entry)) && entry !== null ? Number(entry) : null;
+    var vals = m.map(function(x){ return x.v; }).concat(e !== null ? [e] : []), lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if(hi - lo < 1e-9){ hi += 1; lo -= 1; } var pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+    var X = function(i){ return (i / (m.length - 1) * W).toFixed(1); }, Y = function(v){ return ((1 - (v - lo) / (hi - lo)) * H).toFixed(1); };
+    var d = m.map(function(x, i){ return (i ? 'L' : 'M') + X(i) + ' ' + Y(x.v); }).join(' ');
+    var hm = function(ms){ return new Date(ms).toLocaleTimeString('en-US', { timeZone: KAL_TZ, hour: 'numeric', minute: '2-digit' }); };
+    var hv = ' data-hv="' + JSON.stringify(m.map(function(x, i){ return [Math.round(i / (m.length - 1) * 10000) / 10000, Math.round((1 - (x.v - lo) / (hi - lo)) * 10000) / 10000, x.v.toLocaleString('en-US', { maximumFractionDigits: 4 }) + ' · ' + hm(x.t)]; })).replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"';
+    return '<div class="kal-perp-chart hv"' + hv + '><svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Price since this page was opened' + (e !== null ? ', with the entry price line' : '') + '">' + (e !== null ? '<line class="kal-hc-target-line" x1="0" x2="' + W + '" y1="' + Y(e) + '" y2="' + Y(e) + '"/>' : '') + '<path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(m.length - 1) + '" cy="' + Y(m[m.length - 1].v) + '" r="4"/></svg></div><div class="kal-hc-x"><span>' + esc(hm(m[0].t)) + '</span>' + (e !== null ? '' : '') + '<span>Now</span></div>';
+  }
+  function kalshiPerpsHtml(rows, esc, money, cushion, marks){
     if(!rows || !rows.length){ return ''; }
     var num = function(v){ return Number.isFinite(Number(v)) && v !== null && v !== ''; };
     var px = function(v){ return num(v) ? Number(v).toLocaleString('en-US', { maximumFractionDigits: 4 }) : 'n/a'; };
@@ -3236,14 +3268,9 @@
     return rows.map(function(r){
       var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
       var pnlTxt = num(r.pnl) ? sg(Number(r.pnl)) + (num(r.pnlPct) ? ' (' + (r.pnlPct >= 0 ? '+' : '-') + Math.abs(Number(r.pnlPct)).toFixed(1) + '%)' : '') : 'n/a';
-      var risk = kalshiPerpRisk(num(r.bufferPct) ? Number(r.bufferPct) : NaN);
-      var auto = (num(r.takeProfit) || num(r.stopLoss)) ? 'Take profit ' + px(r.takeProfit) + ' · Stop loss ' + px(r.stopLoss) : (r.autoKnown === true ? 'No auto close set' : 'Auto close levels not readable');   // never claim none is set unless the data says so
-      return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + (num(r.multiplier) ? ' <span class="kal-mult">' + (r.multiplierEst ? '~' : '') + esc(Number(r.multiplier).toFixed(1)) + 'x' + (r.multiplierEst ? ' est.' : '') + '</span>' : '') +
-        '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
+      return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
         '<div class="kal-hold-stats kal-perp-stats">' + (num(r.value) ? stat('Position value', money(Number(r.value))) : '') + stat('Return', pnlTxt, num(r.pnl) ? (r.pnl >= 0 ? 'kal-pos' : 'kal-neg') : '') +
-        (num(r.cost) ? stat('Cost', money(Number(r.cost))) : '') + (num(r.size) ? stat('Contracts', String(Number(r.size))) : '') + stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Now', px(r.index)) : '') + '</div>' +
-        '<div class="kal-perp-risk"><div class="kal-perp-riskhead"><span>' + esc(risk.label) + '</span><span>Closes at ' + esc(px(r.closeAt)) + '</span></div>' + (risk.none ? '' : '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + risk.w.toFixed(0) + '%"></i></div>') + '</div>' +
-        '<div class="kal-hold-sub">' + esc(auto) + ' · Perp, not one of the bot\'s trades.</div></div>';
+        stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Now', px(r.index)) : '') + '</div>' + kalshiPerpChartHtml(marks && marks[r.market], r.entry, esc) + '</div>';
     }).join('');
   }
   // The perps account document (Main, Nov 17, 2026: admin doc kalshiLiveControl/perpsAccount, refreshed every 5 minutes) turned into what the card and the total draw. PURE and not wired to a read yet: the page makes no new read until Main confirms the
@@ -3262,13 +3289,23 @@
         size: size, entry: fin(r.entry) ? Number(r.entry) : null, index: mark, closeAt: fin(r.closeAt) ? Number(r.closeAt) : null, bufferPct: fin(r.bufferPct) ? Number(r.bufferPct) : null,
         takeProfit: fin(r.takeProfit) ? Number(r.takeProfit) : null, stopLoss: fin(r.stopLoss) ? Number(r.stopLoss) : null, autoKnown: false };
     });
-    return { ok: true, reason: '', total: Number.isFinite(eq) ? eq : null, rows: rows };
+    return { ok: true, reason: '', total: Number.isFinite(eq) ? eq : null, rows: rows, cushion: kalshiPerpCushion(doc, rows.length) };
   }
   function kalshiPerpsNote(res){ return res && res.reason === 'stale' ? 'Perps are not in the total: their data is older than 20 minutes.' : (res && res.reason === 'missing' ? 'Perps are not in the total: no perps data.' : ''); }
   function kalshiPerpRows(a){ return a && Array.isArray(a.perps) ? a.perps : []; }
   // The page's one perps feed (display only, see kalshiAccountTotal): the account document is read at most every 4 minutes and the hourly snapshots at most every 30, only while the Bot page draws; a failed read keeps what was
   // there and tries again later. kalshiPerpsView lays the perps figures over the account read, so a fresh account read never wipes them.
-  var kalshiPerpsState = { doc: null, hist: [], docAt: 0, histAt: 0, loaded: false };
+  var kalshiPerpsState = { doc: null, hist: [], docAt: 0, histAt: 0, loaded: false, marks: {} };
+  // Price history for the perp rows: the page keeps each market's mark from every document read it makes (one every 4 minutes while the Bot page is open), at most 120 per market, so the line starts when the page opened. Kalshi's data here has no price series.
+  function kalshiPerpMarksAdd(st, doc){
+    if(!doc || !Number.isFinite(Number(doc.at)) || !Array.isArray(doc.rows)){ return; }
+    doc.rows.forEach(function(r){
+      if(!r || typeof r.market !== 'string' || r.mark === null || r.mark === undefined || r.mark === '' || !Number.isFinite(Number(r.mark))){ return; }
+      var a = st.marks[r.market] || (st.marks[r.market] = []);
+      if(a.length && a[a.length - 1].t >= Number(doc.at)){ return; }
+      a.push({ t: Number(doc.at), v: Number(r.mark) }); if(a.length > 120){ a.shift(); }
+    });
+  }
   function kalshiPerpsView(base, now){
     if(!base){ return base; }
     var res = kalshiPerpsFromDoc(kalshiPerpsState.doc, now), out = {};
@@ -3278,7 +3315,7 @@
     var hist = (kalshiPerpsState.hist || []).concat([{ t: Number(kalshiPerpsState.doc.at), total: res.total }]);
     var todayKey = kalDayKey(now), prior = null;
     hist.forEach(function(p){ if(kalDayKey(p.t) < todayKey && (prior === null || p.t > prior.t)){ prior = p; } });
-    out.perps = res.rows; out.perpsTotal = res.total; out.perpsHistory = hist;
+    out.perps = res.rows; out.perpsCushion = res.cushion; out.perpsTotal = res.total; out.perpsHistory = hist;
     out.perpsDay = prior ? Math.round((res.total - Number(prior.total)) * 100) / 100 : 0;
     return out;
   }
@@ -3287,7 +3324,7 @@
     if(!api || !currentUserIsAdmin){ return; }
     if(api.readKalshiPerpsAccount && now - kalshiPerpsState.docAt > 240000){
       kalshiPerpsState.docAt = now;
-      api.readKalshiPerpsAccount().then(function(d){ kalshiPerpsState.doc = d; kalshiPerpsState.loaded = true; renderKalshiBot(); }, function(){ kalshiPerpsState.loaded = true; });
+      api.readKalshiPerpsAccount().then(function(d){ kalshiPerpsState.doc = d; kalshiPerpMarksAdd(kalshiPerpsState, d); kalshiPerpsState.loaded = true; renderKalshiBot(); }, function(){ kalshiPerpsState.loaded = true; });
     }
     if(api.readKalshiPerpsHistory && now - kalshiPerpsState.histAt > 1800000){
       kalshiPerpsState.histAt = now;
@@ -3319,7 +3356,7 @@
     });
     Object.keys(kalshiPosPaths).forEach(function(k){ if(!openNow[k]){ delete kalshiPosPaths[k]; } });
     rows.forEach(function(r){ var L = kalshiPosPaths[r.ticker] || []; r.path = L.map(function(x){ return x.v; }); r.pathT = L.map(function(x){ return x.t; }); });
-    var perpHtml = kalshiPerpsHtml(kalshiPerpRows(a), escapeHtml, kalshiMoney);
+    var perpHtml = kalshiPerpsHtml(kalshiPerpRows(a), escapeHtml, kalshiMoney, a.perpsCushion, kalshiPerpsState.marks);
     posEl.innerHTML = (rows.length || !perpHtml ? kalshiPositionsHtml(rows, escapeHtml, kalshiMoney) : '') + perpHtml;
   }
   var kalshiBooksLast = null;
@@ -3658,7 +3695,7 @@
     return out;
   }
   function kalshiLineSvg(points, esc, money, g, yTicks){
-    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades.</div>'; }
+    if(!points || points.length < 2){ return '<div class="kal-empty">A line appears after two settled trades or two hourly perps readings.</div>'; }
     var fmt = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     var X = g.X, Y = g.Y, last = points[points.length - 1];
     // A step line: the result holds until the next trade changes it, and holds on to the right edge (now).
@@ -3675,7 +3712,7 @@
   function kalshiPnlPct(net, startBal){ return Number.isFinite(startBal) && startBal > 0 ? (net >= 0 ? '+' : '-') + Math.abs(net / startBal * 100).toFixed(1) + '%' : ''; }
   function kalshiPnlCardHtml(orders, key, nowMs, esc, money, total, perpsHist){
     var since = kalshiPnlRangeStart(key, nowMs), ph = kalshiPerpsSteps(perpsHist, since);
-    if(ph.first !== null){ since = Math.max(since, ph.first); }     // perps history starts at the first snapshot; the line starts there too instead of inventing earlier values
+    // The range is NOT cut to the first perps snapshot (that hid every earlier bot trade on YTD, 1M and All): the perps steps simply start at the first snapshot, nothing earlier is invented.
     var pts = kalshiPnlSeries(orders, since, ph.steps);
     if(pts.length < 2){ return kalshiLineSvg(pts, esc, money); }
     // The result as a share of the account at the start of the range (the total now minus this range's result), so it is a percentage and Privacy view, which masks dollars only, leaves it showing.
