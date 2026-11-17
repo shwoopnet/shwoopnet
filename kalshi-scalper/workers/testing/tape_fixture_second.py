@@ -11,10 +11,10 @@ def build(out):
                 if rnd.random() < 0.08:
                     px[tk] = round(px[tk] * (1 + rnd.gauss(0, 0.0003)), 4); frac = rnd.choice(("", ".5", ".123", ".000000001", ".999999999", ".25"))
                     t = "%sT%02d:%02d:%02d%sZ" % (day, 12 + sec // 3600, (sec % 3600) // 60, sec % 60, frac)
-                    row = [tk, t, repr(px[tk]), rnd.choice(("1", "1", "2", "5", "12", "0.5", "0.02", "10.0", "2.50", "5.0")), rnd.choice(("buy", "sell", "buy", "sell", "", "x")), rnd.choice(("false",) * 12 + ("true", "TRUE", "False"))]
+                    row = [tk, t, repr(px[tk]), rnd.choice(("1", "1", "2", "5", "12", "0.5", "0.02", "10.0", "2.50", "5.0")), rnd.choice(("bid", "ask", "bid", "ask", "", "x")), rnd.choice(("false",) * 12 + ("true", "TRUE", "False"))]
                     trades.append(row)
                     if rnd.random() < 0.05: trades.append(list(row))                       # a genuine repeat inside one page
-        d0 = int(day[-2:]); trades.append(["KXGOLDPERP", "2026-10-%02dT23:59:59Z" % (d0 - 1), "40.0", "1", "buy", "false"]); trades.append(["KXGOLDPERP", "2026-10-%02dT00:00:01Z" % (d0 + 1), "40.1", "2", "sell", "false"])        # midnight overlap rows of the neighbouring dates
+        d0 = int(day[-2:]); trades.append(["KXGOLDPERP", "2026-10-%02dT23:59:59Z" % (d0 - 1), "40.0", "1", "bid", "false"]); trades.append(["KXGOLDPERP", "2026-10-%02dT00:00:01Z" % (d0 + 1), "40.1", "2", "ask", "false"])        # midnight overlap rows of the neighbouring dates
         rows = []; page = 0
         for i in range(0, len(trades), 40):
             chunk = trades[i:i + 40]; page += 1; recv = 1000 * page

@@ -3,9 +3,9 @@ import tape_bars_second as T
 
 def row(t, p, c, side, blk, recv="100", tk="KXT", f="2026-11-17.csv.gz"): return {"file": f, "t_recv_ms": recv, "ticker": tk, "created_time": t, "price": p, "count": c, "taker_side": side, "is_block_trade": blk}
 # file order is NEWEST FIRST within a page (reverse time), as the stored tape
-ROWS = [row("2026-11-17T12:04:00Z", "10.40", "1", "sell", "false"), row("2026-11-17T12:03:05Z", "9.00", "7", "buy", "TRUE"), row("2026-11-17T12:01:45Z", "10.50", "2", "xxx", "false"), row("2026-11-17T12:01:30Z", "9.90", "4", "buy", "true"),
-        row("2026-11-17T12:01:00Z", "10.30", "1", "sell", "false"), row("2026-11-17T12:01:00.000Z", "10.10", "5", "buy", "false"), row("2026-11-17T12:00:59.999999999Z", "10.20", "3", "sell", "false"), row("2026-11-17T12:00:10Z", "10.00", "2", "buy", "false"),
-        row("2026-11-17T12:00:10Z", "10.00", "2", "buy", "false", recv="200"), row("2026-11-17T12:00:59.999999999Z", "10.20", "3", "sell", "false", recv="100")]       # last two: a page overlap (later recv: dropped) and a genuine repeat (same recv: kept)
+ROWS = [row("2026-11-17T12:04:00Z", "10.40", "1", "ask", "false"), row("2026-11-17T12:03:05Z", "9.00", "7", "bid", "TRUE"), row("2026-11-17T12:01:45Z", "10.50", "2", "xxx", "false"), row("2026-11-17T12:01:30Z", "9.90", "4", "bid", "true"),
+        row("2026-11-17T12:01:00Z", "10.30", "1", "ask", "false"), row("2026-11-17T12:01:00.000Z", "10.10", "5", "bid", "false"), row("2026-11-17T12:00:59.999999999Z", "10.20", "3", "ask", "false"), row("2026-11-17T12:00:10Z", "10.00", "2", "bid", "false"),
+        row("2026-11-17T12:00:10Z", "10.00", "2", "bid", "false", recv="200"), row("2026-11-17T12:00:59.999999999Z", "10.20", "3", "ask", "false", recv="100")]       # last two: a page overlap (later recv: dropped) and a genuine repeat (same recv: kept)
 
 class TT(unittest.TestCase):
     def test_hand_case(self):
@@ -18,17 +18,17 @@ class TT(unittest.TestCase):
         s = summ[("2026-11-17.csv.gz", "KXT")]; self.assertEqual((s["rows_read"], s["rows_kept"], s["merged_by_repeat"], s["kept_same_recv"], s["block_rows"], s["unknown_side_trades"], s["bars_written"], s["bars_only_block"], s["block_volume_in_those"]), (10, 9, 1, 1, 2, 1, 3, 1, 7))
         self.assertEqual(ticks[("2026-11-17.csv.gz", "KXT")], T.Decimal("0.10"))
     def test_tie_close_by_reverse_file_order(self):
-        rs = [row("2026-11-17T12:00:20Z", "5.0", "1", "buy", "false"), row("2026-11-17T12:00:20Z", "6.0", "1", "buy", "false"), row("2026-11-17T12:00:20Z", "7.0", "1", "sell", "false")]   # file order 5, 6, 7: printed order 7, 6, 5
+        rs = [row("2026-11-17T12:00:20Z", "5.0", "1", "bid", "false"), row("2026-11-17T12:00:20Z", "6.0", "1", "bid", "false"), row("2026-11-17T12:00:20Z", "7.0", "1", "ask", "false")]   # file order 5, 6, 7: printed order 7, 6, 5
         b = T.build(rs, {"KXT"})[0][("KXT", 1794916860)]; self.assertEqual((float(b["open"]), float(b["close"])), (7.0, 5.0))
-        rs = [row("2026-11-17T12:00:20.5Z", "5.0", "1", "buy", "false"), row("2026-11-17T12:00:20Z", "6.0", "1", "buy", "false")]                    # exact time wins over file order
+        rs = [row("2026-11-17T12:00:20.5Z", "5.0", "1", "bid", "false"), row("2026-11-17T12:00:20Z", "6.0", "1", "bid", "false")]                    # exact time wins over file order
         b = T.build(rs, {"KXT"})[0][("KXT", 1794916860)]; self.assertEqual((float(b["open"]), float(b["close"])), (6.0, 5.0))
     def test_overlap_keeps_earliest_recv(self):
-        a = row("2026-11-17T12:00:20Z", "5.0", "1", "buy", "false", recv="300"); b = row("2026-11-17T12:00:20Z", "5.0", "1", "buy", "false", recv="100"); c = row("2026-11-17T12:00:20Z", "5.0", "1", "buy", "false", recv="100")
+        a = row("2026-11-17T12:00:20Z", "5.0", "1", "bid", "false", recv="300"); b = row("2026-11-17T12:00:20Z", "5.0", "1", "bid", "false", recv="100"); c = row("2026-11-17T12:00:20Z", "5.0", "1", "bid", "false", recv="100")
         bars, summ, _ = T.build([a, b, c], {"KXT"}); bb = bars[("KXT", 1794916860)]; s = summ[("2026-11-17.csv.gz", "KXT")]
         self.assertEqual((bb["n_trades"], bb["volume"], s["merged_by_repeat"], s["kept_same_recv"]), (2, 2, 1, 1))
-        d = row("2026-11-17T12:00:20Z", "5.0", "1", "sell", "false", recv="500"); self.assertEqual(T.build([b, d], {"KXT"})[0][("KXT", 1794916860)]["n_trades"], 2)       # a different side is a different trade
+        d = row("2026-11-17T12:00:20Z", "5.0", "1", "ask", "false", recv="500"); self.assertEqual(T.build([b, d], {"KXT"})[0][("KXT", 1794916860)]["n_trades"], 2)       # a different side is a different trade
     def test_decimal_counts(self):
-        rs = [row("2026-11-17T12:00:10Z", "5.0", "0.02", "buy", "false"), row("2026-11-17T12:00:11Z", "5.0", "0.01", "buy", "false"), row("2026-11-17T12:00:12Z", "5.0", "10.0", "sell", "false"), row("2026-11-17T12:00:13Z", "5.0", "12.5", "sell", "false"), row("2026-11-17T12:00:14Z", "5.0", "5", "buy", "true"), row("2026-11-17T12:00:15Z", "5.0", "2.50", "buy", "true")]
+        rs = [row("2026-11-17T12:00:10Z", "5.0", "0.02", "bid", "false"), row("2026-11-17T12:00:11Z", "5.0", "0.01", "bid", "false"), row("2026-11-17T12:00:12Z", "5.0", "10.0", "ask", "false"), row("2026-11-17T12:00:13Z", "5.0", "12.5", "ask", "false"), row("2026-11-17T12:00:14Z", "5.0", "5", "bid", "true"), row("2026-11-17T12:00:15Z", "5.0", "2.50", "bid", "true")]
         bars, summ, _ = T.build(rs, {"KXT"}); b = bars[("KXT", 1794916860)]; s = summ[("2026-11-17.csv.gz", "KXT")]
         self.assertEqual((T.plain(b["volume"]), T.plain(b["buy_volume"]), T.plain(b["sell_volume"]), T.plain(b["block_volume"]), b["n_trades"], b["block_count"]), ("22.53", "0.03", "22.5", "7.5", 4, 2))
         self.assertEqual((s["count_whole_dot"], s["count_fraction"]), (1, 4))          # 10.0 is whole with a dot; 0.02, 0.01, 12.5 and 2.50 are fractions
@@ -41,18 +41,18 @@ class TT(unittest.TestCase):
         self.assertEqual(T.end_ts_of(T.parse_ns("2026-11-17T12:00:59.999999999Z")), 1794916860); self.assertEqual(T.end_ts_of(a), 1794916920)
     def test_bad_rows_raise(self):
         for kw in ({"count": "-1"}, {"count": "0"}, {"count": "0.0"}, {"count": ""}, {"count": "1e3"}, {"count": "x"}, {"count": "1."}, {"count": ".5"}, {"count": "+1"}, {"price": "0"}, {"price": "abc"}, {"is_block_trade": "maybe"}, {"price": "-1"}):
-            r = row("2026-11-17T12:00:10Z", "1.0", "1", "buy", "false"); r.update(kw)
+            r = row("2026-11-17T12:00:10Z", "1.0", "1", "bid", "false"); r.update(kw)
             with self.assertRaises(ValueError): T.build([r], {"KXT"})
     def test_wall_not_parsed(self):
         bad = {"file": "2026-11-17.csv.gz", "ticker": "KXOTHER"}; bars, summ, ticks = T.build([bad] + ROWS, {"KXT"}); self.assertEqual(len(bars), 3); self.assertEqual(summ[("2026-11-17.csv.gz", "_outside_wall")]["rows"], 1)
     def test_two_tickers_one_file(self):
-        rs = [row("2026-11-17T12:00:20Z", "5.0", "1", "buy", "false", tk="KXA"), row("2026-11-17T12:00:20Z", "9.0", "1", "buy", "false", tk="KXB")]
+        rs = [row("2026-11-17T12:00:20Z", "5.0", "1", "bid", "false", tk="KXA"), row("2026-11-17T12:00:20Z", "9.0", "1", "bid", "false", tk="KXB")]
         bars, summ, _ = T.build(rs, {"KXA", "KXB"}); self.assertEqual((float(bars[("KXA", 1794916860)]["close"]), float(bars[("KXB", 1794916860)]["close"])), (5.0, 9.0)); self.assertEqual(len(T.summary_lines(summ, {})), 3)         # header and two lines
     def test_other_date_and_held_rows(self):
-        rs = [row("2026-11-17T23:59:59Z", "5.0", "1", "buy", "false"), row("2026-11-18T00:00:00Z", "6.0", "1", "buy", "false"), row("2026-11-17T12:00:00Z", "7.0", "1", "sell", "false")]
+        rs = [row("2026-11-17T23:59:59Z", "5.0", "1", "bid", "false"), row("2026-11-18T00:00:00Z", "6.0", "1", "bid", "false"), row("2026-11-17T12:00:00Z", "7.0", "1", "ask", "false")]
         bars, summ, _ = T.build(rs, {"KXT"}); s = summ[("2026-11-17.csv.gz", "KXT")]; self.assertEqual((s["rows_read"], s["rows_other_date"], s["rows_kept"]), (3, 1, 2)); self.assertEqual(len(bars), 2)
         held = lambda tk, t: t >= 1794916860 + 1000       # everything from 12:17:20 on
-        rs2 = [row("2026-11-17T12:00:00Z", "7.0", "1", "sell", "false"), row("2026-11-17T12:20:00Z", "8.0", "1", "sell", "false"), row("2026-11-17T12:17:19Z", "9.0", "1", "sell", "false")]
+        rs2 = [row("2026-11-17T12:00:00Z", "7.0", "1", "ask", "false"), row("2026-11-17T12:20:00Z", "8.0", "1", "ask", "false"), row("2026-11-17T12:17:19Z", "9.0", "1", "ask", "false")]
         bars, summ, _ = T.build(rs2, {"KXT"}, held); s = summ[("2026-11-17.csv.gz", "KXT")]; self.assertEqual((s["rows_held"], s["rows_kept"], len(bars)), (1, 2, 2))      # t < from is not held, the boundary is inclusive from 12:17:20
         self.assertEqual(T.summary_lines(summ, {})[1].split(",")[-4:-2], ["0", "1"])
     def test_holds_loader(self):
@@ -76,7 +76,7 @@ class TT(unittest.TestCase):
             H = ["t_recv_ms", "server_date_header", "ticker", "created_time", "price", "count", "taker_side", "is_block_trade"]; os.makedirs(os.path.join(d, "tape"))
             for day in ("2026-10-05", "2026-10-06", "2026-10-30"):
                 with gzip.open(os.path.join(d, "tape", day + ".csv.gz"), "wt", newline="") as f:
-                    w = csv.writer(f); w.writerow(H); w.writerow(["100", "hdr", "KXT", day + "T12:00:10Z", "5.0", "1", "buy", "false"]); w.writerow(["100", "hdr", "KXT", day + "T12:00:20Z", "5.5", "1", "sell", "false"]); w.writerow(["1", "h", "KXOTHER", "bad", "bad", "bad", "bad", "bad"])
+                    w = csv.writer(f); w.writerow(H); w.writerow(["100", "hdr", "KXT", day + "T12:00:10Z", "5.0", "1", "bid", "false"]); w.writerow(["100", "hdr", "KXT", day + "T12:00:20Z", "5.5", "1", "ask", "false"]); w.writerow(["1", "h", "KXOTHER", "bad", "bad", "bad", "bad", "bad"])
             open(os.path.join(d, "tape", "all-history.csv.gz"), "wb").write(b"junk")
             hp = os.path.join(d, "h.json"); open(hp, "w").write(json.dumps({"forward_default_deny_from": 1794787200, "rows": []})); hs = T.hashlib.sha256(open(hp, "rb").read()).hexdigest()
             allow = os.path.join(d, "a.md"); me = T.sha(open(T.__file__).read()); ms = T.manifest_sha(T.manifest_of(d, T.list_files(d, "2026-10-05", "2026-10-06")))
@@ -89,3 +89,10 @@ class TT(unittest.TestCase):
                 line(**kw)
                 with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06", hp, hs)
         finally: shutil.rmtree(d)
+
+class TSide(unittest.TestCase):
+    def test_amendment_6_sides(self):
+        """taker_side exactly bid = bought, exactly ask = sold; buy, sell, BID, Ask, empty = unknown (neither column, counted)"""
+        rs = [row("2026-11-17T12:00:%02dZ" % (10 + i), "5.0", str(c), sd, "false") for i, (sd, c) in enumerate((("bid", 1), ("ask", 2), ("buy", 4), ("sell", 8), ("BID", 16), ("Ask", 32), ("", 64)))]
+        bars, summ, ticks = T.build(rs, {"KXT"}); b = bars[("KXT", 1794916860)]
+        self.assertEqual((b["buy_volume"], b["sell_volume"], b["volume"], b["n_trades"]), (1, 2, 127, 7)); self.assertEqual(summ[("2026-11-17.csv.gz", "KXT")]["unknown_side_trades"], 5)

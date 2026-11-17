@@ -83,7 +83,7 @@ def build(rows, wall, held=None):
         if block: b["block_volume"] += count; b["block_count"] += 1; summ[fk]["block_rows"] += 1
         else:
             b["trades"].append((t_ns, -i, price, count, side, r["file"]))
-            if side not in ("buy", "sell"): summ[fk]["unknown_side_trades"] += 1
+            if side not in ("bid", "ask"): summ[fk]["unknown_side_trades"] += 1
     out = {}; prices = collections.defaultdict(set)
     for (tk, e), b in sorted(bars.items()):
         fl = sorted(b["files"])[0]; s = summ[(fl, tk)]
@@ -92,7 +92,7 @@ def build(rows, wall, held=None):
         tr = sorted(b["trades"], key=lambda x: (x[0], x[1])); ps = [x[2] for x in tr]
         for x in tr: prices[(x[5], tk)].add(x[2])
         out[(tk, e)] = {"ticker": tk, "end_ts": e, "open": ps[0], "high": max(ps), "low": min(ps), "close": ps[-1], "volume": sum((x[3] for x in tr), Decimal(0)), "n_trades": len(tr),
-                        "buy_volume": sum((x[3] for x in tr if x[4] == "buy"), Decimal(0)), "sell_volume": sum((x[3] for x in tr if x[4] == "sell"), Decimal(0)), "block_volume": b["block_volume"], "block_count": b["block_count"]}
+                        "buy_volume": sum((x[3] for x in tr if x[4] == "bid"), Decimal(0)), "sell_volume": sum((x[3] for x in tr if x[4] == "ask"), Decimal(0)), "block_volume": b["block_volume"], "block_count": b["block_count"]}
         s["bars_written"] += 1
     ticks = {}
     for fk, ps in prices.items():
