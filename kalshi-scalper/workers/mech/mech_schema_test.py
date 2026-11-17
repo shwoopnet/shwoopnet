@@ -28,5 +28,5 @@ except ValueError: pass
 bad = dict(reg[0]); bad["signal"] = ["price_level", "spread"]; assert S.validate_entry(bad)
 pat = dict(next(e for e in reg if e["kind"] == "pattern")); pat["status"] = "live"; assert S.validate_entry(pat)
 # 11. every declined pattern matches at least the row it was written for (a self check)
-pats = [e for e in reg if e["kind"] == "pattern"]; assert len(pats) == 11
+pats = [e for e in reg if e["kind"] == "pattern"]; assert len(pats) == 11, len(pats)
 print("ok:", len(reg), "entries; all hand cases pass")
