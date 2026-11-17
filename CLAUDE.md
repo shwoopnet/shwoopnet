@@ -1857,3 +1857,7 @@ Research only, public GET only, same job and branch (`perp-live-data`), no new s
 ## Held-out log: MECH1 fast clock cost script (Nov 17, 2026, Auditor B's allow line, the Head's request)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's `fastclock_cost.py` (sha256 5a5f9837..., commit e42ef6c60 on `claude/idea-desk-c`; I hashed it, its test 114bd154... and the imported `engine1_core.py` 53317e4b..., which equals the copy on main). It measures spread, fee and round-trip cost only (medians and counts, never a result or price) on three NC15 series, the perps candles' bid and ask, and in-game folders dated before Nov 12, so the Nov 18 first run's cost screen can be priced. Not a go to run. Docs only.
+
+## Cards in a row are the same height (Nov 17, 2026, the owner: "really bugs me how they aren't even")
+
+Page only. `.kal-console` aligned its cards to the start of the row, so a half width Account card and a half width Open positions card with a saved height of 480px ended at different places. It now stretches (`align-items:stretch`): the row is as tall as its tallest card and every card without its own set height fills it, so the bottoms line up; a card the owner resized keeps that height, and a folded card keeps its own. The margin cushion and perp rows text are not drawn (the bare minimum rule above); the perp price line appears after two reads (about 4 minutes) with the page open. Gate EH1 (`test/equalHeightsGates.test.js`).
