@@ -45,5 +45,22 @@ class T(unittest.TestCase):
         o = F.ingame(root)
         self.assertEqual(o["rows_used"], 1); self.assertAlmostEqual(o["median_spread_cents"], 3.0, 6); self.assertNotIn(SECRET, json.dumps(o))
 
+class Ingame(unittest.TestCase):
+    def test_h04_folders_skipped_and_bad_date_refused(self):
+        root = tempfile.mkdtemp()
+        for day, val in (("2026-11-11", "0.50"), ("2026-11-12", SECRET), ("2026-11-14", SECRET)):
+            d = "%s/%s/1500" % (root, day); os.makedirs(d)
+            with gzip.open(d + "/obs.csv.gz", "wt", newline="") as f:
+                w = csv.writer(f); w.writerow(["t_recv_ms", "kind", "yes_bid", "yes_ask"]); w.writerow([1, "ml", val, "0.53" if day == "2026-11-11" else "0.9999"])
+        o = F.ingame(root)
+        self.assertEqual((o["folders_skipped_h04"], o["rows_used"]), (2, 1))
+        self.assertAlmostEqual(o["median_spread_cents"], 3.0, 6)
+        self.assertNotIn(SECRET, json.dumps(o))
+        os.makedirs(root + "/notadate/1500")
+        open(root + "/notadate/1500/obs.csv.gz", "wb").close()
+        with self.assertRaises(SystemExit):
+            F.ingame(root)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -189,6 +189,29 @@ class Positions(unittest.TestCase):
         self.assertGreater(total, 50)                                          # the fixture does trade in every column family
 
 
+class Amendment7(unittest.TestCase):
+    def test_maker_fill_candle_window(self):
+        lo, hi = P.WINDOWS["W1"]
+        sig = calendar.timegm((2026, 10, 30, 13, 59, 0))                      # EDT: 09:59 ET, the signal candle (inside W1)
+        self.assertTrue(P.entry_ok(sig + 60, lo, hi, True))                   # the taker entry candle 10:00 ET is inside
+        self.assertFalse(P.entry_ok(sig + 180, lo, hi, True))                 # a maker fill at 10:02 ET is outside: no entry, counted as 'window'
+        self.assertFalse(P.entry_ok(calendar.timegm((2026, 11, 26, 15, 0, 0)), 9 * 60 + 35, 15 * 60 + 35, True))   # a holiday has no session
+        w2lo, w2hi = P.WINDOWS["W2"]
+        self.assertFalse(P.entry_ok(calendar.timegm((2026, 10, 30, 14, 0, 0)), w2lo, w2hi, False))          # exactly 10:00 ET is outside W2 (lower bound exclusive)
+        self.assertTrue(P.entry_ok(calendar.timegm((2026, 10, 30, 14, 1, 0)), w2lo, w2hi, False))
+        sess = P.sess_end(P.datetime(2026, 11, 27).date())                    # an early close day: the last entry is 10 minutes before 12:45 ET
+        self.assertTrue(P.entry_ok(calendar.timegm((2026, 11, 27, 17, 35, 0)), 9 * 60 + 35, 15 * 60 + 35, True))    # 12:35 ET
+        self.assertFalse(P.entry_ok(calendar.timegm((2026, 11, 27, 17, 36, 0)), 9 * 60 + 35, 15 * 60 + 35, True))   # 12:36 ET
+
+    def test_halves_key_is_entry_then_ticker(self):
+        a = {"e": 100, "side": -1, "name": "KXB", "net": 1.0, "day": "d", "crossed": False, "stop_dist": 0}
+        b = {"e": 100, "side": 1, "name": "KXA", "net": -1.0, "day": "d", "crossed": False, "stop_dist": 0}
+        c = {"e": 160, "side": 1, "name": "KXA", "net": 2.0, "day": "e", "crossed": False, "stop_dist": 0}
+        m = P.metrics([c, a, b])
+        self.assertEqual(m["n"], 3)                                          # h = 1: the first half is KXA at e=100 (net -1), regardless of side
+        self.assertEqual(m["h1"], 0.0)
+
+
 class Hand(unittest.TestCase):
     def test_grid(self):
         self.assertEqual(P.N_CELLS, 168)

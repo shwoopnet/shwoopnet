@@ -223,6 +223,16 @@ def funding_of(fu, side, e, x):
 STATS = {}
 
 
+def entry_ok(e, lo, hi, lo_inclusive):
+    """is the entry candle ending at e inside the window [lo, hi] (ET minutes after midnight) and at least 10 minutes before the session end? Used for a maker FILL candle (Amendment 7)"""
+    wd, m, d = et_min(e)
+    end_d = sess_end(d)
+    if end_d is None:
+        return False
+    hi_d = min(hi, end_d - 10)
+    return (lo <= m <= hi_d) if lo_inclusive else (lo < m <= hi_d)
+
+
 def build_trade(c, fu, tick, t, side, U, ref, k_t, k_s, T, col, N, h):
     """One trade for a signal at candle t. col 'TT' taker/taker, 'MT' maker entry taker exit, 'MM' maker entry and maker target. -> dict or None (not filled / no exit)."""
     q = c[t]
@@ -301,7 +311,7 @@ def day_z(trs):
 
 
 def metrics(trs):
-    trs = sorted(trs, key=lambda t: (t["e"], t["side"]))
+    trs = sorted(trs, key=lambda t: (t["e"], t.get("name", "")))              # Auditor B: entry end, then ticker ascending, nothing else
     n = len(trs)
     h = n // 2
     xs = [t["net"] for t in trs]
@@ -394,6 +404,9 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
                                 tr = build_trade(cc, fu[n], ticks[n], t, side, U, ref, k_t, k_s, T, col, N, HAIRCUTS[0])
                                 if tr is None:
                                     continue
+                                if not entry_ok(tr["e"], lo, hi, WIN_OPEN[w]):                  # Amendment 7: the window and session bound apply to the entry candle, which for a maker order is the FILL candle
+                                    STATS["maker_fill_outside_window"] = STATS.get("maker_fill_outside_window", 0) + 1
+                                    continue
                                 if col == "MT":
                                     filled = True                                               # the limit filled (adverse selection compares filled with unfilled signals)
                                 if tr["e"] >= busy[key] and tr["e"] - last_e[key] >= COOLDOWN:       # one position per name in each column
@@ -424,6 +437,7 @@ def run(root, m_carried=6290660, N_fill=(2, 5)):
     counts["ticks"] = ticks
     counts["load"] = {k: (sorted(v) if isinstance(v, set) else v) for k, v in st.items()}
     counts["no_exit_candle"] = STATS.get("no_exit_candle", 0)
+    counts["maker_fill_outside_window"] = STATS.get("maker_fill_outside_window", 0)
     counts["h16_rows_dropped"] = st.get("h16_rows", 0)
     return {"label": "candle replay, upper bound, not fill-checked; exit checks on bid and ask closes miss intra-minute touches (a lower bound on target and stop hits); "
                      "DEVELOPMENT through 2026-11-15, the same days as PERPSCALP1, PERPSLANE4 and POOL1; day z is a normal approximation on a few days; first week, one regime",
