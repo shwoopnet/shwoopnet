@@ -1822,9 +1822,12 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
-                <div class="changelog-day">Nov 16</div>
+                <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
                   <li>Bot page: the perp rows now follow the real data shape (value is margin plus return, cost is margin, the multiplier is shown as an estimate, and Closes at, the buffer and auto close levels say n/a or not readable until they can be read). Perps older than 20 minutes drop out of the total and say so. No perps read is wired yet, so nothing shows.</li>
+                </ul>
+                <div class="changelog-day">Nov 16</div>
+                <ul class="changelog-list">
                   <li>Bot page: the Account module's balance is now one combined total of predictions and perps (total only, no breakdown), and Today and the result line include the perps change. It is display only: the loss stops and sizing still use the bot's trade results and prediction cash alone. No perps data is connected yet, so the page shows predictions only until it is.</li>
                   <li>Bot page: the Open positions card has a layout for perpetual (perp) positions, copied from the Kalshi app: market and Up or Down, the multiplier, current value, return in dollars and percent, cost, leveraged size, entry and index price, a risk label with a buffer bar, the forced-close price and any auto close levels. They are marked Perp and are not the bot's trades. No perp data is connected yet, so nothing shows until it is.</li>
                   <li>Research: a new recorder saves Kalshi's whole perpetual markets list and the order books of the active ones every minute, to its own data branch (public data, nothing trades; the owner approved the extra Actions minutes).</li>
