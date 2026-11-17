@@ -2,7 +2,7 @@
 import sys, os, json, hashlib
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import mech_schema as S, mech_registry_rows as RR
-EVIDENCE = {"D_CRON_CLUSTER": "UNKNOWN: 7e row cites CRONCLUSTER1 stage A (V2) with no data scope written; kept WIDE (any market) until the VA reads the evidence", "D_FRACTIONAL_SIZE_FLOW": "UNKNOWN: 7e row cites RETAILFRAC1 stage A (V2) with no data scope written; kept WIDE until the VA reads the evidence"}
+EVIDENCE = {}
 def build():
     out = []
     for r in RR.R:
@@ -15,6 +15,18 @@ def build():
         if errs: raise SystemExit("INVALID %s: %s" % (e["id"], errs))
         if e["id"] in EVIDENCE: e["evidence_market_scope"] = EVIDENCE[e["id"]]
         out.append(e)
+    import glob
+    have = {e["id"]: i for i, e in enumerate(out)}
+    for f in sorted(glob.glob(os.path.join(here, "desk_b_rows", "*.json"))):
+        for e in json.load(open(f))["entries"]:
+            e = dict(e); e.setdefault("kind", "signature"); e["verified"] = (e.get("confidence") == "hand_read"); e["source_batch"] = "Desk B " + os.path.basename(f)
+            errs = S.validate_entry(e)
+            if errs: raise SystemExit("INVALID Desk B row %s: %s" % (e.get("id"), errs))
+            if e["id"] in have:
+                mine = out[have[e["id"]]]
+                if e["verified"] and not mine["verified"]: out[have[e["id"]]] = e        # a hand-read row replaces my unverified one
+                continue
+            have[e["id"]] = len(out); out.append(e)
     ids = [e["id"] for e in out]
     if len(set(ids)) != len(ids): raise SystemExit("duplicate ids")
     return out

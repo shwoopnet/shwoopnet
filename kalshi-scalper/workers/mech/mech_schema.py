@@ -13,7 +13,7 @@ ENTRY = ("taker", "maker_touch", "both")                 # ADDED: "both" for two
 EXIT = ("hold_to_settle", "fixed_time", "take_profit_multiple", "stop", "next_print", "none")   # ADDED: "none" for rows with no exit (declined patterns, ideas)
 SIDE = ("favourite", "cheap", "follow", "fade", "both", "any")
 FIELDS = (("market", MARKET), ("signal", SIGNAL), ("clock", CLOCK), ("entry", ENTRY), ("exit", EXIT), ("side", SIDE))
-STATUS = ("live", "trial", "shadow", "paused", "retired", "falsified", "declined", "closed_by_evidence", "closed_unread", "idea", "paper")
+STATUS = ("live", "trial", "shadow", "paused", "retired", "falsified", "declined", "closed_by_evidence", "closed_unread", "idea", "paper", "exploratory")
 def _vals(v): return ["*"] if v == "*" else (list(v) if isinstance(v, (list, tuple)) else [v])
 def validate_entry(e):
     errs = []
@@ -35,7 +35,7 @@ def field_match(entry_v, cand_v):
     vs = _vals(entry_v)
     return "*" in vs or cand_v in vs
 def classify(cand, registry):
-    """-> (verdict, entry id or None, why, extra). verdict: DECLINED | DUPLICATE | VERSION_NEW_MARKET | NEW. cand: dict with the six fields, one value each; optional `tickers` (list) and `idea` (a name). extra: {"provisional": bool, "excluded_tickers": [...]}."""
+    """-> (verdict, entry id or None, why, extra). verdict: DECLINED | DUPLICATE | VERSION_NEW_MARKET | UNVERIFIED_MATCH | NEW. cand: dict with the six fields, one value each; optional `tickers` (list) and `idea` (a name). extra: {"provisional": bool, "excluded_tickers": [...]}."""
     for f, vocab in FIELDS:
         if cand.get(f) not in vocab: raise ValueError("candidate %s %r not in vocabulary" % (f, cand.get(f)))
     ctick = list(cand.get("tickers") or []); excluded = set()
@@ -49,11 +49,13 @@ def classify(cand, registry):
             if not hit: continue
             if len(hit) < len(ctick): excluded.update(hit); continue
         return "DECLINED", e["id"], "matches the declined pattern " + e["id"] + " (" + e.get("source", "") + ")", {"provisional": False, "excluded_tickers": sorted(excluded)}
-    ver = None
+    ver = None; unv = None
     for e in registry:
         if e.get("kind") == "pattern": continue
         if field_match(e["signal"], cand["signal"]) and field_match(e["clock"], cand["clock"]) and field_match(e["exit"], cand["exit"]):
+            if e.get("verified") is False: unv = unv or e["id"]; continue         # a row nobody read (from_title, from_ledger_row) never decides DUPLICATE or VERSION alone (Desk B, the VA)
             if field_match(e["market"], cand["market"]): return "DUPLICATE", e["id"], "same market family, signal, clock class and exit logic as " + e["id"], {"provisional": False, "excluded_tickers": sorted(excluded)}
             ver = ver or e["id"]
     if ver: return "VERSION_NEW_MARKET", ver, "same signal, clock class and exit logic as " + ver + " on another market family: a version (owner, Nov 17: never NEW)", {"provisional": False, "excluded_tickers": sorted(excluded)}
+    if unv: return "UNVERIFIED_MATCH", unv, "matches only the UNVERIFIED row " + unv + " (not read against its rule text); scored and labelled, a human or the VA decides", {"provisional": True, "excluded_tickers": sorted(excluded)}
     return "NEW", None, "a new signal field, clock class or exit logic against every entry; provisional until the VA signs it", {"provisional": True, "excluded_tickers": sorted(excluded)}

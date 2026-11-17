@@ -9,22 +9,26 @@ def v(**k): return S.classify(c(**k), reg)
 # 1. OICORE's signal, clock class and exit again on the same family: DUPLICATE
 r = v(signal="open_interest"); assert r[0] == "DUPLICATE" and r[1] in ("OICORE", "OIREL1") and not r[3]["provisional"], r
 # 2. the same on a new family: a version, never NEW (the owner, Nov 17)
-r = v(market="hourly_ladder", signal="open_interest"); assert r[0] == "VERSION_NEW_MARKET", r
+r = v(market="politics", signal="open_interest"); assert r[0] == "VERSION_NEW_MARKET", r
 # 2b. open interest on a new family with a NEW exit logic is NEW and provisional
-r = v(market="hourly_ladder", signal="open_interest", exit="stop"); assert r[0] == "NEW" and r[3]["provisional"], r
+r = v(market="politics", signal="open_interest", exit="stop"); assert r[0] == "NEW" and r[3]["provisional"], r
 # 3. favourite-and-hold on any family is DECLINED by the pattern
 r = v(side="favourite"); assert r[0] == "DECLINED" and r[1] == "D_FAVOURITE_AND_HOLD", r
 # 4. two-sided market making is DECLINED
 r = v(signal="none", clock="any_minute", entry="both", exit="none", side="both", market="crypto_perp"); assert r[0] == "DECLINED" and r[1] == "D_TWO_SIDED_MM", r
 # 5. funding rate at a print on a crypto perp: NEW, provisional
-r = v(market="crypto_perp", signal="funding_rate", clock="print", exit="next_print", side="fade"); assert r[0] == "NEW" and r[3]["provisional"], r
-# 6. PERPEQ1 (Monday gap: stock perp, price change, reopen, timed exit): the same on stock perps is DUPLICATE, on index perps a version, with a hold exit NEW
-r = v(market="stock_perp", signal="price_change", clock="reopen", exit="fixed_time", side="follow"); assert r[0] == "DUPLICATE" and r[1] == "PERPEQ1", r
-r = v(market="index_perp", signal="price_change", clock="reopen", exit="fixed_time", side="follow"); assert r[0] == "VERSION_NEW_MARKET" and r[1] == "PERPEQ1", r
+r = v(market="crypto_perp", signal="book_depth_imbalance", clock="print", exit="next_print", side="fade"); assert r[0] == "NEW" and r[3]["provisional"], r
+# 5b. funding rate on crypto perps at a print is already a version (Desk B's FUND1 and BASIS1 rows)
+r = v(market="crypto_perp", signal="funding_rate", clock="print", exit="next_print", side="fade"); assert r[0] == "VERSION_NEW_MARKET", r
+# 5c. volume on crypto perps at any minute, a timed exit: NEW provisional
+r = v(market="crypto_perp", signal="volume", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "NEW" and r[3]["provisional"], r
+# 6. PERPEQ1 (Monday gap: stock perp, price change, reopen, timed exit) and S_GOLD_REOPEN_GAP are UNVERIFIED rows, so a matching candidate is UNVERIFIED_MATCH (scored, labelled), never DUPLICATE; with a hold exit it is NEW
+r = v(market="stock_perp", signal="price_change", clock="reopen", exit="fixed_time", side="follow"); assert r[0] == "UNVERIFIED_MATCH" and r[3]["provisional"], r
+r = v(market="index_perp", signal="price_change", clock="reopen", exit="fixed_time", side="follow"); assert r[0] == "UNVERIFIED_MATCH", r
 r = v(market="stock_perp", signal="price_change", clock="reopen", exit="hold_to_settle", side="follow"); assert r[0] == "NEW", r
-# 7. taker tape flow on any market is DECLINED by the wide patterns; as a maker it is a version of the 15 minute tape-flow rows
-r = v(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "DECLINED" and r[1] in ("D_CRON_CLUSTER", "D_FRACTIONAL_SIZE_FLOW"), r
-r = v(market="crypto_perp", signal="tape_flow", clock="any_minute", entry="maker_touch", exit="fixed_time", side="follow"); assert r[0] == "VERSION_NEW_MARKET", r
+# 7. taker tape flow on perps: a version of the 15 minute tape-flow rows (the owner: keep it a version); a maker version likewise
+r = v(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "DUPLICATE" and r[1] == "PERPFLOW1", r      # Desk B's hand-read PERPFLOW1 row already covers crypto perp tape flow (a duplicate, not a version); the two wide patterns were narrowed to R6's five series (the VA's evidence line), so a perps taker tape-flow signature is a labelled version, not declined
+r = v(market="crypto_perp", signal="tape_flow", clock="any_minute", entry="maker_touch", exit="fixed_time", side="follow"); assert r[0] == "DUPLICATE", r        # the entry type never makes a signature new
 # 8. 15 minute taker flow is DECLINED even with another exit
 r = v(signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "DECLINED", r
 # 9. a vocabulary error raises
@@ -47,4 +51,7 @@ r = S.classify(c(market="weather", signal="external_model", clock="any_minute", 
 # 14. unverified rows are marked
 assert all(e["verified"] == (e["confidence"] == "hand_read") for e in reg)
 pats = [e for e in reg if e["kind"] == "pattern"]; assert len(pats) == 19, len(pats)
+# 15. an UNVERIFIED row alone never decides DUPLICATE or VERSION: it returns UNVERIFIED_MATCH (scored, labelled)
+u = [dict(id="ZZ_UNV", status="idea", market="politics", signal="volume", clock="any_minute", entry="taker", exit="fixed_time", side="follow", source="t", confidence="from_title", kind="signature", verified=False)]
+r = S.classify(c(market="politics", signal="volume", clock="any_minute", exit="fixed_time", side="follow"), u); assert r[0] == "UNVERIFIED_MATCH" and r[1] == "ZZ_UNV" and r[3]["provisional"], r
 print("ok:", len(reg), "entries; all hand cases pass;", sum(1 for e in reg if not e["verified"]), "rows unverified")
