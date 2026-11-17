@@ -1,0 +1,1 @@
+taker_side check 2 run, side_check2.py 4918b5d9 (allow line PR 1072), frozen snapshot perp-live-data bf86ba398 and perp-tape 4d5e4d92 (9 files), list sha256 02b86c83bad357074b328a36ccb0eaf29d7617d4e0719497b783b4cff7f30b0f (recomputed, equal to Main). Output sha256 739df8c142256e22059e2179add0f0a5db60ee2dd3b6749b6c89a0acbc08a691, printed before reading.
