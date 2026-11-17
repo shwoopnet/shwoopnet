@@ -1,2 +1,3 @@
 PERPSCALP2 rerun on the fixed build (Amendment 7), once, Nov 17, 2026. Print PERPSCALP2_PRINT3_NOV17.txt sha256 (committed BEFORE it was read): 946b47950e6a0084bfc1ed0ccd4357f77cd6a3e957cac7537c9a2b9145fecd29
 perpscalp2.py 19e6ba90562a6d71, perpscalp2_run.py (unchanged), same perp-data files as the Nov 16 print, m_carried 6290660 as in that print, exit 0, no stderr.
+Deviation, recorded Nov 17: this rerun ran BEFORE the allow line named perpscalp2.py 19e6ba90 (the line named b2c98390); Auditor B recommended ratifying it as for print2 (Main's line pending), and said not to delete or rerun. The print was not opened by Desk C before the sha commit.
