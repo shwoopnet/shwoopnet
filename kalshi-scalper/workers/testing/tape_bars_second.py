@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""60-day tape, 1 minute bar builder, BUILD 2 (Testing Desk, Nov 17, 2026), blind from Desk A's PERPS_TAPE60_AMENDMENT_NOV17.md at 207f46fa5 (sha256 d7e94090df1f4635c6fc25b84bc7629ff4e426dfb4497c47a8ae848c4048b37e), sections 1, 2 and 6 (settled readings T1 to T18). Pure functions on rows; the file reader below checks an allow line.
-Rows: dicts with ticker, trade_id, created_time, price, count, taker_side, is_block_trade (strings as stored)."""
+"""60-day tape, 1 minute bar builder, BUILD 2 (Testing Desk, Nov 17, 2026), blind from Desk A's PERPS_TAPE60_AMENDMENT_NOV17.md at be97878d7 (sha256 fe3d8144a845303571cad5cb53dc82fdfd681a06dcea029b20c684d6914f7e71): sections 2 and 6 (bars, readings T1 to T18) as changed by sections 7 and 8 (one file per UTC date holding all tickers, no trade_id, dedupe by the six fields and the earliest t_recv_ms, ties by reverse file order). Pure functions on rows; the file reader below checks an allow line.
+Rows: dicts with file, t_recv_ms, ticker, created_time, price, count, taker_side, is_block_trade (strings as stored)."""
 import calendar, collections, csv, glob, gzip, hashlib, os, re, sys
 from decimal import Decimal, InvalidOperation
 
 TIME_RE = re.compile(r"^(\d{4})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.(\d{1,9}))?(?:Z|\+00:00)$")
-COLS = ("ticker", "trade_id", "created_time", "price", "count", "taker_side", "is_block_trade")
+COLS = ("t_recv_ms", "ticker", "created_time", "price", "count", "taker_side", "is_block_trade")      # server_date_header is not used
+SIX = ("ticker", "created_time", "price", "count", "taker_side", "is_block_trade")
 BAR_COLS = ("ticker", "end_ts", "open", "high", "low", "close", "volume", "n_trades", "buy_volume", "sell_volume", "block_volume", "block_count")
 NS = 10 ** 9
 
@@ -41,37 +42,43 @@ def parse_block(s):
 
 
 def build(rows, wall):
-    """rows in file order (sorted path order over files); wall = set of tickers. -> (bars {(ticker, end_ts): dict}, summary {ticker: counts and tick})"""
-    seen = {}; bars = {}; summ = {}
-    for r in rows:
-        tk = r["ticker"]
-        if tk not in wall: summ.setdefault("_outside_wall", collections.Counter())["rows"] += 1; continue          # the wall: nothing else of the row is parsed
-        s = summ.setdefault(tk, collections.Counter()); s["rows_read"] += 1
-        key = (tk, r["trade_id"])
-        if key in seen:
-            s["duplicates_dropped"] += 1
-            if tuple(r[c] for c in COLS) != seen[key]: s["duplicate_differs"] += 1
-            continue
-        seen[key] = tuple(r[c] for c in COLS); s["rows_kept"] += 1
+    """Amendment sections 7 and 8. rows: dicts in FILE ORDER (sorted path order, then the row order of each file) with file, t_recv_ms, ticker, created_time, price, count, taker_side, is_block_trade (strings as stored).
+    The wall first (other tickers are counted, never parsed). The same six fields with DIFFERENT t_recv_ms are one trade seen on two pages: only the rows with the EARLIEST t_recv_ms are kept (merged_by_repeat counts the dropped rows); the same six fields with the SAME t_recv_ms are real repeated prints, all kept (kept_same_recv counts the kept rows beyond the first).
+    Inside a bar: exact created_time ascending, ties by REVERSE file order (the last row of the file first). -> (bars, summary {(file, ticker): Counter}, ticks {(file, ticker): Decimal})"""
+    summ = collections.defaultdict(collections.Counter); groups = {}; order = []
+    for i, r in enumerate(rows):
+        tk = r["ticker"]; fk = (r["file"], tk)
+        if tk not in wall: summ[(r["file"], "_outside_wall")]["rows"] += 1; continue
+        summ[fk]["rows_read"] += 1; recv = int(r["t_recv_ms"]); key = tuple(r[c] for c in SIX)
+        g = groups.setdefault(key, []); g.append((recv, i, r))
+    kept = []
+    for key, g in groups.items():
+        m = min(x[0] for x in g); keep = [x for x in g if x[0] == m]; fk = (g[0][2]["file"], g[0][2]["ticker"])
+        summ[fk]["merged_by_repeat"] += len(g) - len(keep)
+        if len(keep) > 1: summ[fk]["kept_same_recv"] += len(keep) - 1
+        kept.extend(keep)
+    bars = {}
+    for recv, i, r in kept:
+        fk = (r["file"], r["ticker"]); summ[fk]["rows_kept"] += 1
         t_ns = parse_ns(r["created_time"]); price = parse_price(r["price"]); count = parse_count(r["count"]); block = parse_block(r["is_block_trade"]); side = r["taker_side"]
-        b = bars.setdefault((tk, end_ts_of(t_ns)), {"trades": [], "block_volume": 0, "block_count": 0})
-        if block: b["block_volume"] += count; b["block_count"] += 1; s["block_rows"] += 1
+        b = bars.setdefault((r["ticker"], end_ts_of(t_ns)), {"trades": [], "block_volume": 0, "block_count": 0, "files": set()}); b["files"].add(r["file"])
+        if block: b["block_volume"] += count; b["block_count"] += 1; summ[fk]["block_rows"] += 1
         else:
-            b["trades"].append((t_ns, r["trade_id"], price, count, side))
-            if side not in ("buy", "sell"): s["unknown_side_trades"] += 1
+            b["trades"].append((t_ns, -i, price, count, side, r["file"]))
+            if side not in ("buy", "sell"): summ[fk]["unknown_side_trades"] += 1
     out = {}; prices = collections.defaultdict(set)
     for (tk, e), b in sorted(bars.items()):
-        s = summ[tk]
+        fl = sorted(b["files"])[0]; s = summ[(fl, tk)]
         if not b["trades"]:
             s["bars_only_block"] += 1; s["block_volume_in_those"] += b["block_volume"]; continue
         tr = sorted(b["trades"], key=lambda x: (x[0], x[1])); ps = [x[2] for x in tr]
-        for x in tr: prices[tk].add(x[2])
+        for x in tr: prices[(x[5], tk)].add(x[2])
         out[(tk, e)] = {"ticker": tk, "end_ts": e, "open": ps[0], "high": max(ps), "low": min(ps), "close": ps[-1], "volume": sum(x[3] for x in tr), "n_trades": len(tr),
                         "buy_volume": sum(x[3] for x in tr if x[4] == "buy"), "sell_volume": sum(x[3] for x in tr if x[4] == "sell"), "block_volume": b["block_volume"], "block_count": b["block_count"]}
         s["bars_written"] += 1
     ticks = {}
-    for tk, ps in prices.items():
-        v = sorted(ps); d = [b - a for a, b in zip(v, v[1:])]; ticks[tk] = min(d) if d else None
+    for fk, ps in prices.items():
+        v = sorted(ps); d = [y - x for x, y in zip(v, v[1:])]; ticks[fk] = min(d) if d else None
     return out, summ, ticks
 
 
@@ -85,10 +92,11 @@ def bar_text(bars): return "".join(bar_line(bars[k]) + "\n" for k in sorted(bars
 
 
 def summary_lines(summ, ticks):
-    """one line per ticker (sorted): ticker,rows_read,rows_kept,duplicates_dropped,duplicate_differs,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick"""
+    """one line per (file, ticker) sorted: file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick"""
     L = []
-    for tk in sorted(k for k in summ if k != "_outside_wall"):
-        s = summ[tk]; tick = ticks.get(tk); L.append(",".join([tk] + [str(s[k]) for k in ("rows_read", "rows_kept", "duplicates_dropped", "duplicate_differs", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["null" if tick is None else f17(tick)]))
+    for fk in sorted(k for k in summ if k[1] != "_outside_wall"):
+        s = summ[fk]; tick = ticks.get(fk)
+        L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["null" if tick is None else f17(tick)]))
     return L
 
 
@@ -96,8 +104,8 @@ def sha(text): return hashlib.sha256(text.encode()).hexdigest()
 
 
 def read_file(path, wall):
-    """one tape file (gzip CSV, header, columns by name; extra columns ignored; a missing required column raises) -> rows; the ticker column is checked first and rows of other tickers are returned as a bare ticker (never parsed)"""
-    rows = []
+    """one date file (gzip CSV with a header; columns by name; extra columns ignored; a missing required column raises). The ticker column is checked FIRST: a row of another ticker keeps only its ticker."""
+    rows = []; name = os.path.basename(path)
     with gzip.open(path, "rt", newline="") as fh:
         r = csv.reader(fh); h = next(r, None)
         if h is None: raise ValueError("empty file %s" % path)
@@ -106,17 +114,17 @@ def read_file(path, wall):
             if c not in idx: raise ValueError("%s lacks column %s" % (path, c))
         ti = idx["ticker"]
         for row in r:
-            if row[ti] not in wall: rows.append({"ticker": row[ti]}); continue
-            rows.append({c: row[idx[c]] for c in COLS})
+            if row[ti] not in wall: rows.append({"file": name, "ticker": row[ti]}); continue
+            d = {c: row[idx[c]] for c in COLS}; d["file"] = name; rows.append(d)
     return rows
 
 
 def build_from_files(root, wall, allow_file, mark="readable ONLY by the Testing Desk's tape bar builder"):
-    """REFUSES unless the allow-list file has a line with the mark naming this file's sha256; reads <root>/tape/<UTC date>/<ticker>.csv.gz for wall tickers only, in sorted path order"""
+    """REFUSES unless the allow-list file has a line with the mark naming this file's sha256; reads <root>/tape/YYYY-MM-DD.csv.gz in sorted path order"""
     text = open(allow_file, encoding="utf-8").read(); me = sha(open(os.path.abspath(__file__)).read())
     line = [l for l in text.splitlines() if mark in l]
     if not line or "tape_bars_second.py" not in line[0] or me not in line[0]: raise SystemExit("REFUSED: no allow-list line naming tape_bars_second.py with sha256 %s" % me)
-    paths = sorted(p for t in wall for p in glob.glob(os.path.join(root, "tape", "*", t + ".csv.gz"))); man = sorted((os.path.relpath(p, root), hashlib.sha256(open(p, "rb").read()).hexdigest()) for p in paths)
-    rows = []
-    for p in sorted(paths, key=lambda p: (os.path.relpath(p, root))): rows.extend(read_file(p, set(wall)))
+    paths = sorted(p for p in glob.glob(os.path.join(root, "tape", "*.csv.gz")) if re.match(r"^\d{4}-\d\d-\d\d\.csv\.gz$", os.path.basename(p)))
+    man = sorted((os.path.relpath(p, root), hashlib.sha256(open(p, "rb").read()).hexdigest()) for p in paths); rows = []
+    for p in paths: rows.extend(read_file(p, set(wall)))
     bars, summ, ticks = build(rows, set(wall)); return bars, summ, ticks, man
