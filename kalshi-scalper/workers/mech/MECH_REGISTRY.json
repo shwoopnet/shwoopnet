@@ -2,11 +2,11 @@
  "registry": "MECH_REGISTRY v0",
  "date": "2026-11-17",
  "spec": "MECHANISM_ENGINE_SPEC.md (rnd-queue 785fe85a4)",
- "count": 92,
+ "count": 100,
  "signatures": 81,
- "patterns": 11,
+ "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "c017e56f2df357c3d97e7ccd4ed4403ce6118167f505fbf01ae852ec81db04ac",
+ "rows_sha256": "c301d5f909e0aba1413ca7e1beb1c4114542f807f51b4ee2b0c14f589889ad6c",
  "entries": [
   {
    "id": "L1",
@@ -19,6 +19,7 @@
    "side": "favourite",
    "source": "CLAUDE.md gold L1: 88c to 97c, 6 min look, 25c exit",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -32,6 +33,7 @@
    "side": "cheap",
    "source": "CLAUDE.md SLOT-OICORE",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -45,6 +47,7 @@
    "side": "cheap",
    "source": "CLAUDE.md Nov 15; a version of OICORE (relative rise)",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -58,6 +61,7 @@
    "side": "favourite",
    "source": "CLAUDE.md Nov 15 trial seat",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -71,6 +75,7 @@
    "side": "cheap",
    "source": "CLAUDE.md SLOT-EVENT830",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -84,6 +89,7 @@
    "side": "cheap",
    "source": "CLAUDE.md SLOT-CFRTIK (perp reference model, one look at 120 s)",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -97,6 +103,7 @@
    "side": "cheap",
    "source": "CLAUDE.md SLOT-SPXOI1",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -110,6 +117,7 @@
    "side": "favourite",
    "source": "CLAUDE.md retired Nov 11",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -123,6 +131,7 @@
    "side": "favourite",
    "source": "CLAUDE.md retired Nov 11",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -136,6 +145,7 @@
    "side": "cheap",
    "source": "CLAUDE.md FLOW1 removed Nov 4",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -149,6 +159,7 @@
    "side": "favourite",
    "source": "CLAUDE.md shadow, retired Nov 11",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -162,6 +173,7 @@
    "side": "favourite",
    "source": "CLAUDE.md shadow, retired Nov 11",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -175,6 +187,7 @@
    "side": "favourite",
    "source": "CLAUDE.md shadow, retired Nov 11",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -188,6 +201,7 @@
    "side": "favourite",
    "source": "CLAUDE.md SHADOW-GOLDOFF (gold's entry logged while off)",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -201,6 +215,7 @@
    "side": "cheap",
    "source": "ledger: five-level imbalance, thin side, look 600 s",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -214,6 +229,7 @@
    "side": "cheap",
    "source": "ledger: R6 order-book features, gold and Bitcoin",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -227,6 +243,7 @@
    "side": "any",
    "source": "ENGINE1: 13 looks x 18 bands x 4 side rules x 6 exits",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -240,6 +257,7 @@
    "side": "follow",
    "source": "lanes 1: stock-basket relative strength, 96 rules, Nov 17 week",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -253,6 +271,7 @@
    "side": "fade",
    "source": "lanes 6: pairs z-scores, 48 rules, Nov 17 week",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "signature"
   },
   {
@@ -266,6 +285,7 @@
    "side": "favourite",
    "source": "README H1 favourites held to settlement",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -279,6 +299,7 @@
    "side": "cheap",
    "source": "README H2 buy 40c or 50c, sell 80c",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -292,6 +313,7 @@
    "side": "both",
    "source": "README H3 resting buys earn the spread",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -305,6 +327,7 @@
    "side": "cheap",
    "source": "README H4 buy 30c sell 80c",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -318,6 +341,7 @@
    "side": "both",
    "source": "README H5 market maker both sides",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -331,6 +355,7 @@
    "side": "follow",
    "source": "README: does Kalshi lag spot Bitcoin",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -344,6 +369,7 @@
    "side": "follow",
    "source": "README H7: spot distance to the target",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -357,6 +383,7 @@
    "side": "follow",
    "source": "README exploratory path situations",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -370,6 +397,7 @@
    "side": "follow",
    "source": "README M1 early window momentum",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -383,6 +411,7 @@
    "side": "any",
    "source": "README strategy search S01 to S42",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -396,6 +425,7 @@
    "side": "favourite",
    "source": "README filters on L1",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -409,6 +439,7 @@
    "side": "favourite",
    "source": "README two more filters on L1",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -422,6 +453,7 @@
    "side": "follow",
    "source": "README H7 distance rule near settlement",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -435,6 +467,7 @@
    "side": "favourite",
    "source": "README exits for L1",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -448,6 +481,7 @@
    "side": "favourite",
    "source": "README price bands for L1",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -461,6 +495,7 @@
    "side": "cheap",
    "source": "README the cheap side scalped early",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -474,6 +509,7 @@
    "side": "favourite",
    "source": "README favourite scalps and the dip buy",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -487,6 +523,7 @@
    "side": "follow",
    "source": "README early taker flow",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -500,6 +537,7 @@
    "side": "cheap",
    "source": "README tick-level scalps",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -513,6 +551,7 @@
    "side": "favourite",
    "source": "README L1 on ETH and SOL",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -526,6 +565,7 @@
    "side": "any",
    "source": "README opening window lanes",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -539,6 +579,7 @@
    "side": "any",
    "source": "README opening-scalp searches",
    "confidence": "from_title",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -552,6 +593,7 @@
    "side": "follow",
    "source": "ledger: Bitcoin perp 15 minute OI change as signal",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -565,6 +607,7 @@
    "side": "cheap",
    "source": "ledger: Kraken spot, no evidence at n 32",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -578,6 +621,7 @@
    "side": "cheap",
    "source": "ledger: signal and price from the R6 book",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -591,6 +635,7 @@
    "side": "cheap",
    "source": "ledger: S&P futures-implied fair value",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -604,6 +649,7 @@
    "side": "cheap",
    "source": "ledger: EVENT830's rule on KXINX15M, a version",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -617,6 +663,7 @@
    "side": "follow",
    "source": "ledger: order-flow resilience after a sweep",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -630,6 +677,7 @@
    "side": "both",
    "source": "ledger: maker on the Bitcoin hourly ladder",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -643,6 +691,7 @@
    "side": "cheap",
    "source": "ledger: spread cell, FAIL Nov 12",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -656,6 +705,7 @@
    "side": "follow",
    "source": "ledger: follow a one-minute in-play jump",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -669,6 +719,7 @@
    "side": "follow",
    "source": "ledger: pre-match move, withdrawn unread",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -682,6 +733,7 @@
    "side": "cheap",
    "source": "ledger: e-soccer Tie against a base rate",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -695,6 +747,7 @@
    "side": "fade",
    "source": "ledger: e-soccer rematch, closed at stage 1",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -708,6 +761,7 @@
    "side": "follow",
    "source": "ledger: esports break after map 1",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -721,6 +775,7 @@
    "side": "cheap",
    "source": "ledger: esports void prices, stage 1",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -734,6 +789,7 @@
    "side": "fade",
    "source": "ledger: NBA points props, NO at 50c",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -747,6 +803,7 @@
    "side": "follow",
    "source": "ledger: politics overnight gap, 07:00 Eastern",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -760,6 +817,7 @@
    "side": "follow",
    "source": "ledger: W-POL-APPR1 approval poll cells",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -773,6 +831,7 @@
    "side": "cheap",
    "source": "ledger: one trade on every non-January release",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -786,6 +845,7 @@
    "side": "follow",
    "source": "ledger: 4 hour exit after a release",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -799,6 +859,7 @@
    "side": "favourite",
    "source": "ledger: combo house side NO at 60c to 90c",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -812,19 +873,21 @@
    "side": "follow",
    "source": "ledger: book levels withdrawing, closed at intake as not unique",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
    "id": "PERPEQ1",
    "status": "idea",
-   "market": "crypto_perp",
-   "signal": "none",
-   "clock": "print",
+   "market": "stock_perp",
+   "signal": "price_change",
+   "clock": "reopen",
    "entry": "taker",
-   "exit": "next_print",
-   "side": "any",
-   "source": "ledger: perps equity read",
+   "exit": "fixed_time",
+   "side": "follow",
+   "source": "ledger/VA Nov 17: Monday gap on stock perps (price change across the weekend reopen)",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -838,19 +901,21 @@
    "side": "any",
    "source": "ledger: roll-off proxy killed",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
    "id": "WHEEL0",
    "status": "idea",
    "market": "15m_noncrypto",
-   "signal": "price_level",
-   "clock": "fixed_time_to_close",
+   "signal": "none",
+   "clock": "any_minute",
    "entry": "taker",
    "exit": "hold_to_settle",
-   "side": "cheap",
-   "source": "ledger: rotation lane wheel",
+   "side": "any",
+   "source": "ledger: rotation lane premise: a META rule on a strategy's own recent results (HOT 60 blocks), not a market signal; stored with signal none",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -864,6 +929,7 @@
    "side": "any",
    "source": "ledger: 600,000 generated strategies, best PF 1.51",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -877,6 +943,7 @@
    "side": "cheap",
    "source": "strategies-registry WH-NC15-* wheel places (same signature as NC15DEPTH1)",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -890,6 +957,7 @@
    "side": "cheap",
    "source": "strategies-registry WH-CFRTIK-* (CFRTIK on silver, copper, WTI, HYPE, BNB)",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -903,6 +971,7 @@
    "side": "cheap",
    "source": "strategies-registry CL-TIE3: period ties",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -916,6 +985,7 @@
    "side": "follow",
    "source": "strategies-registry CL-WXDAYEND: brackets after the climate day ends",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -929,6 +999,7 @@
    "side": "follow",
    "source": "strategies-registry CL-S2-STOCKS: stocks, long leg",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -942,6 +1013,7 @@
    "side": "follow",
    "source": "strategies-registry CL-POLI2: politics singles, exit before settlement",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -955,6 +1027,7 @@
    "side": "fade",
    "source": "strategies-registry CL-PREDRIFT: pre-match drift, other side",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -968,6 +1041,7 @@
    "side": "any",
    "source": "strategies-registry W-NO-ARM1: approval markets a day before the close, NO paid 0.75 to 0.90 or 0.10 to 0.25",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -981,6 +1055,7 @@
    "side": "follow",
    "source": "strategies-registry W-SPOTLEAD1: Coinbase minute candles priced against the market",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -994,6 +1069,7 @@
    "side": "both",
    "source": "strategies-registry MMSIM1",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -1007,6 +1083,7 @@
    "side": "follow",
    "source": "strategies-registry RAINCAL, retired unread",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -1020,6 +1097,7 @@
    "side": "cheap",
    "source": "shadow lists V1 to V4: spread:low filter with a timed exit",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -1033,6 +1111,7 @@
    "side": "cheap",
    "source": "shadow lists: mom3 or mom5 filter",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -1046,6 +1125,7 @@
    "side": "cheap",
    "source": "shadow lists: oi3 or oi6 filter (a DUPLICATE of OICORE's signal and clock)",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -1059,7 +1139,146 @@
    "side": "favourite",
    "source": "shadow lists: vol3 or vspike filter",
    "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
+  },
+  {
+   "id": "D_DOGE",
+   "status": "declined",
+   "market": "*",
+   "signal": "*",
+   "clock": "*",
+   "entry": "*",
+   "exit": "*",
+   "side": "*",
+   "source": "7e: Dogecoin removed (the owner, Nov 9): any Dogecoin strategy",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXDOGE15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
+  },
+  {
+   "id": "D_XRP_L1",
+   "status": "declined",
+   "market": "15m_crypto",
+   "signal": "price_level",
+   "clock": "fixed_time_to_close",
+   "entry": "taker",
+   "exit": "*",
+   "side": "favourite",
+   "source": "7e: XRP as an L1 market, any XRP favourite rule (XRPYES10 was a named exception, retired)",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXXRP15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
+  },
+  {
+   "id": "D_BTC_L1",
+   "status": "declined",
+   "market": "15m_crypto",
+   "signal": "price_level",
+   "clock": "fixed_time_to_close",
+   "entry": "taker",
+   "exit": "*",
+   "side": "favourite",
+   "source": "7e: Bitcoin as L1, any Bitcoin favourite or smooth-climb rule",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXBTC15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
+  },
+  {
+   "id": "D_ETH_L1",
+   "status": "declined",
+   "market": "15m_crypto",
+   "signal": "price_level",
+   "clock": "fixed_time_to_close",
+   "entry": "taker",
+   "exit": "*",
+   "side": "favourite",
+   "source": "7e: Ethereum as L1",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXETH15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
+  },
+  {
+   "id": "D_PROBE_MARKETS",
+   "status": "declined",
+   "market": "15m_noncrypto",
+   "signal": "*",
+   "clock": "*",
+   "entry": "*",
+   "exit": "*",
+   "side": "*",
+   "source": "7e: probe markets AUD/USD, USD/CAD, natural gas, any other rule on them under L1 (KESTREL was a named exception, retired)",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXAUDUSD15M",
+    "KXUSDCAD15M",
+    "KXNATGAS15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
+  },
+  {
+   "id": "D_GOLD_BAND_NARROW",
+   "status": "declined",
+   "market": "15m_noncrypto",
+   "signal": "price_level",
+   "clock": "fixed_time_to_close",
+   "entry": "taker",
+   "exit": "*",
+   "side": "favourite",
+   "source": "7e: gold L1 band narrowed above 0.92 (GOLDHI6S, gold-band)",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXGOLD15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
+  },
+  {
+   "id": "D_GOLD_FLOOR_945",
+   "status": "closed_by_evidence",
+   "market": "15m_noncrypto",
+   "signal": "price_level",
+   "clock": "fixed_time_to_close",
+   "entry": "taker",
+   "exit": "*",
+   "side": "favourite",
+   "source": "7e: gold 94.5c price floor variants (W-BAND945)",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXGOLD15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
+  },
+  {
+   "id": "D_GOLD_LADDER_CAP",
+   "status": "declined",
+   "market": "15m_noncrypto",
+   "signal": "price_level",
+   "clock": "fixed_time_to_close",
+   "entry": "taker",
+   "exit": "*",
+   "side": "favourite",
+   "source": "7e: gold ladder cap and half-size rule: a SIZE rule, stored on the gold L1 shape; the registry has no size field",
+   "confidence": "hand_read",
+   "tickers": [
+    "KXGOLD15M"
+   ],
+   "verified": true,
+   "kind": "pattern"
   },
   {
    "id": "D_TWO_SIDED_MM",
@@ -1072,6 +1291,7 @@
    "side": "both",
    "source": "7e: two-sided market making",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1088,6 +1308,11 @@
    "side": "*",
    "source": "7e: weather forecast against brackets",
    "confidence": "hand_read",
+   "exceptions": [
+    "WXDAYEND",
+    "ORHARVEST1"
+   ],
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1104,6 +1329,7 @@
    "side": "*",
    "source": "7e: taker order flow on the 15 minute tape",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1117,6 +1343,7 @@
    "side": "favourite",
    "source": "7e / Charter: favourite-and-hold (named exceptions only)",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1130,6 +1357,7 @@
    "side": "favourite",
    "source": "7e: maker or resting entries on gold",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1143,6 +1371,7 @@
    "side": "both",
    "source": "7e: lock and parity scans",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1156,6 +1385,7 @@
    "side": "fade",
    "source": "7e: ex-dividend short on stock perps",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1169,6 +1399,7 @@
    "side": "cheap",
    "source": "7e: tie or frozen-source premium on non-crypto 15 minute",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   },
   {
@@ -1182,6 +1413,7 @@
    "side": "*",
    "source": "7e: second-of-minute taker clustering (timing)",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern",
    "evidence_market_scope": "UNKNOWN: 7e row cites CRONCLUSTER1 stage A (V2) with no data scope written; kept WIDE (any market) until the VA reads the evidence"
   },
@@ -1196,6 +1428,7 @@
    "side": "*",
    "source": "7e: fractional-size flow against whole-number flow",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern",
    "evidence_market_scope": "UNKNOWN: 7e row cites RETAILFRAC1 stage A (V2) with no data scope written; kept WIDE until the VA reads the evidence"
   },
@@ -1210,7 +1443,8 @@
     "price_level",
     "price_change",
     "cross_market_residual",
-    "spread"
+    "spread",
+    "spot_elsewhere"
    ],
    "clock": "*",
    "entry": "taker",
@@ -1218,6 +1452,7 @@
    "side": "*",
    "source": "7e: cheap-side price, regime and grammar rules on the 15 minute series (no new data source)",
    "confidence": "hand_read",
+   "verified": true,
    "kind": "pattern"
   }
  ]

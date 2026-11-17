@@ -7,6 +7,8 @@ def build():
     out = []
     for r in RR.R:
         e = dict(zip(("id", "status", "market", "signal", "clock", "entry", "exit", "side", "source", "confidence"), r[:10]))
+        if len(r) > 11: e.update(r[11])
+        e["verified"] = (e["confidence"] == "hand_read")
         if len(r) > 10: e["kind"] = r[10]
         else: e["kind"] = "signature"
         errs = S.validate_entry(e)

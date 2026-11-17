@@ -67,9 +67,9 @@ R = [
 ("ECONLAG", "idea", "economics", "event_calendar", "scheduled_event", "taker", "fixed_time", "follow", "ledger: 4 hour exit after a release", "from_ledger_row"),
 ("S3_COMBO_HOUSE", "paper", "combo", "price_level", "any_minute", "taker", "hold_to_settle", "favourite", "ledger: combo house side NO at 60c to 90c", "from_ledger_row"),
 ("WITHDRAW1", "closed_unread", C15, "book_depth_imbalance", "any_minute", "taker", "fixed_time", "follow", "ledger: book levels withdrawing, closed at intake as not unique", "from_ledger_row"),
-("PERPEQ1", "idea", "crypto_perp", "none", "print", "taker", "next_print", "any", "ledger: perps equity read", "from_ledger_row"),
+("PERPEQ1", "idea", "stock_perp", "price_change", "reopen", "taker", "fixed_time", "follow", "ledger/VA Nov 17: Monday gap on stock perps (price change across the weekend reopen)", "from_ledger_row"),
 ("ROLLOFF", "closed_by_evidence", "index_perp", "none", "reopen", "taker", "fixed_time", "any", "ledger: roll-off proxy killed", "from_ledger_row"),
-("WHEEL0", "idea", N15, "price_level", "fixed_time_to_close", "taker", "hold_to_settle", "cheap", "ledger: rotation lane wheel", "from_ledger_row"),
+("WHEEL0", "idea", N15, "none", "any_minute", "taker", "hold_to_settle", "any", "ledger: rotation lane premise: a META rule on a strategy's own recent results (HOT 60 blocks), not a market signal; stored with signal none", "from_ledger_row"),
 ("GEN12_GEN13", "closed_by_evidence", C15, "price_level", "any_minute", "taker", "fixed_time", "any", "ledger: 600,000 generated strategies, best PF 1.51", "from_ledger_row"),
 # strategies-registry.json rows not covered above (Nov 17, Desk A; Desk B signs the declined and falsified rows, merged when they send theirs)
 ("WH_NC15", "shadow", N15, "book_depth_imbalance", "fixed_time_to_close", "taker", "hold_to_settle", "cheap", "strategies-registry WH-NC15-* wheel places (same signature as NC15DEPTH1)", "from_ledger_row"),
@@ -87,9 +87,18 @@ R = [
 ("ENGINE1_FILTER_MOMENTUM", "shadow", C15, "price_change", "fixed_time_to_close", "taker", "fixed_time", "cheap", "shadow lists: mom3 or mom5 filter", "from_ledger_row"),
 ("ENGINE1_FILTER_OI", "shadow", C15, "open_interest", "fixed_time_to_close", "taker", "fixed_time", "cheap", "shadow lists: oi3 or oi6 filter (a DUPLICATE of OICORE's signal and clock)", "from_ledger_row"),
 ("ENGINE1_FILTER_VOLUME", "shadow", C15, "volume", "fixed_time_to_close", "taker", "hold_to_settle", "favourite", "shadow lists: vol3 or vspike filter", "from_ledger_row"),
+# 7e ticker bans, stored as patterns with a tickers list (the VA's proposal 2; Head, Nov 17)
+("D_DOGE", "declined", "*", "*", "*", "*", "*", "*", "7e: Dogecoin removed (the owner, Nov 9): any Dogecoin strategy", "hand_read", "pattern", {"tickers": ["KXDOGE15M"]}),
+("D_XRP_L1", "declined", C15, "price_level", "fixed_time_to_close", "taker", "*", "favourite", "7e: XRP as an L1 market, any XRP favourite rule (XRPYES10 was a named exception, retired)", "hand_read", "pattern", {"tickers": ["KXXRP15M"]}),
+("D_BTC_L1", "declined", C15, "price_level", "fixed_time_to_close", "taker", "*", "favourite", "7e: Bitcoin as L1, any Bitcoin favourite or smooth-climb rule", "hand_read", "pattern", {"tickers": ["KXBTC15M"]}),
+("D_ETH_L1", "declined", C15, "price_level", "fixed_time_to_close", "taker", "*", "favourite", "7e: Ethereum as L1", "hand_read", "pattern", {"tickers": ["KXETH15M"]}),
+("D_PROBE_MARKETS", "declined", N15, "*", "*", "*", "*", "*", "7e: probe markets AUD/USD, USD/CAD, natural gas, any other rule on them under L1 (KESTREL was a named exception, retired)", "hand_read", "pattern", {"tickers": ["KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M"]}),
+("D_GOLD_BAND_NARROW", "declined", N15, "price_level", "fixed_time_to_close", "taker", "*", "favourite", "7e: gold L1 band narrowed above 0.92 (GOLDHI6S, gold-band)", "hand_read", "pattern", {"tickers": ["KXGOLD15M"]}),
+("D_GOLD_FLOOR_945", "closed_by_evidence", N15, "price_level", "fixed_time_to_close", "taker", "*", "favourite", "7e: gold 94.5c price floor variants (W-BAND945)", "hand_read", "pattern", {"tickers": ["KXGOLD15M"]}),
+("D_GOLD_LADDER_CAP", "declined", N15, "price_level", "fixed_time_to_close", "taker", "*", "favourite", "7e: gold ladder cap and half-size rule: a SIZE rule, stored on the gold L1 shape; the registry has no size field", "hand_read", "pattern", {"tickers": ["KXGOLD15M"]}),
 # declined list 7e, stored as PATTERNS (wildcards and lists allowed)
 ("D_TWO_SIDED_MM", "declined", "*", "none", "any_minute", "both", "*", "both", "7e: two-sided market making", "hand_read", "pattern"),
-("D_WEATHER_FORECAST", "closed_by_evidence", "weather", ["external_model", "price_level"], "*", "*", "hold_to_settle", "*", "7e: weather forecast against brackets", "hand_read", "pattern"),
+("D_WEATHER_FORECAST", "closed_by_evidence", "weather", ["external_model", "price_level"], "*", "*", "hold_to_settle", "*", "7e: weather forecast against brackets", "hand_read", "pattern", {"exceptions": ["WXDAYEND", "ORHARVEST1"]}),
 ("D_15M_TAKER_FLOW", "closed_by_evidence", [C15, N15], "tape_flow", "*", "taker", "*", "*", "7e: taker order flow on the 15 minute tape", "hand_read", "pattern"),
 ("D_FAVOURITE_AND_HOLD", "declined", "*", "price_level", "*", "taker", "hold_to_settle", "favourite", "7e / Charter: favourite-and-hold (named exceptions only)", "hand_read", "pattern"),
 ("D_GOLD_RESTING_ENTRY", "closed_by_evidence", N15, "price_level", "fixed_time_to_close", "maker_touch", "*", "favourite", "7e: maker or resting entries on gold", "hand_read", "pattern"),
@@ -98,5 +107,5 @@ R = [
 ("D_TIE_PREMIUM", "closed_by_evidence", N15, "price_level", "*", "taker", "hold_to_settle", "cheap", "7e: tie or frozen-source premium on non-crypto 15 minute", "hand_read", "pattern"),
 ("D_CRON_CLUSTER", "closed_by_evidence", "*", "tape_flow", "any_minute", "taker", "*", "*", "7e: second-of-minute taker clustering (timing)", "hand_read", "pattern"),
 ("D_FRACTIONAL_SIZE_FLOW", "closed_by_evidence", "*", "tape_flow", "*", "taker", "*", "*", "7e: fractional-size flow against whole-number flow", "hand_read", "pattern"),
-("D_CHEAP_REGIME_GRAMMAR_15M", "closed_by_evidence", [C15, N15], ["price_level", "price_change", "cross_market_residual", "spread"], "*", "taker", "*", "*", "7e: cheap-side price, regime and grammar rules on the 15 minute series (no new data source)", "hand_read", "pattern"),
+("D_CHEAP_REGIME_GRAMMAR_15M", "closed_by_evidence", [C15, N15], ["price_level", "price_change", "cross_market_residual", "spread", "spot_elsewhere"], "*", "taker", "*", "*", "7e: cheap-side price, regime and grammar rules on the 15 minute series (no new data source)", "hand_read", "pattern"),
 ]
