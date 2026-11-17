@@ -38,7 +38,7 @@ def mk(n, base_s, tid0):
     for i in range(n):
         s_ = base_s - i
         iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s_)) + ".500000Z"
-        rows.append({"trade_id": "T%d" % (tid0 - i), "ticker": "KXAAAPERP", "count": "2.00", "price": "10.0100", "created_time": iso, "taker_side": "ask", "is_block_trade": False})
+        rows.append({"trade_id": "T%d" % (tid0 - i), "ticker": "KXBTCPERP", "count": "2.00", "price": "10.0100", "created_time": iso, "taker_side": "ask", "is_block_trade": False})
     return rows
 
 # PLT4: three 429s in a row end the tape STEP (it returns, never raises), the wait doubles 2 s, 4 s and stays under 30 s.
@@ -187,3 +187,43 @@ assert.ok(/^TAPE_ON = True/m.test(code), 'PLT9 the tape step is on');
 assert.ok(/if TAPE_ON and now >= next_tape/.test(code) && /if TAPE_ON:\n\s+ft, ftc = open/.test(code), 'PLT9 the tape files and polls are behind the switch');
 assert.ok(/TAPE_EVERY_S = 60\.0/.test(code), 'PLT9 once a minute');
 console.log('ok   PLT9 tape step on, once a minute');
+
+// PLT10: only the research perps are kept (the Head's list: 19 crypto, gold, US 500, US Tech 100, 13 stocks); the window bookkeeping still counts every trade read; the filtered rows are counted in the coverage row.
+const tk = (code.match(/TAPE_TICKERS = frozenset\(\(([\s\S]*?)\)\)/) || [])[1] || '';
+const list = [...tk.matchAll(/"(KX[A-Z0-9]+PERP)"/g)].map((m) => m[1]);
+assert.strictEqual(list.length, 35, 'PLT10 35 perps');
+for (const need of ['KXBTCPERP', 'KXETHPERP', 'KXGOLDPERP', 'KXUS500PERP', 'KXUSTECH100PERP', 'KXNVDAPERP', 'KXMUPERP', 'KXAMDPERP', 'KXAVGOPERP', 'KXAMATPERP', 'KXAAPLPERP', 'KXMSFTPERP', 'KXGOOGLPERP', 'KXAMZNPERP', 'KXMETAPERP', 'KXXOMPERP', 'KXCVXPERP', 'KXCOPPERP']) assert.ok(list.includes(need), 'PLT10 ' + need);
+assert.ok(!list.includes('KXCOPPERPERP') && !list.includes('KXSILVERPERP'), 'PLT10 copper metal and silver are not in the list (KXCOPPERP is ConocoPhillips)');
+const f = spawnSync('python3', ['-I', '-c', `
+import sys, io, csv, json
+sys.path.insert(0, ${JSON.stringify(path.join(root, 'scripts'))})
+import record_perps_live as R
+buf, bufc = io.StringIO(), io.StringIO()
+def tr(i, tk, ts):
+    return {"trade_id": "X%d" % i, "ticker": tk, "count": "1", "price": "1.5", "created_time": ts, "taker_side": "bid", "is_block_trade": False}
+rows = [tr(1, "KXBTCPERP", "2026-11-17T01:00:05.000000Z"), tr(2, "KXSILVERPERP", "2026-11-17T01:00:09.000000Z"), tr(3, "KXCOPPERPERP", "2026-11-17T01:00:08.000000Z")]
+st = {"min_s": 1, "seen": set()}
+R.tape_poll(st, csv.writer(buf), csv.writer(bufc), lambda p: (200, {"trades": rows, "cursor": None}, "D", 1, 2), 10 ** 12)
+c = list(csv.reader(io.StringIO(bufc.getvalue())))[0]
+print(json.dumps({"kept": len(list(csv.reader(io.StringIO(buf.getvalue())))), "cover": c, "cols": R.TAPE_COVER_COLS, "min_s": st["min_s"]}))
+`], { encoding: 'utf8' });
+assert.strictEqual(f.status, 0, f.stderr);
+const fo = JSON.parse(f.stdout.trim());
+assert.strictEqual(fo.kept, 1, 'PLT10 only the listed perp is written');
+assert.strictEqual(fo.cols[fo.cols.length - 1], 'filtered_out');
+assert.strictEqual(fo.cover[fo.cover.length - 1], '2', 'PLT10 two left-out rows are counted');
+assert.ok(fo.min_s > 1, 'PLT10 the next poll moves forward by every trade read, kept or not (the newest was a left-out perp)');
+console.log('ok   PLT10 ticker filter');
+
+// PLT11: the tape goes to its OWN branch, before perp-live-data is committed, with a 5 GB size stop, and never to main.
+const w = wf.split('\n').filter((l) => !/^\s*#/.test(l)).join('\n');
+assert.ok(/name: Send the trade tape to its own data branch \(perp-tape\), with a 5 GB size stop/.test(w), 'PLT11 step present');
+assert.ok(w.indexOf('Send the trade tape to its own data branch') < w.indexOf('Commit and push the data branch'), 'PLT11 the tape is moved out before perp-live-data is committed');
+assert.ok(/git push -q origin perp-tape/.test(w) && /--orphan perp-tape/.test(w) && !/git push[^\n]*\bmain\b/.test(w), 'PLT11 own orphan branch, never main');
+assert.ok(/-ge 5000000000/.test(w) && /SIZE\.txt/.test(w), 'PLT11 5 GB size stop by a running total on the branch');
+assert.ok(/--filter=blob:none/.test(w) && /git reset -q --mixed FETCH_HEAD/.test(w), 'PLT11 the branch is opened without downloading its data');
+assert.ok(/continue-on-error: true/.test(w.split('Send the trade tape')[1].split('Commit and push the data branch')[0]), 'PLT11 a failed tape push never blocks the perp-live-data commit');
+assert.ok(/echo "STAMP=\$STAMP" >> "\$GITHUB_ENV"/.test(w), 'PLT11 the job folder name is shared between steps');
+assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(w), 'PLT11 still no secret but the built-in token');
+console.log('ok   PLT11 own branch, size stop, order of steps');
+assert.ok(/git add --ignore-removal tape SIZE\.txt/.test(w), 'PLT11 earlier jobs\' files are never removed by a later commit (a plain git add of a folder stages the deletions of files the clone does not hold; found in a local simulation)');
