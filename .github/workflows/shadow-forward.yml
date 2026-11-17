@@ -1,4 +1,4 @@
-# Nov 16, 2026 (the Head of R&D's go, Auditor B's S1 clause and state decision): the generic forward shadow runner. Once a day it reads PUBLIC Kalshi candles and settled markets for the 17 specs of SHADOW_LIST_V1
+# Nov 16, 2026 (the Head of R&D's go, Auditor B's S1 clause and state decision): the generic forward shadow runner. Six times a day (Nov 17, 2026: it was once a day and GitHub dropped the start; every run is idempotent) it reads PUBLIC Kalshi candles and settled markets for the 17 specs of SHADOW_LIST_V1
 # (start 2026-11-17T00:00Z), scores them through Desk A's audited ENGINE1 modules (pinned by sha256 in kalshi-scalper/workers/shadow/SHADOW_RUNNER_CONFIG.json) behind the held-out guard (HOLDS.json, S1 row),
 # and publishes per-spec AGGREGATES only (shadow_results.json, shadow_counts.json) to its OWN orphan branch `shadow-data` (never main). Research only: no key, no order, no Firestore.
 # State (Auditor B, option B): the per-spec ordered net amounts live only in the GitHub Actions cache, keyed by the list sha, the runner sha and the HOLDS.json sha; a miss rebuilds from the public pulls to the identical sequence
@@ -7,7 +7,7 @@
 name: shadow-forward
 on:
   schedule:
-    - cron: "41 3 * * *"
+    - cron: "41 3,7,11,15,19,23 * * *"
   workflow_dispatch: {}
 permissions:
   contents: write
