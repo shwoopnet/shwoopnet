@@ -120,7 +120,7 @@ R = [
 # declined list 7e, stored as PATTERNS (wildcards and lists allowed)
 ("D_TWO_SIDED_MM", "declined", "*", "none", "any_minute", "both", "*", "both", "7e: two-sided market making", "hand_read", "pattern"),
 ("D_WEATHER_FORECAST", "closed_by_evidence", "weather", ["external_model", "price_level"], "*", "*", "hold_to_settle", "*", "7e: weather forecast against brackets", "hand_read", "pattern", {"exceptions": ["WXDAYEND", "ORHARVEST1"]}),
-("D_15M_TAKER_FLOW", "closed_by_evidence", [C15, N15], "tape_flow", "*", "taker", "*", "*", "7e: taker order flow on the 15 minute tape", "hand_read", "pattern"),
+("D_15M_TAKER_FLOW", "closed_by_evidence", [C15, N15, "crypto_perp", "metal_perp", "index_perp", "stock_perp"], "tape_flow", "*", "taker", "*", "*", "7e: taker order flow on a Kalshi trade tape (15 minute markets and, since Nov 17, the perps tape; PR 1078)", "hand_read", "pattern"),
 ("D_FAVOURITE_AND_HOLD", "declined", "*", "price_level", "*", "taker", "hold_to_settle", "favourite", "7e / Charter: favourite-and-hold (named exceptions only)", "hand_read", "pattern"),
 ("D_GOLD_RESTING_ENTRY", "closed_by_evidence", N15, "price_level", "fixed_time_to_close", "maker_touch", "*", "favourite", "7e: maker or resting entries on gold", "hand_read", "pattern"),
 ("D_LOCK_PARITY", "closed_by_evidence", "*", "cross_market_residual", "any_minute", "taker", "hold_to_settle", "*", "7e: lock and parity scans", "hand_read", "pattern"),

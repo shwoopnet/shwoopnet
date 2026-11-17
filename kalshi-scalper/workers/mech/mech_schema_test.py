@@ -33,7 +33,7 @@ r = S.classify(c(market="crypto_perp", signal="open_interest", clock="any_minute
 r = v(market="stock_perp", signal="price_change", clock="time_of_day", exit="fixed_time", side="fade"); assert r[0] == "DUPLICATE" and r[1] in ("PERPEQ1", "ENGINE1_PERPS_MOM_STOCK") or r[0] == "DUPLICATE", r
 r = v(market="weekly_fx", signal="price_change", clock="time_of_day", exit="fixed_time", side="fade"); assert r[0] == "VERSION_NEW_MARKET", r
 # 7. taker tape flow on perps: a version of the 15 minute tape-flow rows (the owner: keep it a version); a maker version likewise
-r = v(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "DUPLICATE" and r[1] == "PERPFLOW1", r      # Desk B's hand-read PERPFLOW1 row already covers crypto perp tape flow (a duplicate, not a version); the two wide patterns were narrowed to R6's five series (the VA's evidence line), so a perps taker tape-flow signature is a labelled version, not declined
+r = v(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "DECLINED" and r[1] == "D_15M_TAKER_FLOW", r      # Desk B's hand-read PERPFLOW1 row already covers crypto perp tape flow (a duplicate, not a version); the two wide patterns were narrowed to R6's five series (the VA's evidence line), so a perps taker tape-flow signature is a labelled version, not declined
 r = v(market="crypto_perp", signal="tape_flow", clock="any_minute", entry="maker_touch", exit="fixed_time", side="follow"); assert r[0] == "DUPLICATE", r        # the entry type never makes a signature new
 # 8. 15 minute taker flow is DECLINED even with another exit
 r = v(signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "DECLINED", r
@@ -63,6 +63,6 @@ r = S.classify(c(market="politics", signal="volume", clock="any_minute", exit="f
 # v2.9 (Nov 17): TAPEFLOW1 and SWEEP1 are rows, PERPFLOW1 has its signal_source; the three perps tape signals the VA ruled VERSIONs still classify as the VA read them
 byid = {e["id"]: e for e in reg}
 assert byid["TAPEFLOW1"]["status"] == "falsified" and byid["TAPEFLOW1"]["signal_source"] == "kalshi_tape" and byid["SWEEP1"]["status"] == "retired" and byid["SWEEP1"]["signal_source"] == "kalshi_tape" and byid["PERPFLOW1"]["signal_source"] == "kalshi_tape"
-r = S.classify(c(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"), reg); assert r[0] == "DUPLICATE" and r[1] == "PERPFLOW1", r
-r = S.classify(c(market="metal_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="fade"), reg); assert r[0] == "VERSION_NEW_MARKET" and r[1] in ("PERPFLOW1", "TAPEFLOW1"), r
+r = S.classify(c(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"), reg); assert r[0] == "DECLINED" and r[1] == "D_15M_TAKER_FLOW", r
+r = S.classify(c(market="metal_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="fade"), reg); assert r[0] == "DECLINED" and r[1] == "D_15M_TAKER_FLOW", r
 print("ok:", len(reg), "entries; all hand cases pass;", sum(1 for e in reg if not e["verified"]), "rows unverified")

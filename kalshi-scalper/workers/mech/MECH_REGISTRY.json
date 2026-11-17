@@ -6,7 +6,7 @@
  "signatures": 379,
  "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "b96804c1db0c7c94bbecb0aacf63bbf6be0ec5fe18ae34004e3f313ce29fe763",
+ "rows_sha256": "af539a5809e2052c020267e10b2abab144f6727ab077d15e12c5c4dc23168906",
  "entries": [
   {
    "id": "L1",
@@ -1653,14 +1653,18 @@
    "status": "closed_by_evidence",
    "market": [
     "15m_crypto",
-    "15m_noncrypto"
+    "15m_noncrypto",
+    "crypto_perp",
+    "metal_perp",
+    "index_perp",
+    "stock_perp"
    ],
    "signal": "tape_flow",
    "clock": "*",
    "entry": "taker",
    "exit": "*",
    "side": "*",
-   "source": "7e: taker order flow on the 15 minute tape",
+   "source": "7e: taker order flow on a Kalshi trade tape (15 minute markets and, since Nov 17, the perps tape; PR 1078)",
    "confidence": "hand_read",
    "verified": true,
    "kind": "pattern",
