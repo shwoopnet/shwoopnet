@@ -1,5 +1,9 @@
 """Test of the BTC page reader on INVENTED pages (no real data). python3 -I mech1_generate_btc_test.py"""
 import os, sys, gzip, json, random, tempfile, hashlib, datetime
+def _body(p):
+    b = open(p, "rb").read()
+    try: return gzip.decompress(b)
+    except OSError: return b          # a filler page that is not gzip (never opened by the reader)
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import mech1_generate_btc as B, mech1_generate as G
 random.seed(3); base = tempfile.mkdtemp(); d0 = datetime.date(2026, 6, 3); rows = []
@@ -16,7 +20,7 @@ for k in range(1, 164):
             cs.append({"end_period_ts": ts0 + 60 * m, "bid": {"open": "%.2f" % (price - 1), "close": "%.2f" % (price - 1)}, "ask": {"open": "%.2f" % (price + 1), "close": "%.2f" % (price + 1)}, "price": {}, "volume": "%.2f" % v, "open_interest": "%.2f" % oi})
         cs.append(dict(cs[-1]))                                                          # a repeated boundary candle
         with gzip.open(p, "wt") as fo: json.dump({"candlesticks": cs, "ticker": "KXBTCPERP"}, fo)
-    rows.append({"index": k, "params": {"period_interval": 1, "start_ts": ts0, "end_ts": ts0 + 86400}, "id": "KXBTCPERP_" + d.isoformat(), "status": 200, "file": fn, "sha256": hashlib.sha256(open(p, "rb").read()).hexdigest(), "truncated": False})
+    rows.append({"index": k, "params": {"period_interval": 1, "start_ts": ts0, "end_ts": ts0 + 86400}, "id": "KXBTCPERP_" + d.isoformat(), "status": 200, "file": fn, "sha256": hashlib.sha256(_body(p)).hexdigest(), "truncated": False})
 json.dump({"job": {}, "rows": rows}, open(os.path.join(base, "manifest.json"), "w"))
 hp = os.path.join(base, "HOLDS.json"); G.HOLDS_FILE = hp; json.dump({"version": G.HOLDS_PINNED_VERSION, "forward_default_deny_from": 2000000000, "rows": [{"id": "HB", "status": "OPEN", "tickers": ["KXBTC15M*"], "from": 0, "to": None}]}, open(hp, "w"))
 allow = os.path.join(base, "ALLOW.md"); B.ALLOW_FILE = allow; out = os.path.join(base, "rec.jsonl")

@@ -9,6 +9,7 @@ WIN = {"search_from": "2026-06-03", "search_to": "2026-07-26", "validate_from": 
 FAMILIES = {"crypto_perp": ["KXBTCPERP"]}
 LAST_PAGE = 108
 def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
+def body_sha(p): return hashlib.sha256(gzip.decompress(open(p, "rb").read())).hexdigest()          # the manifest's rows[k].sha256 is the sha256 of the DECOMPRESSED page body (found on the real pages: the file bytes differ)
 def refuse_unless_allowed(manifest_path):
     me = sha(os.path.abspath(__file__)); ms = sha(manifest_path)
     try: text = open(ALLOW_FILE, encoding="utf-8").read()
@@ -26,7 +27,7 @@ def load(base):
         r = rows[k]
         if r.get("status") != 200 or r.get("truncated"): G.LOG["page_not_complete"] += 1; continue
         p = os.path.join(base, r["file"])
-        if sha(p) != r["sha256"]: raise SystemExit("REFUSED: page %s does not match its manifest sha256" % r["file"])
+        if body_sha(p) != r["sha256"]: raise SystemExit("REFUSED: page %s does not match its manifest sha256" % r["file"])
         for c in json.load(gzip.open(p, "rt"))["candlesticks"]:
             t = int(c["end_period_ts"])
             if G.day_of(t) > WIN["validate_to"]: G.LOG["candle_after_validate_to_dropped"] += 1; continue          # a page is a count of rows, not a date (Auditor B)
