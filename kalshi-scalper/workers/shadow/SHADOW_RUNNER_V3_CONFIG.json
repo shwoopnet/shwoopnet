@@ -1,7 +1,7 @@
 {
  "list_version": "SHADOW_LIST_V3",
  "list_file": "SHADOW_LIST_V3.json",
- "list_sha256": "ecc64e557f75aafb5dee9fb6417acf2e4c1b4b668a84486a1057f3a80a7e93e2",
+ "list_sha256": "3f5a2bb385f46cf108c425b163ef09547ca27cb324bc22c5e6dec0be07d908eb",
  "start_utc": 1794960000,
  "start_utc_note": "2026-11-18T00:00:00Z. The real start is the later of the list's start_utc and this runner's merge, never earlier than the merge. A written constant, never computed from the run date. If this pull request is merged at or after this time, raise this constant to the next whole UTC hour after the merge in the same pull request BEFORE the merge, so no market that closed before the runner existed is counted as forward. A pick may carry its own later start in the list.",
  "modules": {
@@ -15,9 +15,9 @@
  },
  "state_and_outputs": "own state file shadow_state_v3.json and own files shadow_results_v3.json, shadow_counts_v3.json on the shadow-data branch; V1 is untouched and keeps running",
  "clause": "S1 of kalshi-scalper/workers/HOLDS.json: per-spec aggregates only; no spec changes after the first result; new specs only as a new list version with its own start_utc",
- "excluded_picks": {
-  "SH3_08_ETH": "vspike pick: needs the frozen SEARCH tercile cuts file from Desk A (not delivered); not run until it is pinned here",
-  "SH3_11_ETH": "vspike pick: needs the frozen SEARCH tercile cuts file from Desk A (not delivered); not run until it is pinned here",
-  "SH3_17_HYPE": "vspike pick: needs the frozen SEARCH tercile cuts file from Desk A (not delivered); not run until it is pinned here"
- }
+ "vspike_cuts_file": "SHADOW_VSPIKE_CUTS_V1.json",
+ "vspike_cuts_sha256": "c5272db2887186cf75938fa8fa894c3971567b52a2fdb73baed829146f35ae50",
+ "fixture_file": "V3_RUNNER_FIXTURE_NOV17.json",
+ "fixture_sha256": "56fbc90b26d2ae3c2c79123ef843d69d13420e7f0644b778e701236077884648",
+ "vspike_note": "Frozen SEARCH-half tercile cuts from Desk A (Auditor B CLEAN on the no-refit proof and the blind table compare, the Head approved the pin on 2026-11-17). SH3_08_ETH and SH3_11_ETH read ETH 540 (class mid), SH3_17_HYPE reads HYPE 420 (class low). A cell with a null cut gives no feature and no entry."
 }
