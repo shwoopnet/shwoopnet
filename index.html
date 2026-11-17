@@ -1841,6 +1841,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
+                  <li>Bot page: Today no longer counts money you move between the prediction account and the perps account as a profit or loss. It had read about -$250 after a $214 transfer back. A move where the two balances change in opposite directions by about the same amount (perps at least $25) is left out of Today, the chart and the result line; price moves on the perps still count.</li>
                   <li>Nightly report: a new account section with one total (the latest hourly prediction balance plus the perps equity when its read is under 20 minutes old), the perps equity, the margin cushion and the last 24 hour balance change; each hourly history row also carries its account total. Read only, display only. Needs the report deploy to start.</li>
                   <li>Perps positions are now tracked like trades on the server: every 5 minutes the perps account is compared with the read before it, and an opened, closed, added or reduced position is saved as an event (admin read only). A close shows the last profit it was seen at, not a result, and a position opened and closed between two reads is never seen. Nothing shows on the page yet and the bot trades no perps. Needs the server deploy and the rules deploy to start.</li>
                   <li>Phone alert for the perps margin cushion: when the cushion (equity minus maintenance, as a share of equity) falls under 20 percent you get one warning (then at most one every 6 hours), and under 10 percent a critical alert (at most one an hour). It only tells you; it moves no money and the bot trades no perps. It is the cushion, not a forced-close price. Needs the server deploy to start.</li>
@@ -3101,9 +3102,18 @@
     for(var i = 1; i < h.length; i++){
       if(h[i].t < (since || 0)){ continue; }
       var d = Math.round((h[i].total - h[i - 1].total) * 10000) / 10000;
+      // Money moved between the prediction account and the perps account is not a gain or a loss (the owner, Nov 17, 2026: Today read -$250 after a $214 transfer). When both snapshots carry the prediction balance
+      // and the two moved in opposite directions by about the same amount, the step is a transfer and is left out; with no prediction balance on either snapshot nothing can be told, so the step counts as before.
+      if(kalshiIsTransfer(d, h[i].pred !== null && h[i].pred !== undefined && h[i - 1].pred !== null && h[i - 1].pred !== undefined ? Number(h[i].pred) - Number(h[i - 1].pred) : NaN)){ continue; }
       if(d !== 0){ out.push({ t: h[i].t, p: d, m: 'Perps' }); }
     }
     return { first: h.length ? h[0].t : null, steps: out };
+  }
+  // A step is a TRANSFER between the two accounts when the perps total and the prediction balance move in opposite directions, the perps move is at least $25, and the two nearly cancel (within the larger of $5 and 15% of the perps move).
+  function kalshiIsTransfer(dPerps, dPred){
+    if(!Number.isFinite(dPerps) || !Number.isFinite(dPred)){ return false; }
+    var big = Math.abs(dPerps);
+    return big >= 25 && dPerps * dPred < 0 && Math.abs(dPerps + dPred) <= Math.max(5, big * 0.15);
   }
 
   function kalshiLiveTotals(acct, orders){
@@ -3346,11 +3356,14 @@
     Object.keys(base).forEach(function(k){ out[k] = base[k]; });
     out.perpsNote = kalshiPerpsState.loaded ? kalshiPerpsNote(res) : '';
     if(!res.ok || res.total === null){ return out; }
-    var hist = (kalshiPerpsState.hist || []).concat([{ t: Number(kalshiPerpsState.doc.at), total: res.total }]);
+    // The newest point is the live perps document, paired with the live prediction balance when that read is good (so a transfer since the last snapshot nets out too).
+    var livePred = base.balance && base.balance.ok && base.balance.totalDollars !== null && base.balance.totalDollars !== undefined && Number.isFinite(Number(base.balance.totalDollars)) ? Number(base.balance.totalDollars) : null;
+    var hist = (kalshiPerpsState.hist || []).concat([{ t: Number(kalshiPerpsState.doc.at), total: res.total, pred: livePred }]);
     var todayKey = kalDayKey(now), prior = null;
     hist.forEach(function(p){ if(kalDayKey(p.t) < todayKey && (prior === null || p.t > prior.t)){ prior = p; } });
     out.perps = res.rows; out.perpsCushion = res.cushion; out.perpsTotal = res.total; out.perpsHistory = hist;
-    out.perpsDay = prior ? Math.round((res.total - Number(prior.total)) * 100) / 100 : 0;
+    // Today's perps change is the sum of the hourly steps since the last snapshot before US Central midnight, transfers between the two accounts left out (kalshiPerpsSteps).
+    out.perpsDay = prior ? Math.round(kalshiPerpsSteps(hist, prior.t + 1).steps.reduce(function(a, x){ return a + x.p; }, 0) * 100) / 100 : 0;
     return out;
   }
   // The Strategies page shows the account total too, so it redraws when a perps read answers (only while that page is showing).
