@@ -35,6 +35,7 @@ for market, mins, names in (("crypto_perp", 1440, "BTC, ETH"), ("metal_perp", 13
 add("crypto perps funding print", "crypto_perp", "funding_rate", "print", "perp-data funding/<date>[.only].csv.gz (funding_rate, mark_price)", "hourly prints per name", 24 * TAIL, "24 prints a day x 10%, per name", side="fade")
 add("stock perps funding print", "stock_perp", "funding_rate", "print", "perp-data funding/ (daily 16:00 ET)", "one print a day per name", 1 * TAIL, "1 a day x 10%: UNDER 10, listed for completeness", side="fade")
 add("perps windows (open and close, 30 s)", "stock_perp", "settlement_mark", "reopen", "perp-data perps30/<date>/{open,close}.csv.gz and perps/perps-<date>.csv", "two windows a weekday per name", 2 * TAIL, "UNDER 10: two windows a day", side="fade")
+add("perps settlement-mark gap (hourly list, perps30)", "crypto_perp", "settlement_mark", "any_minute", "perp-data perps/perps-<date>.csv hourly (settlement_mark, price, reference_price) and perps30", "24 hourly samples a day per name", 24 * TAIL, "UNDER 10: hourly samples; 30 s samples only inside the open and close windows", side="fade")
 add("BTC liquidations (OKX)", "crypto_perp", "tape_flow", "any_minute", "quote-data oklq/<date>/<HHMM>/liquidations.csv.gz", "one entry per 15 minutes", perps_rate(1440), "same as a 1 minute bar family; the feed is event driven so fewer in quiet hours")
 add("in-game NBA, NHL, NFL books", "sports", "price_change", "any_minute", "sports-data ingame/<date>/<HHMM>/obs.csv.gz (yes_bid, yes_ask, sizes, last, volume)", "per game, about 20 s while hot", 10 * 3 * TAIL * 4,
     "assumes about 10 games a day in season, 4 independent entries a game, 10%; LOW CONFIDENCE (the schedule is seasonal)")
@@ -56,5 +57,17 @@ for f in FAM:
     ids = sorted({S.classify(dict(cand, exit=e, side=s, entry=en), reg)[1] for e in EXITS for s in SIDES for en in ENTRIES if S.classify(dict(cand, exit=e, side=s, entry=en), reg)[0] == "DECLINED"})
     f.update(verdict=v[0], matched=v[1], why=v[2], declined_variants=len(declined), declined_by=ids, canonical=cand)
     out.append(f)
-out.sort(key=lambda r: (-r["signals_per_day"], r["label"], r["signal"], r["clock"]))
+USED_SIGNALS = {e["signal"] for e in reg if e.get("kind") != "pattern"} | {x for e in reg if e.get("kind") == "pattern" for x in (e["signal"] if isinstance(e["signal"], list) else [e["signal"]]) if x != "*"}
+PURE_CLOCK = {"print", "reopen"}                                         # clocks the registry uses only with signal "none" (a pure calendar rule)
+for r in out:
+    if r["signal"] not in USED_SIGNALS:
+        r["owner_class"] = "A_NEW_SIGNAL_FIELD"
+    elif r["clock"] in PURE_CLOCK and not any(e["clock"] == r["clock"] and e["signal"] == r["signal"] for e in reg if e.get("kind") != "pattern"):
+        r["owner_class"] = "B_NEW_CLOCK_CLASS"
+    else:
+        r["owner_class"] = "C_VERSION_OR_DUPLICATE_OR_DECLINED"
+    if r["owner_class"] == "C_VERSION_OR_DUPLICATE_OR_DECLINED" and r["verdict"] == "NEW":
+        r["verdict"] = "VERSION_NEW_MARKET"; r["why"] = "owner ruling (Nov 17): the same signal on a new instrument class is a version; the signal field is already used elsewhere"
+ORD = {"A_NEW_SIGNAL_FIELD": 0, "B_NEW_CLOCK_CLASS": 1, "C_VERSION_OR_DUPLICATE_OR_DECLINED": 2}
+out.sort(key=lambda r: (ORD[r["owner_class"]], -r["signals_per_day"], r["label"], r["signal"], r["clock"]))
 json.dump(out, sys.stdout, indent=1, sort_keys=True)
