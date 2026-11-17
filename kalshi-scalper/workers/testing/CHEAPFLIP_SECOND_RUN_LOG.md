@@ -1,0 +1,3 @@
+# CHEAPFLIP second build, real run log (Testing Desk, Nov 17, 2026)
+Run once: python3 -B cheapflip_second_run.py <nc15 folder of the nc-data checkout at ed82612b9, 31 book.csv.gz and 31 coverage.csv.gz> <allow file = HELDOUT_PULL_RUNS.md at main 13e165915 (PR 1039)>. Reader cheapflip_second_load.py sha256 38f848880813e17e362b6cf339ae87ef0275bfefd1ffc96c4788a9b6032044fd, code cheapflip_second.py 3559dc438595c66ab3b510bddeaa0148cc49e4fec39bf38604265937cd14ccde, driver and run script as at commit 45b18d615. m_carried 7,492,484, m_new 9, m_total 7,492,493.
+Print: 12 lines, sha256 (committed BEFORE reading): e3172a3a7ea496292206faac02cc50e230856609a0a2707b5dbb1332537bb95c. Print file in scratch (/tmp/claude-0/cheapflip_real_print.txt), not in the repo.
