@@ -103,7 +103,7 @@ def summary_lines(summ, ticks):
     L = []
     for fk in sorted(k for k in summ if k[1] != "_outside_wall"):
         s = summ[fk]; tick = ticks.get(fk)
-        L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["null" if tick is None else f17(tick)] + [str(s["rows_other_date"]), str(s["rows_held"])]))
+        L.append(",".join([fk[0], fk[1]] + [str(s[k]) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those")] + ["" if tick is None else f17(tick)] + [str(s["rows_other_date"]), str(s["rows_held"])]))
     return ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held"] + L
 
 
