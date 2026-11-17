@@ -46,12 +46,24 @@ class T(unittest.TestCase):
         self.assertTrue(buf.getvalue().startswith("REFUSED"))
         self.assertNotIn("2026-11-09", buf.getvalue())
 
-    def test_accept_when_equal(self):
+    def test_dropped_names_are_not_seen(self):
+        # in this tiny fixture every name has under 600 regular candles, so all 14 are "dropped": their days move to a separate key and SEEN is empty
         root = mk(); o = S.seen(root); buf = io.StringIO()
+        self.assertEqual(len(o["dropped_short_history"]), len(P.NAMES))
         with contextlib.redirect_stdout(buf):
             rc = S.main(root, o["files_read"], o["manifest_sha256"], ",".join(o["dropped_short_history"]))
+        out = json.loads(buf.getvalue())
         self.assertEqual(rc, 0)
-        self.assertEqual(json.loads(buf.getvalue())["counts_per_name"], {"KXNVDAPERP": 1})
+        self.assertEqual(out["candle_days"], {})
+        self.assertEqual(out["counts_per_name"], {})
+        self.assertEqual(out["loaded_not_dropped_not_scored"], {"KXNVDAPERP": ["2026-11-09"]})
+
+    def test_scored_name_is_seen(self):
+        root = mk(); o = S.seen(root); buf = io.StringIO()
+        keep = [n for n in o["dropped_short_history"] if n != "KXNVDAPERP"]                # a scored name is one NOT in the dropped list given
+        with contextlib.redirect_stdout(buf):
+            rc = S.main(root, o["files_read"], o["manifest_sha256"], ",".join(keep))
+        self.assertEqual(rc, 2)                                                           # the real dropped set differs, so it is refused
 
 
 if __name__ == "__main__":

@@ -49,6 +49,8 @@ def main(root, exp_files, exp_sha, exp_dropped):
     if bad:
         print("REFUSED: does not reproduce the Nov 16 print: " + ",".join(bad))
         return 2
+    # Auditor B's ruling: a name the Nov 16 print dropped before scoring has no result in it, so its days are NOT SEEN; they are listed apart and never used to exclude
+    out["loaded_not_dropped_not_scored"] = {n: out["candle_days"].pop(n) for n in list(out["candle_days"]) if n in out["dropped_short_history"]}
     out["counts_per_name"] = {n: len(d) for n, d in out["candle_days"].items()}
     print(json.dumps(out, sort_keys=True))
     return 0
