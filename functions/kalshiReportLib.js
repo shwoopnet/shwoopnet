@@ -202,9 +202,43 @@ function balanceSection(docs) {
   const rows = (Array.isArray(docs) ? docs : []).filter((d) => d && Number.isFinite(Number(d.ts)) && Number.isFinite(Number(d.total))).map((d) => ({
     ts: new Date(Number(d.ts)).toISOString(), total: Number(d.total),
     shards: (Array.isArray(d.shards) ? d.shards : []).slice(0, 10).filter((s) => s && Number.isFinite(Number(s.dollars))).map((s) => ({ shard: Number(s.shard), dollars: Number(s.dollars) })),
-    ...(Number.isFinite(Number(d.perpsTotal)) && d.perpsTotal !== null ? { perpsTotal: Number(d.perpsTotal) } : {}),
+    ...(Number.isFinite(Number(d.perpsTotal)) && d.perpsTotal !== null ? { perpsTotal: Number(d.perpsTotal), accountTotal: Math.round((Number(d.total) + Number(d.perpsTotal)) * 100) / 100 } : {}),
   })).sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0)).slice(-MAX_BALANCE_ROWS);
   return { count: rows.length, rows };
+}
+
+// The ONE account view (Nov 17, 2026, the owner via the EA: "one total account everywhere", perps phase 1). Display only: nothing that decides a trade reads it. It joins what the report already holds
+// (the latest hourly balance snapshot and the perps account document), with no new read. `rows` are balanceSection rows (oldest first), `perps` the report's perps object, `now` ms.
+// The perps equity counts only when the document is fresh (under PERPS_FRESH_MS old); a stale or missing one leaves the total as predictions only and says so, never a made up figure. The day change
+// compares the newest snapshot with the oldest one inside the last 24 hours (it needs two); the perps part needs both to carry a perps total. The cushion is equity minus maintenance (not a forced-close price).
+const PERPS_FRESH_MS = 20 * 60000;
+const r2 = (x) => Math.round(x * 100) / 100;
+function accountSection(rows, perps, now) {
+  const list = Array.isArray(rows) ? rows : [];
+  const last = list.length ? list[list.length - 1] : null;
+  const pred = last && Number.isFinite(Number(last.total)) ? Number(last.total) : null;
+  const real = (v) => v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v));   // Number(null) is 0: a missing figure must not read as zero
+  const fresh = !!(perps && real(perps.at) && now - Number(perps.at) <= PERPS_FRESH_MS && now - Number(perps.at) >= -60000 && real(perps.equity));
+  const equity = fresh ? Number(perps.equity) : null;
+  const out = {
+    predictions: pred, predictionsAt: last ? last.ts : null,
+    perpsEquity: equity, perpsFresh: fresh, perpsAt: perps && Number.isFinite(Number(perps.at)) ? new Date(Number(perps.at)).toISOString() : null,
+    total: pred === null ? null : r2(pred + (equity === null ? 0 : equity)),
+    totalIncludesPerps: pred !== null && equity !== null,
+    cushion: null, day: null,
+  };
+  if (fresh && Number.isFinite(Number(perps.maintenance)) && Number(perps.maintenance) > 0 && equity > 0) {
+    out.cushion = { dollars: r2(equity - Number(perps.maintenance)), pct: Math.round(((equity - Number(perps.maintenance)) / equity) * 1000) / 10 };
+  }
+  const inDay = list.filter((x) => Date.parse(x.ts) >= now - 24 * 3600000);
+  if (inDay.length >= 2) {
+    const a = inDay[0], b = inDay[inDay.length - 1];
+    const dPred = r2(Number(b.total) - Number(a.total));
+    const havePerps = Number.isFinite(Number(a.perpsTotal)) && Number.isFinite(Number(b.perpsTotal));
+    const dPerps = havePerps ? r2(Number(b.perpsTotal) - Number(a.perpsTotal)) : null;
+    out.day = { from: a.ts, to: b.ts, predictions: dPred, perps: dPerps, total: r2(dPred + (dPerps === null ? 0 : dPerps)), includesPerps: havePerps, note: "balance change, includes any deposit or withdrawal" };
+  }
+  return out;
 }
 
 // Constant-time compare of two secrets of any length (hash both first so the lengths match).
@@ -263,6 +297,8 @@ function makeReportHandler(deps) {
       if (balanceHistory !== undefined) report.balanceHistory = balanceHistory;
       if (perpsProbe !== undefined) report.perpsProbe = perpsProbe;
       if (perps !== undefined) report.perps = perps;
+      // One account view from what is already in hand; needs the balance history (a failed read leaves the field out). Never throws into the report.
+      if (balanceHistory !== undefined) { try { report.account = accountSection(balanceHistory.rows, perps, now); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       res.status(200).json(report);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
@@ -272,4 +308,4 @@ function makeReportHandler(deps) {
   };
 }
 
-module.exports = { buildReport, resultsFromRows, NEAR_MISS_CONTRACTS, makeReportHandler, sameToken, skipSection, balanceSection, MAX_BALANCE_ROWS, MAX_HOURS, MAX_ORDER_ROWS, SKIP_DAYS };
+module.exports = { buildReport, resultsFromRows, NEAR_MISS_CONTRACTS, makeReportHandler, sameToken, skipSection, balanceSection, accountSection, PERPS_FRESH_MS, MAX_BALANCE_ROWS, MAX_HOURS, MAX_ORDER_ROWS, SKIP_DAYS };
