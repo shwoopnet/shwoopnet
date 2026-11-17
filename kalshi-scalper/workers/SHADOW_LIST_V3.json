@@ -1000,5 +1000,5 @@
   }
  ],
  "heldout_read": "batch B and batch C prints, sha256 89363527 and e47eb90b, confirmed at 1e-9 (Forensics, Auditor B, Nov 17 2026)",
- "notes": "Held-out verdicts attached Nov 17 2026 (read n times by ENGINE1 batches; not forward n, not a pass). Pooled step-up over m = 338: 25 survivors, 17 holds. real start = first runner log after merge; the start_utc in the spec is the earliest, never earlier than the merge. No outcome before that first log counts."
+ "notes": "Held-out verdicts attached Nov 17 2026 (read n times by ENGINE1 batches; not forward n, not a pass). Pooled step-up over m = 338: 25 survivors, 17 holds. real start = first runner log after merge; the start_utc in the spec is the earliest, never earlier than the merge. No outcome before that first log counts. | V3 was a DRAFT until commit 047642cd: freeze set start_utc (14 non-Bitcoin picks 2026-11-17T01:00:00Z, 3 BTC picks 2026-11-21T00:00:00Z), so each spec_sha256 changed with the start; that is the freeze, not the attach. The sha of this file changes with every attach or note."
 }
