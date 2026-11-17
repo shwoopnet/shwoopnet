@@ -1,0 +1,342 @@
+{
+ "FEDIMPL1": {
+  "market": "economics",
+  "signal": "external_model",
+  "clock": "scheduled_event",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "Fed funds implied probability model against the cheap side ask (buy if p_model >= 3 x ask)",
+  "confidence": "from_ledger_row"
+ },
+ "COUNT1": {
+  "market": "other",
+  "signal": "external_model",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "Truth Social post count markets (KXTRUTHSOCIAL, D), strike semantics fixed; side and signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "COUNT2": {
+  "market": "weather",
+  "signal": "external_model",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "tornado count markets; 13 event frozen holdout; side only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "MAKERMID1": {
+  "market": "other",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "maker_touch",
+  "exit": "hold_to_settle",
+  "side": "any",
+  "note": "resting order with an adverse selection guard (MR1, MR2); market not read",
+  "confidence": "from_ledger_row"
+ },
+ "NEWLIST1": {
+  "market": "other",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "scan of every newly listed series with 200 or more settled markets (grammar scan)",
+  "confidence": "from_ledger_row"
+ },
+ "XETH1": {
+  "market": "hourly_ladder",
+  "signal": "cross_market_residual",
+  "clock": "fixed_time_to_close",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "hourly Ethereum ladder cheap side against the Bitcoin move over the last minutes (lead-lag territory, owner rule cheap only)",
+  "confidence": "from_ledger_row"
+ },
+ "INPLAY1": {
+  "market": "sports",
+  "signal": "external_model",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "any",
+  "note": "in-play probability from a score feed against the quote at looks 60, 90, 120 minutes after the start",
+  "confidence": "from_ledger_row"
+ },
+ "OVERROUND1": {
+  "market": "other",
+  "signal": "cross_market_residual",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "overround of an event's mutually exclusive set, cheap side 3c to 30c",
+  "confidence": "from_ledger_row"
+ },
+ "TENNIS1": {
+  "market": "sports",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "tennis cheap side 3c to 30c; signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "LIQ1": {
+  "market": "other",
+  "signal": "volume",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "CALIB1's cheap side entry split by liquidity",
+  "confidence": "from_ledger_row"
+ },
+ "MODEL1": {
+  "market": "other",
+  "signal": "external_model",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "a fitted logistic model against the cheap side ask",
+  "confidence": "from_ledger_row"
+ },
+ "PRICEMATCH1": {
+  "market": "other",
+  "signal": "cross_market_residual",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "price matching of similar markets, cheap side",
+  "confidence": "from_ledger_row"
+ },
+ "BOOKNCAA1": {
+  "market": "sports",
+  "signal": "external_model",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "de-vigged sportsbook closing probability at least 3 x the ask, book underdog YES",
+  "confidence": "from_ledger_row"
+ },
+ "WXOTHER1": {
+  "market": "weather",
+  "signal": "external_model",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "weather markets other than temperature, forecast against price (check against declined D09)",
+  "confidence": "from_ledger_row"
+ },
+ "PROPS1": {
+  "market": "sports",
+  "signal": "external_model",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "player prop model from earlier box scores",
+  "confidence": "from_ledger_row"
+ },
+ "GOLF1": {
+  "market": "sports",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "golf cheap side; signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "NHLG1": {
+  "market": "sports",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "NHL goal scorer cheap side; signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "ESPORTM1": {
+  "market": "sports",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "esports match cheap side; signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "NFLANYTD1": {
+  "market": "sports",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "NFL anytime touchdown, YES ask 3c to 30c; signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "NHLALL1": {
+  "market": "sports",
+  "signal": "cross_market_residual",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "NHL goal ladders, cheap side with a ladder sum filter",
+  "confidence": "from_ledger_row"
+ },
+ "MLBHR1": {
+  "market": "sports",
+  "signal": "cross_market_residual",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "MLB home run ladders, cheap side with a ladder sum filter",
+  "confidence": "from_ledger_row"
+ },
+ "NHLFG1": {
+  "market": "sports",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "every cheap rung of NHL first goal ladders, at most 2 per game",
+  "confidence": "from_ledger_row"
+ },
+ "NHLAST1": {
+  "market": "sports",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "NHL assist ladders cheap side; signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "EARNPR1": {
+  "market": "other",
+  "signal": "external_model",
+  "clock": "scheduled_event",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "any",
+  "note": "earnings release text (8-K Ex-99.1) against mention markets",
+  "confidence": "from_ledger_row"
+ },
+ "XI1": {
+  "market": "other",
+  "signal": "price_level",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "cheap YES at 30c or under; signal only partly read",
+  "confidence": "from_ledger_row"
+ },
+ "TRUMPTOPIC1": {
+  "market": "politics",
+  "signal": "external_model",
+  "clock": "scheduled_event",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "any",
+  "note": "word stem pattern for Trump mention markets at the event occurrence",
+  "confidence": "from_ledger_row"
+ },
+ "PHYSCOUNT1": {
+  "market": "other",
+  "signal": "external_model",
+  "clock": "fixed_time_to_close",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "partial count makes the strike reachable at 3 x the ask, look 24 hours before the close",
+  "confidence": "from_ledger_row"
+ },
+ "WXDEAD1": {
+  "market": "weather",
+  "signal": "external_model",
+  "clock": "time_of_day",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "any",
+  "note": "decided fact: the observed maximum so far makes a bracket unreachable (not covered by declined D09)",
+  "confidence": "from_ledger_row"
+ },
+ "TIE1": {
+  "market": "15m_noncrypto",
+  "signal": "cross_market_residual",
+  "clock": "fixed_time_to_close",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "tie or frozen source YES rules, cheap side (declined D17)",
+  "confidence": "from_ledger_row"
+ },
+ "PERPEQ1": {
+  "market": "stock_perp",
+  "signal": "cross_market_residual",
+  "clock": "scheduled_event",
+  "entry": "taker",
+  "exit": "fixed_time",
+  "side": "any",
+  "note": "overnight perp move g_p from the previous 16:00 close to 08:55 New York",
+  "confidence": "from_ledger_row"
+ },
+ "PERPEQ4": {
+  "market": "index_perp",
+  "signal": "cross_market_residual",
+  "clock": "time_of_day",
+  "entry": "taker",
+  "exit": "fixed_time",
+  "side": "any",
+  "note": "ETF perp against index perp ratio on a time grid",
+  "confidence": "from_ledger_row"
+ },
+ "CPREM1": {
+  "market": "crypto_perp",
+  "signal": "cross_market_residual",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "fixed_time",
+  "side": "fade",
+  "note": "perp premium to spot against its expanding median, exit 4 to 12 hours later",
+  "confidence": "from_ledger_row"
+ },
+ "SEASON1": {
+  "market": "hourly_ladder",
+  "signal": "none",
+  "clock": "time_of_day",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "seasonality of the hourly ladder cheap side",
+  "confidence": "from_ledger_row"
+ },
+ "MVE1": {
+  "market": "combo",
+  "signal": "cross_market_residual",
+  "clock": "any_minute",
+  "entry": "taker",
+  "exit": "hold_to_settle",
+  "side": "cheap",
+  "note": "combo print against the product of leg mids, cheap YES at ratio 0.8 or 0.5",
+  "confidence": "from_ledger_row"
+ }
+}

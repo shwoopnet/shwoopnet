@@ -1,0 +1,22 @@
+{
+ "SC1": {"market": "sports", "signal": "price_change", "clock": "any_minute", "entry": "taker", "exit": "fixed_time", "side": "both", "note": "in-play tennis after a 5c jump, momentum or fade (declined D10 neighbourhood: a lead-lag within one market)"},
+ "CRYPTO1": {"market": "crypto_perp", "signal": "price_change", "clock": "any_minute", "exit": "fixed_time", "side": "both", "note": "slow Bitcoin and Ethereum momentum, reversal and breakout rules on spot history 2019 to 2026"},
+ "FP3": {"market": "sports", "signal": "tape_flow", "clock": "any_minute", "entry": "taker", "exit": "take_profit_multiple", "side": "follow", "note": "tennis footprint flow trigger, enter 20c sell 40c"},
+ "HOURS2": {"signal": "none", "note": "hour of the day on every L1 entry"},
+ "HUNT1": {"note": "grid of filters on L1 entries looking for PF 2.5 (grammar)"},
+ "HUNT2": {"note": "opens the grid: time left and price band on the favourite (grammar)"},
+ "WX3": {"market": "weather", "signal": "cross_market_residual", "clock": "any_minute", "side": "any", "note": "buy all or sell all brackets of one event: a bracket lock scan (declined D15)"},
+ "MAKER1": {"note": "resting entries on L1 signals"},
+ "BOUNCE1": {"signal": "spot_elsewhere", "side": "cheap", "note": "cheap side (10c to 30c) when the spot sits within $50 of the strike"},
+ "UNDER1": {"signal": "price_level", "side": "cheap", "note": "search for cells where the cheap side earns"},
+ "CAL1": {"signal": "none", "note": "weekday of the L1 entry"},
+ "MAKER2": {"note": "REST against TAKE on the L1 entries"},
+ "MAKER3": {"entry": "both", "note": "rest first, then take after W seconds"},
+ "THROTTLE1": {"signal": "none", "note": "drawdown throttle on L1 sizing"},
+ "FLOW1": {"market": "15m_crypto", "signal": "tape_flow", "side": "follow", "note": "Binance signed order flow joined to the Bitcoin and Ethereum L1 entry (a different tape from D10's, still tape flow)"},
+ "GROW1": {"signal": "none", "note": "sizing rule on the L1 record"},
+ "MENT1": {"market": "other", "signal": "event_calendar", "clock": "scheduled_event", "note": "mention markets, word key against the call, decision 8 hours before the earliest close"},
+ "PERPFLOW1": {"market": "crypto_perp", "signal": "tape_flow", "clock": "any_minute", "exit": "fixed_time", "side": "both", "note": "net flow share over 5, 15, 30 minutes, followed and faded"},
+ "QUOTE1": {"market": "15m_crypto", "signal": "none", "clock": "any_minute", "entry": "both", "exit": "fixed_time", "side": "both", "note": "post one buy at the bid and one sell at the ask (declined D08 market making)"},
+ "CARRY1_OCT28": {"market": "crypto_perp", "signal": "funding_rate", "clock": "any_minute", "exit": "fixed_time", "side": "both", "note": "Bitcoin and Ethereum dated futures basis carry entered on a 14 day mean funding of 10 percent or more"}
+}

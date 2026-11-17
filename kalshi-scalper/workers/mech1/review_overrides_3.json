@@ -1,0 +1,23 @@
+{
+ "MAKER4": {"signal": "none", "clock": "any_minute", "entry": "both", "exit": "fixed_time", "side": "both", "note": "post a 1 contract buy at the bid and sell at the ask each minute (declined D08)"},
+ "DAYCUT1": {"signal": "none", "clock": "time_of_day", "exit": "none", "note": "stop entering for the day after a realised profit target, a daily rule on L1"},
+ "ARB5": {"market": "sports", "signal": "cross_market_residual", "clock": "any_minute", "exit": "hold_to_settle", "side": "any", "note": "totals ladder: over K_lo never worth less than over K_hi (declined D15)"},
+ "GEN3": {"market": "hourly_ladder", "signal": "price_level", "clock": "fixed_time_to_close", "side": "any", "note": "generated scalps and adjacent strike spreads on the hourly ladder (grammar)"},
+ "MM1": {"market": "15m_noncrypto", "signal": "none", "clock": "any_minute", "entry": "both", "exit": "fixed_time", "side": "both", "note": "queue model market making on gold (declined D08)"},
+ "LOCK2H": {"market": "hourly_ladder", "signal": "cross_market_residual", "exit": "hold_to_settle", "side": "any", "note": "15 minute market against the hourly ladder strikes at the top of the hour (declined D15)"},
+ "CONF2": {"market": "15m_crypto", "signal": "cross_market_residual", "clock": "fixed_time_to_close", "side": "favourite", "note": "L1 on KXBTC15M confirmed by the hourly ladder"},
+ "MUT1": {"note": "mutations of L1 parents (grammar)"},
+ "MKTTIME1": {"signal": "none", "note": "skip a 4 hour block or a weekday on L1"},
+ "HOUSE1": {"signal": "none", "note": "daily rules on L1's history entries"},
+ "HOUSE2": {"signal": "none", "note": "daily rules on L1's history entries"},
+ "HOUSE3": {"signal": "none", "note": "cooldown after a loss on L1"},
+ "FAMSPORTS": {"market": "hourly_ladder", "signal": "cross_market_residual", "side": "any", "note": "lognormal fit of the hourly ladders (KXBTCD, KXETHD, KXGOLDH) against strike prices"},
+ "PUB20": {"market": "hourly_ladder", "signal": "spot_elsewhere", "side": "any", "note": "index ladders' 4 pm closes against an OKX based fair value"},
+ "SPIKE1": {"market": "15m_noncrypto", "signal": "volume", "side": "follow", "note": "spike on non-crypto 15 minute markets"},
+ "VOLSLOT1": {"market": "15m_noncrypto", "note": "non-crypto settlement print rulebook"},
+ "SETTLE1": {"market": "15m_noncrypto", "note": "non-crypto settlement print rulebook"},
+ "HRSEAS1": {"signal": "none", "clock": "time_of_day", "note": "hour of the day seasonality"},
+ "BARRIER1": {"market": "other", "signal": "spot_elsewhere", "clock": "any_minute", "note": "touch style markets, monthly"},
+ "SKEW1": {"market": "hourly_ladder", "signal": "cross_market_residual", "side": "cheap", "note": "tails of the hourly Bitcoin ladder against a fitted distribution"},
+ "LADDER": {"market": "15m_crypto", "signal": "cross_market_residual", "note": "hourly ladder as a filter on L1 at the top of the hour"}
+}
