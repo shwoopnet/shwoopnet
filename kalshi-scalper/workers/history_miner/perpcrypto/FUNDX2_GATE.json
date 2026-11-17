@@ -1,0 +1,59 @@
+{
+ "cells": {
+  "0.05|fade|24": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  },
+  "0.05|fade|8": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  },
+  "0.05|follow|24": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  },
+  "0.05|follow|8": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  },
+  "0.1|fade|24": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  },
+  "0.1|fade|8": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  },
+  "0.1|follow|24": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  },
+  "0.1|follow|8": {
+   "passes": false,
+   "rate_a_day": 0.0,
+   "trades_first_7_days": 0
+  }
+ },
+ "gate_days": [
+  1792540800,
+  1792627200,
+  1792713600,
+  1792800000,
+  1792886400,
+  1792972800,
+  1793059200
+ ],
+ "load_counts": {
+  "btc candle not at the top of an hour (not used)": 226697,
+  "funding ticker outside the wall (dropped)": 232,
+  "snapshot ticker outside the wall (dropped)": 12115
+ },
+ "rate_gate": 3.0
+}
