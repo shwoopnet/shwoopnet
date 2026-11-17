@@ -107,7 +107,7 @@ def cell(ents, k, held_missing=None):
     out["ask_size_5_share_at_entry"] = (sum(1 for e in ents if e["ask_size"] is not None and e["ask_size"] >= 5) / n) if n else None
     for hi, h in enumerate(HS, 1):
         nets = [x for x in (trade_net(e["a"], h, e["touches"][k], e["result"], e["side"]) for e in ents) if x is not None]
-        out["pf_h%d" % hi] = pf(nets); out["net_per_trade_h%d" % hi] = (sum(nets) / len(nets)) if nets else None; out["trades_h%d" % hi] = len(nets)
+        out["n_scored"] = len(nets); out["pf_h%d" % hi] = pf(nets); out["net_per_trade_h%d" % hi] = (sum(nets) / len(nets)) if nets else None; out["trades_h%d" % hi] = len(nets)
     return out
 
 

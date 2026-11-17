@@ -49,7 +49,7 @@ class T(unittest.TestCase):
     def test_no_result_counts(self):
         ents, cnt = c.collect(market(), {}); rows = c.table(ents, cnt)
         self.assertEqual(cnt["windows_without_result"], 1); self.assertEqual(cnt["no_result_by_series"], {"KXHYPE15M": 1})
-        r = [r for r in rows if r[0] == 3 and r[1] == 5][0][2]["POOLED"]; self.assertEqual(r["trades_h1"], 0)                  # the hold without a result is dropped
+        r = [r for r in rows if r[0] == 3 and r[1] == 5][0][2]["POOLED"]; self.assertEqual((r["trades_h1"], r["n_scored"]), (0, 0))                  # the hold without a result is dropped
         r2 = [r for r in rows if r[0] == 3 and r[1] == 2][0][2]["POOLED"]; self.assertEqual(r2["trades_h1"], 1)                # sold: counts
         self.assertGreater(cnt["held_entries_without_result"]["KXHYPE15M"], 0)
     def test_median_even(self):
