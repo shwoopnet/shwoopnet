@@ -1028,6 +1028,7 @@
   }
  },
  "note": "SEARCH tercile cuts of vspike from the archive SEARCH half only (ENGINE1 split constants); floats as computed; class: low if x <= c1, mid if x <= c2, else high. Constants: never recomputed on new data. A candle volume is index 4 of the tuple; the six candles ending e, e-60, ..., e-300 must all exist with a non-null volume and the mean of the five earlier must be positive, else the feature is missing and there is no entry.",
+ "note_nov17_split_pin": "rule_hashes lists engine1_split.py 00a94c6e (the file when the cuts were computed); the tree now has 9a2e6095, changed only by commit 862868f0b (Nov 16 20:30Z) which appended D_ETHD and LAST_SEARCH_ETHD; LAST_SEARCH and phase() are untouched, so the cuts cannot differ. 95 series/bucket cells are null (no cut, so no vspike entry).",
  "picks": {
   "SH3_08_ETH": {
    "bucket": 540,

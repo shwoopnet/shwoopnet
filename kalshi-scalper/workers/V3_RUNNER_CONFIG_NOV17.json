@@ -14,13 +14,19 @@
  },
  "cuts": {
   "file": "kalshi-scalper/workers/SHADOW_VSPIKE_CUTS_V1.json",
-  "sha256": "c207d4a3b372449f60e26813d712276f5712482fb912f6c1033bf840fdd2e56f",
+  "sha256": "c5272db2887186cf75938fa8fa894c3971567b52a2fdb73baed829146f35ae50",
   "reads": {
    "SH3_08_ETH": "picks.SH3_08_ETH (KXETH15M, 540, class mid)",
    "SH3_11_ETH": "picks.SH3_11_ETH (same cell as SH3_08)",
    "SH3_17_HYPE": "picks.SH3_17_HYPE (KXHYPE15M, 420, class low)"
   },
-  "note": "swid picks use the sign class and need no cuts file; built from the archive SEARCH half only"
+  "note": "swid picks use the sign class and need no cuts file; built from the archive SEARCH half only",
+  "runner_shape_file": {
+   "file": "kalshi-scalper/workers/SHADOW_VSPIKE_CUTS_V1_SHAPE.json",
+   "sha256": "bac4e22ec6d4dcf1b9736757c35f160e47344d4f322af94e54f5857a4e354750"
+  },
+  "null_cells": "95 series/bucket cells hold no cut (null): no vspike entry there",
+  "status": "PENDING: Auditor B code CLEAN; values need a blind second compare (rule 16b) before Main pins"
  },
  "fixture": {
   "file": "kalshi-scalper/workers/V3_RUNNER_FIXTURE_NOV17.json",

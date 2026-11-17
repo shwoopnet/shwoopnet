@@ -1,6 +1,6 @@
 """Fixture for the shadow runner's V3 features (Desk A, Nov 17 2026): invented cases, expected value and class for swid and vspike, each checked by hand arithmetic AND by the audited engine1_batchb2 functions. The runner's pure functions are gated against these lines.
   python3 -I engine1_batchb2_runner_fixture.py <out.json>"""
-import sys, os, json
+import sys, os, json, hashlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import engine1_batchb2 as B, engine1_enum as N
 def main(out):
@@ -27,7 +27,7 @@ def main(out):
         assert B.vspike(by, e) is None; cases.append({"feature": "vspike", "case": name, "expected_x": None, "expected_class": "missing"})
     edge = [("at c1 (low)", .7, "low"), ("just over c1 (mid)", .7000001, "mid"), ("at c2 (mid)", 1.1, "mid"), ("just over c2 (high)", 1.1000001, "high")]
     for name, x, k in edge: assert B.klass("vspike", x, CUT) == k; cases.append({"feature": "vspike", "case": "class edge: " + name, "cuts_used_in_this_case": list(CUT), "expected_x": x, "expected_class": k})
-    json.dump({"fixture": "V3 runner features", "rules": {"swid": "cents(ask - bid) of the entry candle (ends at e = close - the pick's seconds_left) minus the same at the candle ending EXACTLY e - 180; each candle must exist and have 0 < yes_bid < yes_ask < 1, else missing (no entry); class up if x > 1e-12, down if x < -1e-12, else flat (cls); x is a whole number of cents", "vspike": "volume(e) / mean(volume of the 5 candles ending e - 60, e - 120, e - 180, e - 240, e - 300); volume is index 4 of the candle tuple (volume_fp, null means missing); all six candles must exist with a non-null volume and the mean must be > 0, else missing; class low if x <= c1, mid if x <= c2, else high, with c1 and c2 read from SHADOW_VSPIKE_CUTS_V1.json for the pick's series and bucket", "entry_candle": "also needs 0 < bid < ask < 1 at e, as for every ENGINE1 entry"}, "pins": {"engine1_batchb2.py": "aa6e0682" , "engine1_batchb.py": "68a5ab43"}, "n": len(cases), "cases": cases}, open(out, "w"), indent=1); print(len(cases), "cases")
+    json.dump({"fixture": "V3 runner features", "rules": {"swid": "cents(ask - bid) of the entry candle (ends at e = close - the pick's seconds_left) minus the same at the candle ending EXACTLY e - 180; each candle must exist and have 0 < yes_bid < yes_ask < 1, else missing (no entry); class up if x > 1e-12, down if x < -1e-12, else flat (cls); x is a whole number of cents", "vspike": "volume(e) / mean(volume of the 5 candles ending e - 60, e - 120, e - 180, e - 240, e - 300); volume is index 4 of the candle tuple (volume_fp, null means missing); all six candles must exist with a non-null volume and the mean must be > 0, else missing; class low if x <= c1, mid if x <= c2, else high, with c1 and c2 read from SHADOW_VSPIKE_CUTS_V1.json for the pick's series and bucket", "entry_candle": "also needs 0 < bid < ask < 1 at e, as for every ENGINE1 entry"}, "pins": {f: hashlib.sha256(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), f), "rb").read()).hexdigest() for f in ("engine1_batchb2.py", "engine1_batchb.py", "engine1_enum.py")}, "n": len(cases), "cases": cases}, open(out, "w"), indent=1); print(len(cases), "cases")
 if __name__ == "__main__":
     if len(sys.argv) != 2: sys.exit(__doc__)
     main(sys.argv[1])
