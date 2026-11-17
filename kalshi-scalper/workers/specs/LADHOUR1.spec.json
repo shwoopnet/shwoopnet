@@ -3,7 +3,7 @@
  "desk": "Idea Desk B",
  "date_registered": "2026-11-16",
  "kind": "grid15m",
- "status": "PAUSED UNRUN (Nov 17, 2026, owner order via the Head). FORWARD CARD: waits for the owner's approval of the recorder change (branch claude/idea-desk-b-ladder-ext eb85615c), Auditor B's hold rows and signature, a loader and a settled-list pull",
+ "status": "DATA SOURCE DROPPED BY THE OWNER Nov 16, 2026 (the recorder change was deleted Nov 17). PAUSED UNRUN (Nov 17, 2026, owner order via the Head). FORWARD CARD: waits for the owner's approval of the recorder change (branch claude/idea-desk-b-ladder-ext eb85615c), Auditor B's hold rows and signature, a loader and a settled-list pull",
  "card": "kalshi-scalper/workers/specs/LADHOUR1_CARD.md",
  "needs_new_code": [
   "quote recorder change (4 series, branch claude/idea-desk-b-ladder-ext, owner approval through the EA)",
