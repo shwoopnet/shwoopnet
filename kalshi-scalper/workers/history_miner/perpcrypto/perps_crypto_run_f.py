@@ -52,7 +52,7 @@ def csv_rows(path):
 
 
 def load_all(snap=(), btc=None, spot=(), funding=None, cnt=None):
-    """funding: one file path or a LIST of per-date files (merged, a repeated print kept once)."""
+    """funding: one file path or a LIST of per-date files, in date order. A print repeated at the same ticker and time is kept ONCE and counted; if the two rates differ the FIRST is kept and a conflict is counted."""
     cnt = cnt if cnt is not None else collections.Counter()
     fl = [funding] if isinstance(funding, str) else list(funding or [])
     srcs = [("csv", p) for p in snap] + ([("run", btc)] if btc else []) + [("run", p) for p in spot] + [("csv", p) for p in fl]
@@ -71,11 +71,17 @@ def load_all(snap=(), btc=None, spot=(), funding=None, cnt=None):
         for r, d in check_run(run):
             product = r["path"].split("/")[2] if r["path"].count("/") >= 3 else ""
             out["spot"].setdefault(product, {}).update(L.spot_rows(d if isinstance(d, list) else [], product, cnt))
-    merged = collections.defaultdict(set)
+    merged = collections.defaultdict(dict)                              # ticker -> {ts: rate}; files in the order given (date order), the FIRST print at an instant is kept
     for p in fl:
         for tk, v in L.funding_rows(csv_rows(p), cnt).items():
-            merged[tk] |= set(v)
-    out["funding"] = {tk: sorted(v) for tk, v in merged.items()}
+            for t, rate in v:
+                if t not in merged[tk]:
+                    merged[tk][t] = rate
+                elif merged[tk][t] == rate:
+                    cnt["funding print repeated (identical rate, kept once)"] += 1
+                else:
+                    cnt["funding print conflict (same ticker and time, different rate; the first kept)"] += 1
+    out["funding"] = {tk: sorted(d.items()) for tk, d in merged.items()}
     return out, cnt
 
 

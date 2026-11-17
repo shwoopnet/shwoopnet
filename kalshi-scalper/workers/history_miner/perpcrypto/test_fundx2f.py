@@ -48,4 +48,14 @@ sh = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
 open(L.ALLOW_FILE, "w").write(" ".join([L.ALLOW_MARK, "perps_crypto_run_f.py", RF.self_sha(), L.self_sha(), sh(fa), sh(fb)]) + "\n")
 o, c = RF.load_all(funding=[fa, fb])
 assert o["funding"]["KXBTCPERP"] == [(F0 + 5 * H, 0.1), (F0 + 13 * H, 0.2)] and o["funding"]["KXETHPERP"] == [(F0 + 21 * H, 0.3)] and c["funding print outside the window (dropped)"] == 1
+assert c["funding print repeated (identical rate, kept once)"] == 1 and c["funding print conflict (same ticker and time, different rate; the first kept)"] == 0
+# a CONFLICTING repeat (same ticker and time, a different rate): the first file's print is kept and the conflict is counted
+fc = gzf("c.csv.gz", "ticker,funding_time,funding_rate,mark_price\nKXBTCPERP,%s,0.7,1\nKXETHPERP,%s,0.3,1\n" % (iso(F0 + 5 * H), iso(F0 + 21 * H)))
+open(L.ALLOW_FILE, "w").write(" ".join([L.ALLOW_MARK, "perps_crypto_run_f.py", RF.self_sha(), L.self_sha(), sh(fa), sh(fb), sh(fc)]) + "\n")
+o2, c2 = RF.load_all(funding=[fa, fb, fc])
+assert o2["funding"]["KXBTCPERP"] == [(F0 + 5 * H, 0.1), (F0 + 13 * H, 0.2)] and o2["funding"]["KXETHPERP"] == [(F0 + 21 * H, 0.3)]
+assert c2["funding print conflict (same ticker and time, different rate; the first kept)"] == 1 and c2["funding print repeated (identical rate, kept once)"] == 2
+# the same two files in the other order keep the other print (the file order is part of the rule)
+o3, c3 = RF.load_all(funding=[fc, fa])
+assert o3["funding"]["KXBTCPERP"][0] == (F0 + 5 * H, 0.7)
 print("fundx2f: ok")
