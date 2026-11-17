@@ -94,6 +94,15 @@ class Hand(unittest.TestCase):
         self.assertEqual(out["stats"]["polls_at_or_after_close"], 1)
         self.assertEqual(T[(0.03, 2)]["median_touch_s"], 200.0)
 
+    def test_band_edges(self):
+        for opp, inband in (("0.966", {0.03: False, 0.05: True, 0.10: True}), ("0.970", {0.03: True, 0.05: True, 0.10: True}), ("0.990", {0.03: True, 0.05: True, 0.10: True}),
+                            ("0.900", {0.03: False, 0.05: False, 0.10: True}), ("0.989", {0.03: True, 0.05: True, 0.10: True}), ("0.991", {0.03: False, 0.05: False, 0.10: False})):
+            w = {"series": "KXHYPE15M", "close": CLOSE, "polls": [((CLOSE - 600) * 1000, (0.02, 5.0), (float(opp), 9.0))]}
+            for hi, ok in inband.items():
+                self.assertEqual("yes" in C.entries(w, hi), ok, (opp, hi))
+        w = {"series": "KXHYPE15M", "close": CLOSE, "polls": [((CLOSE - 600) * 1000, (0.02, 5.0), (0.99, 9.0))]}
+        self.assertEqual(C.entries(w, 0.03)["yes"]["a"], 0.01)
+
     def test_wall(self):
         base = tempfile.mkdtemp()
         rows = [brow("KXINX15M-X", "KXINX15M", CLOSE, -600, "0.02", "5", "0.97", "20"), brow("KXGOLD15M-X", "KXGOLD15M", CLOSE, -600, "0.02", "5", "0.97", "20"),
