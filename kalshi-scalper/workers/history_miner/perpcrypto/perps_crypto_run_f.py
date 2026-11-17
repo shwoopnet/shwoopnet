@@ -52,8 +52,10 @@ def csv_rows(path):
 
 
 def load_all(snap=(), btc=None, spot=(), funding=None, cnt=None):
+    """funding: one file path or a LIST of per-date files (merged, a repeated print kept once)."""
     cnt = cnt if cnt is not None else collections.Counter()
-    srcs = [("csv", p) for p in snap] + ([("run", btc)] if btc else []) + [("run", p) for p in spot] + ([("csv", funding)] if funding else [])
+    fl = [funding] if isinstance(funding, str) else list(funding or [])
+    srcs = [("csv", p) for p in snap] + ([("run", btc)] if btc else []) + [("run", p) for p in spot] + [("csv", p) for p in fl]
     refuse_unless_allowed(srcs)
     out = {"snapshots": collections.defaultdict(list), "btc": [], "spot": {}, "funding": {}}
     for p in snap:
@@ -69,8 +71,11 @@ def load_all(snap=(), btc=None, spot=(), funding=None, cnt=None):
         for r, d in check_run(run):
             product = r["path"].split("/")[2] if r["path"].count("/") >= 3 else ""
             out["spot"].setdefault(product, {}).update(L.spot_rows(d if isinstance(d, list) else [], product, cnt))
-    if funding:
-        out["funding"] = L.funding_rows(csv_rows(funding), cnt)
+    merged = collections.defaultdict(set)
+    for p in fl:
+        for tk, v in L.funding_rows(csv_rows(p), cnt).items():
+            merged[tk] |= set(v)
+    out["funding"] = {tk: sorted(v) for tk, v in merged.items()}
     return out, cnt
 
 

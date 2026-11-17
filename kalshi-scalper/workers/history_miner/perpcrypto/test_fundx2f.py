@@ -29,13 +29,23 @@ sc = XF.score(two, prs, doc, g, 7492500)
 assert sc["0.05|fade|8"]["all_six"]["n"] == 28 and "bar" in sc["0.05|fade|8"] and sc["0.05|fade|24"].keys() == {"dropped", "rate_a_day"} and sc["_bh"]["m_total"] == 7492500
 # (4) refusals: the wrong thresholds file, no allow line, a missing gate file or the wrong m (before any file opens)
 d = tempfile.mkdtemp(); th = os.path.join(d, "T.json"); open(th, "w").write("{}")
-try: XF.load(th, th, []); raise AssertionError("wrong thresholds")
+try: XF.load(th, [th], []); raise AssertionError("wrong thresholds")
 except SystemExit as e: assert "thresholds" in str(e)
 FF.THRESHOLDS_SHA256 = XF.sha(th); L.ALLOW_FILE = os.path.join(d, "A.md"); open(L.ALLOW_FILE, "w").write("x\n")
-try: XF.load(th, th, []); raise AssertionError("no allow line")
+try: XF.load(th, [th], []); raise AssertionError("no allow line")
 except SystemExit as e: assert "REFUSED" in str(e)
 gp = os.path.join(d, "G.json"); open(gp, "w").write(json.dumps({"cells": g}))
 for args in ([os.path.join(d, "none.json"), "00", "7492500"], [gp, "00" * 32, "7492500"], [gp, XF.sha(gp), "6290676" if X.expected_m() == 7492500 else "7492500"]):
     try: XF.run("score", args, {"thresholds": [th], "funding": [th], "snap": []}); raise AssertionError("must refuse")
     except SystemExit as e: assert "REFUSED" in str(e), str(e)
+# (5) several per-date funding files merge, a repeated print is kept once, outside-window prints are dropped
+import gzip, hashlib, perps_crypto_run_f as RF
+def gzf(name, text):
+    p = os.path.join(d, name); open(p, "wb").write(gzip.compress(text.encode())); return p
+fa = gzf("a.csv.gz", "ticker,funding_time,funding_rate,mark_price\nKXBTCPERP,%s,0.1,1\nKXBTCPERP,%s,0.2,1\nKXBTCPERP,%s,0.9,1\n" % (iso(F0 + 5 * H), iso(F0 + 13 * H), iso(F0 - H)))
+fb = gzf("b.csv.gz", "ticker,funding_time,funding_rate,mark_price\nKXBTCPERP,%s,0.2,1\nKXETHPERP,%s,0.3,1\n" % (iso(F0 + 13 * H), iso(F0 + 21 * H)))
+sh = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()
+open(L.ALLOW_FILE, "w").write(" ".join([L.ALLOW_MARK, "perps_crypto_run_f.py", RF.self_sha(), L.self_sha(), sh(fa), sh(fb)]) + "\n")
+o, c = RF.load_all(funding=[fa, fb])
+assert o["funding"]["KXBTCPERP"] == [(F0 + 5 * H, 0.1), (F0 + 13 * H, 0.2)] and o["funding"]["KXETHPERP"] == [(F0 + 21 * H, 0.3)] and c["funding print outside the window (dropped)"] == 1
 print("fundx2f: ok")

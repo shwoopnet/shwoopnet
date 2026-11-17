@@ -1,7 +1,7 @@
 """fundx2f_run.py: FUNDX2-F forward GATE and SCORE (History Miner, 2026-11-17). Card FUNDX2F_CARD_NOV17.md. Same steps and statistics as fundx2_run.py 44a07e96 (imported: cluster_stats, bh_pass, bar_flags, expected_m, HEADER);
 differences: forward loader and runner (perps_crypto_load_f.py, perps_crypto_run_f.py), hourly snapshot rows only (no BTC candle run), the cut points from the committed FUNDX2_THRESHOLDS.json (its sha256 is pinned), the gate days Nov 17 to 23.
-  python3 -I fundx2f_run.py gate  <out FUNDX2F_GATE.json>  --thresholds T.json --funding F --snap S1 S2 ...
-  python3 -I fundx2f_run.py score <FUNDX2F_GATE.json> <its sha256> <m_total>  --thresholds T.json --funding F --snap S1 S2 ...
+  python3 -I fundx2f_run.py gate  <out FUNDX2F_GATE.json>  --thresholds T.json --funding F1 F2 ... --snap S1 S2 ...
+  python3 -I fundx2f_run.py score <FUNDX2F_GATE.json> <its sha256> <m_total>  --thresholds T.json --funding F1 F2 ... --snap S1 S2 ...
 Refuses unless ONE allow line carries the mark, 'fundx2f_run.py', 'perps_crypto_run_f.py' and the sha256 of this script, perps_crypto_run_f.py, perps_crypto_load_f.py, perps_crypto_events.py, fundx2_events.py, fundx2f_events.py, fundx2_run.py, the thresholds file and EVERY source."""
 import calendar, collections, hashlib, json, os, sys
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
@@ -62,12 +62,12 @@ def refuse_unless_allowed(sources):
     raise SystemExit("REFUSED: no allow line names fundx2f_run.py with the sha256 set %s" % need)
 
 
-def load(thresholds, funding, snaps):
+def load(thresholds, fundings, snaps):
     if sha(thresholds) != FF.THRESHOLDS_SHA256:
         raise SystemExit("REFUSED: the thresholds file is not the committed FUNDX2_THRESHOLDS.json")
-    sources = [("csv", thresholds), ("csv", funding)] + [("csv", p) for p in snaps]
+    sources = [("csv", thresholds)] + [("csv", p) for p in fundings] + [("csv", p) for p in snaps]
     refuse_unless_allowed(sources)
-    out, cnt = R.load_all(snap=snaps, funding=funding)
+    out, cnt = R.load_all(snap=snaps, funding=fundings)
     return build_rows(out), out["funding"], json.load(open(thresholds)), cnt
 
 
@@ -78,7 +78,7 @@ def run(mode, args, a):
             raise SystemExit("REFUSED: the committed gate file is missing or its sha256 differs")
         if int(args[2].replace(",", "")) != X.expected_m():
             raise SystemExit("REFUSED: m_total %s is not the Head's figure for this run date (%d)" % (args[2], X.expected_m()))
-    rows, prints, doc, cnt = load(a["thresholds"][0], a["funding"][0], a["snap"])
+    rows, prints, doc, cnt = load(a["thresholds"][0], a["funding"], a["snap"])
     if mode == "gate":
         g = gate_counts(rows, prints, doc)
         open(args[0], "w", encoding="utf-8").write(json.dumps({"gate_days": GATE_DAYS, "rate_gate": X.GATE_RATE, "cells": g, "load_counts": dict(cnt)}, indent=1, sort_keys=True) + "\n")
