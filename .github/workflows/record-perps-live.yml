@@ -42,9 +42,52 @@ jobs:
         if: steps.gate.outputs.go == 'true'
         run: |
           STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          echo "STAMP=$STAMP" >> "$GITHUB_ENV"
           mkdir -p "data/perplive/$STAMP"
           python3 code/scripts/record_perps_live.py "data/perplive/$STAMP" --cycle-hours 4
           gzip -9 -f data/perplive/$STAMP/*.csv
+      - name: Send the trade tape to its own data branch (perp-tape), with a 5 GB size stop
+        if: always() && steps.gate.outputs.go == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Nov 17, 2026 (the Head of R&D): the tape (about 250 trades a minute) lives on ITS OWN branch so no other job fetches it; only the listed research perps are kept (done in the script);
+          # one folder per job (a job never crosses a UTC midnight): tape/<date>/<HHMM>/tape.csv.gz and tape_cover.csv.gz. SIZE.txt on the branch holds the running total of gzipped bytes; from 5 GB the job
+          # pushes nothing and says so (a branch size stop). The tape files are moved out of the perp-live-data folder BEFORE that branch is committed.
+          [ -n "$STAMP" ] || { echo "no stamp"; exit 0; }
+          D="data/perplive/$STAMP"
+          for f in tape tape_cover; do
+            [ -f "$D/$f.csv" ] && gzip -9 -f "$D/$f.csv"
+            [ -f "$D/$f.csv.gz" ] && { mkdir -p tape_out; mv "$D/$f.csv.gz" "tape_out/$f.csv.gz"; }
+          done
+          [ -f tape_out/tape.csv.gz ] || { echo "no tape file this job"; exit 0; }
+          mkdir tapebranch && cd tapebranch
+          git init -q
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          SIZE=0
+          if git fetch -q --depth 1 --filter=blob:none origin perp-tape; then
+            git symbolic-ref HEAD refs/heads/perp-tape
+            git reset -q --mixed FETCH_HEAD
+            SIZE="$(git show FETCH_HEAD:SIZE.txt 2>/dev/null || echo 0)"
+          else
+            git checkout -q --orphan perp-tape
+          fi
+          [[ "$SIZE" =~ ^[0-9]+$ ]] || SIZE=0
+          if [ "$SIZE" -ge 5000000000 ]; then echo "perp-tape is at the 5 GB size stop: this job's tape is NOT stored"; exit 0; fi
+          mkdir -p "tape/$STAMP"
+          NEW=0
+          for f in tape tape_cover; do
+            [ -f "../tape_out/$f.csv.gz" ] && { NEW=$((NEW + $(stat -c %s "../tape_out/$f.csv.gz"))); mv "../tape_out/$f.csv.gz" "tape/$STAMP/$f.csv.gz"; }
+          done
+          echo $((SIZE + NEW)) > SIZE.txt
+          git config user.name "perps-live-recorder"
+          git config user.email "perps-live-recorder@users.noreply.github.com"
+          git add --ignore-removal tape SIZE.txt
+          git commit -q -m "perp tape $STAMP" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin perp-tape && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin perp-tape || true; done
+          exit 1
       - name: Commit and push the data branch
         if: always() && steps.gate.outputs.go == 'true'
         run: |
