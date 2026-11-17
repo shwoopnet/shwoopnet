@@ -88,7 +88,8 @@ class Hand(unittest.TestCase):
         out = C.run([base])
         T = {(r["band"], r["k"]): r["pooled"] for r in out["table"]}
         self.assertEqual(T[(0.03, 2)]["n"], 1)                                      # sold, no result needed
-        self.assertEqual((T[(0.03, 5)]["n"], T[(0.03, 5)]["n_scored"], T[(0.03, 5)]["reach_share"], T[(0.03, 5)]["pf_h1"]), (1, 0, 0.0, None))   # stays in n, no net
+        self.assertEqual((T[(0.03, 5)]["n"], T[(0.03, 5)]["n_scored"], T[(0.03, 5)]["reach_share"], T[(0.03, 5)]["pf_h1"]), (1, 0, 0.0, None))
+        self.assertEqual((T[(0.03, 5)]["trades_h1"], T[(0.03, 5)]["trades_h2"], T[(0.03, 2)]["trades_h1"]), (0, 0, 1))   # stays in n, no net
         self.assertEqual(out["stats"]["no_result_by_series"], {"KXHYPE15M": 1})
         self.assertEqual(out["stats"]["polls_at_or_after_close"], 1)
         self.assertEqual(T[(0.03, 2)]["median_touch_s"], 200.0)

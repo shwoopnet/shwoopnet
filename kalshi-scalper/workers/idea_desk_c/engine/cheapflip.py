@@ -192,6 +192,7 @@ def run(bases, m_carried=M_CARRIED):
              "ask_size_5_share_at_entry": None if not n else sum(1 for x in L if x["ask_sz5"]) / n}
         for h in HS:
             xs = [x["net"][h] for x in L if x["net"][h] is not None]
+            o["trades_h%d" % round(h * 100)] = len(xs)
             o["pf_h%d" % round(h * 100)] = pf(xs)
             o["net_per_trade_h%d" % round(h * 100)] = None if not xs else sum(xs) / len(xs)
         o["n_scored"] = sum(1 for x in L if x["net"][HS[0]] is not None)
