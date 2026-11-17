@@ -1,0 +1,2493 @@
+{
+ "header": "BH m = 68 (every batch C rule read, all ranked) before any result",
+ "label": "unread by ENGINE1, seen by earlier development cards",
+ "dry": true,
+ "markets_by_series": {
+  "KXBTC15M": 2752,
+  "KXETH15M": 2752,
+  "KXGOLD15M": 2072,
+  "KXDOGE15M": 2752,
+  "KXXRP15M": 2752,
+  "KXBNB15M": 2752,
+  "KXHYPE15M": 2752,
+  "KXEURUSD15M": 461,
+  "KXGBPUSD15M": 461,
+  "KXUSDJPY15M": 461,
+  "KXCOPPER15M": 1421,
+  "KXNATGAS15M": 1368,
+  "KXNEAR15M": 2752,
+  "KXPALLADIUM15M": 532,
+  "KXPLATINUM15M": 532,
+  "KXSILVER15M": 2037,
+  "KXWTI15M": 1984,
+  "KXZEC15M": 2752,
+  "KXSOL15M": 2126
+ },
+ "loader_drops": {},
+ "stats": {
+  "missing feature": 237161
+ },
+ "holds": 68,
+ "bh_survivors": 3,
+ "rows": [
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXHYPE15M",
+   "bucket": 600,
+   "band": 3,
+   "side": "cheap",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "M60",
+   "n": 129,
+   "n_floor": 0,
+   "pf_1c": 1.9608213996217239,
+   "pf_2c": 1.7834010668021338,
+   "p": 0.0005959614810277716,
+   "income_1c": {
+    "signals_per_day": 4.449874236435502,
+    "edge_cents_per_contract": 11.026356589147287,
+    "dollars_week": 17.17306503772907
+   },
+   "income_2c": {
+    "signals_per_day": 4.449874236435502,
+    "edge_cents_per_contract": 9.563565891472868,
+    "dollars_week": 14.894832914121451
+   },
+   "validate_pf_1c": 1.9608213996217239,
+   "validate_pf_2c": 1.7834010668021338,
+   "validate_n": 129,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": true,
+   "verdict_full": "holds, BH survivor at 5% over 68 (all ranked)"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 13,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 129,
+   "n_floor": 0,
+   "pf_1c": 1.5008444267832308,
+   "pf_2c": 1.4318738368106574,
+   "p": 0.003725763148286892,
+   "income_1c": {
+    "signals_per_day": 4.449874236435502,
+    "edge_cents_per_contract": 7.816279069767443,
+    "dollars_week": 12.173510600071868
+   },
+   "income_2c": {
+    "signals_per_day": 4.449874236435502,
+    "edge_cents_per_contract": 6.8356589147286835,
+    "dollars_week": 10.64623787279914
+   },
+   "validate_pf_1c": 1.5008444267832308,
+   "validate_pf_2c": 1.4318738368106574,
+   "validate_n": 129,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXHYPE15M",
+   "bucket": 480,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "M60",
+   "n": 119,
+   "n_floor": 0,
+   "pf_1c": 2.0407902217168847,
+   "pf_2c": 1.71195184866724,
+   "p": 0.007673547249540117,
+   "income_1c": {
+    "signals_per_day": 4.104922745238951,
+    "edge_cents_per_contract": 6.153781512605042,
+    "dollars_week": 8.841279195113188
+   },
+   "income_2c": {
+    "signals_per_day": 4.104922745238951,
+    "edge_cents_per_contract": 4.870588235294117,
+    "dollars_week": 6.997685950413223
+   },
+   "validate_pf_1c": 2.0407902217168847,
+   "validate_pf_2c": 1.71195184866724,
+   "validate_n": 119,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXWTI15M",
+   "bucket": 540,
+   "band": 11,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 110,
+   "n_floor": 0,
+   "pf_1c": 1.3167699075320944,
+   "pf_2c": 1.2644018377805264,
+   "p": 0.05971120756702535,
+   "income_1c": {
+    "signals_per_day": 3.9300334946036473,
+    "edge_cents_per_contract": 6.415454545454545,
+    "dollars_week": 8.824532936360253
+   },
+   "income_2c": {
+    "signals_per_day": 3.9300334946036473,
+    "edge_cents_per_contract": 5.4409090909090905,
+    "dollars_week": 7.4840342389281735
+   },
+   "validate_pf_1c": 1.3167699075320944,
+   "validate_pf_2c": 1.2644018377805264,
+   "validate_n": 110,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 1984,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXWTI15M",
+   "bucket": 540,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 105,
+   "n_floor": 0,
+   "pf_1c": 1.6459148196436333,
+   "pf_2c": 1.5313641245972074,
+   "p": 0.05134893963629529,
+   "income_1c": {
+    "signals_per_day": 3.7513956084853,
+    "edge_cents_per_contract": 5.661904761904761,
+    "dollars_week": 7.434015630815036
+   },
+   "income_2c": {
+    "signals_per_day": 3.7513956084853,
+    "edge_cents_per_contract": 4.711428571428571,
+    "dollars_week": 6.18605135839226
+   },
+   "validate_pf_1c": 1.6459148196436333,
+   "validate_pf_2c": 1.5313641245972074,
+   "validate_n": 105,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 1984,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXSOL15M",
+   "bucket": 540,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "S",
+   "n": 135,
+   "n_floor": 0,
+   "pf_1c": 1.3424233490566035,
+   "pf_2c": 1.2251859267734555,
+   "p": 0.07774304419769357,
+   "income_1c": {
+    "signals_per_day": 6.030711959050721,
+    "edge_cents_per_contract": 3.4414814814814814,
+    "dollars_week": 7.264104234527687
+   },
+   "income_2c": {
+    "signals_per_day": 6.030711959050721,
+    "edge_cents_per_contract": 2.3325925925925923,
+    "dollars_week": 4.923517915309445
+   },
+   "validate_pf_1c": 1.3424233490566035,
+   "validate_pf_2c": 1.2251859267734555,
+   "validate_n": 135,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2126,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 163,
+   "n_floor": 0,
+   "pf_1c": 2.235875402792696,
+   "pf_2c": 1.8951286960221232,
+   "p": 0.001545961433918751,
+   "income_1c": {
+    "signals_per_day": 5.622709306503773,
+    "edge_cents_per_contract": 3.5294478527607365,
+    "dollars_week": 6.945770750988142
+   },
+   "income_2c": {
+    "signals_per_day": 5.622709306503773,
+    "edge_cents_per_contract": 2.58159509202454,
+    "dollars_week": 5.080445562342796
+   },
+   "validate_pf_1c": 2.235875402792696,
+   "validate_pf_2c": 1.8951286960221232,
+   "validate_n": 163,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": true,
+   "verdict_full": "holds, BH survivor at 5% over 68 (all ranked)"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXWTI15M",
+   "bucket": 540,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "T",
+   "n": 105,
+   "n_floor": 0,
+   "pf_1c": 1.5498696219035202,
+   "pf_2c": 1.380343716433942,
+   "p": 0.0810866483882109,
+   "income_1c": {
+    "signals_per_day": 3.7513956084853,
+    "edge_cents_per_contract": 4.819999999999999,
+    "dollars_week": 6.3286043915147
+   },
+   "income_2c": {
+    "signals_per_day": 3.7513956084853,
+    "edge_cents_per_contract": 3.3723809523809525,
+    "dollars_week": 4.427897283215482
+   },
+   "validate_pf_1c": 1.5498696219035202,
+   "validate_pf_2c": 1.380343716433942,
+   "validate_n": 105,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 1984,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 145,
+   "n_floor": 0,
+   "pf_1c": 1.3409299881781165,
+   "pf_2c": 1.2465104200480426,
+   "p": 0.11339166961089692,
+   "income_1c": {
+    "signals_per_day": 5.001796622349982,
+    "edge_cents_per_contract": 3.58,
+    "dollars_week": 6.267251167804527
+   },
+   "income_2c": {
+    "signals_per_day": 5.001796622349982,
+    "edge_cents_per_contract": 2.618620689655172,
+    "dollars_week": 4.584232842256557
+   },
+   "validate_pf_1c": 1.3409299881781165,
+   "validate_pf_2c": 1.2465104200480426,
+   "validate_n": 145,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXGOLD15M",
+   "bucket": 300,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 115,
+   "n_floor": 0,
+   "pf_1c": 1.7094509198146326,
+   "pf_2c": 1.5525913575100738,
+   "p": 0.038340789590373354,
+   "income_1c": {
+    "signals_per_day": 3.982683982683983,
+    "edge_cents_per_contract": 4.39304347826087,
+    "dollars_week": 6.123636363636365
+   },
+   "income_2c": {
+    "signals_per_day": 3.982683982683983,
+    "edge_cents_per_contract": 3.458260869565217,
+    "dollars_week": 4.8206060606060595
+   },
+   "validate_pf_1c": 1.7094509198146326,
+   "validate_pf_2c": 1.5525913575100738,
+   "validate_n": 115,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2072,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 180,
+   "n_floor": 0,
+   "pf_1c": 1.7745293127200368,
+   "pf_2c": 1.5092452258260078,
+   "p": 0.03115029210550853,
+   "income_1c": {
+    "signals_per_day": 6.209126841537909,
+    "edge_cents_per_contract": 2.811111111111111,
+    "dollars_week": 6.109090909090909
+   },
+   "income_2c": {
+    "signals_per_day": 6.209126841537909,
+    "edge_cents_per_contract": 1.866666666666667,
+    "dollars_week": 4.056629536471434
+   },
+   "validate_pf_1c": 1.7745293127200368,
+   "validate_pf_2c": 1.5092452258260078,
+   "validate_n": 180,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 150,
+   "n_floor": 0,
+   "pf_1c": 1.4690240452616692,
+   "pf_2c": 1.333955223880597,
+   "p": 0.03622770123962141,
+   "income_1c": {
+    "signals_per_day": 5.174272367948258,
+    "edge_cents_per_contract": 3.3160000000000007,
+    "dollars_week": 6.00526051024075
+   },
+   "income_2c": {
+    "signals_per_day": 5.174272367948258,
+    "edge_cents_per_contract": 2.3866666666666663,
+    "dollars_week": 4.322242184692778
+   },
+   "validate_pf_1c": 1.4690240452616692,
+   "validate_pf_2c": 1.333955223880597,
+   "validate_n": 150,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "S",
+   "n": 178,
+   "n_floor": 0,
+   "pf_1c": 1.384153942038018,
+   "pf_2c": 1.2335379252860499,
+   "p": 0.04936794630123956,
+   "income_1c": {
+    "signals_per_day": 6.140136543298599,
+    "edge_cents_per_contract": 2.7702247191011242,
+    "dollars_week": 5.953345310815668
+   },
+   "income_2c": {
+    "signals_per_day": 6.140136543298599,
+    "edge_cents_per_contract": 1.7314606741573035,
+    "dollars_week": 3.720991735537191
+   },
+   "validate_pf_1c": 1.384153942038018,
+   "validate_pf_2c": 1.2335379252860499,
+   "validate_n": 178,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 190,
+   "n_floor": 0,
+   "pf_1c": 1.6524756439343389,
+   "pf_2c": 1.4082199022069513,
+   "p": 0.054315923064458385,
+   "income_1c": {
+    "signals_per_day": 6.554078332734459,
+    "edge_cents_per_contract": 2.573157894736842,
+    "dollars_week": 5.902637441609774
+   },
+   "income_2c": {
+    "signals_per_day": 6.554078332734459,
+    "edge_cents_per_contract": 1.6257894736842107,
+    "dollars_week": 3.7294430470715056
+   },
+   "validate_pf_1c": 1.6524756439343389,
+   "validate_pf_2c": 1.4082199022069513,
+   "validate_n": 190,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 134,
+   "n_floor": 0,
+   "pf_1c": 1.5419544785415016,
+   "pf_2c": 1.3955625280143436,
+   "p": 0.06119795722781937,
+   "income_1c": {
+    "signals_per_day": 4.622349982033777,
+    "edge_cents_per_contract": 3.5716417910447764,
+    "dollars_week": 5.7782824290334185
+   },
+   "income_2c": {
+    "signals_per_day": 4.622349982033777,
+    "edge_cents_per_contract": 2.6343283582089554,
+    "dollars_week": 4.261875673733383
+   },
+   "validate_pf_1c": 1.5419544785415016,
+   "validate_pf_2c": 1.3955625280143436,
+   "validate_n": 134,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 147,
+   "n_floor": 0,
+   "pf_1c": 1.440829797265441,
+   "pf_2c": 1.308768656716418,
+   "p": 0.04491892478810152,
+   "income_1c": {
+    "signals_per_day": 5.070786920589292,
+    "edge_cents_per_contract": 3.1802721088435377,
+    "dollars_week": 5.644268774703558
+   },
+   "income_2c": {
+    "signals_per_day": 5.070786920589292,
+    "edge_cents_per_contract": 2.251700680272109,
+    "dollars_week": 3.9962630255120377
+   },
+   "validate_pf_1c": 1.440829797265441,
+   "validate_pf_2c": 1.308768656716418,
+   "validate_n": 147,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXGOLD15M",
+   "bucket": 300,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "T",
+   "n": 115,
+   "n_floor": 0,
+   "pf_1c": 1.5912090998455273,
+   "pf_2c": 1.366263720994859,
+   "p": 0.06995617190751009,
+   "income_1c": {
+    "signals_per_day": 3.982683982683983,
+    "edge_cents_per_contract": 3.6608695652173915,
+    "dollars_week": 5.1030303030303035
+   },
+   "income_2c": {
+    "signals_per_day": 3.982683982683983,
+    "edge_cents_per_contract": 2.2921739130434777,
+    "dollars_week": 3.1951515151515144
+   },
+   "validate_pf_1c": 1.5912090998455273,
+   "validate_pf_2c": 1.366263720994859,
+   "validate_n": 115,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2072,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 154,
+   "n_floor": 0,
+   "pf_1c": 1.7467046669041681,
+   "pf_2c": 1.4828924162257495,
+   "p": 0.028226566131920452,
+   "income_1c": {
+    "signals_per_day": 5.312252964426878,
+    "edge_cents_per_contract": 2.722077922077922,
+    "dollars_week": 5.06112827883579
+   },
+   "income_2c": {
+    "signals_per_day": 5.312252964426878,
+    "edge_cents_per_contract": 1.777922077922078,
+    "dollars_week": 3.305670140136544
+   },
+   "validate_pf_1c": 1.7467046669041681,
+   "validate_pf_2c": 1.4828924162257495,
+   "validate_n": 154,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXWTI15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 106,
+   "n_floor": 0,
+   "pf_1c": 2.4392792792792792,
+   "pf_2c": 2.0666904422253927,
+   "p": 0.012522478502827963,
+   "income_1c": {
+    "signals_per_day": 3.7871231857089693,
+    "edge_cents_per_contract": 3.7679245283018865,
+    "dollars_week": 4.9943580200967626
+   },
+   "income_2c": {
+    "signals_per_day": 3.7871231857089693,
+    "edge_cents_per_contract": 2.821698113207547,
+    "dollars_week": 3.740141421659844
+   },
+   "validate_pf_1c": 2.4392792792792792,
+   "validate_pf_2c": 2.0666904422253927,
+   "validate_n": 106,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 1984,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "T",
+   "n": 150,
+   "n_floor": 0,
+   "pf_1c": 1.4036187930502726,
+   "pf_2c": 1.135272579332791,
+   "p": 0.06754200671769908,
+   "income_1c": {
+    "signals_per_day": 5.174272367948258,
+    "edge_cents_per_contract": 2.6173333333333337,
+    "dollars_week": 4.739978440531802
+   },
+   "income_2c": {
+    "signals_per_day": 5.174272367948258,
+    "edge_cents_per_contract": 0.8866666666666665,
+    "dollars_week": 1.6057491915199424
+   },
+   "validate_pf_1c": 1.4036187930502726,
+   "validate_pf_2c": 1.135272579332791,
+   "validate_n": 150,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 190,
+   "n_floor": 0,
+   "pf_1c": 1.4606525911708255,
+   "pf_2c": 1.2423702648141552,
+   "p": 0.11320667123049302,
+   "income_1c": {
+    "signals_per_day": 6.554078332734459,
+    "edge_cents_per_contract": 2.0210526315789474,
+    "dollars_week": 4.636148041681639
+   },
+   "income_2c": {
+    "signals_per_day": 6.554078332734459,
+    "edge_cents_per_contract": 1.0742105263157895,
+    "dollars_week": 2.4641609773625586
+   },
+   "validate_pf_1c": 1.4606525911708255,
+   "validate_pf_2c": 1.2423702648141552,
+   "validate_n": 190,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXDOGE15M",
+   "bucket": 660,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "T",
+   "n": 147,
+   "n_floor": 0,
+   "pf_1c": 1.3782255577259177,
+   "pf_2c": 1.1164564686737184,
+   "p": 0.08021581057884777,
+   "income_1c": {
+    "signals_per_day": 5.070786920589292,
+    "edge_cents_per_contract": 2.502721088435374,
+    "dollars_week": 4.441767876392382
+   },
+   "income_2c": {
+    "signals_per_day": 5.070786920589292,
+    "edge_cents_per_contract": 0.7789115646258502,
+    "dollars_week": 1.3823931009701758
+   },
+   "validate_pf_1c": 1.3782255577259177,
+   "validate_pf_2c": 1.1164564686737184,
+   "validate_n": 147,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXHYPE15M",
+   "bucket": 360,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "M60",
+   "n": 153,
+   "n_floor": 0,
+   "pf_1c": 1.3763277693474962,
+   "pf_2c": 1.1386507640700707,
+   "p": 0.14087278243419465,
+   "income_1c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 2.269281045751634,
+    "dollars_week": 4.1918505210204815
+   },
+   "income_2c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 0.9725490196078431,
+    "dollars_week": 1.796507366151635
+   },
+   "validate_pf_1c": 1.3763277693474962,
+   "validate_pf_2c": 1.1386507640700707,
+   "validate_n": 153,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 153,
+   "n_floor": 0,
+   "pf_1c": 1.5031226199543029,
+   "pf_2c": 1.2801327500377133,
+   "p": 0.1172914870922927,
+   "income_1c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 2.1588235294117646,
+    "dollars_week": 3.987811713977722
+   },
+   "income_2c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 1.2137254901960788,
+    "dollars_week": 2.2420122170319807
+   },
+   "validate_pf_1c": 1.5031226199543029,
+   "validate_pf_2c": 1.2801327500377133,
+   "validate_n": 153,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "S",
+   "n": 134,
+   "n_floor": 0,
+   "pf_1c": 1.3441469816272966,
+   "pf_2c": 1.1969325153374233,
+   "p": 0.11691084493945139,
+   "income_1c": {
+    "signals_per_day": 4.622349982033777,
+    "edge_cents_per_contract": 2.4462686567164185,
+    "dollars_week": 3.957628458498025
+   },
+   "income_2c": {
+    "signals_per_day": 4.622349982033777,
+    "edge_cents_per_contract": 1.437313432835821,
+    "dollars_week": 2.3253180021559468
+   },
+   "validate_pf_1c": 1.3441469816272966,
+   "validate_pf_2c": 1.1969325153374233,
+   "validate_n": 134,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXGOLD15M",
+   "bucket": 300,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "S",
+   "n": 115,
+   "n_floor": 0,
+   "pf_1c": 1.3718504629087074,
+   "pf_2c": 1.232985194536899,
+   "p": 0.1044591905948478,
+   "income_1c": {
+    "signals_per_day": 3.982683982683983,
+    "edge_cents_per_contract": 2.7591304347826093,
+    "dollars_week": 3.8460606060606075
+   },
+   "income_2c": {
+    "signals_per_day": 3.982683982683983,
+    "edge_cents_per_contract": 1.7652173913043478,
+    "dollars_week": 2.4606060606060605
+   },
+   "validate_pf_1c": 1.3718504629087074,
+   "validate_pf_2c": 1.232985194536899,
+   "validate_n": 115,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2072,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXWTI15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "S",
+   "n": 106,
+   "n_floor": 0,
+   "pf_1c": 1.838933629547348,
+   "pf_2c": 1.536750745863846,
+   "p": 0.06383631057348195,
+   "income_1c": {
+    "signals_per_day": 3.7871231857089693,
+    "edge_cents_per_contract": 2.85,
+    "dollars_week": 3.777655377744697
+   },
+   "income_2c": {
+    "signals_per_day": 3.7871231857089693,
+    "edge_cents_per_contract": 1.866981132075472,
+    "dollars_week": 2.47467063639747
+   },
+   "validate_pf_1c": 1.838933629547348,
+   "validate_pf_2c": 1.536750745863846,
+   "validate_n": 106,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 1984,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 200,
+   "n_floor": 0,
+   "pf_1c": 1.3225771869639795,
+   "pf_2c": 1.1182088285229201,
+   "p": 0.16362944223016804,
+   "income_1c": {
+    "signals_per_day": 6.89902982393101,
+    "edge_cents_per_contract": 1.5045,
+    "dollars_week": 3.6328566295364713
+   },
+   "income_2c": {
+    "signals_per_day": 6.89902982393101,
+    "edge_cents_per_contract": 0.5569999999999999,
+    "dollars_week": 1.3449658641753501
+   },
+   "validate_pf_1c": 1.3225771869639795,
+   "validate_pf_2c": 1.1182088285229201,
+   "validate_n": 200,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 137,
+   "n_floor": 0,
+   "pf_1c": 1.5267312522425545,
+   "pf_2c": 1.2919034090909092,
+   "p": 0.08461045541559963,
+   "income_1c": {
+    "signals_per_day": 4.725835429392742,
+    "edge_cents_per_contract": 2.143065693430657,
+    "dollars_week": 3.5447215235357525
+   },
+   "income_2c": {
+    "signals_per_day": 4.725835429392742,
+    "edge_cents_per_contract": 1.2,
+    "dollars_week": 1.9848508803449514
+   },
+   "validate_pf_1c": 1.5267312522425545,
+   "validate_pf_2c": 1.2919034090909092,
+   "validate_n": 137,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 149,
+   "n_floor": 0,
+   "pf_1c": 1.4292096749345247,
+   "pf_2c": 1.2100930019820095,
+   "p": 0.1426942155833363,
+   "income_1c": {
+    "signals_per_day": 5.139777218828603,
+    "edge_cents_per_contract": 1.869798657718121,
+    "dollars_week": 3.363621990657564
+   },
+   "income_2c": {
+    "signals_per_day": 5.139777218828603,
+    "edge_cents_per_contract": 0.9248322147651006,
+    "dollars_week": 1.663701042040963
+   },
+   "validate_pf_1c": 1.4292096749345247,
+   "validate_pf_2c": 1.2100930019820095,
+   "validate_n": 149,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXWTI15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "T",
+   "n": 106,
+   "n_floor": 0,
+   "pf_1c": 1.934054054054054,
+   "pf_2c": 1.283166904422254,
+   "p": 0.06482986900126511,
+   "income_1c": {
+    "signals_per_day": 3.7871231857089693,
+    "edge_cents_per_contract": 2.445283018867925,
+    "dollars_week": 3.2412058057313
+   },
+   "income_2c": {
+    "signals_per_day": 3.7871231857089693,
+    "edge_cents_per_contract": 0.7490566037735851,
+    "dollars_week": 0.9928693710457763
+   },
+   "validate_pf_1c": 1.934054054054054,
+   "validate_pf_2c": 1.283166904422254,
+   "validate_n": 106,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 1984,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "S",
+   "n": 153,
+   "n_floor": 0,
+   "pf_1c": 1.3554682016004491,
+   "pf_2c": 1.1383518442341973,
+   "p": 0.1688821762015894,
+   "income_1c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 1.6549019607843138,
+    "dollars_week": 3.0569601149838306
+   },
+   "income_2c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 0.6594771241830066,
+    "dollars_week": 1.2181961911606183
+   },
+   "validate_pf_1c": 1.3554682016004491,
+   "validate_pf_2c": 1.1383518442341973,
+   "validate_n": 153,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXSILVER15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 140,
+   "n_floor": 0,
+   "pf_1c": 1.3569146508443632,
+   "pf_2c": 1.1543907214942009,
+   "p": 0.15905706007669565,
+   "income_1c": {
+    "signals_per_day": 4.848484848484849,
+    "edge_cents_per_contract": 1.675714285714286,
+    "dollars_week": 2.8436363636363637
+   },
+   "income_2c": {
+    "signals_per_day": 4.848484848484849,
+    "edge_cents_per_contract": 0.7321428571428572,
+    "dollars_week": 1.2424242424242427
+   },
+   "validate_pf_1c": 1.3569146508443632,
+   "validate_pf_2c": 1.1543907214942009,
+   "validate_n": 140,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2037,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXXRP15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "S",
+   "n": 154,
+   "n_floor": 0,
+   "pf_1c": 1.3216569363358355,
+   "pf_2c": 1.1062992125984252,
+   "p": 0.15845631707421376,
+   "income_1c": {
+    "signals_per_day": 5.312252964426878,
+    "edge_cents_per_contract": 1.5025974025974027,
+    "dollars_week": 2.793762127200863
+   },
+   "income_2c": {
+    "signals_per_day": 5.312252964426878,
+    "edge_cents_per_contract": 0.5084415584415584,
+    "dollars_week": 0.9453395616241466
+   },
+   "validate_pf_1c": 1.3216569363358355,
+   "validate_pf_2c": 1.1062992125984252,
+   "validate_n": 154,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 121,
+   "n_floor": 0,
+   "pf_1c": 1.3913666487551497,
+   "pf_2c": 1.182382133995037,
+   "p": 0.21172567879168033,
+   "income_1c": {
+    "signals_per_day": 4.190476190476191,
+    "edge_cents_per_contract": 1.8057851239669422,
+    "dollars_week": 2.648484848484849
+   },
+   "income_2c": {
+    "signals_per_day": 4.190476190476191,
+    "edge_cents_per_contract": 0.8504132231404958,
+    "dollars_week": 1.2472727272727273
+   },
+   "validate_pf_1c": 1.3913666487551497,
+   "validate_pf_2c": 1.182382133995037,
+   "validate_n": 121,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2072,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC1ETHMOM",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "ethmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 119,
+   "n_floor": 0,
+   "pf_1c": 1.3829749103942652,
+   "pf_2c": 1.1775452288045407,
+   "p": 0.14661109283194318,
+   "income_1c": {
+    "signals_per_day": 4.121212121212121,
+    "edge_cents_per_contract": 1.7957983193277312,
+    "dollars_week": 2.5903030303030303
+   },
+   "income_2c": {
+    "signals_per_day": 4.121212121212121,
+    "edge_cents_per_contract": 0.8411764705882353,
+    "dollars_week": 1.2133333333333334
+   },
+   "validate_pf_1c": 1.3829749103942652,
+   "validate_pf_2c": 1.1775452288045407,
+   "validate_n": 119,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2072,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXBTC15M",
+   "bucket": 480,
+   "band": 15,
+   "side": "no",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 128,
+   "n_floor": 0,
+   "pf_1c": 1.4994708294747983,
+   "pf_2c": 1.4128644267224473,
+   "p": 0.05301214687255608,
+   "income_1c": {
+    "signals_per_day": 4.415379087315847,
+    "edge_cents_per_contract": 5.89921875,
+    "dollars_week": 9.116550485088036
+   },
+   "income_2c": {
+    "signals_per_day": 4.415379087315847,
+    "edge_cents_per_contract": 4.934374999999999,
+    "dollars_week": 7.625497664390943
+   },
+   "validate_pf_1c": 1.4994708294747983,
+   "validate_pf_2c": 1.4128644267224473,
+   "validate_n": 128,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXBNB15M",
+   "bucket": 300,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "S",
+   "n": 109,
+   "n_floor": 0,
+   "pf_1c": 2.5636679704476313,
+   "pf_2c": 2.299128956872743,
+   "p": 0.0006620945839976747,
+   "income_1c": {
+    "signals_per_day": 3.7599712540424006,
+    "edge_cents_per_contract": 6.6018348623853225,
+    "dollars_week": 8.687948257276322
+   },
+   "income_2c": {
+    "signals_per_day": 3.7599712540424006,
+    "edge_cents_per_contract": 5.610091743119266,
+    "dollars_week": 7.382824290334172
+   },
+   "validate_pf_1c": 2.5636679704476313,
+   "validate_pf_2c": 2.299128956872743,
+   "validate_n": 109,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": true,
+   "verdict_full": "holds, BH survivor at 5% over 68 (all ranked)"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXETH15M",
+   "bucket": 420,
+   "band": 15,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 142,
+   "n_floor": 0,
+   "pf_1c": 1.3718289575717293,
+   "pf_2c": 1.2924280555859502,
+   "p": 0.044250254875795925,
+   "income_1c": {
+    "signals_per_day": 4.898311174991017,
+    "edge_cents_per_contract": 4.727464788732394,
+    "dollars_week": 8.104807761408551
+   },
+   "income_2c": {
+    "signals_per_day": 4.898311174991017,
+    "edge_cents_per_contract": 3.7640845070422535,
+    "dollars_week": 6.453180021559469
+   },
+   "validate_pf_1c": 1.3718289575717293,
+   "validate_pf_2c": 1.2924280555859502,
+   "validate_n": 142,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXBNB15M",
+   "bucket": 300,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 109,
+   "n_floor": 0,
+   "pf_1c": 2.199068033550792,
+   "pf_2c": 1.996310643792658,
+   "p": 0.00426228926725009,
+   "income_1c": {
+    "signals_per_day": 3.7599712540424006,
+    "edge_cents_per_contract": 5.901834862385321,
+    "dollars_week": 7.766755300035934
+   },
+   "income_2c": {
+    "signals_per_day": 3.7599712540424006,
+    "edge_cents_per_contract": 4.9550458715596335,
+    "dollars_week": 6.520790513833993
+   },
+   "validate_pf_1c": 2.199068033550792,
+   "validate_pf_2c": 1.996310643792658,
+   "validate_n": 109,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXBTC15M",
+   "bucket": 480,
+   "band": 15,
+   "side": "no",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "T",
+   "n": 128,
+   "n_floor": 0,
+   "pf_1c": 1.4223442254266436,
+   "pf_2c": 1.2916067459798668,
+   "p": 0.08423391433541064,
+   "income_1c": {
+    "signals_per_day": 4.415379087315847,
+    "edge_cents_per_contract": 4.98828125,
+    "dollars_week": 7.708803449514912
+   },
+   "income_2c": {
+    "signals_per_day": 4.415379087315847,
+    "edge_cents_per_contract": 3.48515625,
+    "dollars_week": 5.385900107797342
+   },
+   "validate_pf_1c": 1.4223442254266436,
+   "validate_pf_2c": 1.2916067459798668,
+   "validate_n": 128,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 185,
+   "n_floor": 0,
+   "pf_1c": 1.8588289393010424,
+   "pf_2c": 1.584610714827743,
+   "p": 0.007807949664884444,
+   "income_1c": {
+    "signals_per_day": 6.381602587136184,
+    "edge_cents_per_contract": 3.0286486486486486,
+    "dollars_week": 6.764671218109954
+   },
+   "income_2c": {
+    "signals_per_day": 6.381602587136184,
+    "edge_cents_per_contract": 2.082162162162162,
+    "dollars_week": 4.6506360043118935
+   },
+   "validate_pf_1c": 1.8588289393010424,
+   "validate_pf_2c": 1.584610714827743,
+   "validate_n": 185,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "S",
+   "n": 118,
+   "n_floor": 0,
+   "pf_1c": 2.3174748398902105,
+   "pf_2c": 1.9357037037037037,
+   "p": 0.013741584894244789,
+   "income_1c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 3.661016949152543,
+    "dollars_week": 5.215666546891844
+   },
+   "income_2c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 2.676271186440678,
+    "dollars_week": 3.8127488321954717
+   },
+   "validate_pf_1c": 2.3174748398902105,
+   "validate_pf_2c": 1.9357037037037037,
+   "validate_n": 118,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXWTI15M",
+   "bucket": 480,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 141,
+   "n_floor": 0,
+   "pf_1c": 1.3768621534980199,
+   "pf_2c": 1.2481574773766209,
+   "p": 0.08164104182998702,
+   "income_1c": {
+    "signals_per_day": 5.037588388537403,
+    "edge_cents_per_contract": 2.834751773049646,
+    "dollars_week": 4.998109415705249
+   },
+   "income_2c": {
+    "signals_per_day": 5.037588388537403,
+    "edge_cents_per_contract": 1.8865248226950355,
+    "dollars_week": 3.3262374395236325
+   },
+   "validate_pf_1c": 1.3768621534980199,
+   "validate_pf_2c": 1.2481574773766209,
+   "validate_n": 141,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 1984,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 118,
+   "n_floor": 0,
+   "pf_1c": 2.0798592311857065,
+   "pf_2c": 1.770364415862808,
+   "p": 0.03515252088855362,
+   "income_1c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 3.3805084745762715,
+    "dollars_week": 4.816040244340639
+   },
+   "income_2c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 2.4364406779661016,
+    "dollars_week": 3.4710743801652892
+   },
+   "validate_pf_1c": 2.0798592311857065,
+   "validate_pf_2c": 1.770364415862808,
+   "validate_n": 118,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 103,
+   "n_floor": 0,
+   "pf_1c": 2.374909877433309,
+   "pf_2c": 2.0135569033178737,
+   "p": 0.007802748613383465,
+   "income_1c": {
+    "signals_per_day": 3.55300035932447,
+    "edge_cents_per_contract": 3.7029126213592236,
+    "dollars_week": 4.604757455982752
+   },
+   "income_2c": {
+    "signals_per_day": 3.55300035932447,
+    "edge_cents_per_contract": 2.758252427184466,
+    "dollars_week": 3.4300251527128998
+   },
+   "validate_pf_1c": 2.374909877433309,
+   "validate_pf_2c": 2.0135569033178737,
+   "validate_n": 103,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "S",
+   "n": 185,
+   "n_floor": 0,
+   "pf_1c": 1.3661610268378062,
+   "pf_2c": 1.191675535059714,
+   "p": 0.13862254830690995,
+   "income_1c": {
+    "signals_per_day": 6.381602587136184,
+    "edge_cents_per_contract": 1.6962162162162164,
+    "dollars_week": 3.7886022278117144
+   },
+   "income_2c": {
+    "signals_per_day": 6.381602587136184,
+    "edge_cents_per_contract": 0.8762162162162163,
+    "dollars_week": 1.9570822853036292
+   },
+   "validate_pf_1c": 1.3661610268378062,
+   "validate_pf_2c": 1.191675535059714,
+   "validate_n": 185,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXSILVER15M",
+   "bucket": 300,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 168,
+   "n_floor": 0,
+   "pf_1c": 1.4045094618172058,
+   "pf_2c": 1.1897422269465854,
+   "p": 0.12957312887812517,
+   "income_1c": {
+    "signals_per_day": 5.818181818181818,
+    "edge_cents_per_contract": 1.7940476190476191,
+    "dollars_week": 3.6533333333333333
+   },
+   "income_2c": {
+    "signals_per_day": 5.818181818181818,
+    "edge_cents_per_contract": 0.8500000000000002,
+    "dollars_week": 1.7309090909090914
+   },
+   "validate_pf_1c": 1.4045094618172058,
+   "validate_pf_2c": 1.1897422269465854,
+   "validate_n": 168,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2037,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXGOLD15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 146,
+   "n_floor": 0,
+   "pf_1c": 1.4313304721030042,
+   "pf_2c": 1.2157160194174756,
+   "p": 0.18268858365121765,
+   "income_1c": {
+    "signals_per_day": 5.0562770562770565,
+    "edge_cents_per_contract": 1.9273972602739726,
+    "dollars_week": 3.410909090909091
+   },
+   "income_2c": {
+    "signals_per_day": 5.0562770562770565,
+    "edge_cents_per_contract": 0.9739726027397259,
+    "dollars_week": 1.7236363636363634
+   },
+   "validate_pf_1c": 1.4313304721030042,
+   "validate_pf_2c": 1.2157160194174756,
+   "validate_n": 146,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2072,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXSILVER15M",
+   "bucket": 300,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "S",
+   "n": 168,
+   "n_floor": 0,
+   "pf_1c": 1.3505289277785033,
+   "pf_2c": 1.1346499102333931,
+   "p": 0.1435771323180233,
+   "income_1c": {
+    "signals_per_day": 5.818181818181818,
+    "edge_cents_per_contract": 1.5976190476190477,
+    "dollars_week": 3.253333333333334
+   },
+   "income_2c": {
+    "signals_per_day": 5.818181818181818,
+    "edge_cents_per_contract": 0.625,
+    "dollars_week": 1.272727272727273
+   },
+   "validate_pf_1c": 1.3505289277785033,
+   "validate_pf_2c": 1.1346499102333931,
+   "validate_n": 168,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2037,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "B",
+   "n": 118,
+   "n_floor": 0,
+   "pf_1c": 1.7996340347666973,
+   "pf_2c": 1.1285925925925926,
+   "p": 0.08852161192384775,
+   "income_1c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 2.2220338983050847,
+    "dollars_week": 3.1656198347107436
+   },
+   "income_2c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 0.3677966101694915,
+    "dollars_week": 0.5239813151275601
+   },
+   "validate_pf_1c": 1.7996340347666973,
+   "validate_pf_2c": 1.1285925925925926,
+   "validate_n": 118,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXXRP15M",
+   "bucket": 480,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "T",
+   "n": 118,
+   "n_floor": 0,
+   "pf_1c": 1.620194910665945,
+   "pf_2c": 1.040460878885316,
+   "p": 0.14841454376140453,
+   "income_1c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 1.9415254237288138,
+    "dollars_week": 2.7659935321595404
+   },
+   "income_2c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 0.12796610169491524,
+    "dollars_week": 0.18230686309737693
+   },
+   "validate_pf_1c": 1.620194910665945,
+   "validate_pf_2c": 1.040460878885316,
+   "validate_n": 118,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXBTC15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "S",
+   "n": 103,
+   "n_floor": 0,
+   "pf_1c": 1.4663128749423167,
+   "pf_2c": 1.222521915037087,
+   "p": 0.12206908190085661,
+   "income_1c": {
+    "signals_per_day": 3.55300035932447,
+    "edge_cents_per_contract": 1.9621359223300974,
+    "dollars_week": 2.4400143729788
+   },
+   "income_2c": {
+    "signals_per_day": 3.55300035932447,
+    "edge_cents_per_contract": 0.9611650485436891,
+    "dollars_week": 1.1952569169960474
+   },
+   "validate_pf_1c": 1.4663128749423167,
+   "validate_pf_2c": 1.222521915037087,
+   "validate_n": 103,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXETH15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "no",
+   "filter": [
+    "oiacc",
+    "down"
+   ],
+   "exit": "H",
+   "n": 102,
+   "n_floor": 0,
+   "pf_1c": 1.404803115534401,
+   "pf_2c": 1.1936589545844045,
+   "p": 0.1529385875390373,
+   "income_1c": {
+    "signals_per_day": 3.518505210204815,
+    "edge_cents_per_contract": 1.8343137254901962,
+    "dollars_week": 2.258914840100611
+   },
+   "income_2c": {
+    "signals_per_day": 3.518505210204815,
+    "edge_cents_per_contract": 0.8862745098039218,
+    "dollars_week": 1.091426518145886
+   },
+   "validate_pf_1c": 1.404803115534401,
+   "validate_pf_2c": 1.1936589545844045,
+   "validate_n": 102,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC2OIACC",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "yes",
+   "filter": [
+    "oiacc",
+    "up"
+   ],
+   "exit": "H",
+   "n": 114,
+   "n_floor": 0,
+   "pf_1c": 1.3107283817725153,
+   "pf_2c": 1.1150976909413854,
+   "p": 0.22893156105310536,
+   "income_1c": {
+    "signals_per_day": 3.9324469996406757,
+    "edge_cents_per_contract": 1.5192982456140351,
+    "dollars_week": 2.0910959396334894
+   },
+   "income_2c": {
+    "signals_per_day": 3.9324469996406757,
+    "edge_cents_per_contract": 0.5684210526315789,
+    "dollars_week": 0.7823499820337765
+   },
+   "validate_pf_1c": 1.3107283817725153,
+   "validate_pf_2c": 1.1150976909413854,
+   "validate_n": 114,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC3TOD",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "todct",
+    "ct12"
+   ],
+   "exit": "S",
+   "n": 118,
+   "n_floor": 0,
+   "pf_1c": 1.6333034111310591,
+   "pf_2c": 1.3685136323658753,
+   "p": 0.05847762632866352,
+   "income_1c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 2.3915254237288135,
+    "dollars_week": 3.407085878548329
+   },
+   "income_2c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 1.4203389830508477,
+    "dollars_week": 2.0234854473589654
+   },
+   "validate_pf_1c": 1.6333034111310591,
+   "validate_pf_2c": 1.3685136323658753,
+   "validate_n": 118,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC3TOD",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "todct",
+    "ct12"
+   ],
+   "exit": "H",
+   "n": 102,
+   "n_floor": 0,
+   "pf_1c": 1.7217720151269582,
+   "pf_2c": 1.454958567228014,
+   "p": 0.04944165983181782,
+   "income_1c": {
+    "signals_per_day": 3.518505210204815,
+    "edge_cents_per_contract": 2.6196078431372545,
+    "dollars_week": 3.2259863456701403
+   },
+   "income_2c": {
+    "signals_per_day": 3.518505210204815,
+    "edge_cents_per_contract": 1.6686274509803922,
+    "dollars_week": 2.0548760330578513
+   },
+   "validate_pf_1c": 1.7217720151269582,
+   "validate_pf_2c": 1.454958567228014,
+   "validate_n": 102,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC3TOD",
+   "series": "KXXRP15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "todct",
+    "ct12"
+   ],
+   "exit": "H",
+   "n": 118,
+   "n_floor": 0,
+   "pf_1c": 1.5632870864461044,
+   "pf_2c": 1.323678646934461,
+   "p": 0.10009305235096229,
+   "income_1c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 2.2364406779661015,
+    "dollars_week": 3.1861444484369383
+   },
+   "income_2c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 1.2974576271186442,
+    "dollars_week": 1.848422565576716
+   },
+   "validate_pf_1c": 1.5632870864461044,
+   "validate_pf_2c": 1.323678646934461,
+   "validate_n": 118,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC3TOD",
+   "series": "KXDOGE15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "todct",
+    "ct12"
+   ],
+   "exit": "S",
+   "n": 102,
+   "n_floor": 0,
+   "pf_1c": 1.5895997960744326,
+   "pf_2c": 1.260494123290957,
+   "p": 0.053323559973171133,
+   "income_1c": {
+    "signals_per_day": 3.518505210204815,
+    "edge_cents_per_contract": 2.2676470588235293,
+    "dollars_week": 2.7925547969816744
+   },
+   "income_2c": {
+    "signals_per_day": 3.518505210204815,
+    "edge_cents_per_contract": 1.064705882352941,
+    "dollars_week": 1.311160618038088
+   },
+   "validate_pf_1c": 1.5895997960744326,
+   "validate_pf_2c": 1.260494123290957,
+   "validate_n": 102,
+   "missing_feature_skips_at_bucket": 0,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXHYPE15M",
+   "bucket": 360,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "M60",
+   "n": 105,
+   "n_floor": 0,
+   "pf_1c": 1.7893030794165317,
+   "pf_2c": 1.4891122278056952,
+   "p": 0.033654302611052095,
+   "income_1c": {
+    "signals_per_day": 3.62199065756378,
+    "edge_cents_per_contract": 4.6380952380952385,
+    "dollars_week": 5.879698167445203
+   },
+   "income_2c": {
+    "signals_per_day": 3.62199065756378,
+    "edge_cents_per_contract": 3.337142857142857,
+    "dollars_week": 4.230485088034495
+   },
+   "validate_pf_1c": 1.7893030794165317,
+   "validate_pf_2c": 1.4891122278056952,
+   "validate_n": 105,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "goldmom3",
+    "up"
+   ],
+   "exit": "H",
+   "n": 125,
+   "n_floor": 0,
+   "pf_1c": 1.6020548803408095,
+   "pf_2c": 1.4504649721016738,
+   "p": 0.07201274145183492,
+   "income_1c": {
+    "signals_per_day": 4.311893639956881,
+    "edge_cents_per_contract": 3.8440000000000003,
+    "dollars_week": 5.801221703197987
+   },
+   "income_2c": {
+    "signals_per_day": 4.311893639956881,
+    "edge_cents_per_contract": 2.9064,
+    "dollars_week": 4.386230686309738
+   },
+   "validate_pf_1c": 1.6020548803408095,
+   "validate_pf_2c": 1.4504649721016738,
+   "validate_n": 125,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 115,
+   "n_floor": 0,
+   "pf_1c": 1.3709937941001444,
+   "pf_2c": 1.274607043792553,
+   "p": 0.1445292747617841,
+   "income_1c": {
+    "signals_per_day": 3.9669421487603307,
+    "edge_cents_per_contract": 3.7947826086956518,
+    "dollars_week": 5.268789076536112
+   },
+   "income_2c": {
+    "signals_per_day": 3.9669421487603307,
+    "edge_cents_per_contract": 2.840869565217391,
+    "dollars_week": 3.9443478260869567
+   },
+   "validate_pf_1c": 1.3709937941001444,
+   "validate_pf_2c": 1.274607043792553,
+   "validate_n": 115,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXXRP15M",
+   "bucket": 540,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "T",
+   "n": 115,
+   "n_floor": 0,
+   "pf_1c": 1.3770791445805155,
+   "pf_2c": 1.2045002711006687,
+   "p": 0.11504210915249487,
+   "income_1c": {
+    "signals_per_day": 3.9669421487603307,
+    "edge_cents_per_contract": 3.5878260869565213,
+    "dollars_week": 4.981444484369385
+   },
+   "income_2c": {
+    "signals_per_day": 3.9669421487603307,
+    "edge_cents_per_contract": 1.9678260869565218,
+    "dollars_week": 2.7321882860222786
+   },
+   "validate_pf_1c": 1.3770791445805155,
+   "validate_pf_2c": 1.2045002711006687,
+   "validate_n": 115,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 16,
+   "side": "favourite",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 108,
+   "n_floor": 0,
+   "pf_1c": 1.3747602958633915,
+   "pf_2c": 1.2773564463705307,
+   "p": 0.10457275073383841,
+   "income_1c": {
+    "signals_per_day": 3.7254761049227456,
+    "edge_cents_per_contract": 3.8,
+    "dollars_week": 4.954883219547251
+   },
+   "income_2c": {
+    "signals_per_day": 3.7254761049227456,
+    "edge_cents_per_contract": 2.844444444444444,
+    "dollars_week": 3.7089184333453105
+   },
+   "validate_pf_1c": 1.3747602958633915,
+   "validate_pf_2c": 1.2773564463705307,
+   "validate_n": 108,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXDOGE15M",
+   "bucket": 480,
+   "band": 17,
+   "side": "favourite",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 121,
+   "n_floor": 0,
+   "pf_1c": 1.4239736153758673,
+   "pf_2c": 1.2915822642358767,
+   "p": 0.07492284013695522,
+   "income_1c": {
+    "signals_per_day": 4.173913043478261,
+    "edge_cents_per_contract": 3.0809917355371907,
+    "dollars_week": 4.500927057132591
+   },
+   "income_2c": {
+    "signals_per_day": 4.173913043478261,
+    "edge_cents_per_contract": 2.141322314049587,
+    "dollars_week": 3.1281925979159184
+   },
+   "validate_pf_1c": 1.4239736153758673,
+   "validate_pf_2c": 1.2915822642358767,
+   "validate_n": 121,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXETH15M",
+   "bucket": 360,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 153,
+   "n_floor": 0,
+   "pf_1c": 1.519876256767208,
+   "pf_2c": 1.2937212863705974,
+   "p": 0.13325172492341342,
+   "income_1c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 2.1967320261437906,
+    "dollars_week": 4.0578368666906215
+   },
+   "income_2c": {
+    "signals_per_day": 5.277757815307223,
+    "edge_cents_per_contract": 1.25359477124183,
+    "dollars_week": 2.315659360402444
+   },
+   "validate_pf_1c": 1.519876256767208,
+   "validate_pf_2c": 1.2937212863705974,
+   "validate_n": 153,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXHYPE15M",
+   "bucket": 240,
+   "band": 1,
+   "side": "cheap",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "M60",
+   "n": 118,
+   "n_floor": 0,
+   "pf_1c": 1.395236612702366,
+   "pf_2c": 1.1310199234727536,
+   "p": 0.1143733567655231,
+   "income_1c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 2.1516949152542377,
+    "dollars_week": 3.0654114265181462
+   },
+   "income_2c": {
+    "signals_per_day": 4.070427596119296,
+    "edge_cents_per_contract": 0.8415254237288136,
+    "dollars_week": 1.1988789076536113
+   },
+   "validate_pf_1c": 1.395236612702366,
+   "validate_pf_2c": 1.1310199234727536,
+   "validate_n": 118,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  },
+  {
+   "spec": "ENGC4GOLDX",
+   "series": "KXDOGE15M",
+   "bucket": 420,
+   "band": 18,
+   "side": "favourite",
+   "filter": [
+    "goldmom3",
+    "down"
+   ],
+   "exit": "H",
+   "n": 154,
+   "n_floor": 0,
+   "pf_1c": 1.3040667923511984,
+   "pf_2c": 1.1066382298053852,
+   "p": 0.1753042193288778,
+   "income_1c": {
+    "signals_per_day": 5.312252964426878,
+    "edge_cents_per_contract": 1.4662337662337661,
+    "dollars_week": 2.7261516349263384
+   },
+   "income_2c": {
+    "signals_per_day": 5.312252964426878,
+    "edge_cents_per_contract": 0.5194805194805195,
+    "dollars_week": 0.9658641753503414
+   },
+   "validate_pf_1c": 1.3040667923511984,
+   "validate_pf_2c": 1.1066382298053852,
+   "validate_n": 154,
+   "missing_feature_skips_at_bucket": 685,
+   "markets_in_window": 2752,
+   "holds_bar": true,
+   "verdict": "holds",
+   "bh_survivor_all": false,
+   "verdict_full": "holds"
+  }
+ ],
+ "rule_hashes": {
+  "engine1_core.py": "53317e4b56a8328f",
+  "engine1_enum.py": "e42ee1a45f67b76e",
+  "engine1_split.py": "9a2e609542b86ebb",
+  "engine1_driver.py": "1281ce0a1dc0bce7",
+  "engine1_extract_load.py": "5c5b0eaabdcb0237",
+  "engine1_batchb.py": "68a5ab435d8246be",
+  "engine1_batchc.py": "ba77f70c7d861525",
+  "engine1_heldout_load.py": "94e25241580f6396",
+  "engine1_heldout_run_c.py": "97c9b75d684d06f6"
+ }
+}
