@@ -9,6 +9,7 @@ VALIDATE (two calendar days, so days = 2):
 - V4 rise 12, signal yes ask .04 (cheaper YES), fill ask .04: below the 8c floor: no signal (band), counted.
 - V5 rise 11 but its close-360 candle absent: no candle, counted.
 - V6 rise 9. Signal yes bid .48 ask .50 (NO ask .52): YES. Fill yes_ask .50 (inclusive band). Result no. h=1c: .51, .7 x .51 x .49 x 100 = 17.493 -> 18, net -.51 - .018 = -.528. h=2c: .52, 17.472 -> 18, net -.52 - .018 = -.538.
-VALIDATE: n 3, wins 1, days 2, signals a day 1.5. PF 1c = .675 / (.346 + .528) = .675 / .874. PF 2c = .664 / (.356 + .538) = .664 / .894. Net cents 1c = 100 x (.675 - .346 - .528) / 3 = -6.6333...; 2c = 100 x (.664 - .356 - .538) / 3 = -7.6667...
-HELD (one day): H1 rise 20, signal yes bid .18 ask .20, price .20, result yes. h=1c .21: .7 x .21 x .79 x 100 = 11.613 -> 12, net 1 - .21 - .012 = .778; h=2c .22: 12.012 -> 13, net 1 - .22 - .013 = .767. n 1, wins 1, no losing trade so PF is null, net cents 77.8 and 76.7, signals a day 1.
-No-signal counts VALIDATE+HELD: no_candle 1, band 1.
+- V7 (day 3, replaces the old held-out window: the archive has only SEARCH and VALIDATE, Desk A's constants) rise 20, signal yes bid .18 ask .20, price .20, result yes. h=1c .21: .7 x .21 x .79 x 100 = 11.613 -> 12, net 1 - .21 - .012 = .778; h=2c .22: 12.012 -> 13, net 1 - .22 - .013 = .767.
+SPLIT: SEARCH = UTC close date at or before the series' last search date (A windows' date); VALIDATE the rest.
+VALIDATE: n 4 (V1, V2, V6, V7), wins 2, days 2 (days 2 and 3), signals a day 2. PF 1c = (.675 + .778) / (.346 + .528) = 1.453 / .874. PF 2c = (.664 + .767) / (.356 + .538) = 1.431 / .894. Net cents 1c = 100 x (.675 - .346 - .528 + .778) / 4 = 14.475; 2c = 100 x (.664 - .356 - .538 + .767) / 4 = 13.425.
+No-signal counts: no_candle 1, band 1.
