@@ -1,0 +1,2 @@
+# MECH1 fast-clock cost run log (Idea Desk C, Nov 17, 2026)
+Print FASTCLOCK_COSTS.json sha256 (committed BEFORE it was opened): 7aa4c07954774401ab14e1fd974bdfa2000a2704df2e4de607a7e1a4bb6b8afd. fastclock_cost.py 5a5f98377901e6d8 (Main's allow line, PR 1047), run once, exit 0, no stderr. Roots: nc-data nc15 at ed82612b9, the perp-data kalshi1m files of the Nov 16 allow line, sports-data ingame at df3b8fbbf (47 obs files; folders dated 2026-11-12 on are skipped by the script, H04). Columns read: bid and ask only (see the script header).
