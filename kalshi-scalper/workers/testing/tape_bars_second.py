@@ -180,6 +180,9 @@ def build_from_files(root, wall, allow_file, date_from, date_to, holds_path, hol
     if not line or "tape_bars_second.py" not in line[0]: raise SystemExit("REFUSED: no allow-list line for tape_bars_second.py")
     for what, v in (("this file's sha256", me), ("the manifest sha256", msha), ("the holds file sha256", holds_sha), ("the range start", date_from), ("the range end", date_to)):
         if v not in line[0]: raise SystemExit("REFUSED: the allow-list line does not name %s %s" % (what, v))
-    rows = []
-    for p in paths: rows.extend(read_file(p, set(wall)))
-    bars, summ, ticks = build(rows, set(wall), held); return bars, summ, ticks, man
+    bars = {}; summ = {}; ticks = {}
+    for p in paths:                                  # one file at a time: a trade belongs to the file of its own date, so keys never repeat across files and the result equals one build over all rows (memory: the full range does not fit in 16 GB at once)
+        b, s, k = build(read_file(p, set(wall)), set(wall), held)
+        if set(b) & set(bars): raise RuntimeError("a bar in two date files")
+        bars.update(b); summ.update(s); ticks.update(k)
+    return bars, summ, ticks, man
