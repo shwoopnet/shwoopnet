@@ -6,6 +6,9 @@ REG = [
     {"id": "PT", "kind": "pattern", "status": "declined", "source": "ban", "market": "*", "signal": "volume", "clock": "any_minute", "entry": "*", "exit": "*", "side": "*", "tickers": ["KXAAA"], "exceptions": ["ok_idea"]},
     {"id": "R1", "status": "live", "source": "x", "market": "crypto_perp", "signal": "funding_rate", "clock": "print", "entry": "taker", "exit": "next_print", "side": "follow"},
     {"id": "R2", "status": "live", "source": "x", "market": "stock_perp", "signal": "tape_flow", "clock": "any_minute", "entry": "taker", "exit": "fixed_time", "side": "follow"},
+    {"id": "U1", "status": "live", "source": "x", "market": "politics", "signal": "spread", "clock": "time_of_day", "entry": "taker", "exit": "stop", "side": "follow", "verified": False, "confidence": "from_title"},
+    {"id": "U2", "status": "live", "source": "x", "market": "sports", "signal": "open_interest", "clock": "time_of_day", "entry": "taker", "exit": "stop", "side": "follow", "verified": False},
+    {"id": "V2", "status": "live", "source": "x", "market": "sports", "signal": "open_interest", "clock": "time_of_day", "entry": "taker", "exit": "stop", "side": "follow", "verified": True},
 ]
 def cand(**k):
     c = {"market": "crypto_perp", "signal": "funding_rate", "clock": "print", "entry": "taker", "exit": "next_print", "side": "follow"}; c.update(k); return c
@@ -14,7 +17,7 @@ def tr(sid, window, day, ts, mkt, net, traded=True, gross=None, cost=None, n1=No
     g = net + 0.0012 if gross is None else gross; c = round(g - net, 9) if cost is None else cost
     return {"sig_id": sid, "window": window, "day": day, "entry_end": ts, "market_id": mkt, "traded": traded, "gross": g, "cost": c, "net": net, "net_1c": n1, "net_2c": n2}
 def head(sig, thr=1.5, cal=35, units="bp", primary="bp", **k):
-    h = {"sig": sig, "settings": 1, "primary": primary, "units": units, "tail": "abs", "threshold_value": thr, "calendar_days_search": cal, "data": "perps_candles"}; h.update(k); return h
+    h = {"sig": sig, "settings": 1, "primary": primary, "units": units, "tail": "abs", "threshold_value": thr, "calendar_days_search": cal, "calendar_days_validate": 20, "search_from": "2026-09-02", "search_to": "2026-10-06", "validate_from": "2026-10-07", "validate_to": "2026-10-26", "half1_to": "2026-09-28", "half2_from": "2026-09-29", "data": "perps_candles"}; h.update(k); return h
 
 class T(unittest.TestCase):
     def test_classify(self):
@@ -29,6 +32,11 @@ class T(unittest.TestCase):
         self.assertEqual(m.classify(cand(entry="maker_touch", side="fade"), REG)[:2], ("DUPLICATE", "R1"))             # entry and side never make it new
         self.assertEqual(m.classify(cand(market="stock_perp", signal="tape_flow", clock="any_minute", exit="fixed_time"), REG)[:2], ("DUPLICATE", "R2"))
         with self.assertRaises(ValueError): m.classify(cand(signal="bogus"), REG)
+    def test_unverified_match(self):
+        r = m.classify(cand(market="politics", signal="spread", clock="time_of_day", exit="stop"), REG); self.assertEqual((r[0], r[1], r[3]["provisional"]), ("DUPLICATE" if False else "UNVERIFIED_MATCH", "U1", True))   # only an unverified row matches, same market too
+        r = m.classify(cand(market="weather", signal="spread", clock="time_of_day", exit="stop"), REG); self.assertEqual((r[0], r[1]), ("UNVERIFIED_MATCH", "U1"))
+        r = m.classify(cand(market="sports", signal="open_interest", clock="time_of_day", exit="stop"), REG); self.assertEqual((r[0], r[1]), ("DUPLICATE", "V2"))        # a verified row decides, the unverified U2 before it is skipped
+        r = m.classify(cand(market="weather", signal="open_interest", clock="time_of_day", exit="stop"), REG); self.assertEqual((r[0], r[1]), ("VERSION_NEW_MARKET", "V2"))  # verified version beats the unverified match
     def test_tail_and_days(self):
         self.assertEqual(m.tail_threshold([5, 1, 3, 2, 4, 10, 9, 8, 7, 6]), 9); self.assertEqual(m.tail_threshold([-3, 2, -1, 0.5, 4, -6, 7]), 7)   # n = 10 -> index 8; n = 7 -> ceil(6.3) - 1 = 6
         self.assertEqual(m.tail_threshold([-2]), 2); self.assertIsNone(m.tail_threshold([]))
@@ -165,3 +173,23 @@ class T4(unittest.TestCase):
         for d in ["2026-09-29", "2026-09-30", "2026-10-01", "2026-10-02", "2026-10-05"]:
             for k in range(5): add(d, 1.0); add(d, -1.2)                       # half 2: PF 0.83 (< 1) but the total mean is positive
         d = json.loads(m.run(L, REG, self.W, 100)[0]); self.assertTrue(d["screen1"]); self.assertLess(d["search"]["pf_half2"], 1.0); self.assertGreater(d["search"]["pf_half1"], 1.0); self.assertFalse(d["screen2"])
+
+
+class T5(unittest.TestCase):
+    W = {"search": ["2026-09-02", "2026-10-06"], "validate": ["2026-10-07", "2026-10-26"]}
+    def test_explicit_halves_and_new_fields(self):
+        t = [{"day": d, "entry_end": 1, "market_id": "A", "net": 1.0} for d in ("2026-09-28", "2026-09-29", "2026-10-05")]
+        a, b = m.halves_at(t, "2026-09-28", "2026-09-29"); self.assertEqual((len(a), len(b)), (1, 2))
+        sig = cand(market="index_perp", signal="open_interest", clock="any_minute"); sid = m.sig_id(sig); L = [json.dumps(head(sig, 2.0, 20, half1_to="2026-09-05", half2_from="2026-09-06"))]; i = 0
+        for d in ["2026-09-%02d" % x for x in range(2, 12)]:
+            for k in range(12): i += 1; L.append(json.dumps(tr(sid, "search", d, i, "M", 1.0 if k % 2 else -0.5)))
+        d = json.loads(m.run(L, REG, self.W, 100)[0])
+        self.assertEqual((d["screen2_pf_half1"], d["screen2_pf_half2"]), (2.0, 2.0)); self.assertTrue(d["screen2"]); self.assertIn("p_union", d)
+        L2 = [json.dumps(head(sig, 2.0, 20, half1_to="2026-09-30", half2_from="2026-10-01"))] + L[1:]; d2 = json.loads(m.run(L2, REG, self.W, 100)[0])
+        self.assertIsNone(d2["screen2_pf_half2"]); self.assertFalse(d2["screen2"])              # half 2 empty: PF null, fails
+    def test_header_requires_window_fields(self):
+        sig = cand(); h = head(sig); del h["half1_to"]
+        with self.assertRaises(ValueError): m.run([json.dumps(h)], REG, self.W, 1)
+    def test_unverified_is_scored(self):
+        sig = cand(market="weather", signal="spread", clock="time_of_day", exit="stop"); d = json.loads(m.run([json.dumps(head(sig))], REG, self.W, 5)[0])
+        self.assertEqual((d["class"], d["class_ref"], d["scored"], d["provisional"]), ("UNVERIFIED_MATCH", "U1", True, True))

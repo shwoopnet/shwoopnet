@@ -33,13 +33,15 @@ def classify(cand, registry):
             if not hit: continue
             if len(hit) < len(ctick): excluded.update(hit); continue
         return "DECLINED", e["id"], "declined pattern " + e["id"], {"provisional": False, "excluded_tickers": sorted(excluded)}
-    ver = None
+    ver = None; unv = None
     for e in registry:
         if e.get("kind") == "pattern": continue
         if fm(e["signal"], cand["signal"]) and fm(e["clock"], cand["clock"]) and fm(e["exit"], cand["exit"]):
+            if e.get("verified") is False: unv = unv or e["id"]; continue          # a row nobody read against its rule text never decides DUPLICATE or VERSION alone
             if fm(e["market"], cand["market"]): return "DUPLICATE", e["id"], "duplicate of " + e["id"], {"provisional": False, "excluded_tickers": sorted(excluded)}
             ver = ver or e["id"]
     if ver: return "VERSION_NEW_MARKET", ver, "version of " + ver, {"provisional": False, "excluded_tickers": sorted(excluded)}
+    if unv: return "UNVERIFIED_MATCH", unv, "unverified match " + unv, {"provisional": True, "excluded_tickers": sorted(excluded)}
     return "NEW", None, "new", {"provisional": True, "excluded_tickers": sorted(excluded)}
 
 
@@ -71,6 +73,11 @@ def day_z_p(trades, key="net"):
 
 
 def sort_trades(tr): return sorted(tr, key=lambda t: (t["entry_end"], t["market_id"]))
+
+
+def halves_at(trades, half1_to, half2_from):
+    """halves at an explicit boundary (12.15): day <= half1_to is half 1, day >= half2_from is half 2"""
+    return [t for t in trades if t["day"] <= half1_to], [t for t in trades if t["day"] >= half2_from]
 
 
 def halves(trades, start, end):
@@ -115,7 +122,7 @@ def fmt(x):
 
 
 TRADE_KEYS = ("sig_id", "window", "day", "entry_end", "market_id", "traded", "gross", "cost", "net", "net_1c", "net_2c")
-HEAD_KEYS = ("sig", "settings", "primary", "units", "tail", "threshold_value", "calendar_days_search", "data")
+HEAD_KEYS = ("sig", "settings", "primary", "units", "tail", "threshold_value", "calendar_days_search", "calendar_days_validate", "search_from", "search_to", "validate_from", "validate_to", "half1_to", "half2_from", "data")
 
 
 def read_records(lines):
@@ -146,21 +153,21 @@ def read_records(lines):
 
 def run(lines, registry, windows, m_carried, option_a=True, extra_summary=None, data_file_shas=None, rule_hashes=None, holds_file_sha256=None, holds_excluded=0):
     """windows = {'search': [start, end], 'validate': [start, end]} (UTC date strings); -> list of print lines (strings)"""
-    sigs = read_records(lines); rows = []; ss, se = windows["search"]; vs, ve = windows["validate"]
+    sigs = read_records(lines); rows = []
     for sid in sorted(sigs):
         h = sigs[sid]["header"]; cand = dict(h["sig"]); verdict, ref, _why, extra = classify(cand, registry)
-        scored = verdict in ("NEW", "VERSION_NEW_MARKET") and h["threshold_value"] is not None
+        scored = verdict in ("NEW", "VERSION_NEW_MARKET", "UNVERIFIED_MATCH") and h["threshold_value"] is not None
         if verdict == "VERSION_NEW_MARKET" and not option_a: scored = False
         rows.append({"sid": sid, "h": h, "verdict": verdict, "ref": ref, "extra": extra, "scored": scored, "trades": sigs[sid]["trades"]})
     for r in rows:
         if not r["scored"]: continue
         h = r["h"]; tr = r["trades"]; S = [t for t in tr if t["window"] == "search"]; V = [t for t in tr if t["window"] == "validate"]
-        r["search"] = block(S, h, ss, se, h["calendar_days_search"])
-        r["validate"] = block(V, h, vs, ve, h.get("calendar_days_validate", days_inclusive(vs, ve)))
+        r["search"] = block(S, h, h["search_from"], h["search_to"], h["calendar_days_search"])
+        r["validate"] = block(V, h, h["validate_from"], h["validate_to"], h["calendar_days_validate"])
         r["screen1"] = bool(r["search"]["n"] > 0 and r["search"]["trades_per_day"] is not None and r["search"]["trades_per_day"] >= 3 and r["search"]["net_edge_c"] is not None and sum(t["net"] for t in S if t["traded"]) / r["search"]["n"] > 0)
-        U = sort_trades([t for t in S + V if t["traded"]]); u1, u2 = halves(U, ss, ve); pf1, pf2 = pf([t["net"] for t in u1]), pf([t["net"] for t in u2])
+        U = sort_trades([t for t in S + V if t["traded"]]); u1, u2 = halves_at(U, h["half1_to"], h["half2_from"]); pf1, pf2 = pf([t["net"] for t in u1]), pf([t["net"] for t in u2]); r["s2h1"], r["s2h2"] = pf1, pf2
         r["screen2"] = bool(r["screen1"] and len(U) >= 100 and len(set(t["day"] for t in U)) >= 10 and pf_ok(pf1) and pf_ok(pf2) and sum(t["net"] for t in U) / len(U) > 0)
-        z, p = day_z_p(U); r["p_union"] = 1.0 if p is None else p
+        z, p = day_z_p(U); r["p_raw"] = p; r["p_union"] = 1.0 if p is None else p
     scored = [r for r in rows if r["scored"]]; settings_counted = len(scored); m_total = m_carried + settings_counted
     rank = sorted(scored, key=lambda r: (r["p_union"], r["sid"])); k = 0
     for i, r in enumerate(rank, 1):
@@ -172,9 +179,9 @@ def run(lines, registry, windows, m_carried, option_a=True, extra_summary=None, 
         if r["scored"]: cum += 1
         line = {"sig_id": r["sid"], "market": c["market"], "signal": c["signal"], "clock": c["clock"], "entry": c["entry"], "exit": c["exit"], "side": c["side"], "class": r["verdict"], "class_ref": r["ref"], "scored": r["scored"], "heldout_read": False, "provisional": bool(r["extra"]["provisional"]), "excluded_tickers": list(r["extra"]["excluded_tickers"]), "m": m_carried + cum}
         if r["scored"]:
-            line.update({"data": h["data"], "setting": {"threshold_value": h["threshold_value"], "tail": h["tail"], "hold_s": h.get("hold_s"), "tp_mult": h.get("tp_mult"), "stop_mult": h.get("stop_mult")}, "search": r["search"], "validate": r["validate"], "screen1": r["screen1"], "screen2": r["screen2"], "bh_survivor": r["sid"] in surv})
+            line.update({"data": h["data"], "setting": {"threshold_value": h["threshold_value"], "tail": h["tail"], "hold_s": h.get("hold_s"), "tp_mult": h.get("tp_mult"), "stop_mult": h.get("stop_mult")}, "search": r["search"], "validate": r["validate"], "screen1": r["screen1"], "screen2": r["screen2"], "bh_survivor": r["sid"] in surv, "p_union": r["p_raw"], "screen2_pf_half1": r["s2h1"], "screen2_pf_half2": r["s2h2"]})
         else:
-            line.update({"data": h["data"] if isinstance(h.get("data"), str) else None, "setting": None, "search": None, "validate": None, "screen1": False, "screen2": False, "bh_survivor": False})
+            line.update({"data": h["data"] if isinstance(h.get("data"), str) else None, "setting": None, "search": None, "validate": None, "screen1": False, "screen2": False, "bh_survivor": False, "p_union": None, "screen2_pf_half1": None, "screen2_pf_half2": None})
         out.append(fmt(line))
     summary = {"tried": settings_counted, "settings_counted": settings_counted, "m_carried": m_carried, "m_total": m_total, "screen1_pass": sum(1 for r in scored if r["screen1"]), "screen2_pass": sum(1 for r in scored if r["screen2"]), "bh_survivors": len(surv), "windows": {"search": list(windows["search"]), "validate": list(windows["validate"])}, "PF_MIN": PF_MIN, "rule_hashes": rule_hashes or {}, "data_file_shas": data_file_shas or {}, "holds_file_sha256": holds_file_sha256, "holds_excluded": holds_excluded}
     summary.update(extra_summary or {})

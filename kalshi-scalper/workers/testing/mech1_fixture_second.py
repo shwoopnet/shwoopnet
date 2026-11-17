@@ -18,7 +18,7 @@ def build(registry_path=None):
         k = tuple(c.values())
         if k in seen: continue
         seen.add(k); sid = m.sig_id(c); binary = c["market"].startswith("15m") or c["market"] == "hourly_ladder"
-        h = {"sig": c, "settings": 1, "primary": rnd.choice(("1c", "2c")) if binary else "bp", "units": "usd10" if binary else "bp", "tail": "abs", "threshold_value": round(rnd.uniform(0.5, 3), 6), "calendar_days_search": 35, "data": "perps_candles" if not binary else "R6"}
+        h = {"sig": c, "settings": 1, "primary": rnd.choice(("1c", "2c")) if binary else "bp", "units": "usd10" if binary else "bp", "tail": "abs", "threshold_value": round(rnd.uniform(0.5, 3), 6), "calendar_days_search": 35, "calendar_days_validate": 20, "search_from": "2026-09-02", "search_to": "2026-10-06", "validate_from": "2026-10-07", "validate_to": "2026-10-26", "half1_to": "2026-09-28", "half2_from": "2026-09-29", "data": "perps_candles" if not binary else "R6"}
         if rnd.random() < 0.1: h["threshold_value"] = None
         L.append(json.dumps(h)); edge = rnd.choice((-0.0004, 0.0, 0.0006, 0.0015)); ntr = rnd.choice((30, 80, 130, 220, 400))
         for i in range(ntr):
