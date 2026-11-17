@@ -1,4 +1,4 @@
-import csv, gzip, os, shutil, tempfile, unittest
+import csv, gzip, json, os, shutil, tempfile, unittest
 import tape_bars_second as T
 
 def row(t, p, c, side, blk, recv="100", tk="KXT", f="2026-11-17.csv.gz"): return {"file": f, "t_recv_ms": recv, "ticker": tk, "created_time": t, "price": p, "count": c, "taker_side": side, "is_block_trade": blk}
@@ -71,9 +71,14 @@ class TT(unittest.TestCase):
                 with gzip.open(os.path.join(d, "tape", day + ".csv.gz"), "wt", newline="") as f:
                     w = csv.writer(f); w.writerow(H); w.writerow(["100", "hdr", "KXT", day + "T12:00:10Z", "5.0", "1", "buy", "false"]); w.writerow(["100", "hdr", "KXT", day + "T12:00:20Z", "5.5", "1", "sell", "false"]); w.writerow(["1", "h", "KXOTHER", "bad", "bad", "bad", "bad", "bad"])
             open(os.path.join(d, "tape", "all-history.csv.gz"), "wb").write(b"junk")
-            allow = os.path.join(d, "a.md"); open(allow, "w").write("x readable ONLY by the Testing Desk's tape bar builder tape_bars_second.py " + T.sha(open(T.__file__).read()) + "\n")
-            bars, summ, ticks, man = T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06"); self.assertEqual(len(man), 2); self.assertEqual(len(bars), 2)            # the 10-30 file is neither listed nor opened
-            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-30")
-            open(allow, "w").write("x readable ONLY by the Testing Desk's tape bar builder tape_bars_second.py 00\n")
-            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06")
+            hp = os.path.join(d, "h.json"); open(hp, "w").write(json.dumps({"forward_default_deny_from": 1794787200, "rows": []})); hs = T.hashlib.sha256(open(hp, "rb").read()).hexdigest()
+            allow = os.path.join(d, "a.md"); me = T.sha(open(T.__file__).read()); ms = T.manifest_sha(T.manifest_of(d, T.list_files(d, "2026-10-05", "2026-10-06")))
+            def line(me=me, ms=ms, hs=hs, r=("2026-10-05", "2026-10-06")): open(allow, "w").write("x readable ONLY by the Testing Desk's tape bar builder tape_bars_second.py %s %s %s %s %s\n" % (me, ms, hs, r[0], r[1]))
+            line(); bars, summ, ticks, man = T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06", hp, hs); self.assertEqual(len(man), 2); self.assertEqual(len(bars), 2)            # the 10-30 file is neither listed nor opened
+            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-30", hp, hs)                    # the range crosses the boundary
+            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06", None, None)                # the holds file is mandatory
+            with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06", hp, "00")                  # wrong pinned sha
+            for kw in ({"me": "00"}, {"ms": "00"}, {"hs": "00"}, {"r": ("2026-10-05", "2026-10-07")}):                                         # each element of the allow line is required
+                line(**kw)
+                with self.assertRaises(SystemExit): T.build_from_files(d, ["KXT"], allow, "2026-10-05", "2026-10-06", hp, hs)
         finally: shutil.rmtree(d)

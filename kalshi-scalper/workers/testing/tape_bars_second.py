@@ -150,14 +150,25 @@ def check_range(date_from, date_to):
     raise SystemExit("REFUSED: the range is not wholly inside development (%s to %s) or held-out (%s to %s)" % (DEV + HELD))
 
 
-def build_from_files(root, wall, allow_file, date_from, date_to, holds_path=None, holds_sha=None, mark="readable ONLY by the Testing Desk's tape bar builder"):
-    """REFUSES unless the allow-list file has a line with the mark naming this file's sha256 and the range is legal; lists, hashes and opens ONLY the <root>/tape/YYYY-MM-DD.csv.gz files inside [date_from, date_to], in sorted path order"""
-    text = open(allow_file, encoding="utf-8").read(); me = sha(open(os.path.abspath(__file__)).read())
-    line = [l for l in text.splitlines() if mark in l]
-    if not line or "tape_bars_second.py" not in line[0] or me not in line[0]: raise SystemExit("REFUSED: no allow-list line naming tape_bars_second.py with sha256 %s" % me)
+def list_files(root, date_from, date_to):
+    return sorted(p for p in glob.glob(os.path.join(root, "tape", "*.csv.gz")) if re.match(r"^\d{4}-\d\d-\d\d\.csv\.gz$", os.path.basename(p)) and date_from <= os.path.basename(p)[:10] <= date_to)
+
+
+def manifest_of(root, paths): return sorted((os.path.relpath(p, root), hashlib.sha256(open(p, "rb").read()).hexdigest()) for p in paths)
+def manifest_sha(man): return hashlib.sha256(repr(man).encode()).hexdigest()
+
+
+def build_from_files(root, wall, allow_file, date_from, date_to, holds_path, holds_sha, mark="readable ONLY by the Testing Desk's tape bar builder"):
+    """REFUSES unless: the range is legal; the holds file and its pinned sha256 are given (MANDATORY) and match; the allow-list line with the mark names this file's sha256, the sha256 of the manifest of the in-range files (hashed before any file is parsed), the holds file sha256 and the range. Lists, hashes and opens ONLY <root>/tape/YYYY-MM-DD.csv.gz files inside [date_from, date_to], in sorted path order"""
     check_range(date_from, date_to)
-    held = load_holds(holds_path, holds_sha) if holds_path else None
-    paths = sorted(p for p in glob.glob(os.path.join(root, "tape", "*.csv.gz")) if re.match(r"^\d{4}-\d\d-\d\d\.csv\.gz$", os.path.basename(p)) and date_from <= os.path.basename(p)[:10] <= date_to)
-    man = sorted((os.path.relpath(p, root), hashlib.sha256(open(p, "rb").read()).hexdigest()) for p in paths); rows = []
+    if not holds_path or not holds_sha: raise SystemExit("REFUSED: the holds file and its pinned sha256 are mandatory")
+    held = load_holds(holds_path, holds_sha)
+    text = open(allow_file, encoding="utf-8").read(); me = sha(open(os.path.abspath(__file__)).read())
+    paths = list_files(root, date_from, date_to); man = manifest_of(root, paths); msha = manifest_sha(man)             # reading bytes only: nothing parsed yet
+    line = [l for l in text.splitlines() if mark in l]
+    if not line or "tape_bars_second.py" not in line[0]: raise SystemExit("REFUSED: no allow-list line for tape_bars_second.py")
+    for what, v in (("this file's sha256", me), ("the manifest sha256", msha), ("the holds file sha256", holds_sha), ("the range start", date_from), ("the range end", date_to)):
+        if v not in line[0]: raise SystemExit("REFUSED: the allow-list line does not name %s %s" % (what, v))
+    rows = []
     for p in paths: rows.extend(read_file(p, set(wall)))
     bars, summ, ticks = build(rows, set(wall), held); return bars, summ, ticks, man
