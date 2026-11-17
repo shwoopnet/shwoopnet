@@ -22,25 +22,12 @@ gates.NY1 = () => {
   assert.deepStrictEqual(hits, [], 'no Yahoo host in a workflow or script: ' + hits.join(', '));
 };
 
-// NY2: the watchlist, the REF adapters and the signal logger's allowlist and registry name none either.
+// NY2 and NY3: the REF adapters, the REF recorder, the signal logger and the perps cash saver are gone and stay gone (a Yahoo reader would have to come back as a new file).
 gates.NY2 = () => {
-  const hits = scan([
-    path.join(root, 'kalshi-scalper', 'workers', 'RECREF_WATCHLIST.json'),
-    path.join(root, 'scripts', 'ref_adapters.py'),
-    path.join(root, 'scripts', 'record_signals.py'),
-  ]);
-  assert.deepStrictEqual(hits, [], 'no Yahoo host in the watchlist, adapters or signal logger: ' + hits.join(', '));
-  const src = fs.readFileSync(path.join(root, 'scripts', 'record_signals.py'), 'utf8');
-  const m = /ALLOWLIST\s*=\s*frozenset\(\{([\s\S]*?)\}\)/.exec(src);
-  assert.ok(m, 'the allowlist is found');
-  for (const h of [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1])) assert.ok(!BLOCKED.test(h), h + ' is a Yahoo host');
-};
-
-// NY3: the retired recorders stay gone.
-gates.NY3 = () => {
+  for (const f of ['ref_adapters.py', 'record_ref.py', 'record_signals.py', 'record_perps_cash.py']) assert.ok(!fs.existsSync(path.join(root, 'scripts', f)), f + ' is gone');
   assert.ok(!fs.existsSync(path.join(root, '.github', 'workflows', 'record-perps-cash.yml')), 'the cash saver schedule is gone');
-  assert.ok(!fs.existsSync(path.join(root, 'scripts', 'record_perps_cash.py')), 'the cash saver script is gone');
-  assert.ok(!/yahoo1m|standalone_refs/.test(fs.readFileSync(path.join(root, 'scripts', 'record_ref.py'), 'utf8') + fs.readFileSync(path.join(root, 'scripts', 'ref_adapters.py'), 'utf8')), 'no Yahoo adapter or standalone reference');
+  const hits = scan([path.join(root, 'kalshi-scalper', 'workers', 'RECREF_WATCHLIST.json')]);
+  assert.deepStrictEqual(hits, [], 'no Yahoo host in the kept watchlist: ' + hits.join(', '));
 };
 
 let failed = 0;
