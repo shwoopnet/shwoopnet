@@ -120,8 +120,71 @@ def selftest():
     print("selftest OK")
 
 
+# ---- FUNDX2-F forward layer (card FUNDX2F_CARD_NOV17 + Amendment 1) ----
+import calendar, itertools
+def _ep(y, m, d):
+    return calendar.timegm((y, m, d, 0, 0, 0))
+FWD_T0, FWD_T1 = _ep(2026, 11, 17), _ep(2026, 12, 15)      # prints and rows in [T0, T1)
+GATE_D0, GATE_D1 = _ep(2026, 11, 17), _ep(2026, 11, 24)    # entry UTC date Nov 17..23 (7 days)
+TICKERS = ["KXBTCPERP", "KXETHPERP", "KXSOLPERP", "KXXRPPERP", "KXDOGEPERP", "KXHYPEPERP"]
+CELLS = [(q, side, hh) for q in (5, 10) for side in ("fade", "follow") for hh in (8, 24)]
+RATE_MIN = 3.0
+
+
+def cut_of(thr, ticker, q):
+    """thr = parsed FUNDX2_THRESHOLDS.json. None when the name has no threshold."""
+    c = thr["cuts"].get(ticker, {}).get(str(q))
+    if not c or not c.get("has_threshold"):
+        return None
+    return {"lower": c["lower"], "upper": c["upper"]}
+
+
+def gate(thr, prints_by, rows_by, h=0.0):
+    """Counts only. prints_by/rows_by: ticker -> list. Returns per cell: pooled trades with entry in
+    the gate window, rate a day, passes, plus skip counts pooled. Rows are cut to the window first."""
+    out = {}
+    for (q, side, hh) in CELLS:
+        n, skips = 0, {"no_prior": 0, "no_after": 0, "open": 0, "no_exit": 0}
+        for tk in TICKERS:
+            c = cut_of(thr, tk, q)
+            if c is None:
+                continue
+            rows = [x for x in rows_by.get(tk, []) if FWD_T0 <= x[0] < FWD_T1]
+            pr = [x for x in prints_by.get(tk, []) if FWD_T0 <= x[0] < FWD_T1]
+            tr, k = build_trades(pr, rows, c, side, hh, FWD_T0, FWD_T1, h)
+            n += sum(1 for x in tr if GATE_D0 <= x["entry"] < GATE_D1)
+            for a in skips:
+                skips[a] += k[a]
+        out["%d|%s|%d" % (q, side, hh)] = {"trades_gate_window": n, "rate_a_day": n / 7.0,
+                                            "passes": n / 7.0 >= RATE_MIN, "skips": skips}
+    return out
+
+
+def selftest_fwd():
+    H = 3600
+    thr = {"cuts": {"KXBTCPERP": {"5": {"has_threshold": True, "lower": 0.0, "upper": 0.0002},
+                                  "10": {"has_threshold": True, "lower": 0.0, "upper": 0.0001}},
+                    "KXHYPEPERP": {"5": {"has_threshold": False}}}}
+    rows = [(FWD_T0 + i * H, 99.9, 100.1) for i in range(0, 24 * 40)]
+    prints = [(FWD_T0 + (24 * d + 21) * H, 0.0003) for d in range(0, 10)]
+    g = gate(thr, {"KXBTCPERP": prints, "KXHYPEPERP": prints}, {"KXBTCPERP": rows, "KXHYPEPERP": rows})
+    # 8h hold: prints at 21:00 each day, entry 22:00, exit 06:00 next day; 7 entries on Nov 17..23
+    assert g["5|fade|8"]["trades_gate_window"] == 7 and abs(g["5|fade|8"]["rate_a_day"] - 1.0) < 1e-12
+    assert g["5|fade|24"]["trades_gate_window"] == 4, g["5|fade|24"]   # exit 22:00 next day blocks the next print: every 2nd day
+    assert not any(v["passes"] for v in g.values())                    # one name cannot reach 3 a day
+    # HYPE has no threshold at q 5: excluded; at q 10 it is missing from thr: excluded too
+    assert cut_of(thr, "KXHYPEPERP", 5) is None and cut_of(thr, "KXSOLPERP", 10) is None
+    # a print before the window is never used; a print in the first hour has no prior row
+    g2 = gate(thr, {"KXBTCPERP": [(FWD_T0 - 5, 0.0003), (FWD_T0, 0.0003)]}, {"KXBTCPERP": rows})
+    assert g2["5|fade|8"]["trades_gate_window"] == 1 and g2["5|fade|8"]["skips"]["no_prior"] == 0
+    g3 = gate(thr, {"KXBTCPERP": [(FWD_T0 - 1, 0.0003)]}, {"KXBTCPERP": rows[1:]})
+    assert g3["5|fade|8"]["trades_gate_window"] == 0
+    print("selftest_fwd OK")
+
+
 if __name__ == "__main__":
     if sys.argv[1:] == ["selftest"]:
         selftest()
+        selftest_fwd()
     else:
         print("only selftest; no data is opened by this build")
