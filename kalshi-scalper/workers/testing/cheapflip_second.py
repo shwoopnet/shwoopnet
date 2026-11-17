@@ -90,10 +90,10 @@ def collect(markets, results):
             for upper in BANDS:
                 e = find_entries(polls, close, side, upper)
                 if e is None: continue
-                i, a, asz = e; t0 = polls[i][0] / 1000.0; touches = {}
+                i, a, asz = e; t0 = polls[i][0]; touches = {}
                 for k in KS:
                     t = find_touch(polls, close, side, i, a, k)
-                    touches[k] = None if t is None else (polls[t[0]][0] / 1000.0 - t0, t[1], t[2])
+                    touches[k] = None if t is None else (polls[t[0]][0] - t0, t[1], t[2])       # integer milliseconds from entry to touch
                 ents.append({"ticker": tk, "series": series, "close": close, "side": side, "band": upper, "a": a, "ask_size": asz, "touches": touches, "result": results.get(tk)})
     return ents, cnt
 
@@ -102,7 +102,7 @@ def cell(ents, k, held_missing=None):
     n = len(ents); out = {"n": n, "days": len(set(utc_day(e["close"]) for e in ents)), "windows": len(set(e["ticker"] for e in ents))}
     out["first_day"] = min((utc_day(e["close"]) for e in ents), default=None); out["last_day"] = max((utc_day(e["close"]) for e in ents), default=None)
     tch = [e for e in ents if e["touches"][k] is not None]
-    out["reach_share"] = len(tch) / n if n else None; out["median_touch_s"] = median([e["touches"][k][0] for e in tch])
+    out["reach_share"] = len(tch) / n if n else None; mm = median([e["touches"][k][0] for e in tch]); out["median_touch_s"] = None if mm is None else mm / 1000
     out["bid_size_5_share_at_touch"] = (sum(1 for e in tch if e["touches"][k][2] is not None and e["touches"][k][2] >= 5) / len(tch)) if tch else None
     out["ask_size_5_share_at_entry"] = (sum(1 for e in ents if e["ask_size"] is not None and e["ask_size"] >= 5) / n) if n else None
     for hi, h in enumerate(HS, 1):

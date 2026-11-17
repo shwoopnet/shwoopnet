@@ -14,7 +14,7 @@ class T(unittest.TestCase):
     def test_hand_case(self):
         ents, cnt = self.run_case("yes"); self.assertEqual(cnt["polls_at_or_after_close"], 1)
         yes = [e for e in ents if e["side"] == "yes"]; self.assertEqual(sorted(e["band"] for e in yes), [3, 5, 10]); e = yes[0]; self.assertEqual((e["a"], e["ask_size"]), (3, 7))
-        self.assertEqual((e["touches"][2][0], e["touches"][2][1], e["touches"][2][2]), (100.0, 6, 4)); self.assertEqual((e["touches"][3][0], e["touches"][3][2]), (200.0, 8)); self.assertIsNone(e["touches"][5])
+        self.assertEqual((e["touches"][2][0], e["touches"][2][1], e["touches"][2][2]), (100000, 6, 4)); self.assertEqual((e["touches"][3][0], e["touches"][3][2]), (200000, 8)); self.assertIsNone(e["touches"][5])
         n = c.trade_net
         self.assertAlmostEqual(n(3, 1, e["touches"][2], "yes", "yes"), 0.03, 12); self.assertAlmostEqual(n(3, 1, e["touches"][3], "yes", "yes"), 0.31, 12)
         self.assertAlmostEqual(n(3, 2, e["touches"][2], "yes", "yes"), -0.17, 12); self.assertAlmostEqual(n(3, 2, e["touches"][3], "yes", "yes"), 0.11, 12)
@@ -52,5 +52,9 @@ class T(unittest.TestCase):
         r = [r for r in rows if r[0] == 3 and r[1] == 5][0][2]["POOLED"]; self.assertEqual((r["trades_h1"], r["n_scored"]), (0, 0))                  # the hold without a result is dropped
         r2 = [r for r in rows if r[0] == 3 and r[1] == 2][0][2]["POOLED"]; self.assertEqual(r2["trades_h1"], 1)                # sold: counts
         self.assertGreater(cnt["held_entries_without_result"]["KXHYPE15M"], 0)
+    def test_ms_integer_median(self):
+        ps = [(1794000000013, "M", 1794001000, bids(), bids((0.97, 7))), (1794000042000, "M", 1794001000, bids((0.06, 9)), bids()), (1794000043013, "M", 1794001000, bids((0.06, 9)), bids())]
+        ents, cnt = c.collect({"M": ("KXHYPE15M", 1794001000, ps)}, {"M": "yes"}); e = [x for x in ents if x["side"] == "yes" and x["band"] == 3][0]; self.assertEqual(e["touches"][2][0], 41987)
+        e2 = dict(e); e2["touches"] = {2: (42000, 6, 9), 3: None, 5: None}; self.assertEqual(c.cell([e, e2], 2)["median_touch_s"], (41987 + 42000) / 2 / 1000)
     def test_median_even(self):
         self.assertEqual(c.median([1, 2, 3, 10]), 2.5); self.assertEqual(c.median([5, 1, 3]), 3)
