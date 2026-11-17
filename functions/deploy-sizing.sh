@@ -12,7 +12,7 @@ cd "$(dirname "$0")/.."
 ENV_FILE=functions/.env
 PROJECT=shwoopnet
 CHECKER=functions:kalshiHardStopCheck   # the hard account stop's checker goes out FIRST, in its own command (Nov 13, 2026): the minute function blocks buys when the checker has never written its record
-ONLY=functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount,functions:kalshiGoldKillCheck,functions:kalshiBalanceSnapshot   # kalshiLiveAccount reports the order switch to the Bot page: left out, it kept an old value (Nov 2, 2026)
+ONLY=functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount,functions:kalshiGoldKillCheck,functions:kalshiBalanceSnapshot,functions:kalshiPerpsAccount   # kalshiLiveAccount reports the order switch to the Bot page: left out, it kept an old value (Nov 2, 2026)
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 
