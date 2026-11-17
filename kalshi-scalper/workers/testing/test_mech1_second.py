@@ -193,3 +193,11 @@ class T5(unittest.TestCase):
     def test_unverified_is_scored(self):
         sig = cand(market="weather", signal="spread", clock="time_of_day", exit="stop"); d = json.loads(m.run([json.dumps(head(sig))], REG, self.W, 5)[0])
         self.assertEqual((d["class"], d["class_ref"], d["scored"], d["provisional"]), ("UNVERIFIED_MATCH", "U1", True, True))
+
+
+class T6(unittest.TestCase):
+    W = {"search": ["2026-09-02", "2026-10-06"], "validate": ["2026-10-07", "2026-10-26"]}
+    def test_summary_classes_and_windows(self):
+        a = cand(signal="price_change", clock="any_minute"); b = cand(market="weather", signal="spread", clock="time_of_day", exit="stop"); c = cand(market="index_perp", signal="open_interest", clock="any_minute")
+        out = m.run([json.dumps(head(x)) for x in (a, b, c)], REG, self.W, 7); s = json.loads(out[-1])["summary"]
+        self.assertEqual(s["classes"], {"DECLINED": 1, "UNVERIFIED_MATCH": 1, "NEW": 1}); self.assertEqual((s["windows"]["half1_to"], s["windows"]["half2_from"]), ("2026-09-28", "2026-09-29")); self.assertEqual(s["windows"]["search"], ["2026-09-02", "2026-10-06"])

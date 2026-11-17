@@ -183,7 +183,9 @@ def run(lines, registry, windows, m_carried, option_a=True, extra_summary=None, 
         else:
             line.update({"data": h["data"] if isinstance(h.get("data"), str) else None, "setting": None, "search": None, "validate": None, "screen1": False, "screen2": False, "bh_survivor": False, "p_union": None, "screen2_pf_half1": None, "screen2_pf_half2": None})
         out.append(fmt(line))
-    summary = {"tried": settings_counted, "settings_counted": settings_counted, "m_carried": m_carried, "m_total": m_total, "screen1_pass": sum(1 for r in scored if r["screen1"]), "screen2_pass": sum(1 for r in scored if r["screen2"]), "bh_survivors": len(surv), "windows": {"search": list(windows["search"]), "validate": list(windows["validate"])}, "PF_MIN": PF_MIN, "rule_hashes": rule_hashes or {}, "data_file_shas": data_file_shas or {}, "holds_file_sha256": holds_file_sha256, "holds_excluded": holds_excluded}
+    classes = {}
+    for r in rows: classes[r["verdict"]] = classes.get(r["verdict"], 0) + 1
+    summary = {"tried": settings_counted, "settings_counted": settings_counted, "m_carried": m_carried, "m_total": m_total, "screen1_pass": sum(1 for r in scored if r["screen1"]), "screen2_pass": sum(1 for r in scored if r["screen2"]), "bh_survivors": len(surv), "windows": dict({"search": list(windows["search"]), "validate": list(windows["validate"])}, **({"half1_to": rows[0]["h"]["half1_to"], "half2_from": rows[0]["h"]["half2_from"]} if rows else {})), "classes": classes, "PF_MIN": PF_MIN, "rule_hashes": rule_hashes or {}, "data_file_shas": data_file_shas or {}, "holds_file_sha256": holds_file_sha256, "holds_excluded": holds_excluded}
     summary.update(extra_summary or {})
     out.append(fmt({"summary": summary}))
     return out
