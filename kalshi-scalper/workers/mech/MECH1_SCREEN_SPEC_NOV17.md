@@ -38,3 +38,20 @@ Per row: signature id, market, signal, clock, exit, side, stage, held-out n and 
 
 ## 8. Open points for the Head (the build cannot start the NEW step until decided)
 (a) Option A or B for a new market family (strict spec versus a family counts as NEW). (b) Whether a second or third setting per signature is ever allowed on the first run (default: no, one each). (c) The carried m for the header.
+
+## 9. Output format of each build (v1, Nov 17, 2026; both builds print exactly this)
+One JSON object per line, one line per signature tried, UTF-8, keys sorted, separators "," and ":" with no spaces, lines sorted by `sig_id`. Floats are printed with Python's "%.17g" (counts and flags are integers or true/false; a missing value is null, never 0 or NaN). The file ends with one summary line `{"summary": ...}`. The print's sha256 is committed BEFORE it is opened (the usual rule), by whichever desk ran it.
+Fields per signature line:
+- `sig_id`: first 16 hex of sha256 of "market|signal|clock|entry|exit|side" (the six values joined by "|").
+- `market`, `signal`, `clock`, `entry`, `exit`, `side`: the six values.
+- `class`: the matcher's verdict (NEW, VERSION_NEW_MARKET, DUPLICATE, DECLINED), `class_ref`: the registry id it matched or null. Only NEW and, labelled, VERSION_NEW_MARKET are scored; the others print with `scored` false.
+- `scored`: true or false. `data`: the named data file group read (e.g. "R6", "NC15", "perps_candles").
+- `setting`: {`threshold_value` (the SEARCH 10% tail cut, float), `tail` ("high" or "low"), `hold_s` (seconds or null), `tp_mult` (or null), `stop_mult` (or null)}.
+- `search`: {`n` (trades), `trade_days`, `calendar_days`, `trades_per_day`, `gross_edge_c` (cents per contract), `net_edge_c`, `pf_1c`, `pf_2c` (null where not defined), `pf_half1`, `pf_half2`, `day_z`, `p`} on the SEARCH window; `validate`: the same on VALIDATE.
+- `screen1`, `screen2`: true or false; `m`: the BH family size for this line (the carried m plus the settings counted so far, an integer); `bh_survivor`: true or false.
+- `heldout_read`: false. The held-out window is never read by the screen.
+Summary line: `tried` (signatures scored), `settings_counted`, `m_carried`, `m_total`, `screen1_pass`, `screen2_pass`, `bh_survivors`, `windows` (the date constants as strings), `rule_hashes` (sha256 of every code file used), `data_file_shas` (sha256 of every data file read), `holds_file_sha256`.
+Rounding: none inside the computation; printing only. A comparison is at 1e-9 relative for floats and exact for counts, flags and strings.
+
+## 10. Data and holds the screen reads (Nov 17 inventory, Desk C's FAST_CLOCK_SIGNAL_FIELDS.md at 48c10c8bb on claude/idea-desk-c, read for file names only)
+First run (Nov 18): R6 15 minute books (Bitcoin, Ethereum, XRP, Dogecoin, gold; 2026-10-29 to 11-16), NC15 (12 non-crypto series; 2026-11-11 to 11-16), perps minute candles (bid, ask, open interest, volume; indices, gold, BTC and ETH from Sep 2, stocks from Nov 5), funding and the 30 second recorder. Open interest, funding rate and settlement mark exist only on perps and the Deribit-linked Bitcoin feed; R6 and NC15 have none of them. HOLDS.json is applied by the generator at a pinned sha256 (the file is the Head's; this spec does not copy it): R6 gold, Bitcoin, Ethereum, XRP and Dogecoin are under hold H20 and the eight NC15 series of H21 are held; a held market-window is excluded from every window of the screen and its rows are counted in `summary.holds_excluded`. Where a hold and a window conflict the hold wins. Dogecoin is excluded under 7e whatever the hold says. The perps tape joins when the back-pull lands (PERPS_TAPE60_AMENDMENT_NOV17.md, settled readings in its section 6).

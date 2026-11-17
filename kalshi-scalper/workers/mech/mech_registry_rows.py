@@ -96,7 +96,7 @@ R = [
 ("D_LOCK_PARITY", "closed_by_evidence", "*", "cross_market_residual", "any_minute", "taker", "hold_to_settle", "both", "7e: lock and parity scans", "hand_read", "pattern"),
 ("D_EXDIV_PERP", "closed_by_evidence", "stock_perp", "event_calendar", "scheduled_event", "*", "*", "fade", "7e: ex-dividend short on stock perps", "hand_read", "pattern"),
 ("D_TIE_PREMIUM", "closed_by_evidence", N15, "price_level", "*", "taker", "hold_to_settle", "cheap", "7e: tie or frozen-source premium on non-crypto 15 minute", "hand_read", "pattern"),
-("D_CRON_CLUSTER", "closed_by_evidence", [C15, N15], "tape_flow", "any_minute", "taker", "*", "*", "7e: second-of-minute taker clustering (timing)", "hand_read", "pattern"),
-("D_FRACTIONAL_SIZE_FLOW", "closed_by_evidence", [C15, N15], "tape_flow", "*", "taker", "*", "*", "7e: fractional-size flow against whole-number flow", "hand_read", "pattern"),
+("D_CRON_CLUSTER", "closed_by_evidence", "*", "tape_flow", "any_minute", "taker", "*", "*", "7e: second-of-minute taker clustering (timing)", "hand_read", "pattern"),
+("D_FRACTIONAL_SIZE_FLOW", "closed_by_evidence", "*", "tape_flow", "*", "taker", "*", "*", "7e: fractional-size flow against whole-number flow", "hand_read", "pattern"),
 ("D_CHEAP_REGIME_GRAMMAR_15M", "closed_by_evidence", [C15, N15], ["price_level", "price_change", "cross_market_residual", "spread"], "*", "taker", "*", "*", "7e: cheap-side price, regime and grammar rules on the 15 minute series (no new data source)", "hand_read", "pattern"),
 ]

@@ -18,7 +18,9 @@ v = S.classify(c(market="crypto_perp", signal="funding_rate", clock="print", exi
 # 6. a different clock with a known signal is NEW (the spec's "signal field OR clock")
 v = S.classify(c(market="stock_perp", signal="price_change", clock="reopen", exit="fixed_time", side="follow"), reg); assert v[0] == "NEW", v
 # 7. tape flow on crypto perps at any minute: the strict spec rule makes it a VERSION of the 15 minute tape-flow rows (RESIL1 or FLOW1 clock any_minute), NOT new; the Head decides if a new market family should count as new (documented, not changed here)
-v = S.classify(c(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"), reg); assert v[0] == "VERSION_NEW_MARKET", v
+v = S.classify(c(market="crypto_perp", signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"), reg); assert v[0] == "DECLINED" and v[1] in ("D_CRON_CLUSTER", "D_FRACTIONAL_SIZE_FLOW"), v
+# 7b. the same signature as a maker (no declined pattern names a maker tape-flow entry) is a version, not new
+v = S.classify(c(market="crypto_perp", signal="tape_flow", clock="any_minute", entry="maker_touch", exit="fixed_time", side="follow"), reg); assert v[0] == "VERSION_NEW_MARKET", v
 # 8. 15 minute taker flow is DECLINED even with a different exit
 v = S.classify(c(signal="tape_flow", clock="any_minute", exit="fixed_time", side="follow"), reg); assert v[0] == "DECLINED", v
 # 9. a vocabulary error raises

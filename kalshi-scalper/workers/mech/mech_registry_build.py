@@ -2,6 +2,7 @@
 import sys, os, json, hashlib
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import mech_schema as S, mech_registry_rows as RR
+EVIDENCE = {"D_CRON_CLUSTER": "UNKNOWN: 7e row cites CRONCLUSTER1 stage A (V2) with no data scope written; kept WIDE (any market) until the VA reads the evidence", "D_FRACTIONAL_SIZE_FLOW": "UNKNOWN: 7e row cites RETAILFRAC1 stage A (V2) with no data scope written; kept WIDE until the VA reads the evidence"}
 def build():
     out = []
     for r in RR.R:
@@ -10,6 +11,7 @@ def build():
         else: e["kind"] = "signature"
         errs = S.validate_entry(e)
         if errs: raise SystemExit("INVALID %s: %s" % (e["id"], errs))
+        if e["id"] in EVIDENCE: e["evidence_market_scope"] = EVIDENCE[e["id"]]
         out.append(e)
     ids = [e["id"] for e in out]
     if len(set(ids)) != len(ids): raise SystemExit("duplicate ids")

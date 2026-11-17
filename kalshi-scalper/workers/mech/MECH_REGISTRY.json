@@ -6,7 +6,7 @@
  "signatures": 81,
  "patterns": 11,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "d9d80c753bd7882c408eeaec8a2a891e874820764524e1b35f001c975a3b02b8",
+ "rows_sha256": "c017e56f2df357c3d97e7ccd4ed4403ce6118167f505fbf01ae852ec81db04ac",
  "entries": [
   {
    "id": "L1",
@@ -1174,10 +1174,7 @@
   {
    "id": "D_CRON_CLUSTER",
    "status": "closed_by_evidence",
-   "market": [
-    "15m_crypto",
-    "15m_noncrypto"
-   ],
+   "market": "*",
    "signal": "tape_flow",
    "clock": "any_minute",
    "entry": "taker",
@@ -1185,15 +1182,13 @@
    "side": "*",
    "source": "7e: second-of-minute taker clustering (timing)",
    "confidence": "hand_read",
-   "kind": "pattern"
+   "kind": "pattern",
+   "evidence_market_scope": "UNKNOWN: 7e row cites CRONCLUSTER1 stage A (V2) with no data scope written; kept WIDE (any market) until the VA reads the evidence"
   },
   {
    "id": "D_FRACTIONAL_SIZE_FLOW",
    "status": "closed_by_evidence",
-   "market": [
-    "15m_crypto",
-    "15m_noncrypto"
-   ],
+   "market": "*",
    "signal": "tape_flow",
    "clock": "*",
    "entry": "taker",
@@ -1201,7 +1196,8 @@
    "side": "*",
    "source": "7e: fractional-size flow against whole-number flow",
    "confidence": "hand_read",
-   "kind": "pattern"
+   "kind": "pattern",
+   "evidence_market_scope": "UNKNOWN: 7e row cites RETAILFRAC1 stage A (V2) with no data scope written; kept WIDE until the VA reads the evidence"
   },
   {
    "id": "D_CHEAP_REGIME_GRAMMAR_15M",
