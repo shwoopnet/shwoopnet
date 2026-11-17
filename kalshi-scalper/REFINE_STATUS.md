@@ -4,6 +4,10 @@ HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; line
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-17 08:01 AM CT (14:01Z): OKX liquidation recorder first-week gap check
+
+26 passes (52 coverage rows, 2 underlyings) from 2026-11-11 05:57Z to 2026-11-17 11:42Z. Largest gap between consecutive passes 10.9 h, none over 12 h, no missing pass. Within OKX's 17 h retention. No report to Main needed.
+
 ## 2026-11-16 07:45 AM CT (13:45Z): Weekly rotation recommendation sent to Main (Nov 16)
 
 Sent by message: per strategy keep, watch or kill against its IMPLEMENT, KILL and RETURN rules, cash basis. Flagged: OICORE and EVENT830 have no strategy-specific RETURN rule; XRPYES10 shows trades after its retirement, deploy state of PR 772 asked of Main. No figures in this file.
