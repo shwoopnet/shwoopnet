@@ -59,7 +59,13 @@ TAPE_OVERLAP_S = 60                        # a poll starts 60 s before the newes
 TAPE_FIRST_BACK_S = 900                    # the first poll of a job reaches 15 minutes back (the gap before a job that started late); rows are NOT deduplicated across jobs, readers drop repeats by the whole row
 TAPE_BACKOFF_S, TAPE_BACKOFF_MAX_S = 2.0, 30.0
 TAPE_COLS = ["t_recv_ms", "server_date_header", "ticker", "created_time", "price", "count", "taker_side", "is_block_trade"]
-TAPE_COVER_COLS = ["t_local_ms", "pages", "trades", "duplicates_dropped", "n429", "newest_created_ms", "cursor_ended", "truncated", "lost_window_lo_ms", "lost_window_hi_ms", "note"]
+TAPE_COVER_COLS = ["t_local_ms", "pages", "trades", "duplicates_dropped", "n429", "newest_created_ms", "cursor_ended", "truncated", "lost_window_lo_ms", "lost_window_hi_ms", "note", "filtered_out"]
+# Only the perps the research needs are KEPT (the Head of R&D, Nov 17, 2026): the 19 crypto perps, gold, US 500, US Tech 100 and the 13 stock perps of the page-max table (kalshi-scalper/workers/forensics/inventory/
+# PERPS_PAGE_MAX_20261116.tsv on claude/forensics-desk, sha256 5be707ec...: NVDA, MU, AMD, AVGO, AMAT, AAPL, MSFT, GOOGL, AMZN, META, XOM, CVX, COP; the ticker KXCOPPERP is ConocoPhillips, not copper). The tape is read for ALL
+# perps (it has no server side filter we use), so the filter saves size, not requests; `filtered_out` in the coverage row counts the rows left out.
+TAPE_TICKERS = frozenset(("KXAAVEPERP", "KXADAPERP", "KXBCHPERP", "KXBNBPERP", "KXBTCPERP", "KXDOGEPERP", "KXETHPERP", "KXHYPEPERP", "KXKSHIBPERP", "KXLINKPERP", "KXLTCPERP", "KXNEARPERP", "KXSOLPERP", "KXSUIPERP",
+                          "KXUNIPERP", "KXVVVPERP", "KXWLDPERP", "KXXRPPERP", "KXZECPERP", "KXGOLDPERP", "KXUS500PERP", "KXUSTECH100PERP",
+                          "KXNVDAPERP", "KXMUPERP", "KXAMDPERP", "KXAVGOPERP", "KXAMATPERP", "KXAAPLPERP", "KXMSFTPERP", "KXGOOGLPERP", "KXAMZNPERP", "KXMETAPERP", "KXXOMPERP", "KXCVXPERP", "KXCOPPERP"))
 SETTLE_FROM_S, SETTLE_TO_S = 16 * 3600 + 55 * 60, 17 * 3600 + 5 * 60      # 16:55 to 17:05 UTC: every list row of the window is also written to settle.csv with settle_window=1
 SETTLE_COLS = MARKET_COLS + ["settle_window"]
 FUNDING_DAY_AFTER_S = 21 * 3600 + 15 * 60  # the first read after 21:15 UTC reads the whole day's funding prints of every market (one request, no ticker)
@@ -180,7 +186,7 @@ def tape_poll(state, wt, wtc, getter, deadline, sleep=time.sleep, clock=time.tim
     """One bounded tape poll. state = {"min_s": epoch seconds to start from, "seen": set of trade ids kept in memory (overlap only)}. Reads newest first, follows the cursor for at most TAPE_MAX_PAGES pages and
     TAPE_BUDGET_S seconds and never past `deadline` (the next list read). Never raises. Three 429s in a row end THIS step only. A poll that did not reach the end of its window says so in the coverage row
     (truncated=1 and the window it did not read); the tape back-serves, so a back-pull can fill it."""
-    t_start = clock(); cursor = None; pages = trades = dups = n429 = 0; newest = None; oldest = None; ended = False; note = ""; streak = 0; wait = TAPE_BACKOFF_S
+    t_start = clock(); cursor = None; pages = trades = dups = n429 = filtered = 0; newest = None; oldest = None; ended = False; note = ""; streak = 0; wait = TAPE_BACKOFF_S
     while pages < TAPE_MAX_PAGES:
         if clock() - t_start >= TAPE_BUDGET_S or clock() >= deadline - 1.0:
             note = "time bound"; break
@@ -202,10 +208,12 @@ def tape_poll(state, wt, wtc, getter, deadline, sleep=time.sleep, clock=time.tim
                 dups += 1; continue
             if tid is not None:
                 state["seen"].add(tid)
-            wt.writerow(tape_row(x, t1, date)); trades += 1
-            if ms is not None:
+            if ms is not None:                      # the window bookkeeping counts EVERY trade read, kept or not, so a poll of only left-out perps still moves the next poll forward
                 newest = ms if newest is None or ms > newest else newest
                 oldest = ms if oldest is None or ms < oldest else oldest
+            if x.get("ticker") not in TAPE_TICKERS:
+                filtered += 1; continue
+            wt.writerow(tape_row(x, t1, date)); trades += 1
         cursor = obj.get("cursor")
         if not cursor or not isinstance(cursor, str) or not cursor.replace("-", "").replace("_", "").replace("=", "").isalnum():
             ended = True; break
@@ -217,7 +225,7 @@ def tape_poll(state, wt, wtc, getter, deadline, sleep=time.sleep, clock=time.tim
         state["min_s"] = max(state["min_s"], int(newest // 1000) - TAPE_OVERLAP_S)
     if len(state["seen"]) > 20000:      # the overlap is 60 seconds, so only recent ids matter; keep memory bounded
         state["seen"].clear()
-    wtc.writerow([int(clock() * 1000), pages, trades, dups, n429, newest if newest is not None else "", 1 if ended else 0, truncated, lo, hi, note])
+    wtc.writerow([int(clock() * 1000), pages, trades, dups, n429, newest if newest is not None else "", 1 if ended else 0, truncated, lo, hi, note, filtered])
     return trades
 
 
