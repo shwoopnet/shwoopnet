@@ -224,7 +224,7 @@ gates.HS8 = () => {
   const lib = stripC(read('functions', 'kalshiHardStopLib.js'));
   assert.ok(!/fetch|keyId|pem|\/portfolio|method: "POST"|runL1Tick|liveRequest/.test(lib));
   const idx = read('functions', 'index.js');
-  const fn = idx.slice(idx.indexOf('exports.kalshiHardStopCheck'), idx.indexOf('exports.kalshiPaperTick'));
+  const fn = idx.slice(idx.indexOf('exports.kalshiHardStopCheck'), idx.indexOf('// ---- Phone alerts (Web Push)'));
   assert.ok(!/KALSHI_LIVE_KEY_ID|KALSHI_LIVE_PRIVATE_KEY|secrets/.test(fn), 'no secret on the checker');
   assert.ok(/schedule: "every 5 minutes"/.test(fn), 'every 5 minutes: a 5 minute trip delay is fine for a 40% line, and the 15 minute stale rule allows two missed runs');
   assert.ok(hs.HARD_STOP.staleMs >= 3 * 5 * 60 * 1000 && hs.HARD_STOP.heartbeatMs < 5 * 60 * 1000, 'every run refreshes the heartbeat and three runs fit in the stale window');

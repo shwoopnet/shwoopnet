@@ -3,7 +3,7 @@
 #
 #   git clone https://github.com/shwoopnet/shwoopnet && bash shwoopnet/functions/deploy-cost.sh
 #
-#   kalshiPaperTick     now returns at once (the paper tracker is switched off; its card is gone and live one-contract probes replaced it)
+#   (kalshiPaperTick, the paper tracker, was deleted on Nov 17, 2026 and is no longer deployed)
 #   kalshiBookRecorder  while switched off it now deletes old order-book snapshots (200 a minute) instead of doing nothing, so stored data stops billing
 #
 # Neither holds a secret, signs anything or places an order, so unlike deploy-sizing.sh and deploy-push.sh this needs no order-switch line and touches no live function.
@@ -12,7 +12,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 PROJECT=shwoopnet
-ONLY=functions:kalshiPaperTick,functions:kalshiBookRecorder
+ONLY=functions:kalshiBookRecorder
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 

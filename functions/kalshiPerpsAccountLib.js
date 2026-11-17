@@ -1,6 +1,6 @@
 "use strict";
 // The owner's perpetuals (margin) account, READ ONLY (Nov 16, 2026, the owner: the Account card shows one total, predictions plus perps, and the Open positions card lists each perp).
-// The probe (kalshiPerpsProbeLib) proved the trading key can read /margin/balance and /margin/positions. This shapes those two answers, plus the PUBLIC perps list (mark price and leverage
+// An earlier probe (since removed) proved the trading key can read /margin/balance and /margin/positions. This shapes those two answers, plus the PUBLIC perps list (mark price and leverage
 // estimate by ticker), into one small document the Bot page reads. GET only: no order, no POST, nothing written to Kalshi, nothing that decides a trade reads it (display only; the stops,
 // limits and sizing stay on the bot's own trade results).
 //

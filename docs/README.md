@@ -14,7 +14,6 @@ These files are working notes, not part of the app. They are excluded from the p
 | `WHEEL_ADMIT_LIST.md`, `WHEEL_LEDGER.md` | The wheel's shadow admit list and lane ledger (kept by the Head of R&D) | By the Head of R&D |
 | `GOLD_KILL_LATCH.md` | The gold kill latch: design, options, the return rule, GOLDOFF | When the latch rules change |
 | `SECOND_SLOT_DESIGN.md`, `SECOND_SLOT_WIRING.md` | The second slot: Phase A design and the Phase B wiring plan (history; the slot is on) | Status line only |
-| `LONGHOLD_DESIGN.md` | Long-hold paper log (log only; no rule registered) | When a rule is registered |
 | `CHARTER.md` | Standing orders for every agent (owner-only) | Only the owner edits it |
 | `RND_CHARTER.md` | R&D operating charter (in force) | When the owner changes R&D limits |
 | `POLITICS_RULES.md` | Owner decisions on politics, parlay and slow-family probes | When the owner decides |
