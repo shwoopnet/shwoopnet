@@ -171,6 +171,20 @@ def day_of(ts):
     return time.strftime("%Y-%m-%d", time.gmtime(ts))
 
 
+HELD_REASONS = ("no mark", "too late")
+
+
+def score_both(K, core, exit_):
+    """-> (net at 1c, net at 2c, held). The engine core returns None for an M60 or M180 exit when no two-sided sellable candle ends at the mark, or the entry is after it; that trade must NOT be dropped (a collapsed side
+    has no bid, so total losses would vanish and the forward PF would read too high). Nothing could be sold, so the position stays open: it is scored through the core's own hold-to-settlement path (exit "H", the
+    same haircuts and contracts), counted as a trade, and flagged (held = 1). The Head of R&D and Desk A confirmed this rule on 2026-11-17."""
+    x1, r1 = K.score(core, exit_, 0.01, CONTRACTS); x2, r2 = K.score(core, exit_, 0.02, CONTRACTS)
+    if (x1 is None or x2 is None) and (r1 in HELD_REASONS or r2 in HELD_REASONS):
+        x1, _a = K.score(core, "H", 0.01, CONTRACTS); x2, _b = K.score(core, "H", 0.02, CONTRACTS)
+        return x1, x2, 1
+    return x1, x2, 0
+
+
 def score_spec(mods, spec, cut, markets, start_utc, guard, series_in_list, sha256):
     """-> (new trades [ {t: ticker, c: close, d: day, x1: net at 1c, x2: net at 2c, w: 1 if it won, v: 1 if void} ], refused count). The engine core scores every trade; a market is skipped unless the guard clears it."""
     N, K, D = mods["engine1_enum"], mods["engine1_core"], mods["engine1_driver"]
@@ -188,10 +202,10 @@ def score_spec(mods, spec, cut, markets, start_utc, guard, series_in_list, sha25
         if ent is None:
             continue
         core = D.to_core(m, ent)
-        x1, r1 = K.score(core, spec["exit"], 0.01, CONTRACTS); x2, _r2 = K.score(core, spec["exit"], 0.02, CONTRACTS)
+        x1, x2, held = score_both(K, core, spec["exit"])
         if x1 is None or x2 is None:
             continue
-        trades.append({"t": m["ticker"], "c": m["close"], "d": day_of(m["close"]), "x1": x1, "x2": x2, "w": 1 if m["result"] == ent["side"] else 0, "v": 1 if m["result"] == "void" else 0})
+        trades.append({"t": m["ticker"], "c": m["close"], "d": day_of(m["close"]), "x1": x1, "x2": x2, "w": 1 if m["result"] == ent["side"] else 0, "v": 1 if m["result"] == "void" else 0, "h": held})
     return trades, refused
 
 
@@ -199,7 +213,7 @@ def aggregate(mods, seq, n_days, start_utc, now):
     """Per-spec aggregates from the private ordered sequence [[net at 1c, net at 2c, void flag], ...] (order = (close, ticker), the engine's own), with the engine core's pf. PF is None (with no_losses true) when there are no losses."""
     K = mods["engine1_core"]
     n = len(seq); half = n // 2
-    out = {"n": n, "wins": sum(1 for t in seq if t[0] > 0), "voids": sum(t[2] for t in seq)}
+    out = {"n": n, "wins": sum(1 for t in seq if t[0] > 0), "voids": sum(t[2] for t in seq), "scored_at_settlement": sum(t[3] for t in seq if len(t) > 3)}
     for tag, i in (("1c", 0), ("2c", 1)):
         xs = [t[i] for t in seq]
         v = K.pf(xs); out["net_" + tag] = round(sum(xs), 4)
@@ -292,7 +306,7 @@ def run_once(root, now, puller, state, cfg=None):
         mine = st["trades"].setdefault(spec["id"], {"seq": [], "n_days": 0, "last_day": ""})
         new, refused = score_spec(mods, spec, cut_for(cuts, spec), fetched.get(spec["market"], []), start, guard, series_in_list, sha)
         for t in sorted(new, key=lambda t: (t["c"], t["t"])):
-            mine["seq"].append([t["x1"], t["x2"], t["v"]])
+            mine["seq"].append([t["x1"], t["x2"], t["v"], t.get("h", 0)])
             if t["d"] != mine["last_day"]:
                 mine["n_days"] += 1; mine["last_day"] = t["d"]
         a = aggregate(mods, mine["seq"], mine["n_days"], start, now)
@@ -300,7 +314,7 @@ def run_once(root, now, puller, state, cfg=None):
         a["refused_by_guard"] = st.setdefault("refused", {}).get(spec["id"], 0) + refused
         st["refused"][spec["id"]] = a["refused_by_guard"]
         results[spec["id"]] = dict(a, admission=item.get("admission"), market=spec["market"], spec_sha256=sha)
-        counts.append({"id": spec["id"], "signals": a["n"], "settled": a["n"], "wins": a["wins"], "voids": a["voids"], "target": 100, "status": a["status"], "expected_days_to_100": a["days_to_100"],
+        counts.append({"id": spec["id"], "signals": a["n"], "settled": a["n"], "wins": a["wins"], "voids": a["voids"], "scored_at_settlement": a["scored_at_settlement"], "target": 100, "status": a["status"], "expected_days_to_100": a["days_to_100"],
                        "start_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(start)), "as_of_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(now))})
     for series in fetched:
         st["pulled_until"][series] = max_close + 1
