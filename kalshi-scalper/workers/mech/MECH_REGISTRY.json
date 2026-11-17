@@ -6,7 +6,7 @@
  "signatures": 357,
  "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "573bae9abeec35b060338dfa7b7e98444b46381c9df895dd6f796cecee1cf2b0",
+ "rows_sha256": "2433312cbb7ea373d89516eab04f65100bbf5e7791e22c72728ea06313aa985b",
  "entries": [
   {
    "id": "L1",
@@ -4508,7 +4508,7 @@
    "signal": "open_interest",
    "clock": "any_minute",
    "entry": "taker",
-   "exit": "take_profit_multiple",
+   "exit": "bracket",
    "side": "fade",
    "source": "VA Nov 17: liquidation-cascade fade on the Kalshi BTC and ETH perps (1 hour move of k ATR with open interest down), stop and target, 6 hour time stop",
    "confidence": "hand_read",

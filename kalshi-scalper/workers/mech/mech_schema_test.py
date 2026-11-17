@@ -24,6 +24,8 @@ r = v(market="crypto_perp", signal="funding_rate", clock="print", exit="next_pri
 r = v(market="crypto_perp", signal="open_interest", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "NEW" and r[3]["provisional"], r
 # 5d. volume on perps at any minute with a timed exit is a VERSION of S37 (thin-move reversion on 15 minute crypto, Desk B hand read)
 r = v(market="crypto_perp", signal="volume", clock="any_minute", exit="fixed_time", side="follow"); assert r[0] == "VERSION_NEW_MARKET" and r[1] == "S37", r
+# 5e. a bracket (target and stop) is its own exit class: open interest on crypto perps with a bracket is a DUPLICATE of SNAPBACK1; with a timed exit it is a different class
+r = v(market="crypto_perp", signal="open_interest", clock="any_minute", exit="bracket", side="fade"); assert r[0] == "DUPLICATE" and r[1] == "SNAPBACK1", r
 # 6. PERPEQ1 (hand read by the VA: fade the overnight perp gap into the cash open): the same on stock perps is a DUPLICATE, on index perps a version
 r = v(market="stock_perp", signal="price_change", clock="time_of_day", exit="fixed_time", side="fade"); assert r[0] == "DUPLICATE" and r[1] in ("PERPEQ1", "ENGINE1_PERPS_MOM_STOCK") or r[0] == "DUPLICATE", r
 r = v(market="weekly_fx", signal="price_change", clock="time_of_day", exit="fixed_time", side="fade"); assert r[0] == "VERSION_NEW_MARKET", r

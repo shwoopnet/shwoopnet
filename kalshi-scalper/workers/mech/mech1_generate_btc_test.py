@@ -16,8 +16,9 @@ for k in range(1, 164):
             cs.append({"end_period_ts": ts0 + 60 * m, "bid": {"open": "%.2f" % (price - 1), "close": "%.2f" % (price - 1)}, "ask": {"open": "%.2f" % (price + 1), "close": "%.2f" % (price + 1)}, "price": {}, "volume": "%.2f" % v, "open_interest": "%.2f" % oi})
         cs.append(dict(cs[-1]))                                                          # a repeated boundary candle
         with gzip.open(p, "wt") as fo: json.dump({"candlesticks": cs, "ticker": "KXBTCPERP"}, fo)
-    rows.append({"index": k, "id": "KXBTCPERP_" + d.isoformat(), "status": 200, "file": fn, "sha256": hashlib.sha256(open(p, "rb").read()).hexdigest(), "truncated": False})
+    rows.append({"index": k, "params": {"period_interval": 1, "start_ts": ts0, "end_ts": ts0 + 86400}, "id": "KXBTCPERP_" + d.isoformat(), "status": 200, "file": fn, "sha256": hashlib.sha256(open(p, "rb").read()).hexdigest(), "truncated": False})
 json.dump({"job": {}, "rows": rows}, open(os.path.join(base, "manifest.json"), "w"))
+hp = os.path.join(base, "HOLDS.json"); G.HOLDS_FILE = hp; json.dump({"version": G.HOLDS_PINNED_VERSION, "forward_default_deny_from": 2000000000, "rows": [{"id": "HB", "status": "OPEN", "tickers": ["KXBTC15M*"], "from": 0, "to": None}]}, open(hp, "w"))
 allow = os.path.join(base, "ALLOW.md"); B.ALLOW_FILE = allow; out = os.path.join(base, "rec.jsonl")
 open(allow, "w").write("nothing\n")
 try: B.main(base, out); raise SystemExit("ran without an allow line")
@@ -27,7 +28,8 @@ B.main(base, out)                                                               
 L = [json.loads(x) for x in open(out)]; heads = [x for x in L if "sig" in x]; trades = [x for x in L if "sig" not in x]
 assert len(heads) == 4 and all(h["sig"]["market"] == "crypto_perp" and h["half1_to"] == "2026-07-26" for h in heads), len(heads)
 assert trades and all("2026-06-03" <= t["day"] <= "2026-09-18" for t in trades)
-lg = json.load(open(out + ".log.json")); assert lg["pages_read"] == 108 and lg["counts"].get("candle_duplicate_first_kept", 0) >= 100, lg
+lg = json.load(open(out + ".log.json")); assert lg["counts"].get("candle_after_validate_to_dropped", 0) >= 1 and lg["holds_excluded"] == 0 and lg["holds_file_sha256"], lg
+assert lg["pages_read"] == 108 and lg["counts"].get("candle_duplicate_first_kept", 0) >= 100, lg
 # a page whose sha does not match its manifest row is refused
 rows[2]["sha256"] = "0" * 64; json.dump({"job": {}, "rows": rows}, open(os.path.join(base, "manifest.json"), "w"))
 open(allow, "w").write(B.ALLOW_MARK + " mech1_generate_btc.py " + B.sha(B.__file__) + " " + B.sha(os.path.join(base, "manifest.json")) + "\n")

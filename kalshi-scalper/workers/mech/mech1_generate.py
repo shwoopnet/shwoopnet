@@ -6,6 +6,21 @@ import sys, os, csv, gzip, json, math, hashlib, collections, datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 ALLOW_FILE = os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md"); ALLOW_MARK = "readable ONLY by Desk A's MECH1 generator"
 LOG = collections.Counter()
+HOLDS_FILE = os.path.join(HERE, "..", "HOLDS.json"); HOLDS_PINNED_VERSION = "2026-11-16T16Z+7"; HOLDS = None
+def load_holds():
+    """Auditor B's HOLDS table (the version pinned above, else REFUSED). A cell (ticker, candle end time) is excluded if it is in [from, to) of any row with status OPEN or FROZEN, no `scope` (scoped rows concern archive binaries or in-play), and a ticker pattern that matches ('*' any, 'XYZ*' prefix); or at or after forward_default_deny_from. Mirrors scripts/shadow_holds.py."""
+    global HOLDS
+    raw = open(HOLDS_FILE, "rb").read(); t = json.loads(raw)
+    if t.get("version") != HOLDS_PINNED_VERSION: raise SystemExit("REFUSED: HOLDS.json version %r is not the pinned %r" % (t.get("version"), HOLDS_PINNED_VERSION))
+    HOLDS = {"table": t, "sha256": hashlib.sha256(raw).hexdigest()}
+def _matches(p, ticker): return True if p == "*" else (ticker.startswith(p[:-1]) if p.endswith("*") else ticker == p)
+def held(ticker, t):
+    T = HOLDS["table"]
+    if t >= T["forward_default_deny_from"]: return True
+    for r in T["rows"]:
+        if r.get("status") not in ("OPEN", "FROZEN") or r.get("scope") or r.get("kind") == "clearance": continue
+        if any(_matches(p, ticker) for p in r.get("tickers", [])) and r["from"] <= t and (r.get("to") is None or t < r["to"]): return True
+    return False
 WIN = {"search_from": "2026-09-02", "search_to": "2026-10-06", "validate_from": "2026-10-07", "validate_to": "2026-10-26", "half1_to": "2026-09-28", "half2_from": "2026-09-29"}
 FAMILIES = {"metal_perp": ["KXGOLDPERP"], "index_perp": ["KXUS500PERP", "KXUSTECH100PERP"]}
 HOLD_S = 900; FEE_BP = 12.0
@@ -36,6 +51,7 @@ def load(base, tickers):
             t = r["ticker"]
             if t not in out: continue
             k = int(r["end_period_ts"])
+            if held(t, k): LOG["holds_excluded"] += 1; continue
             if k in out[t]: LOG["candle_duplicate_first_kept"] += 1; continue
             out[t][k] = (f(r["bid_open"]), f(r["ask_open"]), f(r["bid_close"]), f(r["ask_close"]), f(r["open_interest"]), f(r["volume"]))
             first.setdefault(t, d)
@@ -115,12 +131,12 @@ def build(data, first, FAMILIES, WIN, label):
                         lines.append({"sig_id": sid, "window": window, "day": d, "entry_end": e_end, "market_id": t, "traded": bool(traded), "gross": gross, "cost": cost, "net": round(gross - cost, 9), "net_1c": None, "net_2c": None})
     return lines
 def main(base, out_path):
-    files = window_files(base); mfs = refuse_unless_allowed(files)
+    files = window_files(base); mfs = refuse_unless_allowed(files); load_holds()
     tickers = [t for v in FAMILIES.values() for t in v]; data, first = load(base, tickers)
     lines = build(data, first, FAMILIES, WIN, "kalshi1m (funding not booked)")
     with open(out_path, "w") as fo:
         for L in lines: fo.write(json.dumps(L, sort_keys=True, separators=(",", ":")) + "\n")
-    json.dump({"file_list_sha256": mfs, "counts": dict(LOG), "generator_sha256": hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest(), "funding": "not booked", "files_read": len(files)}, open(out_path + ".log.json", "w"), sort_keys=True, indent=1)
+    json.dump({"file_list_sha256": mfs, "counts": dict(LOG), "generator_sha256": hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest(), "funding": "not booked", "files_read": len(files), "holds_file_sha256": HOLDS["sha256"], "holds_version": HOLDS_PINNED_VERSION, "holds_excluded": LOG.get("holds_excluded", 0)}, open(out_path + ".log.json", "w"), sort_keys=True, indent=1)
     print("wrote", out_path, len(lines), "lines;", dict(LOG))
 if __name__ == "__main__":
     if len(sys.argv) != 3: sys.exit(__doc__)

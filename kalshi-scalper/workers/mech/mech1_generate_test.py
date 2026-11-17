@@ -24,6 +24,10 @@ hdr, body = rows[0], rows[1:]
 for i in (100, 200, 300): body[i][6] = "9.22e14"; body[i][9] = "9.22e14"                                 # ask_open and ask_close placeholders on three gold candles
 dup = list(body[500]); dup[2] = "1.0"; dup[5] = "1.0"; body.append(dup)                                  # a repeated end_ts with other values, AFTER the original
 with gzip.open(p0, "wt", newline="") as fo: w = csv.writer(fo); w.writerow(hdr); w.writerows(body)
+hp = os.path.join(base, "HOLDS.json"); G.HOLDS_FILE = hp
+holds = {"version": G.HOLDS_PINNED_VERSION, "forward_default_deny_from": 2000000000, "rows": [{"id": "HX", "status": "OPEN", "tickers": ["KXUS500*"], "from": day_ts("2026-10-08"), "to": day_ts("2026-10-09")}, {"id": "HC", "status": "OPEN", "scope": "archive_binary", "tickers": ["*"], "from": 0, "to": None}, {"id": "HS", "status": "APPROVED", "kind": "clearance", "tickers": ["*"], "from": 0, "to": None}]}
+json.dump(holds, open(hp, "w"))
+bad = dict(holds); bad["version"] = "other"; json.dump(bad, open(hp + ".bad", "w"))
 allow = os.path.join(base, "ALLOW.md"); G.ALLOW_FILE = allow
 out = os.path.join(base, "rec.jsonl")
 open(allow, "w").write("nothing here\n")
@@ -32,12 +36,17 @@ except SystemExit as e: assert str(e).startswith("REFUSED"), e
 me = hashlib.sha256(open(G.__file__, "rb").read()).hexdigest(); ms = G.manifest_sha(G.window_files(base))
 open(allow, "w").write(G.ALLOW_MARK + " mech1_generate.py " + me + " " + ms + "\n")
 G.main(base, out)                      # raises if the 10-27 file is opened
-lg = json.load(open(out + ".log.json")); assert lg["counts"].get("candle_duplicate_first_kept", 0) >= 1 and lg["file_list_sha256"] == ms and lg["funding"] == "not booked", lg
+lg = json.load(open(out + ".log.json")); assert lg["holds_excluded"] == 1440 and lg["holds_file_sha256"] == hashlib.sha256(open(hp, "rb").read()).hexdigest() and lg["holds_version"] == G.HOLDS_PINNED_VERSION, lg      # one held day of US 500 candles (the archive_binary and clearance rows do not apply)
+G.HOLDS_FILE = hp + ".bad"
+try: G.main(base, out + "2"); raise SystemExit("accepted a different holds version")
+except SystemExit as e: assert str(e).startswith("REFUSED: HOLDS.json version"), e
+G.HOLDS_FILE = hp; assert lg["counts"].get("candle_duplicate_first_kept", 0) >= 1 and lg["file_list_sha256"] == ms and lg["funding"] == "not booked", lg
 assert any(k.startswith("fire_dropped_unusable") or k.startswith("signal_candle_unusable") for k in lg["counts"]), lg
 
 L = [json.loads(x) for x in open(out)]
 heads = [x for x in L if "sig" in x]; trades = [x for x in L if "sig" not in x]
-assert len(heads) == 8, len(heads)                                              # 2 families x 2 signals x 2 sides
+assert len(heads) == 8, len(heads)
+assert not any(x.get("market_id") == "KXUS500PERP" and x["day"] == "2026-10-08" for x in trades), "a held cell was traded"                                              # 2 families x 2 signals x 2 sides
 assert all(h["threshold_value"] is not None and h["units"] == "bp" and h["hold_s"] == 900 for h in heads)
 assert trades and all(t["window"] in ("search", "validate") and "2026-10-04" <= t["day"] <= "2026-10-09" for t in trades)
 assert all(abs(t["net"] - round(t["gross"] - t["cost"], 9)) < 1e-9 and t["cost"] == 24.0 for t in trades)

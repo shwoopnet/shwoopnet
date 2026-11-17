@@ -10,7 +10,7 @@ SIGNAL = ("price_level", "price_change", "spread", "book_depth_imbalance", "open
           "none", "external_model")   # ADDED: "none" (no signal: liquidity provision or a pure calendar rule) and "external_model" (a public forecast or model that is not a price); both used by declined rows
 CLOCK = ("fixed_time_to_close", "time_of_day", "scheduled_event", "print", "reopen", "any_minute")
 ENTRY = ("taker", "maker_touch", "both")                 # ADDED: "both" for two sided quoting
-EXIT = ("hold_to_settle", "fixed_time", "take_profit_multiple", "stop", "next_print", "none")   # ADDED: "none" for rows with no exit (declined patterns, ideas)
+EXIT = ("hold_to_settle", "fixed_time", "take_profit_multiple", "stop", "bracket", "next_print", "none")   # "bracket" = target AND stop (the Head, Nov 17 02:06Z)   # ADDED: "none" for rows with no exit (declined patterns, ideas)
 SIDE = ("favourite", "cheap", "follow", "fade", "both", "any")
 FIELDS = (("market", MARKET), ("signal", SIGNAL), ("clock", CLOCK), ("entry", ENTRY), ("exit", EXIT), ("side", SIDE))
 STATUS = ("live", "trial", "shadow", "paused", "retired", "falsified", "declined", "closed_by_evidence", "closed_unread", "idea", "paper", "exploratory")
