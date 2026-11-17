@@ -30,3 +30,6 @@ Found by the blind second build's compare on an invented fixture. In Amendment 2
 ## Amendment 4 (Nov 17, 2026, after a procedural deviation, before the rerun): the series wall is in the plugin
 
 The first real print (CHEAPFLIP_REAL_PRINT_FIRST.txt, sha256 7f8a7248...) also read KXINX15M, a twelfth series in the nc15 folders that this card never named (it is not held for closes through the cut: only H15 names it, from 1796083200). Ruling by Auditor B: that print's figures are NOT used. The plugin now reads only the card's three series (`WALL`: KXHYPE15M, KXBNB15M, KXNATGAS15M); every other series is counted per series (`windows_outside_wall`, `rows_outside_wall`) and never parsed, so the eight H21 series and KXINX15M all fall outside it. The held-window counts of the first print are therefore not repeated. One rerun on the same nc-data files (ed82612b9), print sha committed before it is read.
+
+## Amendment 5 (Nov 17, 2026, Auditor B's one-line note, after the clean compare)
+`windows` in a cell is the number of distinct close times (UTC epoch seconds) among the cell's entries, counted across the series in a pooled cell; it is not the number of markets, so two series closing at the same minute count as one window.
