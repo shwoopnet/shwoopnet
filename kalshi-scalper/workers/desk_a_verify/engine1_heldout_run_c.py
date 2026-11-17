@@ -10,6 +10,17 @@ def bh_all(ps, m, alpha=0.05):
     for r, i in enumerate(order, 1):
         if ps[i] <= alpha * r / m: k = r
     return {order[j] for j in range(k)}
+def missing_feature_skips(mkts, fname, other, bucket):
+    """candidate entries of ONE bucket whose entry candle is usable but whose feature cannot be computed (a missing cross-series candle pair, or a missing open interest): the number a rule's n is short by because the market was not covered, as against a thin n."""
+    n = 0
+    for m in mkts:
+        by_end = {c[0]: c for c in m["candles"] if c[0] <= m["close"]}; e = m["close"] - bucket
+        if e not in by_end or not (0 < by_end[e][1] < by_end[e][2] < 1): continue
+        if fname in ("ethmom3", "goldmom3"): o = other.get(m["close"]) if other is not None else None; v = C.xmom(o, e) if o is not None else None
+        elif fname == "oiacc": v = C.oiacc(by_end, e)
+        else: v = 0
+        if v is None: n += 1
+    return n
 def evaluate(rules, held, floors, windows_days, stats):
     """rules: [(spec, row)]; held: {series: [market]}. -> rows (every rule ranked in BH)."""
     idx = {"ethmom3": B.btc_index(held.get("KXETH15M", [])), "goldmom3": B.btc_index(held.get("KXGOLD15M", []))}; G = {}; rows = []
@@ -19,7 +30,7 @@ def evaluate(rules, held, floors, windows_days, stats):
         items = G[(s, f)].get((x["bucket"], x["band"], x["side"], tuple(x["filter"])), [])
         agg, p = D.score_group(items, x["exit"]) if items else ({0.01: {"n": 0, "pf": float("nan"), "net": 0.0}, 0.02: {"n": 0, "pf": float("nan"), "net": 0.0}}, 1.0)
         a1, a2 = agg[0.01], agg[0.02]; fl = floors[s]; days = windows_days(s); holds = a1["n"] >= fl and a1["pf"] >= D.PF1 and a2["pf"] >= D.PF2
-        rows.append({"spec": spec, "series": s, "bucket": x["bucket"], "band": x["band"], "side": x["side"], "filter": x["filter"], "exit": x["exit"], "n": a1["n"], "n_floor": fl, "pf_1c": a1["pf"], "pf_2c": a2["pf"], "p": p, "income_1c": D.income(a1, days), "income_2c": D.income(a2, days), "validate_pf_1c": x["pf_1c"], "validate_pf_2c": x["pf_2c"], "validate_n": x["n"], "holds_bar": bool(holds),
+        rows.append({"spec": spec, "series": s, "bucket": x["bucket"], "band": x["band"], "side": x["side"], "filter": x["filter"], "exit": x["exit"], "n": a1["n"], "n_floor": fl, "pf_1c": a1["pf"], "pf_2c": a2["pf"], "p": p, "income_1c": D.income(a1, days), "income_2c": D.income(a2, days), "validate_pf_1c": x["pf_1c"], "validate_pf_2c": x["pf_2c"], "validate_n": x["n"], "missing_feature_skips_at_bucket": missing_feature_skips(held.get(s, []), f, idx.get(f), x["bucket"]), "markets_in_window": len(held.get(s, [])), "holds_bar": bool(holds),
                      "verdict": ("holds" if holds else ("no evidence at n = %d" % a1["n"] if a1["n"] < fl else "does not hold"))})
     keep = bh_all([r["p"] for r in rows], len(rows))
     for i, r in enumerate(rows): r["bh_survivor_all"] = i in keep; r["verdict_full"] = r["verdict"] + (", BH survivor at 5%% over %d (all ranked)" % len(rows) if i in keep and r["holds_bar"] else "")
