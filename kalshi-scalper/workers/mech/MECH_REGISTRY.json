@@ -2,11 +2,11 @@
  "registry": "MECH_REGISTRY v0",
  "date": "2026-11-17",
  "spec": "MECHANISM_ENGINE_SPEC.md (rnd-queue 785fe85a4)",
- "count": 395,
- "signatures": 376,
+ "count": 396,
+ "signatures": 377,
  "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "535ee72c2f152b061ffc8f2705236f38305a615c62d199a0dcf45f890f3df453",
+ "rows_sha256": "60583fffe0efa2f51c900e52d61a176b6f86889a030f002424886afb529c2fe5",
  "entries": [
   {
    "id": "L1",
@@ -1522,6 +1522,20 @@
    "note": "the VA expected signal settlement_mark and clock time_of_day; the card shows a snapshot rule on any snapshot (clock any_minute) with the basis to the reference index, so I used cross_market_residual",
    "verified": true,
    "source_batch": "Desk B MECH_ROWS_B_BATCH6_PRIORITY.json"
+  },
+  {
+   "id": "LIQREV",
+   "status": "idea",
+   "market": "15m_crypto",
+   "signal": "spot_elsewhere",
+   "clock": "fixed_time_to_close",
+   "entry": "taker",
+   "exit": "hold_to_settle",
+   "side": "fade",
+   "source": "VA Nov 17, read the Idea Desk C card (Nov 13): fade the 15 minute market after OKX liquidation flow, first trigger 12 to 3 minutes before the close; a different venue's forced flow, not Kalshi tape",
+   "confidence": "hand_read",
+   "verified": true,
+   "kind": "signature"
   },
   {
    "id": "D_TWO_SIDED_MM",
