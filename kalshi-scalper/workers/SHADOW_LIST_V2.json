@@ -48,7 +48,17 @@
    "family": "plain band, cheap tail",
    "cluster": 1,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "no evidence at n = 62",
+    "n": 62,
+    "n_floor": 90,
+    "pf_1c": 1.412,
+    "pf_2c": 1.27,
+    "validate_pf_1c": 1.659,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 632,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 129,
     "signals_per_day": 4.45,
@@ -100,7 +110,17 @@
    "family": "plain band, middle",
    "cluster": 2,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 94,
+    "n_floor": 74,
+    "pf_1c": 0.631,
+    "pf_2c": 0.586,
+    "validate_pf_1c": 1.723,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 162,
     "signals_per_day": 5.588,
@@ -152,7 +172,17 @@
    "family": "plain band, middle",
    "cluster": 3,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 94,
+    "n_floor": 74,
+    "pf_1c": 0.58,
+    "pf_2c": 0.506,
+    "validate_pf_1c": 1.693,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 162,
     "signals_per_day": 5.588,
@@ -204,7 +234,17 @@
    "family": "plain band, cheap tail",
    "cluster": 4,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 78,
+    "n_floor": 74,
+    "pf_1c": 0.6,
+    "pf_2c": 0.553,
+    "validate_pf_1c": 1.346,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 122,
     "signals_per_day": 4.208,
@@ -256,7 +296,17 @@
    "family": "plain band, cheap tail",
    "cluster": 6,
    "cluster_size": 2,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "no evidence at n = 57",
+    "n": 57,
+    "n_floor": 90,
+    "pf_1c": 1.842,
+    "pf_2c": 1.526,
+    "validate_pf_1c": 1.96,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 632,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 124,
     "signals_per_day": 4.277,
@@ -308,7 +358,17 @@
    "family": "F1 favourite-late shape",
    "cluster": 7,
    "cluster_size": 3,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "holds",
+    "n": 158,
+    "n_floor": 74,
+    "pf_1c": 2.732,
+    "pf_2c": 2.317,
+    "validate_pf_1c": 2.084,
+    "bh_rank_survivor_in_own_read": true,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 182,
     "signals_per_day": 6.278,
@@ -360,7 +420,17 @@
    "family": "F1 favourite-late shape",
    "cluster": 9,
    "cluster_size": 2,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "holds",
+    "n": 136,
+    "n_floor": 74,
+    "pf_1c": 3.14,
+    "pf_2c": 2.665,
+    "validate_pf_1c": 2.085,
+    "bh_rank_survivor_in_own_read": true,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 152,
     "signals_per_day": 5.243,
@@ -412,7 +482,17 @@
    "family": "F1 favourite-late shape",
    "cluster": 11,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 119,
+    "n_floor": 74,
+    "pf_1c": 0.765,
+    "pf_2c": 0.694,
+    "validate_pf_1c": 1.502,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 131,
     "signals_per_day": 4.519,
@@ -464,7 +544,17 @@
    "family": "plain band, middle",
    "cluster": 12,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 124,
+    "n_floor": 90,
+    "pf_1c": 0.725,
+    "pf_2c": 0.662,
+    "validate_pf_1c": 1.31,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 632,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 105,
     "signals_per_day": 4.691,
@@ -516,7 +606,17 @@
    "family": "F1 favourite-late shape",
    "cluster": 13,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 137,
+    "n_floor": 90,
+    "pf_1c": 1.039,
+    "pf_2c": 0.864,
+    "validate_pf_1c": 1.406,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 632,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 219,
     "signals_per_day": 7.554,
@@ -568,7 +668,17 @@
    "family": "F1 favourite-late shape",
    "cluster": 14,
    "cluster_size": 1,
-   "heldout_verdict": null,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 100,
+    "n_floor": 90,
+    "pf_1c": 0.738,
+    "pf_2c": 0.627,
+    "validate_pf_1c": 1.637,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 632,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
    "paper_research": {
     "validate_n": 148,
     "signals_per_day": 5.105,
@@ -582,5 +692,6 @@
     "label": "validate-window income, upward biased, not a forecast"
    }
   }
- ]
+ ],
+ "heldout_read": "batch B and batch C prints, sha256 89363527 and e47eb90b, confirmed at 1e-9 (Forensics, Auditor B, Nov 17 2026)"
 }
