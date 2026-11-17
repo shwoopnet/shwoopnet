@@ -1,5 +1,5 @@
 {
- "as_of_utc": "2026-11-17T12:35:06Z",
+ "as_of_utc": "2026-11-17T23:59:09Z",
  "rebuilt_from_scratch": false,
  "specs": [
   {
@@ -13,7 +13,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_02_BTC",
@@ -26,7 +26,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_03_BTC",
@@ -39,7 +39,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_04_BNB",
@@ -52,7 +52,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_05_ETH",
@@ -65,7 +65,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_06_SOL",
@@ -78,7 +78,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_07_XRP",
@@ -91,7 +91,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_08_ETH",
@@ -104,7 +104,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_09_HYPE",
@@ -117,7 +117,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_10_HYPE",
@@ -130,7 +130,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_11_ETH",
@@ -143,7 +143,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_12_SOL",
@@ -156,7 +156,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_13_XRP",
@@ -169,7 +169,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_14_GOLD",
@@ -182,7 +182,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_15_XRP",
@@ -195,7 +195,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_16_NEAR",
@@ -208,7 +208,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   },
   {
    "id": "SH3_17_HYPE",
@@ -221,7 +221,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T12:35:06Z"
+   "as_of_utc": "2026-11-17T23:59:09Z"
   }
  ]
 }
