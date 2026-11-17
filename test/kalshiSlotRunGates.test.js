@@ -240,9 +240,15 @@ gates['OB OICORE total base through the engine: fresh perps equity sizes it, any
   assert.strictEqual(rec.baseSource, 'total'); assert.strictEqual(rec.baseUsed, 874.33, 'the order records which base sized it');
   // The shared window cap is judged on prediction cash: a tiny prediction base leaves no window room however much perps equity there is.
   assert.strictEqual((await world(20, async () => ({ equity: 100000, at: NOW - 60000 }))).count, 0, 'perps money never widens the shared window cap');
+  // Risk Analyst's guards: nothing is sent while prediction cash is under $150, and the size is held so the order's worst case cost fits the cash on its shard.
+  assert.strictEqual((await world(100, async () => ({ equity: 674.33, at: NOW - 60000 }))).ex.posts.length, 0, 'prediction cash under $150: nothing, however much perps equity there is');
+  assert.strictEqual((await world(149.99, fresh)).ex.posts.length, 0, 'just under the floor');
+  const tight = await world(200, fresh, 300);   // $3.00 on the shard: 20 contracts at 18c would cost about $4, so the size is cut to fit
+  assert.ok(tight.ex.posts.length === 1 && Number(tight.ex.posts[0].count) >= 1 && Number(tight.ex.posts[0].count) < 20, 'cut to fit the shard cash: ' + JSON.stringify(tight.out).slice(0, 200));
+  assert.ok(Number(tight.ex.posts[0].count) * 0.18 <= 3.0, 'the worst case cost is within the shard cash');
   // A shard that cannot fund the order skips it and reports it for the phone alert (shape of runL1Tick shardShort).
-  const short = await world(200, fresh, 100);
-  assert.strictEqual(short.ex.posts.length, 0, 'only $1 on the shard: nothing is sent');
+  const short = await world(200, fresh, 10);
+  assert.strictEqual(short.ex.posts.length, 0, 'ten cents on the shard: even one contract does not fit, nothing is sent');
   assert.ok(Array.isArray(short.out.shardShort) && short.out.shardShort.length === 1 && Number.isFinite(short.out.shardShort[0].avail) && Number.isFinite(short.out.shardShort[0].need), 'the shortage is reported: ' + JSON.stringify(short.out));
 };
 gates['SW5 a switch on with no registered strategy, or a registry with one bad entry, sends nothing'] = async () => {

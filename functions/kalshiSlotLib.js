@@ -716,7 +716,7 @@ function slotOrderCheckWith(flags, input) {
   const dailyRoom = caps.daily + own.day.worst, lifeRoom = lad.laddered ? lad.ddStop - lad.drawdown : caps.lifetime + own.lifetime.worst;
   while (n >= 1) {
     const c = costOf(n);
-    if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9) break;
+    if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9 && (!isNum(i.cashLimit) || c <= i.cashLimit + 1e-9)) break;
     n -= 1;
   }
   if (n < 1) return no("no whole contract fits the caps (per order, per market, depth share, window, total, the shared window limit, or what is left of the daily and lifetime loss caps)");

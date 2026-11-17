@@ -7,6 +7,7 @@
 //
 // Pure: no I/O, no clock (the caller passes `now`). The caller reads the perps document and hands it in.
 const STRATEGY_ID = "OICORE";
+const MIN_PREDICTION_CASH = 150;         // OICORE sends nothing while the prediction cash base is under this (dollars; the Risk Analyst's guard)
 const PERPS_STALE_MS = 20 * 60000;       // the document is refreshed every 5 minutes; older than 20 minutes is treated as missing (same line the page uses)
 const CLOCK_SKEW_MS = 60000;             // a document stamped more than a minute in the future is not trusted
 
@@ -22,4 +23,4 @@ function oicoreBase({ predictionBase, perpsDoc, now } = {}) {
   return { base: Number((pred + eq).toFixed(2)), source: "total", perps: Number(eq.toFixed(2)) };
 }
 
-module.exports = { STRATEGY_ID, PERPS_STALE_MS, CLOCK_SKEW_MS, oicoreBase };
+module.exports = { STRATEGY_ID, MIN_PREDICTION_CASH, PERPS_STALE_MS, CLOCK_SKEW_MS, oicoreBase };

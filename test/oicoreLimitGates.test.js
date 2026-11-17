@@ -29,7 +29,7 @@ gates.LM3 = () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiSlotRunLib.js'), 'utf8');
   assert.ok(/const limitSide = slotLib\.slotLimitFor\(s, sidePrice\);/.test(src), 'the engine asks the library for the limit');
   assert.ok(/const touch = side === "yes" \? limitSide : Math\.round\(\(1 - limitSide\) \* 100\) \/ 100;/.test(src), 'a NO limit 1c higher is a YES price 1c lower in the order body');
-  assert.ok(/check\(\{ strategyId: s\.id, ticker, side, limit: limitSide,/.test(src), 'the gate sees the higher limit');
+  assert.ok(/const ci = \{ strategyId: s\.id, ticker, side, limit: limitSide,/.test(src), 'the gate sees the higher limit');
   assert.ok(src.indexOf('outside the band') < src.indexOf('const limitSide'), 'the band test is on the quoted price, before the slip');
 };
 let failed = 0;

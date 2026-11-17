@@ -327,9 +327,21 @@ function makeRunners(flags) {
         for (const t of l1Fresh) l1Merged.set(t.id || t.clientOrderId, t);
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
-        const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, refEdge: refDec ? refDec.edge : undefined, oiRise, oiRel, flow, position, spread, closeTime: closeMs, sizingBase: s.id === oiBaseLib.STRATEGY_ID ? oiBase.base : sh.sizeBase, windowBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
-        if (!c.allowed) return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
+        // The shard must hold the money (L1's own check, with this minute's earlier L1 and slot orders taken off).
+        const l1Shard = l1All.filter((t) => !seenInShared.has(t.id || t.clientOrderId) && String(t.exchangeIndex) === shardKey && t.settled !== true).reduce((a, t) => a + Math.max(0, num(t.maxCost) || 0), 0);
+        const avail = live.availableFor(sh.balanceBody, m.exchange_index) - (committed[shardKey] || 0) - l1Shard;
+        const ci = { strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, refEdge: refDec ? refDec.edge : undefined, oiRise, oiRel, flow, position, spread, closeTime: closeMs, sizingBase: s.id === oiBaseLib.STRATEGY_ID ? oiBase.base : sh.sizeBase, windowBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now,
+          // OICORE's size is held so its worst case cost fits the cash on its own shard (the gate only ever lowers a count with it).
+          ...(s.id === oiBaseLib.STRATEGY_ID && Number.isFinite(avail) ? { cashLimit: avail - BALANCE_MARGIN } : {}) };
+        // OICORE sends nothing while prediction cash is under the floor (the total base must never make a nearly empty prediction account trade).
+        if (s.id === oiBaseLib.STRATEGY_ID && !(sh.sizeBase >= oiBaseLib.MIN_PREDICTION_CASH)) return { allowed: false, code: "low_cash", detail: { cash: Number(Number(sh.sizeBase).toFixed(2)), min: oiBaseLib.MIN_PREDICTION_CASH }, reason: "prediction cash is under $" + oiBaseLib.MIN_PREDICTION_CASH };
+        let c = check(ci);
+        if (!c.allowed) {
+          // OICORE only: if the order would have fit but for the cash on its shard, say so as a shard shortage (the low money alert reads it), not as a generic cap.
+          if (ci.cashLimit !== undefined) { const free = check(Object.assign({}, ci, { cashLimit: undefined })); if (free.allowed) return { allowed: false, code: "shard_short", detail: { shard: Number(m.exchange_index), avail: Number(avail.toFixed(2)), need: Number((free.cost + BALANCE_MARGIN).toFixed(2)) }, reason: "only $" + avail.toFixed(2) + " on its shard" }; }
+          return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
+        }
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
         const slotDelta = slotLib.slotRiskForBotRisk(slotNow, sinceMs).worst - slotLib.slotRiskForBotRisk(sh.slotOrders || [], sinceMs).worst;
@@ -344,9 +356,6 @@ function makeRunners(flags) {
           const ownWorst = slotLib.slotRiskForBotRisk(slotNow, sinceMs).worst;
           if (!(ownWorst - c.cost > -(prof.stopFraction * sh.sizeBase) + 1e-9)) return { allowed: false, code: "own_loss_stop", detail: { need: c.cost }, reason: "the slot's own loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
         }
-        // The shard must hold the money (L1's own check, with this minute's earlier L1 and slot orders taken off).
-        const l1Shard = l1All.filter((t) => !seenInShared.has(t.id || t.clientOrderId) && String(t.exchangeIndex) === shardKey && t.settled !== true).reduce((a, t) => a + Math.max(0, num(t.maxCost) || 0), 0);
-        const avail = live.availableFor(sh.balanceBody, m.exchange_index) - (committed[shardKey] || 0) - l1Shard;
         if (!Number.isFinite(avail)) return { allowed: false, code: "balance_unreadable", reason: "the balance came back in a shape this code does not recognise" };
         if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, code: "shard_short", detail: { shard: Number(m.exchange_index), avail: Number(avail.toFixed(2)), need: Number((c.cost + BALANCE_MARGIN).toFixed(2)) }, reason: "only $" + avail.toFixed(2) + " on its shard" };
         const record = slotLib.slotOrderRecord({ strategyId: s.id, ticker, side, step, count: c.count, limit: touch, maxCost: Number(c.cost.toFixed(2)), ts: now });
