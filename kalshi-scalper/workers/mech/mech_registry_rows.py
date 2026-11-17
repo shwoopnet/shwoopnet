@@ -113,6 +113,7 @@ R = [
 ("ENGINE1_PERPS_SPREAD_METAL", "falsified", "metal_perp", "spread", "any_minute", "taker", "fixed_time", "follow", "engine1_perps.py: spread tercile filter, timed exits", "hand_read"),
 ("ENGINE1_PERPS_TOD_METAL", "falsified", "metal_perp", "none", "time_of_day", "taker", "fixed_time", "follow", "engine1_perps.py: time of day filter", "hand_read"),
 ("ENGINE1_PERPS_ORB_METAL", "falsified", "metal_perp", "price_level", "time_of_day", "taker", "fixed_time", "follow", "engine1_perps.py: opening range breakout and session high or low", "hand_read"),
+("PERPCRYPTO1_BASIS", "closed_unread", "crypto_perp", "cross_market_residual", "any_minute", "taker", "fixed_time", "fade", "VA Nov 17: PERPCRYPTO1 BASIS cells, withdrawn unrun, replaced by PERPBASIS1 (fields are Desk A's best reading of the VA's note, not read from the card)", "from_ledger_row"),
 # declined list 7e, stored as PATTERNS (wildcards and lists allowed)
 ("D_TWO_SIDED_MM", "declined", "*", "none", "any_minute", "both", "*", "both", "7e: two-sided market making", "hand_read", "pattern"),
 ("D_WEATHER_FORECAST", "closed_by_evidence", "weather", ["external_model", "price_level"], "*", "*", "hold_to_settle", "*", "7e: weather forecast against brackets", "hand_read", "pattern", {"exceptions": ["WXDAYEND", "ORHARVEST1"]}),

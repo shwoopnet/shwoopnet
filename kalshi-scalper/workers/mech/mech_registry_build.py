@@ -29,7 +29,11 @@ def build():
             have[e["id"]] = len(out); out.append(e)
     OVERRIDES = {"SPIKE1": dict(market="15m_noncrypto", signal="price_change", clock="fixed_time_to_close", exit="hold_to_settle", side="fade", confidence="hand_read", source="VA Nov 17: 15 minute mid spike (3 sd and 5c in 2 minutes), non-crypto series, buy the cheap side, held"),
                  "SNAPBACK1": dict(clock="any_minute", confidence="hand_read", source="VA Nov 17: liquidation-cascade fade on the Kalshi BTC and ETH perps (1 hour move of k ATR with open interest down), stop and target, 6 hour time stop"),
-                 "MENT1": dict(market="mentions")}
+                 "MENT1": dict(market="mentions"),
+                 "SWING1": dict(market="sports", signal="price_change", clock="any_minute", exit="hold_to_settle", side="fade", confidence="hand_read", source="VA Nov 17 (README line 8383): in-play swing overreaction on college football and MLB game winners, the YES mid falls 0.25 within 5 minutes, buy the faller's cheap side 5c to 30c, held"),
+                 "PERPEQ2": dict(clock="time_of_day", confidence="hand_read", source="VA Nov 17 read the registration: sector pair ratio z at 7 grid times 10:00 to 15:55 ET, z of 2, fade the rich leg, 18 hour hold"),
+                 "PERPEQ3": dict(clock="any_minute", confidence="hand_read", source="VA Nov 17 read the registration: stock perp premium to its reference in cash hours, samples 09:50 to 15:25 ET, premium of 10 bp or 3 times the spread, fade, exit 90 minutes later"),
+                 "PERPEQ4": dict(side="fade", confidence="hand_read", source="VA Nov 17 read the registration: ETF perp against the index perp, grid as PERPEQ2, fade")}
     for e in out:
         if e["id"] in OVERRIDES: e.update(OVERRIDES[e["id"]]); e["verified"] = (e["confidence"] == "hand_read"); e["source_note"] = "field override by Desk A on the VA's second-pass reading"
     ids = [e["id"] for e in out]

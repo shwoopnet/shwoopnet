@@ -2,11 +2,11 @@
  "registry": "MECH_REGISTRY v0",
  "date": "2026-11-17",
  "spec": "MECHANISM_ENGINE_SPEC.md (rnd-queue 785fe85a4)",
- "count": 361,
- "signatures": 342,
+ "count": 362,
+ "signatures": 343,
  "patterns": 19,
  "coverage_note": "v0: README section titles, the 7e declined list, CLAUDE.md strategies and the head of the deflation ledger. NOT the whole ledger (about 300 lines). A row from_title or from_ledger_row was not checked against its rule text; the VA audits on Nov 19.",
- "rows_sha256": "9c1fe3936f5ca049e8e67b4732891688d45d701881cb49ba4bed2a8eecc274fb",
+ "rows_sha256": "6f7f377debecd6a52b9addeae1816597da4136e5e4e436196006a41cd4452ce0",
  "entries": [
   {
    "id": "L1",
@@ -923,28 +923,30 @@
    "status": "idea",
    "market": "stock_perp",
    "signal": "cross_market_residual",
-   "clock": "any_minute",
+   "clock": "time_of_day",
    "entry": "taker",
    "exit": "fixed_time",
    "side": "fade",
-   "source": "VA Nov 17 description: stock perp against its sector partner, ratio reversion (not read by Desk A)",
-   "confidence": "from_ledger_row",
-   "verified": false,
-   "kind": "signature"
+   "source": "VA Nov 17 read the registration: sector pair ratio z at 7 grid times 10:00 to 15:55 ET, z of 2, fade the rich leg, 18 hour hold",
+   "confidence": "hand_read",
+   "verified": true,
+   "kind": "signature",
+   "source_note": "field override by Desk A on the VA's second-pass reading"
   },
   {
    "id": "PERPEQ3",
    "status": "idea",
    "market": "stock_perp",
    "signal": "cross_market_residual",
-   "clock": "time_of_day",
+   "clock": "any_minute",
    "entry": "taker",
    "exit": "fixed_time",
    "side": "fade",
-   "source": "VA Nov 17 description: fade the premium to the reference, cash hours (not read by Desk A)",
-   "confidence": "from_ledger_row",
-   "verified": false,
-   "kind": "signature"
+   "source": "VA Nov 17 read the registration: stock perp premium to its reference in cash hours, samples 09:50 to 15:25 ET, premium of 10 bp or 3 times the spread, fade, exit 90 minutes later",
+   "confidence": "hand_read",
+   "verified": true,
+   "kind": "signature",
+   "source_note": "field override by Desk A on the VA's second-pass reading"
   },
   {
    "id": "ROLLOFF",
@@ -1502,6 +1504,20 @@
    "source": "engine1_perps.py: opening range breakout and session high or low",
    "confidence": "hand_read",
    "verified": true,
+   "kind": "signature"
+  },
+  {
+   "id": "PERPCRYPTO1_BASIS",
+   "status": "closed_unread",
+   "market": "crypto_perp",
+   "signal": "cross_market_residual",
+   "clock": "any_minute",
+   "entry": "taker",
+   "exit": "fixed_time",
+   "side": "fade",
+   "source": "VA Nov 17: PERPCRYPTO1 BASIS cells, withdrawn unrun, replaced by PERPBASIS1 (fields are Desk A's best reading of the VA's note, not read from the card)",
+   "confidence": "from_ledger_row",
+   "verified": false,
    "kind": "signature"
   },
   {
@@ -4514,13 +4530,13 @@
    "id": "SWING1",
    "status": "falsified",
    "market": "sports",
-   "signal": "tape_flow",
-   "clock": "fixed_time_to_close",
+   "signal": "price_change",
+   "clock": "any_minute",
    "entry": "taker",
    "exit": "hold_to_settle",
-   "side": "favourite",
-   "source": "kalshi-scalper/README.md line 8401 (result heading); pre-registration at line 8381",
-   "confidence": "from_title",
+   "side": "fade",
+   "source": "VA Nov 17 (README line 8383): in-play swing overreaction on college football and MLB game winners, the YES mid falls 0.25 within 5 minutes, buy the faller's cheap side 5c to 30c, held",
+   "confidence": "hand_read",
    "kind": "signature",
    "verdict": "FALSIFIED",
    "fields_keyword_matched": [
@@ -4531,8 +4547,9 @@
     "exit_type",
     "side_rule"
    ],
-   "verified": false,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json"
+   "verified": true,
+   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
+   "source_note": "field override by Desk A on the VA's second-pass reading"
   },
   {
    "id": "HRSEAS1",
@@ -5463,17 +5480,18 @@
    "clock": "time_of_day",
    "entry": "taker",
    "exit": "fixed_time",
-   "side": "any",
-   "source": "kalshi-scalper/README.md line 8969 (result heading); no pre-registration paragraph found",
-   "confidence": "from_ledger_row",
+   "side": "fade",
+   "source": "VA Nov 17 read the registration: ETF perp against the index perp, grid as PERPEQ2, fade",
+   "confidence": "hand_read",
    "kind": "signature",
    "verdict": "NOT_ENOUGH_DATA",
    "fields_keyword_matched": [
     "market_family"
    ],
    "note": "ETF perp against index perp ratio on a time grid",
-   "verified": false,
-   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json"
+   "verified": true,
+   "source_batch": "Desk B MECH_ROWS_B_BATCH3_REVIEWED.json",
+   "source_note": "field override by Desk A on the VA's second-pass reading"
   },
   {
    "id": "CPREM1",
