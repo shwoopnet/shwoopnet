@@ -2,6 +2,7 @@
   python3 -I tape_bars.py <tape dir holding YYYY-MM-DD.csv.gz> <ticker list file, one per line> <out bars.csv> <out summary.csv> --from YYYY-MM-DD --to YYYY-MM-DD [--no-allow]
 Only the files dated in [from, to] are listed, hashed and opened; a range must lie wholly in DEVELOPMENT (2026-09-18 to 2026-10-27) or wholly in HELD-OUT (2026-10-28 to 2026-11-15); a range across the boundary is REFUSED, and any file dated 2026-11-16 or later is REFUSED (HOLDS forward_default_deny_from). A row whose created_time is not on its file's own date is counted and dropped (it is taken from the file of its own date). The shared MECH1 HOLDS check (pinned version) drops and counts any held ticker-time.
 Allow line (HELDOUT_PULL_RUNS.md above this folder): mark, "tape_bars.py", this file's sha256 and the sha256 of the sorted "<file name> <sha256>" list of the files read. The wall: the ticker column is read FIRST and a row of another ticker is counted and never parsed further.
+Counts are exact decimals (amendment 5: fractions and ".0" allowed, zero, negative or malformed refused).
 Row: t_recv_ms, server_date_header, ticker, created_time, price, count, taker_side, is_block_trade. Bar end = first whole minute STRICTLY after created_time. Block trades are out of OHLC, volume, n_trades and the side volumes (block_volume and block_count only). Order in a bar: exact created_time, ties by REVERSE FILE ORDER. Dedupe: same six fields with DIFFERENT t_recv_ms = one trade seen twice (earliest t_recv_ms kept); same t_recv_ms rows are all kept."""
 import sys, os, csv, gzip, re, hashlib, collections
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "mech"))
@@ -17,6 +18,7 @@ def parse_ns(s):
     y, mo, d, h, mi, se = (int(m.group(i)) for i in range(1, 7)); frac = (m.group(7) or "").ljust(9, "0")
     return calendar.timegm((y, mo, d, h, mi, se)) * 10 ** 9 + int(frac)
 def fmt(x): return "%.17g" % x
+def dec(x): return format(x.normalize(), "f") if isinstance(x, Decimal) else str(x)          # exact decimal text, never a float; whole sums print as integers
 def sha(p): return hashlib.sha256(open(p, "rb").read()).hexdigest()
 def list_sha(files): return hashlib.sha256("\n".join("%s %s" % (os.path.basename(p), sha(p)) for p in sorted(files)).encode()).hexdigest()
 def refuse_unless_allowed(files):
@@ -58,10 +60,13 @@ def build_file(path, tickers, file_date):
             blk = r[ix["is_block_trade"]].strip().lower()
             if blk not in ("true", "false"): raise SystemExit("bad is_block_trade %r" % r[ix["is_block_trade"]])
             cnt_s = r[ix["count"]]
-            if not re.fullmatch(r"\d+", cnt_s): raise ValueError("bad count %r" % cnt_s)
+            if not re.fullmatch(r"\d+(\.\d+)?", cnt_s): raise ValueError("bad count %r" % cnt_s)      # amendment 5: an exact decimal, no sign, no exponent
+            cnt = Decimal(cnt_s)
+            if not cnt > 0: raise ValueError("bad count (zero) %r" % cnt_s)
+            if "." in cnt_s: S["count_fraction" if cnt != cnt.to_integral_value() else "count_whole_dot"] += 1
             px = Decimal(r[ix["price"]])
             if not px > 0: raise ValueError("bad price")
-            per[end].append((t_ns, -n, px, int(cnt_s), r[ix["taker_side"]], blk == "true"))
+            per[end].append((t_ns, -n, px, cnt, r[ix["taker_side"]], blk == "true"))
         out = {}
         for end, L in per.items():
             L.sort(key=lambda x: (x[0], x[1]))                                 # exact time, ties by REVERSE file order (a later file row printed first)
@@ -80,7 +85,7 @@ def main(tape_dir, tickers_file, out_bars, out_summ, d_from, d_to, check_allow=T
     files = sorted(os.path.join(tape_dir, f) for f in os.listdir(tape_dir) if re.fullmatch(r"\d{4}-\d{2}-\d{2}\.csv\.gz", f) and d_from <= f[:10] <= d_to)
     ls = refuse_unless_allowed(files) if check_allow else "no-allow-check (invented fixture)"
     G.load_holds()
-    allbars = {}; lines_s = ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held"]
+    allbars = {}; lines_s = ["file,ticker,rows_read,rows_kept,merged_by_repeat,kept_same_recv,block_rows,unknown_side_trades,bars_written,bars_only_block,block_volume_in_those,tick,rows_other_date,rows_held,count_whole_dot,count_fraction"]
     for p in files:
         bars, summ = build_file(p, tickers, os.path.basename(p)[:10])
         for tk, rws in bars.items():
@@ -88,10 +93,10 @@ def main(tape_dir, tickers_file, out_bars, out_summ, d_from, d_to, check_allow=T
                 if (tk, end) in allbars: raise SystemExit("a bar appears in two date files: " + tk + " " + str(end))
                 allbars[(tk, end)] = row
         for tk in sorted(summ):
-            S = summ[tk]; lines_s.append(",".join([os.path.basename(p), tk] + [str(S[k]) if k != "tick" else ("" if S[k] is None else fmt(float(S[k]))) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those", "tick")] + [str(S["rows_other_date"]), str(S["rows_held"])]))
+            S = summ[tk]; lines_s.append(",".join([os.path.basename(p), tk] + [(dec(S[k]) if k == "block_volume_in_those" else str(S[k])) if k != "tick" else ("" if S[k] is None else fmt(float(S[k]))) for k in ("rows_read", "rows_kept", "merged_by_repeat", "kept_same_recv", "block_rows", "unknown_side_trades", "bars_written", "bars_only_block", "block_volume_in_those", "tick")] + [str(S["rows_other_date"]), str(S["rows_held"]), str(S["count_whole_dot"]), str(S["count_fraction"])]))
     lines = ["ticker,end_ts,open,high,low,close,volume,n_trades,buy_volume,sell_volume,block_volume,block_count"]
     for k in sorted(allbars):
-        r = allbars[k]; lines.append(",".join([r[0], str(r[1])] + [fmt(float(x)) for x in r[2:6]] + [str(x) for x in r[6:]]))
+        r = allbars[k]; lines.append(",".join([r[0], str(r[1])] + [fmt(float(x)) for x in r[2:6]] + [dec(x) for x in r[6:]]))
     open(out_bars, "w").write("\n".join(lines) + "\n"); open(out_summ, "w").write("\n".join(lines_s) + "\n")
     print("bars", len(allbars), "bars sha256", sha(out_bars), "summary sha256", sha(out_summ), "list", ls)
 if __name__ == "__main__":
