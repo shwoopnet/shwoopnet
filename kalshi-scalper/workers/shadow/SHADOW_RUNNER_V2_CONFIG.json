@@ -1,0 +1,18 @@
+{
+ "list_version": "SHADOW_LIST_V2",
+ "list_file": "SHADOW_LIST_V2.json",
+ "list_sha256": "71bc18fb8200dcb48bd7e280be0fb5c47510d8d6c4e6be60cb05307d8e12faea",
+ "start_utc": 1795219200,
+ "start_utc_note": "2026-11-21T00:00:00Z, the list's own start (every V2 pick reads the KXBTC15M same-close candles, which the held-out guard holds until then). Never earlier than the runner merge. A written constant.",
+ "modules": {
+  "engine1_core": "53317e4b56a8328fb616d460d5cb4597af13a2b9020d73aefaa37717439694bf",
+  "engine1_enum": "e42ee1a45f67b76e8560cd9cbefac352fce9a765c8300bc04d5ce05a27e4d5a7",
+  "engine1_split": "00a94c6ef569261ec4f649f596075d85e2b407c43a2bbe9b0a593f75743e07fd",
+  "engine1_driver": "1281ce0a1dc0bce7875bbafc4774358f557e45d0897b8099f5615c33cf12640b",
+  "engine1_batchb": "68a5ab435d8246be30681a703179d88608b0384ce2ca50f4f6bad458cea07f1e",
+  "engine1_batchc": "ba77f70c7d86152539ad01cbd958d1056e3e78b40b3a568693f6ea444f77a279"
+ },
+ "state_and_outputs": "own state file shadow_state_v2.json and own files shadow_results_v2.json, shadow_counts_v2.json on the shadow-data branch; V1 is untouched and keeps running",
+ "clause": "S1 of kalshi-scalper/workers/HOLDS.json: per-spec aggregates only; no spec changes after the first result; new specs only as a new list version with its own start_utc",
+ "fixture_sha256": "db12709d3ed07a3885da05f1cf7d1dea137e5cb01552318e7651dd55efe3abd6"
+}

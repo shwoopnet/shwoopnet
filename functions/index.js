@@ -1027,6 +1027,8 @@ exports.kalshiBalanceSnapshot = onSchedule(
       const out = await balanceSnap.runBalanceSnapshot({
         now: Date.now(), fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(),
         write: (id, doc) => col.doc(id).set(doc, { merge: true }),
+        // The perps equity comes from the 5 minute perps document, so the hourly snapshot makes no extra margin request; a document older than 20 minutes counts as unreadable.
+        readPerpsEquity: async () => { const d = await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).get(); const v = d.exists ? d.data() : null; return v && Number.isFinite(v.equity) && Date.now() - Number(v.at) < 20 * 60000 ? v.equity : NaN; },
         prune: async (beforeMs, limit) => { const old = await col.where("ts", "<", beforeMs).limit(limit).get(); await Promise.all(old.docs.map((d) => d.ref.delete())); },
       });
       console.log("kalshiBalanceSnapshot: " + out);
@@ -1046,6 +1048,23 @@ exports.kalshiPerpsProbe = onSchedule(
       await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).set(out);
       console.log("kalshiPerpsProbe: " + Object.keys(out.results).map((p) => p + "=" + out.results[p].status).join(" "));
     } catch (e) { console.error("kalshiPerpsProbe: " + String((e && e.message) || e).slice(0, 160)); }
+  }
+);
+
+// The perpetuals account, display only (Nov 16, 2026, the owner: one account total, predictions plus perps; each perp on Open positions). Every 5 minutes: GET /margin/balance and
+// /margin/positions through the bot's own signer plus the PUBLIC perps list, shaped into one document the Bot page reads (functions/kalshiPerpsAccountLib.js, test/perpsAccountGates.test.js).
+// No order, no POST, nothing written to Kalshi; nothing that decides a trade reads the document. A failed read leaves the last document as it was (the page shows its age). Deploy: bash functions/deploy-sizing.sh.
+const perpsAccount = require("./kalshiPerpsAccountLib");
+exports.kalshiPerpsAccount = onSchedule(
+  { schedule: "every 5 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 40, retryCount: 0, memory: "256MiB" },
+  async () => {
+    try {
+      ensureDefaultAdminApp();
+      const publicGet = async (url) => { const r = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(6000) }); return r.ok ? r.json() : null; };
+      const doc = await perpsAccount.runPerpsAccount({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(), publicGet });
+      if (doc) await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).set(doc);
+      console.log("kalshiPerpsAccount: " + (doc ? "rows=" + doc.count : "unreadable, document left as it was"));
+    } catch (e) { console.error("kalshiPerpsAccount: " + String((e && e.message) || e).slice(0, 160)); }
   }
 );
 
@@ -1107,6 +1126,7 @@ exports.kalshiNightlyReport = onRequest(
     // The hourly balance snapshots (Nov 12, 2026): documents of balance data only, read only.
     readBalances: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(balanceSnap.COLLECTION).where("ts", ">=", sinceMs).orderBy("ts").limit(kalshiReport.MAX_BALANCE_ROWS).get()).docs.map((d) => d.data()); },
     // The perps probe answer (Nov 16, 2026): statuses and field names only.
+    readPerpsAccount: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).get(); return d.exists ? d.data() : null; },
     readPerpsProbe: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).get(); return d.exists ? d.data() : null; },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.

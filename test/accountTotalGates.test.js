@@ -20,7 +20,7 @@ assert.strictEqual(f.kalshiPerpsSteps([],0).first,null);
 // AT5: display only, checked by INTENT. The code that decides a stop, a loss limit, the window cap or a size must never read the combined total or the perps fields. Data code (the hourly balance snapshot, the report,
 // the account read) may name them: that is how the total reaches the page. Risk code is every functions/ file that is not data code, so a new risk file is covered by default.
 const RISK_NAMED = /Live|Slot|HardStop|RiskCore|GoldKill|Rotation|Wheel|Sizing|Shadow|Longhold|Cfrti|Spxoi|Exit|Alarm|ShardAlert|Kill/;
-const FIELDS = /perpsTotal|perpsDay|perpsHistory|kalshiAccountTotal|account_equity/;
+const FIELDS = /perpsTotal|perpsAccount|perpsDay|perpsHistory|kalshiAccountTotal|account_equity/;
 const riskFiles = fs.readdirSync('functions').filter(x => x.endsWith('.js') && RISK_NAMED.test(x) && !/Snapshot|Report|Account|Balance|Probe|Push/.test(x));
 assert(riskFiles.length >= 8, 'AT5 sees the risk files: ' + riskFiles.join(','));
 for(const file of riskFiles){

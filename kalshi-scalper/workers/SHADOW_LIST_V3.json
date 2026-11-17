@@ -1,0 +1,986 @@
+{
+ "list": "SHADOW_LIST_V3",
+ "date": "2026-11-16",
+ "start_utc": "2026-11-17T01:00:00Z",
+ "start_rule": "non-Bitcoin picks start at the given start (next whole UTC hour after the freeze commit); picks on KXBTC15M start at 2026-11-21T00:00:00Z at the earliest (H09)",
+ "record_note": "header m below today's ruling of 6,290,660; BH 0 at both, no count changes",
+ "n": 17,
+ "source": "batch B2 validate-bar lists (47 passes; BH survivors 0)",
+ "excluded_dogecoin_7e": 5,
+ "dropped_by_3_a_day_gate": 0,
+ "clusters": 36,
+ "spec_sha256_covers": "the spec object only",
+ "no_money_no_orders": true,
+ "specs": [
+  {
+   "spec": {
+    "id": "SH3_01_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 180,
+     "price_band_5c": 5,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-21T00:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "1df2d73be92e62f41f1d233084ee272311795d2c8b4ad455c6a4cc48b3206950",
+   "rank": 1,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, cheap tail",
+   "cluster": 1,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 110,
+    "n_floor": 74,
+    "pf_1c": 0.897,
+    "pf_2c": 0.854,
+    "validate_pf_1c": 1.381,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 148,
+    "signals_per_day": 5.105,
+    "pf_1c": 1.381,
+    "pf_2c": 1.316,
+    "edge_1c_cents_per_contract": 7.101,
+    "dollars_week_5c_1c": 12.69,
+    "dollars_week_5c_2c": 10.87,
+    "p_day_clustered": 0.050485727976478684,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_02_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 180,
+     "price_band_5c": 7,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-21T00:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "a3980d9b1879191a2c5c8ae0ada7ada98c8506f1ac53d6c724439d8bc3b646fc",
+   "rank": 2,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, middle",
+   "cluster": 2,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 100,
+    "n_floor": 74,
+    "pf_1c": 0.754,
+    "pf_2c": 0.723,
+    "validate_pf_1c": 1.358,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 110,
+    "signals_per_day": 3.794,
+    "pf_1c": 1.358,
+    "pf_2c": 1.302,
+    "edge_1c_cents_per_contract": 7.445,
+    "dollars_week_5c_1c": 9.89,
+    "dollars_week_5c_2c": 8.56,
+    "p_day_clustered": 0.08191797498257743,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_03_BTC",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBTC15M",
+    "entry": {
+     "seconds_left": 120,
+     "price_band_5c": 2,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-21T00:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "7c87d2f3feb5223c2df08f1a0354ebdbbddc8cc72f44257196f762525791dd58",
+   "rank": 3,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, cheap tail",
+   "cluster": 3,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 153,
+    "n_floor": 74,
+    "pf_1c": 0.904,
+    "pf_2c": 0.828,
+    "validate_pf_1c": 1.419,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 175,
+    "signals_per_day": 6.037,
+    "pf_1c": 1.419,
+    "pf_2c": 1.301,
+    "edge_1c_cents_per_contract": 4.657,
+    "dollars_week_5c_1c": 9.84,
+    "dollars_week_5c_2c": 7.6,
+    "p_day_clustered": 0.05199825627419233,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_04_BNB",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXBNB15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "3e013fc94609b91815a2239c0e79f0d90c43d0009244e322c02f06642e79d415",
+   "rank": 4,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, cheap tail",
+   "cluster": 6,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "no evidence at n = 80",
+    "n": 80,
+    "n_floor": 90,
+    "pf_1c": 3.373,
+    "pf_2c": 2.794,
+    "validate_pf_1c": 2.275,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 107,
+    "signals_per_day": 3.691,
+    "pf_1c": 2.275,
+    "pf_2c": 1.871,
+    "edge_1c_cents_per_contract": 6.752,
+    "dollars_week_5c_1c": 8.72,
+    "dollars_week_5c_2c": 7.0,
+    "p_day_clustered": 0.038647420710817296,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_05_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 16,
+     "side_rule": "yes",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "1fd6654b33edb4290664fbe394637951a7a723de698f13e8c703e2909f1f9646",
+   "rank": 5,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, middle",
+   "cluster": 7,
+   "cluster_size": 2,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 92,
+    "n_floor": 74,
+    "pf_1c": 0.615,
+    "pf_2c": 0.572,
+    "validate_pf_1c": 1.547,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 136,
+    "signals_per_day": 4.691,
+    "pf_1c": 1.547,
+    "pf_2c": 1.439,
+    "edge_1c_cents_per_contract": 5.044,
+    "dollars_week_5c_1c": 8.28,
+    "dollars_week_5c_2c": 6.72,
+    "p_day_clustered": 0.025053887723344152,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_06_SOL",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXSOL15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "c8d6db1157b57b4c3cebb4bb7b516976b341d2933f90eb0949cd7db19134c52d",
+   "rank": 6,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, middle",
+   "cluster": 8,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 162,
+    "n_floor": 90,
+    "pf_1c": 0.802,
+    "pf_2c": 0.745,
+    "validate_pf_1c": 1.487,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 116,
+    "signals_per_day": 5.182,
+    "pf_1c": 1.487,
+    "pf_2c": 1.379,
+    "edge_1c_cents_per_contract": 4.565,
+    "dollars_week_5c_1c": 8.28,
+    "dollars_week_5c_2c": 6.52,
+    "p_day_clustered": 0.06422366942524806,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_07_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 17,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "32ea12e4d44b9877abc7b736a10ca2682000b2738e381b02320d2f20a8396052",
+   "rank": 7,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 9,
+   "cluster_size": 2,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 237,
+    "n_floor": 74,
+    "pf_1c": 0.726,
+    "pf_2c": 0.658,
+    "validate_pf_1c": 1.46,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 201,
+    "signals_per_day": 6.934,
+    "pf_1c": 1.46,
+    "pf_2c": 1.323,
+    "edge_1c_cents_per_contract": 3.242,
+    "dollars_week_5c_1c": 7.87,
+    "dollars_week_5c_2c": 5.58,
+    "p_day_clustered": 0.012938372834207026,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_08_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 14,
+     "side_rule": "favourite",
+     "filter": "vspike:mid"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB2VSPIKE"
+   },
+   "spec_sha256": "68c7bba5b59a17fe7a209e722c6137b186b239e022f4a2867468c560dff29a93",
+   "rank": 8,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "momentum or volume filter, middle",
+   "cluster": 10,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 94,
+    "n_floor": 74,
+    "pf_1c": 0.944,
+    "pf_2c": 0.897,
+    "validate_pf_1c": 1.431,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 104,
+    "signals_per_day": 3.587,
+    "pf_1c": 1.431,
+    "pf_2c": 1.359,
+    "edge_1c_cents_per_contract": 6.19,
+    "dollars_week_5c_1c": 7.77,
+    "dollars_week_5c_2c": 6.57,
+    "p_day_clustered": 0.08913520900228192,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_09_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 300,
+     "price_band_5c": 2,
+     "side_rule": "cheap",
+     "filter": "swid:flat"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "b3ace64e5a4671f67d19017bcf1941ce344856c0d950fedb9bb6aa872c048e53",
+   "rank": 9,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, cheap tail",
+   "cluster": 11,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "holds",
+    "n": 99,
+    "n_floor": 90,
+    "pf_1c": 1.652,
+    "pf_2c": 1.432,
+    "validate_pf_1c": 1.535,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 133,
+    "signals_per_day": 4.588,
+    "pf_1c": 1.535,
+    "pf_2c": 1.337,
+    "edge_1c_cents_per_contract": 4.733,
+    "dollars_week_5c_1c": 7.6,
+    "dollars_week_5c_2c": 5.3,
+    "p_day_clustered": 0.03712441779719483,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_10_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 300,
+     "price_band_5c": 1,
+     "side_rule": "yes",
+     "filter": "swid:flat"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "589a1f0f428b5b3065039bf681c731045e5a6f7577e759daebd2da43fc342f4c",
+   "rank": 10,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, cheap tail",
+   "cluster": 13,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "no evidence at n = 51",
+    "n": 51,
+    "n_floor": 90,
+    "pf_1c": 1.578,
+    "pf_2c": 1.274,
+    "validate_pf_1c": 1.79,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 123,
+    "signals_per_day": 4.243,
+    "pf_1c": 1.79,
+    "pf_2c": 1.49,
+    "edge_1c_cents_per_contract": 4.615,
+    "dollars_week_5c_1c": 6.85,
+    "dollars_week_5c_2c": 4.92,
+    "p_day_clustered": 0.009632721216536773,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_11_ETH",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXETH15M",
+    "entry": {
+     "seconds_left": 540,
+     "price_band_5c": 14,
+     "side_rule": "favourite",
+     "filter": "vspike:mid"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB2VSPIKE"
+   },
+   "spec_sha256": "fba6d48146330bfb320fd46141fd4946b9e964d820e7faea0b30b804a7b93709",
+   "rank": 11,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "momentum or volume filter, middle",
+   "cluster": 15,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 94,
+    "n_floor": 74,
+    "pf_1c": 0.957,
+    "pf_2c": 0.883,
+    "validate_pf_1c": 1.37,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 104,
+    "signals_per_day": 3.587,
+    "pf_1c": 1.37,
+    "pf_2c": 1.261,
+    "edge_1c_cents_per_contract": 5.313,
+    "dollars_week_5c_1c": 6.67,
+    "dollars_week_5c_2c": 4.77,
+    "p_day_clustered": 0.12039882982424327,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_12_SOL",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXSOL15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 16,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "08ad2f887d0efd6ee60a89c5eeead5200f31d28f863d7ba54287bae6eb3b1459",
+   "rank": 12,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "spread filter, middle",
+   "cluster": 16,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 162,
+    "n_floor": 90,
+    "pf_1c": 0.744,
+    "pf_2c": 0.653,
+    "validate_pf_1c": 1.377,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 116,
+    "signals_per_day": 5.182,
+    "pf_1c": 1.377,
+    "pf_2c": 1.205,
+    "edge_1c_cents_per_contract": 3.535,
+    "dollars_week_5c_1c": 6.41,
+    "dollars_week_5c_2c": 3.53,
+    "p_day_clustered": 0.11592846153726208,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_13_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 360,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "f4c2a1f0e007308dfaafa501249ff6a162eed784b4487c7352db7c8c58118c26",
+   "rank": 13,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 17,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 241,
+    "n_floor": 74,
+    "pf_1c": 0.933,
+    "pf_2c": 0.791,
+    "validate_pf_1c": 1.353,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 323,
+    "signals_per_day": 11.142,
+    "pf_1c": 1.353,
+    "pf_2c": 1.147,
+    "edge_1c_cents_per_contract": 1.631,
+    "dollars_week_5c_1c": 6.36,
+    "dollars_week_5c_2c": 2.68,
+    "p_day_clustered": 0.08334916740249632,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_14_GOLD",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXGOLD15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "8d5efa442cecc699df81557e7fb4b23339800fd2c0764429a34463b2ff0ffc58",
+   "rank": 14,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 19,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "holds",
+    "n": 194,
+    "n_floor": 74,
+    "pf_1c": 1.34,
+    "pf_2c": 1.141,
+    "validate_pf_1c": 1.594,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 204,
+    "signals_per_day": 7.065,
+    "pf_1c": 1.594,
+    "pf_2c": 1.358,
+    "edge_1c_cents_per_contract": 2.442,
+    "dollars_week_5c_1c": 6.04,
+    "dollars_week_5c_2c": 3.68,
+    "p_day_clustered": 0.04374409222231611,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_15_XRP",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXXRP15M",
+    "entry": {
+     "seconds_left": 600,
+     "price_band_5c": 17,
+     "side_rule": "favourite",
+     "filter": "swid:flat"
+    },
+    "exit": "T",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "3620967d7ea32284d645e71391489bee2e4f325971aa05490d9b8210e44ca133",
+   "rank": 15,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 20,
+   "cluster_size": 2,
+   "heldout_verdict": {
+    "verdict": "does not hold",
+    "n": 237,
+    "n_floor": 74,
+    "pf_1c": 0.63,
+    "pf_2c": 0.507,
+    "validate_pf_1c": 1.374,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 201,
+    "signals_per_day": 6.934,
+    "pf_1c": 1.374,
+    "pf_2c": 1.113,
+    "edge_1c_cents_per_contract": 2.466,
+    "dollars_week_5c_1c": 5.98,
+    "dollars_week_5c_2c": 1.83,
+    "p_day_clustered": 0.031931408627974625,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_16_NEAR",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXNEAR15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 18,
+     "side_rule": "yes",
+     "filter": "swid:down"
+    },
+    "exit": "H",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB3SPRW"
+   },
+   "spec_sha256": "d8ddd7b273ea3fc6ff22b736b7d25aca5cf8bbe87c5fa3684b16babf65196e94",
+   "rank": 16,
+   "admission": "owner_override_shadow (standing, Nov 16)",
+   "admission_note": "favourite-late shape: same mechanism as gold L1; owner standing override of Nov 16: logging only, going live needs its own popup",
+   "family": "F1 favourite-late shape",
+   "cluster": 23,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "no evidence at n = 77",
+    "n": 77,
+    "n_floor": 90,
+    "pf_1c": 0.708,
+    "pf_2c": 0.6,
+    "validate_pf_1c": 2.427,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 106,
+    "signals_per_day": 3.656,
+    "pf_1c": 2.427,
+    "pf_2c": 2.055,
+    "edge_1c_cents_per_contract": 3.737,
+    "dollars_week_5c_1c": 4.78,
+    "dollars_week_5c_2c": 3.57,
+    "p_day_clustered": 0.004361389897156977,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  },
+  {
+   "spec": {
+    "id": "SH3_17_HYPE",
+    "kind": "grid15m",
+    "source": "archive",
+    "market": "KXHYPE15M",
+    "entry": {
+     "seconds_left": 420,
+     "price_band_5c": 1,
+     "side_rule": "cheap",
+     "filter": "vspike:low"
+    },
+    "exit": "M60",
+    "costs": {
+     "contracts": 10,
+     "haircuts_primary": [
+      0.01,
+      0.02
+     ],
+     "fee_form": "ceil(round(100 x 0.07 x c x p x (1 - p), 9)) / 100 per order"
+    },
+    "size_in_log": 1,
+    "mode": "log_only_forward",
+    "start_utc": "2026-11-17T01:00:00Z",
+    "found_by_spec": "ENGB2VSPIKE"
+   },
+   "spec_sha256": "13217c4ff43bff7572d8ca3661adb14cc057b230911355dd81f0c091e61a4513",
+   "rank": 17,
+   "admission": "clean",
+   "admission_note": "search plus validate bar; no 7e row touched",
+   "family": "momentum or volume filter, cheap tail",
+   "cluster": 24,
+   "cluster_size": 1,
+   "heldout_verdict": {
+    "verdict": "no evidence at n = 36",
+    "n": 36,
+    "n_floor": 90,
+    "pf_1c": 3.522,
+    "pf_2c": 2.968,
+    "validate_pf_1c": 1.607,
+    "bh_rank_survivor_in_own_read": false,
+    "missing_feature_skips_at_bucket": 0,
+    "label": "read n times by ENGINE1 batches (held-out window Oct 3 to Oct 28 or Nov 3); not forward n, not a pass; the in-print 'unread by ENGINE1' is superseded"
+   },
+   "paper_research": {
+    "validate_n": 105,
+    "signals_per_day": 3.622,
+    "pf_1c": 1.607,
+    "pf_2c": 1.341,
+    "edge_1c_cents_per_contract": 3.67,
+    "dollars_week_5c_1c": 4.65,
+    "dollars_week_5c_2c": 3.03,
+    "p_day_clustered": 0.12004771992691829,
+    "bh_survivor": false,
+    "label": "validate-window income, upward biased, not a forecast"
+   }
+  }
+ ],
+ "heldout_read": "batch B and batch C prints, sha256 89363527 and e47eb90b, confirmed at 1e-9 (Forensics, Auditor B, Nov 17 2026)"
+}
