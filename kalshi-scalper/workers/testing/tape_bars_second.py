@@ -130,10 +130,10 @@ DEV = ("2026-09-18", "2026-10-27"); HELD = ("2026-10-28", "2026-11-15"); CUT_DAT
 
 
 def load_holds(path, pinned_sha256):
-    """the pinned HOLDS.json (sha256 checked): a function held(ticker, t_seconds). A cell is held if its time is at or after forward_default_deny_from, or in [from, to) of a row with status OPEN or FROZEN whose ticker pattern matches (fnmatch; '*' matches anything; 'to' null is open ended); rows with scope archive_binary do not apply to perps tape rows."""
+    """the pinned HOLDS.json (sha256 checked): a function held(ticker, t_seconds). A cell is held if its time is at or after forward_default_deny_from, or in [from, to) of a row with status OPEN or FROZEN whose ticker pattern matches (fnmatch; '*' matches anything; 'to' null is open ended); rows with any scope key, or kind clearance, do not apply to perps tape rows (Desk A, Nov 17)."""
     raw = open(path, "rb").read()
     if hashlib.sha256(raw).hexdigest() != pinned_sha256: raise SystemExit("REFUSED: the holds file does not match the pinned sha256")
-    d = json.loads(raw); deny = d["forward_default_deny_from"]; rows = [r for r in d["rows"] if r["status"] in ("OPEN", "FROZEN") and r.get("scope") != "archive_binary"]
+    d = json.loads(raw); deny = d["forward_default_deny_from"]; rows = [r for r in d["rows"] if r["status"] in ("OPEN", "FROZEN") and "scope" not in r and r.get("kind") != "clearance"]
     def held(ticker, t):
         if t >= deny: return True
         return any(r["from"] <= t and (r["to"] is None or t < r["to"]) and any(fnmatch.fnmatchcase(ticker, p) for p in r["tickers"]) for r in rows)

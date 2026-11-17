@@ -53,10 +53,10 @@ class TT(unittest.TestCase):
         d = tempfile.mkdtemp()
         try:
             p = os.path.join(d, "h.json"); J.dump({"forward_default_deny_from": 1794787200, "rows": [{"id": "H1", "tickers": ["KXGOLDPERP*"], "from": 1000, "to": 2000, "status": "OPEN"}, {"id": "H2", "tickers": ["*"], "from": 0, "to": None, "status": "FROZEN", "scope": "archive_binary"},
-                {"id": "H3", "tickers": ["KXAAA"], "from": 5000, "to": None, "status": "APPROVED"}, {"id": "H4", "tickers": ["KXFRZ"], "from": 3000, "to": 4000, "status": "FROZEN"}]}, open(p, "w"))
+                {"id": "H3", "tickers": ["KXAAA"], "from": 5000, "to": None, "status": "APPROVED"}, {"id": "H4", "tickers": ["KXFRZ"], "from": 3000, "to": 4000, "status": "FROZEN"}, {"id": "H5", "tickers": ["KXSC"], "from": 0, "to": None, "status": "OPEN", "scope": "other_scope"}, {"id": "H6", "tickers": ["KXCL"], "from": 0, "to": None, "status": "OPEN", "kind": "clearance"}]}, open(p, "w"))
             sh = T.hashlib.sha256(open(p, "rb").read()).hexdigest(); h = T.load_holds(p, sh)
             self.assertTrue(h("KXGOLDPERP", 1000)); self.assertFalse(h("KXGOLDPERP", 2000)); self.assertFalse(h("KXGOLDPERP", 999)); self.assertFalse(h("KXOTHER", 1500)); self.assertFalse(h("KXAAA", 6000))      # APPROVED and archive_binary rows do not hold
-            self.assertTrue(h("KXFRZ", 3500)); self.assertTrue(h("KXOTHER", 1794787200)); self.assertFalse(h("KXOTHER", 1794787199))
+            self.assertFalse(h("KXSC", 10)); self.assertFalse(h("KXCL", 10)); self.assertTrue(h("KXFRZ", 3500)); self.assertTrue(h("KXOTHER", 1794787200)); self.assertFalse(h("KXOTHER", 1794787199))
             with self.assertRaises(SystemExit): T.load_holds(p, "00")
         finally: shutil.rmtree(d)
     def test_range_rules(self):
