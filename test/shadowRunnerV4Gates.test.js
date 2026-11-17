@@ -99,6 +99,8 @@ gates.V4_8 = () => {
   assert.strictEqual(o.swid_up, 2);
   assert.strictEqual(o.swid_missing, null);
   assert.ok(!c3.vspike_cuts_file, 'no cuts file is pinned yet');
+  // the vspike class code, on invented numbers and the real cuts shape: ratio 1.0 is mid (between 0.7 and 1.1), 0.5 is low, 2.0 is high; a null cut, a missing volume candle or a zero mean is no feature
+  assert.deepStrictEqual([o.vspike_mid_ratio1, o.vspike_low, o.vspike_high, o.vspike_nullcut, o.vspike_missing, o.vspike_zero_mean], ['mid', 'low', 'high', null, null, null]);
 };
 
 let failed = 0;

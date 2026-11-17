@@ -133,4 +133,15 @@ by = {10000 - 180: (10000 - 180, .50, .52, 0, 5, 0), 10000: (10000, .50, .54, 0,
 out["swid_up"] = B2.swid(by, 10000); by2 = {10000 - 180: (10000 - 180, .50, .52, 0, 5, 0)}; out["swid_missing"] = B2.swid(by2, 10000)
 sw = next(i for i in lst3["specs"] if i["spec"]["entry"]["filter"].startswith("swid"))
 out["v3_swid_pick"] = sw["spec"]["id"]
+# vspike with a cuts dict of the real shape (invented numbers): low, mid, high, a null cut and a missing candle give a class or no feature
+cuts_i = {"all_series_buckets": {"KXETH15M": {"540": {"c1": 0.7, "c2": 1.1}, "600": {"c1": None, "c2": None}}}}
+def vs(vol_e, vols):
+    ee = 20000; cs = [(ee - 60 * i, .5, .6, None, v, 0) for i, v in zip(range(1, 6), vols)] + [(ee, .5, .6, None, vol_e, 0)]
+    return {"close": ee + 540, "candles": cs, "series": "KXETH15M"}, ee
+mm, ee = vs(10, [10] * 5); out["vspike_mid_ratio1"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 540)
+mm, ee = vs(5, [10] * 5); out["vspike_low"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 540)
+mm, ee = vs(20, [10] * 5); out["vspike_high"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 540)
+mm, ee = vs(10, [10] * 5); out["vspike_nullcut"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 600)
+mm, ee = vs(10, [10, 10, None, 10, 10]); out["vspike_missing"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 540)
+mm, ee = vs(10, [0, 0, 0, 0, 0]); out["vspike_zero_mean"] = V.feature_class(mods3, "vspike", mm, None, ee, cuts_i, 540)
 print(json.dumps(out))

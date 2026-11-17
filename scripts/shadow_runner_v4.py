@@ -51,10 +51,11 @@ def feature_class(mods, name, market, other_idx, e, cuts=None, bucket=None):
         x = mods["engine1_batchb2"].swid(by_end, e)
     elif name == "vspike":
         v = mods["engine1_batchb2"].vspike(by_end, e)
-        c = (cuts or {}).get(market["series"], {}).get(str(bucket))
-        if v is None or not c:
+        c = ((cuts or {}).get("all_series_buckets", {}).get(market["series"], {})).get(str(bucket)) or {}
+        c1, c2 = c.get("c1"), c.get("c2")
+        if v is None or c1 is None or c2 is None:
             return None
-        return "low" if v <= c[0] else ("mid" if v <= c[1] else "high")
+        return "low" if v <= c1 else ("mid" if v <= c2 else "high")
     elif name in OTHER:
         x = None if other_idx is None else C.xmom(other_idx, e)
     else:
