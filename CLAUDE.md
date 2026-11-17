@@ -1808,3 +1808,7 @@ Three more lines in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md`. (1) Batch B (
 ## Held-out log: ENGPERPS lanes 1 and 6 second-build reader (Nov 16, 2026, Auditor B's allow line)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for the Testing Desk's lanes 1 and 6 second-build reader (`lanes16_second_load.py`, its run script and two build files, commit 2a2fdb527 on `claude/testing-desk`). I hashed all four files myself and they match Auditor B's values; the two extract hashes and the page max table hash are the ones already on the lanes first-build and POOL1 lines. Scope: the 13 stock basket perps only, 1793903940 to before 1794873600. Not a go by itself: the Testing Desk commits its print sha first, Desk A runs its own print. Docs only.
+
+## Held-out log: CHEAPFLIP line updated (Nov 16, 2026, Auditor B's update of PR 1035)
+
+The CHEAPFLIP line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` now names Desk C's amended reader (`cheapflip.py` sha256 1e42c501..., `cheapflip_run.py` sha256 ac92a629..., amendment 2, commit aa822bc85 on `claude/idea-desk-c`; I hashed both before merging and they match Auditor B's values). The old shas 6bd0fe79... and e7e47b28... no longer read. Scope is unchanged (nc15 book and coverage files of KXHYPE15M, KXBNB15M and KXNATGAS15M, closes 2026-11-11 to 2026-11-15). Still not a go to run: the Testing Desk's blind second build and the print sha first. Docs only.
