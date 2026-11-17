@@ -16,7 +16,25 @@ for d in G.dates_between("2026-10-04", "2026-10-09"):
         w = csv.writer(fo); w.writerow(COLS); w.writerows(rows)
 open(os.path.join(base, "kalshi1m", "2026-10-27.only.csv.gz"), "wb").write(b"NOT A GZIP FILE: a held-out date must never be opened")
 G.WIN.update({"search_from": "2026-10-04", "search_to": "2026-10-06", "validate_from": "2026-10-07", "validate_to": "2026-10-09", "half1_to": "2026-10-05", "half2_from": "2026-10-06"})
-out = os.path.join(base, "rec.jsonl"); G.main(base, out)                      # raises if the 10-27 file is opened
+# usable pair: a few candles carry the 9.22e14 ask placeholder and a duplicated end_ts carries different values (the FIRST must be kept)
+import hashlib
+p0 = os.path.join(base, "kalshi1m", "2026-10-05.only.csv.gz")
+rows = list(csv.reader(gzip.open(p0, "rt", newline="")))
+hdr, body = rows[0], rows[1:]
+for i in (100, 200, 300): body[i][6] = "9.22e14"; body[i][9] = "9.22e14"                                 # ask_open and ask_close placeholders on three gold candles
+dup = list(body[500]); dup[2] = "1.0"; dup[5] = "1.0"; body.append(dup)                                  # a repeated end_ts with other values, AFTER the original
+with gzip.open(p0, "wt", newline="") as fo: w = csv.writer(fo); w.writerow(hdr); w.writerows(body)
+allow = os.path.join(base, "ALLOW.md"); G.ALLOW_FILE = allow
+out = os.path.join(base, "rec.jsonl")
+open(allow, "w").write("nothing here\n")
+try: G.main(base, out); raise SystemExit("ran without an allow line")
+except SystemExit as e: assert str(e).startswith("REFUSED"), e
+me = hashlib.sha256(open(G.__file__, "rb").read()).hexdigest(); ms = G.manifest_sha(G.window_files(base))
+open(allow, "w").write(G.ALLOW_MARK + " mech1_generate.py " + me + " " + ms + "\n")
+G.main(base, out)                      # raises if the 10-27 file is opened
+lg = json.load(open(out + ".log.json")); assert lg["counts"].get("candle_duplicate_first_kept", 0) >= 1 and lg["file_list_sha256"] == ms and lg["funding"] == "not booked", lg
+assert any(k.startswith("fire_dropped_unusable") or k.startswith("signal_candle_unusable") for k in lg["counts"]), lg
+
 L = [json.loads(x) for x in open(out)]
 heads = [x for x in L if "sig" in x]; trades = [x for x in L if "sig" not in x]
 assert len(heads) == 8, len(heads)                                              # 2 families x 2 signals x 2 sides
