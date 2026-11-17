@@ -1,0 +1,80 @@
+0 KXBNB15M 420 18 favourite btcmom3:up S n 137 pf1 1.039336433329 pf2 0.864190012180 p 4.448460255261e-01 days 25 mfs 632 mkts 2944 does not hold survivor no
+1 KXDOGE15M 360 18 favourite btcmom3:down H n 145 pf1 1.036043587594 pf2 0.872451398767 p 4.568977767133e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+2 KXDOGE15M 360 18 no btcmom3:down H n 106 pf1 0.833310892689 pf2 0.701052912168 p 6.823097032917e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+3 KXDOGE15M 660 13 yes btcmom3:up H n 108 pf1 0.667340135367 pf2 0.636861677402 p 9.545306360758e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+4 KXDOGE15M 660 13 yes btcmom3:up T n 108 pf1 0.644273832374 pf2 0.600537884322 p 9.655596206962e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+5 KXDOGE15M 660 17 yes btcmom3:up H n 103 pf1 0.651017948031 pf2 0.591186216037 p 8.959947726815e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+6 KXDOGE15M 660 17 yes btcmom3:up T n 103 pf1 0.558866863113 pf2 0.448177601060 p 9.469680557355e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+7 KXETH15M 120 1 no btcmom3:up H n 81 pf1 0.451105651106 pf2 0.392527409117 p 9.665109000511e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+8 KXETH15M 360 18 yes btcmom3:up H n 128 pf1 0.498595317726 pf2 0.423255197987 p 9.776188104642e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+9 KXETH15M 360 18 yes btcmom3:up S n 128 pf1 0.491893001300 pf2 0.423973591913 p 9.893317342640e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+10 KXETH15M 600 4 cheap btcmom3:down M60 n 95 pf1 1.041266794626 pf2 0.946601941748 p 4.410892149128e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+11 KXETH15M 600 16 favourite btcmom3:up H n 111 pf1 0.597912502776 pf2 0.555658016072 p 9.746051392424e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+12 KXETH15M 600 16 yes btcmom3:up H n 94 pf1 0.630681818182 pf2 0.586119362679 p 9.541025475593e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+13 KXETH15M 600 16 yes btcmom3:up T n 94 pf1 0.579654720280 pf2 0.505698082636 p 9.743775650566e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+14 KXETH15M 660 6 yes btcmom3:down M60 n 78 pf1 0.599732411640 pf2 0.552788363480 p 9.811216215040e-01 days 23 mfs 0 mkts 2312 does not hold survivor no
+15 KXGOLD15M 420 18 favourite btcmom3:up H n 92 pf1 1.559113957833 pf2 1.323910171731 p 1.336377194116e-01 days 17 mfs 0 mkts 1529 holds survivor no
+16 KXHYPE15M 420 1 cheap btcmom3:up M60 n 57 pf1 1.841897233202 pf2 1.525835073069 p 1.054774754183e-01 days 22 mfs 632 mkts 2944 no evidence at n = 57 survivor no
+17 KXHYPE15M 480 1 cheap btcmom3:down M60 n 42 pf1 4.247208121827 pf2 3.501730103806 p 4.059131342177e-04 days 20 mfs 632 mkts 2944 no evidence at n = 42 survivor yes
+18 KXHYPE15M 600 3 cheap btcmom3:down M60 n 62 pf1 1.412395709178 pf2 1.269894062577 p 1.702127431814e-01 days 22 mfs 632 mkts 2944 no evidence at n = 62 survivor no
+19 KXNEAR15M 420 18 yes btcmom3:up H n 100 pf1 0.737726563438 pf2 0.626589045978 p 8.005145713561e-01 days 25 mfs 632 mkts 2944 does not hold survivor no
+20 KXSILVER15M 360 18 favourite btcmom3:down H n 132 pf1 0.976498800959 pf2 0.829317507418 p 5.248010869544e-01 days 20 mfs 411 mkts 1923 does not hold survivor no
+21 KXSOL15M 540 16 favourite btcmom3:up S n 124 pf1 0.725245901639 pf2 0.661816578483 p 9.146783740230e-01 days 25 mfs 632 mkts 2944 does not hold survivor no
+22 KXXRP15M 360 18 favourite btcmom3:up H n 150 pf1 1.280059443394 pf2 1.086497326203 p 2.325503253810e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+23 KXXRP15M 360 18 favourite btcmom3:up S n 150 pf1 1.231707317073 pf2 1.029841105800 p 2.643694025592e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+24 KXXRP15M 360 18 yes btcmom3:up H n 123 pf1 1.198111747408 pf2 1.016385911179 p 3.084296423145e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+25 KXXRP15M 360 18 yes btcmom3:up S n 123 pf1 1.144631228230 pf2 0.954498601090 p 3.497963034736e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+26 KXXRP15M 420 18 favourite btcmom3:up H n 158 pf1 2.732243366390 pf2 2.317144373673 p 4.283515887187e-04 days 25 mfs 0 mkts 2312 holds survivor yes
+27 KXXRP15M 420 18 yes btcmom3:up H n 136 pf1 3.140319715808 pf2 2.665024630542 p 2.480740135040e-04 days 25 mfs 0 mkts 2312 holds survivor yes
+28 KXXRP15M 420 18 yes btcmom3:up S n 136 pf1 2.163790947737 pf2 1.590210093134 p 7.179288913971e-03 days 25 mfs 0 mkts 2312 holds survivor no
+29 KXXRP15M 480 18 favourite btcmom3:up H n 152 pf1 1.052127086699 pf2 0.897228144989 p 4.274699273711e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+30 KXXRP15M 480 18 favourite btcmom3:up S n 152 pf1 0.906596614127 pf2 0.758725054384 p 6.485326679957e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+31 KXXRP15M 540 17 yes btcmom3:up H n 119 pf1 0.764698057994 pf2 0.694044093452 p 8.259255792658e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+32 KXXRP15M 540 17 yes btcmom3:up S n 119 pf1 0.910001615770 pf2 0.813849062549 p 6.549322789641e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+33 KXBTC15M 240 4 cheap mom1:down TA3 n 84 pf1 0.999675614305 pf2 0.902074435631 p 5.005606498845e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+34 KXBTC15M 360 3 cheap vol3:up TA5 n 90 pf1 1.400663987419 pf2 1.269830842503 p 1.414284964015e-01 days 25 mfs 0 mkts 2312 holds survivor no
+35 KXHYPE15M 360 1 yes mom3:down TA5 n 74 pf1 2.099103585657 pf2 1.723218096458 p 4.867657526586e-02 days 29 mfs 0 mkts 2944 no evidence at n = 74 survivor no
+36 KXBTC15M 360 18 favourite vspike:mid H n 97 pf1 1.103893773551 pf2 0.939108823007 p 3.916434644987e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+37 KXBTC15M 360 18 favourite vspike:mid S n 97 pf1 1.007770270270 pf2 0.844521224087 p 4.913444773588e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+38 KXBTC15M 360 18 favourite vspike:mid T n 97 pf1 0.867575811950 pf2 0.563820344399 p 6.381141550268e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+39 KXBTC15M 420 18 favourite vspike:high H n 138 pf1 0.549364021805 pf2 0.466324695224 p 9.234592168101e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+40 KXBTC15M 480 16 favourite vspike:mid H n 100 pf1 0.921958415285 pf2 0.855614973262 p 6.173212793683e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+41 KXDOGE15M 540 16 favourite vspike:low H n 81 pf1 0.763249832751 pf2 0.708143466118 p 8.345704260803e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+42 KXDOGE15M 540 16 favourite vspike:low T n 81 pf1 0.690626626031 pf2 0.595031603704 p 9.013429111031e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+43 KXDOGE15M 540 17 favourite vspike:high H n 97 pf1 0.699021877100 pf2 0.634771686124 p 8.825190114521e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+44 KXETH15M 360 18 favourite vspike:low H n 75 pf1 0.968450223833 pf2 0.818834459459 p 5.255388297874e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+45 KXETH15M 420 18 favourite vspike:mid H n 120 pf1 1.004622705642 pf2 0.852395048439 p 4.952847370159e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+46 KXETH15M 540 14 favourite vspike:mid H n 94 pf1 0.944105037513 pf2 0.897131971637 p 5.803249255301e-01 days 23 mfs 0 mkts 2312 does not hold survivor no
+47 KXETH15M 540 14 favourite vspike:mid T n 94 pf1 0.956861868574 pf2 0.882813793103 p 5.597664663159e-01 days 23 mfs 0 mkts 2312 does not hold survivor no
+48 KXHYPE15M 420 1 cheap vspike:low M60 n 36 pf1 3.522009321595 pf2 2.967596759676 p 3.178712608277e-03 days 20 mfs 0 mkts 2944 no evidence at n = 36 survivor no
+49 KXHYPE15M 540 18 favourite vspike:low H n 130 pf1 1.133883850007 pf2 0.967046215673 p 3.654355830817e-01 days 31 mfs 0 mkts 2944 does not hold survivor no
+50 KXXRP15M 540 16 favourite vspike:low H n 102 pf1 0.834439989977 pf2 0.775610058219 p 7.504763924574e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+51 KXXRP15M 540 16 favourite vspike:low T n 102 pf1 0.764908544225 pf2 0.665675709154 p 8.350788957632e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+52 KXBNB15M 420 1 cheap swid:flat M60 n 80 pf1 3.373188405797 pf2 2.793559042114 p 5.923582813518e-03 days 30 mfs 0 mkts 2944 no evidence at n = 80 survivor no
+53 KXBTC15M 120 1 no swid:flat S n 142 pf1 0.678468899522 pf2 0.581421067183 p 9.197721537498e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+54 KXBTC15M 120 2 cheap swid:flat H n 153 pf1 0.904208595096 pf2 0.827570213862 p 6.627653279937e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+55 KXBTC15M 120 2 cheap swid:flat S n 153 pf1 0.916845365737 pf2 0.832165151681 p 6.407469678727e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+56 KXBTC15M 180 5 cheap swid:flat H n 110 pf1 0.897391081934 pf2 0.854301363094 p 7.522587923036e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+57 KXBTC15M 180 7 cheap swid:flat H n 100 pf1 0.754244016787 pf2 0.723441129835 p 9.103732008979e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+58 KXBTC15M 420 18 yes swid:flat H n 157 pf1 0.872442080591 pf2 0.740364025696 p 6.674099795470e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+59 KXBTC15M 600 3 cheap swid:flat M60 n 116 pf1 1.519854839835 pf2 1.379364559450 p 2.148576067835e-02 days 25 mfs 0 mkts 2312 holds survivor no
+60 KXBTC15M 600 18 favourite swid:flat H n 169 pf1 0.993780982425 pf2 0.849090260435 p 5.074117416866e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+61 KXDOGE15M 360 18 favourite swid:down H n 39 pf1 2.677072120560 pf2 2.261980830671 p 5.325459063050e-02 days 22 mfs 0 mkts 2312 no evidence at n = 39 survivor no
+62 KXDOGE15M 420 18 favourite swid:flat H n 237 pf1 1.230762852405 pf2 1.043913650168 p 2.601481424875e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+63 KXETH15M 360 18 yes swid:flat H n 143 pf1 0.572106388666 pf2 0.486271915316 p 9.422977486445e-01 days 24 mfs 0 mkts 2312 does not hold survivor no
+64 KXETH15M 540 17 yes swid:flat H n 123 pf1 0.698982324585 pf2 0.634136286000 p 9.288138053421e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+65 KXETH15M 540 17 yes swid:flat T n 123 pf1 0.602451943105 pf2 0.484363036692 p 9.753031107916e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+66 KXETH15M 540 18 yes swid:flat S n 104 pf1 0.668071420650 pf2 0.520061255743 p 9.003768702724e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+67 KXETH15M 600 16 yes swid:flat H n 92 pf1 0.615393007146 pf2 0.572075715904 p 9.678021625054e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+68 KXETH15M 600 16 yes swid:flat T n 92 pf1 0.564010254732 pf2 0.491398371353 p 9.830677983813e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+69 KXGOLD15M 420 18 favourite swid:flat H n 194 pf1 1.340010770059 pf2 1.140511727079 p 1.446535763178e-01 days 18 mfs 0 mkts 1529 holds survivor no
+70 KXHYPE15M 300 1 yes swid:flat M60 n 51 pf1 1.578378378378 pf2 1.273817455030 p 1.774282815518e-01 days 24 mfs 0 mkts 2944 no evidence at n = 51 survivor no
+71 KXHYPE15M 300 2 cheap swid:flat M60 n 99 pf1 1.652376403153 pf2 1.431656229756 p 4.181664194057e-02 days 32 mfs 0 mkts 2944 holds survivor no
+72 KXNEAR15M 420 18 yes swid:down H n 77 pf1 0.708467309753 pf2 0.600272851296 p 8.046131900692e-01 days 30 mfs 0 mkts 2944 no evidence at n = 77 survivor no
+73 KXNEAR15M 420 18 yes swid:down T n 77 pf1 0.554892053284 pf2 0.359557374564 p 9.067940205661e-01 days 30 mfs 0 mkts 2944 no evidence at n = 77 survivor no
+74 KXSOL15M 420 16 favourite swid:flat H n 162 pf1 0.802128726235 pf2 0.745072623995 p 8.237082883388e-01 days 32 mfs 0 mkts 2944 does not hold survivor no
+75 KXSOL15M 420 16 favourite swid:flat T n 162 pf1 0.744321468513 pf2 0.652662879799 p 8.881590829658e-01 days 32 mfs 0 mkts 2944 does not hold survivor no
+76 KXXRP15M 360 18 favourite swid:flat H n 241 pf1 0.933291179260 pf2 0.791374561843 p 5.887374601039e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+77 KXXRP15M 360 18 yes swid:flat S n 128 pf1 1.312395589709 pf2 1.093937916464 p 2.154178701860e-01 days 25 mfs 0 mkts 2312 holds survivor no
+78 KXXRP15M 600 17 favourite swid:flat H n 237 pf1 0.726419065505 pf2 0.658080225554 p 9.423746618667e-01 days 25 mfs 0 mkts 2312 does not hold survivor no
+79 KXXRP15M 600 17 favourite swid:flat T n 237 pf1 0.629925849173 pf2 0.506760220428 p 9.838122959889e-01 days 25 mfs 0 mkts 2312 does not hold survivor no

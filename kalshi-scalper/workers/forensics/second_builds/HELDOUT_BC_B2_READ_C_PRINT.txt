@@ -1,0 +1,2 @@
+label: unread by ENGINE1, seen by earlier development cards | batch C rules 68 BH m 68 survivors 5 desk_a_print_sha256 e47eb90b9f2e4345e3fbbf03712b30cd55d4a0826671430113cd2389cf608bb6
+Counter({'does not hold': 46, 'no evidence': 13, 'holds': 9})
