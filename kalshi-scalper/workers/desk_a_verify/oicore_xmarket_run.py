@@ -21,7 +21,8 @@ def main(base, out, check_allow=True):
             if not p: lines.append("  %s: n 0" % ph); continue
             b = btc.get(ph, {}).get("day_net_1c") if s != "KXBTC15M" else None
             c = X.corr(p["day_net_1c"], b) if b else None
-            lines.append("  %s: n %d wins %d | 1c PF %s cents/contract %s | 2c PF %s cents/contract %s | signals/day %.3f | day corr with BTC %s" % (ph, p["1c"]["n"], p["1c"]["wins"], fmt(p["1c"]["pf"]), fmt(p["1c"]["cents_per_contract"]), fmt(p["2c"]["pf"]), fmt(p["2c"]["cents_per_contract"]), p["signals_per_day"], fmt(c)))
+            lines.append("  %s: n %d wins %d | 1c PF %s cents/contract %s | 2c PF %s cents/contract %s | signals/day (phase days %.1f, %d windows) %.3f, over the fired span %.3f | day corr with BTC %s" % (ph, p["1c"]["n"], p["1c"]["wins"], fmt(p["1c"]["pf"]), fmt(p["1c"]["cents_per_contract"]), fmt(p["2c"]["pf"]), fmt(p["2c"]["cents_per_contract"]), p["phase_days"], p["windows_in_phase"], p["signals_per_day"], p["signals_per_day_fired_span"], fmt(c)))
+    scored = sum(1 for s in res if "note" not in res[s]); lines.append("markets (series) actually scored: %d of %d series in the archive (m is added by series: the Head's carried m plus this number at the print date)" % (scored, len(res)))
     open(out, "w").write("\n".join(lines) + "\n"); print("output sha256", hashlib.sha256(open(out, "rb").read()).hexdigest())
 if __name__ == "__main__":
     a = [x for x in sys.argv[1:] if x != "--no-allow"]

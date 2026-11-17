@@ -30,12 +30,14 @@ def run(markets, phase_of, cut=None, min_rises=MIN_RISES):
     out = {}
     for s, ms in markets.items():
         key = s[2:-3] if s.startswith("KX") and s.endswith("15M") else s
-        rs = [rise(m) for m in ms if phase_of(key, m["close"]) == "search"]; rs = [x for x in rs if x is not None]
+        rs = [rise(m) for m in ms if phase_of(key, m["close"]) == "search" and m.get("result") in ("yes", "no")]; rs = [x for x in rs if x is not None]
         C = (cut or {}).get(s) if cut else (p90(rs) if len(rs) >= min_rises else None)
         res = {"cut": C, "phases": {}}
         if C is None or C <= 0: res["note"] = "no usable threshold"; out[s] = res; continue
-        by = collections.defaultdict(list); skipped = collections.Counter()
+        by = collections.defaultdict(list); skipped = collections.Counter(); closes_ph = collections.defaultdict(list)
         for m in ms:
+            if m.get("result") not in ("yes", "no"): skipped["unsettled or void result"] += 1; continue      # Auditor B (b): never scored as a loss
+            closes_ph[phase_of(key, m["close"])].append(m["close"])
             e, why = score_market(m, C)
             if e is None: skipped[why] += 1; continue
             by[phase_of(key, m["close"])].append(e)
@@ -45,7 +47,10 @@ def run(markets, phase_of, cut=None, min_rises=MIN_RISES):
             for h, tag in ((H1, "1c"), (H2, "2c")):
                 a = K.aggregate(es, "H", h, N10); row[tag] = {"n": a["n"], "wins": a["wins"], "pf": a["pf"], "cents_per_contract": (a["net"] / (a["n"] * N10) * 100) if a["n"] else 0.0}
             closes = [e["close_ts"] for e in es]; days = (max(closes) - min(closes)) / 86400.0 + 1 if closes else 0.0
-            row["signals_per_day"] = len(es) / days if days else 0.0
+            row["signals_per_day_fired_span"] = len(es) / days if days else 0.0          # days from the first to the last FIRED close (overstates when few or clustered)
+            cl = closes_ph.get(ph, []); pdays = (max(cl) - min(cl)) / 86400.0 + 1 if cl else 0.0
+            row["signals_per_day"] = len(es) / pdays if pdays else 0.0                      # Auditor B (a): the calendar days of the PHASE (first to last close of all the market's windows in it)
+            row["phase_days"] = pdays; row["windows_in_phase"] = len(cl)
             row["day_net_1c"] = day_nets(es, H1); res["phases"][ph] = row
         out[s] = res
     return out

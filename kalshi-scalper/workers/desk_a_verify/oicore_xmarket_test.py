@@ -22,6 +22,10 @@ assert X.entry(mk("E", C0, 20, "yes", ent=(0.45, 0.55)))[0] is None and X.entry(
 assert X.entry(mk("G", C0, 20, "yes", ent=(0.0, 0.2)))[0] is None
 # a market whose own cut is not above 0 is reported
 flat = [mk("H%d" % i, C0 + 900 * i, 0, "yes") for i in range(5)]; assert X.run({"KXT15M": flat}, ph, min_rises=3)["KXT15M"]["note"] == "no usable threshold"
+# Auditor B (a) and (b): rate over the PHASE's calendar days, and an unsettled result is skipped and counted, never a loss
+un = [mk("U%d" % i, C0 + 100 * i, 0 if i else 20, "pending") for i in range(3)] + [mk("V", C0 + 2700, 30, "no")]
+o = X.run({"KXT15M": ms + un}, ph, min_rises=3)["KXT15M"]; assert o["skipped"].get("unsettled or void result") == 3, o["skipped"]
+vp = o["phases"]["validate"]; assert abs(vp["signals_per_day"] - 2 / vp["phase_days"]) < 1e-12 and vp["windows_in_phase"] == 2 and vp["signals_per_day_fired_span"] >= vp["signals_per_day"], vp
 # correlation needs 10 common days
 assert X.corr({str(i): float(i) for i in range(12)}, {str(i): float(2 * i) for i in range(12)}) > 0.999999 and X.corr({"a": 1.0}, {"a": 1.0}) is None
 # the Head's rules: fewer than 20 rises gives no threshold; the entry is the candle ending exactly close - 180 and no other candle
