@@ -56,6 +56,9 @@ function sessionKinds(before, after) {
   // The perpetuals margin cushion fell under a line (kalshiPerpsCushionLib): same rule, only a CHANGED stamp alerts; it needs no session on (the perps account is separate from the bot).
   const wasCush = before.perpsCushionAlert && before.perpsCushionAlert.at, nowCush = after.perpsCushionAlert && after.perpsCushionAlert.at;
   if (Number.isFinite(Number(nowCush)) && Number(nowCush) !== Number(wasCush)) out.push("perpscushion");
+  // The nightly reconciliation found a mismatch (kalshiReconcileLib): same rule, only a CHANGED stamp alerts, once a day at most, and it needs no session on.
+  const wasRec = before.reconcileAlert && before.reconcileAlert.at, nowRec = after.reconcileAlert && after.reconcileAlert.at;
+  if (Number.isFinite(Number(nowRec)) && Number(nowRec) !== Number(wasRec)) out.push("reconcile");
   return out;
 }
 
@@ -106,6 +109,10 @@ function message(kind, o, ctx) {
   if (kind === "perpscushion") {
     const a = (o && o.perpsCushionAlert) || {}, pct = Number(a.pct), usd = Number(a.dollars), high = a.level === "high";
     return { title: (high ? "Perps margin cushion is very low" : "Perps margin cushion is getting low") + (Number.isFinite(pct) ? ": " + pct.toFixed(1) + "%" : ""), body: (Number.isFinite(usd) ? "$" + usd.toFixed(2) + " of cushion left. " : "") + "Add margin or close a position by hand in Kalshi. The bot trades no perps and cannot do this for you. This is the cushion, not a forced-close price.", tag: "issue-perpscushion" };
+  }
+  if (kind === "reconcile") {
+    const a = (o && o.reconcileAlert) || {}, n = Number(a.count);
+    return { title: "Check the books: the nightly reconciliation found a mismatch" + (Number.isFinite(n) && n > 0 ? " (" + n + ")" : ""), body: "First: " + String(a.first || "see the report").slice(0, 40) + ". The first line of tonight's report says what it is. Nothing was changed; this only reports.", tag: "issue-reconcile" };
   }
   if (kind === "hardstop") {
     return { title: "Hard stop: all new buys are off", body: "The account fell to the hard stop line on trading results. No strategy will buy until you re-arm it with a reviewed change. Open positions are still sold. Open the Bot page and look.", tag: "issue-hardstop" };

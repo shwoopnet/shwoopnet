@@ -299,7 +299,17 @@ function makeReportHandler(deps) {
       if (perps !== undefined) report.perps = perps;
       // One account view from what is already in hand; needs the balance history (a failed read leaves the field out). Never throws into the report.
       if (balanceHistory !== undefined) { try { report.account = accountSection(balanceHistory.rows, perps, now); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
-      res.status(200).json(report);
+      // The nightly reconciliation (kalshiReconcileLib, Nov 17, 2026): computed once a day by the hourly balance snapshot function and stored; the report only READS it and prints its line FIRST. A missing or
+      // old result says so (never a stale "OK"). The portfolio probe answer (route statuses and field NAMES only) rides along until the real record shapes are known.
+      let reconcile, portfolioProbe;
+      if (typeof deps.readReconcile === "function") { try { const rc = await deps.readReconcile(); if (rc && typeof rc === "object") reconcile = rc; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      if (typeof deps.readPortfolioProbe === "function") { try { const pp = await deps.readPortfolioProbe(); if (pp && typeof pp === "object") portfolioProbe = { at: Number(pp.at) || null, results: pp.results && typeof pp.results === "object" ? pp.results : {} }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      const old = !reconcile || !Number.isFinite(Number(reconcile.at)) || now - Number(reconcile.at) > 36 * 3600000;
+      const reconcileLine = !reconcile ? "RECONCILE NOT RUN: no result stored yet" : old ? "RECONCILE STALE: the last result is older than 36 hours (" + new Date(Number(reconcile.at) || 0).toISOString() + "); " + String(reconcile.line || "").slice(0, 200) : String(reconcile.line || "RECONCILE: no line").slice(0, 400);
+      const out = Object.assign({ reconcileLine }, report);
+      if (reconcile) out.reconcile = { at: Number(reconcile.at) || null, ok: reconcile.ok === true, checks: reconcile.checks || null, findingCount: Number(reconcile.findingCount) || 0, findings: Array.isArray(reconcile.findings) ? reconcile.findings.slice(0, 20) : [], notChecked: Array.isArray(reconcile.notChecked) ? reconcile.notChecked.slice(0, 10) : [] };
+      if (portfolioProbe) out.portfolioProbe = portfolioProbe;
+      res.status(200).json(out);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
       if (typeof deps.logError === "function") deps.logError(e);
