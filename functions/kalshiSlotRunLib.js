@@ -18,6 +18,7 @@ const bot = require("./kalshiSignalLib");
 const slotLib = require("./kalshiSlotLib");
 const live = require("./kalshiLiveLib");
 const cfrtiK = require("./kalshiCfrtiKLib");
+const oiBaseLib = require("./kalshiOicoreBaseLib");
 
 const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
 const EXIT_SLIPPAGE = 0.15;       // how far past the bid the immediate-or-cancel sell may go; it still fills at the book's own prices (the same figure the L1 watch uses)
@@ -163,7 +164,15 @@ function makeRunners(flags) {
       if (typeof args.recordSkip !== "function" || !skips.size) return;
       try { await Promise.all([...skips.values()].map(async (d) => { try { await args.recordSkip(d); } catch (e) { /* log only */ } })); } catch (e) { /* log only */ }
     };
-    const done = async (out) => { await flushSkips(); return out; };
+    // A shard that cannot fund an order is reported back (shape of runL1Tick's shardShort) so the caller can raise the same low money phone alert; nothing here sends or moves money.
+    const done = async (out) => {
+      await flushSkips();
+      try {
+        const ss = [...skips.values()].filter((x) => x.reason === "shard_short" && x.detail && Number.isFinite(x.detail.avail) && Number.isFinite(x.detail.need)).map((x) => ({ shard: x.detail.shard, avail: x.detail.avail, need: x.detail.need, ticker: x.ticker }));
+        if (ss.length && out && typeof out === "object") out.shardShort = ss;
+      } catch (e) { /* log only */ }
+      return out;
+    };
 
     // Hard account stop (docs/HARD_ACCOUNT_STOP.md): decided by the caller from the sizing document it already read. Entries only; the exit and settle passes are separate and never see it.
     if (args.hardStopBlocked === true) { skipAll("hard_stop"); return done({ skipped: "hard account stop" }); }
@@ -173,6 +182,15 @@ function makeRunners(flags) {
     // Ending the session must never be skipped because a write failed: each step is tried on its own.
     const end = async (why, detail) => { try { await setSession({ active: false, endedAt: now, endedBecause: why }); } catch (e) { /* the unresolved check ends it next minute */ } await log("session ended", detail); return { ended: why }; };
     const clock = typeof args.clock === "function" ? args.clock : () => now;
+    // OICORE's sizing base (kalshiOicoreBaseLib): prediction cash plus a FRESH perps equity, read once per tick through an injected reader; any failure or a stale figure gives prediction cash only.
+    // Only OICORE's own size and its own daily and drawdown figures use it. The window cap, the shared stop, the slot's own stop and the shard check keep sh.sizeBase.
+    let oiBase = { base: sh.sizeBase, source: "prediction_only", perps: 0 };
+    if (typeof args.readPerpsDoc === "function" && jobs.some((j) => j.s.id === oiBaseLib.STRATEGY_ID)) {
+      let pd = null;
+      try { pd = await args.readPerpsDoc(); } catch (e) { pd = null; }
+      oiBase = oiBaseLib.oicoreBase({ predictionBase: sh.sizeBase, perpsDoc: pd, now });
+      if (!(oiBase.base > 0)) oiBase = { base: sh.sizeBase, source: "prediction_only", perps: 0 };
+    }
 
     // Preconditions, every one failing closed (a skip, never an order).
     let latches, slotOrders, l1Fresh;
@@ -310,7 +328,7 @@ function makeRunners(flags) {
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, refEdge: refDec ? refDec.edge : undefined, oiRise, oiRel, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, refEdge: refDec ? refDec.edge : undefined, oiRise, oiRel, flow, position, spread, closeTime: closeMs, sizingBase: s.id === oiBaseLib.STRATEGY_ID ? oiBase.base : sh.sizeBase, windowBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -336,6 +354,7 @@ function makeRunners(flags) {
           ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
         if (flow !== null) record.flow = Number(flow.toFixed(4));
+        if (s.id === oiBaseLib.STRATEGY_ID) Object.assign(record, { baseSource: oiBase.source, baseUsed: Number(oiBase.base.toFixed(2)) });   // log only: which base sized this order
         // Log only (CFRTIK): the model's edge and chance for the side bought, and the perp candle freshness numbers of this evaluation.
         if (refDec) Object.assign(record, { refModel: s.entry.refModel, refEdge: Number(refDec.edge.toFixed(4)), refChance: Number(refDec.sideChance.toFixed(4)), refAsk: Number(refDec.sidePrice.toFixed(4)), ...(refInfo.get(s.id + "|" + ticker) || {}) });
         return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };

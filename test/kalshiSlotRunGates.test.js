@@ -213,6 +213,38 @@ gates['OICORE end to end through the engine: a rise of 86,300 or more buys the r
   assert.strictEqual(tooCheap.ex.posts.length, 0, 'a cheap side under 5c is outside the band: no order');
   assert.strictEqual((await world(90000, { market: { yes_bid_dollars: '0.4900', yes_ask_dollars: '0.5100' } })).ex.posts.length, 0, 'both sides at 51c: the cheaper side is over the 50c band edge, no order');
 };
+// OICORE's total-balance base (Nov 16, 2026, the owner's decision). Consequence: a FRESH perps equity lets OICORE size off the whole account; a stale, missing, unreadable or negative figure gives prediction cash only (the cap),
+// so a failed perps read can only make it smaller; the shared window cap never sees the perps money; and a shard that cannot fund the order is skipped and reported for the low money alert.
+gates['OB OICORE total base through the engine: fresh perps equity sizes it, anything else falls back to prediction cash, the window cap ignores perps, a short shard skips and is reported'] = async () => {
+  const OI = () => R({ enabled: true, registry: [slot.SLOT_STRATEGIES[0]], everUsed: true });
+  const closeMs = NOW + 150000, closeSec = Math.round(closeMs / 1000);
+  const world = async (sizeBase, readPerpsDoc, balance) => {
+    const db = makeDb(), ex = makeExchange(db, { market: { close_time: iso(closeMs), yes_bid_dollars: '0.1700', yes_ask_dollars: '0.1800', yes_bid_size_fp: '100.00', yes_ask_size_fp: '100.00' } });
+    const inner = ex.fetchFn;
+    ex.fetchFn = async (url, init) => {
+      if (url.includes('/candlesticks')) { ex.calls.push({ url, method: init.method, body: null }); return { status: 200, text: async () => JSON.stringify({ candlesticks: [{ end_period_ts: closeSec - 360, open_interest_fp: '1000000.00' }, { end_period_ts: closeSec - 180, open_interest_fp: '1090000' }] }) }; }
+      return inner(url, init);
+    };
+    const t = tickArgs(db, ex, { args: { quotes: QUOTES({ close_time: iso(closeMs) }), fetchFn: ex.fetchFn, shared: SHARED(Object.assign({ sizeBase }, balance === undefined ? {} : { balanceBody: { balance } })), ...(readPerpsDoc ? { readPerpsDoc } : {}) } });
+    const out = await OI().runSlotTick(t.args);
+    return { db, ex, out, count: ex.posts.length ? Number(ex.posts[0].count) : 0 };
+  };
+  const fresh = async () => ({ equity: 674.33, at: NOW - 60000 });
+  assert.strictEqual((await world(200, fresh)).count, 20, 'a $200 prediction base plus $674.33 of fresh perps equity sizes OICORE as a $874 account: the bottom step of 20');
+  assert.strictEqual((await world(200, null)).count, 5, 'no reader: prediction cash only, the cap of 5 at a $200 base');
+  assert.strictEqual((await world(200, async () => ({ equity: 674.33, at: NOW - 25 * 60000 }))).count, 5, 'a perps document older than 20 minutes is treated as missing');
+  assert.strictEqual((await world(200, async () => null)).count, 5, 'a missing document gives prediction cash only');
+  assert.strictEqual((await world(200, async () => { throw new Error('unreadable'); })).count, 5, 'a failing read gives prediction cash only');
+  assert.strictEqual((await world(200, async () => ({ equity: -50, at: NOW - 60000 }))).count, 5, 'a negative equity is not used');
+  const rec = [...(await world(200, fresh)).db.slot.values()][0];
+  assert.strictEqual(rec.baseSource, 'total'); assert.strictEqual(rec.baseUsed, 874.33, 'the order records which base sized it');
+  // The shared window cap is judged on prediction cash: a tiny prediction base leaves no window room however much perps equity there is.
+  assert.strictEqual((await world(20, async () => ({ equity: 100000, at: NOW - 60000 }))).count, 0, 'perps money never widens the shared window cap');
+  // A shard that cannot fund the order skips it and reports it for the phone alert (shape of runL1Tick shardShort).
+  const short = await world(200, fresh, 100);
+  assert.strictEqual(short.ex.posts.length, 0, 'only $1 on the shard: nothing is sent');
+  assert.ok(Array.isArray(short.out.shardShort) && short.out.shardShort.length === 1 && Number.isFinite(short.out.shardShort[0].avail) && Number.isFinite(short.out.shardShort[0].need), 'the shortage is reported: ' + JSON.stringify(short.out));
+};
 gates['SW5 a switch on with no registered strategy, or a registry with one bad entry, sends nothing'] = async () => {
   for (const flags of [{ enabled: true, registry: [] }, { enabled: false, registry: [GOOD()] }, { enabled: true, registry: [GOOD({ contractsPerOrder: 11 })] }, { enabled: true, registry: [GOOD({ exit: { stopBid: 0.4, targetBid: 0.95, mustExitLeftSec: 30 } })] }]) {
     const db = makeDb(), ex = makeExchange(db), t = tickArgs(db, ex);
@@ -645,7 +677,7 @@ gates['unsoldOf reads in-flight and unreadable orders as holding everything (the
 gates['the engine file has no environment, randomness, timers or Firestore, requires only the three libraries, and exposes no switch'] = () => {
   const c = code(runSrc);
   assert.ok(!/process\.env|Math\.random|setTimeout|setInterval|getFirestore|firebase|\.collection\(|eval\(|child_process|\bfs\b/.test(c));
-  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSlotLib"', '"./kalshiLiveLib"', '"./kalshiCfrtiKLib"']);   // CFRTIK's pure decision, Nov 12, 2026
+  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSlotLib"', '"./kalshiLiveLib"', '"./kalshiCfrtiKLib"', '"./kalshiOicoreBaseLib"']);   // CFRTIK's pure decision, Nov 12, 2026; OICORE's pure base figure, Nov 16, 2026
   assert.ok(!/portfolio\/events\/orders/.test(c), 'the order path lives with the other order code');
   assert.strictEqual((c.match(/method: "POST"/g) || []).length, 2, 'two places send an order: the entry and the exit');
   assert.ok(!/time_in_force/.test(c), 'the order bodies come only from liveOrderBody and exitBody, which are immediate-or-cancel');

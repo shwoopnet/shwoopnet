@@ -1834,7 +1834,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
-                  <li>Bot: OICORE's size now has a cap: never more than 12% of the account base divided by $4.50 a contract, and never fewer than 1. It can only lower the size (at a small account it sends fewer than 20 contracts); only trading cash counts, not the perps account.</li>
+                  <li>Bot: OICORE's size now has a cap: never more than 12% of the account base divided by $4.50 a contract, and never fewer than 1. It can only lower the size. OICORE (and only OICORE) now counts the perps account too when its figure is under 20 minutes old, so it is sized off the whole account; if that figure is missing or old it falls back to trading cash only, which is the cap. A short shard sends a phone alert so cash can be moved.</li>
                   <li>Bot page: the Account chart's hover dot now sits on the curve at the pointer (it was drawn off to the right and near the bottom), on a phone drag too.</li>
                   <li>Bot page: cards that sit side by side in a row are now the same height (the row follows the taller card). A card you resized yourself keeps its height.</li>
                   <li>Bot page: charts are back. The Account result line no longer cuts its range to start at the first perps reading (it hid earlier trades on YTD, 1M and All and left Today empty); perps now just add steps from their first hourly reading, and Today says what it is waiting for. Each perp row is plain (market, direction, value, return, entry, now) with a small price line once the page has two reads.</li>

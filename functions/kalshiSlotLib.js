@@ -708,7 +708,8 @@ function slotOrderCheckWith(flags, input) {
   const l1Used = i.l1Orders.filter((t) => t && windowKey(normTicker(t.ticker)) === wk && (num(t.fillCount) > 0 || SLOT_OPEN_STATUSES.includes(normStatus(t.status)))).reduce((a, t) => a + Math.max(0, (num(t.maxCost) || 0) - (num(t.addonCost) || 0)), 0);
   const slotUsed = slotWindowSpent(i.slotOrders, i.ticker);
   const costOf = (c) => i.limit * c + bot.takerFee(i.limit, c);
-  const windowCap = i.windowCapFraction * i.sizingBase;
+  // The shared window cap is an account risk path: it always uses the prediction cash base (windowBase), never OICORE's larger total base.
+  const windowCap = i.windowCapFraction * (isNum(i.windowBase) && i.windowBase > 0 ? i.windowBase : i.sizingBase);
   // The slot takes at most half of the shared window cap and always leaves one L1 contract of room, so L1's first order in a window is never starved.
   const windowRoom = Math.min(windowCap - l1Used - slotUsed - SLOT_L1_RESERVE, windowCap * SLOT_WINDOW_SHARE - slotUsed);
   // The new order's own cost must fit under what is left of the daily and lifetime loss caps (worst is zero or negative), so one order can never overshoot them.
