@@ -8,8 +8,8 @@ Plain words, one page each. Written from CLAUDE.md and the code in `functions/`;
 
 All three live in one place: the **Account card** on the Bot page. Tap the **Running** pill (it says "Not running" when the bot is off). A small menu opens under it.
 
-- **Start bot.** The page asks first ("Start it?"). The server then places REAL orders by itself, around the clock, until you pause it or a stop ends it. Starting also lifts a pause. The sizes are decided in code, not by anything you type here.
-- **Pause bot.** The bot stops placing new orders. Anything already open is still watched and sold by the exit watch (the 25c early sell) or settles on its own.
+- **Start bot.** The page asks first ("Start it?"). The server then places REAL orders by itself, around the clock, until you pause it or a stop ends it. Starting also lifts a pause (the page does this itself after a successful Start, checked in `index.html`). The sizes are decided in code, not by anything you type here.
+- **Pause bot.** The bot stops placing new orders. Anything already open is still watched and sold by the exit watch (the 25c early sell) or settles on its own. While paused, the same button reads **Resume bot**, and the page says "Paused by you". Press Resume bot to let it trade again.
 - **Flatten all.** Asks twice. It pauses the bot, then SELLS every open position in the account, the bot's and any you opened by hand, at whatever the book pays right now. It takes the loss at the bid. Use it only when you want out of everything.
 
 If a stop (the 12% loss stop) ends the bot, it stays off until you Start it again. That is on purpose.
@@ -25,7 +25,7 @@ Alerts come from the owner's own server (Web Push). Turn them on in Settings, No
 - **Won / Lost / Closed <market>** (with an amount): a trade finished. You get one for every close.
 - **Sold <market> early**: the 25c exit sold it before the end. You will see the result in the alert.
 - **A buy never alerts.** If you got used to buy alerts, they were removed on purpose.
-- **"Check the bot: ..."**: something needs a look. The wording says what. Open the Bot page and read the red banner and the "Needs a look" block under Bot status.
+- **"Check the bot: ..."**: something needs a look. The wording says what. Open the Bot page and read the red banner across the top and the bell (top navigation, left of Brief). There is no Bot status card any more (it was removed Nov 16, 2026), so there is no "Needs a look" block; the Running, Paused or Order switch OFF badge on the Account card still shows the state.
   - "an exit ..." with a market name: an exit order's answer was lost or refused. Look at that order on the Bot page.
   - "a market cannot trade, low money on exchange N": a shard is short. Go to page 4.
   - "the exit watch is silent": a position is open and nothing has checked it for the 25c exit. Go to page 6.
@@ -34,18 +34,20 @@ Alerts come from the owner's own server (Web Push). Turn them on in Settings, No
 
 ---
 
-## 3. A kill latch fired
+## 3. A stop or a kill latch fired
 
-There are two kinds of automatic stop, and they are not the same thing.
+There are three kinds of automatic stop. They are not the same thing.
 
-- **The loss stop (12%).** It ends the whole session and the page says so ("Bot stopped"). You can Start again when you choose.
-- **A strategy kill rule or latch** (for example gold's kill latch, or a probe's streak or drawdown stop). Only that strategy stops placing NEW orders. The other strategies keep running, and the exit watch still sells anything open.
+- **The loss stop (12%).** It ends the whole session and the page says so ("Bot stopped"). It stays off until you start it again. You can Start when you choose.
+- **A strategy kill rule or latch** (gold's kill latch, a trial seat's streak or net rule, OICORE's drawdown stop, and so on). Only that strategy stops placing NEW orders. The other strategies keep running, and the exit watch still sells anything open. A latch has **no automatic restart**: only a reviewed code edit puts that strategy back.
+- **The hard account stop (40%).** If the bot's total trading result (every settled or sold order, L1 and the second slot, on the cash basis) falls 40% of the trading capital below its own best point, **all new buys stop** and stay stopped. Exits still run. Nothing on the page clears it; only a reviewed code edit that moves its re-arm date does. It judges trading results, not the raw balance, so a deposit is not a gain and a withdrawal is not a loss. A small scheduled function (`kalshiHardStopCheck`) works it out; if that function goes silent for more than 15 minutes, buys are blocked as a precaution.
 
-What you should know:
-- A latch has **no automatic restart.** That is by design: only a reviewed code change puts a strategy back.
-- On gold, a kill shows in the bell as a critical item ("gold kill"). Softer warnings ("gold alert") are only warnings.
-- Do not restart the bot to "clear" a latch. Starting the bot does not re-arm a strategy.
-- What to do: ask Main in the chat. A re-arm needs a dated entry from you and a reviewed pull request. For OICORE the written rule is: after its drawdown stop or any kill, never re-armed automatically.
+**Trial seats** (the small second-slot strategies, each live at a trial size) each have their own kill rules and their own latch. A fired latch is only on that seat; it is never cleared by Starting the bot.
+
+What to do:
+- Read the reason first: the bell shows a critical item (for example "gold kill"), and the phone alert says "Bot stopped: <reason>".
+- Do not restart the bot to "clear" a latch or the hard stop. Starting the bot does not re-arm a strategy and does not lift the hard stop.
+- Ask Main in the chat. A re-arm needs a dated entry from you and a reviewed pull request. For OICORE the written rule is: after its drawdown stop or any kill, never re-armed automatically.
 
 ---
 
@@ -68,7 +70,8 @@ A merge to `main` changes the site at once (the Pages page). The **bot** only ch
 2. Run: `bash functions/deploy-latest.sh`
 3. It updates to the latest `main`, runs every test, works out which of the three deploy scripts are needed (push first, then sizing, then report), shows the plan, and **asks before running anything**. Say yes only if the plan looks right.
 4. If it asks for `KALSHI_LIVE_ENABLED`, type **only the word `on`**. Typing the whole line once left the order switch off after a "successful" deploy.
-5. If the plan mentions `firestore.rules` changed, it prints one extra command to run (`npx firebase-tools deploy --only firestore:rules --project shwoopnet`).
+5. `deploy-sizing.sh` deploys more than the bot's minute function: it also puts out the market relay, the account read, the gold kill checker, the hourly balance snapshot and the perps account function (`kalshiPerpsAccount`). The hard stop's checker goes out first, in its own command, because the minute function blocks buys if the checker has never written.
+6. If the plan mentions `firestore.rules` changed, it prints one extra command to run (`npx firebase-tools deploy --only firestore:rules --project shwoopnet`).
 
 If a test fails or a deploy errors, stop and show Main the last lines. The wrapper only records the last deployed commit after every selected deploy finished, so a failed one is offered again next time.
 
@@ -79,8 +82,10 @@ If a test fails or a deploy errors, stop and show Main the last lines. The wrapp
 Three checks, in this order:
 
 1. **The Running pill and the red banner** (Bot page). Pill says Running? Is there a banner for "bot stopped by itself", "an order that needs checking" or "no check for several minutes"? The banner stays as long as the problem is true.
-2. **The exit-watch heartbeat.** The exit watch writes a heartbeat every minute. If a position is open and it has been silent more than 4 minutes you get the phone alert "the exit watch is silent". If you get that alert, treat it as real: open the page, look at the open position, and if in doubt Pause or Flatten (page 1).
+2. **The exit-watch heartbeat.** The exit watch writes a heartbeat every minute. A separate scheduled function (the minute function, a different process) checks it, but only while the bot is on AND a position is open. If the watch has been silent more than 4 minutes it raises one alert per silent spell: the phone alert "the exit watch is silent". Limits: it neither sells nor restarts anything, and it cannot see a stall if both scheduled functions are down. If you get that alert, treat it as real: open the page, look at the open position, and if in doubt Pause or Flatten (page 1).
 3. **The nightly report.** It lists the day's orders and, under `deploys`, which version each function is running. If the bot placed nothing for a long time, the report's `skips` section says why each market was skipped (a fixed code, such as a short shard or a stop).
+
+The page no longer has a Bot status card or a silent-market warning (both removed Nov 16, 2026), so a market that went quiet is not flagged on the page; the nightly report's `skips` is where to look.
 
 Common innocent causes: a paused market (several markets are paused in code on purpose), the quiet weekend for gold and forex, or "Order switch OFF" (page 5, step 4). If all three checks are clean and you still see nothing, tell Main in the chat.
 
