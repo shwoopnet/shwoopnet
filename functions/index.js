@@ -61,8 +61,6 @@ const shadowLib = require("./kalshiShadowLib");   // shadow rules (Nov 9, 2026):
 const shadowSeen = new Set();
 const shadowCandleCache = {};   // successful open interest candle answers, shared by every shadow rule that needs the same market window (P2)
 const shadowLastRead = new Map();   // series to the last time a shadow rule read it (round robin under the per minute read budget)
-const longholdLib = require("./kalshiLongholdLib");   // long-hold PAPER log (Nov 12, 2026): log only, empty registry, no order
-const longholdSeen = new Set();
 const SLOT_ON = slotLib.slotWatch();
 // The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
 // session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
@@ -72,8 +70,6 @@ const book = require("./kalshiBookLib");
 const marketTape = require("./marketTapeLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
-const footprint = require("./kalshiFootprintLib");
-const paper = require("./kalshiPaperLib");
 const push = require("./kalshiPushLib");
 const webpush = require("web-push");
 const { onDocumentWritten } = require("firebase-functions/v2/firestore");
@@ -194,71 +190,6 @@ exports.kalshiBooks = onCall(async (request) => {
     if (e instanceof HttpsError) throw e;
     console.error("kalshiBooks failed:", e);
     throw new HttpsError("unavailable", "Relay error: " + String((e && e.message) || e).slice(0, 120));
-  }
-});
-
-// The footprint view on the Bot page (the owner, Oct 26, 2026): per minute and per YES price, how much the takers sold and bought, from Kalshi's PUBLIC trade tape. Admin only, GET only, keyless,
-// read only: it never signs a request, touches the account or writes anything. Only a market the bot trades is accepted (see validTicker), and one read is bounded in pages and age.
-const KALSHI_TAPE_CACHE_MS = 15000;
-const kalshiTapeCache = new Map();
-// One market's public trades inside a window, newest first as Kalshi sends them; follows the cursor for at most MAX_PAGES pages. `budget.left` is shared across a whole-series read so one busy day cannot run away.
-async function kalshiReadTrades(ticker, win, budget) {
-  const trades = [];
-  let cursor = "";
-  for (let page = 0; page < footprint.MAX_PAGES; page++) {
-    const q = "/markets/trades?ticker=" + encodeURIComponent(ticker) + "&min_ts=" + Math.floor(win.fromMs / 1000) + "&max_ts=" + Math.ceil(win.toMs / 1000) +
-      "&limit=" + footprint.PAGE_LIMIT + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
-    const body = await kalshiGetJson(q);
-    const got = Array.isArray(body && body.trades) ? body.trades : [];
-    got.forEach((t) => trades.push(t));
-    budget.left -= got.length;
-    cursor = body && body.cursor ? String(body.cursor) : "";
-    if (!cursor || !got.length) return { trades, truncated: false };
-    if (budget.left <= 0) return { trades, truncated: true };
-  }
-  return { trades, truncated: true };
-}
-exports.kalshiTape = onCall(async (request) => {
-  await assertKalshiAdmin(request.auth);
-  const data = request.data || {};
-  const now = Date.now();
-  const wholeSeries = typeof data.series === "string" && data.series !== "";
-  const ticker = String(data.ticker || "");
-  if (wholeSeries ? !footprint.validSeries(data.series, live.L1_SERIES) : !footprint.validTicker(ticker, live.L1_SERIES)) {
-    throw new HttpsError("invalid-argument", "That is not a market the bot trades.");
-  }
-  const win = wholeSeries ? footprint.seriesWindow(data.spanMin, data.toMs, now) : footprint.readWindow(data.toMs, now);
-  const key = (wholeSeries ? "S:" + data.series + ":" + win.spanMin : "T:" + ticker) + "|" + Math.floor(win.toMs / KALSHI_TAPE_CACHE_MS);
-  const hit = kalshiTapeCache.get(key);
-  if (hit && now - hit.at < KALSHI_TAPE_CACHE_MS) return hit.body;
-  try {
-    let trades = [];
-    let truncated = false;
-    let windows = null;
-    if (wholeSeries) {
-      const list = await kalshiGetJson("/markets?series_ticker=" + encodeURIComponent(data.series) + "&min_close_ts=" + Math.floor(win.fromMs / 1000) + "&max_close_ts=" + Math.ceil((win.toMs + 15 * 60000) / 1000) + "&limit=20");
-      windows = footprint.windowsFromMarkets(list && list.markets, data.series, win.fromMs, win.toMs);
-      const budget = { left: footprint.MAX_SERIES_TRADES };
-      for (const w of windows) {
-        if (budget.left <= 0) { truncated = true; break; }
-        const r = await kalshiReadTrades(w.ticker, win, budget);
-        r.trades.forEach((t) => trades.push(t));
-        if (r.truncated) truncated = true;
-      }
-    } else {
-      const r = await kalshiReadTrades(ticker, win, { left: footprint.PAGE_LIMIT * footprint.MAX_PAGES });
-      trades = r.trades;
-      truncated = r.truncated;
-    }
-    const out = { ticker: wholeSeries ? "" : ticker, series: wholeSeries ? data.series : "", spanMin: wholeSeries ? win.spanMin : null, windows, fromMs: win.fromMs, toMs: win.toMs, fetchedAt: now, trades: trades.length, truncated,
-      bars: footprint.buildFootprint(trades, win.fromMs, win.toMs), ...footprint.bigPrints(trades, win.fromMs, win.toMs) };
-    if (kalshiTapeCache.size > 40) kalshiTapeCache.clear();
-    kalshiTapeCache.set(key, { at: now, body: out });
-    return out;
-  } catch (e) {
-    if (e instanceof HttpsError) throw e;
-    console.error("kalshiTape failed:", e);
-    throw new HttpsError("unavailable", "Trade tape error: " + String((e && e.message) || e).slice(0, 120));
   }
 });
 
@@ -801,27 +732,6 @@ exports.kalshiLiveArmed = onSchedule(
           } catch (e) { /* log only */ }
         }
       }
-      // Long-hold paper log (Nov 12, 2026, docs/LONGHOLD_DESIGN.md): the very last step, after the shadow block. LONGHOLD_RULES is EMPTY, so today this makes no call and no write. When a reviewed edit adds a rule:
-      // at most ONE public series list read a minute (to choose) and at most 3 public single-market reads (to price), no key, no order; rows go to kalshiLongholdRows only. Every error is swallowed.
-      if (!armedOn && longholdLib.activeLongholdRules().length) {
-        const ctlRef = db.collection(longholdLib.CONTROL_COLLECTION).doc(longholdLib.LATCH_DOC);
-        const readLatch = async () => { const d = await ctlRef.get(); return d.exists ? d.data() : null; };
-        try {
-          await longholdLib.runLongholdTick({ now, rules: longholdLib.LONGHOLD_RULES, seen: longholdSeen, readLatch,
-            listMarkets: (series) => kalshiMarketApi().markets(series), market: (ticker) => kalshiMarketApi().market(ticker),
-            record: (row) => db.collection(longholdLib.COLLECTION).doc(longholdLib.rowId(row)).create(row) });
-        } catch (e) { /* log only */ }
-        if (Math.floor(now / 60000) % 5 === 2) {
-          try {
-            await longholdLib.settleLongholdRows({ now, rules: longholdLib.LONGHOLD_RULES, budgetMs: 8000, clock: Date.now, readLatch,
-              readOpen: async () => (await db.collection(longholdLib.COLLECTION).where("settled", "==", false).limit(100).get()).docs.map((d) => d.data()),
-              readSettled: async (ruleId) => (await db.collection(longholdLib.COLLECTION).where("rule", "==", ruleId).where("settled", "==", true).limit(1000).get()).docs.map((d) => d.data()),
-              update: (id, patch) => db.collection(longholdLib.COLLECTION).doc(id).set(patch, { merge: true }),
-              writeLatch: (patch) => ctlRef.set(patch, { merge: true }),
-              market: (ticker) => kalshiMarketApi().market(ticker) });
-          } catch (e) { /* log only */ }
-        }
-      }
     } catch (e) {
       failure = e;
     }
@@ -902,45 +812,6 @@ exports.kalshiHardStopCheck = onSchedule(
     } catch (e) {
       console.error("kalshiHardStopCheck failed: " + String((e && e.message) || e).slice(0, 160));
     }
-  }
-);
-
-// ---- The paper tracker (PAPER1), keyless ---------------------------------------------------------------------------------------------------
-// Records what L1's rule WOULD have bought on three candidate markets (kalshiPaperLib.js), one contract, no money, and settles each from the public result. It holds NO secret, signs nothing, calls no
-// /portfolio endpoint and sends no order: public market reads and its own Firestore records only. Each entry document is created once (its id is the ticker), so two processes during a deploy cannot
-// record a market twice. It is not imported by, and shares nothing with, the trading code; a failure here is logged and costs a paper row at most.
-async function kalshiFetchMarket(ticker) {
-  for (const base of KALSHI_HOSTS) {
-    try {
-      const res = await fetch(base + "/markets/" + encodeURIComponent(ticker), { signal: AbortSignal.timeout(8000), headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" } });
-      if (res.ok) { const data = await res.json(); return data.market || null; }
-    } catch (e) { /* try the next host */ }
-  }
-  return null;
-}
-// Switched off on Oct 21, 2026 at the owner's request to cut the Firebase bill: its page card is gone and live one-contract probes replaced it, so it recorded for nobody. The function stays exported
-// (the tests and the deploy scripts name it) and returns at once, which costs almost nothing; set this to true to record again. Its collection and its pass bar in the research README are untouched.
-const PAPER_TRACKER_ON = false;
-exports.kalshiPaperTick = onSchedule(
-  { schedule: "every 1 minutes", timeoutSeconds: 50, retryCount: 0, memory: "256MiB" },
-  async () => {
-    if (!PAPER_TRACKER_ON) return;
-    try {
-      ensureDefaultAdminApp();
-      const col = getFirestore().collection("kalshiPaperOrders");
-      const r = await paper.runPaperTick({
-        now: Date.now(),
-        store: {
-          async openDocs() { return (await col.where("settled", "==", false).limit(60).get()).docs.map((d) => ({ id: d.id, data: d.data() })); },
-          async create(id, doc) { try { await col.doc(id).create(doc); return true; } catch (e) { if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false; throw e; } },
-          async update(id, patch) { await col.doc(id).update(patch); },
-        },
-        fetchSeries: (series) => kalshiFetchSeries(series, "open", 6),
-        fetchMarket: kalshiFetchMarket,
-        log: (m) => console.error("kalshiPaperTick: " + m),
-      });
-      if (r.entries || r.settled) console.log("kalshiPaperTick: entries=" + r.entries + " settled=" + r.settled);
-    } catch (e) { console.error("kalshiPaperTick: " + String((e && e.message) || e).slice(0, 200)); }
   }
 );
 
@@ -1036,21 +907,6 @@ exports.kalshiBalanceSnapshot = onSchedule(
   }
 );
 
-// One-shot read only probe of the perpetuals account (Nov 16, 2026, the owner: "Yes, run the probe"): three GETs, keeps HTTP status and field NAMES only, no value, no order
-// (functions/kalshiPerpsProbeLib.js, test/perpsProbeGates.test.js). The answer shows in the nightly report as perpsProbe. Delete this function once the answer is known.
-const perpsProbe = require("./kalshiPerpsProbeLib");
-exports.kalshiPerpsProbe = onSchedule(
-  { schedule: "every 60 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30, retryCount: 0, memory: "256MiB" },
-  async () => {
-    try {
-      ensureDefaultAdminApp();
-      const out = await perpsProbe.runPerpsProbe({ liveRequest: live.liveRequest, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now() });
-      await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).set(out);
-      console.log("kalshiPerpsProbe: " + Object.keys(out.results).map((p) => p + "=" + out.results[p].status).join(" "));
-    } catch (e) { console.error("kalshiPerpsProbe: " + String((e && e.message) || e).slice(0, 160)); }
-  }
-);
-
 // The perpetuals account, display only (Nov 16, 2026, the owner: one account total, predictions plus perps; each perp on Open positions). Every 5 minutes: GET /margin/balance and
 // /margin/positions through the bot's own signer plus the PUBLIC perps list, shaped into one document the Bot page reads (functions/kalshiPerpsAccountLib.js, test/perpsAccountGates.test.js).
 // No order, no POST, nothing written to Kalshi; nothing that decides a trade reads the document. A failed read leaves the last document as it was (the page shows its age). Deploy: bash functions/deploy-sizing.sh.
@@ -1120,14 +976,10 @@ exports.kalshiNightlyReport = onRequest(
     // The shadow rules' rows (log only) and the registry, so the report can score them (lifecycle spec (c)); read only.
     readShadowRows: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(shadowLib.COLLECTION).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     shadowRules: () => shadowLib.SHADOW_RULES,
-    // The long-hold paper rows (Nov 12, 2026): compact, read only; an empty registry reads nothing. Newest 2000 rows (it TRUNCATES older ones, in a stable order).
-    longholdRules: () => longholdLib.activeLongholdRules(),
-    readLongholdRows: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(longholdLib.COLLECTION).orderBy("atMs", "desc").limit(2000).get()).docs.map((d) => d.data()); },
     // The hourly balance snapshots (Nov 12, 2026): documents of balance data only, read only.
     readBalances: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(balanceSnap.COLLECTION).where("ts", ">=", sinceMs).orderBy("ts").limit(kalshiReport.MAX_BALANCE_ROWS).get()).docs.map((d) => d.data()); },
-    // The perps probe answer (Nov 16, 2026): statuses and field names only.
+    // The perpetuals account document (display only), read only.
     readPerpsAccount: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsAccount.DOC.collection).doc(perpsAccount.DOC.id).get(); return d.exists ? d.data() : null; },
-    readPerpsProbe: async () => { ensureDefaultAdminApp(); const d = await getFirestore().collection(perpsProbe.DOC.collection).doc(perpsProbe.DOC.id).get(); return d.exists ? d.data() : null; },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.
     readSkips: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SKIPS).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },

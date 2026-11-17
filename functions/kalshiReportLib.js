@@ -4,7 +4,6 @@
 const crypto = require("crypto");
 const { maxContractsFor } = require("./kalshiLiveLib");
 const deployStampLib = require("./deployStampLib");
-const longholdLib = require("./kalshiLongholdLib");   // read only: the long-hold paper score
 const shadowLib = require("./kalshiShadowLib");   // read only: the shadow rules' score; this library still sends nothing to Kalshi and writes nothing
 
 const MAX_HOURS = 24 * 90;
@@ -243,15 +242,9 @@ function makeReportHandler(deps) {
       // The shadow rules' score (lifecycle spec (c)): per rule, signals, cash PF per contract and the verdict against the written pass and kill rules. Optional, read only; a failure leaves the field out.
       let shadow;
       if (shadowRows !== null && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), shadowRows, now).map((x) => Object.assign({}, x, x.rule === "GOLDOFF" ? { returnRule: shadowLib.returnRule(x) } : {}, { rolling: shadowLib.shadowRolling({ id: x.rule }, shadowRows) })) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
-      // The long-hold paper log's score (Nov 12, 2026): compact rows per rule and arm, no ids. Optional, read only; with no rule registered it reads nothing and the field is left out.
-      let longhold;
-      if (typeof deps.longholdRules === "function" && typeof deps.readLongholdRows === "function") { try { const lr = deps.longholdRules(); if (lr.length) longhold = { rules: longholdLib.longholdReport(lr, await deps.readLongholdRows(), now) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       // The hourly balance history over the asked window. Optional, read only; a failure leaves the field out, an empty history is an empty list.
       let balanceHistory;
       if (typeof deps.readBalances === "function") { try { balanceHistory = balanceSection(await deps.readBalances(now - hours * 3600000)); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
-      // The one-shot perps account probe (Nov 16, 2026): HTTP statuses and field NAMES only, never a value. Optional; a failure leaves it out.
-      let perpsProbe;
-      if (typeof deps.readPerpsProbe === "function") { try { const pp = await deps.readPerpsProbe(); if (pp && typeof pp === "object") perpsProbe = { at: Number(pp.at) || null, results: pp.results && typeof pp.results === "object" ? pp.results : {} }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       // The perps account snapshot (Nov 16, 2026): the shaped document the Bot page reads, first rows included RAW so one real read can confirm the units. Optional; a failure leaves it out.
       let perps;
       if (typeof deps.readPerpsAccount === "function") { try { const pa = await deps.readPerpsAccount(); if (pa && typeof pa === "object") perps = { at: Number(pa.at) || null, scale: pa.scale, equity: pa.equity, positionValue: pa.positionValue, maintenance: pa.maintenance, available: pa.available, pnlTotal: pa.pnlTotal, count: pa.count, rows: Array.isArray(pa.rows) ? pa.rows.slice(0, 5) : [] }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
@@ -259,9 +252,7 @@ function makeReportHandler(deps) {
       if (deploys !== undefined) report.deploys = deploys;
       if (skips !== undefined) report.skips = skips;
       if (shadow !== undefined) report.shadow = shadow;
-      if (longhold !== undefined) report.longhold = longhold;
       if (balanceHistory !== undefined) report.balanceHistory = balanceHistory;
-      if (perpsProbe !== undefined) report.perpsProbe = perpsProbe;
       if (perps !== undefined) report.perps = perps;
       res.status(200).json(report);
     } catch (e) {

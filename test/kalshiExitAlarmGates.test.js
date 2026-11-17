@@ -96,8 +96,8 @@ gates.EA9 = () => {   // wiring: no key, no order, no new secret, endpoint or sc
   const lib = fs.readFileSync(path.join(root, 'functions', 'kalshiExitAlarmLib.js'), 'utf8');
   assert.ok(!/require\(|fetch\(|liveRequest|KALSHI_LIVE|pem|keyId|\/portfolio|\.set\(|\.add\(/.test(lib.replace(/^\/\/.*$/gm, '')), 'the library imports nothing, calls nothing and writes nothing itself');
   const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
-  assert.deepStrictEqual([...idx.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['marketTapeTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiGoldKillCheck', 'kalshiHardStopCheck', 'kalshiPaperTick', 'kalshiBalanceSnapshot', 'kalshiPerpsProbe', 'kalshiPerpsAccount', 'kalshiBookRecorder'], 'no new scheduled function besides the hourly balance snapshot');
-  const armed = idx.slice(idx.indexOf('exports.kalshiLiveArmed = onSchedule('), idx.indexOf('exports.kalshiPaperTick') > 0 ? idx.indexOf('// ---- The paper tracker') : undefined);
+  assert.deepStrictEqual([...idx.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['marketTapeTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiGoldKillCheck', 'kalshiHardStopCheck', 'kalshiBalanceSnapshot', 'kalshiPerpsAccount', 'kalshiBookRecorder'], 'no new scheduled function besides the hourly balance snapshot');
+  const armed = idx.slice(idx.indexOf('exports.kalshiLiveArmed = onSchedule('), idx.indexOf('// ---- Phone alerts (Web Push)') > 0 ? idx.indexOf('// ---- Phone alerts (Web Push)') : undefined);
   const call = armed.slice(armed.indexOf('exitAlarm.runExitAlarm('));
   assert.ok(call.length > 0 && /try \{[\s\S]{0,200}exitAlarm\.runExitAlarm/.test(armed), 'called from the minute function, inside its own try');
   assert.ok(!/KALSHI_PUSH|webpush|liveRequest|placeOrder/.test(call.slice(0, 1500)), 'it sends nothing itself; the existing session trigger sends the alert');

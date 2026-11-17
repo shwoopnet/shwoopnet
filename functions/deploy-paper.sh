@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Deploys ONLY the paper tracker (kalshiPaperTick) and the Firestore rules (the admin-only read rule for its records), from a fresh clone:
+# Deploys ONLY the Firestore rules (the paper tracker it was named for was deleted on Nov 17, 2026; the file name stays so the one rules deploy has one known command), from a fresh clone:
 #
 #   git clone https://github.com/shwoopnet/shwoopnet && bash shwoopnet/functions/deploy-paper.sh
 #
-# The tracker is keyless: it holds no secret, signs nothing and places no order, so unlike deploy-sizing.sh and deploy-push.sh this needs no order switch line and touches no live function.
+# Rules only: it holds no secret, signs nothing and touches no function, so unlike deploy-sizing.sh and deploy-push.sh this needs no order switch line.
 # DRY_RUN=1 prints the commands instead of running the network ones (the test uses it).
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 PROJECT=shwoopnet
-ONLY=functions:kalshiPaperTick,firestore:rules
+ONLY=firestore:rules
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 
@@ -24,4 +24,4 @@ fi
 echo "Deploying to $PROJECT: $ONLY"
 run "${FB[@]}" deploy --only "$ONLY" --project "$PROJECT"
 echo
-echo "Done. The tracker starts recording at the next entry minute (8 or 9 of a quarter hour). Open the Kalshi page: the Paper candidates card fills as markets settle."
+echo "Done. The Firestore rules are published."
