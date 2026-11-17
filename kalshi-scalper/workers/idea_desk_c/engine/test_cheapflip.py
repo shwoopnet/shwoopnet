@@ -80,6 +80,19 @@ class Hand(unittest.TestCase):
         self.assertEqual(out["stats"]["duplicate_polls"], 2)
         self.assertEqual(out["windows"], 1)
 
+    def test_no_result_sold_counts_hold_dropped(self):
+        base = tempfile.mkdtemp()
+        t, s = "KXHYPE15M-A", "KXHYPE15M"
+        book = [brow(t, s, CLOSE, -600, "0.01", "5", "0.97", "20"), brow(t, s, CLOSE, -400, "0.06", "8", "0.93", "9"), brow(t, s, CLOSE, 0, "0.50", "9", "0.50", "9")]
+        write(base, "2026-11-10", "1500", book, [])
+        out = C.run([base])
+        T = {(r["band"], r["k"]): r["pooled"] for r in out["table"]}
+        self.assertEqual(T[(0.03, 2)]["n"], 1)                                      # sold, no result needed
+        self.assertNotIn((0.03, 5), T)                                              # would hold with no result: dropped
+        self.assertEqual(out["stats"]["no_result_by_series"], {"KXHYPE15M": 1})
+        self.assertEqual(out["stats"]["polls_at_or_after_close"], 1)
+        self.assertEqual(T[(0.03, 2)]["median_touch_s"], 200.0)
+
     def test_holds(self):
         self.assertEqual(C.held_by("KXGOLD15M", CLOSE), "H20")
         self.assertEqual(C.held_by("KXWTI15M", CLOSE), "H21")

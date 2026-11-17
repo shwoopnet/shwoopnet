@@ -80,6 +80,8 @@ def read_windows(bases, stats):
                         stats["duplicate_polls"] = stats.get("duplicate_polls", 0) + 1
                         continue
                     seen.add((key, t))
+                    if t / 1000.0 >= ct:
+                        stats["polls_at_or_after_close"] = stats.get("polls_at_or_after_close", 0) + 1
                     w = wins.setdefault(key, {"series": r["series"], "close": ct, "polls": []})
                     yb, nb = best(r, "yes"), best(r, "no")
                     w["polls"].append((t, yb, nb))
@@ -128,6 +130,8 @@ def entries(w, hi):
 def touch(w, side, ent, k):
     """first later poll with the side's bid >= k x a -> (t_ms, bid, size) or None"""
     for t, yb, nb in w["polls"][ent["idx"] + 1:]:
+        if t / 1000.0 >= w["close"]:
+            break                                                     # only polls strictly before the close
         b = yb if side == "yes" else nb
         if b is not None and b[0] >= k * ent["a"] - EPS:
             return t, b[0], b[1]
@@ -165,12 +169,14 @@ def run(bases, m_carried=M_CARRIED):
         if r is None:
             stats["windows_without_result"] = stats.get("windows_without_result", 0) + 1
             nr = stats.setdefault("no_result_by_series", {}); nr[w["series"]] = nr.get(w["series"], 0) + 1
-            continue
         day = time.strftime("%Y-%m-%d", time.gmtime(w["close"]))
         for hi in BANDS:
             for side, ent in entries(w, hi).items():
                 for k in KS:
                     tch = touch(w, side, ent, k)
+                    if r is None and tch is None:                                  # would hold, no result: dropped and counted
+                        nh = stats.setdefault("held_entries_without_result", {}); nh[w["series"]] = nh.get(w["series"], 0) + 1
+                        continue
                     rec = {"series": w["series"], "day": day, "close": w["close"], "t": ent["t"], "a": ent["a"], "ask_sz5": ent["ask_sz"] >= 5, "touch": tch,
                            "dt": None if tch is None else (tch[0] - ent["t"]) / 1000.0, "bid_sz5": None if tch is None else tch[2] >= 5,
                            "net": {h: net(side, ent["a"], tch, r, h) for h in HS}}
