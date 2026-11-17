@@ -1841,6 +1841,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
+                  <li>Research: the one-time pull of the perpetuals trade tape is finished (60 days, Sep 18 to Nov 16, saved on a data branch), so its workflow, script and tests are deleted. Nothing on the bot or the page changes.</li>
                   <li>Strategies page: the top card has a fourth tile, Account total (the prediction balance plus the perps equity when its data is under 20 minutes old; it says "predictions only" otherwise, and says when an hourly snapshot was used). Recent trades on the Bot page now also lists closed perps, once the server's position events are deployed: the last profit the server saw (labelled so, not a final result), seen at the next 5 minute read. Display only.</li>
                   <li>Bot page: one line is back under the perp rows: the account margin cushion (equity minus maintenance, in dollars, with a Low, Medium or High label and a bar; not a forced-close price), plus a one line note while the perp price line waits for its second read.</li>
                   <li>Bot page: the Account chart's hover dot now sits on the curve at the pointer (it was drawn off to the right and near the bottom), on a phone drag too.</li>
