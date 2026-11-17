@@ -174,12 +174,12 @@ def run(bases, m_carried=M_CARRIED):
             for side, ent in entries(w, hi).items():
                 for k in KS:
                     tch = touch(w, side, ent, k)
-                    if r is None and tch is None:                                  # would hold, no result: dropped and counted
+                    unscored = r is None and tch is None                           # would hold, no result: stays in n and the touch shares, no net
+                    if unscored:
                         nh = stats.setdefault("held_entries_without_result", {}); nh[w["series"]] = nh.get(w["series"], 0) + 1
-                        continue
                     rec = {"series": w["series"], "day": day, "close": w["close"], "t": ent["t"], "a": ent["a"], "ask_sz5": ent["ask_sz"] >= 5, "touch": tch,
                            "dt": None if tch is None else (tch[0] - ent["t"]) / 1000.0, "bid_sz5": None if tch is None else tch[2] >= 5,
-                           "net": {h: net(side, ent["a"], tch, r, h) for h in HS}}
+                           "net": {h: None if unscored else net(side, ent["a"], tch, r, h) for h in HS}}
                     rows.setdefault((hi, k), []).append(rec)
     def cell(L):
         n = len(L)
@@ -191,9 +191,10 @@ def run(bases, m_carried=M_CARRIED):
              "bid_size_5_share_at_touch": None if not t else sum(1 for x in t if x["bid_sz5"]) / len(t),
              "ask_size_5_share_at_entry": None if not n else sum(1 for x in L if x["ask_sz5"]) / n}
         for h in HS:
-            xs = [x["net"][h] for x in L]
+            xs = [x["net"][h] for x in L if x["net"][h] is not None]
             o["pf_h%d" % round(h * 100)] = pf(xs)
-            o["net_per_trade_h%d" % round(h * 100)] = None if not n else sum(xs) / n
+            o["net_per_trade_h%d" % round(h * 100)] = None if not xs else sum(xs) / len(xs)
+        o["n_scored"] = sum(1 for x in L if x["net"][HS[0]] is not None)
         return o
     table = []
     for (hi, k), L in sorted(rows.items()):
