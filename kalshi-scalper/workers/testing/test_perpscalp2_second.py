@@ -96,3 +96,10 @@ class T3(unittest.TestCase):
 class T4(unittest.TestCase):
     def test_equal_bid_ask_usable(self):
         self.assertTrue(m.usable((100.0, 100.0, 1))); self.assertFalse(m.usable((100.01, 100.0, 1))); self.assertFalse(m.usable((0, 1, 1)))
+
+
+class T5(unittest.TestCase):
+    def test_halves_tie_order_is_ticker(self):
+        tr = [{"name": "B", "e": 100, "side": -1, "day": 1, "net": -0.01, "span": False}, {"name": "A", "e": 100, "side": 1, "day": 1, "net": 0.02, "span": False}, {"name": "C", "e": 100, "side": -1, "day": 1, "net": 0.03, "span": False}, {"name": "D", "e": 100, "side": 1, "day": 1, "net": -0.04, "span": False}]
+        s = m.stats(tr)                                           # order A (+0.02), B (-0.01), C (+0.03), D (-0.04): h1 = A, B and h2 = C, D
+        self.assertAlmostEqual(s["h1"], 0.02 / 0.01, 12); self.assertAlmostEqual(s["h2"], 0.03 / 0.04, 12)

@@ -190,7 +190,7 @@ def zday(trades):
 
 
 def stats(trades):
-    ts = sorted(trades, key=lambda t: (t["e"], t["side"])); v = [t["net"] for t in ts]; k = len(v); h = k // 2
+    ts = sorted(trades, key=lambda t: (t["e"], t["name"])); v = [t["net"] for t in ts]; k = len(v); h = k // 2
     return {"n": k, "days": len(set(t["day"] for t in ts)), "pf": pf(v), "h1": pf(v[:h]), "h2": pf(v[h:]), "z": zday(ts), "mean_bps": (sum(v) / k * 1e4) if k else None, "spanning_funding": sum(1 for t in ts if t["span"])}
 
 
