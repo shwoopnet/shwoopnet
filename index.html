@@ -1834,6 +1834,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the Account chart's hover dot now sits on the curve at the pointer (it was drawn off to the right and near the bottom), on a phone drag too.</li>
                   <li>Bot page: charts are back. The Account result line no longer cuts its range to start at the first perps reading (it hid earlier trades on YTD, 1M and All and left Today empty); perps now just add steps from their first hourly reading, and Today says what it is waiting for. Each perp row is plain (market, direction, value, return, entry, now) with a small price line once the page has two reads.</li>
                   <li>Bot page: your perpetuals are now live on the Bot page. The Account total is the prediction balance plus the perps account value (total only), Today and the result line include the perps change (the result line starts from the first hourly snapshot that has a perps total), and each open perp shows on Open positions with its return in dollars, position value, contracts, entry price and the price now; the multiplier is marked as an estimate, and the cost, return percent, forced-close price and auto close levels say n/a or not readable because Kalshi's data does not give them. If the perps data is older than 20 minutes it is left out of the total and the page says so. Display only: the loss stops, limits and sizing never read it.</li>
                   <li>Research: a second paper only runner follows the picks of three new shadow lists (V2, V3 and V4) once a day, beside the first one, from public data: no order, no key, results as totals only. The Bitcoin picks wait until Nov 21. The three picks that needed frozen cut points now run on them.</li>
@@ -3799,7 +3800,7 @@
     function move(e){
       var svg = host.querySelector('svg'), d = kalshiPnlScrub, head = host.querySelector('.kal-pnl-head');
       if(!svg || !d || !head || !d.pts || d.pts.length < 2){ return; }
-      var r = svg.getBoundingClientRect(), c = host.getBoundingClientRect();
+      var r = svg.getBoundingClientRect();
       if(!(r.width > 0)){ return; }
       var geo = kalshiPnlGeometry(d.pts, d.t0, d.t1), frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
       // The pointer's time on the x axis, then the nearest trade to it.
@@ -3809,9 +3810,10 @@
       var g = svg.querySelector('.kal-pnl-guide');
       if(!g){ g = document.createElementNS('http://www.w3.org/2000/svg', 'line'); g.setAttribute('class', 'kal-pnl-guide'); g.setAttribute('y1', '0'); g.setAttribute('y2', String(geo.H)); g.setAttribute('stroke', 'var(--muted)'); g.setAttribute('stroke-width', '1'); g.setAttribute('vector-effect', 'non-scaling-stroke'); svg.appendChild(g); }
       g.setAttribute('x1', x.toFixed(1)); g.setAttribute('x2', x.toFixed(1));
-      var dot = host.querySelector('.kal-pnl-dot');
-      if(!dot){ dot = document.createElement('span'); dot.className = 'kal-pnl-dot'; host.appendChild(dot); }
-      var z = zoomOf(host); dot.style.left = ((r.left - c.left + x / geo.W * r.width) / z) + 'px'; dot.style.top = ((r.top - c.top + y / geo.H * r.height) / z) + 'px';
+      // The dot lives in the chart's own box (.kal-plot, position:relative, the svg fills it) and is placed by the svg's own rectangle. It used to be appended to #kalPnlBody, which is display:contents since Nov 16 (the Account and result line merge), so it has no box of its own: its offset read 0 and the dot was drawn against the card instead of the curve.
+      var plot = svg.parentNode, dot = plot.querySelector('.kal-pnl-dot'), pr = plot.getBoundingClientRect();
+      if(!dot){ dot = document.createElement('span'); dot.className = 'kal-pnl-dot'; plot.appendChild(dot); }
+      var z = zoomOf(plot); dot.style.left = ((r.left - pr.left + x / geo.W * r.width) / z) + 'px'; dot.style.top = ((r.top - pr.top + y / geo.H * r.height) / z) + 'px';
       shown = true;
       paint(head, pt.cum, kalshiPnlPct(pt.cum, d.startBal), kalDateTime(pt.t));
     }

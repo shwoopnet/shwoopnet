@@ -1857,3 +1857,7 @@ Research only, public GET only, same job and branch (`perp-live-data`), no new s
 ## Held-out log: MECH1 fast clock cost script (Nov 17, 2026, Auditor B's allow line, the Head's request)
 
 One more line in `kalshi-scalper/workers/HELDOUT_PULL_RUNS.md` for Desk C's `fastclock_cost.py` (sha256 5a5f9837..., commit e42ef6c60 on `claude/idea-desk-c`; I hashed it, its test 114bd154... and the imported `engine1_core.py` 53317e4b..., which equals the copy on main). It measures spread, fee and round-trip cost only (medians and counts, never a result or price) on three NC15 series, the perps candles' bid and ask, and in-game folders dated before Nov 12, so the Nov 18 first run's cost screen can be priced. Not a go to run. Docs only.
+
+## Account chart hover dot sits on the curve (Nov 17, 2026, the owner's screenshot: the vertical line was right, the dot about 30px to the right and near the bottom)
+
+Page only. The hover dot was appended to `#kalPnlBody`, which became `display:contents` when Account and Account result were merged (Nov 16), so it has no box and its offset read zero: the dot was placed against the card, not the chart. It is now created inside `.kal-plot` (the chart's own positioned box, the svg fills it) and placed by the svg's rectangle, so it sits on the curve under the guide line, with the date and value label unchanged; touch drag uses the same code. Local build: dot centre x 853 against guide x 824 and below the plot before; 824 and inside the plot after. Gate HD1 (`test/hoverDotGates.test.js`).
