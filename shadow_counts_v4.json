@@ -1,6 +1,6 @@
 {
- "as_of_utc": "2026-11-17T04:17:19Z",
- "rebuilt_from_scratch": true,
+ "as_of_utc": "2026-11-17T12:35:06Z",
+ "rebuilt_from_scratch": false,
  "specs": [
   {
    "id": "SH4_01_BTC",
@@ -13,7 +13,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_02_BNB",
@@ -26,7 +26,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_03_ETH",
@@ -39,7 +39,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_04_BNB",
@@ -52,7 +52,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_05_BTC",
@@ -65,7 +65,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_06_WTI",
@@ -78,7 +78,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_07_XRP",
@@ -91,7 +91,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_08_WTI",
@@ -104,7 +104,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_09_HYPE",
@@ -117,7 +117,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_10_XRP",
@@ -130,7 +130,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_11_XRP",
@@ -143,7 +143,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH4_12_HYPE",
@@ -156,7 +156,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   }
  ]
 }

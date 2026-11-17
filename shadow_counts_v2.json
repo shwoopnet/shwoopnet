@@ -1,6 +1,6 @@
 {
- "as_of_utc": "2026-11-17T04:17:19Z",
- "rebuilt_from_scratch": true,
+ "as_of_utc": "2026-11-17T12:35:06Z",
+ "rebuilt_from_scratch": false,
  "specs": [
   {
    "id": "SH2_01_HYPE",
@@ -13,7 +13,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_02_ETH",
@@ -26,7 +26,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_03_ETH",
@@ -39,7 +39,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_04_ETH",
@@ -52,7 +52,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_05_HYPE",
@@ -65,7 +65,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_06_XRP",
@@ -78,7 +78,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_07_XRP",
@@ -91,7 +91,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_08_XRP",
@@ -104,7 +104,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_09_SOL",
@@ -117,7 +117,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_10_BNB",
@@ -130,7 +130,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   },
   {
    "id": "SH2_11_NEAR",
@@ -143,7 +143,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-17T04:17:19Z"
+   "as_of_utc": "2026-11-17T12:35:06Z"
   }
  ]
 }
