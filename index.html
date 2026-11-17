@@ -1824,6 +1824,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 17</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the perp rows now follow the real data shape (value is margin plus return, cost is margin, the multiplier is shown as an estimate, and Closes at, the buffer and auto close levels say n/a or not readable until they can be read). Perps older than 20 minutes drop out of the total and say so. No perps read is wired yet, so nothing shows.</li>
                   <li>Research: a second paper only runner follows the picks of three new shadow lists (V2, V3 and V4) once a day, beside the first one, from public data: no order, no key, results as totals only. The Bitcoin picks wait until Nov 21, and three picks wait for their frozen cut points.</li>
                 </ul>
                 <div class="changelog-day">Nov 16</div>
@@ -3215,7 +3216,7 @@
   // market, up (true for Up, false for Down), multiplier, cost, size (cost times multiplier), entry, index (current index price), value (current value), pnl, pnlPct, takeProfit and stopLoss (price levels, optional),
   // closeAt (the forced-close price) and bufferPct (distance to it as a percent). Nothing in the page produces such rows yet (kalshiPerpRows returns none), so the card shows no perp until real data is wired.
   function kalshiPerpRisk(buf){
-    if(!Number.isFinite(buf)){ return { label: 'Risk n/a', w: 0 }; }
+    if(!Number.isFinite(buf)){ return { label: 'Buffer n/a', w: 0, none: true }; }
     return { label: (buf >= 20 ? 'Low' : (buf >= 10 ? 'Medium' : 'High')) + ' risk, ' + Math.round(buf) + '% buffer', w: Math.max(0, Math.min(100, buf)) };
   }
   function kalshiPerpsHtml(rows, esc, money){
@@ -3226,16 +3227,35 @@
     return rows.map(function(r){
       var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
       var pnlTxt = num(r.pnl) ? sg(Number(r.pnl)) + (num(r.pnlPct) ? ' (' + (r.pnlPct >= 0 ? '+' : '-') + Math.abs(Number(r.pnlPct)).toFixed(1) + '%)' : '') : 'n/a';
-      var risk = kalshiPerpRisk(Number(r.bufferPct));
-      var auto = (num(r.takeProfit) || num(r.stopLoss)) ? 'Take profit ' + px(r.takeProfit) + ' · Stop loss ' + px(r.stopLoss) : 'No auto close set';
-      return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + (num(r.multiplier) ? ' <span class="kal-mult">' + esc(Number(r.multiplier).toFixed(1)) + 'x</span>' : '') +
+      var risk = kalshiPerpRisk(num(r.bufferPct) ? Number(r.bufferPct) : NaN);
+      var auto = (num(r.takeProfit) || num(r.stopLoss)) ? 'Take profit ' + px(r.takeProfit) + ' · Stop loss ' + px(r.stopLoss) : (r.autoKnown === true ? 'No auto close set' : 'Auto close levels not readable');   // never claim none is set unless the data says so
+      return '<div class="kal-hold kal-perp"><div class="kal-hold-head"><div class="kal-name"><span class="kal-chip">Perp</span>' + esc(r.market || 'Perp') + (num(r.multiplier) ? ' <span class="kal-mult">' + (r.multiplierEst ? '~' : '') + esc(Number(r.multiplier).toFixed(1)) + 'x' + (r.multiplierEst ? ' est.' : '') + '</span>' : '') +
         '</div><span class="kal-side kal-side-' + (r.up ? 'yes' : 'no') + '">' + (r.up ? 'UP' : 'DOWN') + '</span></div>' +
         '<div class="kal-hold-stats kal-perp-stats">' + stat('Current value', num(r.value) ? money(Number(r.value)) : 'n/a') + stat('Return', pnlTxt, num(r.pnl) ? (r.pnl >= 0 ? 'kal-pos' : 'kal-neg') : '') +
-        stat('Cost', num(r.cost) ? money(Number(r.cost)) : 'n/a') + stat('Leveraged size', num(r.size) ? money(Number(r.size)) : 'n/a') + stat('Entered at', px(r.entry)) + stat('Index now', px(r.index)) + '</div>' +
-        '<div class="kal-perp-risk"><div class="kal-perp-riskhead"><span>' + esc(risk.label) + '</span><span>Closes at ' + esc(px(r.closeAt)) + '</span></div><div class="kal-perp-bar" aria-hidden="true"><i style="width:' + risk.w.toFixed(0) + '%"></i></div></div>' +
+        stat('Cost', num(r.cost) ? money(Number(r.cost)) : 'n/a') + (num(r.size) ? stat('Leveraged size', money(Number(r.size))) : '') + stat('Entered at', px(r.entry)) + (num(r.index) ? stat('Index now', px(r.index)) : '') + '</div>' +
+        '<div class="kal-perp-risk"><div class="kal-perp-riskhead"><span>' + esc(risk.label) + '</span><span>Closes at ' + esc(px(r.closeAt)) + '</span></div>' + (risk.none ? '' : '<div class="kal-perp-bar" aria-hidden="true"><i style="width:' + risk.w.toFixed(0) + '%"></i></div>') + '</div>' +
         '<div class="kal-hold-sub">' + esc(auto) + ' · Perp, not one of the bot\'s trades.</div></div>';
     }).join('');
   }
+  // The perps account document (Main, Nov 17, 2026: admin doc kalshiLiveControl/perpsAccount, refreshed every 5 minutes) turned into what the card and the total draw. PURE and not wired to a read yet: the page makes no new read until Main confirms the
+  // units. Older than 20 minutes (or no document) hides the perps part and says why, never a stale figure. Value is margin plus pnl and cost is margin (Main: units to be confirmed after the first real read); Leveraged size is left out because the
+  // size's unit is not confirmed. The multiplier is the public list's ESTIMATE and is labelled so; closeAt, bufferPct, takeProfit and stopLoss are null for now, so Closes at and the buffer say n/a and auto close says "not readable".
+  var KAL_PERPS_MAX_AGE_MS = 20 * 60 * 1000;
+  function kalshiPerpsFromDoc(doc, now){
+    if(!doc || typeof doc !== 'object' || !Number.isFinite(Number(doc.at))){ return { ok: false, reason: 'missing', total: null, rows: [] }; }
+    if(now - Number(doc.at) > KAL_PERPS_MAX_AGE_MS){ return { ok: false, reason: 'stale', total: null, rows: [] }; }
+    var eq = Number(doc.equity);
+    var fin = function(v){ return v !== null && v !== undefined && v !== '' && Number.isFinite(Number(v)); };
+    var rows = (Array.isArray(doc.rows) ? doc.rows : []).filter(function(r){ return r && typeof r.market === 'string'; }).map(function(r){
+      var margin = fin(r.margin) ? Number(r.margin) : null, pnl = fin(r.pnl) ? Number(r.pnl) : null;
+      return { market: r.market, up: r.up === true, multiplier: fin(r.multiplierEstimate) ? Number(r.multiplierEstimate) : null, multiplierEst: true,
+        cost: margin, value: margin !== null && pnl !== null ? Math.round((margin + pnl) * 100) / 100 : null, pnl: pnl, pnlPct: margin && pnl !== null ? Math.round(pnl / margin * 1000) / 10 : null,
+        size: null, entry: fin(r.entry) ? Number(r.entry) : null, index: fin(r.mark) ? Number(r.mark) : null, closeAt: fin(r.closeAt) ? Number(r.closeAt) : null, bufferPct: fin(r.bufferPct) ? Number(r.bufferPct) : null,
+        takeProfit: fin(r.takeProfit) ? Number(r.takeProfit) : null, stopLoss: fin(r.stopLoss) ? Number(r.stopLoss) : null, autoKnown: false };
+    });
+    return { ok: true, reason: '', total: Number.isFinite(eq) ? eq : null, rows: rows };
+  }
+  function kalshiPerpsNote(res){ return res && res.reason === 'stale' ? 'Perps are not in the total: their data is older than 20 minutes.' : (res && res.reason === 'missing' ? 'Perps are not in the total: no perps data.' : ''); }
   function kalshiPerpRows(a){ return a && Array.isArray(a.perps) ? a.perps : []; }   // no source yet: the account read carries no perp positions, so this is empty until the data is named
   // Today's result as a share of the account (Oct 22, 2026, the owner's request). The base is the account total at the START of today, taken as the total now minus today's bot result, so a good day is not
   // measured against a balance it already grew. The total includes anything done outside the bot (your own trades, deposits), which is why this is "of the account" and not a return on the bot alone.
