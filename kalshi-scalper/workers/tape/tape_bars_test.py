@@ -6,19 +6,19 @@ base = tempfile.mkdtemp(); tdir = os.path.join(base, "tape"); os.makedirs(tdir)
 H0 = H = ["t_recv_ms", "server_date_header", "ticker", "created_time", "price", "count", "taker_side", "is_block_trade"]
 def row(tr, tk, ct, px, n, side, blk="false"): return [str(tr), "Mon, 16 Nov 2026 00:00:00 GMT", tk, ct, px, str(n), side, blk]
 # a page is NEWEST FIRST (file order is reverse time); two pages overlap (the same trade pulled twice with different t_recv_ms)
-d0 = [row(2000, "KXAAA", "2026-09-17T23:59:59Z", "9.0", 1, "buy"),                 # created on the PREVIOUS date: not this file's date, counted and dropped
-      row(2000, "KXAAA", "2026-09-18T00:00:59.999999999Z", "10.5", 3, "sell"),     # last print of minute 1 (ends 00:01:00)
-      row(2000, "KXAAA", "2026-09-18T00:01:00Z", "10.7", 2, "buy"),                # exactly on the boundary: belongs to the bar ending 00:02:00
-      row(2000, "KXAAA", "2026-09-18T00:01:30.5Z", "10.9", 1, "buy"),
-      row(2000, "KXAAA", "2026-09-18T00:01:30.5Z", "10.8", 4, "sell"),             # same created_time as the row above: reverse file order says THIS one printed first
-      row(2000, "KXAAA", "2026-09-18T00:01:40Z", "99.0", 500, "buy", "true"),      # a block trade: out of OHLC and volume
-      row(2000, "KXAAA", "2026-09-18T00:01:50Z", "10.6", "0.5", "buy"),            # a genuine fraction (amendment 5): counted exactly, volume 12.5
+d0 = [row(2000, "KXAAA", "2026-09-17T23:59:59Z", "9.0", 1, "bid"),                 # created on the PREVIOUS date: not this file's date, counted and dropped
+      row(2000, "KXAAA", "2026-09-18T00:00:59.999999999Z", "10.5", 3, "ask"),     # last print of minute 1 (ends 00:01:00)
+      row(2000, "KXAAA", "2026-09-18T00:01:00Z", "10.7", 2, "bid"),                # exactly on the boundary: belongs to the bar ending 00:02:00
+      row(2000, "KXAAA", "2026-09-18T00:01:30.5Z", "10.9", 1, "bid"),
+      row(2000, "KXAAA", "2026-09-18T00:01:30.5Z", "10.8", 4, "ask"),             # same created_time as the row above: reverse file order says THIS one printed first
+      row(2000, "KXAAA", "2026-09-18T00:01:40Z", "99.0", 500, "bid", "true"),      # a block trade: out of OHLC and volume
+      row(2000, "KXAAA", "2026-09-18T00:01:50Z", "10.6", "0.5", "bid"),            # a genuine fraction (amendment 5): counted exactly, volume 12.5
       row(2000, "KXAAA", "2026-09-18T00:01:55Z", "10.6", "5.0", "weird"),            # a whole number written with ".0": counted as count_whole_dot; unknown side: volume and n_trades, in neither side column
       row(1000, "KXAAA", "2026-09-18T00:01:55Z", "10.6", "5.0", "weird"),            # same trade seen on an earlier page (t_recv 1000): the EARLIEST t_recv is kept, so this one replaces the 2000 copy
-      row(2000, "KXAAA", "2026-09-18T00:03:10Z", "11.0", 7, "buy"), row(2000, "KXAAA", "2026-09-18T00:03:10Z", "11.0", 7, "buy"),   # two real repeated prints in one page: both kept
-      row(2000, "KXAAA", "2026-09-18T00:04:20Z", "50.0", 9, "buy", "true"),        # a bar with only a block trade writes no bar
-      row(2000, "KXHELD", "2026-09-18T00:02:00Z", "5.0", 1, "buy"),                  # a held ticker (the invented HOLDS row): counted, no bar
-      row(2000, "KXOTHER", "2026-09-18T00:01:00Z", "bad price", "x", "buy")]       # another ticker: counted, never parsed
+      row(2000, "KXAAA", "2026-09-18T00:03:10Z", "11.0", 7, "bid"), row(2000, "KXAAA", "2026-09-18T00:03:10Z", "11.0", 7, "bid"),   # two real repeated prints in one page: both kept
+      row(2000, "KXAAA", "2026-09-18T00:04:20Z", "50.0", 9, "bid", "true"),        # a bar with only a block trade writes no bar
+      row(2000, "KXHELD", "2026-09-18T00:02:00Z", "5.0", 1, "bid"),                  # a held ticker (the invented HOLDS row): counted, no bar
+      row(2000, "KXOTHER", "2026-09-18T00:01:00Z", "bad price", "x", "bid")]       # another ticker: counted, never parsed
 with gzip.open(os.path.join(tdir, "2026-09-18.csv.gz"), "wt", newline="") as fo: w = csv.writer(fo); w.writerow(H); w.writerows(d0)
 tk = os.path.join(base, "tickers.txt"); open(tk, "w").write("KXAAA\nKXHELD\n")
 ob, os_ = os.path.join(base, "bars.csv"), os.path.join(base, "summary.csv")
@@ -47,16 +47,23 @@ HH = dict(zip(S[0].split(","), S[2].split(","))); assert HH["ticker"] == "KXHELD
 assert s["count_whole_dot"] == "1" and s["count_fraction"] == "1", s
 # amendment 5: zero, negative, empty, exponent or non-numeric counts raise (the run stops); no float rounding
 for badc in ("0", "0.0", "-1", "", "1e3", "x", "1."):
-    d1 = [row(3000, "KXAAA", "2026-09-19T00:00:10Z", "10.0", badc, "buy")]
+    d1 = [row(3000, "KXAAA", "2026-09-19T00:00:10Z", "10.0", badc, "bid")]
     t2 = tempfile.mkdtemp(); os.makedirs(os.path.join(t2, "tape")); 
     with gzip.open(os.path.join(t2, "tape", "2026-09-19.csv.gz"), "wt", newline="") as fo: w = csv.writer(fo); w.writerow(H0); w.writerows(d1)
     try: T.main(os.path.join(t2, "tape"), tk, os.path.join(t2, "b.csv"), os.path.join(t2, "s.csv"), "2026-09-19", "2026-09-19", check_allow=False); raise SystemExit("accepted bad count %r" % badc)
     except ValueError: pass
-d2 = [row(3000, "KXAAA", "2026-09-19T00:00:10Z", "10.0", "0.02", "buy"), row(3000, "KXAAA", "2026-09-19T00:00:20Z", "10.0", "0.01", "sell")]   # 0.02 + 0.01 must be exactly 0.03
+d2 = [row(3000, "KXAAA", "2026-09-19T00:00:10Z", "10.0", "0.02", "bid"), row(3000, "KXAAA", "2026-09-19T00:00:20Z", "10.0", "0.01", "ask")]   # 0.02 + 0.01 must be exactly 0.03
 t3 = tempfile.mkdtemp(); os.makedirs(os.path.join(t3, "tape"))
 with gzip.open(os.path.join(t3, "tape", "2026-09-19.csv.gz"), "wt", newline="") as fo: w = csv.writer(fo); w.writerow(H0); w.writerows(d2)
 T.main(os.path.join(t3, "tape"), tk, os.path.join(t3, "b.csv"), os.path.join(t3, "s.csv"), "2026-09-19", "2026-09-19", check_allow=False)
 b3 = open(os.path.join(t3, "b.csv")).read().strip().split("\n")[1].split(","); assert b3[6] == "0.03" and b3[8] == "0.02" and b3[9] == "0.01", b3
+# amendment 6: only exactly "bid" and "ask" are sides; the old words buy, sell and any other case are UNKNOWN
+d3 = [row(3000, "KXAAA", "2026-09-19T00:00:10Z", "10.0", "2.0", "buy"), row(3000, "KXAAA", "2026-09-19T00:00:11Z", "10.0", "3.0", "Bid"), row(3000, "KXAAA", "2026-09-19T00:00:12Z", "10.0", "4.0", "bid"), row(3000, "KXAAA", "2026-09-19T00:00:13Z", "10.0", "5.0", "ask")]
+t4 = tempfile.mkdtemp(); os.makedirs(os.path.join(t4, "tape"))
+with gzip.open(os.path.join(t4, "tape", "2026-09-19.csv.gz"), "wt", newline="") as fo: w = csv.writer(fo); w.writerow(H0); w.writerows(d3)
+T.main(os.path.join(t4, "tape"), tk, os.path.join(t4, "b.csv"), os.path.join(t4, "s.csv"), "2026-09-19", "2026-09-19", check_allow=False)
+b4 = open(os.path.join(t4, "b.csv")).read().strip().split("\n")[1].split(","); s4 = dict(zip(open(os.path.join(t4, "s.csv")).read().split("\n")[0].split(","), open(os.path.join(t4, "s.csv")).read().split("\n")[1].split(",")))
+assert b4[6] == "14" and b4[8] == "4" and b4[9] == "5" and s4["unknown_side_trades"] == "2", (b4, s4)
 print("ok: bars", len(L) - 1, "summary", s)
 if len(sys.argv) > 1:                                                          # python3 -I tape_bars_test.py <new dir>: write the invented fixture and my outputs there
     import shutil; shutil.copytree(base, sys.argv[1])

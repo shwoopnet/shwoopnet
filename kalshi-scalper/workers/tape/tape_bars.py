@@ -2,6 +2,7 @@
   python3 -I tape_bars.py <tape dir holding YYYY-MM-DD.csv.gz> <ticker list file, one per line> <out bars.csv> <out summary.csv> --from YYYY-MM-DD --to YYYY-MM-DD [--no-allow]
 Only the files dated in [from, to] are listed, hashed and opened; a range must lie wholly in DEVELOPMENT (2026-09-18 to 2026-10-27) or wholly in HELD-OUT (2026-10-28 to 2026-11-15); a range across the boundary is REFUSED, and any file dated 2026-11-16 or later is REFUSED (HOLDS forward_default_deny_from). A row whose created_time is not on its file's own date is counted and dropped (it is taken from the file of its own date). The shared MECH1 HOLDS check (pinned version) drops and counts any held ticker-time.
 Allow line (HELDOUT_PULL_RUNS.md above this folder): mark, "tape_bars.py", this file's sha256 and the sha256 of the sorted "<file name> <sha256>" list of the files read. The wall: the ticker column is read FIRST and a row of another ticker is counted and never parsed further.
+taker_side (amendment 6, PROVISIONAL, the Head's ruling): exactly "bid" = taker bought (buy_volume), exactly "ask" = taker sold (sell_volume), anything else unknown_side_trades; every side-based result is labelled "side mapping provisional".
 Counts are exact decimals (amendment 5: fractions and ".0" allowed, zero, negative or malformed refused).
 Row: t_recv_ms, server_date_header, ticker, created_time, price, count, taker_side, is_block_trade. Bar end = first whole minute STRICTLY after created_time. Block trades are out of OHLC, volume, n_trades and the side volumes (block_volume and block_count only). Order in a bar: exact created_time, ties by REVERSE FILE ORDER. Dedupe: same six fields with DIFFERENT t_recv_ms = one trade seen twice (earliest t_recv_ms kept); same t_recv_ms rows are all kept."""
 import sys, os, csv, gzip, re, hashlib, collections
@@ -74,8 +75,8 @@ def build_file(path, tickers, file_date):
             S["block_rows"] += len(bl)
             if not nb: S["bars_only_block"] += 1; S["block_volume_in_those"] += sum(x[3] for x in bl); continue
             for x in nb: prices.add(x[2]); 
-            unk = sum(1 for x in nb if x[4] not in ("buy", "sell")); S["unknown_side_trades"] += unk
-            out[end] = [tk, end, nb[0][2], max(x[2] for x in nb), min(x[2] for x in nb), nb[-1][2], sum(x[3] for x in nb), len(nb), sum(x[3] for x in nb if x[4] == "buy"), sum(x[3] for x in nb if x[4] == "sell"), sum(x[3] for x in bl), len(bl)]
+            unk = sum(1 for x in nb if x[4] not in ("bid", "ask")); S["unknown_side_trades"] += unk
+            out[end] = [tk, end, nb[0][2], max(x[2] for x in nb), min(x[2] for x in nb), nb[-1][2], sum(x[3] for x in nb), len(nb), sum(x[3] for x in nb if x[4] == "bid"), sum(x[3] for x in nb if x[4] == "ask"), sum(x[3] for x in bl), len(bl)]
         S["bars_written"] = len(out); sp = sorted(prices); S["tick"] = min((b - a for a, b in zip(sp, sp[1:])), default=None)
         bars[tk] = out; summ[tk] = S
     return bars, summ
