@@ -2,43 +2,43 @@
  "places": [
   {
    "id": "WH-NC15-SILVER",
-   "fill_checked_signals": 5,
+   "fill_checked_signals": 6,
    "status": "parked",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T01:02:20Z"
+   "as_of_utc": "2026-11-18T15:49:46Z"
   },
   {
    "id": "WH-NC15-COPPER",
-   "fill_checked_signals": 52,
+   "fill_checked_signals": 55,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T01:02:20Z"
+   "as_of_utc": "2026-11-18T15:49:46Z"
   },
   {
    "id": "WH-NC15-WTI",
-   "fill_checked_signals": 25,
+   "fill_checked_signals": 31,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T01:02:20Z"
+   "as_of_utc": "2026-11-18T15:49:46Z"
   },
   {
    "id": "WH-NC15-HYPE",
-   "fill_checked_signals": 32,
+   "fill_checked_signals": 33,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T01:02:20Z"
+   "as_of_utc": "2026-11-18T15:49:46Z"
   },
   {
    "id": "WH-NC15-BNB",
-   "fill_checked_signals": 36,
+   "fill_checked_signals": 41,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T01:02:20Z"
+   "as_of_utc": "2026-11-18T15:49:46Z"
   },
   {
    "id": "WH-NC15-USDCAD",
@@ -46,15 +46,15 @@
    "status": "parked",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T01:02:20Z"
+   "as_of_utc": "2026-11-18T15:49:46Z"
   },
   {
    "id": "WH-NC15-NATGAS",
-   "fill_checked_signals": 46,
+   "fill_checked_signals": 55,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T01:02:20Z"
+   "as_of_utc": "2026-11-18T15:49:46Z"
   }
  ]
 }
