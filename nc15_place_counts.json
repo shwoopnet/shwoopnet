@@ -2,59 +2,59 @@
  "places": [
   {
    "id": "WH-NC15-SILVER",
-   "fill_checked_signals": 6,
+   "fill_checked_signals": 7,
    "status": "parked",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T15:49:46Z"
+   "as_of_utc": "2026-11-19T00:32:56Z"
   },
   {
    "id": "WH-NC15-COPPER",
-   "fill_checked_signals": 55,
+   "fill_checked_signals": 62,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T15:49:46Z"
+   "as_of_utc": "2026-11-19T00:32:56Z"
   },
   {
    "id": "WH-NC15-WTI",
-   "fill_checked_signals": 31,
-   "status": "active",
-   "target": 60,
-   "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T15:49:46Z"
-  },
-  {
-   "id": "WH-NC15-HYPE",
    "fill_checked_signals": 33,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T15:49:46Z"
+   "as_of_utc": "2026-11-19T00:32:56Z"
+  },
+  {
+   "id": "WH-NC15-HYPE",
+   "fill_checked_signals": 34,
+   "status": "active",
+   "target": 60,
+   "start_utc": "2026-11-13T02:40:00Z",
+   "as_of_utc": "2026-11-19T00:32:56Z"
   },
   {
    "id": "WH-NC15-BNB",
-   "fill_checked_signals": 41,
+   "fill_checked_signals": 47,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T15:49:46Z"
+   "as_of_utc": "2026-11-19T00:32:56Z"
   },
   {
    "id": "WH-NC15-USDCAD",
-   "fill_checked_signals": 6,
+   "fill_checked_signals": 7,
    "status": "parked",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T15:49:46Z"
+   "as_of_utc": "2026-11-19T00:32:56Z"
   },
   {
    "id": "WH-NC15-NATGAS",
-   "fill_checked_signals": 55,
+   "fill_checked_signals": 60,
    "status": "active",
    "target": 60,
    "start_utc": "2026-11-13T02:40:00Z",
-   "as_of_utc": "2026-11-18T15:49:46Z"
+   "as_of_utc": "2026-11-19T00:32:56Z"
   }
  ]
 }
