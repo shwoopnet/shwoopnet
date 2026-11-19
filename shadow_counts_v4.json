@@ -1,5 +1,5 @@
 {
- "as_of_utc": "2026-11-18T18:26:19Z",
+ "as_of_utc": "2026-11-19T02:50:50Z",
  "rebuilt_from_scratch": false,
  "specs": [
   {
@@ -13,7 +13,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_02_BNB",
@@ -24,22 +24,22 @@
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 19,
+   "expected_days_to_100": 22,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_03_ETH",
-   "signals": 6,
-   "settled": 6,
-   "wins": 5,
+   "signals": 7,
+   "settled": 7,
+   "wins": 6,
    "voids": 0,
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 16,
+   "expected_days_to_100": 15,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_04_BNB",
@@ -50,9 +50,9 @@
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 19,
+   "expected_days_to_100": 22,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_05_BTC",
@@ -65,7 +65,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-21T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_06_WTI",
@@ -78,20 +78,20 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_07_XRP",
-   "signals": 4,
-   "settled": 4,
-   "wins": 4,
+   "signals": 6,
+   "settled": 6,
+   "wins": 5,
    "voids": 0,
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": null,
+   "expected_days_to_100": 18,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_08_WTI",
@@ -104,25 +104,25 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_09_HYPE",
-   "signals": 5,
-   "settled": 5,
+   "signals": 6,
+   "settled": 6,
    "wins": 0,
    "voids": 0,
-   "scored_at_settlement": 4,
+   "scored_at_settlement": 5,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 19,
+   "expected_days_to_100": 18,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_10_XRP",
-   "signals": 1,
-   "settled": 1,
+   "signals": 2,
+   "settled": 2,
    "wins": 1,
    "voids": 0,
    "scored_at_settlement": 0,
@@ -130,7 +130,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_11_XRP",
@@ -143,20 +143,20 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   },
   {
    "id": "SH4_12_HYPE",
-   "signals": 8,
-   "settled": 8,
+   "signals": 9,
+   "settled": 9,
    "wins": 0,
    "voids": 0,
-   "scored_at_settlement": 4,
+   "scored_at_settlement": 5,
    "target": 100,
    "status": "collecting",
    "expected_days_to_100": 12,
    "start_utc": "2026-11-18T00:00:00Z",
-   "as_of_utc": "2026-11-18T18:26:19Z"
+   "as_of_utc": "2026-11-19T02:50:50Z"
   }
  ]
 }

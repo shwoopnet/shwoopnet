@@ -1,6 +1,6 @@
 {
  "list": "SHADOW_LIST_V2",
- "as_of_utc": "2026-11-18T18:26:19Z",
+ "as_of_utc": "2026-11-19T02:50:50Z",
  "labels": {
   "forward": "forward income at 5 contracts a signal, 7 days a week; signals a day counts calendar days, weekends included; a forward development figure, not a forecast",
   "paper": "validate-window income, upward biased, not a forecast"
