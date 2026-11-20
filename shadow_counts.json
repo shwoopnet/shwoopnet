@@ -1,19 +1,19 @@
 {
- "as_of_utc": "2026-11-20T04:16:42Z",
+ "as_of_utc": "2026-11-20T16:22:13Z",
  "rebuilt_from_scratch": false,
  "specs": [
   {
    "id": "SH1_01_HYPE",
-   "signals": 19,
-   "settled": 19,
+   "signals": 21,
+   "settled": 21,
    "wins": 6,
    "voids": 0,
-   "scored_at_settlement": 12,
+   "scored_at_settlement": 14,
    "target": 100,
    "status": "collecting",
    "expected_days_to_100": 14,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_02_ETH",
@@ -24,22 +24,22 @@
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 17,
+   "expected_days_to_100": 20,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_03_ETH",
-   "signals": 22,
-   "settled": 22,
-   "wins": 9,
+   "signals": 26,
+   "settled": 26,
+   "wins": 11,
    "voids": 0,
    "scored_at_settlement": 10,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 12,
+   "expected_days_to_100": 11,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_04_BTC",
@@ -52,7 +52,7 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_05_BTC",
@@ -65,20 +65,20 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_06_HYPE",
-   "signals": 23,
-   "settled": 23,
-   "wins": 7,
+   "signals": 26,
+   "settled": 26,
+   "wins": 8,
    "voids": 0,
-   "scored_at_settlement": 13,
+   "scored_at_settlement": 15,
    "target": 100,
    "status": "collecting",
    "expected_days_to_100": 11,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_07_BTC",
@@ -91,20 +91,20 @@
    "status": "collecting",
    "expected_days_to_100": null,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_08_HYPE",
-   "signals": 37,
-   "settled": 37,
+   "signals": 40,
+   "settled": 40,
    "wins": 3,
    "voids": 0,
-   "scored_at_settlement": 27,
+   "scored_at_settlement": 30,
    "target": 100,
    "status": "collecting",
    "expected_days_to_100": 6,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_09_ETH",
@@ -115,113 +115,113 @@
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 13,
+   "expected_days_to_100": 15,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_10_NEAR",
-   "signals": 23,
-   "settled": 23,
-   "wins": 7,
+   "signals": 26,
+   "settled": 26,
+   "wins": 8,
    "voids": 0,
    "scored_at_settlement": 8,
    "target": 100,
    "status": "collecting",
    "expected_days_to_100": 11,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_11_SOL",
-   "signals": 16,
-   "settled": 16,
-   "wins": 11,
-   "voids": 0,
-   "scored_at_settlement": 0,
-   "target": 100,
-   "status": "collecting",
-   "expected_days_to_100": 17,
-   "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
-  },
-  {
-   "id": "SH1_12_GOLD",
-   "signals": 38,
-   "settled": 38,
-   "wins": 36,
-   "voids": 0,
-   "scored_at_settlement": 0,
-   "target": 100,
-   "status": "collecting",
-   "expected_days_to_100": 6,
-   "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
-  },
-  {
-   "id": "SH1_13_XRP",
-   "signals": 10,
-   "settled": 10,
-   "wins": 10,
-   "voids": 0,
-   "scored_at_settlement": 0,
-   "target": 100,
-   "status": "collecting",
-   "expected_days_to_100": 29,
-   "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
-  },
-  {
-   "id": "SH1_14_SOL",
-   "signals": 18,
-   "settled": 18,
-   "wins": 17,
+   "signals": 20,
+   "settled": 20,
+   "wins": 15,
    "voids": 0,
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
    "expected_days_to_100": 15,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
+  },
+  {
+   "id": "SH1_12_GOLD",
+   "signals": 50,
+   "settled": 50,
+   "wins": 45,
+   "voids": 0,
+   "scored_at_settlement": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": 4,
+   "start_utc": "2026-11-17T00:00:00Z",
+   "as_of_utc": "2026-11-20T16:22:13Z"
+  },
+  {
+   "id": "SH1_13_XRP",
+   "signals": 11,
+   "settled": 11,
+   "wins": 11,
+   "voids": 0,
+   "scored_at_settlement": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": 30,
+   "start_utc": "2026-11-17T00:00:00Z",
+   "as_of_utc": "2026-11-20T16:22:13Z"
+  },
+  {
+   "id": "SH1_14_SOL",
+   "signals": 22,
+   "settled": 22,
+   "wins": 21,
+   "voids": 0,
+   "scored_at_settlement": 0,
+   "target": 100,
+   "status": "collecting",
+   "expected_days_to_100": 14,
+   "start_utc": "2026-11-17T00:00:00Z",
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_15_XRP",
-   "signals": 35,
-   "settled": 35,
-   "wins": 31,
+   "signals": 39,
+   "settled": 39,
+   "wins": 34,
    "voids": 0,
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
    "expected_days_to_100": 6,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_16_BNB",
-   "signals": 31,
-   "settled": 31,
-   "wins": 5,
+   "signals": 36,
+   "settled": 36,
+   "wins": 6,
    "voids": 0,
-   "scored_at_settlement": 21,
+   "scored_at_settlement": 25,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 8,
+   "expected_days_to_100": 7,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   },
   {
    "id": "SH1_17_NEAR",
-   "signals": 22,
-   "settled": 22,
-   "wins": 19,
+   "signals": 26,
+   "settled": 26,
+   "wins": 23,
    "voids": 0,
    "scored_at_settlement": 0,
    "target": 100,
    "status": "collecting",
-   "expected_days_to_100": 12,
+   "expected_days_to_100": 11,
    "start_utc": "2026-11-17T00:00:00Z",
-   "as_of_utc": "2026-11-20T04:16:42Z"
+   "as_of_utc": "2026-11-20T16:22:13Z"
   }
  ]
 }
